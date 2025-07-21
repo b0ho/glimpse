@@ -1,20 +1,26 @@
+import React from 'react';
+import { ClerkProvider } from '@clerk/clerk-expo';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { CLERK_CONFIG } from '@/services/auth/clerk-config';
+import RootNavigator from '@/navigation/AppNavigator';
 
-export default function App() {
+function GlimpseApp() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+    <>
+      <RootNavigator />
       <StatusBar style="auto" />
-    </View>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  return (
+    <ClerkProvider 
+      publishableKey={CLERK_CONFIG.publishableKey}
+      tokenCache={CLERK_CONFIG.tokenCache}
+    >
+      <GlimpseApp />
+    </ClerkProvider>
+  );
+}
+
