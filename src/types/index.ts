@@ -110,6 +110,28 @@ export type RootStackParamList = {
   Settings: undefined;
 };
 
+// 콘텐츠 타입
+export interface Content {
+  id: string;
+  authorId: string;
+  authorNickname: string;
+  groupId: string;
+  type: 'text' | 'image' | 'mixed';
+  text?: string;
+  imageUrls?: string[];
+  likeCount: number;
+  isLikedByUser: boolean;
+  createdAt: Date;
+}
+
+// 콘텐츠 생성 요청
+export interface CreateContentRequest {
+  groupId: string;
+  type: 'text' | 'image' | 'mixed';
+  text?: string;
+  imageFiles?: string[]; // base64 또는 파일 경로
+}
+
 // 환경 변수 타입
 export interface EnvConfig {
   CLERK_PUBLISHABLE_KEY: string;

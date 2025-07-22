@@ -7,6 +7,7 @@ import { useAuth } from '@clerk/clerk-expo';
 
 // Screens
 import { AuthScreen } from '@/screens/auth/AuthScreen';
+import { HomeScreen } from '@/screens/HomeScreen';
 // import { RootStackParamList } from '@/types';
 import { COLORS, FONT_SIZES } from '@/utils/constants';
 
@@ -32,14 +33,6 @@ const AuthStack = createStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // 임시 메인 화면들 (추후 실제 화면으로 교체)
-const HomeScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.BACKGROUND }}>
-    <Text style={{ fontSize: FONT_SIZES.LG, color: COLORS.TEXT.PRIMARY }}>🏠 홈 화면</Text>
-    <Text style={{ fontSize: FONT_SIZES.SM, color: COLORS.TEXT.SECONDARY, marginTop: 8 }}>
-      받은 좋아요와 매칭 현황을 확인하세요
-    </Text>
-  </View>
-);
 
 const GroupsScreen = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.BACKGROUND }}>
