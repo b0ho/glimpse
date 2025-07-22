@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,8 +8,10 @@ import { useAuth } from '@clerk/clerk-expo';
 // Screens
 import { AuthScreen } from '@/screens/auth/AuthScreen';
 import { HomeScreen } from '@/screens/HomeScreen';
+import { GroupsScreen } from '@/screens/GroupsScreen';
+import { MatchesScreen } from '@/screens/MatchesScreen';
+import { ProfileScreen } from '@/screens/ProfileScreen';
 // import { RootStackParamList } from '@/types';
-import { COLORS, FONT_SIZES } from '@/utils/constants';
 
 // Navigation Types
 type AuthStackParamList = {
@@ -32,34 +34,7 @@ const Stack = createStackNavigator<AppStackParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-// 임시 메인 화면들 (추후 실제 화면으로 교체)
-
-const GroupsScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.BACKGROUND }}>
-    <Text style={{ fontSize: FONT_SIZES.LG, color: COLORS.TEXT.PRIMARY }}>👥 그룹 화면</Text>
-    <Text style={{ fontSize: FONT_SIZES.SM, color: COLORS.TEXT.SECONDARY, marginTop: 8 }}>
-      다양한 그룹을 탐색하고 참여하세요
-    </Text>
-  </View>
-);
-
-const MatchesScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.BACKGROUND }}>
-    <Text style={{ fontSize: FONT_SIZES.LG, color: COLORS.TEXT.PRIMARY }}>💕 매칭 화면</Text>
-    <Text style={{ fontSize: FONT_SIZES.SM, color: COLORS.TEXT.SECONDARY, marginTop: 8 }}>
-      매칭된 사람들과 채팅을 시작하세요
-    </Text>
-  </View>
-);
-
-const ProfileScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.BACKGROUND }}>
-    <Text style={{ fontSize: FONT_SIZES.LG, color: COLORS.TEXT.PRIMARY }}>👤 프로필 화면</Text>
-    <Text style={{ fontSize: FONT_SIZES.SM, color: COLORS.TEXT.SECONDARY, marginTop: 8 }}>
-      프로필 설정과 계정 관리
-    </Text>
-  </View>
-);
+// 모든 메인 화면들이 실제 컴포넌트로 구현됨
 
 // AuthScreen 래퍼 컴포넌트
 const AuthScreenWrapper = () => {

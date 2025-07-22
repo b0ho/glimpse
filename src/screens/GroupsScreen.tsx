@@ -1,0 +1,556 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  RefreshControl,
+  SafeAreaView,
+  ActivityIndicator,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { useGroupStore } from '@/store/slices/groupSlice';
+import { Group, GroupType } from '@/types';
+import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+
+// 임시 더미 그룹 데이터
+const generateDummyGroups = (): Group[] => {
+  const groups: Group[] = [
+    {
+      id: 'group_1',
+      name: '카카오 본사',
+      type: GroupType.OFFICIAL,
+      description: '카카오 임직원들을 위한 공식 그룹입니다.',
+      memberCount: 45,
+      maleCount: 23,
+      femaleCount: 22,
+      minimumMembers: 10,
+      isMatchingActive: true,
+      createdAt: new Date('2024-01-15'),
+    },
+    {
+      id: 'group_2',
+      name: '네이버 판교',
+      type: GroupType.OFFICIAL,
+      description: '네이버 판교 사옥 직원들의 그룹입니다.',
+      memberCount: 67,
+      maleCount: 35,
+      femaleCount: 32,
+      minimumMembers: 10,
+      isMatchingActive: true,
+      createdAt: new Date('2024-01-20'),
+    },
+    {
+      id: 'group_3',
+      name: '연세대학교 미래캠퍼스',
+      type: GroupType.OFFICIAL,
+      description: '연세대 송도 캠퍼스 학생들의 만남의 장',
+      memberCount: 89,
+      maleCount: 44,
+      femaleCount: 45,
+      minimumMembers: 20,
+      isMatchingActive: true,
+      createdAt: new Date('2024-01-10'),
+    },
+    {
+      id: 'group_4',
+      name: '홍대 독서모임',
+      type: GroupType.CREATED,
+      description: '매주 토요일 홍대에서 만나는 20-30대 독서모임입니다.',
+      memberCount: 12,
+      maleCount: 5,
+      femaleCount: 7,
+      minimumMembers: 8,
+      isMatchingActive: true,
+      createdBy: 'user_123',
+      createdAt: new Date('2024-02-01'),
+    },
+    {
+      id: 'group_5',
+      name: '강남 러닝크루',
+      type: GroupType.CREATED,
+      description: '매주 화/목 저녁 한강에서 함께 뛰는 모임',
+      memberCount: 18,
+      maleCount: 8,
+      femaleCount: 10,
+      minimumMembers: 6,
+      isMatchingActive: true,
+      createdBy: 'user_456',
+      createdAt: new Date('2024-01-25'),
+    },
+    {
+      id: 'group_6',
+      name: '스타벅스 여의도IFC점',
+      type: GroupType.LOCATION,
+      description: '여의도 IFC몰 스타벅스에서 만나는 사람들',
+      memberCount: 8,
+      maleCount: 3,
+      femaleCount: 5,
+      minimumMembers: 6,
+      isMatchingActive: true,
+      location: {
+        latitude: 37.5252,
+        longitude: 126.9265,
+        address: '서울 영등포구 여의도동 국제금융로 10',
+      },
+      createdAt: new Date('2024-02-05'),
+    },
+    {
+      id: 'group_7',
+      name: '코딩 스터디 모임',
+      type: GroupType.CREATED,
+      description: '주말 코딩 스터디와 프로젝트를 함께하는 개발자 모임',
+      memberCount: 15,
+      maleCount: 10,
+      femaleCount: 5,
+      minimumMembers: 8,
+      isMatchingActive: true,
+      createdBy: 'user_789',
+      createdAt: new Date('2024-01-30'),
+    },
+    {
+      id: 'group_8',
+      name: '요리 클래스 @압구정',
+      type: GroupType.INSTANCE,
+      description: '2월 한 달간 진행되는 이탈리안 요리 클래스 참여자들',
+      memberCount: 20,
+      maleCount: 8,
+      femaleCount: 12,
+      minimumMembers: 16,
+      isMatchingActive: true,
+      expiresAt: new Date('2024-03-01'),
+      createdAt: new Date('2024-01-28'),
+    },
+  ];
+
+  return groups.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+};
+
+export const GroupsScreen: React.FC = () => {
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  const groupStore = useGroupStore();
+
+  // 그룹 로드 함수
+  const loadGroups = useCallback(async (refresh = false) => {
+    if (refresh) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
+
+    try {
+      // 실제로는 API 호출
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const dummyGroups = generateDummyGroups();
+      setGroups(dummyGroups);
+      groupStore.setGroups(dummyGroups);
+    } catch (error) {
+      console.error('Failed to load groups:', error);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [groupStore]);
+
+  // 그룹 참여 함수
+  const handleJoinGroup = useCallback(async (group: Group) => {
+    // 이미 참여한 그룹인지 확인
+    if (groupStore.isUserInGroup(group.id)) {
+      Alert.alert('알림', '이미 참여 중인 그룹입니다.');
+      return;
+    }
+
+    // 성별 균형 확인 (실제로는 백엔드에서 처리)
+    const genderRatio = group.maleCount / group.femaleCount;
+    if (genderRatio > 2 || genderRatio < 0.5) {
+      Alert.alert(
+        '그룹 참여 제한',
+        '성별 균형을 위해 현재 참여가 제한되어 있습니다.\n나중에 다시 시도해주세요.',
+        [{ text: '확인' }]
+      );
+      return;
+    }
+
+    Alert.alert(
+      '그룹 참여',
+      `"${group.name}" 그룹에 참여하시겠습니까?\n\n참여 후에는 그룹 내 다른 멤버들과 익명으로 소통할 수 있습니다.`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '참여하기',
+          onPress: async () => {
+            try {
+              // 실제로는 API 호출
+              await new Promise(resolve => setTimeout(resolve, 500));
+              
+              groupStore.joinGroup(group);
+              Alert.alert(
+                '참여 완료! 🎉',
+                `"${group.name}" 그룹에 성공적으로 참여했습니다.\n이제 홈 피드에서 그룹 멤버들의 게시물을 확인할 수 있습니다.`
+              );
+              
+              // 로컬 상태 업데이트
+              setGroups(prevGroups =>
+                prevGroups.map(g =>
+                  g.id === group.id
+                    ? { ...g, memberCount: g.memberCount + 1 }
+                    : g
+                )
+              );
+            } catch (error) {
+              console.error('Join group error:', error);
+              Alert.alert('오류', '그룹 참여 중 오류가 발생했습니다.');
+            }
+          },
+        },
+      ]
+    );
+  }, [groupStore]);
+
+  useEffect(() => {
+    loadGroups();
+  }, [loadGroups]);
+
+  const renderGroupTypeIcon = (type: GroupType): string => {
+    switch (type) {
+      case GroupType.OFFICIAL:
+        return '🏢';
+      case GroupType.CREATED:
+        return '👥';
+      case GroupType.INSTANCE:
+        return '⏰';
+      case GroupType.LOCATION:
+        return '📍';
+      default:
+        return '🔵';
+    }
+  };
+
+  const renderGroupTypeName = (type: GroupType): string => {
+    switch (type) {
+      case GroupType.OFFICIAL:
+        return '공식 그룹';
+      case GroupType.CREATED:
+        return '생성 그룹';
+      case GroupType.INSTANCE:
+        return '이벤트 그룹';
+      case GroupType.LOCATION:
+        return '장소 그룹';
+      default:
+        return '일반 그룹';
+    }
+  };
+
+  const renderGroupItem = ({ item }: { item: Group }) => (
+    <View style={styles.groupItem}>
+      <View style={styles.groupHeader}>
+        <View style={styles.groupInfo}>
+          <Text style={styles.groupIcon}>
+            {renderGroupTypeIcon(item.type)}
+          </Text>
+          <View style={styles.groupDetails}>
+            <Text style={styles.groupName}>{item.name}</Text>
+            <Text style={styles.groupType}>
+              {renderGroupTypeName(item.type)}
+            </Text>
+          </View>
+        </View>
+        
+        <View style={styles.memberInfo}>
+          <Text style={styles.memberCount}>
+            {item.memberCount}명
+          </Text>
+          <Text style={styles.genderBalance}>
+            👨 {item.maleCount} · 👩 {item.femaleCount}
+          </Text>
+        </View>
+      </View>
+
+      {item.description && (
+        <Text style={styles.groupDescription}>
+          {item.description}
+        </Text>
+      )}
+
+      <View style={styles.groupFooter}>
+        <View style={styles.statusInfo}>
+          <Text style={[
+            styles.matchingStatus,
+            item.isMatchingActive ? styles.statusActive : styles.statusInactive
+          ]}>
+            {item.isMatchingActive ? '🟢 매칭 활성' : '🔴 매칭 비활성'}
+          </Text>
+          
+          {item.location && (
+            <Text style={styles.locationText}>
+              📍 {item.location.address}
+            </Text>
+          )}
+          
+          {item.expiresAt && (
+            <Text style={styles.expiryText}>
+              ⏰ {item.expiresAt.toLocaleDateString('ko-KR')}까지
+            </Text>
+          )}
+        </View>
+
+        <TouchableOpacity
+          style={[
+            styles.joinButton,
+            groupStore.isUserInGroup(item.id) && styles.joinButtonDisabled,
+            !item.isMatchingActive && styles.joinButtonInactive,
+          ]}
+          onPress={() => handleJoinGroup(item)}
+          disabled={groupStore.isUserInGroup(item.id) || !item.isMatchingActive}
+        >
+          <Text style={[
+            styles.joinButtonText,
+            groupStore.isUserInGroup(item.id) && styles.joinButtonTextDisabled,
+          ]}>
+            {groupStore.isUserInGroup(item.id) ? '참여중' : '참여하기'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <Text style={styles.headerTitle}>그룹 탐색</Text>
+      <Text style={styles.headerSubtitle}>
+        관심사와 소속이 비슷한 사람들을 만나보세요
+      </Text>
+      <View style={styles.joinedGroupsInfo}>
+        <Text style={styles.joinedCount}>
+          참여 중인 그룹: {groupStore.joinedGroups.length}개
+        </Text>
+      </View>
+    </View>
+  );
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <Text style={styles.emptyStateEmoji}>🔍</Text>
+      <Text style={styles.emptyStateTitle}>그룹을 찾을 수 없어요</Text>
+      <Text style={styles.emptyStateSubtitle}>
+        새로운 그룹이 곧 추가될 예정입니다!
+      </Text>
+    </View>
+  );
+
+  if (isLoading && groups.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+          <Text style={styles.loadingText}>그룹을 불러오는 중...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={groups}
+        keyExtractor={(item) => item.id}
+        renderItem={renderGroupItem}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={renderEmptyState}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={() => loadGroups(true)}
+            colors={[COLORS.PRIMARY]}
+            tintColor={COLORS.PRIMARY}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={groups.length === 0 ? styles.emptyContainer : undefined}
+      />
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.BACKGROUND,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: SPACING.MD,
+    fontSize: FONT_SIZES.MD,
+    color: COLORS.TEXT.SECONDARY,
+  },
+  header: {
+    backgroundColor: COLORS.SURFACE,
+    paddingHorizontal: SPACING.LG,
+    paddingVertical: SPACING.LG,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.BORDER,
+  },
+  headerTitle: {
+    fontSize: FONT_SIZES.XXL,
+    fontWeight: 'bold',
+    color: COLORS.PRIMARY,
+    marginBottom: SPACING.XS,
+  },
+  headerSubtitle: {
+    fontSize: FONT_SIZES.MD,
+    color: COLORS.TEXT.PRIMARY,
+    marginBottom: SPACING.MD,
+  },
+  joinedGroupsInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  joinedCount: {
+    fontSize: FONT_SIZES.SM,
+    color: COLORS.TEXT.SECONDARY,
+    fontWeight: '500',
+  },
+  groupItem: {
+    backgroundColor: COLORS.SURFACE,
+    marginVertical: SPACING.XS,
+    marginHorizontal: SPACING.MD,
+    borderRadius: 12,
+    padding: SPACING.MD,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  groupHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.SM,
+  },
+  groupInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  groupIcon: {
+    fontSize: 24,
+    marginRight: SPACING.SM,
+  },
+  groupDetails: {
+    flex: 1,
+  },
+  groupName: {
+    fontSize: FONT_SIZES.LG,
+    fontWeight: 'bold',
+    color: COLORS.TEXT.PRIMARY,
+    marginBottom: 2,
+  },
+  groupType: {
+    fontSize: FONT_SIZES.SM,
+    color: COLORS.TEXT.SECONDARY,
+  },
+  memberInfo: {
+    alignItems: 'flex-end',
+  },
+  memberCount: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: 'bold',
+    color: COLORS.PRIMARY,
+    marginBottom: 2,
+  },
+  genderBalance: {
+    fontSize: FONT_SIZES.XS,
+    color: COLORS.TEXT.SECONDARY,
+  },
+  groupDescription: {
+    fontSize: FONT_SIZES.SM,
+    color: COLORS.TEXT.PRIMARY,
+    lineHeight: 20,
+    marginBottom: SPACING.MD,
+  },
+  groupFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  statusInfo: {
+    flex: 1,
+  },
+  matchingStatus: {
+    fontSize: FONT_SIZES.SM,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  statusActive: {
+    color: COLORS.SUCCESS,
+  },
+  statusInactive: {
+    color: COLORS.ERROR,
+  },
+  locationText: {
+    fontSize: FONT_SIZES.XS,
+    color: COLORS.TEXT.SECONDARY,
+    marginBottom: 2,
+  },
+  expiryText: {
+    fontSize: FONT_SIZES.XS,
+    color: COLORS.WARNING,
+  },
+  joinButton: {
+    backgroundColor: COLORS.PRIMARY,
+    paddingHorizontal: SPACING.MD,
+    paddingVertical: SPACING.SM,
+    borderRadius: 8,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  joinButtonDisabled: {
+    backgroundColor: COLORS.TEXT.LIGHT,
+  },
+  joinButtonInactive: {
+    backgroundColor: COLORS.TEXT.LIGHT,
+  },
+  joinButtonText: {
+    color: COLORS.TEXT.WHITE,
+    fontSize: FONT_SIZES.SM,
+    fontWeight: '600',
+  },
+  joinButtonTextDisabled: {
+    color: COLORS.TEXT.SECONDARY,
+  },
+  emptyContainer: {
+    flexGrow: 1,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.XL,
+  },
+  emptyStateEmoji: {
+    fontSize: 64,
+    marginBottom: SPACING.LG,
+  },
+  emptyStateTitle: {
+    fontSize: FONT_SIZES.LG,
+    fontWeight: 'bold',
+    color: COLORS.TEXT.PRIMARY,
+    marginBottom: SPACING.SM,
+    textAlign: 'center',
+  },
+  emptyStateSubtitle: {
+    fontSize: FONT_SIZES.MD,
+    color: COLORS.TEXT.SECONDARY,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+});
