@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { Match } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -19,6 +20,7 @@ export const MatchesScreen: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
+  const navigation = useNavigation();
   const likeStore = useLikeStore();
 
   useEffect(() => {
@@ -41,8 +43,13 @@ export const MatchesScreen: React.FC = () => {
   }, [likeStore]);
 
   const handleStartChat = (matchId: string, nickname: string) => {
-    console.log(`Starting chat with ${nickname} in match ${matchId}`);
-    // 실제로는 채팅 화면으로 네비게이션
+    // 채팅 화면으로 네비게이션
+    const roomId = `room_${matchId}`;
+    (navigation as any).navigate('Chat', {
+      roomId,
+      matchId,
+      otherUserNickname: nickname,
+    });
   };
 
 

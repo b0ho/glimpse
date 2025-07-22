@@ -67,6 +67,29 @@ export interface ChatMessage {
   isRead: boolean;
 }
 
+// 실시간 채팅 메시지 (WebSocket용)
+export interface Message {
+  id: string;
+  roomId: string;
+  senderId: string;
+  content: string;
+  type: 'text' | 'image' | 'file';
+  isRead: boolean;
+  readBy: string[];
+  createdAt: Date;
+}
+
+// 채팅방
+export interface ChatRoom {
+  id: string;
+  matchId: string;
+  participants: string[];
+  lastMessage?: Message;
+  unreadCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // 회사 인증
 export interface CompanyVerification {
   id: string;

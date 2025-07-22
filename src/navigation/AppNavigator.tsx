@@ -15,6 +15,7 @@ import { ProfileScreen } from '@/screens/ProfileScreen';
 import { CreateContentScreen } from '@/screens/CreateContentScreen';
 import { CreateGroupScreen } from '@/screens/CreateGroupScreen';
 import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
+import { ChatScreen } from '@/screens/ChatScreen';
 // import { RootStackParamList } from '@/types';
 
 // Navigation Types
@@ -37,6 +38,15 @@ type ProfileStackParamList = {
   MyGroups: undefined;
 };
 
+type MatchesStackParamList = {
+  MatchesTab: undefined;
+  Chat: {
+    roomId: string;
+    matchId: string;
+    otherUserNickname: string;
+  };
+};
+
 type MainTabParamList = {
   Home: undefined;
   Groups: undefined;
@@ -53,6 +63,7 @@ const Stack = createStackNavigator<AppStackParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
 const HomeStack = createStackNavigator<HomeStackParamList>();
 const GroupsStack = createStackNavigator<GroupsStackParamList>();
+const MatchesStack = createStackNavigator<MatchesStackParamList>();
 const ProfileStack = createStackNavigator<ProfileStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -125,6 +136,26 @@ function GroupsStackNavigator() {
   );
 }
 
+// Matches Stack Navigator
+function MatchesStackNavigator() {
+  return (
+    <MatchesStack.Navigator>
+      <MatchesStack.Screen 
+        name="MatchesTab" 
+        component={MatchesScreen} 
+        options={{ headerShown: false }}
+      />
+      <MatchesStack.Screen 
+        name="Chat" 
+        component={ChatScreen} 
+        options={{ 
+          headerShown: true,
+        }}
+      />
+    </MatchesStack.Navigator>
+  );
+}
+
 // Profile Stack Navigator
 function ProfileStackNavigator() {
   return (
@@ -186,7 +217,7 @@ function MainTabNavigator() {
       />
       <Tab.Screen 
         name="Matches" 
-        component={MatchesScreen}
+        component={MatchesStackNavigator}
         options={{
           title: '매칭',
           tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.MATCHES} color={color} size={size || 24} />,
