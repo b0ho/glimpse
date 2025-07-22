@@ -3,8 +3,10 @@
  * Clerk + Stripe 통합
  */
 
-import { useUser } from '@clerk/clerk-expo';
 import * as SecureStore from 'expo-secure-store';
+
+// React Native global fetch
+declare const fetch: typeof globalThis.fetch;
 
 // 프리미엄 플랜 타입
 export enum PremiumPlan {

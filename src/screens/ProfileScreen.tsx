@@ -24,7 +24,6 @@ export const ProfileScreen: React.FC = () => {
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
-  const premiumStore = usePremiumStore();
   
   const isPremiumUser = usePremiumStore(premiumSelectors.isPremiumUser());
   const currentPlan = usePremiumStore(premiumSelectors.getCurrentPlan());
@@ -225,7 +224,10 @@ export const ProfileScreen: React.FC = () => {
         </View>
       </View>
       
-      <TouchableOpacity style={styles.upgradeButton}>
+      <TouchableOpacity 
+        style={styles.upgradeButton}
+        onPress={() => (navigation as any).navigate('Premium')}
+      >
         <Text style={styles.upgradeButtonText}>프리미엄 업그레이드</Text>
       </TouchableOpacity>
     </View>

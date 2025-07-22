@@ -31,8 +31,6 @@ export const PremiumScreen: React.FC = () => {
   const {
     subscription,
     paymentProducts,
-    isLoading,
-    error,
     loadSubscription,
     loadPaymentProducts,
     cancelSubscription,
@@ -104,7 +102,7 @@ export const PremiumScreen: React.FC = () => {
             try {
               await cancelSubscription(user.id);
               Alert.alert('완료', '구독이 취소되었습니다.');
-            } catch (error) {
+            } catch {
               Alert.alert('오류', '구독 취소 중 오류가 발생했습니다.');
             }
           },
@@ -114,6 +112,7 @@ export const PremiumScreen: React.FC = () => {
   };
 
   // 에러 처리
+  const error = usePremiumStore(state => state.error);
   useEffect(() => {
     if (error) {
       Alert.alert('오류', error, [
