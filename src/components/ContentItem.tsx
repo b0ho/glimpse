@@ -8,6 +8,8 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { formatTimeAgo } from '@/utils/dateUtils';
+import { STATE_ICONS } from '@/utils/icons';
 
 interface ContentItemProps {
   item: Content;
@@ -23,29 +25,6 @@ export const ContentItem: React.FC<ContentItemProps> = ({
   onLikeToggle,
 }) => {
   const isOwnContent = item.authorId === currentUserId;
-
-  const formatTimeAgo = (date: Date): string => {
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) {
-      return '방금 전';
-    } else if (diffInSeconds < 3600) {
-      const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes}분 전`;
-    } else if (diffInSeconds < 86400) {
-      const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours}시간 전`;
-    } else if (diffInSeconds < 604800) {
-      const days = Math.floor(diffInSeconds / 86400);
-      return `${days}일 전`;
-    } else {
-      return date.toLocaleDateString('ko-KR', {
-        month: 'short',
-        day: 'numeric',
-      });
-    }
-  };
 
   return (
     <View style={styles.contentItem}>
@@ -92,7 +71,7 @@ export const ContentItem: React.FC<ContentItemProps> = ({
           >
             <View style={styles.likeButton}>
               <Icon
-                name={item.isLikedByUser ? 'heart' : 'heart-outline'}
+                name={item.isLikedByUser ? STATE_ICONS.LIKED : STATE_ICONS.UNLIKED}
                 size={20}
                 color={
                   item.isLikedByUser

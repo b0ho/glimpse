@@ -17,38 +17,9 @@ import { useLikeStore } from '@/store/slices/likeSlice';
 import { ContentItem } from '@/components/ContentItem';
 import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { generateDummyContent } from '@/utils/mockData';
+import { ACTION_ICONS } from '@/utils/icons';
 
-// 임시 더미 데이터 (실제로는 API에서 가져올 예정)
-const generateDummyContent = (): Content[] => {
-  const contents: Content[] = [];
-  const nicknames = ['커피러버', '산책마니아', '책벌레', '영화광', '음악애호가', '요리사', '여행자'];
-  const textSamples = [
-    '오늘 날씨가 정말 좋네요! 산책하기 딱 좋은 날씨에요 ☀️',
-    '점심으로 새로운 카페에 갔는데 커피가 정말 맛있었어요 ☕',
-    '주말에 영화 보러 갈 예정인데 추천해주실 만한 영화 있나요?',
-    '운동 시작한지 일주일 됐는데 벌써 효과가 보이는 것 같아요 💪',
-    '새로 나온 책을 읽고 있는데 너무 재밌어서 밤새 읽을 것 같아요 📚',
-    '오늘 요리에 도전해봤는데 생각보다 잘 나온 것 같아요!',
-    '퇴근길에 찍은 일몰 사진이에요. 오늘도 수고했어요 🌅',
-  ];
-
-  for (let i = 1; i <= 15; i++) {
-    contents.push({
-      id: `content_${i}`,
-      authorId: `user_${(i % 7) + 1}`,
-      authorNickname: nicknames[i % nicknames.length],
-      groupId: 'group_company_1',
-      type: i % 4 === 0 ? 'image' : 'text',
-      text: textSamples[i % textSamples.length],
-      imageUrls: i % 4 === 0 ? [`https://picsum.photos/400/300?random=${i}`] : undefined,
-      likeCount: Math.floor(Math.random() * 20),
-      isLikedByUser: Math.random() > 0.7,
-      createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000), // 최근 일주일 랜덤
-    });
-  }
-
-  return contents.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-};
 
 export const HomeScreen: React.FC = () => {
   const [contents, setContents] = useState<Content[]>([]);
@@ -258,7 +229,7 @@ export const HomeScreen: React.FC = () => {
         accessibilityHint="새로운 콘텐츠를 작성할 수 있는 화면으로 이동합니다"
         accessibilityRole="button"
       >
-        <Icon name="create" color="white" size={28} />
+        <Icon name={ACTION_ICONS.CREATE} color="white" size={28} />
       </TouchableOpacity>
     </SafeAreaView>
   );

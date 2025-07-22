@@ -15,119 +15,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { generateDummyGroups } from '@/utils/mockData';
+import { ACTION_ICONS } from '@/utils/icons';
 
-// 임시 더미 그룹 데이터
-const generateDummyGroups = (): Group[] => {
-  const groups: Group[] = [
-    {
-      id: 'group_1',
-      name: '카카오 본사',
-      type: GroupType.OFFICIAL,
-      description: '카카오 임직원들을 위한 공식 그룹입니다.',
-      memberCount: 45,
-      maleCount: 23,
-      femaleCount: 22,
-      minimumMembers: 10,
-      isMatchingActive: true,
-      createdAt: new Date('2024-01-15'),
-    },
-    {
-      id: 'group_2',
-      name: '네이버 판교',
-      type: GroupType.OFFICIAL,
-      description: '네이버 판교 사옥 직원들의 그룹입니다.',
-      memberCount: 67,
-      maleCount: 35,
-      femaleCount: 32,
-      minimumMembers: 10,
-      isMatchingActive: true,
-      createdAt: new Date('2024-01-20'),
-    },
-    {
-      id: 'group_3',
-      name: '연세대학교 미래캠퍼스',
-      type: GroupType.OFFICIAL,
-      description: '연세대 송도 캠퍼스 학생들의 만남의 장',
-      memberCount: 89,
-      maleCount: 44,
-      femaleCount: 45,
-      minimumMembers: 20,
-      isMatchingActive: true,
-      createdAt: new Date('2024-01-10'),
-    },
-    {
-      id: 'group_4',
-      name: '홍대 독서모임',
-      type: GroupType.CREATED,
-      description: '매주 토요일 홍대에서 만나는 20-30대 독서모임입니다.',
-      memberCount: 12,
-      maleCount: 5,
-      femaleCount: 7,
-      minimumMembers: 8,
-      isMatchingActive: true,
-      createdBy: 'user_123',
-      createdAt: new Date('2024-02-01'),
-    },
-    {
-      id: 'group_5',
-      name: '강남 러닝크루',
-      type: GroupType.CREATED,
-      description: '매주 화/목 저녁 한강에서 함께 뛰는 모임',
-      memberCount: 18,
-      maleCount: 8,
-      femaleCount: 10,
-      minimumMembers: 6,
-      isMatchingActive: true,
-      createdBy: 'user_456',
-      createdAt: new Date('2024-01-25'),
-    },
-    {
-      id: 'group_6',
-      name: '스타벅스 여의도IFC점',
-      type: GroupType.LOCATION,
-      description: '여의도 IFC몰 스타벅스에서 만나는 사람들',
-      memberCount: 8,
-      maleCount: 3,
-      femaleCount: 5,
-      minimumMembers: 6,
-      isMatchingActive: true,
-      location: {
-        latitude: 37.5252,
-        longitude: 126.9265,
-        address: '서울 영등포구 여의도동 국제금융로 10',
-      },
-      createdAt: new Date('2024-02-05'),
-    },
-    {
-      id: 'group_7',
-      name: '코딩 스터디 모임',
-      type: GroupType.CREATED,
-      description: '주말 코딩 스터디와 프로젝트를 함께하는 개발자 모임',
-      memberCount: 15,
-      maleCount: 10,
-      femaleCount: 5,
-      minimumMembers: 8,
-      isMatchingActive: true,
-      createdBy: 'user_789',
-      createdAt: new Date('2024-01-30'),
-    },
-    {
-      id: 'group_8',
-      name: '요리 클래스 @압구정',
-      type: GroupType.INSTANCE,
-      description: '2월 한 달간 진행되는 이탈리안 요리 클래스 참여자들',
-      memberCount: 20,
-      maleCount: 8,
-      femaleCount: 12,
-      minimumMembers: 16,
-      isMatchingActive: true,
-      expiresAt: new Date('2024-03-01'),
-      createdAt: new Date('2024-01-28'),
-    },
-  ];
-
-  return groups.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-};
 
 export const GroupsScreen: React.FC = () => {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -385,7 +275,7 @@ export const GroupsScreen: React.FC = () => {
         accessibilityHint="새로운 그룹을 생성할 수 있는 화면으로 이동합니다"
         accessibilityRole="button"
       >
-        <Icon name="add" color="white" size={32} />
+        <Icon name={ACTION_ICONS.ADD} color="white" size={32} />
       </TouchableOpacity>
     </SafeAreaView>
   );

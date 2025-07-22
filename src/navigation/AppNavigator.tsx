@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '@clerk/clerk-expo';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { NAVIGATION_ICONS } from '@/utils/icons';
 
 // Screens
 import { AuthScreen } from '@/screens/auth/AuthScreen';
@@ -170,7 +171,7 @@ function MainTabNavigator() {
         component={HomeStackNavigator}
         options={{
           title: '홈',
-          tabBarIcon: ({ color, size }) => <Icon name="home" color={color} size={size || 24} />,
+          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.HOME} color={color} size={size || 24} />,
           tabBarAccessibilityLabel: '홈 화면으로 이동',
         }}
       />
@@ -179,7 +180,7 @@ function MainTabNavigator() {
         component={GroupsStackNavigator}
         options={{
           title: '그룹',
-          tabBarIcon: ({ color, size }) => <Icon name="people" color={color} size={size || 24} />,
+          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.GROUPS} color={color} size={size || 24} />,
           tabBarAccessibilityLabel: '그룹 화면으로 이동',
         }}
       />
@@ -188,7 +189,7 @@ function MainTabNavigator() {
         component={MatchesScreen}
         options={{
           title: '매칭',
-          tabBarIcon: ({ color, size }) => <Icon name="heart" color={color} size={size || 24} />,
+          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.MATCHES} color={color} size={size || 24} />,
           tabBarAccessibilityLabel: '매칭 화면으로 이동',
         }}
       />
@@ -197,7 +198,7 @@ function MainTabNavigator() {
         component={ProfileStackNavigator}
         options={{
           title: '프로필',
-          tabBarIcon: ({ color, size }) => <Icon name="person" color={color} size={size || 24} />,
+          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.PROFILE} color={color} size={size || 24} />,
           tabBarAccessibilityLabel: '프로필 화면으로 이동',
         }}
       />

@@ -11,42 +11,9 @@ import {
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { Match } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { generateDummyMatches, dummyUserNicknames } from '@/utils/mockData';
+import { formatTimeAgo } from '@/utils/dateUtils';
 
-// 임시 더미 매칭 데이터
-const generateDummyMatches = (): Match[] => {
-  return [
-    {
-      id: 'match_1',
-      user1Id: 'current_user',
-      user2Id: 'user_2',
-      groupId: 'group_1',
-      matchedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
-      chatChannelId: 'chat_1',
-    },
-    {
-      id: 'match_2',
-      user1Id: 'current_user',
-      user2Id: 'user_5',
-      groupId: 'group_2',
-      matchedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1일 전
-      chatChannelId: 'chat_2',
-    },
-    {
-      id: 'match_3',
-      user1Id: 'current_user',
-      user2Id: 'user_8',
-      groupId: 'group_1',
-      matchedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3일 전
-      chatChannelId: 'chat_3',
-    },
-  ];
-};
-
-const dummyUserNicknames: { [key: string]: string } = {
-  user_2: '커피매니아',
-  user_5: '독서광',
-  user_8: '영화러버',
-};
 
 export const MatchesScreen: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -78,19 +45,6 @@ export const MatchesScreen: React.FC = () => {
     // 실제로는 채팅 화면으로 네비게이션
   };
 
-  const formatTimeAgo = (date: Date): string => {
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) {
-      return '방금 매칭';
-    } else if (diffInHours < 24) {
-      return `${diffInHours}시간 전 매칭`;
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      return `${diffInDays}일 전 매칭`;
-    }
-  };
 
   const renderMatchItem = ({ item }: { item: Match }) => {
     const otherUserId = item.user1Id === 'current_user' ? item.user2Id : item.user1Id;
