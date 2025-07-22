@@ -17,6 +17,7 @@ import { CreateGroupScreen } from '@/screens/CreateGroupScreen';
 import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
 import { ChatScreen } from '@/screens/ChatScreen';
 import { PremiumScreen } from '@/screens/PremiumScreen';
+import NotificationSettingsScreen from '@/screens/NotificationSettingsScreen';
 // import { RootStackParamList } from '@/types';
 
 // Navigation Types
@@ -38,6 +39,7 @@ type ProfileStackParamList = {
   ProfileTab: undefined;
   MyGroups: undefined;
   Premium: undefined;
+  NotificationSettings: undefined;
 };
 
 type MatchesStackParamList = {
@@ -54,6 +56,20 @@ type MainTabParamList = {
   Groups: undefined;
   Matches: undefined;
   Profile: undefined;
+};
+
+// Combined navigation type for global use
+export type RootNavigationParamList = MainTabParamList & {
+  Chat: {
+    roomId: string;
+    matchId: string;
+    otherUserNickname: string;
+  };
+  Premium: undefined;
+  NotificationSettings: undefined;
+  MyGroups: undefined;
+  CreateContent: undefined;
+  CreateGroup: undefined;
 };
 
 type AppStackParamList = {
@@ -178,6 +194,13 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen 
         name="Premium" 
         component={PremiumScreen} 
+        options={{ 
+          headerShown: false,
+        }}
+      />
+      <ProfileStack.Screen 
+        name="NotificationSettings" 
+        component={NotificationSettingsScreen} 
         options={{ 
           headerShown: false,
         }}

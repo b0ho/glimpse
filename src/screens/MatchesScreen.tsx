@@ -69,7 +69,7 @@ export const MatchesScreen: React.FC = () => {
             <View>
               <Text style={styles.nickname}>{nickname}</Text>
               <Text style={styles.matchTime}>
-                {formatTimeAgo(item.matchedAt)}
+                {formatTimeAgo(item.matchedAt || item.createdAt)}
               </Text>
             </View>
           </View>

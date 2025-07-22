@@ -246,7 +246,10 @@ export const ProfileScreen: React.FC = () => {
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => navigation.navigate('NotificationSettings' as never)}
+        >
           <Text style={styles.settingText}>알림 설정</Text>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>

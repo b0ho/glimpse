@@ -122,6 +122,36 @@ export const useLikeStore = create<LikeStore>()(
             dailyLikesUsed: state.dailyLikesUsed + 1,
             isLoading: false,
           }));
+
+          // 매치 확인 (받은 좋아요가 있는지 확인)
+          const receivedLikeFromSameUser = state.receivedLikes.find(
+            like => like.fromUserId === toUserId && like.toUserId === 'current_user_id'
+          );
+
+          if (receivedLikeFromSameUser) {
+            // 매치 생성!
+            const newMatch: Match = {
+              id: `match_${Date.now()}`,
+              user1Id: 'current_user_id',
+              user2Id: toUserId,
+              groupId,
+              createdAt: new Date(),
+              lastMessageAt: null,
+              isActive: true,
+            };
+
+            state.createMatch(newMatch);
+
+            // 새 매치 알림 전송
+            if (typeof window !== 'undefined') {
+              // 실제 사용자 이름 가져오기 (더미 데이터)
+              const userName = `사용자${toUserId.slice(-4)}`;
+              // notification service를 직접 사용
+              import('../../services/notifications/notification-service').then(({ notificationService }) => {
+                notificationService.notifyNewMatch(newMatch.id, userName);
+              });
+            }
+          }
           
           return true;
         } catch (error) {
@@ -145,7 +175,34 @@ export const useLikeStore = create<LikeStore>()(
       },
 
       setReceivedLikes: (likes: Like[]) => {
+        const state = get();
+        const previousLikes = state.receivedLikes;
+        
         set({ receivedLikes: likes });
+
+        // 새로운 좋아요가 있는지 확인 (프리미엄 기능)
+        const newLikes = likes.filter(like => 
+          !previousLikes.some(prevLike => prevLike.id === like.id)
+        );
+
+        if (newLikes.length > 0) {
+          // 알림 전송 (프리미엄 사용자만)
+          import('../slices/premiumSlice').then(({ usePremiumStore }) => {
+            const premiumState = usePremiumStore.getState();
+            if (premiumState.subscription?.isActive) {
+              import('../../services/notifications/notification-service').then(({ notificationService }) => {
+                import('../slices/notificationSlice').then(({ useNotificationStore }) => {
+                  const notificationState = useNotificationStore.getState();
+                  if (notificationState.settings.likesReceived && notificationState.settings.pushEnabled) {
+                    newLikes.forEach(like => {
+                      notificationService.notifyLikeReceived(like.fromUserId, true);
+                    });
+                  }
+                });
+              });
+            }
+          });
+        }
       },
 
       setMatches: (matches: Match[]) => {

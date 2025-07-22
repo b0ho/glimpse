@@ -85,6 +85,27 @@ export const useChatStore = create<ChatStore>()(
           // 이벤트 리스너 설정
           webSocketService.on('message', (message: Message) => {
             get().addMessage(message);
+
+            // 새 메시지 알림 (현재 활성 방이 아닌 경우에만)
+            const state = get();
+            if (state.activeRoomId !== message.roomId && message.senderId !== userId) {
+              // 알림 전송
+              import('../../services/notifications/notification-service').then(({ notificationService }) => {
+                import('../slices/notificationSlice').then(({ useNotificationStore }) => {
+                  const notificationState = useNotificationStore.getState();
+                  if (notificationState.settings.newMessages && notificationState.settings.pushEnabled) {
+                    const senderName = message.senderNickname || '익명사용자';
+                    const preview = message.type === 'text' 
+                      ? message.content 
+                      : message.type === 'image' 
+                        ? '📷 사진을 보냈습니다' 
+                        : '📎 파일을 보냈습니다';
+                    
+                    notificationService.notifyNewMessage(message.id, senderName, preview);
+                  }
+                });
+              });
+            }
           });
 
           webSocketService.on('messageRead', ({ messageId, readBy: _readBy }) => {

@@ -53,7 +53,10 @@ export interface Match {
   user1Id: string;
   user2Id: string;
   groupId: string;
-  matchedAt: Date;
+  createdAt: Date; // 매치 생성 시간
+  matchedAt?: Date; // 매치된 시간 (별도 관리 가능)
+  lastMessageAt?: Date | null; // 마지막 메시지 시간
+  isActive: boolean; // 활성 상태
   chatChannelId?: string;
 }
 
@@ -72,6 +75,7 @@ export interface Message {
   id: string;
   roomId: string;
   senderId: string;
+  senderNickname?: string; // 발신자 닉네임 (알림용)
   content: string;
   type: 'text' | 'image' | 'file';
   isRead: boolean;

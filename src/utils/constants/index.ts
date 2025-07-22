@@ -28,6 +28,20 @@ export const CHAT_CONFIG = {
   CONNECTION_TIMEOUT: 10000,
 } as const;
 
+// 알림 상수
+export const NOTIFICATION_CONFIG = {
+  CHANNELS: {
+    MATCHES: 'matches',
+    MESSAGES: 'messages', 
+    LIKES: 'likes',
+  },
+  CHANNEL_NAMES: {
+    MATCHES: '새로운 매치',
+    MESSAGES: '메시지',
+    LIKES: '좋아요',
+  },
+} as const;
+
 // 보안 상수
 export const SECURITY = {
   TOKEN_REFRESH_INTERVAL: 15 * 60 * 1000, // 15분
@@ -67,6 +81,16 @@ export const COLORS = {
     WHITE: '#FFFFFF',
   },
   BORDER: '#E9ECEF',
+  // 추가 색상들
+  primary: '#FF6B6B',
+  text: '#212529',
+  textSecondary: '#6C757D',
+  white: '#FFFFFF',
+  gray50: '#F8F9FA',
+  gray200: '#E9ECEF',
+  gray300: '#DEE2E6',
+  gray500: '#ADB5BD',
+  premium: '#FFD700',
 } as const;
 
 // 스타일 상수
@@ -77,6 +101,13 @@ export const SPACING = {
   LG: 24,
   XL: 32,
   XXL: 48,
+  // 소문자 별칭 추가
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
 } as const;
 
 export const FONT_SIZES = {
@@ -87,6 +118,45 @@ export const FONT_SIZES = {
   XL: 20,
   XXL: 24,
   XXXL: 32,
+} as const;
+
+// 타이포그래피 스타일
+export const TYPOGRAPHY = {
+  h1: {
+    fontSize: FONT_SIZES.XXXL,
+    fontWeight: 'bold' as 'bold',
+    lineHeight: 40,
+  },
+  h2: {
+    fontSize: FONT_SIZES.XXL,
+    fontWeight: 'bold' as 'bold',
+    lineHeight: 32,
+  },
+  h3: {
+    fontSize: FONT_SIZES.XL,
+    fontWeight: '600' as '600',
+    lineHeight: 28,
+  },
+  h4: {
+    fontSize: FONT_SIZES.LG,
+    fontWeight: '600' as '600',
+    lineHeight: 24,
+  },
+  body: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: 'normal' as 'normal',
+    lineHeight: 24,
+  },
+  bodySmall: {
+    fontSize: FONT_SIZES.SM,
+    fontWeight: 'normal' as 'normal',
+    lineHeight: 20,
+  },
+  caption: {
+    fontSize: FONT_SIZES.XS,
+    fontWeight: 'normal' as 'normal',
+    lineHeight: 16,
+  },
 } as const;
 
 // 정규 표현식

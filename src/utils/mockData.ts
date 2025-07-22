@@ -167,7 +167,10 @@ export const generateDummyMatches = (): Match[] => {
       user1Id: 'current_user',
       user2Id: 'user_2',
       groupId: 'group_1',
-      matchedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
+      matchedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      lastMessageAt: null,
+      isActive: true,
       chatChannelId: 'chat_1',
     },
     {
@@ -175,7 +178,10 @@ export const generateDummyMatches = (): Match[] => {
       user1Id: 'current_user',
       user2Id: 'user_5',
       groupId: 'group_2',
-      matchedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1일 전
+      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1일 전
+      matchedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      lastMessageAt: null,
+      isActive: true,
       chatChannelId: 'chat_2',
     },
     {
@@ -183,7 +189,10 @@ export const generateDummyMatches = (): Match[] => {
       user1Id: 'current_user',
       user2Id: 'user_8',
       groupId: 'group_1',
-      matchedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3일 전
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3일 전
+      matchedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      lastMessageAt: null,
+      isActive: true,
       chatChannelId: 'chat_3',
     },
   ];
