@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '@clerk/clerk-expo';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
@@ -17,6 +18,7 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 export const ProfileScreen: React.FC = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
+  const navigation = useNavigation();
   const { signOut } = useAuth();
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
@@ -182,6 +184,14 @@ export const ProfileScreen: React.FC = () => {
       <Text style={styles.sectionTitle}>설정</Text>
       
       <View style={styles.settingsCard}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => navigation.navigate('MyGroups' as never)}
+        >
+          <Text style={styles.settingText}>내 그룹 관리</Text>
+          <Text style={styles.settingArrow}>{'>'}</Text>
+        </TouchableOpacity>
+        
         <TouchableOpacity style={styles.settingItem}>
           <Text style={styles.settingText}>알림 설정</Text>
           <Text style={styles.settingArrow}>{'>'}</Text>

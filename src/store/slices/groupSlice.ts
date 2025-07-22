@@ -23,6 +23,7 @@ interface GroupStore extends GroupState {
   // Actions
   setGroups: (groups: Group[]) => void;
   addGroup: (group: Group) => void;
+  createGroup: (group: Group) => void;
   updateGroup: (groupId: string, updates: Partial<Group>) => void;
   removeGroup: (groupId: string) => void;
   setCurrentGroup: (group: Group | null) => void;
@@ -63,6 +64,13 @@ export const useGroupStore = create<GroupStore>((set, get) => ({
   addGroup: (group: Group) => {
     set((state) => ({
       groups: [...state.groups, group],
+    }));
+  },
+
+  createGroup: (group: Group) => {
+    set((state) => ({
+      groups: [...state.groups, group],
+      joinedGroups: [...state.joinedGroups, group], // 생성자는 자동으로 참여
     }));
   },
 

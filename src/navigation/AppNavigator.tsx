@@ -11,11 +11,29 @@ import { HomeScreen } from '@/screens/HomeScreen';
 import { GroupsScreen } from '@/screens/GroupsScreen';
 import { MatchesScreen } from '@/screens/MatchesScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
+import { CreateContentScreen } from '@/screens/CreateContentScreen';
+import { CreateGroupScreen } from '@/screens/CreateGroupScreen';
+import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
 // import { RootStackParamList } from '@/types';
 
 // Navigation Types
 type AuthStackParamList = {
   Auth: undefined;
+};
+
+type HomeStackParamList = {
+  HomeTab: undefined;
+  CreateContent: undefined;
+};
+
+type GroupsStackParamList = {
+  GroupsTab: undefined;
+  CreateGroup: undefined;
+};
+
+type ProfileStackParamList = {
+  ProfileTab: undefined;
+  MyGroups: undefined;
 };
 
 type MainTabParamList = {
@@ -32,6 +50,9 @@ type AppStackParamList = {
 
 const Stack = createStackNavigator<AppStackParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
+const HomeStack = createStackNavigator<HomeStackParamList>();
+const GroupsStack = createStackNavigator<GroupsStackParamList>();
+const ProfileStack = createStackNavigator<ProfileStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // 모든 메인 화면들이 실제 컴포넌트로 구현됨
@@ -59,6 +80,71 @@ function AuthNavigator() {
   );
 }
 
+// Home Stack Navigator
+function HomeStackNavigator() {
+  return (
+    <HomeStack.Navigator>
+      <HomeStack.Screen 
+        name="HomeTab" 
+        component={HomeScreen} 
+        options={{ headerShown: false }}
+      />
+      <HomeStack.Screen 
+        name="CreateContent" 
+        component={CreateContentScreen} 
+        options={{ 
+          title: '새 게시물',
+          headerShown: true,
+          presentation: 'modal',
+        }}
+      />
+    </HomeStack.Navigator>
+  );
+}
+
+// Groups Stack Navigator
+function GroupsStackNavigator() {
+  return (
+    <GroupsStack.Navigator>
+      <GroupsStack.Screen 
+        name="GroupsTab" 
+        component={GroupsScreen} 
+        options={{ headerShown: false }}
+      />
+      <GroupsStack.Screen 
+        name="CreateGroup" 
+        component={CreateGroupScreen} 
+        options={{ 
+          title: '새 그룹 만들기',
+          headerShown: true,
+          presentation: 'modal',
+        }}
+      />
+    </GroupsStack.Navigator>
+  );
+}
+
+// Profile Stack Navigator
+function ProfileStackNavigator() {
+  return (
+    <ProfileStack.Navigator>
+      <ProfileStack.Screen 
+        name="ProfileTab" 
+        component={ProfileScreen} 
+        options={{ headerShown: false }}
+      />
+      <ProfileStack.Screen 
+        name="MyGroups" 
+        component={MyGroupsScreen} 
+        options={{ 
+          title: '내 그룹',
+          headerShown: true,
+        }}
+      />
+    </ProfileStack.Navigator>
+  );
+}
+
 // 인증된 사용자용 탭 네비게이터
 function MainTabNavigator() {
   return (
@@ -81,7 +167,7 @@ function MainTabNavigator() {
     >
       <Tab.Screen 
         name="Home" 
-        component={HomeScreen}
+        component={HomeStackNavigator}
         options={{
           title: '홈',
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🏠</Text>,
@@ -89,7 +175,7 @@ function MainTabNavigator() {
       />
       <Tab.Screen 
         name="Groups" 
-        component={GroupsScreen}
+        component={GroupsStackNavigator}
         options={{
           title: '그룹',
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>👥</Text>,
@@ -105,7 +191,7 @@ function MainTabNavigator() {
       />
       <Tab.Screen 
         name="Profile" 
-        component={ProfileScreen}
+        component={ProfileStackNavigator}
         options={{
           title: '프로필',
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>👤</Text>,

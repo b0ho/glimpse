@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -132,6 +133,7 @@ export const GroupsScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
+  const navigation = useNavigation();
   const groupStore = useGroupStore();
 
   // 그룹 로드 함수
@@ -372,6 +374,15 @@ export const GroupsScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={groups.length === 0 ? styles.emptyContainer : undefined}
       />
+      
+      {/* Create Group Floating Action Button */}
+      <TouchableOpacity
+        style={styles.createGroupFab}
+        onPress={() => navigation.navigate('CreateGroup' as never)}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.createGroupFabIcon}>+</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -552,5 +563,26 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  createGroupFab: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.SUCCESS,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  createGroupFabIcon: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: COLORS.TEXT.WHITE,
   },
 });

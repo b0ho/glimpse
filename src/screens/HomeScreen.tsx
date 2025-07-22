@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { Content } from '@/types';
@@ -53,6 +54,7 @@ export const HomeScreen: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasMoreData, setHasMoreData] = useState(true);
   
+  const navigation = useNavigation();
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
 
@@ -292,6 +294,15 @@ export const HomeScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={contents.length === 0 ? styles.emptyContainer : undefined}
       />
+      
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate('CreateContent' as never)}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.fabIcon}>✏️</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -493,5 +504,24 @@ const styles = StyleSheet.create({
   loadingFooter: {
     paddingVertical: SPACING.LG,
     alignItems: 'center',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.PRIMARY,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  fabIcon: {
+    fontSize: 24,
   },
 });

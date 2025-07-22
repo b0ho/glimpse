@@ -110,13 +110,16 @@ export type RootStackParamList = {
   Settings: undefined;
 };
 
+// 콘텐츠 타입 열거형
+export type ContentType = 'text' | 'image' | 'mixed';
+
 // 콘텐츠 타입
 export interface Content {
   id: string;
   authorId: string;
   authorNickname: string;
   groupId: string;
-  type: 'text' | 'image' | 'mixed';
+  type: ContentType;
   text?: string;
   imageUrls?: string[];
   likeCount: number;
