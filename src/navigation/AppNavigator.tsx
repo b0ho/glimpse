@@ -1,9 +1,9 @@
 import React from 'react';
-import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '@clerk/clerk-expo';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 // Screens
 import { AuthScreen } from '@/screens/auth/AuthScreen';
@@ -170,7 +170,8 @@ function MainTabNavigator() {
         component={HomeStackNavigator}
         options={{
           title: '홈',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🏠</Text>,
+          tabBarIcon: ({ color, size }) => <Icon name="home" color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '홈 화면으로 이동',
         }}
       />
       <Tab.Screen 
@@ -178,7 +179,8 @@ function MainTabNavigator() {
         component={GroupsStackNavigator}
         options={{
           title: '그룹',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>👥</Text>,
+          tabBarIcon: ({ color, size }) => <Icon name="people" color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '그룹 화면으로 이동',
         }}
       />
       <Tab.Screen 
@@ -186,7 +188,8 @@ function MainTabNavigator() {
         component={MatchesScreen}
         options={{
           title: '매칭',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>💕</Text>,
+          tabBarIcon: ({ color, size }) => <Icon name="heart" color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '매칭 화면으로 이동',
         }}
       />
       <Tab.Screen 
@@ -194,7 +197,8 @@ function MainTabNavigator() {
         component={ProfileStackNavigator}
         options={{
           title: '프로필',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>👤</Text>,
+          tabBarIcon: ({ color, size }) => <Icon name="person" color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '프로필 화면으로 이동',
         }}
       />
     </Tab.Navigator>

@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -380,8 +381,11 @@ export const GroupsScreen: React.FC = () => {
         style={styles.createGroupFab}
         onPress={() => navigation.navigate('CreateGroup' as never)}
         activeOpacity={0.8}
+        accessibilityLabel="새 그룹 만들기"
+        accessibilityHint="새로운 그룹을 생성할 수 있는 화면으로 이동합니다"
+        accessibilityRole="button"
       >
-        <Text style={styles.createGroupFabIcon}>+</Text>
+        <Icon name="add" color="white" size={32} />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -579,10 +583,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-  },
-  createGroupFabIcon: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.TEXT.WHITE,
   },
 });

@@ -11,8 +11,10 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
+import { ContentItem } from '@/components/ContentItem';
 import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
@@ -184,60 +186,12 @@ export const HomeScreen: React.FC = () => {
   );
 
   const renderContentItem = ({ item }: { item: Content }) => (
-    <View style={styles.contentItem}>
-      <View style={styles.contentHeader}>
-        <View style={styles.authorInfo}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {item.authorNickname.charAt(0)}
-            </Text>
-          </View>
-          <View>
-            <Text style={styles.authorName}>{item.authorNickname}</Text>
-            <Text style={styles.timeText}>
-              {formatTimeAgo(item.createdAt)}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.contentBody}>
-        {item.text && (
-          <Text style={styles.contentText}>{item.text}</Text>
-        )}
-        {item.type === 'image' && item.imageUrls && (
-          <View style={styles.imageContainer}>
-            <Text style={styles.imagePlaceholder}>
-              📷 이미지 ({item.imageUrls.length}개)
-            </Text>
-          </View>
-        )}
-      </View>
-
-      <View style={styles.contentFooter}>
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={styles.likeButtonContainer}
-            onPress={() => handleLikeToggle(item.id, item.authorId)}
-            disabled={item.isLikedByUser || item.authorId === authStore.user?.id}
-          >
-            <Text style={[
-              styles.likeButton,
-              item.isLikedByUser && styles.likeButtonActive,
-              item.authorId === authStore.user?.id && styles.likeButtonDisabled,
-            ]}>
-              {item.isLikedByUser ? '❤️' : '🤍'} {item.likeCount}
-            </Text>
-          </TouchableOpacity>
-          
-          <View style={styles.actionInfo}>
-            <Text style={styles.remainingLikes}>
-              남은 좋아요: {likeStore.getRemainingFreeLikes()}개
-            </Text>
-          </View>
-        </View>
-      </View>
-    </View>
+    <ContentItem
+      item={item}
+      currentUserId={authStore.user?.id}
+      remainingLikes={likeStore.getRemainingFreeLikes()}
+      onLikeToggle={handleLikeToggle}
+    />
   );
 
   const renderEmptyState = () => (
@@ -300,36 +254,16 @@ export const HomeScreen: React.FC = () => {
         style={styles.fab}
         onPress={() => navigation.navigate('CreateContent' as never)}
         activeOpacity={0.8}
+        accessibilityLabel="새 게시물 작성"
+        accessibilityHint="새로운 콘텐츠를 작성할 수 있는 화면으로 이동합니다"
+        accessibilityRole="button"
       >
-        <Text style={styles.fabIcon}>✏️</Text>
+        <Icon name="create" color="white" size={28} />
       </TouchableOpacity>
     </SafeAreaView>
   );
 };
 
-// 시간 포맷팅 헬퍼 함수
-const formatTimeAgo = (date: Date): string => {
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) {
-    return '방금 전';
-  } else if (diffInSeconds < 3600) {
-    const minutes = Math.floor(diffInSeconds / 60);
-    return `${minutes}분 전`;
-  } else if (diffInSeconds < 86400) {
-    const hours = Math.floor(diffInSeconds / 3600);
-    return `${hours}시간 전`;
-  } else if (diffInSeconds < 604800) {
-    const days = Math.floor(diffInSeconds / 86400);
-    return `${days}일 전`;
-  } else {
-    return date.toLocaleDateString('ko-KR', {
-      month: 'short',
-      day: 'numeric',
-    });
-  }
-};
 
 const styles = StyleSheet.create({
   container: {
@@ -371,108 +305,6 @@ const styles = StyleSheet.create({
   statsText: {
     fontSize: FONT_SIZES.SM,
     color: COLORS.TEXT.SECONDARY,
-    fontWeight: '500',
-  },
-  contentItem: {
-    backgroundColor: COLORS.SURFACE,
-    marginVertical: SPACING.XS,
-    marginHorizontal: SPACING.MD,
-    borderRadius: 12,
-    padding: SPACING.MD,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  contentHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.MD,
-  },
-  authorInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.PRIMARY,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.SM,
-  },
-  avatarText: {
-    color: COLORS.TEXT.WHITE,
-    fontSize: FONT_SIZES.MD,
-    fontWeight: 'bold',
-  },
-  authorName: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
-  },
-  timeText: {
-    fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.SECONDARY,
-    marginTop: 2,
-  },
-  contentBody: {
-    marginBottom: SPACING.MD,
-  },
-  contentText: {
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
-    lineHeight: 22,
-  },
-  imageContainer: {
-    marginTop: SPACING.SM,
-    padding: SPACING.LG,
-    backgroundColor: COLORS.BACKGROUND,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  imagePlaceholder: {
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
-  },
-  contentFooter: {
-    borderTopWidth: 1,
-    borderTopColor: COLORS.BORDER,
-    paddingTop: SPACING.SM,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  likeButtonContainer: {
-    paddingVertical: SPACING.XS,
-    paddingHorizontal: SPACING.SM,
-    borderRadius: 20,
-    backgroundColor: COLORS.BACKGROUND,
-  },
-  likeButton: {
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
-    fontWeight: '500',
-  },
-  likeButtonActive: {
-    color: COLORS.PRIMARY,
-    fontWeight: '600',
-  },
-  likeButtonDisabled: {
-    color: COLORS.TEXT.LIGHT,
-    opacity: 0.6,
-  },
-  actionInfo: {
-    alignItems: 'flex-end',
-  },
-  remainingLikes: {
-    fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
     fontWeight: '500',
   },
   emptyContainer: {
@@ -520,8 +352,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-  },
-  fabIcon: {
-    fontSize: 24,
   },
 });
