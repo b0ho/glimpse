@@ -8,8 +8,10 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useAuthService } from '@/services/auth/auth-service';
+import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, FONT_SIZES, SECURITY } from '@/utils/constants';
 
 interface SMSVerificationScreenProps {
@@ -28,6 +30,7 @@ export const SMSVerificationScreen: React.FC<SMSVerificationScreenProps> = ({
   const [remainingTime, setRemainingTime] = useState(SECURITY.OTP_EXPIRY_MINUTES * 60);
   const [canResend, setCanResend] = useState(false);
   const authService = useAuthService();
+  const authStore = useAuthStore();
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
@@ -85,6 +88,19 @@ export const SMSVerificationScreen: React.FC<SMSVerificationScreenProps> = ({
       const result = await authService.verifyPhoneCode(code);
       
       if (result.success) {
+        // 인증 성공 시 사용자 정보를 스토어에 저장
+        const currentUser = authService.getCurrentUser();
+        if (currentUser) {
+          authStore.setUser({
+            id: currentUser.id,
+            anonymousId: `anon_${currentUser.id.slice(-8)}`,
+            nickname: currentUser.firstName || '사용자',
+            phoneNumber: phoneNumber, // 해시화된 전화번호 (실제로는 백엔드에서 처리)
+            isVerified: true,
+            createdAt: new Date(),
+          });
+        }
+        
         Alert.alert(
           '인증 성공',
           '전화번호 인증이 완료되었습니다.',
@@ -174,9 +190,16 @@ export const SMSVerificationScreen: React.FC<SMSVerificationScreenProps> = ({
             onPress={handleVerifyCode}
             disabled={code.length !== SECURITY.OTP_LENGTH || isLoading}
           >
-            <Text style={styles.buttonText}>
-              {isLoading ? '인증 중...' : '인증하기'}
-            </Text>
+            {isLoading ? (
+              <View style={styles.buttonContent}>
+                <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
+                <Text style={[styles.buttonText, { marginLeft: SPACING.SM }]}>
+                  인증 중...
+                </Text>
+              </View>
+            ) : (
+              <Text style={styles.buttonText}>인증하기</Text>
+            )}
           </TouchableOpacity>
           
           <TouchableOpacity
@@ -187,12 +210,21 @@ export const SMSVerificationScreen: React.FC<SMSVerificationScreenProps> = ({
             onPress={handleResendCode}
             disabled={!canResend || isLoading}
           >
-            <Text style={[
-              styles.resendButtonText,
-              !canResend && styles.resendButtonTextDisabled,
-            ]}>
-              {isLoading ? '전송 중...' : '인증번호 재전송'}
-            </Text>
+            {isLoading ? (
+              <View style={styles.resendButtonContent}>
+                <ActivityIndicator size="small" color={COLORS.PRIMARY} />
+                <Text style={[styles.resendButtonText, { marginLeft: SPACING.XS }]}>
+                  전송 중...
+                </Text>
+              </View>
+            ) : (
+              <Text style={[
+                styles.resendButtonText,
+                !canResend && styles.resendButtonTextDisabled,
+              ]}>
+                인증번호 재전송
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
         
@@ -276,12 +308,22 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
   },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   resendButton: {
     alignItems: 'center',
     paddingVertical: SPACING.SM,
   },
   resendButtonDisabled: {
     opacity: 0.5,
+  },
+  resendButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   resendButtonText: {
     color: COLORS.PRIMARY,

@@ -8,6 +8,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useAuthService } from '@/services/auth/auth-service';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -118,9 +119,16 @@ export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = (
             onPress={handleSendVerification}
             disabled={!phoneNumber.trim() || isLoading}
           >
-            <Text style={styles.buttonText}>
-              {isLoading ? '전송 중...' : '인증번호 받기'}
-            </Text>
+            {isLoading ? (
+              <View style={styles.buttonContent}>
+                <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
+                <Text style={[styles.buttonText, { marginLeft: SPACING.SM }]}>
+                  전송 중...
+                </Text>
+              </View>
+            ) : (
+              <Text style={styles.buttonText}>인증번호 받기</Text>
+            )}
           </TouchableOpacity>
         </View>
         
@@ -194,6 +202,11 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   privacy: {
     fontSize: FONT_SIZES.XS,
