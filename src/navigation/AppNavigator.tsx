@@ -16,6 +16,7 @@ import { CreateContentScreen } from '@/screens/CreateContentScreen';
 import { CreateGroupScreen } from '@/screens/CreateGroupScreen';
 import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
 import { ChatScreen } from '@/screens/ChatScreen';
+import { PremiumScreen } from '@/screens/PremiumScreen';
 // import { RootStackParamList } from '@/types';
 
 // Navigation Types
@@ -36,6 +37,7 @@ type GroupsStackParamList = {
 type ProfileStackParamList = {
   ProfileTab: undefined;
   MyGroups: undefined;
+  Premium: undefined;
 };
 
 type MatchesStackParamList = {
@@ -171,6 +173,13 @@ function ProfileStackNavigator() {
         options={{ 
           title: '내 그룹',
           headerShown: true,
+        }}
+      />
+      <ProfileStack.Screen 
+        name="Premium" 
+        component={PremiumScreen} 
+        options={{ 
+          headerShown: false,
         }}
       />
     </ProfileStack.Navigator>

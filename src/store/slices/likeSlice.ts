@@ -36,6 +36,7 @@ interface LikeStore extends LikeState {
   // Premium actions
   purchasePremiumLikes: (count: number) => void;
   setPremiumStatus: (hasPremium: boolean) => void;
+  syncWithPremiumStore: () => void;
   
   // Computed values
   canSendLike: (toUserId: string) => boolean;
@@ -168,6 +169,21 @@ export const useLikeStore = create<LikeStore>()(
 
       setPremiumStatus: (hasPremium: boolean) => {
         set({ hasPremium });
+      },
+      
+      // Sync with premium store
+      syncWithPremiumStore: () => {
+        // Import premium store dynamically to avoid circular dependency
+        import('./premiumSlice').then(({ usePremiumStore, premiumSelectors }) => {
+          const premiumState = usePremiumStore.getState();
+          const isPremium = premiumSelectors.isPremiumUser()(premiumState);
+          const remainingLikes = premiumSelectors.getRemainingLikes()(premiumState);
+          
+          set(state => ({
+            hasPremium: isPremium,
+            premiumLikesRemaining: isPremium ? 999 : Math.max(0, remainingLikes - state.dailyLikesUsed)
+          }));
+        });
       },
 
       // Computed values

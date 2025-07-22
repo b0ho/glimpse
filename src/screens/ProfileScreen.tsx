@@ -13,6 +13,7 @@ import { useAuth } from '@clerk/clerk-expo';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
+import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 export const ProfileScreen: React.FC = () => {
@@ -23,6 +24,10 @@ export const ProfileScreen: React.FC = () => {
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
+  const premiumStore = usePremiumStore();
+  
+  const isPremiumUser = usePremiumStore(premiumSelectors.isPremiumUser());
+  const currentPlan = usePremiumStore(premiumSelectors.getCurrentPlan());
 
   const handleSignOut = () => {
     Alert.alert(
@@ -112,6 +117,53 @@ export const ProfileScreen: React.FC = () => {
           <Text style={styles.editButtonText}>편집</Text>
         </TouchableOpacity>
       </View>
+    </View>
+  );
+
+  const renderPremiumSection = () => (
+    <View style={styles.section}>
+      <TouchableOpacity
+        style={[
+          styles.premiumCard,
+          isPremiumUser ? styles.premiumCardActive : styles.premiumCardInactive,
+        ]}
+        onPress={() => (navigation as any).navigate('Premium')}
+      >
+        <View style={styles.premiumHeader}>
+          <Text style={[
+            styles.premiumTitle,
+            isPremiumUser ? styles.premiumTitleActive : styles.premiumTitleInactive,
+          ]}>
+            {isPremiumUser ? '✨ Premium 활성' : '⭐ Premium으로 업그레이드'}
+          </Text>
+          {isPremiumUser && (
+            <View style={styles.premiumBadge}>
+              <Text style={styles.premiumBadgeText}>
+                {currentPlan.includes('yearly') ? '연간' : '월간'}
+              </Text>
+            </View>
+          )}
+        </View>
+        
+        <Text style={styles.premiumDescription}>
+          {isPremiumUser 
+            ? '모든 프리미엄 기능을 이용하고 있습니다'
+            : '무제한 좋아요, 매칭 우선권 등 프리미엄 기능을 만나보세요'
+          }
+        </Text>
+        
+        <View style={styles.premiumFeatures}>
+          <Text style={styles.premiumFeature}>
+            💕 {isPremiumUser ? '무제한 좋아요' : '일일 좋아요 1개 → 무제한'}
+          </Text>
+          <Text style={styles.premiumFeature}>
+            👀 {isPremiumUser ? '좋아요 받은 사람 확인 가능' : '누가 좋아요를 보냈는지 확인'}
+          </Text>
+          <Text style={styles.premiumFeature}>
+            ⚡ {isPremiumUser ? '우선 매칭 활성' : '우선 매칭으로 더 빠른 연결'}
+          </Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 
@@ -250,6 +302,7 @@ export const ProfileScreen: React.FC = () => {
         </View>
         
         {renderProfileSection()}
+        {renderPremiumSection()}
         {renderStatsSection()}
         {renderLikeSystemSection()}
         {renderSettingsSection()}
@@ -494,5 +547,67 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT.LIGHT,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  
+  // Premium section styles
+  premiumCard: {
+    borderRadius: 16,
+    padding: SPACING.LG,
+    marginBottom: SPACING.MD,
+  },
+  premiumCardActive: {
+    backgroundColor: COLORS.SUCCESS + '20',
+    borderWidth: 2,
+    borderColor: COLORS.SUCCESS,
+  },
+  premiumCardInactive: {
+    backgroundColor: COLORS.PRIMARY + '10',
+    borderWidth: 2,
+    borderColor: COLORS.PRIMARY,
+  },
+  premiumHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.MD,
+  },
+  premiumTitle: {
+    fontSize: FONT_SIZES.LG,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  premiumTitleActive: {
+    color: COLORS.SUCCESS,
+  },
+  premiumTitleInactive: {
+    color: COLORS.PRIMARY,
+  },
+  premiumBadge: {
+    backgroundColor: COLORS.SUCCESS,
+    paddingHorizontal: SPACING.SM,
+    paddingVertical: SPACING.XS,
+    borderRadius: 12,
+  },
+  premiumBadgeText: {
+    color: COLORS.TEXT.WHITE,
+    fontSize: FONT_SIZES.XS,
+    fontWeight: '600',
+  },
+  premiumDescription: {
+    fontSize: FONT_SIZES.MD,
+    color: COLORS.TEXT.PRIMARY,
+    marginBottom: SPACING.MD,
+    lineHeight: 20,
+  },
+  premiumFeatures: {
+    backgroundColor: COLORS.SURFACE + '80',
+    borderRadius: 8,
+    padding: SPACING.MD,
+  },
+  premiumFeature: {
+    fontSize: FONT_SIZES.SM,
+    color: COLORS.TEXT.PRIMARY,
+    marginBottom: SPACING.XS,
+    lineHeight: 18,
   },
 });
