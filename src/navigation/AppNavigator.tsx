@@ -7,7 +7,7 @@ import { useAuth } from '@clerk/clerk-expo';
 
 // Screens
 import { AuthScreen } from '@/screens/auth/AuthScreen';
-import { RootStackParamList } from '@/types';
+// import { RootStackParamList } from '@/types';
 import { COLORS, FONT_SIZES } from '@/utils/constants';
 
 // Navigation Types

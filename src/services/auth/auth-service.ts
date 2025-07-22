@@ -11,7 +11,7 @@ export interface AuthService {
 }
 
 export const useAuthService = (): AuthService => {
-  const { signOut: clerkSignOut, isSignedIn, isLoaded } = useAuth();
+  const { signOut: clerkSignOut, isSignedIn } = useAuth();
   const { user } = useUser();
   const { signIn, isLoaded: signInLoaded } = useSignIn();
   const { signUp, isLoaded: signUpLoaded } = useSignUp();

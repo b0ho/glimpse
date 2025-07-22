@@ -1,4 +1,4 @@
-import { ClerkProvider } from '@clerk/clerk-expo';
+// import { ClerkProvider } from '@clerk/clerk-expo';
 import * as SecureStore from 'expo-secure-store';
 
 // Clerk 토큰 캐시 설정

@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { useAuthService } from '@/services/auth/auth-service';
-import { COLORS, SPACING, FONT_SIZES, REGEX } from '@/utils/constants';
+import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 interface PhoneVerificationScreenProps {
   onVerificationSent: (phoneNumber: string) => void;
