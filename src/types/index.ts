@@ -5,11 +5,23 @@ export type Gender = 'MALE' | 'FEMALE';
 export interface User {
   id: string;
   anonymousId: string; // 익명 식별자
-  nickname: string;
+  nickname: string; // 익명 닉네임 (매칭 전 공개)
+  realName?: string; // 실제 이름 (매칭 후에만 공개)
   gender?: Gender; // 사용자 성별 (매칭에 필수)
   phoneNumber?: string; // 해시화된 전화번호
   isVerified: boolean;
   createdAt: Date;
+}
+
+// 익명성 컨텍스트별 사용자 정보
+export interface AnonymousUserInfo {
+  id: string;
+  anonymousId: string;
+  displayName: string; // 매칭 상태에 따라 nickname 또는 realName
+  nickname: string;
+  realName?: string; // 매칭된 경우에만 포함
+  isMatched: boolean;
+  gender?: Gender;
 }
 
 // 그룹 타입 열거형

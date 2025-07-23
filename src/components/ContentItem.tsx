@@ -10,6 +10,7 @@ import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { STATE_ICONS } from '@/utils/icons';
+import { useLikeStore } from '@/store/slices/likeSlice';
 
 interface ContentItemProps {
   item: Content;
@@ -25,6 +26,12 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   onLikeToggle,
 }) => {
   const isOwnContent = item.authorId === currentUserId;
+  const { getUserDisplayName } = useLikeStore();
+
+  // 익명성 시스템: 매칭 상태에 따라 표시명 결정
+  const displayName = currentUserId 
+    ? getUserDisplayName(item.authorId, currentUserId)
+    : item.authorNickname;
 
   return (
     <View style={styles.contentItem}>
@@ -32,11 +39,11 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
         <View style={styles.authorInfo}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
-              {item.authorNickname.charAt(0)}
+              {displayName.charAt(0)}
             </Text>
           </View>
           <View>
-            <Text style={styles.authorName}>{item.authorNickname}</Text>
+            <Text style={styles.authorName}>{displayName}</Text>
             <Text style={styles.timeText}>{formatTimeAgo(item.createdAt)}</Text>
           </View>
         </View>

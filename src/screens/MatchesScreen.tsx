@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useLikeStore } from '@/store/slices/likeSlice';
+import { useAuthStore } from '@/store/slices/authSlice';
 import { Match } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { generateDummyMatches, dummyUserNicknames } from '@/utils/mockData';
@@ -22,6 +23,7 @@ export const MatchesScreen: React.FC = React.memo(() => {
   
   const navigation = useNavigation();
   const likeStore = useLikeStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     const loadMatches = async () => {
@@ -54,8 +56,12 @@ export const MatchesScreen: React.FC = React.memo(() => {
 
 
   const renderMatchItem = ({ item }: { item: Match }) => {
-    const otherUserId = item.user1Id === 'current_user' ? item.user2Id : item.user1Id;
-    const nickname = dummyUserNicknames[otherUserId] || '익명사용자';
+    const otherUserId = item.user1Id === user?.id ? item.user2Id : item.user1Id;
+    
+    // 익명성 시스템: 매칭된 상대방이므로 실명 표시
+    const displayName = user?.id 
+      ? likeStore.getUserDisplayName(otherUserId, user.id)
+      : (dummyUserNicknames[otherUserId] || '익명사용자');
 
     return (
       <View style={styles.matchItem}>
@@ -63,11 +69,11 @@ export const MatchesScreen: React.FC = React.memo(() => {
           <View style={styles.userInfo}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
-                {nickname.charAt(0)}
+                {displayName.charAt(0)}
               </Text>
             </View>
             <View>
-              <Text style={styles.nickname}>{nickname}</Text>
+              <Text style={styles.nickname}>{displayName}</Text>
               <Text style={styles.matchTime}>
                 {formatTimeAgo(item.matchedAt || item.createdAt)}
               </Text>
@@ -76,7 +82,7 @@ export const MatchesScreen: React.FC = React.memo(() => {
           
           <TouchableOpacity
             style={styles.chatButton}
-            onPress={() => handleStartChat(item.id, nickname)}
+            onPress={() => handleStartChat(item.id, displayName)}
           >
             <Text style={styles.chatButtonText}>채팅하기</Text>
           </TouchableOpacity>

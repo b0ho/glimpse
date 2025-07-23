@@ -2,7 +2,7 @@
  * 개발 및 테스트용 더미 데이터 생성 유틸리티
  */
 
-import { Content, Group, GroupType, Match } from '@/types';
+import { Content, Group, GroupType, Match, User } from '@/types';
 
 /**
  * 홈 피드용 더미 콘텐츠 생성
@@ -199,7 +199,58 @@ export const generateDummyMatches = (): Match[] => {
 };
 
 /**
- * 매칭된 사용자 닉네임 더미 데이터
+ * 익명성 시스템 테스트용 더미 사용자 데이터
+ */
+export const dummyUsers: User[] = [
+  {
+    id: 'user_1',
+    anonymousId: 'anon_001',
+    nickname: '커피러버',
+    realName: '김민수',
+    gender: 'MALE',
+    isVerified: true,
+    createdAt: new Date(),
+  },
+  {
+    id: 'user_2',
+    anonymousId: 'anon_002', 
+    nickname: '산책마니아',
+    realName: '이소영',
+    gender: 'FEMALE',
+    isVerified: true,
+    createdAt: new Date(),
+  },
+  {
+    id: 'user_3',
+    anonymousId: 'anon_003',
+    nickname: '책벌레',
+    realName: '박준호',
+    gender: 'MALE',
+    isVerified: true,
+    createdAt: new Date(),
+  },
+  {
+    id: 'user_4',
+    anonymousId: 'anon_004',
+    nickname: '영화광',
+    realName: '최지은',
+    gender: 'FEMALE',
+    isVerified: true,
+    createdAt: new Date(),
+  },
+  {
+    id: 'user_5',
+    anonymousId: 'anon_005',
+    nickname: '음악애호가',
+    realName: '정태현',
+    gender: 'MALE',
+    isVerified: true,
+    createdAt: new Date(),
+  },
+];
+
+/**
+ * 매칭된 사용자 닉네임 더미 데이터 (하위 호환성)
  */
 export const dummyUserNicknames: { [key: string]: string } = {
   user_2: '커피매니아',

@@ -61,6 +61,10 @@ interface LikeStore extends LikeState {
   isMatchedWith: (userId: string) => boolean;
   getReceivedLikesCount: () => number;
   
+  // Anonymity system
+  getAnonymousUserInfo: (userId: string, currentUserId: string) => import('@/types').AnonymousUserInfo | null;
+  getUserDisplayName: (userId: string, currentUserId: string) => string;
+  
   // Location-based matching
   getLocationBasedMatches: (userLocation?: { latitude: number; longitude: number }) => Array<{
     id: string;
@@ -552,6 +556,41 @@ export const useLikeStore = create<LikeStore>()(
 
       getReceivedLikesCount: () => {
         return get().receivedLikes.length;
+      },
+
+      // 익명성 시스템 구현
+      getAnonymousUserInfo: (userId: string, currentUserId: string) => {
+        const state = get();
+        
+        // 더미 사용자 데이터에서 사용자 정보 찾기
+        const { dummyUsers } = require('@/utils/mockData');
+        const user = dummyUsers.find((u: import('@/types').User) => u.id === userId);
+        
+        if (!user) {
+          return null;
+        }
+
+        // 매칭 여부 확인
+        const isMatched = state.matches.some(
+          match => (match.user1Id === currentUserId && match.user2Id === userId) ||
+                   (match.user2Id === currentUserId && match.user1Id === userId)
+        );
+
+        // 익명성 규칙 적용: 매칭된 경우에만 실명 공개
+        return {
+          id: user.id,
+          anonymousId: user.anonymousId,
+          displayName: isMatched && user.realName ? user.realName : user.nickname,
+          nickname: user.nickname,
+          realName: isMatched ? user.realName : undefined,
+          isMatched,
+          gender: user.gender,
+        };
+      },
+
+      getUserDisplayName: (userId: string, currentUserId: string) => {
+        const anonymousInfo = get().getAnonymousUserInfo(userId, currentUserId);
+        return anonymousInfo?.displayName || '알 수 없는 사용자';
       },
 
       // 위치 기반 매칭 알고리즘
