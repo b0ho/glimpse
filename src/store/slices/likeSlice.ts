@@ -61,6 +61,10 @@ interface LikeStore extends LikeState {
   isMatchedWith: (userId: string) => boolean;
   getReceivedLikesCount: () => number;
   
+  // Location-based matching
+  getLocationBasedMatches: (userLocation?: { latitude: number; longitude: number }) => any[];
+  calculateLocationMatchingScore: (userId: string, userLocation?: { latitude: number; longitude: number }) => number;
+  
   // Daily reset
   resetDailyLimits: () => void;
   checkAndResetDaily: () => void;
@@ -540,6 +544,86 @@ export const useLikeStore = create<LikeStore>()(
 
       getReceivedLikesCount: () => {
         return get().receivedLikes.length;
+      },
+
+      // 위치 기반 매칭 알고리즘
+      getLocationBasedMatches: (userLocation) => {
+        if (!userLocation) return [];
+
+        // TODO: 실제 구현에서는 서버 API로 근처 사용자 데이터 가져오기
+        // 더미 데이터
+        const nearbyUsers = [
+          {
+            id: 'nearby_1',
+            nickname: '커피러버',
+            distance: 150,
+            commonGroups: 1,
+            matchingScore: 0.85,
+            lastActive: new Date(),
+          },
+          {
+            id: 'nearby_2',
+            nickname: '운동좋아',
+            distance: 300,
+            commonGroups: 2,
+            matchingScore: 0.92,
+            lastActive: new Date(Date.now() - 10 * 60 * 1000),
+          },
+          {
+            id: 'nearby_3',
+            nickname: '음악매니아',
+            distance: 500,
+            commonGroups: 0,
+            matchingScore: 0.67,
+            lastActive: new Date(Date.now() - 30 * 60 * 1000),
+          },
+        ];
+
+        // 위치 기반 매칭 점수로 정렬
+        return nearbyUsers
+          .map(user => ({
+            ...user,
+            locationScore: get().calculateLocationMatchingScore(user.id, userLocation),
+          }))
+          .sort((a, b) => b.locationScore - a.locationScore);
+      },
+
+      calculateLocationMatchingScore: (userId, userLocation) => {
+        if (!userLocation) return 0;
+
+        // 기본 매칭 점수 (0-1)
+        let score = 0.5;
+
+        // TODO: 실제 사용자 데이터로 계산
+        // 더미 계산
+        const userDistance = Math.floor(Math.random() * 1000); // 0-1000m
+        const commonGroups = Math.floor(Math.random() * 3); // 0-2개 공통 그룹
+        const lastActiveMinutes = Math.floor(Math.random() * 60); // 0-60분 전 활동
+
+        // 거리 가중치 (0.3)
+        if (userDistance <= 200) {
+          score += 0.3; // 200m 이내 최고 점수
+        } else if (userDistance <= 500) {
+          score += 0.2; // 500m 이내 중간 점수
+        } else if (userDistance <= 1000) {
+          score += 0.1; // 1km 이내 낮은 점수
+        }
+
+        // 공통 그룹 가중치 (0.2)
+        if (commonGroups >= 2) {
+          score += 0.2;
+        } else if (commonGroups >= 1) {
+          score += 0.1;
+        }
+
+        // 최근 활동 가중치 (0.1)
+        if (lastActiveMinutes <= 10) {
+          score += 0.1; // 10분 이내 활동
+        } else if (lastActiveMinutes <= 30) {
+          score += 0.05; // 30분 이내 활동
+        }
+
+        return Math.min(1.0, score); // 최대 1.0
       },
 
       // Daily reset

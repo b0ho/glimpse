@@ -153,6 +153,16 @@ export const HomeScreen: React.FC = () => {
           남은 좋아요: {likeStore.getRemainingFreeLikes()}개
         </Text>
       </View>
+      
+      {/* 위치 기반 기능 버튼 */}
+      <TouchableOpacity
+        style={styles.locationButton}
+        onPress={() => navigation.navigate('LocationGroup' as never)}
+      >
+        <Icon name="location" size={20} color={COLORS.PRIMARY} />
+        <Text style={styles.locationButtonText}>근처 그룹 및 사용자</Text>
+        <Icon name="chevron-forward" size={16} color={COLORS.TEXT.SECONDARY} />
+      </TouchableOpacity>
     </View>
   );
 
@@ -272,6 +282,23 @@ const styles = StyleSheet.create({
   headerStats: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.SURFACE,
+    borderRadius: 12,
+    padding: SPACING.MD,
+    marginTop: SPACING.MD,
+    borderWidth: 1,
+    borderColor: COLORS.PRIMARY + '20',
+  },
+  locationButtonText: {
+    flex: 1,
+    fontSize: FONT_SIZES.MD,
+    color: COLORS.TEXT.PRIMARY,
+    fontWeight: '500',
+    marginLeft: SPACING.SM,
   },
   statsText: {
     fontSize: FONT_SIZES.SM,
