@@ -1,8 +1,12 @@
+// 성별 타입
+export type Gender = 'MALE' | 'FEMALE';
+
 // 기본 사용자 타입
 export interface User {
   id: string;
   anonymousId: string; // 익명 식별자
   nickname: string;
+  gender?: Gender; // 사용자 성별 (매칭에 필수)
   phoneNumber?: string; // 해시화된 전화번호
   isVerified: boolean;
   createdAt: Date;

@@ -18,6 +18,7 @@ import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
 import { ChatScreen } from '@/screens/ChatScreen';
 import { PremiumScreen } from '@/screens/PremiumScreen';
 import NotificationSettingsScreen from '@/screens/NotificationSettingsScreen';
+import { WhoLikesYouScreen } from '@/screens/WhoLikesYouScreen';
 // import { RootStackParamList } from '@/types';
 
 // Navigation Types
@@ -40,6 +41,7 @@ type ProfileStackParamList = {
   MyGroups: undefined;
   Premium: undefined;
   NotificationSettings: undefined;
+  WhoLikesYou: undefined;
 };
 
 type MatchesStackParamList = {
@@ -70,6 +72,7 @@ export type RootNavigationParamList = MainTabParamList & {
   MyGroups: undefined;
   CreateContent: undefined;
   CreateGroup: undefined;
+  WhoLikesYou: undefined;
 };
 
 type AppStackParamList = {
@@ -201,6 +204,13 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen 
         name="NotificationSettings" 
         component={NotificationSettingsScreen} 
+        options={{ 
+          headerShown: false,
+        }}
+      />
+      <ProfileStack.Screen 
+        name="WhoLikesYou" 
+        component={WhoLikesYouScreen} 
         options={{ 
           headerShown: false,
         }}

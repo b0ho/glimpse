@@ -240,6 +240,19 @@ export const ProfileScreen: React.FC = () => {
       <View style={styles.settingsCard}>
         <TouchableOpacity 
           style={styles.settingItem}
+          onPress={() => navigation.navigate('WhoLikesYou' as never)}
+        >
+          <View style={styles.settingTextContainer}>
+            <Text style={styles.settingText}>좋아요 받은 사람 보기</Text>
+            {!isPremiumUser && (
+              <Text style={styles.premiumBadge}>PRO</Text>
+            )}
+          </View>
+          <Text style={styles.settingArrow}>{'>'}</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.settingItem}
           onPress={() => navigation.navigate('MyGroups' as never)}
         >
           <Text style={styles.settingText}>내 그룹 관리</Text>
@@ -510,9 +523,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.BORDER,
   },
+  settingTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
   settingText: {
     fontSize: FONT_SIZES.MD,
     color: COLORS.TEXT.PRIMARY,
+    marginRight: SPACING.SM,
   },
   settingArrow: {
     fontSize: FONT_SIZES.MD,
@@ -588,10 +607,10 @@ const styles = StyleSheet.create({
     color: COLORS.PRIMARY,
   },
   premiumBadge: {
-    backgroundColor: COLORS.SUCCESS,
-    paddingHorizontal: SPACING.SM,
-    paddingVertical: SPACING.XS,
-    borderRadius: 12,
+    backgroundColor: COLORS.PRIMARY,
+    paddingHorizontal: SPACING.XS,
+    paddingVertical: 2,
+    borderRadius: 8,
   },
   premiumBadgeText: {
     color: COLORS.TEXT.WHITE,

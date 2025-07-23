@@ -3,9 +3,10 @@ import { View, StyleSheet } from 'react-native';
 import { PhoneVerificationScreen } from './PhoneVerificationScreen';
 import { SMSVerificationScreen } from './SMSVerificationScreen';
 import { NicknameSetupScreen } from './NicknameSetupScreen';
+import { CompanyVerificationScreen } from './CompanyVerificationScreen';
 import { COLORS } from '@/utils/constants';
 
-type AuthStep = 'phone' | 'sms' | 'nickname' | 'completed';
+type AuthStep = 'phone' | 'sms' | 'nickname' | 'company' | 'completed';
 
 interface AuthScreenProps {
   onAuthCompleted: () => void;
@@ -25,6 +26,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
   };
 
   const handleNicknameSet = (): void => {
+    setCurrentStep('company');
+  };
+
+  const handleCompanyVerificationSubmitted = (): void => {
     setCurrentStep('completed');
     onAuthCompleted();
   };
@@ -35,6 +40,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
       setPhoneNumber('');
     } else if (currentStep === 'nickname') {
       setCurrentStep('sms');
+    } else if (currentStep === 'company') {
+      setCurrentStep('nickname');
     }
   };
 
@@ -55,6 +62,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
       {currentStep === 'nickname' && (
         <NicknameSetupScreen
           onNicknameSet={handleNicknameSet}
+        />
+      )}
+      
+      {currentStep === 'company' && (
+        <CompanyVerificationScreen
+          onVerificationSubmitted={handleCompanyVerificationSubmitted}
+          onSkip={handleCompanyVerificationSubmitted}
         />
       )}
     </View>

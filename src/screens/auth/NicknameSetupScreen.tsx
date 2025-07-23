@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, FONT_SIZES, REGEX } from '@/utils/constants';
+import { Gender } from '@/types';
 
 interface NicknameSetupScreenProps {
   onNicknameSet: () => void;
@@ -21,6 +22,7 @@ export const NicknameSetupScreen: React.FC<NicknameSetupScreenProps> = ({
   onNicknameSet,
 }) => {
   const [nickname, setNickname] = useState('');
+  const [gender, setGender] = useState<Gender | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const authStore = useAuthStore();
@@ -46,12 +48,10 @@ export const NicknameSetupScreen: React.FC<NicknameSetupScreenProps> = ({
     setNickname(text);
     setIsAvailable(null);
     
-    // 디바운스를 위한 타이머 (실제로는 useCallback과 useMemo 사용 권장)
+    // 개선된 디바운싱 (Gemini 피드백 반영)
     if (text.length >= 2) {
       setTimeout(() => {
-        if (text === nickname) { // 입력이 변경되지 않았으면 검증
-          checkNicknameAvailability(text);
-        }
+        checkNicknameAvailability(text);
       }, 500);
     }
   };
@@ -59,6 +59,11 @@ export const NicknameSetupScreen: React.FC<NicknameSetupScreenProps> = ({
   const handleSetNickname = async (): Promise<void> => {
     if (!nickname.trim()) {
       Alert.alert('오류', '닉네임을 입력해주세요.');
+      return;
+    }
+
+    if (!gender) {
+      Alert.alert('오류', '성별을 선택해주세요.');
       return;
     }
 
@@ -75,11 +80,14 @@ export const NicknameSetupScreen: React.FC<NicknameSetupScreenProps> = ({
     setIsLoading(true);
 
     try {
-      // 사용자 정보 업데이트
-      authStore.updateUser({ nickname: nickname.trim() });
+      // 사용자 정보 업데이트 (닉네임 + 성별)
+      authStore.updateUser({ 
+        nickname: nickname.trim(),
+        gender: gender,
+      });
       
       Alert.alert(
-        '닉네임 설정 완료',
+        '프로필 설정 완료',
         `"${nickname}" 닉네임으로 설정되었습니다.`,
         [
           {
@@ -89,8 +97,9 @@ export const NicknameSetupScreen: React.FC<NicknameSetupScreenProps> = ({
         ]
       );
     } catch (error) {
-      console.error('Nickname setup error:', error);
-      Alert.alert('오류', '닉네임 설정 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.error('Profile setup error:', error);
+      // TODO: 실제 운영 환경에서는 Sentry, Firebase Crashlytics 등으로 에러 전송
+      Alert.alert('오류', '프로필 설정 중 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
       setIsLoading(false);
     }
@@ -109,14 +118,53 @@ export const NicknameSetupScreen: React.FC<NicknameSetupScreenProps> = ({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>닉네임 설정</Text>
+        <Text style={styles.title}>프로필 설정</Text>
         <Text style={styles.subtitle}>
           Glimpse에서 사용할{'\n'}
-          닉네임을 설정해주세요
+          프로필 정보를 설정해주세요
         </Text>
         
         <View style={styles.form}>
-          <Text style={styles.label}>닉네임</Text>
+          {/* 성별 선택 */}
+          <Text style={styles.label}>성별</Text>
+          <Text style={styles.description}>
+            매칭에 사용되는 정보입니다. 다른 사용자에게 공개되지 않습니다.
+          </Text>
+          
+          <View style={styles.genderContainer}>
+            <TouchableOpacity
+              style={[
+                styles.genderButton,
+                gender === 'MALE' && styles.genderButtonSelected,
+              ]}
+              onPress={() => setGender('MALE')}
+            >
+              <Text style={[
+                styles.genderButtonText,
+                gender === 'MALE' && styles.genderButtonTextSelected,
+              ]}>
+                남성
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[
+                styles.genderButton,
+                gender === 'FEMALE' && styles.genderButtonSelected,
+              ]}
+              onPress={() => setGender('FEMALE')}
+            >
+              <Text style={[
+                styles.genderButtonText,
+                gender === 'FEMALE' && styles.genderButtonTextSelected,
+              ]}>
+                여성
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* 닉네임 입력 */}
+          <Text style={[styles.label, { marginTop: SPACING.XL }]}>닉네임</Text>
           <Text style={styles.description}>
             2-20자의 한글, 영문, 숫자를 사용할 수 있습니다.{'\n'}
             다른 사용자에게 표시될 이름입니다.
@@ -131,7 +179,6 @@ export const NicknameSetupScreen: React.FC<NicknameSetupScreenProps> = ({
             value={nickname}
             onChangeText={handleNicknameChange}
             maxLength={20}
-            autoFocus
             autoCapitalize="none"
             autoCorrect={false}
           />
@@ -158,10 +205,10 @@ export const NicknameSetupScreen: React.FC<NicknameSetupScreenProps> = ({
           <TouchableOpacity
             style={[
               styles.button,
-              (!nickname.trim() || isLoading || isAvailable === false) && styles.buttonDisabled,
+              (!nickname.trim() || !gender || isLoading || isAvailable === false) && styles.buttonDisabled,
             ]}
             onPress={handleSetNickname}
-            disabled={!nickname.trim() || isLoading || isAvailable === false}
+            disabled={!nickname.trim() || !gender || isLoading || isAvailable === false}
           >
             {isLoading ? (
               <View style={styles.buttonContent}>
@@ -171,14 +218,14 @@ export const NicknameSetupScreen: React.FC<NicknameSetupScreenProps> = ({
                 </Text>
               </View>
             ) : (
-              <Text style={styles.buttonText}>닉네임 설정하기</Text>
+              <Text style={styles.buttonText}>프로필 설정하기</Text>
             )}
           </TouchableOpacity>
         </View>
         
         <Text style={styles.notice}>
-          닉네임은 나중에 변경할 수 있습니다.{'\n'}
-          매칭 후에만 상대방에게 공개됩니다.
+          프로필 정보는 나중에 변경할 수 있습니다.{'\n'}
+          성별은 매칭에만 사용되며, 닉네임은 매칭 후에만 상대방에게 공개됩니다.
         </Text>
       </View>
     </KeyboardAvoidingView>
@@ -274,5 +321,32 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT.LIGHT,
     textAlign: 'center',
     lineHeight: 16,
+  },
+  genderContainer: {
+    flexDirection: 'row',
+    marginBottom: SPACING.LG,
+    gap: SPACING.MD,
+  },
+  genderButton: {
+    flex: 1,
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 2,
+    borderColor: COLORS.BORDER,
+    borderRadius: 12,
+    paddingVertical: SPACING.MD,
+    alignItems: 'center',
+  },
+  genderButtonSelected: {
+    backgroundColor: COLORS.PRIMARY + '10',
+    borderColor: COLORS.PRIMARY,
+  },
+  genderButtonText: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '500',
+    color: COLORS.TEXT.SECONDARY,
+  },
+  genderButtonTextSelected: {
+    color: COLORS.PRIMARY,
+    fontWeight: '600',
   },
 });
