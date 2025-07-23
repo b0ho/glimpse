@@ -48,6 +48,7 @@ export interface Like {
   toUserId: string;
   groupId: string;
   isAnonymous: boolean;
+  isSuper: boolean; // 슈퍼 좋아요 여부
   createdAt: Date;
 }
 

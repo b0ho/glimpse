@@ -222,6 +222,15 @@ export const ProfileScreen: React.FC = () => {
             {likeStore.hasPremium ? '활성' : '비활성'}
           </Text>
         </View>
+        
+        {isPremiumUser && (
+          <View style={styles.likeSystemItem}>
+            <Text style={styles.likeSystemLabel}>⭐ 슈퍼 좋아요</Text>
+            <Text style={[styles.likeSystemValue, styles.superLikeValue]}>
+              {likeStore.getRemainingSuperLikes()} / {likeStore.dailySuperLikesLimit}
+            </Text>
+          </View>
+        )}
       </View>
       
       <TouchableOpacity 
@@ -493,6 +502,10 @@ const styles = StyleSheet.create({
   },
   premiumInactive: {
     color: COLORS.TEXT.SECONDARY,
+  },
+  superLikeValue: {
+    color: COLORS.WARNING,
+    fontWeight: '600',
   },
   upgradeButton: {
     backgroundColor: COLORS.PRIMARY,

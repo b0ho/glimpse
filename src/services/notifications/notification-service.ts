@@ -186,6 +186,26 @@ class NotificationService {
     });
   }
 
+  // 슈퍼 좋아요 받음 알림 (likeSlice에서 호출용)
+  async notifySuperLikeReceived(likeId: string, userName: string): Promise<void> {
+    await this.schedulePushNotification({
+      type: 'super_like',
+      userId: likeId,
+      title: '⭐ 슈퍼 좋아요!',
+      body: `${userName}님이 당신에게 슈퍼 좋아요를 보냈어요! 즉시 확인해보세요.`,
+    });
+  }
+
+  // 슈퍼 매치 알림 (특별한 매치)
+  async notifySuperMatch(matchId: string, userName: string): Promise<void> {
+    await this.schedulePushNotification({
+      type: 'new_match',
+      matchId,
+      title: '🌟 슈퍼 매치!',
+      body: `⭐ ${userName}님과 슈퍼 매치가 성사되었어요! 특별한 대화를 시작해보세요.`,
+    });
+  }
+
   // 그룹 초대 알림
   async notifyGroupInvite(groupId: string, groupName: string): Promise<void> {
     await this.schedulePushNotification({

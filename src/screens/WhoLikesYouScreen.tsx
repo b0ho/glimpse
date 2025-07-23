@@ -36,7 +36,7 @@ export const WhoLikesYouScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const isPremiumUser = usePremiumStore(premiumSelectors.isPremiumUser());
-  const { sendLike } = useLikeStore();
+  const { sendLike, sendSuperLike, canSendSuperLike, getRemainingSuperLikes } = useLikeStore();
 
   // 받은 좋아요 데이터 로드
   const loadLikesReceived = useCallback(async () => {
@@ -153,30 +153,59 @@ export const WhoLikesYouScreen: React.FC = () => {
 
   const handleSuperLikeBack = useCallback(async (likeInfo: LikeInfo) => {
     try {
+      // 프리미엄 사용자가 아닌 경우 체크
+      if (!isPremiumUser) {
+        Alert.alert(
+          '프리미엄 전용 기능',
+          '슈퍼 좋아요는 프리미엄 사용자만 사용할 수 있습니다.',
+          [
+            { text: '취소', style: 'cancel' },
+            {
+              text: '프리미엄 가입',
+              onPress: () => navigation.navigate('Premium' as never),
+            },
+          ]
+        );
+        return;
+      }
+
+      // 슈퍼 좋아요 사용 가능 여부 확인
+      if (!canSendSuperLike()) {
+        const remaining = getRemainingSuperLikes();
+        Alert.alert(
+          '슈퍼 좋아요 한도 초과',
+          `오늘 사용 가능한 슈퍼 좋아요가 ${remaining}개 남았습니다.\n내일 다시 시도해주세요.`,
+          [{ text: '확인' }]
+        );
+        return;
+      }
+
+      const remainingSuperLikes = getRemainingSuperLikes();
       Alert.alert(
         '슈퍼 좋아요 보내기',
-        `${likeInfo.fromUser.nickname}님에게 슈퍼 좋아요를 보내시겠습니까?\n슈퍼 좋아요는 더 높은 확률로 매칭됩니다.`,
+        `${likeInfo.fromUser.nickname}님에게 슈퍼 좋아요를 보내시겠습니까?\n\n⭐ 슈퍼 좋아요는 즉시 상대방에게 알림이 가며 더 높은 매칭 확률을 제공합니다.\n💎 오늘 ${remainingSuperLikes - 1}개 더 사용할 수 있습니다.`,
         [
           { text: '취소', style: 'cancel' },
           {
-            text: '슈퍼 좋아요',
+            text: '⭐ 슈퍼 좋아요',
+            style: 'default',
             onPress: async () => {
-              const success = await sendLike(
+              const success = await sendSuperLike(
                 likeInfo.fromUser.id,
                 likeInfo.groupId
               );
 
               if (success) {
                 Alert.alert(
-                  '매칭 성공!',
-                  `${likeInfo.fromUser.nickname}님과 매칭되었습니다!\n슈퍼 좋아요 덕분에 특별한 매칭이 성사되었어요!`,
+                  '🌟 슈퍼 매칭 성공!',
+                  `⭐ ${likeInfo.fromUser.nickname}님과 슈퍼 매칭되었습니다!\n특별한 대화를 시작해보세요!`,
                   [
                     {
-                      text: '채팅하기',
+                      text: '💬 채팅하기',
                       onPress: () => {
                         // TODO: 실제 채팅 화면으로 이동 로직 구현 (Gemini 피드백 반영)
                         // navigation.navigate('Chat', { matchId: newMatchId, roomId: roomId });
-                        console.log('Navigate to chat - matchId needed');
+                        console.log('Navigate to super match chat - matchId needed');
                       },
                     },
                   ]
@@ -192,7 +221,7 @@ export const WhoLikesYouScreen: React.FC = () => {
       console.error('Error sending super like back:', error);
       Alert.alert('오류', '슈퍼 좋아요 전송 중 오류가 발생했습니다.');
     }
-  }, [sendLike]);
+  }, [sendSuperLike, isPremiumUser, canSendSuperLike, getRemainingSuperLikes, navigation]);
 
   const renderLikeItem = ({ item }: { item: LikeInfo }) => (
     <View style={styles.likeItem}>
@@ -236,13 +265,25 @@ export const WhoLikesYouScreen: React.FC = () => {
           <Text style={styles.likeButtonText}>좋아요</Text>
         </TouchableOpacity>
         
-        {isPremiumUser && (
+        {isPremiumUser && canSendSuperLike() && (
           <TouchableOpacity
             style={[styles.actionButton, styles.superLikeButton]}
             onPress={() => handleSuperLikeBack(item)}
           >
             <Icon name="star" size={20} color={COLORS.TEXT.WHITE} />
-            <Text style={styles.superLikeButtonText}>슈퍼</Text>
+            <Text style={styles.superLikeButtonText}>
+              슈퍼 ({getRemainingSuperLikes()})
+            </Text>
+          </TouchableOpacity>
+        )}
+        
+        {isPremiumUser && !canSendSuperLike() && (
+          <TouchableOpacity
+            style={[styles.actionButton, styles.superLikeButtonDisabled]}
+            disabled={true}
+          >
+            <Icon name="star-outline" size={20} color={COLORS.TEXT.LIGHT} />
+            <Text style={styles.superLikeButtonDisabledText}>한도 초과</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -488,6 +529,16 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.SM,
     fontWeight: '600',
+  },
+  superLikeButtonDisabled: {
+    backgroundColor: COLORS.BACKGROUND,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
+  },
+  superLikeButtonDisabledText: {
+    color: COLORS.TEXT.LIGHT,
+    fontSize: FONT_SIZES.SM,
+    fontWeight: '500',
   },
   emptyState: {
     alignItems: 'center',
