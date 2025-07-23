@@ -56,7 +56,10 @@ export function useNotifications() {
       
       const data = response.notification.request.content.data;
       if (data && typeof data === 'object') {
-        handleNotificationPress(data);
+        // 알림 응답 지연 처리 (네비게이션 준비 대기)
+        setTimeout(() => {
+          handleNotificationPress(data);
+        }, 500); // 0.5초 대기
       }
     });
 

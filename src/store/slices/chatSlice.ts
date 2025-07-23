@@ -221,6 +221,26 @@ export const useChatStore = create<ChatStore>()(
             ),
           }));
           
+          // 상대방에게 새 메시지 알림 전송
+          if (typeof window !== 'undefined') {
+            // 알림 설정 확인 후 전송
+            import('../slices/notificationSlice').then(({ useNotificationStore }) => {
+              const notificationState = useNotificationStore.getState();
+              if (notificationState.settings.pushEnabled && notificationState.settings.newMessages) {
+                // 상대방 닉네임 가져오기 (메시지에서 또는 기본값 사용)
+                const otherUserNickname = message.senderNickname || '익명 사용자';
+                
+                // 메시지 미리보기 (최대 50자)
+                const preview = content.length > 50 ? content.substring(0, 47) + '...' : content;
+                
+                import('../../services/notifications/notification-service').then(({ notificationService }) => {
+                  // 상대방에게 알림 전송 (메시지 전송자는 자신이므로 알림 받지 않음)
+                  notificationService.notifyNewMessage(message.id, otherUserNickname, preview);
+                });
+              }
+            });
+          }
+          
         } catch (error) {
           console.error('Failed to send message:', error);
           set({ error: error instanceof Error ? error.message : '메시지 전송에 실패했습니다.' });

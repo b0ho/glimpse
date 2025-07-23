@@ -163,11 +163,17 @@ export const useLikeStore = create<LikeStore>()(
 
             // 새 매치 알림 전송
             if (typeof window !== 'undefined') {
-              // 실제 사용자 이름 가져오기 (더미 데이터)
-              const userName = `사용자${toUserId.slice(-4)}`;
-              // notification service를 직접 사용
-              import('../../services/notifications/notification-service').then(({ notificationService }) => {
-                notificationService.notifyNewMatch(newMatch.id, userName);
+              // 알림 설정 확인 후 전송
+              import('../slices/notificationSlice').then(({ useNotificationStore }) => {
+                const notificationState = useNotificationStore.getState();
+                if (notificationState.settings.pushEnabled && notificationState.settings.newMatches) {
+                  // 실제 사용자 이름 가져오기 (더미 데이터)
+                  const userName = `사용자${toUserId.slice(-4)}`;
+                  // notification service를 직접 사용
+                  import('../../services/notifications/notification-service').then(({ notificationService }) => {
+                    notificationService.notifyNewMatch(newMatch.id, userName);
+                  });
+                }
               });
             }
           }
@@ -231,10 +237,16 @@ export const useLikeStore = create<LikeStore>()(
 
           // 슈퍼 좋아요는 즉시 상대방에게 알림 전송
           if (typeof window !== 'undefined') {
-            const userName = `사용자${toUserId.slice(-4)}`;
-            import('../../services/notifications/notification-service').then(({ notificationService }) => {
-              // 슈퍼 좋아요 전용 알림
-              notificationService.notifySuperLikeReceived(newSuperLike.id, userName);
+            // 알림 설정 확인 후 전송
+            import('../slices/notificationSlice').then(({ useNotificationStore }) => {
+              const notificationState = useNotificationStore.getState();
+              if (notificationState.settings.pushEnabled && notificationState.settings.superLikes) {
+                const userName = `사용자${toUserId.slice(-4)}`;
+                import('../../services/notifications/notification-service').then(({ notificationService }) => {
+                  // 슈퍼 좋아요 전용 알림
+                  notificationService.notifySuperLikeReceived(newSuperLike.id, userName);
+                });
+              }
             });
           }
 
@@ -259,9 +271,15 @@ export const useLikeStore = create<LikeStore>()(
 
             // 슈퍼 매치 특별 알림
             if (typeof window !== 'undefined') {
-              const userName = `사용자${toUserId.slice(-4)}`;
-              import('../../services/notifications/notification-service').then(({ notificationService }) => {
-                notificationService.notifySuperMatch(newMatch.id, userName);
+              // 알림 설정 확인 후 전송
+              import('../slices/notificationSlice').then(({ useNotificationStore }) => {
+                const notificationState = useNotificationStore.getState();
+                if (notificationState.settings.pushEnabled && notificationState.settings.newMatches) {
+                  const userName = `사용자${toUserId.slice(-4)}`;
+                  import('../../services/notifications/notification-service').then(({ notificationService }) => {
+                    notificationService.notifySuperMatch(newMatch.id, userName);
+                  });
+                }
               });
             }
           }
