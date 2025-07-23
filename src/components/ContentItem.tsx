@@ -18,7 +18,7 @@ interface ContentItemProps {
   onLikeToggle: (contentId: string, authorId: string) => void;
 }
 
-export const ContentItem: React.FC<ContentItemProps> = ({
+export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   item,
   currentUserId,
   remainingLikes,
@@ -102,7 +102,7 @@ export const ContentItem: React.FC<ContentItemProps> = ({
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   contentItem: {
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: SPACING.MD,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,

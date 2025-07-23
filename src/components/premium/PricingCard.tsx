@@ -23,7 +23,7 @@ interface PricingCardProps {
   formatPrice: (price: number) => string;
 }
 
-export const PricingCard: React.FC<PricingCardProps> = ({
+export const PricingCard: React.FC<PricingCardProps> = React.memo(({
   product,
   isSelected = false,
   isPopular = false,
@@ -129,7 +129,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
       )}
     </TouchableOpacity>
   );
-};
+});
 
 const styles = StyleSheet.create({
   card: {
@@ -139,12 +139,12 @@ const styles = StyleSheet.create({
     marginVertical: SPACING.SM,
     marginHorizontal: SPACING.MD,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: COLORS.TRANSPARENT,
     position: 'relative',
   },
   selectedCard: {

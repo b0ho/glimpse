@@ -62,7 +62,15 @@ interface LikeStore extends LikeState {
   getReceivedLikesCount: () => number;
   
   // Location-based matching
-  getLocationBasedMatches: (userLocation?: { latitude: number; longitude: number }) => any[];
+  getLocationBasedMatches: (userLocation?: { latitude: number; longitude: number }) => Array<{
+    id: string;
+    nickname: string;
+    distance: number;
+    commonGroups: number;
+    matchingScore: number;
+    lastActive: Date;
+    locationScore: number;
+  }>;
   calculateLocationMatchingScore: (userId: string, userLocation?: { latitude: number; longitude: number }) => number;
   
   // Daily reset

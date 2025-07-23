@@ -38,7 +38,7 @@ export const QRGroupJoinScreen: React.FC = () => {
   const { joinGroup, groups } = useGroupStore();
 
   // URL 파라미터에서 그룹 ID 가져오기 (QR 생성 모드용)
-  const groupId = (route.params as any)?.groupId;
+  const groupId = (route.params as { groupId?: string })?.groupId;
 
   useEffect(() => {
     (async () => {
@@ -437,14 +437,14 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.PRIMARY,
     borderRadius: 12,
-    backgroundColor: 'transparent',
+    backgroundColor: COLORS.TRANSPARENT,
   },
   scanText: {
     fontSize: FONT_SIZES.SM,
     color: COLORS.TEXT.WHITE,
     textAlign: 'center',
     marginTop: SPACING.LG,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: COLORS.OVERLAY,
     paddingHorizontal: SPACING.MD,
     paddingVertical: SPACING.SM,
     borderRadius: 8,
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: SPACING.LG,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,

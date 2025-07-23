@@ -4,9 +4,9 @@ import { ApiResponse } from '@/types';
 
 export interface AuthService {
   signInWithPhone: (phoneNumber: string) => Promise<ApiResponse<{ verificationId: string }>>;
-  verifyPhoneCode: (code: string) => Promise<ApiResponse<{ user: any }>>;
+  verifyPhoneCode: (code: string) => Promise<ApiResponse<{ user: object }>>;
   signOut: () => Promise<void>;
-  getCurrentUser: () => any;
+  getCurrentUser: () => object | null | undefined;
   isAuthenticated: () => boolean;
 }
 
@@ -92,7 +92,7 @@ export const useAuthService = (): AuthService => {
     }
   };
 
-  const verifyPhoneCode = async (code: string): Promise<ApiResponse<{ user: any }>> => {
+  const verifyPhoneCode = async (code: string): Promise<ApiResponse<{ user: object }>> => {
     try {
       if (!signInLoaded || !signUpLoaded) {
         return {
@@ -111,7 +111,7 @@ export const useAuthService = (): AuthService => {
         if (result.status === 'complete') {
           return {
             success: true,
-            data: { user: result.createdSessionId },
+            data: { user: (result.createdSessionId as unknown as object) || {} },
             message: 'Successfully signed in',
           };
         }
@@ -126,7 +126,7 @@ export const useAuthService = (): AuthService => {
         if (result.status === 'complete') {
           return {
             success: true,
-            data: { user: result.createdSessionId },
+            data: { user: (result.createdSessionId as unknown as object) || {} },
             message: 'Successfully signed up',
           };
         }

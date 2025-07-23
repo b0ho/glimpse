@@ -2,7 +2,7 @@
  * 채팅 메시지 입력 컴포넌트
  */
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,7 +25,7 @@ interface MessageInputProps {
   placeholder?: string;
 }
 
-export const MessageInput: React.FC<MessageInputProps> = ({
+export const MessageInput: React.FC<MessageInputProps> = React.memo(({
   onSendMessage,
   onTypingStatusChange,
   disabled = false,
@@ -37,6 +37,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   
   const textInputRef = useRef<TextInput>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 컴포넌트 언마운트 시 타이머 정리 (메모리 누수 방지)
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   // 텍스트 변경 핸들러
   const handleTextChange = useCallback((text: string) => {
@@ -266,7 +276,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

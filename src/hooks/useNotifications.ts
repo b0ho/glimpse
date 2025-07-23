@@ -24,6 +24,7 @@ export function useNotifications() {
     if (isSignedIn && !isInitialized) {
       initializeNotifications();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn, isInitialized]);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export function useNotifications() {
       const data = notification.request.content.data;
       if (data && typeof data === 'object' && 'type' in data) {
         addPendingNotification({
-          type: data.type as any,
+          type: data.type as 'new_match' | 'new_message' | 'like_received' | 'group_invite',
           userId: data.userId as string,
           groupId: data.groupId as string,
           matchId: data.matchId as string,
@@ -58,7 +59,7 @@ export function useNotifications() {
       if (data && typeof data === 'object') {
         // 알림 응답 지연 처리 (네비게이션 준비 대기)
         setTimeout(() => {
-          handleNotificationPress(data);
+          handleNotificationPress(data as { type: string; userId?: string; groupId?: string; matchId?: string; messageId?: string; roomId?: string });
         }, 500); // 0.5초 대기
       }
     });
@@ -67,9 +68,10 @@ export function useNotifications() {
       notificationListener.current?.remove();
       responseListener.current?.remove();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitialized, settings.pushEnabled]);
 
-  const handleNotificationPress = (data: any) => {
+  const handleNotificationPress = (data: { type: string; userId?: string; groupId?: string; matchId?: string; messageId?: string; roomId?: string }) => {
     try {
       switch (data.type) {
         case 'new_match':

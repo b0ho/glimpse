@@ -164,7 +164,7 @@ export const ProfileScreen: React.FC = () => {
           styles.premiumCard,
           isPremiumUser ? styles.premiumCardActive : styles.premiumCardInactive,
         ]}
-        onPress={() => (navigation as any).navigate('Premium')}
+        onPress={() => navigation.navigate('Premium' as never)}
       >
         <View style={styles.premiumHeader}>
           <Text style={[
@@ -286,7 +286,7 @@ export const ProfileScreen: React.FC = () => {
       {!isPremiumUser && (
         <TouchableOpacity 
           style={styles.upgradeButton}
-          onPress={() => (navigation as any).navigate('Premium')}
+          onPress={() => navigation.navigate('Premium' as never)}
         >
           <Text style={styles.upgradeButtonText}>프리미엄 업그레이드</Text>
         </TouchableOpacity>
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: SPACING.LG,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     width: '48%',
     marginBottom: SPACING.SM,
     elevation: 1,
-    shadowColor: '#000',
+    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
     padding: SPACING.MD,
     marginBottom: SPACING.MD,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.SURFACE,
     borderRadius: 12,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   deleteButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: COLORS.TRANSPARENT,
     borderWidth: 1,
     borderColor: COLORS.ERROR,
     borderRadius: 8,

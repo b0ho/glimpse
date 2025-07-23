@@ -16,7 +16,7 @@ import { generateDummyMatches, dummyUserNicknames } from '@/utils/mockData';
 import { formatTimeAgo } from '@/utils/dateUtils';
 
 
-export const MatchesScreen: React.FC = () => {
+export const MatchesScreen: React.FC = React.memo(() => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -45,7 +45,7 @@ export const MatchesScreen: React.FC = () => {
   const handleStartChat = (matchId: string, nickname: string) => {
     // 채팅 화면으로 네비게이션
     const roomId = `room_${matchId}`;
-    (navigation as any).navigate('Chat', {
+    (navigation as { navigate: (screen: string, params: object) => void }).navigate('Chat', {
       roomId,
       matchId,
       otherUserNickname: nickname,
@@ -143,7 +143,7 @@ export const MatchesScreen: React.FC = () => {
       />
     </SafeAreaView>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: SPACING.MD,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,

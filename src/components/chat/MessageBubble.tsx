@@ -25,7 +25,7 @@ interface MessageBubbleProps {
   onLongPress?: (message: Message) => void;
 }
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({
+export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
   message,
   isOwnMessage,
   showAvatar = true,
@@ -174,7 +174,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   messageContainer: {
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.SM,
     borderRadius: 18,
     elevation: 1,
-    shadowColor: '#000',
+    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: SPACING.XS,
     right: SPACING.XS,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: COLORS.OVERLAY,
     borderRadius: 12,
     padding: 4,
   },

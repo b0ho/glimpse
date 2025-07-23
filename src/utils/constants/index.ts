@@ -81,6 +81,12 @@ export const COLORS = {
     WHITE: '#FFFFFF',
   },
   BORDER: '#E9ECEF',
+  // 공통 UI 색상들
+  BLACK: '#000000',
+  TRANSPARENT: 'transparent',
+  SHADOW: '#000',
+  OVERLAY: 'rgba(0, 0, 0, 0.5)',
+  OVERLAY_LIGHT: 'rgba(0, 0, 0, 0.3)',
   // 추가 색상들
   primary: '#FF6B6B',
   text: '#212529',

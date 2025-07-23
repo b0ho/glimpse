@@ -17,7 +17,7 @@ interface TypingIndicatorProps {
   visible?: boolean;
 }
 
-export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
+export const TypingIndicator: React.FC<TypingIndicatorProps> = React.memo(({
   typingUsers,
   visible = true,
 }) => {
@@ -80,6 +80,17 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
       });
     }
   }, [isTyping, fadeAnim, dot1Anim, dot2Anim, dot3Anim]);
+
+  // 컴포넌트 언마운트 시 애니메이션 정리 (메모리 누수 방지)
+  useEffect(() => {
+    return () => {
+      // 모든 애니메이션 정지 및 정리
+      [fadeAnim, dot1Anim, dot2Anim, dot3Anim].forEach(anim => {
+        anim.stopAnimation();
+        anim.setValue(0);
+      });
+    };
+  }, [fadeAnim, dot1Anim, dot2Anim, dot3Anim]);
 
   if (!isTyping) {
     return null;
@@ -148,7 +159,7 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
       </View>
     </Animated.View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -178,7 +189,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderBottomLeftRadius: 6,
     elevation: 1,
-    shadowColor: '#000',
+    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,

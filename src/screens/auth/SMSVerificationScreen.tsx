@@ -92,9 +92,9 @@ export const SMSVerificationScreen: React.FC<SMSVerificationScreenProps> = ({
         const currentUser = authService.getCurrentUser();
         if (currentUser) {
           authStore.setUser({
-            id: currentUser.id,
-            anonymousId: `anon_${currentUser.id.slice(-8)}`,
-            nickname: currentUser.firstName || '사용자',
+            id: (currentUser as { id: string }).id,
+            anonymousId: `anon_${(currentUser as { id: string }).id.slice(-8)}`,
+            nickname: (currentUser as { firstName?: string }).firstName || '사용자',
             phoneNumber: phoneNumber, // 해시화된 전화번호 (실제로는 백엔드에서 처리)
             isVerified: true,
             createdAt: new Date(),

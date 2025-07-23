@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -32,7 +32,7 @@ interface NearbyPlace {
   address: string;
 }
 
-export const LocationGroupScreen: React.FC = () => {
+export const LocationGroupScreen: React.FC = React.memo(() => {
   const navigation = useNavigation();
   const [currentLocation, setCurrentLocation] = useState<LocationData | null>(null);
   const [nearbyGroups, setNearbyGroups] = useState<Group[]>([]);
@@ -45,15 +45,17 @@ export const LocationGroupScreen: React.FC = () => {
 
   useEffect(() => {
     requestLocationPermission();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (currentLocation) {
       loadNearbyData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLocation]);
 
-  const requestLocationPermission = async () => {
+  const requestLocationPermission = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -85,7 +87,7 @@ export const LocationGroupScreen: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const getCurrentLocation = async () => {
     try {
@@ -123,7 +125,7 @@ export const LocationGroupScreen: React.FC = () => {
     }
   };
 
-  const loadNearbyData = async () => {
+  const loadNearbyData = useCallback(async () => {
     if (!currentLocation) return;
 
     try {
@@ -172,7 +174,7 @@ export const LocationGroupScreen: React.FC = () => {
     } catch (error) {
       console.error('Load nearby data error:', error);
     }
-  };
+  }, [currentLocation, groups]);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3; // 지구 반지름 (미터)
@@ -204,7 +206,7 @@ export const LocationGroupScreen: React.FC = () => {
     }
 
     // CreateGroupScreen으로 이동하면서 위치 정보 전달
-    (navigation as any).navigate('CreateGroup', {
+    (navigation as { navigate: (screen: string, params: object) => void }).navigate('CreateGroup', {
       type: GroupType.LOCATION,
       location: place ? {
         latitude: place.latitude,
@@ -435,7 +437,7 @@ export const LocationGroupScreen: React.FC = () => {
       </ScrollView>
     </SafeAreaView>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

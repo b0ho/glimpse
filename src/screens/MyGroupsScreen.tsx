@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.MD,
     alignItems: 'center',
     borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderBottomColor: COLORS.TRANSPARENT,
   },
   tabButtonActive: {
     borderBottomColor: COLORS.PRIMARY,
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     padding: SPACING.MD,
     marginBottom: SPACING.MD,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,

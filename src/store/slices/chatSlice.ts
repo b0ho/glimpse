@@ -51,6 +51,8 @@ interface ChatActions {
   addTypingUser: (userId: string, nickname: string, roomId: string) => void;
   removeTypingUser: (userId: string, roomId: string) => void;
   clearTypingUsers: (roomId: string) => void;
+  startTypingCleanup: () => void;
+  stopTypingCleanup: () => void;
   
   // 유틸리티
   clearError: () => void;
@@ -68,6 +70,9 @@ const initialState: ChatState = {
   isLoading: false,
   error: null,
 };
+
+// 타이핑 사용자 정리를 위한 전역 타이머
+let typingCleanupInterval: ReturnType<typeof setInterval> | null = null;
 
 export const useChatStore = create<ChatStore>()(
   persist(
@@ -126,6 +131,9 @@ export const useChatStore = create<ChatStore>()(
 
           // 채팅방 목록 로드
           await get().loadChatRooms();
+
+          // 타이핑 사용자 정리 시스템 시작
+          get().startTypingCleanup();
 
         } catch (error) {
           console.error('Chat initialization failed:', error);
@@ -290,7 +298,7 @@ export const useChatStore = create<ChatStore>()(
         webSocketService.sendTypingStatus(roomId, isTyping);
       },
 
-      // 타이핑 사용자 추가
+      // 타이핑 사용자 추가 (메모리 누수 방지를 위해 setTimeout 제거)
       addTypingUser: (userId: string, nickname: string, roomId: string) => {
         // 자신은 제외
         if (userId === webSocketService.userId) {
@@ -314,11 +322,6 @@ export const useChatStore = create<ChatStore>()(
             ],
           };
         });
-
-        // 5초 후 자동 제거
-        setTimeout(() => {
-          get().removeTypingUser(userId, roomId);
-        }, 5000);
       },
 
       // 타이핑 사용자 제거
@@ -345,7 +348,37 @@ export const useChatStore = create<ChatStore>()(
       // 연결 해제
       disconnect: () => {
         webSocketService.disconnect();
+        get().stopTypingCleanup();
         set({ activeRoomId: null, typingUsers: [] });
+      },
+
+      // 타이핑 사용자 정리 시작 (메모리 누수 방지)
+      startTypingCleanup: () => {
+        // 기존 타이머가 있으면 정리
+        if (typingCleanupInterval) {
+          clearInterval(typingCleanupInterval);
+        }
+
+        // 5초마다 오래된 타이핑 사용자 정리
+        typingCleanupInterval = setInterval(() => {
+          const now = Date.now();
+          const state = get();
+          const validTypingUsers = state.typingUsers.filter(
+            user => now - user.timestamp < 5000 // 5초 이내
+          );
+
+          if (validTypingUsers.length !== state.typingUsers.length) {
+            set({ typingUsers: validTypingUsers });
+          }
+        }, 5000);
+      },
+
+      // 타이핑 사용자 정리 중지
+      stopTypingCleanup: () => {
+        if (typingCleanupInterval) {
+          clearInterval(typingCleanupInterval);
+          typingCleanupInterval = null;
+        }
       },
 
       // 상태 초기화

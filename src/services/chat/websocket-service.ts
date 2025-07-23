@@ -143,11 +143,11 @@ class WebSocketService {
         return;
       }
 
-      this.socket.emit('send_message', message, (response: any) => {
+      this.socket.emit('send_message', message, (response: { error?: string; message?: Message }) => {
         if (response.error) {
           reject(new Error(response.error));
         } else {
-          resolve(response.message);
+          resolve(response.message!);
         }
       });
     });
@@ -235,11 +235,11 @@ class WebSocketService {
         return;
       }
 
-      this.socket.emit('get_chat_rooms', (response: any) => {
+      this.socket.emit('get_chat_rooms', (response: { error?: string; rooms?: ChatRoom[] }) => {
         if (response.error) {
           reject(new Error(response.error));
         } else {
-          resolve(response.rooms);
+          resolve(response.rooms!);
         }
       });
     });
@@ -266,11 +266,11 @@ class WebSocketService {
         return;
       }
 
-      this.socket.emit('get_messages', { roomId, page, limit }, (response: any) => {
+      this.socket.emit('get_messages', { roomId, page, limit }, (response: { error?: string; messages?: Message[] }) => {
         if (response.error) {
           reject(new Error(response.error));
         } else {
-          resolve(response.messages);
+          resolve(response.messages!);
         }
       });
     });
@@ -319,12 +319,12 @@ class WebSocketService {
    * 등록된 리스너들에게 이벤트 전파
    * @private
    */
-  private emitToListeners<K extends keyof ChatEvent>(event: K, data: any): void {
+  private emitToListeners(event: string, data: unknown): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       listeners.forEach(callback => {
         try {
-          (callback as any)(data);
+          callback(data);
         } catch (error) {
           console.error(`Error in ${event} listener:`, error);
         }
