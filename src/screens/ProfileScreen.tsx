@@ -84,6 +84,44 @@ export const ProfileScreen: React.FC = () => {
     );
   };
 
+  const handleRewindLike = async () => {
+    const lastLike = likeStore.getLastLike();
+    if (!lastLike) {
+      Alert.alert('알림', '되돌릴 좋아요가 없습니다.');
+      return;
+    }
+
+    const timeLeft = Math.ceil((lastLike.createdAt.getTime() + 5 * 60 * 1000 - Date.now()) / 1000 / 60);
+    
+    Alert.alert(
+      '좋아요 되돌리기',
+      `마지막으로 보낸 좋아요를 되돌리시겠습니까?\n\n• 대상: 익명 사용자\n• ${lastLike.isSuper ? '슈퍼 좋아요' : '일반 좋아요'}\n• 남은 시간: ${Math.max(0, timeLeft)}분\n\n⚠️ 되돌린 후에는 다시 되돌릴 수 없습니다.`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '되돌리기',
+          style: 'destructive',
+          onPress: async () => {
+            const success = await likeStore.rewindLastLike();
+            if (success) {
+              Alert.alert(
+                '완료',
+                '좋아요가 성공적으로 되돌려졌습니다.\n해당 사용자에게 보낸 좋아요가 취소되었습니다.',
+                [{ text: '확인' }]
+              );
+            } else {
+              Alert.alert(
+                '오류',
+                likeStore.error || '좋아요 되돌리기에 실패했습니다.',
+                [{ text: '확인' }]
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderProfileSection = () => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>프로필 정보</Text>
@@ -224,21 +262,44 @@ export const ProfileScreen: React.FC = () => {
         </View>
         
         {isPremiumUser && (
-          <View style={styles.likeSystemItem}>
-            <Text style={styles.likeSystemLabel}>⭐ 슈퍼 좋아요</Text>
-            <Text style={[styles.likeSystemValue, styles.superLikeValue]}>
-              {likeStore.getRemainingSuperLikes()} / {likeStore.dailySuperLikesLimit}
-            </Text>
-          </View>
+          <>
+            <View style={styles.likeSystemItem}>
+              <Text style={styles.likeSystemLabel}>⭐ 슈퍼 좋아요</Text>
+              <Text style={[styles.likeSystemValue, styles.superLikeValue]}>
+                {likeStore.getRemainingSuperLikes()} / {likeStore.dailySuperLikesLimit}
+              </Text>
+            </View>
+            
+            <View style={styles.likeSystemItem}>
+              <Text style={styles.likeSystemLabel}>↩️ 좋아요 되돌리기</Text>
+              <Text style={[
+                styles.likeSystemValue,
+                likeStore.canRewindLike() ? styles.rewindAvailable : styles.rewindUnavailable
+              ]}>
+                {likeStore.canRewindLike() ? '사용 가능' : '사용 불가'}
+              </Text>
+            </View>
+          </>
         )}
       </View>
       
-      <TouchableOpacity 
-        style={styles.upgradeButton}
-        onPress={() => (navigation as any).navigate('Premium')}
-      >
-        <Text style={styles.upgradeButtonText}>프리미엄 업그레이드</Text>
-      </TouchableOpacity>
+      {!isPremiumUser && (
+        <TouchableOpacity 
+          style={styles.upgradeButton}
+          onPress={() => (navigation as any).navigate('Premium')}
+        >
+          <Text style={styles.upgradeButtonText}>프리미엄 업그레이드</Text>
+        </TouchableOpacity>
+      )}
+      
+      {isPremiumUser && likeStore.canRewindLike() && (
+        <TouchableOpacity 
+          style={styles.rewindButton}
+          onPress={handleRewindLike}
+        >
+          <Text style={styles.rewindButtonText}>↩️ 마지막 좋아요 되돌리기</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 
@@ -505,6 +566,25 @@ const styles = StyleSheet.create({
   },
   superLikeValue: {
     color: COLORS.WARNING,
+    fontWeight: '600',
+  },
+  rewindAvailable: {
+    color: COLORS.SUCCESS,
+    fontWeight: '600',
+  },
+  rewindUnavailable: {
+    color: COLORS.TEXT.LIGHT,
+    fontWeight: '500',
+  },
+  rewindButton: {
+    backgroundColor: COLORS.WARNING,
+    borderRadius: 8,
+    paddingVertical: SPACING.MD,
+    alignItems: 'center',
+  },
+  rewindButtonText: {
+    color: COLORS.TEXT.WHITE,
+    fontSize: FONT_SIZES.MD,
     fontWeight: '600',
   },
   upgradeButton: {

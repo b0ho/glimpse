@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import * as SecureStore from 'expo-secure-store';
 import { Like, Match } from '@/types';
 import { LIKE_SYSTEM } from '@/utils/constants';
+import { useAuthStore } from './authSlice';
 
 interface LikeState {
   // State
@@ -46,6 +47,11 @@ interface LikeStore extends LikeState {
   // Super Like actions
   canSendSuperLike: () => boolean;
   getRemainingSuperLikes: () => number;
+  
+  // Rewind actions (Premium only)
+  canRewindLike: () => boolean;
+  rewindLastLike: () => Promise<boolean>;
+  getLastLike: () => Like | null;
   
   // Computed values
   canSendLike: (toUserId: string) => boolean;
@@ -121,7 +127,7 @@ export const useLikeStore = create<LikeStore>()(
           // API 호출 (실제 구현에서는 서버 API 호출)
           const newLike: Like = {
             id: `like_${Date.now()}`,
-            fromUserId: 'current_user_id', // 실제로는 현재 사용자 ID
+            fromUserId: useAuthStore.getState().user?.id || 'anonymous', // 현재 로그인된 사용자 ID
             toUserId,
             groupId,
             isAnonymous: true,
@@ -138,14 +144,14 @@ export const useLikeStore = create<LikeStore>()(
 
           // 매치 확인 (받은 좋아요가 있는지 확인)
           const receivedLikeFromSameUser = state.receivedLikes.find(
-            like => like.fromUserId === toUserId && like.toUserId === 'current_user_id'
+            like => like.fromUserId === toUserId && like.toUserId === (useAuthStore.getState().user?.id || 'anonymous')
           );
 
           if (receivedLikeFromSameUser) {
             // 매치 생성!
             const newMatch: Match = {
               id: `match_${Date.now()}`,
-              user1Id: 'current_user_id',
+              user1Id: useAuthStore.getState().user?.id || 'anonymous',
               user2Id: toUserId,
               groupId,
               createdAt: new Date(),
@@ -208,7 +214,7 @@ export const useLikeStore = create<LikeStore>()(
           // API 호출 (실제 구현에서는 서버 API 호출)
           const newSuperLike: Like = {
             id: `super_like_${Date.now()}`,
-            fromUserId: 'current_user_id', // 실제로는 현재 사용자 ID
+            fromUserId: useAuthStore.getState().user?.id || 'anonymous', // 현재 로그인된 사용자 ID
             toUserId,
             groupId,
             isAnonymous: false, // 슈퍼 좋아요는 비익명
@@ -234,14 +240,14 @@ export const useLikeStore = create<LikeStore>()(
 
           // 매치 확인 (받은 좋아요가 있는지 확인)
           const receivedLikeFromSameUser = state.receivedLikes.find(
-            like => like.fromUserId === toUserId && like.toUserId === 'current_user_id'
+            like => like.fromUserId === toUserId && like.toUserId === (useAuthStore.getState().user?.id || 'anonymous')
           );
 
           if (receivedLikeFromSameUser) {
             // 슈퍼 좋아요 매치 생성!
             const newMatch: Match = {
               id: `super_match_${Date.now()}`,
-              user1Id: 'current_user_id',
+              user1Id: useAuthStore.getState().user?.id || 'anonymous',
               user2Id: toUserId,
               groupId,
               createdAt: new Date(),
@@ -362,9 +368,12 @@ export const useLikeStore = create<LikeStore>()(
         const twoWeeksAgo = new Date();
         twoWeeksAgo.setDate(twoWeeksAgo.getDate() - LIKE_SYSTEM.COOLDOWN_PERIOD_DAYS);
         
-        const recentLike = state.sentLikes.find(
-          (like) => like.toUserId === toUserId && like.createdAt > twoWeeksAgo
-        );
+        const recentLike = state.sentLikes.find((like) => {
+          const likeCreatedAt = typeof like.createdAt === 'string' 
+            ? new Date(like.createdAt) 
+            : like.createdAt;
+          return like.toUserId === toUserId && likeCreatedAt > twoWeeksAgo;
+        });
         if (recentLike) return false;
         
         // 일일 한도 확인
@@ -400,6 +409,108 @@ export const useLikeStore = create<LikeStore>()(
         const state = get();
         if (!state.hasPremium) return 0;
         return Math.max(0, state.dailySuperLikesLimit - state.superLikesUsed);
+      },
+
+      // 좋아요 되돌리기 기능 (프리미엄 전용)
+      canRewindLike: () => {
+        const state = get();
+        
+        // 프리미엄 사용자인지 확인
+        if (!state.hasPremium) return false;
+        
+        // 보낸 좋아요가 있어야 함
+        if (state.sentLikes.length === 0) return false;
+        
+        // 마지막 좋아요가 5분 이내에 보낸 것인지 확인 (되돌리기 제한 시간)
+        const lastLike = state.getLastLike();
+        if (!lastLike) return false;
+        
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000); // 5분 전
+        const likeCreatedAt = typeof lastLike.createdAt === 'string' 
+          ? new Date(lastLike.createdAt) 
+          : lastLike.createdAt;
+        return likeCreatedAt > fiveMinutesAgo;
+      },
+
+      getLastLike: () => {
+        const state = get();
+        if (state.sentLikes.length === 0) return null;
+        
+        // 가장 최근에 보낸 좋아요 반환 (시간 순 정렬)
+        const sortedLikes = [...state.sentLikes].sort((a, b) => {
+          const aTime = typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : a.createdAt.getTime();
+          const bTime = typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : b.createdAt.getTime();
+          return bTime - aTime;
+        });
+        
+        return sortedLikes[0];
+      },
+
+      rewindLastLike: async () => {
+        const state = get();
+        
+        // 되돌리기 가능 여부 확인
+        if (!state.canRewindLike()) {
+          set({ error: '좋아요 되돌리기를 사용할 수 없습니다.' });
+          return false;
+        }
+        
+        const lastLike = state.getLastLike();
+        if (!lastLike) {
+          set({ error: '되돌릴 좋아요가 없습니다.' });
+          return false;
+        }
+        
+        try {
+          set({ isLoading: true, error: null });
+          
+          // API 호출 (실제 구현에서는 서버 API 호출)
+          // TODO: 실제 API 엔드포인트 구현 필요
+          
+          // 상태에서 해당 좋아요 제거
+          set((state) => ({
+            sentLikes: state.sentLikes.filter(like => like.id !== lastLike.id),
+            // 일반 좋아요인 경우 dailyLikesUsed 감소
+            dailyLikesUsed: !lastLike.isSuper && state.dailyLikesUsed > 0 
+              ? state.dailyLikesUsed - 1 
+              : state.dailyLikesUsed,
+            // 슈퍼 좋아요인 경우 superLikesUsed 감소
+            superLikesUsed: lastLike.isSuper && state.superLikesUsed > 0 
+              ? state.superLikesUsed - 1 
+              : state.superLikesUsed,
+            isLoading: false,
+          }));
+          
+          // 해당 사용자와의 매치가 있었다면 제거
+          const currentUserId = useAuthStore.getState().user?.id || 'anonymous';
+          const existingMatch = state.matches.find(
+            match => (match.user1Id === currentUserId && match.user2Id === lastLike.toUserId) ||
+                    (match.user2Id === currentUserId && match.user1Id === lastLike.toUserId)
+          );
+          
+          if (existingMatch) {
+            // 매치도 함께 제거 (서로 좋아요로만 매치된 경우)
+            const otherUserLike = state.receivedLikes.find(
+              like => like.fromUserId === lastLike.toUserId
+            );
+            
+            if (otherUserLike) {
+              // 상대방도 좋아요를 보낸 상태였다면 매치 제거
+              set((state) => ({
+                matches: state.matches.filter(match => match.id !== existingMatch.id)
+              }));
+            }
+          }
+          
+          return true;
+        } catch (error) {
+          console.error('Rewind like error:', error);
+          set({ 
+            error: '좋아요 되돌리기에 실패했습니다.',
+            isLoading: false,
+          });
+          return false;
+        }
       },
 
       isMatchedWith: (userId: string) => {
@@ -443,6 +554,31 @@ export const useLikeStore = create<LikeStore>()(
         hasPremium: state.hasPremium,
         premiumLikesRemaining: state.premiumLikesRemaining,
       }),
+      // Date 문자열을 Date 객체로 복원
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // sentLikes의 createdAt을 Date 객체로 변환
+          state.sentLikes = state.sentLikes?.map(like => ({
+            ...like,
+            createdAt: typeof like.createdAt === 'string' ? new Date(like.createdAt) : like.createdAt
+          })) || [];
+          
+          // receivedLikes의 createdAt을 Date 객체로 변환
+          state.receivedLikes = state.receivedLikes?.map(like => ({
+            ...like,
+            createdAt: typeof like.createdAt === 'string' ? new Date(like.createdAt) : like.createdAt
+          })) || [];
+          
+          // matches의 createdAt을 Date 객체로 변환
+          state.matches = state.matches?.map(match => ({
+            ...match,
+            createdAt: typeof match.createdAt === 'string' ? new Date(match.createdAt) : match.createdAt,
+            lastMessageAt: match.lastMessageAt && typeof match.lastMessageAt === 'string' 
+              ? new Date(match.lastMessageAt) 
+              : match.lastMessageAt
+          })) || [];
+        }
+      },
     }
   )
 );
