@@ -4,169 +4,256 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Glimpse is a Korean dating app frontend built with React Native and Expo. The app focuses on **anonymity and privacy** with group/company-based matching. Key features include anonymous "like" systems, SMS-based verification, real-time chat, secure payment system, and premium subscriptions.
+Glimpse is a privacy-focused Korean dating app with a complete monorepo architecture. The app focuses on **anonymity and privacy** with group/company-based matching. Key features include anonymous "like" systems, SMS-based verification, real-time encrypted chat, secure payment system, and premium subscriptions.
 
 **Core Concept:** Users join groups (company, university, hobby groups) and can anonymously express interest in other group members. Only when interest is mutual do users learn each other's nicknames for chatting.
 
 ## Technology Stack
 
-- **Frontend Framework:** React Native with Expo (managed workflow)
-- **Language:** TypeScript with strict mode enabled
+### Full-Stack Monorepo Architecture
+- **Structure:** npm workspaces with mobile/, server/, shared/
+- **Language:** TypeScript with strict mode across all packages
+- **Type Safety:** Shared interfaces between frontend-backend
+- **Development:** Unified development workflow and build process
+
+### Frontend (Mobile App)
+- **Framework:** React Native with Expo (managed workflow)
 - **State Management:** Zustand for application state
 - **Authentication:** Clerk for user auth, session management, and subscription billing
-- **Payment Processing:** Stripe React Native SDK for secure payments
-- **Real-time Communication:** Socket.IO for live messaging
+- **Payment Processing:** Stripe React Native SDK + Korean payment gateways
+- **Real-time Communication:** Socket.IO client for live messaging
 - **Styling:** Custom design system with utility constants
 - **Testing:** Playwright for E2E testing, Jest for unit tests
-- **Code Quality:** ESLint + Prettier
 - **Security:** Expo SecureStore for sensitive data
 
-## Current Implementation Status (2025-01-22)
+### Backend (Server)
+- **Framework:** Node.js with Express.js
+- **Database:** PostgreSQL with Prisma ORM
+- **Authentication:** JWT with Clerk integration
+- **Payments:** TossPay, KakaoPay, Stripe webhooks
+- **Real-time:** Socket.IO server with WebSocket handling
+- **Storage:** AWS S3 for file uploads with Sharp image processing
+- **Notifications:** Firebase Cloud Messaging (FCM)
+- **External APIs:** Kakao Maps, Naver/Google OCR for document verification
+- **Security:** AES-GCM encryption, rate limiting, input validation
 
-### ✅ Phase 1: MVP Foundation (Completed)
-- Clerk authentication with SMS verification
-- Core navigation (Home, Groups, Matches, Profile)
-- Basic state management with Zustand
-- TypeScript setup with strict mode
+### Shared (Common)
+- **Types:** TypeScript interfaces shared between frontend-backend
+- **Constants:** Common configuration and business rules
+- **Utils:** Shared utility functions and validation schemas
 
-### ✅ Phase 2: Content & Group Management (Completed)
-- Content creation and management system
-- Group creation, joining, and management
-- Enhanced UI components with accessibility
-- Dummy data systems for development
+## Current Implementation Status (2025-01-24)
 
-### ✅ Phase 3: Real-time Chat System (Completed)
-- Socket.IO WebSocket service integration
-- Complete chat UI (MessageBubble, MessageInput, TypingIndicator)
-- Real-time messaging with optimistic updates
-- Chat state management with Zustand
-- **Gemini Review Score: 42/50 (84%)**
+### ✅ Phase 1: Complete Monorepo Migration (Completed)
+- Full backend migration from Java Spring Boot to Node.js/TypeScript
+- Monorepo structure with npm workspaces
+- Shared type system ensuring frontend-backend type safety
+- Unified development and build processes
 
-### ✅ Phase 4: Premium Payment System (Completed)
-- Clerk + Stripe payment integration
-- Subscription management (월 9,900원, 연 99,000원)
-- Like packages for microtransactions (₩2,500-19,000)
-- Premium features differentiation
-- **Gemini Review Score: 41/50 (82%)**
+### ✅ Phase 2: Core Business Logic (Completed)
+- **User Management:** Registration, authentication, profile management
+- **Group System:** 4 group types (Official, Created, Instance, Location)
+- **Anonymous Matching:** Like system with cooldown and credit management
+- **Real-time Chat:** Encrypted messaging with Socket.IO
+- **Payment System:** Korean payment gateways (Toss, Kakao) integration
+- **Notification System:** Firebase push notifications
+
+### ✅ Phase 3: Advanced Features (Completed)
+- **Company Verification:** Email domain + OCR document verification
+- **File Management:** AWS S3 with image processing and optimization
+- **Location Services:** Kakao Maps integration for location-based groups
+- **Security Services:** Comprehensive encryption and authentication
+- **Admin Tools:** User management and reporting systems
 
 ### 🚀 Next Phase Options:
-- **Phase 5A:** Push Notifications & Real-time Updates
-- **Phase 5B:** Location-based Groups & GPS Integration
-- **Phase 5C:** Backend API Integration & Production Setup
+- **Phase 4A:** Production Deployment & DevOps Setup
+- **Phase 4B:** Advanced Analytics & Business Intelligence
+- **Phase 4C:** AI-Powered Matching Algorithm Enhancement
+- **Phase 4D:** Video/Voice Features & Rich Media
 
-## Development Commands
+## Critical Commands
 
+### Monorepo Development
 ```bash
-# Development
-expo start              # Start development server
-expo start --web        # Start web version
-expo start --ios        # Start iOS simulator
-expo start --android    # Start Android emulator
+# Start all services
+npm run dev                    # Start both mobile and server concurrently
+npm run dev:mobile             # Start mobile app only
+npm run dev:server             # Start server only
 
 # Building
-expo build:android      # Build for Android
-expo build:ios         # Build for iOS
-eas build --platform all  # Build with Expo Application Services
+npm run build                  # Build all workspaces
+npm run build:mobile           # Build mobile app
+npm run build:server           # Build server
 
 # Testing & Quality
-npm test               # Run unit tests
-npx playwright test    # Run E2E tests
-npm run lint          # Run ESLint
-npm run typecheck     # Run TypeScript checks
-npm run format        # Format code with Prettier
-npm run lint:fix      # Auto-fix ESLint issues
+npm run test                   # Run all tests across workspaces
+npm run test:mobile            # Run mobile tests
+npm run test:server            # Run server tests
+npm run typecheck             # Check TypeScript across all packages
+npm run lint                  # Lint all packages
+npm run format                # Format all code
+
+# Database Operations
+npm run db:generate           # Generate Prisma client
+npm run db:push              # Push schema changes
+npm run db:migrate           # Run migrations
+npm run db:studio            # Open Prisma Studio
+```
+
+### Mobile Development
+```bash
+# Expo Development
+cd mobile && expo start              # Start development server
+cd mobile && expo start --ios        # Start iOS simulator
+cd mobile && expo start --android    # Start Android emulator
+
+# Building
+cd mobile && eas build --platform all  # Build with Expo Application Services
+```
+
+### Server Development
+```bash
+# Development
+cd server && npm run dev              # Start with nodemon
+cd server && npm run build           # Build TypeScript
+cd server && npm start              # Start production server
+
+# Database
+cd server && npx prisma studio       # Open database GUI
+cd server && npx prisma migrate dev  # Run development migrations
 ```
 
 ## Architecture Guidelines
 
-### Current Directory Structure
+### Monorepo Project Structure
 ```
-src/
-├── components/           # Reusable UI components
-│   ├── auth/            # Authentication components
-│   ├── chat/            # Real-time messaging components
-│   │   ├── MessageBubble.tsx
-│   │   ├── MessageInput.tsx
-│   │   └── TypingIndicator.tsx
-│   ├── premium/         # Payment & subscription components
-│   │   ├── PricingCard.tsx
-│   │   └── PaymentModal.tsx
-│   ├── ErrorBoundary.tsx # Global error handling
-│   └── ContentItem.tsx  # Content display component
-├── screens/             # Main app screens
-│   ├── auth/           # Authentication screens
-│   ├── HomeScreen.tsx  # Main feed
-│   ├── GroupsScreen.tsx # Group browsing
-│   ├── MatchesScreen.tsx # Match management
-│   ├── ProfileScreen.tsx # User profile
-│   ├── ChatScreen.tsx  # Real-time messaging
-│   ├── PremiumScreen.tsx # Subscription management
-│   ├── CreateContentScreen.tsx
-│   ├── CreateGroupScreen.tsx
-│   └── MyGroupsScreen.tsx
-├── navigation/          # Navigation configuration
-│   └── AppNavigator.tsx # Complete navigation setup
-├── services/           # External service integrations
-│   ├── auth/           # Clerk authentication
-│   ├── chat/           # WebSocket service
-│   │   └── websocket-service.ts
-│   └── payment/        # Premium payment service
-│       └── premium-service.ts
-├── store/              # Zustand state management
-│   └── slices/         # Feature-based stores
-│       ├── authSlice.ts
-│       ├── likeSlice.ts
-│       ├── groupSlice.ts
-│       ├── chatSlice.ts # Real-time messaging state
-│       └── premiumSlice.ts # Subscription state
-├── utils/              # Utility functions
-│   ├── constants.ts    # App-wide constants
-│   ├── dateUtils.ts    # Time formatting utilities
-│   ├── mockData.ts     # Development dummy data
-│   └── icons.ts        # Icon name constants
-└── types/              # TypeScript definitions
-    └── index.ts        # All type definitions
+📁 glimpse-monorepo/
+├── 📁 mobile/                    # React Native mobile app
+│   ├── components/              # Reusable UI components
+│   │   ├── auth/               # Authentication components
+│   │   ├── chat/               # Real-time messaging components
+│   │   │   ├── MessageBubble.tsx
+│   │   │   ├── MessageInput.tsx
+│   │   │   └── TypingIndicator.tsx
+│   │   ├── premium/            # Payment & subscription components
+│   │   │   ├── PricingCard.tsx
+│   │   │   └── PaymentModal.tsx
+│   │   ├── ErrorBoundary.tsx   # Global error handling
+│   │   └── ContentItem.tsx     # Content display component
+│   ├── screens/                # Main app screens
+│   │   ├── auth/              # Authentication screens
+│   │   ├── HomeScreen.tsx     # Main feed
+│   │   ├── GroupsScreen.tsx   # Group browsing
+│   │   ├── MatchesScreen.tsx  # Match management
+│   │   ├── ProfileScreen.tsx  # User profile
+│   │   ├── ChatScreen.tsx     # Real-time messaging
+│   │   ├── PremiumScreen.tsx  # Subscription management
+│   │   └── LocationGroupScreen.tsx # GPS-based groups
+│   ├── navigation/            # Navigation configuration
+│   ├── services/              # External service integrations
+│   │   ├── auth/             # Clerk authentication
+│   │   ├── chat/             # WebSocket service
+│   │   ├── payment/          # Premium payment service
+│   │   ├── location/         # Location-based services
+│   │   └── notifications/    # Push notification handling
+│   ├── store/                # Zustand state management
+│   │   └── slices/           # Feature-based stores
+│   │       ├── authSlice.ts
+│   │       ├── likeSlice.ts
+│   │       ├── groupSlice.ts
+│   │       ├── chatSlice.ts  # Real-time messaging state
+│   │       ├── premiumSlice.ts # Subscription state
+│   │       ├── locationSlice.ts # Location state
+│   │       └── notificationSlice.ts # Notification state
+│   ├── utils/                # Utility functions
+│   └── types/                # Mobile-specific types
+├── 📁 server/                    # Node.js backend server
+│   ├── src/
+│   │   ├── controllers/          # API endpoint controllers
+│   │   │   ├── AuthController.ts
+│   │   │   ├── UserController.ts
+│   │   │   ├── GroupController.ts
+│   │   │   ├── MatchController.ts
+│   │   │   ├── ChatController.ts
+│   │   │   └── PaymentController.ts
+│   │   ├── services/             # Business logic services
+│   │   │   ├── AuthService.ts
+│   │   │   ├── UserService.ts
+│   │   │   ├── GroupService.ts
+│   │   │   ├── LikeService.ts
+│   │   │   ├── MatchingService.ts
+│   │   │   ├── ChatService.ts
+│   │   │   ├── PaymentService.ts
+│   │   │   ├── NotificationService.ts
+│   │   │   ├── EncryptionService.ts
+│   │   │   ├── EmailService.ts
+│   │   │   ├── FileUploadService.ts
+│   │   │   ├── LocationService.ts
+│   │   │   ├── FirebaseService.ts
+│   │   │   ├── OCRService.ts
+│   │   │   └── CompanyVerificationService.ts
+│   │   ├── middleware/           # Express middleware
+│   │   │   ├── auth.ts          # JWT authentication
+│   │   │   ├── errorHandler.ts  # Global error handling
+│   │   │   ├── rateLimiter.ts   # API rate limiting
+│   │   │   └── notFound.ts      # 404 handler
+│   │   ├── routes/              # API route definitions
+│   │   └── index.ts             # Server entry point with Socket.IO
+│   ├── prisma/                  # Database schema and migrations
+│   │   └── schema.prisma        # Complete database schema
+│   └── package.json            # Server dependencies
+├── 📁 shared/                    # Shared types and utilities
+│   ├── types/                   # TypeScript interfaces
+│   │   └── index.ts            # All shared type definitions
+│   ├── constants/              # Shared constants
+│   │   └── index.ts           # Business rules and configuration
+│   ├── utils/                  # Common utility functions
+│   │   └── index.ts           # Validation, formatting, etc.
+│   └── package.json           # Shared package configuration
+├── 📄 package.json               # Root workspace configuration
+├── 📄 requirements.md           # Integrated project requirements
+└── 📄 README.md                # Project documentation
 ```
 
 ### Key Implementation Patterns
 
-1. **Component Architecture**
-   - Functional components with hooks
-   - React.memo for performance optimization
-   - Comprehensive accessibility support
-   - Error boundaries for stability
+1. **Monorepo Architecture**
+   - npm workspaces for dependency management
+   - Shared TypeScript types across frontend-backend
+   - Unified development and build processes
+   - Type-safe API contracts
 
-2. **State Management with Zustand**
+2. **Backend Service Layer Pattern**
+   - Controllers handle HTTP requests/responses
+   - Services contain business logic
+   - Repository pattern with Prisma ORM
+   - Middleware for cross-cutting concerns (auth, validation, etc.)
+
+3. **Frontend State Management**
+   - Zustand for application state
    - Feature-based slices (auth, chat, premium, etc.)
-   - Selectors for performance optimization
    - Persistence with SecureStore/AsyncStorage
-   - Real-time state synchronization
+   - Real-time state synchronization with WebSocket
 
-3. **Real-time Systems**
+4. **Real-time Systems**
    - Socket.IO for live messaging
    - WebSocket reconnection handling
    - Optimistic UI updates
-   - Typing indicators and read receipts
-
-4. **Payment Integration**
-   - Clerk authentication + Stripe processing
-   - Subscription and one-time payment support
-   - Premium feature gating
-   - Korean market pricing optimization
+   - End-to-end encryption for messages
 
 5. **Security Implementation**
-   - Clerk authentication with SMS verification
-   - Expo SecureStore for sensitive data
+   - JWT authentication with Clerk integration
+   - AES-GCM encryption for sensitive data
+   - Rate limiting and input validation
    - Anonymous user system until matching
-   - Input sanitization and validation
 
-## Business Model & Premium Features
+## Business Model & Korean Market Features
 
 ### Pricing Strategy (Korean Market)
 - **Free Tier:** 1 daily like + basic matching
+- **Credit Packages:** ₩2,500 (5개) ~ ₩19,000 (50개) microtransactions
 - **Premium Monthly:** ₩9,900 (unlimited likes + premium features)
 - **Premium Yearly:** ₩99,000 (2개월 무료, 17% 할인)
-- **Like Packages:** ₩2,500 (5개) ~ ₩19,000 (50개)
 
 ### Premium Features
 - 무제한 좋아요 (Unlimited likes)
@@ -177,6 +264,13 @@ src/
 - 읽음 표시 (Read receipts)
 - 온라인 상태 표시 (Online status)
 - 프리미엄 배지 (Premium badge)
+
+### Korean Market Integrations
+- **SMS Authentication:** Korean carrier support
+- **Payment Gateways:** TossPay, KakaoPay integration
+- **Maps:** Kakao Map API for location features
+- **OCR:** Naver/Google Vision for document verification
+- **Company Culture:** Email domain verification for company groups
 
 ### Target Metrics
 - **Expected ARPU:** ₩15,000-25,000
@@ -192,7 +286,7 @@ src/
 - Premium users get enhanced anonymity controls
 
 ### Group Types & Verification
-1. **Official Groups** - Company/university verified (email domain)
+1. **Official Groups** - Company/university verified (email domain + OCR)
 2. **Created Groups** - User-created hobby/interest groups  
 3. **Instance Groups** - One-time event-based groups
 4. **Location Groups** - GPS/QR code verified location groups
@@ -204,220 +298,178 @@ src/
 - Mutual likes create matches and reveal nicknames
 - Groups need minimum gender balance to activate matching
 
-## Development Workflow
-
-### Quality Assurance Process
-1. **Development:** TypeScript strict mode + ESLint
-2. **Testing:** Unit tests + E2E with Playwright
-3. **Review:** Gemini CLI analysis for code quality
-4. **Commit:** Structured commit messages with implementation details
-
-### Code Review Process
-**🔥 필수 프로세스 - 반드시 준수할 것:**
-1. **구현 완료** → 2. **Gemini CLI 검사** → 3. **Claude가 피드백 검증 및 적용** → 4. **커밋**
-
-**절대 건너뛰지 말 것:**
-- 모든 새 기능/Phase 완료 후 **반드시** `gemini -p "@src/ 이번 구현한 기능을 검토해주세요"` 실행
-- Gemini 피드백 점수 **목표: 40+ / 50점** (필수 달성)
-- Claude는 Gemini 피드백을 **모두 검토하고 적용**한 후에만 커밋
-- 모든 새 기능은 접근성 및 TypeScript 완전 지원 필수
-- **커밋 전 필수 체크리스트:**
-  - [ ] `npm run typecheck` 통과
-  - [ ] `npm run lint` 통과 (에러 없음)
-  - [ ] Gemini 검토 완료 및 피드백 적용
-  - [ ] 기능 동작 테스트 완료
-
-### Testing Strategy
-- **Unit Testing:** Components, stores, utilities
-- **Integration Testing:** Clerk auth flows, payment processing
-- **E2E Testing:** Complete user journeys
-- **Performance Testing:** Real-time messaging, payment flows
-
-## Security & Privacy Requirements
+### Security & Privacy Requirements
 
 **Critical:** This is a dating app handling sensitive personal data and anonymity requirements.
 
 - **Data Privacy:** GDPR-compliant, minimal data collection
 - **Anonymous Until Match:** Strict enforcement of anonymity rules
-- **Payment Security:** Stripe PCI compliance, no card data storage
+- **Payment Security:** PCI DSS compliance, no card data storage
 - **Real-time Security:** WebSocket authentication, message encryption
-- **Secure Storage:** Expo SecureStore for tokens and sensitive data
+- **Secure Storage:** Encrypted storage for all sensitive data
 
-## Performance Guidelines
+## Development Workflow
 
-### React Native Optimizations
-- FlatList for all data lists (messages, groups, users)
-- React.memo for expensive chat components
-- Image lazy loading and caching
-- Bundle size optimization with code splitting
+### Quality Assurance Process
+1. **Development:** TypeScript strict mode + ESLint across all packages
+2. **Testing:** Unit tests + E2E with Playwright + Integration tests
+3. **Type Safety:** Shared types ensure no frontend-backend mismatches
+4. **Review:** Code review process with comprehensive testing
+5. **Commit:** Structured commit messages with implementation details
 
-### Real-time Performance
-- WebSocket connection pooling
-- Message batching for high traffic
-- Optimistic updates for immediate UX
-- Background sync for offline messages
+### Testing Strategy
+- **Unit Testing:** Components, services, utilities across all packages
+- **Integration Testing:** API endpoints, database operations
+- **E2E Testing:** Complete user journeys with Playwright
+- **Type Testing:** Compilation checks across frontend-backend
+- **Performance Testing:** Real-time messaging, payment flows
 
-### State Management Performance
-- Zustand selectors to prevent unnecessary re-renders
-- Persistent storage optimization
-- Memory leak prevention in real-time features
+### Code Quality Standards
+- **Response Language:** Always respond in Korean (응답은 한글로한다)
+- **TypeScript:** Strict mode, explicit types, no any across all packages
+- **Accessibility:** All interactive elements labeled
+- **Error Handling:** Comprehensive try-catch with user feedback
+- **Testing:** 80%+ coverage for business logic
+- **Security:** Input validation, rate limiting, encryption
 
 ## External Service Integrations
 
 ### Current Integrations
 - **Clerk:** Authentication, user management, subscription billing
 - **Stripe:** Payment processing, subscription management
+- **TossPay/KakaoPay:** Korean payment gateway integration
 - **Socket.IO:** Real-time messaging infrastructure
-- **Expo:** Mobile app framework and services
+- **AWS S3:** File storage with Sharp image processing
+- **Firebase:** Push notification system (FCM)
+- **Kakao Maps:** Location-based services for Korean market
+- **Naver/Google OCR:** Document verification for company authentication
+- **PostgreSQL:** Primary database with Prisma ORM
 
 ### Integration Architecture
 - Service layer pattern for external APIs
 - Error handling and retry logic
 - Offline capability where appropriate
 - Rate limiting and API optimization
+- Webhook handling for payment confirmations
 
-## Development Notes
+## Environment Setup Requirements
 
-### Environment Setup Requirements
-- Expo CLI 50+ with React Native 0.79+
+### Development Environment
 - Node.js 18+ with npm 9+
-- Clerk dashboard configuration
-- Stripe dashboard setup for payments
-- Socket.IO server (development/production)
+- PostgreSQL 14+ (local or Docker)
+- Redis (for session management and caching)
+- Expo CLI 50+ with React Native 0.79+
 
-### Code Quality Standards
-- **Response Language:** Always respond in Korean (응답은 한글로한다)
-- **TypeScript:** Strict mode, explicit types, no any
-- **Accessibility:** All interactive elements labeled
-- **Error Handling:** Comprehensive try-catch with user feedback
-- **Testing:** 80%+ coverage for business logic
+### External Service Configuration
+- **Clerk:** Dashboard configuration for authentication
+- **Stripe:** Dashboard setup for payments + webhooks
+- **TossPay/KakaoPay:** Korean payment gateway credentials
+- **AWS S3:** Bucket setup for file storage
+- **Firebase:** Project setup for FCM push notifications
+- **Kakao:** API keys for Maps and OCR services
+- **Naver:** API keys for OCR and other services
 
-### Debugging Tools
-- **React Native Debugger** for component debugging
-- **Expo DevTools** for performance monitoring
-- **Clerk Dashboard** for authentication debugging
-- **Stripe Dashboard** for payment testing
-- **Zustand DevTools** for state inspection
+### Production Requirements
+- Docker containers for deployment
+- Environment variable management
+- SSL certificates
+- CDN setup for static assets
+- Database backup and recovery
+- Monitoring and alerting systems
 
-### Common Development Issues
+## Performance Guidelines
+
+### Full-Stack Optimizations
+- Shared type compilation optimization
+- Bundle size optimization with code splitting
+- Database query optimization with Prisma
+- API response caching strategies
+- WebSocket connection pooling
+
+### Real-time Performance
+- Message batching for high traffic
+- Optimistic updates for immediate UX
+- Background sync for offline messages
+- Connection state management
+
+### Database Performance
+- Proper indexing for common queries
+- Connection pooling optimization
+- Query optimization for matching algorithms
+- Data archival strategies for old messages
+
+## Common Development Issues & Solutions
+
+### Monorepo Specific
+- **Type Sync:** Ensure shared types are properly imported
+- **Build Order:** Shared package must build before others
+- **Dependency Management:** Use workspace: protocol for internal deps
+
+### Cross-Platform Compatibility
 - **Expo Compatibility:** Verify all packages support Expo managed workflow
 - **Platform Differences:** Test payment flows on both iOS/Android
 - **Network Handling:** Implement proper offline/online state management
-- **Memory Management:** Monitor WebSocket connections and state cleanup
+
+### Korean Market Specific
+- **SMS Providers:** Handle different Korean carrier requirements
+- **Payment Integration:** Test all Korean payment methods thoroughly
+- **Character Encoding:** Proper handling of Korean text in all systems
 
 ## Next Development Priorities
 
-### Phase 5 Options (Pick One):
-1. **Push Notifications:** Real-time match/message alerts
-2. **Location Features:** GPS-based groups, nearby users
-3. **Backend Integration:** Production API, database setup
-4. **Advanced Features:** Video calls, voice messages, stories
+### Phase 4 Options (Choose Based on Business Needs):
+1. **Production Deployment:** DevOps setup, monitoring, CI/CD
+2. **Analytics & BI:** User behavior tracking, business intelligence
+3. **AI-Powered Matching:** Machine learning for better compatibility
+4. **Rich Media Features:** Video calls, voice messages, story features
 
 ### Technical Debt & Improvements
-- WebSocket reconnection logic enhancement
-- Payment retry mechanism implementation
-- Comprehensive test coverage
+- Comprehensive error monitoring and alerting
 - Performance monitoring integration
-- Error tracking and analytics
+- Advanced security auditing
+- Automated testing improvements
+- Documentation completion
 
 ---
 
-Remember: This is a privacy-focused Korean dating app. Always prioritize user anonymity, payment security, and Korean user experience in all development decisions.
+Remember: This is a privacy-focused Korean dating app with a complete full-stack implementation. Always prioritize user anonymity, payment security, Korean user experience, and type safety across the entire stack in all development decisions.
 
-# Using Gemini CLI for Large Codebase Analysis
+# Using Gemini CLI for Monorepo Analysis
 
-When analyzing large codebases or multiple files that might exceed context limits, use the Gemini CLI with its massive context window. Use `gemini -p` to leverage Google Gemini's large context capacity.
+When analyzing this large monorepo codebase, use the Gemini CLI with its massive context window for comprehensive analysis.
 
-## File and Directory Inclusion Syntax
+## Monorepo Analysis Examples
 
-Use the `@` syntax to include files and directories in your Gemini prompts. The paths should be relative to WHERE you run the gemini command:
-
-### Examples:
-
-**Single file analysis:**
+**Analyze entire monorepo:**
 ```bash
-gemini -p "@src/main.py Explain this file's purpose and structure"
+gemini -p "@mobile/ @server/ @shared/ Analyze the complete monorepo architecture and identify any inconsistencies"
 ```
 
-**Multiple files:**
+**Check type consistency across packages:**
 ```bash
-gemini -p "@package.json @src/index.js Analyze the dependencies used in the code"
+gemini -p "@shared/types/ @mobile/types/ @server/src/ Are the TypeScript types consistent across frontend and backend?"
 ```
 
-**Entire directory:**
+**Verify business logic implementation:**
 ```bash
-gemini -p "@src/ Summarize the architecture of this codebase"
+gemini -p "@server/src/services/ @mobile/store/ Is the business logic properly implemented on both frontend and backend?"
 ```
 
-**Multiple directories:**
+**Security audit across stack:**
 ```bash
-gemini -p "@src/ @tests/ Analyze test coverage for the source code"
+gemini -p "@server/src/ @mobile/services/ Perform a security audit of the authentication and payment systems"
 ```
 
-**Current directory and subdirectories:**
+**API contract verification:**
 ```bash
-gemini -p "@./ Give me an overview of this entire project"
-# Or use --all_files flag:
-gemini --all_files -p "Analyze the project structure and dependencies"
+gemini -p "@server/src/controllers/ @mobile/services/api/ Do the API contracts match between server controllers and mobile API services?"
 ```
 
-### Implementation Verification Examples
+Use Gemini CLI when:
+- Analyzing cross-package dependencies and consistency
+- Verifying complete feature implementation across frontend-backend
+- Performing comprehensive security audits
+- Checking for architectural patterns and best practices
+- Understanding the complete data flow from mobile to server
 
-**Check if a feature is implemented:**
-```bash
-gemini -p "@src/ @lib/ Has dark mode been implemented in this codebase? Show me the relevant files and functions"
-```
-
-**Verify authentication implementation:**
-```bash
-gemini -p "@src/ @middleware/ Is JWT authentication implemented? List all auth-related endpoints and middleware"
-```
-
-**Check for specific patterns:**
-```bash
-gemini -p "@src/ Are there any React hooks that handle WebSocket connections? List them with file paths"
-```
-
-**Verify error handling:**
-```bash
-gemini -p "@src/ @api/ Is proper error handling implemented for all API endpoints? Show examples of try-catch blocks"
-```
-
-**Check for rate limiting:**
-```bash
-gemini -p "@backend/ @middleware/ Is rate limiting implemented for the API? Show the implementation details"
-```
-
-**Verify caching strategy:**
-```bash
-gemini -p "@src/ @lib/ @services/ Is Redis caching implemented? List all cache-related functions and their usage"
-```
-
-**Check for specific security measures:**
-```bash
-gemini -p "@src/ @api/ Are SQL injection protections implemented? Show how user inputs are sanitized"
-```
-
-**Verify test coverage for features:**
-```bash
-gemini -p "@src/payment/ @tests/ Is the payment processing module fully tested? List all test cases"
-```
-
-### When to Use Gemini CLI
-
-Use `gemini -p` when:
-- Analyzing entire codebases or large directories
-- Comparing multiple large files
-- Need to understand project-wide patterns or architecture
-- Current context window is insufficient for the task
-- Working with files totaling more than 100KB
-- Verifying if specific features, patterns, or security measures are implemented
-- Checking for the presence of certain coding patterns across the entire codebase
-
-### Important Notes
-
-- Paths in @ syntax are relative to your current working directory when invoking gemini
-- The CLI will include file contents directly in the context
-- No need for --yolo flag for read-only analysis
-- Gemini's context window can handle entire codebases that would overflow Claude's context
-- When checking implementations, be specific about what you're looking for to get accurate results
+This ensures comprehensive analysis of the monorepo structure and maintains consistency across all packages.
