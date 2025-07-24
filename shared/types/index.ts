@@ -126,13 +126,19 @@ export enum VerificationStatus {
 }
 
 // Like & Match Types
-export interface UserLike {
+export interface Like {
   id: string;
   fromUserId: string;
   toUserId: string;
   groupId: string;
-  isMatch: boolean;
+  isAnonymous: boolean;
+  isSuper: boolean;
   createdAt: Date;
+}
+
+// Legacy interface for backwards compatibility
+export interface UserLike extends Like {
+  isMatch: boolean;
 }
 
 export interface Match {
@@ -140,7 +146,9 @@ export interface Match {
   user1Id: string;
   user2Id: string;
   groupId: string;
-  status: 'ACTIVE' | 'EXPIRED' | 'DELETED';
+  status?: 'ACTIVE' | 'EXPIRED' | 'DELETED';
+  isActive: boolean;
+  lastMessageAt: Date | null;
   createdAt: Date;
 }
 
@@ -260,4 +268,30 @@ export interface UserDeviceToken {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Anonymous User Info for privacy system
+export interface AnonymousUserInfo {
+  id: string;
+  anonymousId: string;
+  displayName: string;
+  nickname: string;
+  realName?: string;
+  isMatched: boolean;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+}
+
+// User with anonymous ID for privacy
+export interface UserWithAnonymousId extends User {
+  anonymousId: string;
+  realName?: string;
+}
+
+// Nearby Users for location-based matching
+export interface NearbyUser extends User {
+  anonymousId: string;
+  distance: number;
+  lastSeen: string;
+  isOnline: boolean;
+  commonGroups: string[];
 }

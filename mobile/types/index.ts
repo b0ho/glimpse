@@ -7,10 +7,25 @@ export interface User {
   anonymousId: string; // 익명 식별자
   nickname: string; // 익명 닉네임 (매칭 전 공개)
   realName?: string; // 실제 이름 (매칭 후에만 공개)
+  age?: number;
   gender?: Gender; // 사용자 성별 (매칭에 필수)
   phoneNumber?: string; // 해시화된 전화번호
+  bio?: string;
+  profileImage?: string;
   isVerified: boolean;
+  isPremium?: boolean;
+  credits?: number;
+  lastActive?: Date;
   createdAt: Date;
+  updatedAt?: Date;
+}
+
+// 근처 사용자 타입 (위치 기반 매칭용)
+export interface NearbyUser extends User {
+  distance: number;
+  lastSeen: string;
+  isOnline: boolean;
+  commonGroups: string[];
 }
 
 // 익명성 컨텍스트별 사용자 정보

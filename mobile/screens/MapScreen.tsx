@@ -243,7 +243,7 @@ export const MapScreen: React.FC = React.memo(() => {
 
   const createGroupAtPlace = (placeData: any) => {
     // 장소 기반 그룹 생성
-    navigation.navigate('CreateGroup' as never, {
+    (navigation as any).navigate('CreateGroup', {
       type: GroupType.LOCATION,
       location: {
         latitude: placeData.latitude,
@@ -251,7 +251,7 @@ export const MapScreen: React.FC = React.memo(() => {
         address: placeData.name,
       },
       suggestedName: `${placeData.name} 모임`,
-    } as never);
+    });
   };
 
   const renderMapTypeSelector = () => (

@@ -16,7 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import * as Location from 'expo-location';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
-import { User } from '@/types';
+import { User, NearbyUser } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 interface LocationData {
@@ -25,17 +25,12 @@ interface LocationData {
   address?: string;
 }
 
-interface NearbyUser extends User {
-  distance: number;
-  lastSeen: string;
-  isOnline: boolean;
-  commonGroups: string[];
-}
+// NearbyUser interface is now imported from shared/types
 
 export const NearbyUsersScreen: React.FC = React.memo(() => {
   const navigation = useNavigation();
   const { user } = useAuthStore();
-  const { sendLike, likes } = useLikeStore();
+  const { sendLike, sentLikes } = useLikeStore();
   
   const [currentLocation, setCurrentLocation] = useState<LocationData | null>(null);
   const [nearbyUsers, setNearbyUsers] = useState<NearbyUser[]>([]);
@@ -135,7 +130,7 @@ export const NearbyUsersScreen: React.FC = React.memo(() => {
           id: 'user1',
           nickname: '카페러버',
           age: 25,
-          gender: 'FEMALE',
+          gender: 'FEMALE' as const,
           profileImage: undefined,
           isVerified: true,
           isPremium: false,
@@ -149,12 +144,13 @@ export const NearbyUsersScreen: React.FC = React.memo(() => {
           lastActive: new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),
+          anonymousId: 'anon_user1',
         },
         {
           id: 'user2',
           nickname: '헬스매니아',
           age: 28,
-          gender: 'MALE',
+          gender: 'MALE' as const,
           profileImage: undefined,
           isVerified: false,
           isPremium: true,
@@ -168,12 +164,13 @@ export const NearbyUsersScreen: React.FC = React.memo(() => {
           lastActive: new Date(Date.now() - 5 * 60 * 1000),
           createdAt: new Date(),
           updatedAt: new Date(),
+          anonymousId: 'anon_user2',
         },
         {
           id: 'user3',
           nickname: '음악감상가',
           age: 23,
-          gender: 'FEMALE',
+          gender: 'FEMALE' as const,
           profileImage: undefined,
           isVerified: true,
           isPremium: false,
@@ -187,6 +184,7 @@ export const NearbyUsersScreen: React.FC = React.memo(() => {
           lastActive: new Date(Date.now() - 60 * 60 * 1000),
           createdAt: new Date(),
           updatedAt: new Date(),
+          anonymousId: 'anon_user3',
         },
       ].filter(dummyUser => 
         dummyUser.distance <= selectedRadius * 1000 && // km to meters
@@ -214,7 +212,7 @@ export const NearbyUsersScreen: React.FC = React.memo(() => {
 
     try {
       // 이미 좋아요를 보낸 사용자인지 확인
-      const existingLike = likes.find(like => 
+      const existingLike = sentLikes.find((like: any) => 
         like.senderId === user.id && like.receiverId === targetUser.id
       );
 
@@ -224,7 +222,7 @@ export const NearbyUsersScreen: React.FC = React.memo(() => {
       }
 
       // 크레딧 확인
-      if (!user.isPremium && user.credits <= 0) {
+      if (!user.isPremium && (user.credits || 0) <= 0) {
         Alert.alert(
           '크레딧 부족',
           '좋아요를 보내려면 크레딧이 필요합니다.\n크레딧을 구매하거나 프리미엄으로 업그레이드하세요.',
@@ -245,11 +243,10 @@ export const NearbyUsersScreen: React.FC = React.memo(() => {
             text: '보내기',
             onPress: async () => {
               try {
-                await sendLike({
-                  receiverId: targetUser.id,
-                  groupId: targetUser.commonGroups[0], // 첫 번째 공통 그룹
-                  isAnonymous: true,
-                });
+                await sendLike(
+                  targetUser.id,
+                  targetUser.commonGroups[0] || 'location_group'
+                );
                 Alert.alert('성공', '익명 좋아요를 보냈습니다! 💕');
               } catch (error) {
                 Alert.alert('오류', '좋아요 전송에 실패했습니다.');
@@ -278,7 +275,7 @@ export const NearbyUsersScreen: React.FC = React.memo(() => {
         <View style={styles.userInfo}>
           <View style={styles.userNameRow}>
             <Text style={styles.userName}>{item.nickname}</Text>
-            <Text style={styles.userAge}>{item.age}세</Text>
+            <Text style={styles.userAge}>{item.age || 25}세</Text>
             {item.isVerified && (
               <Icon name="checkmark-circle" size={16} color={COLORS.SUCCESS} />
             )}

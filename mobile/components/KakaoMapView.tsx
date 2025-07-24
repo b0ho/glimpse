@@ -15,7 +15,8 @@ interface MapMarker {
   longitude: number;
   title: string;
   description?: string;
-  type?: 'user' | 'group' | 'place';
+  type: 'user' | 'group' | 'place';
+  data?: any;
 }
 
 interface KakaoMapViewProps {
