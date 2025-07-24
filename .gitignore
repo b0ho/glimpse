@@ -59,3 +59,7 @@ coverage/
 
 # Build outputs (kept only one dist/ entry)
 build/
+
+# Playwright test results
+test-results/
+playwright-report/

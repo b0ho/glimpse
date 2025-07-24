@@ -12,31 +12,34 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "src/*"
+        "mobile/*"
       ],
       "@/components/*": [
-        "src/components/*"
+        "mobile/components/*"
       ],
       "@/screens/*": [
-        "src/screens/*"
+        "mobile/screens/*"
       ],
       "@/services/*": [
-        "src/services/*"
+        "mobile/services/*"
       ],
       "@/store/*": [
-        "src/store/*"
+        "mobile/store/*"
       ],
       "@/utils/*": [
-        "src/utils/*"
+        "mobile/utils/*"
       ],
       "@/types/*": [
-        "src/types/*"
+        "mobile/types/*"
       ],
       "@/hooks/*": [
-        "src/hooks/*"
+        "mobile/hooks/*"
       ],
       "@/navigation/*": [
-        "src/navigation/*"
+        "mobile/navigation/*"
+      ],
+      "@shared/*": [
+        "shared/*"
       ]
     }
   },

@@ -56,6 +56,8 @@ export class AuthController {
         // Create new user
         user = await prisma.user.create({
           data: {
+            clerkId: `temp_${Date.now()}`, // 임시 Clerk ID
+            nickname: `사용자${Date.now().toString().slice(-4)}`, // 임시 닉네임
             phoneNumber,
             isVerified: true
           }
