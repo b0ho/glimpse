@@ -1,0 +1,434 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Management
+model User {
+  id            String   @id @default(cuid())
+  clerkId       String   @unique
+  anonymousId   String   @unique @default(cuid())
+  phoneNumber   String?  @unique
+  nickname      String
+  age           Int?
+  gender        Gender?
+  profileImage  String?
+  bio           String?
+  isVerified    Boolean  @default(false)
+  credits       Int      @default(5)
+  isPremium     Boolean  @default(false)
+  premiumUntil  DateTime?
+  lastActive    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  deviceTokens       UserDeviceToken[]
+  fcmTokens          FcmToken[]
+  verifications      CompanyVerification[]
+  groupMemberships   GroupMember[]
+  sentLikes          UserLike[] @relation("SentLikes")
+  receivedLikes      UserLike[] @relation("ReceivedLikes")
+  matches1           Match[] @relation("User1Matches")
+  matches2           Match[] @relation("User2Matches")
+  sentMessages       ChatMessage[]
+  notifications      Notification[]
+  scheduledNotifications ScheduledNotification[]
+  payments           Payment[]
+  subscriptions      Subscription[]
+  locationCheckIns   LocationCheckIn[]
+  createdGroups      Group[] @relation("GroupCreator")
+
+  @@map("users")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+// Device & Authentication
+model UserDeviceToken {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  platform    String   // 'ios', 'android', 'web'
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_device_tokens")
+}
+
+model FcmToken {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  deviceType  String   // 'ios', 'android'
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("fcm_tokens")
+}
+
+// Company & Verification
+model Company {
+  id          String      @id @default(cuid())
+  name        String
+  domain      String      @unique
+  type        CompanyType
+  isVerified  Boolean     @default(false)
+  logo        String?
+  description String?
+  location    String?
+  createdAt   DateTime    @default(now())
+
+  groups        Group[]
+  verifications CompanyVerification[]
+
+  @@map("companies")
+}
+
+enum CompanyType {
+  COMPANY
+  UNIVERSITY
+  ORGANIZATION
+}
+
+model CompanyVerification {
+  id          String             @id @default(cuid())
+  userId      String
+  companyId   String
+  method      VerificationMethod
+  status      VerificationStatus @default(PENDING)
+  data        Json?              // Flexible field for method-specific data
+  submittedAt DateTime           @default(now())
+  reviewedAt  DateTime?
+  reviewedBy  String?
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("company_verifications")
+}
+
+enum VerificationMethod {
+  EMAIL_DOMAIN
+  OCR_VERIFICATION
+  INVITE_CODE
+  HR_APPROVAL
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+// Groups
+model Group {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  type        GroupType
+  imageUrl    String?
+  isActive    Boolean     @default(true)
+  maxMembers  Int?
+  creatorId   String?
+  companyId   String?
+  settings    Json        // GroupSettings as JSON
+  location    Json?       // GroupLocation as JSON
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  creator       User?            @relation("GroupCreator", fields: [creatorId], references: [id])
+  company       Company?         @relation(fields: [companyId], references: [id])
+  members       GroupMember[]
+  likes         UserLike[]
+  matches       Match[]
+  inviteCodes   InviteCode[]
+  checkIns      LocationCheckIn[]
+
+  @@map("groups")
+}
+
+enum GroupType {
+  OFFICIAL    // Company/University groups
+  CREATED     // User-created groups
+  INSTANCE    // Temporary event groups
+  LOCATION    // Location-based groups
+}
+
+model GroupMember {
+  id        String            @id @default(cuid())
+  userId    String
+  groupId   String
+  role      GroupMemberRole   @default(MEMBER)
+  status    GroupMemberStatus @default(ACTIVE)
+  joinedAt  DateTime          @default(now())
+
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group     Group             @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@map("group_members")
+}
+
+enum GroupMemberRole {
+  MEMBER
+  ADMIN
+  CREATOR
+}
+
+enum GroupMemberStatus {
+  ACTIVE
+  PENDING
+  BANNED
+}
+
+// Invite Codes
+model InviteCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  groupId   String
+  createdBy String
+  maxUses   Int      @default(1)
+  usedCount Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("invite_codes")
+}
+
+// Likes & Matches
+model UserLike {
+  id         String   @id @default(cuid())
+  fromUserId String
+  toUserId   String
+  groupId    String
+  isMatch    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  fromUser   User     @relation("SentLikes", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser     User     @relation("ReceivedLikes", fields: [toUserId], references: [id], onDelete: Cascade)
+  group      Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId, groupId])
+  @@map("user_likes")
+}
+
+model Match {
+  id            String      @id @default(cuid())
+  user1Id       String
+  user2Id       String
+  groupId       String
+  status        MatchStatus @default(ACTIVE)
+  lastMessageAt DateTime?
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+
+  user1     User        @relation("User1Matches", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2     User        @relation("User2Matches", fields: [user2Id], references: [id], onDelete: Cascade)
+  group     Group       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+
+  @@unique([user1Id, user2Id, groupId])
+  @@map("matches")
+}
+
+enum MatchStatus {
+  ACTIVE
+  EXPIRED
+  DELETED
+}
+
+// Chat
+model ChatMessage {
+  id          String          @id @default(cuid())
+  matchId     String
+  senderId    String
+  content     String
+  type        MessageType     @default(TEXT)
+  isEncrypted Boolean         @default(true)
+  readAt      DateTime?
+  createdAt   DateTime        @default(now())
+
+  match       Match           @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  sender      User            @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  SYSTEM
+}
+
+// Payments
+model Payment {
+  id               String        @id @default(cuid())
+  userId           String
+  amount           Int           // Amount in cents/won
+  currency         String        @default("KRW")
+  type             PaymentType
+  status           PaymentStatus @default(PENDING)
+  method           PaymentMethod
+  stripePaymentId  String?
+  metadata         Json?
+  createdAt        DateTime      @default(now())
+
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+enum PaymentType {
+  PREMIUM_SUBSCRIPTION
+  LIKE_CREDITS
+}
+
+// Subscriptions
+model Subscription {
+  id                     String             @id @default(cuid())
+  userId                 String
+  plan                   SubscriptionPlan
+  status                 SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId       String?
+  stripeSubscriptionId   String?
+  currentPeriodStart     DateTime
+  currentPeriodEnd       DateTime
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  user                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+enum SubscriptionPlan {
+  MONTHLY
+  YEARLY
+  LIFETIME
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PENDING
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  KAKAO_PAY
+  TOSS_PAY
+  NAVER_PAY
+}
+
+// Notifications
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model ScheduledNotification {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  body        String
+  data        Json?
+  scheduledAt DateTime
+  sent        Boolean  @default(false)
+  sentAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("scheduled_notifications")
+}
+
+enum NotificationType {
+  LIKE_RECEIVED
+  MATCH_CREATED
+  MESSAGE_RECEIVED
+  GROUP_INVITATION
+  VERIFICATION_APPROVED  
+  VERIFICATION_REJECTED
+  PAYMENT_SUCCESS
+  SUBSCRIPTION_CANCELLED
+}
+
+// Location
+model LocationCheckIn {
+  id        String               @id @default(cuid())
+  userId    String
+  groupId   String
+  latitude  Float
+  longitude Float
+  accuracy  Float
+  method    LocationCheckMethod
+  isValid   Boolean              @default(true)
+  createdAt DateTime             @default(now())
+
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group     Group                @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("location_check_ins")
+}
+
+enum LocationCheckMethod {
+  GPS
+  QR_CODE
+}
+
+// File Storage
+model File {
+  id          String   @id @default(cuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  url         String
+  path        String?
+  uploadedBy  String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("files")
+}
