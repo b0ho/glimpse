@@ -490,4 +490,34 @@ export class OCRService {
       };
     }
   }
+
+  // Method alias for compatibility
+  async processEmployeeCard(imageInput: string | Buffer): Promise<{ companyName?: string; employeeName?: string; confidence: number }> {
+    let imageBuffer: Buffer;
+    
+    if (typeof imageInput === 'string') {
+      // Handle base64 or URL input
+      if (imageInput.startsWith('data:image/')) {
+        const base64Data = imageInput.split(',')[1];
+        imageBuffer = Buffer.from(base64Data, 'base64');
+      } else if (imageInput.startsWith('http')) {
+        // Handle URL - would need to fetch the image
+        throw new Error('URL input not supported yet');
+      } else {
+        // Assume base64
+        imageBuffer = Buffer.from(imageInput, 'base64');
+      }
+    } else {
+      imageBuffer = imageInput;
+    }
+
+    const companyInfo = await this.verifyCompanyCard(imageBuffer);
+    const idInfo = await this.verifyIDCard(imageBuffer);
+    
+    return {
+      companyName: companyInfo.companyName,
+      employeeName: idInfo.name,
+      confidence: Math.min(companyInfo.confidence, idInfo.confidence || 0.5)
+    };
+  }
 }

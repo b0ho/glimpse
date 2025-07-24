@@ -30,6 +30,12 @@ export interface UserUpdateRequest {
   profileImage?: string;
 }
 
+export interface UserResponse extends User {
+  // Additional computed fields for API responses
+  premiumUntil?: Date;
+  deviceTokens?: UserDeviceToken[];
+}
+
 // Group Types
 export interface Group {
   id: string;
@@ -242,4 +248,16 @@ export interface LocationCheckIn {
   method: 'GPS' | 'QR_CODE';
   isValid: boolean;
   createdAt: Date;
+}
+
+// Device Token Types
+export interface UserDeviceToken {
+  id: string;
+  userId: string;
+  deviceId: string;
+  fcmToken: string;
+  platform: 'ios' | 'android' | 'web';
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }

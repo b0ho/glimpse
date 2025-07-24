@@ -1,5 +1,5 @@
 import { apiClient } from './config';
-import { UserResponse, UserCreateRequest, UserUpdateRequest } from '@/types';
+import { UserResponse, UserCreateRequest, UserUpdateRequest } from '@shared/types';
 
 export const userApiService = {
   // 현재 사용자 정보 조회

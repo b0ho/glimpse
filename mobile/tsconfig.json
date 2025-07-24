@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@shared/*": ["../shared/*"]
+    },
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "module": "esnext",
+    "target": "es2020",
+    "lib": ["es2020", "dom", "dom.iterable"],
+    "noEmit": true,
+    "isolatedModules": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../shared/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "../server/**/*",
+    "../tests/**/*",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
+}

@@ -1,5 +1,3 @@
-import { getToken } from '@clerk/clerk-expo';
-
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
 const SOCKET_URL = process.env.EXPO_PUBLIC_SOCKET_URL || 'ws://localhost:8080/api/v1/ws';
 
@@ -13,6 +11,15 @@ interface RequestOptions extends RequestInit {
   params?: Record<string, any>;
 }
 
+// Token storage for cross-service access
+let currentAuthToken: string | null = null;
+
+export const setAuthToken = (token: string | null) => {
+  currentAuthToken = token;
+};
+
+export const getAuthToken = () => currentAuthToken;
+
 class ApiClient {
   private baseURL: string;
 
@@ -22,9 +29,7 @@ class ApiClient {
 
   private async getAuthToken(): Promise<string | null> {
     try {
-      // Get token from Clerk
-      const token = await getToken();
-      return token;
+      return currentAuthToken;
     } catch (error) {
       console.error('Failed to get auth token:', error);
       return null;
@@ -48,9 +53,9 @@ class ApiClient {
     const token = await this.getAuthToken();
 
     // Set up headers
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     };
 
     if (token) {

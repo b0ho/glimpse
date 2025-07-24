@@ -14,7 +14,7 @@ export const TestAPIScreen = () => {
       const data = await response.json();
       setResult(`Health Check: ${JSON.stringify(data, null, 2)}`);
     } catch (error) {
-      setResult(`Health Check Error: ${error.message}`);
+      setResult(`Health Check Error: ${error instanceof Error ? error.message : String(error)}`);
     }
     setLoading(false);
   };
@@ -25,7 +25,7 @@ export const TestAPIScreen = () => {
       const data = await userApiService.getCurrentUser();
       setResult(`User Data: ${JSON.stringify(data, null, 2)}`);
     } catch (error) {
-      setResult(`User API Error: ${error.message}`);
+      setResult(`User API Error: ${error instanceof Error ? error.message : String(error)}`);
     }
     setLoading(false);
   };
@@ -37,7 +37,7 @@ export const TestAPIScreen = () => {
       const data = await response.text();
       setResult(`Public API: ${data}`);
     } catch (error) {
-      setResult(`Public API Error: ${error.message}`);
+      setResult(`Public API Error: ${error instanceof Error ? error.message : String(error)}`);
     }
     setLoading(false);
   };

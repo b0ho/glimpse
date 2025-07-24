@@ -1,7 +1,7 @@
 {
   "name": "glimpse-mobile",
   "version": "0.1.0",
-  "main": "../index.ts",
+  "main": "index.js",
   "description": "Glimpse Dating App - React Native Mobile App",
   "scripts": {
     "start": "expo start",
@@ -17,6 +17,7 @@
   "dependencies": {
     "@clerk/clerk-expo": "^2.14.7",
     "@expo/metro-runtime": "~5.0.4",
+    "@shared/types": "file:../shared",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-navigation/bottom-tabs": "^7.4.2",
     "@react-navigation/native": "^7.1.14",

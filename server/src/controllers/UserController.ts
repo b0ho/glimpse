@@ -5,6 +5,8 @@ import { createError } from '../middleware/errorHandler';
 import { UserService } from '../services/UserService';
 import { LikeService } from '../services/LikeService';
 import { validateNickname, calculateAge } from '@shared/utils';
+import { UserResponse, UserCreateRequest, UserUpdateRequest } from '@shared/types';
+import { prismaUserToUserResponse } from '../utils/typeConverters';
 
 const prisma = new PrismaClient();
 const userService = new UserService();

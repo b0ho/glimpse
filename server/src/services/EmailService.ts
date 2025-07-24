@@ -395,4 +395,82 @@ export class EmailService {
 
     return { sent, failed };
   }
+
+  // Method aliases for compatibility
+  async sendVerificationEmail(email: string, verificationCode: string, companyName: string): Promise<boolean> {
+    return this.sendCompanyVerificationEmail({
+      userEmail: email,
+      companyName,
+      verificationCode,
+      expiresInMinutes: 30
+    });
+  }
+
+  async sendHrApprovalRequest(
+    supervisorEmail: string,
+    employeeId: string,
+    department: string,
+    position: string,
+    companyName: string
+  ): Promise<boolean> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>직원 인증 승인 요청</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { text-align: center; margin-bottom: 30px; }
+          .logo { font-size: 24px; font-weight: bold; color: #007AFF; }
+          .content { background: #f8f9fa; padding: 30px; border-radius: 8px; margin: 20px 0; }
+          .employee-info { background: white; padding: 20px; border-radius: 6px; margin: 20px 0; }
+          .button { display: inline-block; padding: 12px 24px; background: #28a745; color: white; text-decoration: none; border-radius: 6px; margin: 10px 5px; }
+          .button.reject { background: #dc3545; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">📱 Glimpse</div>
+            <h1>직원 인증 승인 요청</h1>
+          </div>
+          
+          <div class="content">
+            <p>안녕하세요,</p>
+            <p>Glimpse 앱에서 ${companyName} 직원 인증 요청이 접수되었습니다.</p>
+            
+            <div class="employee-info">
+              <h3>직원 정보</h3>
+              <p><strong>사번:</strong> ${employeeId}</p>
+              <p><strong>부서:</strong> ${department}</p>
+              <p><strong>직급:</strong> ${position || '미기재'}</p>
+              <p><strong>요청 시간:</strong> ${new Date().toLocaleString('ko-KR')}</p>
+            </div>
+            
+            <p>해당 직원이 귀하의 회사에 소속되어 있는지 확인 후 승인 또는 거부해주세요.</p>
+            
+            <div style="text-align: center;">
+              <a href="#" class="button">승인하기</a>
+              <a href="#" class="button reject">거부하기</a>
+            </div>
+          </div>
+          
+          <div class="footer">
+            <p>문의: support@glimpse.app</p>
+            <p>© 2025 Glimpse. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    return await this.sendEmail({
+      to: supervisorEmail,
+      subject: `[Glimpse] ${companyName} 직원 인증 승인 요청`,
+      html
+    });
+  }
 }

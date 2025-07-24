@@ -238,6 +238,11 @@ export class CompanyVerificationService {
   }
 
   async rejectVerification(verificationId: string, reviewerId: string, reason?: string) {
+    // First get the existing verification to access its data
+    const existingVerification = await prisma.companyVerification.findUnique({
+      where: { id: verificationId }
+    });
+
     const verification = await prisma.companyVerification.update({
       where: { id: verificationId },
       data: {
@@ -245,7 +250,7 @@ export class CompanyVerificationService {
         reviewedAt: new Date(),
         reviewedBy: reviewerId,
         data: {
-          ...(verification.data as any || {}),
+          ...(existingVerification?.data as any || {}),
           rejectionReason: reason
         }
       },
