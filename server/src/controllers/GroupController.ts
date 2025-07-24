@@ -1,0 +1,429 @@
+import { Response, NextFunction } from 'express';
+import { PrismaClient } from '@prisma/client';
+import { AuthRequest } from '../middleware/auth';
+import { createError } from '../middleware/errorHandler';
+import { GroupService } from '../services/GroupService';
+import { CompanyVerificationService } from '../services/CompanyVerificationService';
+import { LocationService } from '../services/LocationService';
+
+const prisma = new PrismaClient();
+const groupService = new GroupService();
+const companyVerificationService = new CompanyVerificationService();
+const locationService = new LocationService();
+
+export class GroupController {
+  async getGroups(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.id;
+      const { type, search, page = 1, limit = 20 } = req.query;
+
+      const groups = await groupService.getGroups({
+        userId,
+        type: type as any,
+        search: search as string,
+        page: parseInt(page as string),
+        limit: parseInt(limit as string)
+      });
+
+      res.json({
+        success: true,
+        data: groups
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async createGroup(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.id;
+      const { name, description, type, settings, location, companyId } = req.body;
+
+      if (!name || !type) {
+        throw createError(400, '그룹 이름과 타입이 필요합니다.');
+      }
+
+      // Validate user can create this type of group
+      if (type === 'OFFICIAL' && !companyId) {
+        throw createError(400, '공식 그룹은 회사 인증이 필요합니다.');
+      }
+
+      if (type === 'OFFICIAL') {
+        const isVerified = await companyVerificationService.isUserVerifiedForCompany(userId, companyId);
+        if (!isVerified) {
+          throw createError(403, '해당 회사에 대한 인증이 필요합니다.');
+        }
+      }
+
+      const group = await groupService.createGroup({
+        name,
+        description,
+        type,
+        settings: settings || {},
+        location,
+        companyId,
+        creatorId: userId
+      });
+
+      res.json({
+        success: true,
+        data: group
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getGroupById(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId } = req.params;
+      const userId = req.user!.id;
+
+      const group = await groupService.getGroupById(groupId, userId);
+
+      if (!group) {
+        throw createError(404, '그룹을 찾을 수 없습니다.');
+      }
+
+      res.json({
+        success: true,
+        data: group
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateGroup(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId } = req.params;
+      const userId = req.user!.id;
+      const updateData = req.body;
+
+      // Check if user has permission to update
+      const membership = await prisma.groupMember.findFirst({
+        where: {
+          groupId,
+          userId,
+          role: { in: ['ADMIN', 'CREATOR'] },
+          status: 'ACTIVE'
+        }
+      });
+
+      if (!membership) {
+        throw createError(403, '그룹을 수정할 권한이 없습니다.');
+      }
+
+      const group = await groupService.updateGroup(groupId, updateData);
+
+      res.json({
+        success: true,
+        data: group
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteGroup(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId } = req.params;
+      const userId = req.user!.id;
+
+      // Check if user is the creator
+      const group = await prisma.group.findUnique({
+        where: { id: groupId },
+        select: { creatorId: true }
+      });
+
+      if (!group || group.creatorId !== userId) {
+        throw createError(403, '그룹을 삭제할 권한이 없습니다.');
+      }
+
+      await groupService.deleteGroup(groupId);
+
+      res.json({
+        success: true,
+        data: { message: '그룹이 삭제되었습니다.' }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async joinGroup(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId } = req.params;
+      const userId = req.user!.id;
+
+      const result = await groupService.joinGroup(userId, groupId);
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async leaveGroup(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId } = req.params;
+      const userId = req.user!.id;
+
+      await groupService.leaveGroup(userId, groupId);
+
+      res.json({
+        success: true,
+        data: { message: '그룹에서 나갔습니다.' }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getGroupMembers(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId } = req.params;
+      const userId = req.user!.id;
+      const { page = 1, limit = 50 } = req.query;
+
+      // Check if user is member of the group
+      const membership = await prisma.groupMember.findFirst({
+        where: { groupId, userId, status: 'ACTIVE' }
+      });
+
+      if (!membership) {
+        throw createError(403, '그룹 멤버만 멤버 목록을 볼 수 있습니다.');
+      }
+
+      const members = await groupService.getGroupMembers(
+        groupId,
+        parseInt(page as string),
+        parseInt(limit as string)
+      );
+
+      res.json({
+        success: true,
+        data: members
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async inviteToGroup(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId } = req.params;
+      const { phoneNumbers } = req.body;
+      const userId = req.user!.id;
+
+      if (!phoneNumbers || !Array.isArray(phoneNumbers)) {
+        throw createError(400, '초대할 전화번호 목록이 필요합니다.');
+      }
+
+      // Check if user has permission to invite
+      const membership = await prisma.groupMember.findFirst({
+        where: {
+          groupId,
+          userId,
+          role: { in: ['ADMIN', 'CREATOR'] },
+          status: 'ACTIVE'
+        }
+      });
+
+      if (!membership) {
+        throw createError(403, '멤버를 초대할 권한이 없습니다.');
+      }
+
+      const result = await groupService.inviteUsersToGroup(groupId, phoneNumbers, userId);
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateMemberRole(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId, userId: targetUserId } = req.params;
+      const { role } = req.body;
+      const userId = req.user!.id;
+
+      if (!['MEMBER', 'ADMIN'].includes(role)) {
+        throw createError(400, '유효하지 않은 역할입니다.');
+      }
+
+      // Check if user has permission
+      const membership = await prisma.groupMember.findFirst({
+        where: {
+          groupId,
+          userId,
+          role: { in: ['ADMIN', 'CREATOR'] },
+          status: 'ACTIVE'
+        }
+      });
+
+      if (!membership) {
+        throw createError(403, '멤버 역할을 변경할 권한이 없습니다.');
+      }
+
+      await prisma.groupMember.update({
+        where: {
+          userId_groupId: {
+            userId: targetUserId,
+            groupId
+          }
+        },
+        data: { role }
+      });
+
+      res.json({
+        success: true,
+        data: { message: '멤버 역할이 변경되었습니다.' }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async removeMember(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId, userId: targetUserId } = req.params;
+      const userId = req.user!.id;
+
+      // Check if user has permission
+      const membership = await prisma.groupMember.findFirst({
+        where: {
+          groupId,
+          userId,
+          role: { in: ['ADMIN', 'CREATOR'] },
+          status: 'ACTIVE'
+        }
+      });
+
+      if (!membership) {
+        throw createError(403, '멤버를 제거할 권한이 없습니다.');
+      }
+
+      await prisma.groupMember.update({
+        where: {
+          userId_groupId: {
+            userId: targetUserId,
+            groupId
+          }
+        },
+        data: { status: 'BANNED' }
+      });
+
+      res.json({
+        success: true,
+        data: { message: '멤버가 제거되었습니다.' }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async locationCheckIn(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId } = req.params;
+      const { latitude, longitude, accuracy, method = 'GPS' } = req.body;
+      const userId = req.user!.id;
+
+      if (!latitude || !longitude) {
+        throw createError(400, '위치 정보가 필요합니다.');
+      }
+
+      const result = await locationService.checkIn(userId, groupId, {
+        latitude,
+        longitude,
+        accuracy: accuracy || 100,
+        method
+      });
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getCheckIns(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId } = req.params;
+      const userId = req.user!.id;
+      const { page = 1, limit = 20 } = req.query;
+
+      const checkIns = await locationService.getCheckIns(
+        groupId,
+        parseInt(page as string),
+        parseInt(limit as string)
+      );
+
+      res.json({
+        success: true,
+        data: checkIns
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async createInviteCode(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { groupId } = req.params;
+      const { maxUses = 1, expiresInHours = 24 } = req.body;
+      const userId = req.user!.id;
+
+      // Check if user has permission
+      const membership = await prisma.groupMember.findFirst({
+        where: {
+          groupId,
+          userId,
+          role: { in: ['ADMIN', 'CREATOR'] },
+          status: 'ACTIVE'
+        }
+      });
+
+      if (!membership) {
+        throw createError(403, '초대 코드를 생성할 권한이 없습니다.');
+      }
+
+      const inviteCode = await groupService.createInviteCode(groupId, userId, maxUses, expiresInHours);
+
+      res.json({
+        success: true,
+        data: inviteCode
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async joinByInviteCode(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { code } = req.body;
+      const userId = req.user!.id;
+
+      if (!code) {
+        throw createError(400, '초대 코드가 필요합니다.');
+      }
+
+      const result = await groupService.joinByInviteCode(userId, code);
+
+      res.json({
+        success: true,  
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+}

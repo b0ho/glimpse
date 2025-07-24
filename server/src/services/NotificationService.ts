@@ -1,0 +1,307 @@
+import { PrismaClient, NotificationType } from '@prisma/client';
+import { createError } from '../middleware/errorHandler';
+import { FirebaseService } from './FirebaseService';
+import { NOTIFICATION_TYPES } from '@shared/constants';
+
+const prisma = new PrismaClient();
+const firebaseService = new FirebaseService();
+
+export class NotificationService {
+  async sendLikeNotification(userId: string, fromUserId: string, groupId: string) {
+    try {
+      const [toUser, fromUser, group] = await Promise.all([
+        prisma.user.findUnique({ where: { id: userId } }),
+        prisma.user.findUnique({ where: { id: fromUserId } }),
+        prisma.group.findUnique({ where: { id: groupId } })
+      ]);
+
+      if (!toUser || !fromUser || !group) return;
+
+      // Create notification record
+      const notification = await prisma.notification.create({
+        data: {
+          userId,
+          type: 'LIKE_RECEIVED',
+          title: NOTIFICATION_TYPES.LIKE_RECEIVED.title,
+          message: `${group.name}에서 누군가 당신을 좋아합니다!`,
+          data: {
+            fromUserId,
+            groupId,
+            groupName: group.name
+          }
+        }
+      });
+
+      // Send push notification
+      await this.sendPushNotification(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: {
+          type: 'LIKE_RECEIVED',
+          notificationId: notification.id,
+          fromUserId,
+          groupId
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Failed to send like notification:', error);
+    }
+  }
+
+  async sendMatchNotification(userId: string, matchedUserId: string, matchId: string) {
+    try {
+      const [user, matchedUser] = await Promise.all([
+        prisma.user.findUnique({ where: { id: userId } }),
+        prisma.user.findUnique({ where: { id: matchedUserId } })
+      ]);
+
+      if (!user || !matchedUser) return;
+
+      const notification = await prisma.notification.create({
+        data: {
+          userId,
+          type: 'MATCH_CREATED',
+          title: NOTIFICATION_TYPES.MATCH_CREATED.title,
+          message: `${matchedUser.nickname || '익명의 사용자'}님과 매치되었습니다!`,
+          data: {
+            matchId,
+            matchedUserId,
+            matchedUserNickname: matchedUser.nickname
+          }
+        }
+      });
+
+      await this.sendPushNotification(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: {
+          type: 'MATCH_CREATED',
+          notificationId: notification.id,
+          matchId,
+          matchedUserId
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Failed to send match notification:', error);
+    }
+  }
+
+  async sendMessageNotification(userId: string, fromUserId: string, matchId: string, messagePreview: string) {
+    try {
+      const fromUser = await prisma.user.findUnique({ where: { id: fromUserId } });
+      if (!fromUser) return;
+
+      const notification = await prisma.notification.create({
+        data: {
+          userId,
+          type: 'MESSAGE_RECEIVED',
+          title: `${fromUser.nickname || '매치된 사용자'}님의 메시지`,
+          message: messagePreview.length > 50 ? `${messagePreview.substring(0, 50)}...` : messagePreview,
+          data: {
+            fromUserId,
+            matchId,
+            fromUserNickname: fromUser.nickname
+          }
+        }
+      });
+
+      await this.sendPushNotification(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: {
+          type: 'MESSAGE_RECEIVED',
+          notificationId: notification.id,
+          matchId,
+          fromUserId
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Failed to send message notification:', error);
+    }
+  }
+
+  async sendGroupInvitationNotification(userId: string, groupId: string, invitedBy: string) {
+    try {
+      const [group, inviter] = await Promise.all([
+        prisma.group.findUnique({ where: { id: groupId } }),
+        prisma.user.findUnique({ where: { id: invitedBy } })
+      ]);
+
+      if (!group || !inviter) return;
+
+      const notification = await prisma.notification.create({
+        data: {
+          userId,
+          type: 'GROUP_INVITATION',
+          title: NOTIFICATION_TYPES.GROUP_INVITATION.title,
+          message: `${inviter.nickname || '사용자'}님이 "${group.name}" 그룹에 초대했습니다.`,
+          data: {
+            groupId,
+            groupName: group.name,
+            invitedBy,
+            inviterNickname: inviter.nickname
+          }
+        }
+      });
+
+      await this.sendPushNotification(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: {
+          type: 'GROUP_INVITATION',
+          notificationId: notification.id,
+          groupId,
+          invitedBy
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Failed to send group invitation notification:', error);
+    }
+  }
+
+  async sendVerificationStatusNotification(userId: string, isApproved: boolean, companyName: string) {
+    try {
+      const type = isApproved ? 'VERIFICATION_APPROVED' : 'VERIFICATION_REJECTED';
+      const config = NOTIFICATION_TYPES[type];
+
+      const notification = await prisma.notification.create({
+        data: {
+          userId,
+          type,
+          title: config.title,
+          message: isApproved 
+            ? `${companyName} 인증이 승인되었습니다!`
+            : `${companyName} 인증이 거절되었습니다.`,
+          data: {
+            companyName,
+            isApproved
+          }
+        }
+      });
+
+      await this.sendPushNotification(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: {
+          type,
+          notificationId: notification.id,
+          companyName
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Failed to send verification status notification:', error);
+    }
+  }
+
+  async getUserNotifications(userId: string, page: number = 1, limit: number = 20) {
+    const notifications = await prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit
+    });
+
+    return notifications;
+  }
+
+  async markAsRead(notificationId: string, userId: string) {
+    const notification = await prisma.notification.findFirst({
+      where: { id: notificationId, userId }
+    });
+
+    if (!notification) {
+      throw createError(404, '알림을 찾을 수 없습니다.');
+    }
+
+    await prisma.notification.update({
+      where: { id: notificationId },
+      data: { isRead: true }
+    });
+
+    return { message: '알림을 읽음으로 표시했습니다.' };
+  }
+
+  async markAllAsRead(userId: string) {
+    await prisma.notification.updateMany({
+      where: { userId, isRead: false },
+      data: { isRead: true }
+    });
+
+    return { message: '모든 알림을 읽음으로 표시했습니다.' };
+  }
+
+  async getUnreadCount(userId: string): Promise<number> {
+    return await prisma.notification.count({
+      where: { userId, isRead: false }
+    });
+  }
+
+  private async sendPushNotification(userId: string, payload: any) {
+    try {
+      // Get user's device tokens
+      const deviceTokens = await prisma.userDeviceToken.findMany({
+        where: { userId, isActive: true },
+        select: { token: true, platform: true }
+      });
+
+      if (deviceTokens.length === 0) return;
+
+      // Send to all user devices
+      const promises = deviceTokens.map(device => 
+        firebaseService.sendNotification(device.token, payload, device.platform)
+      );
+
+      await Promise.allSettled(promises);
+    } catch (error) {
+      console.error('Failed to send push notification:', error);
+    }
+  }
+
+  async deleteNotification(notificationId: string, userId: string) {
+    const notification = await prisma.notification.findFirst({
+      where: { id: notificationId, userId }
+    });
+
+    if (!notification) {
+      throw createError(404, '알림을 찾을 수 없습니다.');
+    }
+
+    await prisma.notification.delete({
+      where: { id: notificationId }
+    });
+
+    return { message: '알림이 삭제되었습니다.' };
+  }
+
+  async updateDeviceToken(userId: string, token: string, platform: string) {
+    // Deactivate old tokens for this platform
+    await prisma.userDeviceToken.updateMany({
+      where: { userId, platform },
+      data: { isActive: false }
+    });
+
+    // Create or update new token
+    await prisma.userDeviceToken.upsert({
+      where: { token },
+      update: { isActive: true, updatedAt: new Date() },
+      create: {
+        userId,
+        token,
+        platform,
+        isActive: true
+      }
+    });
+
+    return { message: '디바이스 토큰이 업데이트되었습니다.' };
+  }
+}
