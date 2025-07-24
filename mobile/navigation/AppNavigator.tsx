@@ -17,6 +17,9 @@ import { CreateGroupScreen } from '@/screens/CreateGroupScreen';
 import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
 import { ChatScreen } from '@/screens/ChatScreen';
 import { PremiumScreen } from '@/screens/PremiumScreen';
+import { LocationGroupScreen } from '@/screens/LocationGroupScreen';
+import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen';
+import { MapScreen } from '@/screens/MapScreen';
 import NotificationSettingsScreen from '@/screens/NotificationSettingsScreen';
 import { WhoLikesYouScreen } from '@/screens/WhoLikesYouScreen';
 // import { RootStackParamList } from '@/types';
@@ -34,6 +37,9 @@ type HomeStackParamList = {
 type GroupsStackParamList = {
   GroupsTab: undefined;
   CreateGroup: undefined;
+  LocationGroup: undefined;
+  NearbyUsers: undefined;
+  Map: undefined;
 };
 
 type ProfileStackParamList = {
@@ -151,6 +157,30 @@ function GroupsStackNavigator() {
           title: '새 그룹 만들기',
           headerShown: true,
           presentation: 'modal',
+        }}
+      />
+      <GroupsStack.Screen 
+        name="LocationGroup" 
+        component={LocationGroupScreen} 
+        options={{ 
+          title: '위치 기반 그룹',
+          headerShown: false,
+        }}
+      />
+      <GroupsStack.Screen 
+        name="NearbyUsers" 
+        component={NearbyUsersScreen} 
+        options={{ 
+          title: '근처 사용자',
+          headerShown: false,
+        }}
+      />
+      <GroupsStack.Screen 
+        name="Map" 
+        component={MapScreen} 
+        options={{ 
+          title: '지도',
+          headerShown: false,
         }}
       />
     </GroupsStack.Navigator>
