@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { getAuth } from '@clerk/nextjs/server';
 import { UserResponse, UserCreateRequest } from '@shared/types';
 
 const prisma = new PrismaClient();
 
 // Convert Prisma User to shared UserResponse type
-function prismaUserToUserResponse(prismaUser: any): UserResponse {
+function prismaUserToUserResponse(prismaUser: User): UserResponse {
   return {
     id: prismaUser.clerkId,
     phoneNumber: prismaUser.phoneNumber || '',

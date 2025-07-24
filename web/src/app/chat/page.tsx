@@ -1,7 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSocket } from '@/hooks/useSocket';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ChatMessage {
   id: string;
@@ -18,6 +24,7 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState('');
   const [matchId] = useState('test-match-123');
   const [userId] = useState('user-' + Math.random().toString(36).substr(2, 9));
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (socket) {
@@ -34,6 +41,13 @@ export default function ChatPage() {
       };
     }
   }, [socket, joinChat, matchId]);
+
+  useEffect(() => {
+    // 새 메시지가 왔을 때 스크롤 맨 아래로
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const handleSendMessage = () => {
     if (newMessage.trim() && socket) {
@@ -64,82 +78,112 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-white shadow-sm p-4">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-800">💬 Glimpse Chat Test</h1>
-          <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            <span className="text-sm text-gray-600">
-              {isConnected ? '연결됨' : '연결 끊김'}
-            </span>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex-1 max-w-2xl mx-auto w-full p-4">
-        <div className="bg-white rounded-lg shadow-sm h-96 flex flex-col">
-          {/* 메시지 영역 */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3">
-            {messages.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
-                메시지가 없습니다. 첫 번째 메시지를 보내보세요!
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 p-4">
+      <div className="max-w-2xl mx-auto">
+        <Card className="h-[80vh] flex flex-col">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>💬 Glimpse Chat</CardTitle>
+                <CardDescription>실시간 채팅 테스트</CardDescription>
               </div>
-            ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.senderId === userId ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                      message.senderId === userId
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-200 text-gray-800'
-                    }`}
-                  >
-                    <div className="text-sm">{message.content}</div>
-                    <div className={`text-xs mt-1 ${
-                      message.senderId === userId ? 'text-blue-100' : 'text-gray-500'
-                    }`}>
-                      {new Date(message.timestamp).toLocaleTimeString('ko-KR')}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+              <Badge variant={isConnected ? 'default' : 'destructive'}>
+                {isConnected ? '● 연결됨' : '● 연결 끊김'}
+              </Badge>
+            </div>
+          </CardHeader>
 
-          {/* 입력 영역 */}
-          <div className="border-t p-4">
-            <div className="flex space-x-2">
-              <input
-                type="text"
+          <CardContent className="flex-1 p-0 overflow-hidden">
+            <ScrollArea className="h-full px-4" ref={scrollAreaRef}>
+              <div className="space-y-4 py-4">
+                {messages.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-12">
+                    메시지가 없습니다. 첫 번째 메시지를 보내보세요!
+                  </div>
+                ) : (
+                  messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex gap-2 ${
+                        message.senderId === userId ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      {message.senderId !== userId && (
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>
+                            {message.senderId.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                      
+                      <div
+                        className={`group relative max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                          message.senderId === userId
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        }`}
+                      >
+                        <div className="text-sm break-words">{message.content}</div>
+                        <div
+                          className={`text-xs mt-1 ${
+                            message.senderId === userId
+                              ? 'text-primary-foreground/70'
+                              : 'text-muted-foreground'
+                          }`}
+                        >
+                          {new Date(message.timestamp).toLocaleTimeString('ko-KR')}
+                        </div>
+                      </div>
+
+                      {message.senderId === userId && (
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-primary text-primary-foreground">
+                            나
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </CardContent>
+
+          <CardFooter className="border-t p-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="flex w-full gap-2"
+            >
+              <Input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="메시지를 입력하세요..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={!isConnected}
+                className="flex-1"
               />
-              <button
-                onClick={handleSendMessage}
+              <Button
+                type="submit"
                 disabled={!isConnected || !newMessage.trim()}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 전송
-              </button>
+              </Button>
+            </form>
+          </CardFooter>
+        </Card>
+
+        <Card className="mt-4 p-4">
+          <div className="text-sm text-muted-foreground space-y-1 text-center">
+            <div>Match ID: <span className="font-mono">{matchId}</span></div>
+            <div>User ID: <span className="font-mono">{userId.slice(0, 8)}...</span></div>
+            <div className="pt-2">
+              💡 새 브라우저 탭을 열어서 실시간 채팅을 테스트해보세요!
             </div>
           </div>
-        </div>
-
-        <div className="mt-4 text-center text-sm text-gray-600">
-          <div>Match ID: {matchId}</div>
-          <div>User ID: {userId}</div>
-          <div className="mt-2">
-            💡 새 브라우저 탭을 열어서 실시간 채팅을 테스트해보세요!
-          </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
