@@ -123,6 +123,10 @@ export class UserController {
       const { userId } = req.params;
       const requesterId = req.user!.id;
 
+      if (!userId) {
+        throw createError(400, '사용자 ID가 필요합니다.');
+      }
+
       const user = await prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -147,7 +151,7 @@ export class UserController {
         success: true,
         data: canViewDetails ? user : {
           id: user.id,
-          nickname: user.nickname ? user.nickname.charAt(0) + '*'.repeat(user.nickname.length - 1) : null,
+          nickname: user.nickname ? user.nickname.charAt(0) + '*'.repeat(user.nickname.length - 1) : '',
           age: user.age,
           gender: user.gender
         }
@@ -338,7 +342,7 @@ export class UserController {
         where: { id: userId },
         data: {
           phoneNumber: `deleted_${Date.now()}`,
-          nickname: null,
+          nickname: 'deleted_user',
           profileImage: null,
           bio: null,
           isVerified: false,

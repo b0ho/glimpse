@@ -20,7 +20,8 @@ export const errorHandler = (
       error: {
         message,
         stack: error.stack,
-        ...error
+        statusCode: error.statusCode,
+        isOperational: error.isOperational
       }
     });
   }

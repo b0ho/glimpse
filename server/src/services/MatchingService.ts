@@ -199,7 +199,7 @@ export class MatchingService {
             status: 'ACTIVE'
           }
         },
-        nickname: { not: null },
+        nickname: { not: 'deleted_user' },
         age: { not: null },
         gender: { not: null }
       },
@@ -221,7 +221,7 @@ export class MatchingService {
         ...user,
         compatibilityScore: this.calculateAdvancedCompatibilityScore(currentUser, user),
         // Anonymize until liked
-        nickname: user.nickname?.charAt(0) + '*'.repeat((user.nickname?.length || 1) - 1),
+        nickname: user.nickname ? user.nickname.charAt(0) + '*'.repeat(user.nickname.length - 1) : '',
         bio: null // Hide bio until matched
       }))
       .sort((a, b) => b.compatibilityScore - a.compatibilityScore)

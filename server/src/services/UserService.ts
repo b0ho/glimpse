@@ -34,7 +34,7 @@ export class UserService {
             status: 'ACTIVE'
           }
         },
-        nickname: { not: null },
+        nickname: { not: 'deleted_user' },
         age: { not: null },
         gender: { not: null }
       },
@@ -56,7 +56,7 @@ export class UserService {
       ...user,
       compatibilityScore: this.calculateCompatibilityScore(currentUser, user),
       // Anonymize data until matched
-      nickname: user.nickname?.charAt(0) + '*'.repeat((user.nickname?.length || 1) - 1)
+      nickname: user.nickname ? user.nickname.charAt(0) + '*'.repeat(user.nickname.length - 1) : ''
     })).sort((a, b) => b.compatibilityScore - a.compatibilityScore);
 
     return recommendations;

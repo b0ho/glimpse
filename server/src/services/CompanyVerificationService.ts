@@ -245,7 +245,7 @@ export class CompanyVerificationService {
         reviewedAt: new Date(),
         reviewedBy: reviewerId,
         data: {
-          ...verification.data,
+          ...(verification.data as any || {}),
           rejectionReason: reason
         }
       },

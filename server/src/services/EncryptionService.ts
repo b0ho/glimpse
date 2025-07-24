@@ -20,7 +20,7 @@ export class EncryptionService {
   async encrypt(text: string): Promise<string> {
     try {
       const iv = crypto.randomBytes(this.ivLength);
-      const cipher = crypto.createCipher(this.algorithm, this.secretKey);
+      const cipher = crypto.createCipherGCM(this.algorithm, this.secretKey, iv);
       cipher.setAAD(Buffer.from('glimpse-aad'));
 
       let encrypted = cipher.update(text, 'utf8', 'hex');
@@ -47,7 +47,7 @@ export class EncryptionService {
       const iv = Buffer.from(ivHex, 'hex');
       const tag = Buffer.from(tagHex, 'hex');
 
-      const decipher = crypto.createDecipher(this.algorithm, this.secretKey);
+      const decipher = crypto.createDecipherGCM(this.algorithm, this.secretKey, iv);
       decipher.setAAD(Buffer.from('glimpse-aad'));
       decipher.setAuthTag(tag);
 
@@ -97,7 +97,7 @@ export class EncryptionService {
     const key = crypto.randomBytes(this.keyLength);
     const iv = crypto.randomBytes(this.ivLength);
     
-    const cipher = crypto.createCipher(this.algorithm, key);
+    const cipher = crypto.createCipherGCM(this.algorithm, key, iv);
     const encrypted = Buffer.concat([cipher.update(buffer), cipher.final()]);
     
     return {
@@ -111,7 +111,7 @@ export class EncryptionService {
     const key = Buffer.from(keyHex, 'hex');
     const iv = Buffer.from(ivHex, 'hex');
     
-    const decipher = crypto.createDecipher(this.algorithm, key);
+    const decipher = crypto.createDecipherGCM(this.algorithm, key, iv);
     const decrypted = Buffer.concat([decipher.update(encryptedBuffer), decipher.final()]);
     
     return decrypted;

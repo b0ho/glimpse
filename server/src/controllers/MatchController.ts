@@ -12,7 +12,11 @@ const matchingStatsService = new MatchingStatisticsService();
 export class MatchController {
   async getMatches(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.user.id;
       const { status = 'ACTIVE', page = 1, limit = 20 } = req.query;
 
       const matches = await matchingService.getUserMatches(
@@ -33,8 +37,16 @@ export class MatchController {
 
   async getMatchById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
       const { matchId } = req.params;
-      const userId = req.user!.id;
+      const userId = req.user.id;
+      
+      if (!matchId) {
+        throw createError(400, '매치 ID가 필요합니다.');
+      }
 
       const match = await matchingService.getMatchById(matchId, userId);
 
@@ -53,8 +65,16 @@ export class MatchController {
 
   async deleteMatch(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
       const { matchId } = req.params;
-      const userId = req.user!.id;
+      const userId = req.user.id;
+      
+      if (!matchId) {
+        throw createError(400, '매치 ID가 필요합니다.');
+      }
 
       await matchingService.deleteMatch(matchId, userId);
 
@@ -69,7 +89,11 @@ export class MatchController {
 
   async getMatchStats(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.user.id;
 
       const stats = await matchingStatsService.getUserMatchingStatistics(userId);
 
@@ -84,7 +108,11 @@ export class MatchController {
 
   async getRecommendations(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.user.id;
       const { groupId, count = 10 } = req.query;
 
       if (!groupId) {
@@ -108,9 +136,17 @@ export class MatchController {
 
   async reportMatch(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
       const { matchId } = req.params;
       const { reason, description } = req.body;
-      const userId = req.user!.id;
+      const userId = req.user.id;
+      
+      if (!matchId) {
+        throw createError(400, '매치 ID가 필요합니다.');
+      }
 
       if (!reason) {
         throw createError(400, '신고 사유가 필요합니다.');
@@ -129,8 +165,16 @@ export class MatchController {
 
   async extendMatch(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
       const { matchId } = req.params;
-      const userId = req.user!.id;
+      const userId = req.user.id;
+      
+      if (!matchId) {
+        throw createError(400, '매치 ID가 필요합니다.');
+      }
 
       // Check if user is premium
       const user = await prisma.user.findUnique({
@@ -155,7 +199,11 @@ export class MatchController {
 
   async getMatchingHistory(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.user.id;
       const { page = 1, limit = 20, groupId } = req.query;
 
       const history = await matchingService.getMatchingHistory(
@@ -176,8 +224,16 @@ export class MatchController {
 
   async getMutualConnections(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
       const { matchId } = req.params;
-      const userId = req.user!.id;
+      const userId = req.user.id;
+      
+      if (!matchId) {
+        throw createError(400, '매치 ID가 필요합니다.');
+      }
 
       const connections = await matchingService.getMutualConnections(matchId, userId);
 

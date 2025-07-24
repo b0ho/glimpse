@@ -14,7 +14,11 @@ const locationService = new LocationService();
 export class GroupController {
   async getGroups(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      const userId = req.user.id;
       const { type, search, page = 1, limit = 20 } = req.query;
 
       const groups = await groupService.getGroups({
@@ -36,7 +40,11 @@ export class GroupController {
 
   async createGroup(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      const userId = req.user.id;
       const { name, description, type, settings, location, companyId } = req.body;
 
       if (!name || !type) {
@@ -77,7 +85,16 @@ export class GroupController {
   async getGroupById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       const group = await groupService.getGroupById(groupId, userId);
 
@@ -97,7 +114,16 @@ export class GroupController {
   async updateGroup(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
       const updateData = req.body;
 
       // Check if user has permission to update
@@ -128,7 +154,16 @@ export class GroupController {
   async deleteGroup(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       // Check if user is the creator
       const group = await prisma.group.findUnique({
@@ -154,7 +189,16 @@ export class GroupController {
   async joinGroup(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       const result = await groupService.joinGroup(userId, groupId);
 
@@ -170,7 +214,16 @@ export class GroupController {
   async leaveGroup(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       await groupService.leaveGroup(userId, groupId);
 
@@ -186,7 +239,16 @@ export class GroupController {
   async getGroupMembers(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
       const { page = 1, limit = 50 } = req.query;
 
       // Check if user is member of the group
@@ -217,7 +279,16 @@ export class GroupController {
     try {
       const { groupId } = req.params;
       const { phoneNumbers } = req.body;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       if (!phoneNumbers || !Array.isArray(phoneNumbers)) {
         throw createError(400, '초대할 전화번호 목록이 필요합니다.');
@@ -252,7 +323,20 @@ export class GroupController {
     try {
       const { groupId, userId: targetUserId } = req.params;
       const { role } = req.body;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      if (!targetUserId) {
+        throw createError(400, '사용자 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       if (!['MEMBER', 'ADMIN'].includes(role)) {
         throw createError(400, '유효하지 않은 역할입니다.');
@@ -294,7 +378,20 @@ export class GroupController {
   async removeMember(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId, userId: targetUserId } = req.params;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      if (!targetUserId) {
+        throw createError(400, '사용자 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       // Check if user has permission
       const membership = await prisma.groupMember.findFirst({
@@ -333,7 +430,16 @@ export class GroupController {
     try {
       const { groupId } = req.params;
       const { latitude, longitude, accuracy, method = 'GPS' } = req.body;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       if (!latitude || !longitude) {
         throw createError(400, '위치 정보가 필요합니다.');
@@ -358,7 +464,16 @@ export class GroupController {
   async getCheckIns(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
       const { page = 1, limit = 20 } = req.query;
 
       const checkIns = await locationService.getCheckIns(
@@ -380,7 +495,16 @@ export class GroupController {
     try {
       const { groupId } = req.params;
       const { maxUses = 1, expiresInHours = 24 } = req.body;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!groupId) {
+        throw createError(400, '그룹 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       // Check if user has permission
       const membership = await prisma.groupMember.findFirst({
@@ -410,7 +534,12 @@ export class GroupController {
   async joinByInviteCode(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { code } = req.body;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       if (!code) {
         throw createError(400, '초대 코드가 필요합니다.');

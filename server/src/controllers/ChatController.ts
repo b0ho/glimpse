@@ -17,7 +17,16 @@ export class ChatController {
     try {
       const { matchId } = req.params;
       const { page = 1, limit = 50 } = req.query;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!matchId) {
+        throw createError(400, '매치 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       // Verify user is part of this match
       const match = await prisma.match.findUnique({
@@ -51,7 +60,16 @@ export class ChatController {
     try {
       const { matchId } = req.params;
       const { content, type = 'TEXT' } = req.body;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!matchId) {
+        throw createError(400, '매치 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       if (!content || content.trim().length === 0) {
         throw createError(400, '메시지 내용이 필요합니다.');
@@ -118,7 +136,16 @@ export class ChatController {
   async markAsRead(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.params;
-      const userId = req.user!.id;
+      
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!messageId) {
+        throw createError(400, '메시지 ID가 필요합니다.');
+      }
+      
+      const userId = req.user.id;
 
       const message = await prisma.chatMessage.findUnique({
         where: { id: messageId },
@@ -171,6 +198,10 @@ export class ChatController {
       const { matchId } = req.params;
       const { isTyping } = req.body;
       const userId = req.user!.id;
+      
+      if (!matchId) {
+        throw createError(400, '매치 ID가 필요합니다.');
+      }
 
       // Verify user is part of this match
       const match = await prisma.match.findUnique({
@@ -226,6 +257,10 @@ export class ChatController {
     try {
       const { messageId } = req.params;
       const userId = req.user!.id;
+      
+      if (!messageId) {
+        throw createError(400, '메시지 ID가 필요합니다.');
+      }
 
       const message = await prisma.chatMessage.findUnique({
         where: { id: messageId },
@@ -272,6 +307,10 @@ export class ChatController {
       const { messageId } = req.params;
       const { reason, description } = req.body;
       const userId = req.user!.id;
+      
+      if (!messageId) {
+        throw createError(400, '메시지 ID가 필요합니다.');
+      }
 
       if (!reason) {
         throw createError(400, '신고 사유가 필요합니다.');
@@ -319,6 +358,10 @@ export class ChatController {
       const { matchId } = req.params;
       const { query, page = 1, limit = 20 } = req.query as any;
       const userId = req.user!.id;
+      
+      if (!matchId) {
+        throw createError(400, '매치 ID가 필요합니다.');
+      }
 
       if (!query || query.trim().length < 2) {
         throw createError(400, '검색어는 2자 이상이어야 합니다.');

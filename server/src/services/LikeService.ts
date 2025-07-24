@@ -96,7 +96,7 @@ export class LikeService {
     });
 
     // Deduct credit if not premium
-    const creditCost = calculateLikeCost(fromUser.iPremium);
+    const creditCost = calculateLikeCost(fromUser.isPremium);
     if (creditCost > 0) {
       await prisma.user.update({
         where: { id: fromUserId },

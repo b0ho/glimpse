@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, PaymentType, PaymentStatus } from '@prisma/client';
 import { AuthRequest } from '../middleware/auth';
 import { createError } from '../middleware/errorHandler';
 import { PaymentService } from '../services/PaymentService';
@@ -12,22 +12,25 @@ const notificationService = new NotificationService();
 export class PaymentController {
   async createPayment(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
-      const { type, packageType, amount, currency = 'KRW', paymentMethod = 'TOSS' } = req.body;
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.user.id;
+      const { type, amount, currency = 'KRW', paymentMethod = 'TOSS' } = req.body;
 
       if (!type || !amount) {
         throw createError(400, '결제 유형과 금액이 필요합니다.');
       }
 
-      const validTypes = ['CREDITS', 'PREMIUM_MONTHLY', 'PREMIUM_YEARLY'];
+      const validTypes = ['LIKE_CREDITS', 'PREMIUM_SUBSCRIPTION'];
       if (!validTypes.includes(type)) {
         throw createError(400, '유효하지 않은 결제 유형입니다.');
       }
 
       const payment = await paymentService.createPayment({
         userId,
-        type,
-        packageType,
+        type: type as PaymentType,
         amount,
         currency,
         paymentMethod
@@ -44,9 +47,17 @@ export class PaymentController {
 
   async processPayment(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
       const { paymentId } = req.params;
       const { paymentToken, paymentKey } = req.body;
-      const userId = req.user!.id;
+      const userId = req.user.id;
+      
+      if (!paymentId) {
+        throw createError(400, '결제 ID가 필요합니다.');
+      }
 
       if (!paymentToken && !paymentKey) {
         throw createError(400, '결제 토큰 또는 결제 키가 필요합니다.');
@@ -58,7 +69,18 @@ export class PaymentController {
       });
 
       // Send success notification
-      await notificationService.sendPaymentSuccessNotification(userId, result.type, result.amount);
+      let creditsAmount: number | undefined;
+      if (result.type === PaymentType.LIKE_CREDITS) {
+        // Calculate credits from amount (assuming standard pricing)
+        creditsAmount = Math.floor(result.amount / 500); // Adjust based on your pricing logic
+      }
+      
+      await notificationService.sendPaymentSuccessNotification(
+        userId, 
+        result.amount, 
+        result.type === PaymentType.PREMIUM_SUBSCRIPTION ? 'PREMIUM' : 'CREDITS',
+        creditsAmount
+      );
 
       res.json({
         success: true,
@@ -71,24 +93,26 @@ export class PaymentController {
 
   async getPaymentHistory(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.user.id;
       const { page = 1, limit = 20, type } = req.query;
 
       const payments = await prisma.payment.findMany({
         where: {
           userId,
-          ...(type && { type: type as string })
+          ...(type && { type: type as PaymentType })
         },
         select: {
           id: true,
           type: true,
-          packageType: true,
           amount: true,
           currency: true,
           status: true,
-          paymentMethod: true,
-          createdAt: true,
-          processedAt: true
+          method: true,
+          createdAt: true
         },
         orderBy: { createdAt: 'desc' },
         skip: (parseInt(page as string) - 1) * parseInt(limit as string),
@@ -98,7 +122,7 @@ export class PaymentController {
       const totalPayments = await prisma.payment.count({
         where: {
           userId,
-          ...(type && { type: type as string })
+          ...(type && { type: type as PaymentType })
         }
       });
 
@@ -121,7 +145,11 @@ export class PaymentController {
 
   async getCurrentSubscription(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.user.id;
 
       const subscription = await prisma.subscription.findFirst({
         where: {
@@ -130,13 +158,11 @@ export class PaymentController {
         },
         select: {
           id: true,
-          type: true,
+          plan: true,
           status: true,
-          startDate: true,
-          endDate: true,
-          autoRenew: true,
-          price: true,
-          currency: true
+          currentPeriodStart: true,
+          currentPeriodEnd: true,
+          createdAt: true
         }
       });
 
@@ -145,7 +171,7 @@ export class PaymentController {
         select: {
           credits: true,
           isPremium: true,
-          premiumExpiresAt: true
+          premiumUntil: true
         }
       });
 
@@ -155,7 +181,7 @@ export class PaymentController {
           subscription,
           credits: user?.credits || 0,
           isPremium: user?.isPremium || false,
-          premiumExpiresAt: user?.premiumExpiresAt
+          premiumUntil: user?.premiumUntil
         }
       });
     } catch (error) {
@@ -165,7 +191,11 @@ export class PaymentController {
 
   async cancelSubscription(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.user.id;
 
       const subscription = await prisma.subscription.findFirst({
         where: {
@@ -182,19 +212,19 @@ export class PaymentController {
       await prisma.subscription.update({
         where: { id: subscription.id },
         data: {
-          autoRenew: false,
-          cancelledAt: new Date()
+          status: 'CANCELLED',
+          updatedAt: new Date()
         }
       });
 
       // Send cancellation notification
-      await notificationService.sendSubscriptionCancelledNotification(userId, subscription.endDate);
+      await notificationService.sendSubscriptionCancelledNotification(userId, subscription.currentPeriodEnd);
 
       res.json({
         success: true,
         data: {
           message: '구독이 취소되었습니다. 구독 만료일까지 프리미엄 혜택을 이용할 수 있습니다.',
-          expiresAt: subscription.endDate
+          expiresAt: subscription.currentPeriodEnd
         }
       });
     } catch (error) {
@@ -204,8 +234,16 @@ export class PaymentController {
 
   async verifyPayment(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
       const { paymentId } = req.params;
-      const userId = req.user!.id;
+      const userId = req.user.id;
+      
+      if (!paymentId) {
+        throw createError(400, '결제 ID가 필요합니다.');
+      }
 
       const payment = await prisma.payment.findUnique({
         where: { id: paymentId },
@@ -237,9 +275,17 @@ export class PaymentController {
 
   async refundPayment(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      if (!req.user) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
       const { paymentId } = req.params;
       const { reason } = req.body;
-      const userId = req.user!.id;
+      const userId = req.user.id;
+      
+      if (!paymentId) {
+        throw createError(400, '결제 ID가 필요합니다.');
+      }
 
       if (!reason) {
         throw createError(400, '환불 사유가 필요합니다.');
@@ -257,22 +303,34 @@ export class PaymentController {
         throw createError(403, '이 결제를 환불할 권한이 없습니다.');
       }
 
-      if (payment.status !== 'SUCCESS') {
-        throw createError(400, '성공한 결제만 환불할 수 있습니다.');
+      if (payment.status !== PaymentStatus.COMPLETED) {
+        throw createError(400, '완료된 결제만 환불할 수 있습니다.');
       }
 
       // Check refund eligibility (within 7 days for digital goods)
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      if (payment.processedAt && payment.processedAt < sevenDaysAgo) {
+      if (payment.createdAt < sevenDaysAgo) {
         throw createError(400, '결제 후 7일이 지난 건은 환불할 수 없습니다.');
       }
 
       const refund = await paymentService.refundPayment(paymentId, reason);
 
-      // Send refund notification
-      await notificationService.sendRefundNotification(userId, refund.amount, refund.currency);
+      // Create refund notification (using a generic notification since sendRefundNotification doesn't exist)
+      await prisma.notification.create({
+        data: {
+          userId,
+          type: 'VERIFICATION_APPROVED', // Using existing enum value temporarily for refund notifications
+          title: '환불 완료',
+          message: `₩${refund.amount.toLocaleString()} 환불이 완료되었습니다.`,
+          data: {
+            amount: refund.amount,
+            paymentId,
+            reason
+          }
+        }
+      });
 
       res.json({
         success: true,
@@ -381,8 +439,7 @@ export class PaymentController {
       const packages = [
         // Credit packages
         {
-          type: 'CREDITS',
-          packageType: 'SMALL',
+          type: 'LIKE_CREDITS',
           name: '라이크 5개',
           description: '5번의 좋아요 기회',
           price: 2500,
@@ -392,8 +449,7 @@ export class PaymentController {
           popular: false
         },
         {
-          type: 'CREDITS',
-          packageType: 'MEDIUM',
+          type: 'LIKE_CREDITS',
           name: '라이크 15개',
           description: '15번의 좋아요 + 보너스 2개',
           price: 6900,
@@ -403,8 +459,7 @@ export class PaymentController {
           popular: true
         },
         {
-          type: 'CREDITS',
-          packageType: 'LARGE',
+          type: 'LIKE_CREDITS',
           name: '라이크 30개',
           description: '30번의 좋아요 + 보너스 5개',
           price: 12900,
@@ -414,8 +469,7 @@ export class PaymentController {
           popular: false
         },
         {
-          type: 'CREDITS',
-          packageType: 'XLARGE',
+          type: 'LIKE_CREDITS',
           name: '라이크 50개',
           description: '50번의 좋아요 + 보너스 10개',
           price: 19000,
@@ -426,8 +480,7 @@ export class PaymentController {
         },
         // Premium subscriptions
         {
-          type: 'PREMIUM_MONTHLY',
-          packageType: 'MONTHLY',
+          type: 'PREMIUM_SUBSCRIPTION',
           name: '프리미엄 월간',
           description: '무제한 라이크 + 프리미엄 기능',
           price: 9900,
@@ -446,8 +499,7 @@ export class PaymentController {
           popular: false
         },
         {
-          type: 'PREMIUM_YEARLY',
-          packageType: 'YEARLY',
+          type: 'PREMIUM_SUBSCRIPTION',
           name: '프리미엄 연간',
           description: '2개월 무료! 17% 할인',
           price: 99000,

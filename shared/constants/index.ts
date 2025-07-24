@@ -98,6 +98,14 @@ export const NOTIFICATION_TYPES = {
   VERIFICATION_REJECTED: {
     title: '인증 실패',
     body: '회사 인증이 거절되었습니다.'
+  },
+  PAYMENT_SUCCESS: {
+    title: '결제 완료',
+    body: '결제가 성공적으로 완료되었습니다!'
+  },
+  SUBSCRIPTION_CANCELLED: {
+    title: '구독 취소 완료',
+    body: '프리미엄 구독이 취소되었습니다.'
   }
 } as const;
 

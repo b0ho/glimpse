@@ -6,18 +6,22 @@ const router = express.Router();
 const paymentController = new PaymentController();
 
 // Payment routes
-router.post('/create-intent', authMiddleware, paymentController.createPaymentIntent);
-router.post('/confirm', authMiddleware, paymentController.confirmPayment);
+router.post('/create', authMiddleware, paymentController.createPayment);
+router.post('/process/:paymentId', authMiddleware, paymentController.processPayment);
 router.get('/history', authMiddleware, paymentController.getPaymentHistory);
+router.get('/verify/:paymentId', authMiddleware, paymentController.verifyPayment);
+router.post('/refund/:paymentId', authMiddleware, paymentController.refundPayment);
 
 // Webhook endpoints (no auth required)
-router.post('/webhook/stripe', paymentController.stripeWebhook);
-router.post('/webhook/toss', paymentController.tossWebhook);
-router.post('/webhook/kakao', paymentController.kakaoWebhook);
+router.post('/webhook/toss', paymentController.webhookToss);
+router.post('/webhook/kakao', paymentController.webhookKakao);
 
-// Premium subscription
-router.post('/premium/subscribe', authMiddleware, paymentController.subscribePremium);
-router.post('/premium/cancel', authMiddleware, paymentController.cancelPremium);
-router.get('/premium/status', authMiddleware, paymentController.getPremiumStatus);
+// Subscription management
+router.get('/subscription/current', authMiddleware, paymentController.getCurrentSubscription);
+router.post('/subscription/cancel', authMiddleware, paymentController.cancelSubscription);
+
+// Pricing and payment methods
+router.get('/methods', authMiddleware, paymentController.getPaymentMethods);
+router.get('/packages', authMiddleware, paymentController.getPricingPackages);
 
 export default router;

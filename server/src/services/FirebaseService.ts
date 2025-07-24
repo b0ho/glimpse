@@ -33,7 +33,7 @@ export class FirebaseService {
       if (!admin.apps.length) {
         const serviceAccountPath = process.env.FCM_CREDENTIALS_PATH;
         
-        if (serviceAccountPath) {
+        if (serviceAccountPath && serviceAccountPath.trim() !== '') {
           const serviceAccount = require(path.resolve(serviceAccountPath));
           
           admin.initializeApp({
@@ -42,10 +42,16 @@ export class FirebaseService {
           });
         } else {
           // Use default credentials if path not provided
-          admin.initializeApp({
-            credential: admin.credential.applicationDefault(),
-            projectId: process.env.FIREBASE_PROJECT_ID
-          });
+          const projectId = process.env.FIREBASE_PROJECT_ID;
+          if (projectId) {
+            admin.initializeApp({
+              credential: admin.credential.applicationDefault(),
+              projectId
+            });
+          } else {
+            console.warn('FIREBASE_PROJECT_ID not configured');
+            return;
+          }
         }
       }
       
@@ -124,8 +130,7 @@ export class FirebaseService {
 
       console.log(`Successfully sent notification to ${response.successCount} devices`);
       
-      // Save notification record
-      await this.saveNotificationRecord(options.userId, options.payload);
+      // Notification record is saved by NotificationService
       
       return response.successCount > 0;
     } catch (error) {
@@ -348,100 +353,10 @@ export class FirebaseService {
     }
   }
 
-  private async saveNotificationRecord(userId: string, payload: NotificationPayload): Promise<void> {
-    try {
-      await prisma.notification.create({
-        data: {
-          userId,
-          title: payload.title,
-          body: payload.body,
-          data: payload.data || {},
-          isRead: false
-        }
-      });
-    } catch (error) {
-      console.error('Error saving notification record:', error);
-    }
-  }
 
-  async getNotificationHistory(userId: string, page: number = 1, limit: number = 20) {
-    const notifications = await prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit
-    });
 
-    const totalNotifications = await prisma.notification.count({
-      where: { userId }
-    });
 
-    return {
-      notifications,
-      pagination: {
-        page,
-        limit,
-        total: totalNotifications,
-        totalPages: Math.ceil(totalNotifications / limit)
-      }
-    };
-  }
 
-  async markNotificationAsRead(notificationId: string, userId: string): Promise<boolean> {
-    try {
-      const notification = await prisma.notification.findUnique({
-        where: { id: notificationId }
-      });
-
-      if (!notification || notification.userId !== userId) {
-        return false;
-      }
-
-      await prisma.notification.update({
-        where: { id: notificationId },
-        data: { isRead: true, readAt: new Date() }
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-      return false;
-    }
-  }
-
-  async markAllNotificationsAsRead(userId: string): Promise<number> {
-    try {
-      const result = await prisma.notification.updateMany({
-        where: {
-          userId,
-          isRead: false
-        },
-        data: {
-          isRead: true,
-          readAt: new Date()
-        }
-      });
-
-      return result.count;
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
-      return 0;
-    }
-  }
-
-  async getUnreadNotificationCount(userId: string): Promise<number> {
-    try {
-      return await prisma.notification.count({
-        where: {
-          userId,
-          isRead: false
-        }
-      });
-    } catch (error) {
-      console.error('Error getting unread notification count:', error);
-      return 0;
-    }
-  }
 
   async sendScheduledNotifications(): Promise<number> {
     try {

@@ -1,17 +1,17 @@
-import { PrismaClient, PaymentStatus, PaymentMethod } from '@prisma/client';
+import { PrismaClient, PaymentStatus, PaymentMethod, PaymentType } from '@prisma/client';
 import { createError } from '../middleware/errorHandler';
 import axios from 'axios';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
 interface CreatePaymentRequest {
   userId: string;
-  type: string;
+  type: PaymentType;
   packageType?: string;
   amount: number;
   currency: string;
-  paymentMethod: string;
+  paymentMethod: PaymentMethod;
 }
 
 interface ProcessPaymentRequest {
@@ -38,15 +38,15 @@ export class PaymentService {
       data: {
         userId,
         type,
-        packageType,
         amount,
         currency,
         status: 'PENDING',
-        paymentMethod: paymentMethod as PaymentMethod,
-        externalId: this.generatePaymentId(),
+        method: paymentMethod,
         metadata: {
           userAgent: 'mobile-app',
-          platform: 'glimpse'
+          platform: 'glimpse',
+          externalId: this.generatePaymentId(),
+          packageType
         }
       }
     });
@@ -56,14 +56,14 @@ export class PaymentService {
     let paymentData = {};
 
     switch (paymentMethod) {
-      case 'TOSS':
+      case 'TOSS_PAY':
         ({ paymentUrl, paymentData } = await this.createTossPayment(payment));
         break;
-      case 'KAKAO':
+      case 'KAKAO_PAY':
         ({ paymentUrl, paymentData } = await this.createKakaoPayment(payment));
         break;
       case 'CARD':
-      case 'BANK':
+      case 'NAVER_PAY':
         ({ paymentUrl, paymentData } = await this.createGenericPayment(payment));
         break;
       default:
@@ -74,18 +74,21 @@ export class PaymentService {
     await prisma.payment.update({
       where: { id: payment.id },
       data: {
-        externalData: paymentData,
-        paymentUrl
+        metadata: {
+          ...payment.metadata as object,
+          externalData: paymentData,
+          paymentUrl
+        }
       }
     });
 
     return {
       id: payment.id,
-      externalId: payment.externalId,
+      externalId: (payment.metadata as any)?.externalId,
       amount: payment.amount,
       currency: payment.currency,
       paymentUrl,
-      paymentMethod: payment.paymentMethod,
+      paymentMethod: payment.method,
       status: payment.status,
       createdAt: payment.createdAt
     };
@@ -109,11 +112,11 @@ export class PaymentService {
     }
 
     let result;
-    switch (payment.paymentMethod) {
-      case 'TOSS':
+    switch (payment.method) {
+      case 'TOSS_PAY':
         result = await this.processTossPayment(payment, data.paymentKey!);
         break;
-      case 'KAKAO':
+      case 'KAKAO_PAY':
         result = await this.processKakaoPayment(payment, data.paymentToken!);
         break;
       default:
@@ -124,13 +127,14 @@ export class PaymentService {
     await prisma.payment.update({
       where: { id: paymentId },
       data: {
-        status: result.success ? 'SUCCESS' : 'FAILED',
-        processedAt: new Date(),
-        externalData: {
-          ...payment.externalData as object,
-          ...result.data
+        status: result.success ? 'COMPLETED' : 'FAILED',
+        metadata: {
+          ...payment.metadata as object,
+          externalData: {
+            ...(payment.metadata as any)?.externalData,
+            ...result.data
+          }
         },
-        failureReason: result.success ? null : result.error
       }
     });
 
@@ -141,11 +145,10 @@ export class PaymentService {
 
     return {
       id: payment.id,
-      status: result.success ? 'SUCCESS' : 'FAILED',
+      status: result.success ? 'COMPLETED' : 'FAILED',
       type: payment.type,
       amount: payment.amount,
       currency: payment.currency,
-      processedAt: new Date(),
       ...(result.error && { error: result.error })
     };
   }
@@ -160,25 +163,24 @@ export class PaymentService {
     }
 
     let verification;
-    switch (payment.paymentMethod) {
-      case 'TOSS':
-        verification = await this.verifyTossPayment(payment.externalId);
+    switch (payment.method) {
+      case 'TOSS_PAY':
+        verification = await this.verifyTossPayment((payment.metadata as any)?.externalId);
         break;
-      case 'KAKAO':
-        verification = await this.verifyKakaoPayment(payment.externalId);
+      case 'KAKAO_PAY':
+        verification = await this.verifyKakaoPayment((payment.metadata as any)?.externalId);
         break;
       default:
-        verification = { verified: payment.status === 'SUCCESS' };
+        verification = { verified: payment.status === 'COMPLETED' };
     }
 
     return {
       paymentId: payment.id,
-      externalId: payment.externalId,
+      externalId: (payment.metadata as any)?.externalId,
       status: payment.status,
       verified: verification.verified,
       amount: payment.amount,
       currency: payment.currency,
-      processedAt: payment.processedAt,
       verificationData: verification.data
     };
   }
@@ -192,33 +194,42 @@ export class PaymentService {
       throw createError(404, '결제를 찾을 수 없습니다.');
     }
 
-    if (payment.status !== 'SUCCESS') {
+    if (payment.status !== 'COMPLETED') {
       throw createError(400, '성공한 결제만 환불할 수 있습니다.');
     }
 
     let refundResult;
-    switch (payment.paymentMethod) {
-      case 'TOSS':
-        refundResult = await this.refundTossPayment(payment.externalId, payment.amount, reason);
+    switch (payment.method) {
+      case 'TOSS_PAY':
+        refundResult = await this.refundTossPayment((payment.metadata as any)?.externalId, payment.amount, reason);
         break;
-      case 'KAKAO':
-        refundResult = await this.refundKakaoPayment(payment.externalId, payment.amount, reason);
+      case 'KAKAO_PAY':
+        refundResult = await this.refundKakaoPayment((payment.metadata as any)?.externalId, payment.amount, reason);
         break;
       default:
         throw createError(400, '이 결제 방법은 자동 환불을 지원하지 않습니다. 고객센터로 문의해주세요.');
     }
 
-    // Create refund record
-    const refund = await prisma.refund.create({
+    // Create refund record in payment metadata
+    const refundData = {
+      paymentId: payment.id,
+      amount: payment.amount,
+      currency: payment.currency,
+      reason,
+      status: refundResult.success ? 'COMPLETED' : 'FAILED',
+      refundId: refundResult.refundId,
+      processedAt: refundResult.success ? new Date().toISOString() : null,
+      failureReason: refundResult.success ? null : refundResult.error
+    };
+
+    // Update payment with refund information
+    await prisma.payment.update({
+      where: { id: payment.id },
       data: {
-        paymentId: payment.id,
-        amount: payment.amount,
-        currency: payment.currency,
-        reason,
-        status: refundResult.success ? 'SUCCESS' : 'FAILED',
-        externalId: refundResult.refundId,
-        processedAt: refundResult.success ? new Date() : null,
-        failureReason: refundResult.success ? null : refundResult.error
+        metadata: {
+          ...payment.metadata as object,
+          refund: refundData
+        }
       }
     });
 
@@ -234,13 +245,13 @@ export class PaymentService {
     }
 
     return {
-      refundId: refund.id,
+      refundId: refundData.refundId,
       paymentId: payment.id,
-      amount: refund.amount,
-      currency: refund.currency,
-      status: refund.status,
-      reason: refund.reason,
-      processedAt: refund.processedAt
+      amount: refundData.amount,
+      currency: refundData.currency,
+      status: refundData.status,
+      reason: refundData.reason,
+      processedAt: refundData.processedAt
     };
   }
 
@@ -510,17 +521,28 @@ export class PaymentService {
   private async handlePaymentConfirmed(data: any, method: string) {
     const orderId = method === 'TOSS' ? data.orderId : data.partner_order_id;
     
-    const payment = await prisma.payment.findFirst({
-      where: { externalId: orderId }
+    // Find payment by searching in metadata
+    const payments = await prisma.payment.findMany({
+      where: {
+        metadata: {
+          not: {}
+        }
+      }
     });
+    
+    const payment = payments.find(p => 
+      (p.metadata as any)?.externalId === orderId
+    );
 
     if (payment && payment.status === 'PENDING') {
       await prisma.payment.update({
         where: { id: payment.id },
         data: {
-          status: 'SUCCESS',
-          processedAt: new Date(),
-          externalData: data
+          status: 'COMPLETED',
+          metadata: {
+            ...payment.metadata as object,
+            externalData: data
+          }
         }
       });
 
@@ -531,17 +553,28 @@ export class PaymentService {
   private async handlePaymentCanceled(data: any, method: string) {
     const orderId = method === 'TOSS' ? data.orderId : data.partner_order_id;
     
-    const payment = await prisma.payment.findFirst({
-      where: { externalId: orderId }
+    // Find payment by searching in metadata
+    const payments = await prisma.payment.findMany({
+      where: {
+        metadata: {
+          not: {}
+        }
+      }
     });
+    
+    const payment = payments.find(p => 
+      (p.metadata as any)?.externalId === orderId
+    );
 
     if (payment) {
       await prisma.payment.update({
         where: { id: payment.id },
         data: {
-          status: 'CANCELED',
-          processedAt: new Date(),
-          externalData: data
+          status: 'FAILED',
+          metadata: {
+            ...payment.metadata as object,
+            externalData: data
+          }
         }
       });
     }
@@ -549,11 +582,10 @@ export class PaymentService {
 
   private async applyPaymentBenefits(payment: any) {
     switch (payment.type) {
-      case 'CREDITS':
+      case 'LIKE_CREDITS':
         await this.applyCredits(payment);
         break;
-      case 'PREMIUM_MONTHLY':
-      case 'PREMIUM_YEARLY':
+      case 'PREMIUM_SUBSCRIPTION':
         await this.applyPremiumSubscription(payment);
         break;
     }
@@ -567,7 +599,8 @@ export class PaymentService {
       XLARGE: 60  // 50 + 10 bonus
     };
 
-    const credits = creditAmounts[payment.packageType] || 5;
+    const packageType = (payment.metadata as any)?.packageType;
+    const credits = creditAmounts[packageType] || 5;
 
     await prisma.user.update({
       where: { id: payment.userId },
@@ -580,7 +613,8 @@ export class PaymentService {
   }
 
   private async applyPremiumSubscription(payment: any) {
-    const duration = payment.type === 'PREMIUM_YEARLY' ? 365 : 30;
+    const packageType = (payment.metadata as any)?.packageType;
+    const duration = packageType === 'PREMIUM_YEARLY' ? 365 : 30;
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(startDate.getDate() + duration);
@@ -595,25 +629,22 @@ export class PaymentService {
 
     if (existingSubscription) {
       // Extend existing subscription
-      const newEndDate = new Date(existingSubscription.endDate);
+      const newEndDate = new Date(existingSubscription.currentPeriodEnd);
       newEndDate.setDate(newEndDate.getDate() + duration);
 
       await prisma.subscription.update({
         where: { id: existingSubscription.id },
-        data: { endDate: newEndDate }
+        data: { currentPeriodEnd: newEndDate }
       });
     } else {
       // Create new subscription
       await prisma.subscription.create({
         data: {
           userId: payment.userId,
-          type: payment.type,
+          plan: packageType === 'PREMIUM_YEARLY' ? 'YEARLY' : 'MONTHLY',
           status: 'ACTIVE',
-          startDate,
-          endDate,
-          price: payment.amount,
-          currency: payment.currency,
-          autoRenew: true
+          currentPeriodStart: startDate,
+          currentPeriodEnd: endDate
         }
       });
     }
@@ -623,18 +654,17 @@ export class PaymentService {
       where: { id: payment.userId },
       data: {
         isPremium: true,
-        premiumExpiresAt: endDate
+        premiumUntil: endDate
       }
     });
   }
 
   private async reversePaymentBenefits(payment: any) {
     switch (payment.type) {
-      case 'CREDITS':
+      case 'LIKE_CREDITS':
         await this.reverseCredits(payment);
         break;
-      case 'PREMIUM_MONTHLY':
-      case 'PREMIUM_YEARLY':
+      case 'PREMIUM_SUBSCRIPTION':
         await this.reversePremiumSubscription(payment);
         break;
     }
@@ -648,7 +678,8 @@ export class PaymentService {
       XLARGE: 60
     };
 
-    const credits = creditAmounts[payment.packageType] || 5;
+    const packageType = (payment.metadata as any)?.packageType;
+    const credits = creditAmounts[packageType] || 5;
 
     await prisma.user.update({
       where: { id: payment.userId },
@@ -668,8 +699,7 @@ export class PaymentService {
         status: 'ACTIVE'
       },
       data: {
-        status: 'CANCELED',
-        cancelledAt: new Date()
+        status: 'CANCELLED'
       }
     });
 
@@ -678,7 +708,7 @@ export class PaymentService {
       where: { id: payment.userId },
       data: {
         isPremium: false,
-        premiumExpiresAt: null
+        premiumUntil: null
       }
     });
   }
@@ -709,7 +739,7 @@ export class PaymentService {
 
   private getOrderName(type: string, packageType?: string): string {
     switch (type) {
-      case 'CREDITS':
+      case 'LIKE_CREDITS':
         const creditNames: Record<string, string> = {
           SMALL: '라이크 5개',
           MEDIUM: '라이크 15개 + 보너스 2개',
@@ -717,10 +747,8 @@ export class PaymentService {
           XLARGE: '라이크 50개 + 보너스 10개'
         };
         return creditNames[packageType || 'SMALL'] || '라이크 구매';
-      case 'PREMIUM_MONTHLY':
-        return '글림프스 프리미엄 월간';
-      case 'PREMIUM_YEARLY':
-        return '글림프스 프리미엄 연간';
+      case 'PREMIUM_SUBSCRIPTION':
+        return packageType === 'PREMIUM_YEARLY' ? '글림프스 프리미엄 연간' : '글림프스 프리미엄 월간';
       default:
         return '글림프스 결제';
     }

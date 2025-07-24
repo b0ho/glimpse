@@ -1,7 +1,7 @@
 import { PrismaClient, NotificationType } from '@prisma/client';
 import { createError } from '../middleware/errorHandler';
 import { FirebaseService } from './FirebaseService';
-import { NOTIFICATION_TYPES } from '@shared/constants';
+import { NOTIFICATION_TYPES } from '../../../shared/constants';
 
 const prisma = new PrismaClient();
 const firebaseService = new FirebaseService();
@@ -15,7 +15,7 @@ export class NotificationService {
         prisma.group.findUnique({ where: { id: groupId } })
       ]);
 
-      if (!toUser || !fromUser || !group) return;
+      if (!toUser || !fromUser || !group) return null;
 
       // Create notification record
       const notification = await prisma.notification.create({
@@ -47,6 +47,7 @@ export class NotificationService {
       return notification;
     } catch (error) {
       console.error('Failed to send like notification:', error);
+      return null;
     }
   }
 
@@ -57,7 +58,7 @@ export class NotificationService {
         prisma.user.findUnique({ where: { id: matchedUserId } })
       ]);
 
-      if (!user || !matchedUser) return;
+      if (!user || !matchedUser) return null;
 
       const notification = await prisma.notification.create({
         data: {
@@ -87,13 +88,14 @@ export class NotificationService {
       return notification;
     } catch (error) {
       console.error('Failed to send match notification:', error);
+      return null;
     }
   }
 
   async sendMessageNotification(userId: string, fromUserId: string, matchId: string, messagePreview: string) {
     try {
       const fromUser = await prisma.user.findUnique({ where: { id: fromUserId } });
-      if (!fromUser) return;
+      if (!fromUser) return null;
 
       const notification = await prisma.notification.create({
         data: {
@@ -123,6 +125,7 @@ export class NotificationService {
       return notification;
     } catch (error) {
       console.error('Failed to send message notification:', error);
+      return null;
     }
   }
 
@@ -133,7 +136,7 @@ export class NotificationService {
         prisma.user.findUnique({ where: { id: invitedBy } })
       ]);
 
-      if (!group || !inviter) return;
+      if (!group || !inviter) return null;
 
       const notification = await prisma.notification.create({
         data: {
@@ -164,6 +167,7 @@ export class NotificationService {
       return notification;
     } catch (error) {
       console.error('Failed to send group invitation notification:', error);
+      return null;
     }
   }
 
@@ -200,6 +204,74 @@ export class NotificationService {
       return notification;
     } catch (error) {
       console.error('Failed to send verification status notification:', error);
+      return null;
+    }
+  }
+
+  async sendPaymentSuccessNotification(userId: string, amount: number, type: 'PREMIUM' | 'CREDITS', credits?: number) {
+    try {
+      const notification = await prisma.notification.create({
+        data: {
+          userId,
+          type: 'PAYMENT_SUCCESS',
+          title: '결제 완료',
+          message: type === 'PREMIUM' 
+            ? `프리미엄 멤버십 결제가 완료되었습니다! (₩${amount.toLocaleString()})`
+            : `크레딧 ${credits}개 결제가 완료되었습니다! (₩${amount.toLocaleString()})`,
+          data: {
+            amount,
+            type,
+            credits: credits || null
+          }
+        }
+      });
+
+      await this.sendPushNotification(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: {
+          type: 'PAYMENT_SUCCESS',
+          notificationId: notification.id,
+          amount: amount.toString(),
+          paymentType: type
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Failed to send payment success notification:', error);
+      return null;
+    }
+  }
+
+  async sendSubscriptionCancelledNotification(userId: string, expiresAt: Date) {
+    try {
+      const notification = await prisma.notification.create({
+        data: {
+          userId,
+          type: 'SUBSCRIPTION_CANCELLED',
+          title: '구독 취소 완료',
+          message: `프리미엄 구독이 취소되었습니다. ${expiresAt.toLocaleDateString('ko-KR')}까지 이용 가능합니다.`,
+          data: {
+            expiresAt: expiresAt.toISOString()
+          }
+        }
+      });
+
+      await this.sendPushNotification(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: {
+          type: 'SUBSCRIPTION_CANCELLED',
+          notificationId: notification.id,
+          expiresAt: expiresAt.toISOString()
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Failed to send subscription cancelled notification:', error);
+      return null;
     }
   }
 
@@ -248,60 +320,65 @@ export class NotificationService {
 
   private async sendPushNotification(userId: string, payload: any) {
     try {
-      // Get user's device tokens
-      const deviceTokens = await prisma.userDeviceToken.findMany({
-        where: { userId, isActive: true },
-        select: { token: true, platform: true }
+      // Send notification using FirebaseService
+      await firebaseService.sendNotificationToUser({
+        userId,
+        payload: {
+          title: payload.title,
+          body: payload.body,
+          data: payload.data
+        }
       });
-
-      if (deviceTokens.length === 0) return;
-
-      // Send to all user devices
-      const promises = deviceTokens.map(device => 
-        firebaseService.sendNotification(device.token, payload, device.platform)
-      );
-
-      await Promise.allSettled(promises);
     } catch (error) {
       console.error('Failed to send push notification:', error);
     }
   }
 
   async deleteNotification(notificationId: string, userId: string) {
-    const notification = await prisma.notification.findFirst({
-      where: { id: notificationId, userId }
-    });
+    try {
+      const notification = await prisma.notification.findFirst({
+        where: { id: notificationId, userId }
+      });
 
-    if (!notification) {
-      throw createError(404, '알림을 찾을 수 없습니다.');
+      if (!notification) {
+        throw createError(404, '알림을 찾을 수 없습니다.');
+      }
+
+      await prisma.notification.delete({
+        where: { id: notificationId }
+      });
+
+      return { message: '알림이 삭제되었습니다.' };
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
+      throw error;
     }
-
-    await prisma.notification.delete({
-      where: { id: notificationId }
-    });
-
-    return { message: '알림이 삭제되었습니다.' };
   }
 
   async updateDeviceToken(userId: string, token: string, platform: string) {
-    // Deactivate old tokens for this platform
-    await prisma.userDeviceToken.updateMany({
-      where: { userId, platform },
-      data: { isActive: false }
-    });
+    try {
+      // Deactivate old tokens for this platform
+      await prisma.userDeviceToken.updateMany({
+        where: { userId, platform },
+        data: { isActive: false }
+      });
 
-    // Create or update new token
-    await prisma.userDeviceToken.upsert({
-      where: { token },
-      update: { isActive: true, updatedAt: new Date() },
-      create: {
-        userId,
-        token,
-        platform,
-        isActive: true
-      }
-    });
+      // Create or update new token
+      await prisma.userDeviceToken.upsert({
+        where: { token },
+        update: { isActive: true, updatedAt: new Date() },
+        create: {
+          userId,
+          token,
+          platform,
+          isActive: true
+        }
+      });
 
-    return { message: '디바이스 토큰이 업데이트되었습니다.' };
+      return { message: '디바이스 토큰이 업데이트되었습니다.' };
+    } catch (error) {
+      console.error('Failed to update device token:', error);
+      throw error;
+    }
   }
 }
