@@ -46,8 +46,71 @@ npm run dev
 
 개발 서버:
 - 모바일 앱: http://localhost:8081 (Expo)
-- 서버 API: http://localhost:8080
+- 서버 API: http://localhost:3001
 - 웹 대시보드: http://localhost:3000
+
+## 🐳 Docker로 실행하기
+
+### 개발 환경 (데이터베이스만)
+
+```bash
+# PostgreSQL과 Redis 시작
+docker-compose -f docker-compose.dev.yml up -d
+
+# 데이터베이스 마이그레이션
+cd server && npx prisma migrate dev
+
+# 개발 서버 시작
+npm run dev
+```
+
+### 프로덕션 환경 (전체 스택)
+
+```bash
+# 환경변수 파일 생성
+cp .env.docker.example .env.docker
+# .env.docker 파일 편집하여 실제 값 입력
+
+# 전체 스택 시작
+docker-compose up -d
+
+# 로그 확인
+docker-compose logs -f
+
+# 서비스 중지
+docker-compose down
+```
+
+### Docker 서비스
+
+- **PostgreSQL**: 데이터베이스 (포트 5432)
+- **Redis**: 세션 및 캐싱 (포트 6379)
+- **Server**: 백엔드 API (포트 3001)
+- **Web**: 관리자 대시보드 (포트 3000)
+- **Nginx**: 리버스 프록시 (포트 80/443)
+- **pgAdmin**: 데이터베이스 관리 도구 (포트 5050)
+
+### 유용한 Docker 명령어
+
+```bash
+# 특정 서비스만 시작
+docker-compose up -d postgres redis
+
+# 서비스 재시작
+docker-compose restart server
+
+# 로그 보기
+docker-compose logs -f server
+
+# 컨테이너 쉘 접속
+docker-compose exec server sh
+
+# 데이터베이스 백업
+docker-compose exec postgres pg_dump -U glimpse glimpse_db > backup.sql
+
+# 볼륨 정리
+docker-compose down -v
+```
 
 ### 개별 서비스 실행
 

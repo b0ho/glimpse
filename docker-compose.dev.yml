@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (Development)
+  postgres:
+    image: postgres:16-alpine
+    container_name: glimpse-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: glimpse_dev
+      POSTGRES_PASSWORD: glimpse_dev_password
+      POSTGRES_DB: glimpse_dev
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U glimpse_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - glimpse-dev-network
+
+  # Redis for session management and caching (Development)
+  redis:
+    image: redis:7-alpine
+    container_name: glimpse-redis-dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_dev_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - glimpse-dev-network
+
+  # pgAdmin for database management (Development)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: glimpse-pgadmin-dev
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dev@glimpse.com
+      PGADMIN_DEFAULT_PASSWORD: dev_password
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_dev_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - glimpse-dev-network
+
+networks:
+  glimpse-dev-network:
+    driver: bridge
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+  pgadmin_dev_data:

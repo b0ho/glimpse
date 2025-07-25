@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -7,7 +8,8 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 
 // Load and validate environment variables
-import env, { logConfigurationStatus } from './config/env';
+import { env, logConfigurationStatus } from './config/env';
+import { initializeSentry } from './config/sentry';
 
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
@@ -22,6 +24,10 @@ import chatRoutes from './routes/chat';
 import paymentRoutes from './routes/payments';
 
 const app = express();
+
+// Initialize Sentry before other middleware
+initializeSentry(app);
+
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
@@ -76,11 +82,18 @@ app.use('/api/v1/payments', paymentRoutes);
 import { initializeChatSocket } from './socket/chatSocket';
 initializeChatSocket(io);
 
+// The Sentry request handler must be the first error handler
+app.use(Sentry.Handlers.requestHandler());
+
+// The Sentry error handler must be before any other error middleware
+app.use(Sentry.Handlers.errorHandler());
+
 // Error handling middleware
 app.use(notFound);
 app.use(errorHandler);
 
 // Start server
+const PORT = env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`🚀 Glimpse Server running on port ${PORT}`);
   console.log(`📱 Frontend URL: ${env.FRONTEND_URL}`);

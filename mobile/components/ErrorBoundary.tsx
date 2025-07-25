@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { captureError } from '@/services/sentry/sentry-config';
 
 interface Props {
   children: ReactNode;
@@ -31,6 +32,13 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    
+    // Report to Sentry
+    captureError(error, {
+      errorBoundary: true,
+      componentStack: errorInfo.componentStack,
+    });
+    
     this.setState({
       error,
       errorInfo,

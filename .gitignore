@@ -63,3 +63,26 @@ build/
 # Playwright test results
 test-results/
 playwright-report/
+
+# Docker
+.env.docker
+docker-compose.override.yml
+
+# SSL certificates
+nginx/ssl/
+*.pem
+*.crt
+*.key
+
+# Logs
+logs/
+*.log
+
+# Uploads
+uploads/
+server/uploads/
+
+# Database
+postgres_data/
+redis_data/
+pgadmin_data/

@@ -2,10 +2,15 @@ import React, { useEffect } from 'react';
 import { ClerkProvider } from '@clerk/clerk-expo';
 import { StatusBar } from 'expo-status-bar';
 import { AppState, AppStateStatus } from 'react-native';
+import * as Sentry from '@sentry/react-native';
 import { CLERK_CONFIG } from '@/services/auth/clerk-config';
 import RootNavigator from '@/navigation/AppNavigator';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useNotifications } from '@/hooks/useNotifications';
+import { initializeSentry } from '@/services/sentry/sentry-config';
+
+// Initialize Sentry
+initializeSentry();
 
 function GlimpseApp() {
   // Initialize notifications
@@ -42,7 +47,7 @@ function GlimpseApp() {
   );
 }
 
-export default function App() {
+function App() {
   return (
     <ClerkProvider 
       publishableKey={CLERK_CONFIG.publishableKey}
@@ -52,4 +57,7 @@ export default function App() {
     </ClerkProvider>
   );
 }
+
+// Wrap the app with Sentry
+export default Sentry.wrap(App);
 
