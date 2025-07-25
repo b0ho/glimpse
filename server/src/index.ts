@@ -10,6 +10,8 @@ import { Server } from 'socket.io';
 // Load and validate environment variables
 import { env, logConfigurationStatus } from './config/env';
 import { initializeSentry } from './config/sentry';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
 
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
@@ -69,6 +71,12 @@ app.get('/health', (req, res) => {
     service: 'glimpse-server'
   });
 });
+
+// Swagger API documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Glimpse API Documentation'
+}));
 
 // API routes
 app.use('/api/v1/auth', authRoutes);
