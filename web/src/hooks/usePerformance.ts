@@ -31,15 +31,22 @@ export function usePerformance() {
     
     // 디바이스 정보 수집
     const getDeviceInfo = () => {
-      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
-      const deviceMemory = (navigator as any).deviceMemory;
+      interface ExtendedNavigator extends Navigator {
+        connection?: { effectiveType?: string };
+        mozConnection?: { effectiveType?: string };
+        webkitConnection?: { effectiveType?: string };
+        deviceMemory?: number;
+      }
+      const nav = navigator as ExtendedNavigator;
+      const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
+      const deviceMemory = nav.deviceMemory;
       
       // 저사양 디바이스 감지
       const isLowEndDevice = deviceMemory ? deviceMemory <= 4 : false;
       
       return {
         connectionType: connection?.effectiveType || 'unknown',
-        deviceMemory: deviceMemory || 'unknown',
+        deviceMemory: deviceMemory || undefined,
         isLowEndDevice,
       };
     };
@@ -77,11 +84,15 @@ export function usePerformance() {
           // First Input Delay (FID)
           new PerformanceObserver((entryList) => {
             const entries = entryList.getEntries();
-            entries.forEach((entry: any) => {
-              setPerformanceData(prev => ({
-                ...prev,
-                webVitals: { ...prev.webVitals, FID: Math.round(entry.processingStart - entry.startTime) }
-              }));
+            entries.forEach((entry) => {
+              // PerformanceEventTiming has processingStart property
+              const eventEntry = entry as PerformanceEventTiming;
+              if ('processingStart' in eventEntry && typeof eventEntry.processingStart === 'number') {
+                setPerformanceData(prev => ({
+                  ...prev,
+                  webVitals: { ...prev.webVitals, FID: Math.round(eventEntry.processingStart - eventEntry.startTime) }
+                }));
+              }
             });
           }).observe({ entryTypes: ['first-input'] });
 
@@ -89,9 +100,9 @@ export function usePerformance() {
           let clsValue = 0;
           new PerformanceObserver((entryList) => {
             const entries = entryList.getEntries();
-            entries.forEach((entry: any) => {
-              if (!entry.hadRecentInput) {
-                clsValue += entry.value;
+            entries.forEach((entry) => {
+              if ('hadRecentInput' in entry && !entry.hadRecentInput && 'value' in entry) {
+                clsValue += (entry as { value: number }).value;
                 setPerformanceData(prev => ({
                   ...prev,
                   webVitals: { ...prev.webVitals, CLS: Number(clsValue.toFixed(3)) }
@@ -142,7 +153,7 @@ export function usePerformance() {
     return () => {
       window.removeEventListener('beforeunload', sendPerformanceData);
     };
-  }, []);
+  }, [performanceData]);
 
   // 성능 점수 계산
   const getPerformanceScore = () => {

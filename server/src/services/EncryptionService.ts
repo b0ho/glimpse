@@ -70,6 +70,9 @@ export class EncryptionService {
   verifyHash(data: string, hashedData: string): boolean {
     try {
       const [salt, hash] = hashedData.split(':');
+      if (!salt || !hash) {
+        return false;
+      }
       const newHash = crypto.pbkdf2Sync(data, salt, 10000, 64, 'sha256').toString('hex');
       return hash === newHash;
     } catch (error) {
@@ -158,6 +161,9 @@ export class EncryptionService {
   verifyPassword(password: string, hashedPassword: string): boolean {
     try {
       const [salt, hash] = hashedPassword.split(':');
+      if (!salt || !hash) {
+        return false;
+      }
       const newHash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha256').toString('hex');
       return hash === newHash;
     } catch (error) {

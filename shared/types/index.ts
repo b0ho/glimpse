@@ -1,6 +1,8 @@
 // User Types
 export interface User {
   id: string;
+  clerkId?: string;
+  anonymousId: string;
   phoneNumber: string;
   nickname?: string;
   age?: number;
@@ -10,7 +12,10 @@ export interface User {
   isVerified: boolean;
   credits: number;
   isPremium: boolean;
+  premiumUntil?: Date;
   lastActive: Date;
+  lastOnline?: Date;
+  deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

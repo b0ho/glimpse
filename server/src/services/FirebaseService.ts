@@ -117,7 +117,10 @@ export class FirebaseService {
           if (!resp.success) {
             console.error(`Failed to send to token ${tokens[idx]}:`, resp.error);
             if (resp.error?.code === 'messaging/registration-token-not-registered') {
-              failedTokens.push(tokens[idx]);
+              const token = tokens[idx];
+              if (token) {
+                failedTokens.push(token);
+              }
             }
           }
         });
@@ -328,7 +331,10 @@ export class FirebaseService {
           
           response.responses.forEach((resp, idx) => {
             if (!resp.success && resp.error?.code === 'messaging/registration-token-not-registered') {
-              inactiveTokens.push(batch[idx].token);
+              const tokenData = batch[idx];
+              if (tokenData) {
+                inactiveTokens.push(tokenData.token);
+              }
             }
           });
         } catch (error) {

@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { AuthRequest } from '../middleware/auth';
+import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
 import { UserService } from '../services/UserService';
 import { LikeService } from '../services/LikeService';
@@ -13,9 +13,9 @@ const userService = new UserService();
 const likeService = new LikeService();
 
 export class UserController {
-  async getCurrentUser(req: AuthRequest, res: Response, next: NextFunction) {
+  async getCurrentUser(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       
       const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -55,9 +55,9 @@ export class UserController {
     }
   }
 
-  async updateProfile(req: AuthRequest, res: Response, next: NextFunction) {
+  async updateProfile(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       const { nickname, age, bio, profileImage } = req.body;
 
       // Validate inputs
@@ -95,9 +95,9 @@ export class UserController {
     }
   }
 
-  async getRecommendations(req: AuthRequest, res: Response, next: NextFunction) {
+  async getRecommendations(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       const { groupId, page = 1, limit = 10 } = req.query;
 
       if (!groupId) {
@@ -120,10 +120,10 @@ export class UserController {
     }
   }
 
-  async getUserById(req: AuthRequest, res: Response, next: NextFunction) {
+  async getUserById(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { userId } = req.params;
-      const requesterId = req.user!.id;
+      const requesterId = req.auth!.userId;
 
       if (!userId) {
         throw createError(400, '사용자 ID가 필요합니다.');
@@ -163,9 +163,9 @@ export class UserController {
     }
   }
 
-  async sendLike(req: AuthRequest, res: Response, next: NextFunction) {
+  async sendLike(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       const { toUserId, groupId } = req.body;
 
       if (!toUserId || !groupId) {
@@ -187,9 +187,9 @@ export class UserController {
     }
   }
 
-  async getReceivedLikes(req: AuthRequest, res: Response, next: NextFunction) {
+  async getReceivedLikes(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       const { page = 1, limit = 20 } = req.query;
 
       const likes = await prisma.userLike.findMany({
@@ -231,9 +231,9 @@ export class UserController {
     }
   }
 
-  async getSentLikes(req: AuthRequest, res: Response, next: NextFunction) {
+  async getSentLikes(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       const { page = 1, limit = 20 } = req.query;
 
       const likes = await prisma.userLike.findMany({
@@ -275,9 +275,9 @@ export class UserController {
     }
   }
 
-  async getCredits(req: AuthRequest, res: Response, next: NextFunction) {
+  async getCredits(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
 
       const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -306,9 +306,9 @@ export class UserController {
     }
   }
 
-  async purchaseCredits(req: AuthRequest, res: Response, next: NextFunction) {
+  async purchaseCredits(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       const { packageId, paymentMethodId } = req.body;
 
       if (!packageId || !paymentMethodId) {
@@ -326,9 +326,9 @@ export class UserController {
     }
   }
 
-  async deleteAccount(req: AuthRequest, res: Response, next: NextFunction) {
+  async deleteAccount(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       const { confirmPhoneNumber } = req.body;
 
       const user = await prisma.user.findUnique({

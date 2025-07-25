@@ -281,7 +281,10 @@ export class CompanyVerificationService {
 
   private maskEmail(email: string): string {
     const [local, domain] = email.split('@');
-    const maskedLocal = local.charAt(0) + '*'.repeat(local.length - 2) + local.charAt(local.length - 1);
+    if (!local || !domain) {
+      return email; // Return original if split fails
+    }
+    const maskedLocal = local.charAt(0) + '*'.repeat(Math.max(0, local.length - 2)) + (local.length > 1 ? local.charAt(local.length - 1) : '');
     return `${maskedLocal}@${domain}`;
   }
 }

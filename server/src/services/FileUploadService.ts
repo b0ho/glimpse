@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 interface UploadedFile {
   id: string;
   originalName: string;
-  fileName: string;
+  filename: string;
   url: string;
   size: number;
   mimeType: string;
@@ -80,16 +80,16 @@ export class FileUploadService {
       format: 'jpeg'
     });
 
-    const fileName = `profiles/${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
+    const filename = `profiles/${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
     
-    const uploadResult = await this.uploadToS3(processedBuffer, fileName, 'image/jpeg');
+    const uploadResult = await this.uploadToS3(processedBuffer, filename, 'image/jpeg');
     
     // Save file record to database
     const fileRecord = await prisma.file.create({
       data: {
         userId,
         originalName: file.originalname,
-        fileName: uploadResult.fileName,
+        filename: uploadResult.filename,
         url: uploadResult.url,
         size: processedBuffer.length,
         mimeType: 'image/jpeg',
@@ -106,11 +106,11 @@ export class FileUploadService {
     return {
       id: fileRecord.id,
       originalName: fileRecord.originalName,
-      fileName: fileRecord.fileName,
+      filename: fileRecord.filename,
       url: fileRecord.url,
       size: fileRecord.size,
       mimeType: fileRecord.mimeType,
-      userId: fileRecord.userId
+      userId: fileRecord.userId || userId
     };
   }
 
@@ -131,16 +131,16 @@ export class FileUploadService {
       format: 'jpeg'
     });
 
-    const fileName = `chats/${matchId}/${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
+    const filename = `chats/${matchId}/${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
     
-    const uploadResult = await this.uploadToS3(processedBuffer, fileName, 'image/jpeg');
+    const uploadResult = await this.uploadToS3(processedBuffer, filename, 'image/jpeg');
     
     // Save file record
     const fileRecord = await prisma.file.create({
       data: {
         userId,
         originalName: file.originalname,
-        fileName: uploadResult.fileName,
+        filename: uploadResult.filename,
         url: uploadResult.url,
         size: processedBuffer.length,
         mimeType: 'image/jpeg',
@@ -152,11 +152,11 @@ export class FileUploadService {
     return {
       id: fileRecord.id,
       originalName: fileRecord.originalName,
-      fileName: fileRecord.fileName,
+      filename: fileRecord.filename,
       url: fileRecord.url,
       size: fileRecord.size,
       mimeType: fileRecord.mimeType,
-      userId: fileRecord.userId
+      userId: fileRecord.userId || userId
     };
   }
 
@@ -183,16 +183,16 @@ export class FileUploadService {
       format: 'jpeg'
     });
 
-    const fileName = `groups/${groupId}/${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
+    const filename = `groups/${groupId}/${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
     
-    const uploadResult = await this.uploadToS3(processedBuffer, fileName, 'image/jpeg');
+    const uploadResult = await this.uploadToS3(processedBuffer, filename, 'image/jpeg');
     
     // Save file record
     const fileRecord = await prisma.file.create({
       data: {
         userId,
         originalName: file.originalname,
-        fileName: uploadResult.fileName,
+        filename: uploadResult.filename,
         url: uploadResult.url,
         size: processedBuffer.length,
         mimeType: 'image/jpeg',
@@ -210,11 +210,11 @@ export class FileUploadService {
     return {
       id: fileRecord.id,
       originalName: fileRecord.originalName,
-      fileName: fileRecord.fileName,
+      filename: fileRecord.filename,
       url: fileRecord.url,
       size: fileRecord.size,
       mimeType: fileRecord.mimeType,
-      userId: fileRecord.userId
+      userId: fileRecord.userId || userId
     };
   }
 
@@ -225,16 +225,16 @@ export class FileUploadService {
       throw createError(400, '인증 문서는 JPG, PNG, PDF 형식만 지원합니다.');
     }
 
-    const fileName = `verification/${userId}/${Date.now()}-document.${file.mimetype.split('/')[1]}`;
+    const filename = `verification/${userId}/${Date.now()}-document.${file.mimetype.split('/')[1]}`;
     
-    const uploadResult = await this.uploadToS3(file.buffer, fileName, file.mimetype);
+    const uploadResult = await this.uploadToS3(file.buffer, filename, file.mimetype);
     
     // Save file record
     const fileRecord = await prisma.file.create({
       data: {
         userId,
         originalName: file.originalname,
-        fileName: uploadResult.fileName,
+        filename: uploadResult.filename,
         url: uploadResult.url,
         size: file.size,
         mimeType: file.mimetype,
@@ -245,11 +245,11 @@ export class FileUploadService {
     return {
       id: fileRecord.id,
       originalName: fileRecord.originalName,
-      fileName: fileRecord.fileName,
+      filename: fileRecord.filename,
       url: fileRecord.url,
       size: fileRecord.size,
       mimeType: fileRecord.mimeType,
-      userId: fileRecord.userId
+      userId: fileRecord.userId || userId
     };
   }
 
@@ -268,7 +268,7 @@ export class FileUploadService {
 
     try {
       // Delete from S3
-      await this.deleteFromS3(file.fileName);
+      await this.deleteFromS3(file.filename);
 
       // Delete from database
       await prisma.file.delete({
@@ -282,12 +282,12 @@ export class FileUploadService {
     }
   }
 
-  async getPresignedUploadUrl(userId: string, fileName: string, contentType: string): Promise<string> {
+  async getPresignedUploadUrl(userId: string, filename: string, contentType: string): Promise<string> {
     if (!this.allowedMimeTypes.includes(contentType)) {
       throw createError(400, '지원하지 않는 파일 형식입니다.');
     }
 
-    const key = `temp/${userId}/${Date.now()}-${fileName}`;
+    const key = `temp/${userId}/${Date.now()}-${filename}`;
     
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
@@ -303,10 +303,10 @@ export class FileUploadService {
     return signedUrl;
   }
 
-  async getPresignedDownloadUrl(fileName: string): Promise<string> {
+  async getPresignedDownloadUrl(filename: string): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
-      Key: fileName
+      Key: filename
     });
 
     const signedUrl = await getSignedUrl(this.s3Client, command, {
@@ -343,10 +343,10 @@ export class FileUploadService {
     return await image.toBuffer();
   }
 
-  private async uploadToS3(buffer: Buffer, fileName: string, contentType: string): Promise<{ fileName: string; url: string }> {
+  private async uploadToS3(buffer: Buffer, filename: string, contentType: string): Promise<{ filename: string; url: string }> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
-      Key: fileName,
+      Key: filename,
       Body: buffer,
       ContentType: contentType,
       ACL: 'public-read'
@@ -354,15 +354,15 @@ export class FileUploadService {
 
     await this.s3Client.send(command);
 
-    const url = `https://${this.bucketName}.s3.${process.env.AWS_REGION || 'ap-northeast-2'}.amazonaws.com/${fileName}`;
+    const url = `https://${this.bucketName}.s3.${process.env.AWS_REGION || 'ap-northeast-2'}.amazonaws.com/${filename}`;
 
-    return { fileName, url };
+    return { filename, url };
   }
 
-  private async deleteFromS3(fileName: string): Promise<void> {
+  private async deleteFromS3(filename: string): Promise<void> {
     const command = new DeleteObjectCommand({
       Bucket: this.bucketName,
-      Key: fileName
+      Key: filename
     });
 
     await this.s3Client.send(command);
@@ -379,7 +379,7 @@ export class FileUploadService {
       select: {
         id: true,
         originalName: true,
-        fileName: true,
+        filename: true,
         url: true,
         size: true,
         mimeType: true,
@@ -437,7 +437,7 @@ export class FileUploadService {
     // Find temp files older than 1 day
     const tempFiles = await prisma.file.findMany({
       where: {
-        fileName: { startsWith: 'temp/' },
+        filename: { startsWith: 'temp/' },
         createdAt: { lt: oneDayAgo }
       }
     });
@@ -446,11 +446,11 @@ export class FileUploadService {
 
     for (const file of tempFiles) {
       try {
-        await this.deleteFromS3(file.fileName);
+        await this.deleteFromS3(file.filename);
         await prisma.file.delete({ where: { id: file.id } });
         cleanedCount++;
       } catch (error) {
-        console.error(`Failed to cleanup temp file ${file.fileName}:`, error);
+        console.error(`Failed to cleanup temp file ${file.filename}:`, error);
       }
     }
 

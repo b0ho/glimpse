@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { createError } from '../middleware/errorHandler';
 import sharp from 'sharp';
+import FormData from 'form-data';
 
 interface OCRResult {
   text: string;
@@ -130,15 +131,18 @@ export class OCRService {
     }
 
     try {
+      // Use FormData for Node.js
       const formData = new FormData();
-      const blob = new Blob([imageBuffer], { type: 'image/jpeg' });
-      formData.append('image', blob, 'image.jpg');
+      formData.append('image', imageBuffer, {
+        filename: 'image.jpg',
+        contentType: 'image/jpeg'
+      });
 
       const response = await axios.post(this.naverApiUrl, formData, {
         headers: {
           'X-NCP-APIGW-API-KEY-ID': this.naverClientId,
           'X-NCP-APIGW-API-KEY': this.naverClientSecret,
-          'Content-Type': 'multipart/form-data'
+          ...formData.getHeaders()
         }
       });
 
@@ -149,17 +153,27 @@ export class OCRService {
       }
 
       const fields = result.images[0].fields || [];
-      const extractedText = fields.map((field: any) => field.inferText).join(' ');
-      const avgConfidence = fields.reduce((sum: number, field: any) => sum + field.inferConfidence, 0) / fields.length;
+      const extractedText = fields.map((field: any) => field.inferText || '').join(' ');
+      const avgConfidence = fields.length > 0 
+        ? fields.reduce((sum: number, field: any) => sum + (field.inferConfidence || 0), 0) / fields.length 
+        : 0;
 
-      const boundingBoxes: BoundingBox[] = fields.map((field: any) => ({
-        text: field.inferText,
-        x: field.boundingPoly.vertices[0].x,
-        y: field.boundingPoly.vertices[0].y,
-        width: field.boundingPoly.vertices[2].x - field.boundingPoly.vertices[0].x,
-        height: field.boundingPoly.vertices[2].y - field.boundingPoly.vertices[0].y,
-        confidence: field.inferConfidence
-      }));
+      const boundingBoxes: BoundingBox[] = fields.map((field: any) => {
+        const vertices = field.boundingPoly?.vertices || [];
+        const x = vertices[0]?.x || 0;
+        const y = vertices[0]?.y || 0;
+        const width = (vertices[2]?.x || 0) - x;
+        const height = (vertices[2]?.y || 0) - y;
+        
+        return {
+          text: field.inferText || '',
+          x,
+          y,
+          width,
+          height,
+          confidence: field.inferConfidence || 0
+        };
+      });
 
       return {
         text: extractedText,
@@ -202,13 +216,18 @@ export class OCRService {
       const confidence = result.textAnnotations[0].confidence || 0.8; // Default confidence
 
       const boundingBoxes: BoundingBox[] = result.textAnnotations.slice(1).map((annotation: any) => {
-        const vertices = annotation.boundingPoly.vertices;
+        const vertices = annotation.boundingPoly?.vertices || [];
+        const x = vertices[0]?.x || 0;
+        const y = vertices[0]?.y || 0;
+        const width = (vertices[2]?.x || 0) - x;
+        const height = (vertices[2]?.y || 0) - y;
+        
         return {
-          text: annotation.description,
-          x: vertices[0].x,
-          y: vertices[0].y,
-          width: vertices[2].x - vertices[0].x,
-          height: vertices[2].y - vertices[0].y,
+          text: annotation.description || '',
+          x,
+          y,
+          width,
+          height,
           confidence: annotation.confidence || 0.8
         };
       });
@@ -246,7 +265,9 @@ export class OCRService {
         const match = line.match(pattern);
         if (match) {
           companyName = match[1] || match[2];
-          companyName = companyName.trim();
+          if (companyName) {
+            companyName = companyName.trim();
+          }
           confidence = Math.max(confidence, 0.8);
           break;
         }
@@ -290,8 +311,12 @@ export class OCRService {
     // Korean ID number pattern
     const idNumberPattern = /(\d{6}[-\s]*\d{7})/;
     
-    // Date patterns
-    const datePattern = /(\d{4})[-.\s]*(\d{1,2})[-.\s]*(\d{1,2})/;
+    // Date patterns - make sure it's specific enough
+    const datePatterns = [
+      /발급일\s*[:：]?\s*(\d{4})[-.\s]*(\d{1,2})[-.\s]*(\d{1,2})/,
+      /발행일\s*[:：]?\s*(\d{4})[-.\s]*(\d{1,2})[-.\s]*(\d{1,2})/,
+      /(\d{4})[-.\s]*(\d{1,2})[-.\s]*(\d{1,2})\s*(?:발급|발행)/
+    ];
 
     const fullText = lines.join(' ');
 
@@ -304,19 +329,24 @@ export class OCRService {
 
     // Extract ID number
     const idMatch = fullText.match(idNumberPattern);
-    if (idMatch) {
+    if (idMatch && idMatch[1]) {
       idNumber = idMatch[1].replace(/\s/g, ''); // Remove spaces
       confidence = Math.max(confidence, 0.9);
     }
 
     // Extract issue date
-    const dateMatch = fullText.match(datePattern);
-    if (dateMatch) {
-      const year = dateMatch[1];
-      const month = dateMatch[2].padStart(2, '0');
-      const day = dateMatch[3].padStart(2, '0');
-      issueDate = `${year}-${month}-${day}`;
-      confidence = Math.max(confidence, 0.7);
+    for (const datePattern of datePatterns) {
+      const dateMatch = fullText.match(datePattern);
+      if (dateMatch) {
+        const year = dateMatch[1];
+        const month = dateMatch[2]?.padStart(2, '0');
+        const day = dateMatch[3]?.padStart(2, '0');
+        if (year && month && day) {
+          issueDate = `${year}-${month}-${day}`;
+          confidence = Math.max(confidence, 0.7);
+          break;
+        }
+      }
     }
 
     // Validate ID number format
@@ -409,11 +439,14 @@ export class OCRService {
     let sum = 0;
 
     for (let i = 0; i < 12; i++) {
-      sum += parseInt(cleanId[i]) * weights[i];
+      const digit = parseInt(cleanId[i] || '0');
+      const weight = weights[i] || 0;
+      sum += digit * weight;
     }
 
     const checkDigit = (11 - (sum % 11)) % 10;
-    return checkDigit === parseInt(cleanId[12]);
+    const lastDigit = parseInt(cleanId[12] || '0');
+    return checkDigit === lastDigit;
   }
 
   async detectDocumentType(imageBuffer: Buffer): Promise<'id_card' | 'company_card' | 'student_card' | 'unknown'> {
@@ -499,6 +532,9 @@ export class OCRService {
       // Handle base64 or URL input
       if (imageInput.startsWith('data:image/')) {
         const base64Data = imageInput.split(',')[1];
+        if (!base64Data) {
+          throw new Error('Invalid base64 image data');
+        }
         imageBuffer = Buffer.from(base64Data, 'base64');
       } else if (imageInput.startsWith('http')) {
         // Handle URL - would need to fetch the image

@@ -13,19 +13,21 @@ datasource db {
 // User Management
 model User {
   id            String   @id @default(cuid())
-  clerkId       String   @unique
+  clerkId       String?  @unique
   anonymousId   String   @unique @default(cuid())
-  phoneNumber   String?  @unique
-  nickname      String
+  phoneNumber   String   @unique
+  nickname      String?
   age           Int?
   gender        Gender?
   profileImage  String?
   bio           String?
   isVerified    Boolean  @default(false)
-  credits       Int      @default(5)
+  credits       Int      @default(1)
   isPremium     Boolean  @default(false)
   premiumUntil  DateTime?
   lastActive    DateTime @default(now())
+  lastOnline    DateTime?
+  deletedAt     DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -45,6 +47,7 @@ model User {
   subscriptions      Subscription[]
   locationCheckIns   LocationCheckIn[]
   createdGroups      Group[] @relation("GroupCreator")
+  files              File[]
 
   @@map("users")
 }
@@ -426,9 +429,14 @@ model File {
   url         String
   path        String?
   uploadedBy  String?
+  userId      String?
+  category    String?
   metadata    Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("files")
 }

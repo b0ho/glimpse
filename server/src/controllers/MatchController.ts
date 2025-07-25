@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { AuthRequest } from '../middleware/auth';
+import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
 import { MatchingService } from '../services/MatchingService';
 import { MatchingStatisticsService } from '../services/MatchingStatisticsService';
@@ -10,13 +10,13 @@ const matchingService = new MatchingService();
 const matchingStatsService = new MatchingStatisticsService();
 
 export class MatchController {
-  async getMatches(req: AuthRequest, res: Response, next: NextFunction) {
+  async getMatches(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const { status = 'ACTIVE', page = 1, limit = 20 } = req.query;
 
       const matches = await matchingService.getUserMatches(
@@ -35,14 +35,14 @@ export class MatchController {
     }
   }
 
-  async getMatchById(req: AuthRequest, res: Response, next: NextFunction) {
+  async getMatchById(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
       const { matchId } = req.params;
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       
       if (!matchId) {
         throw createError(400, '매치 ID가 필요합니다.');
@@ -63,14 +63,14 @@ export class MatchController {
     }
   }
 
-  async deleteMatch(req: AuthRequest, res: Response, next: NextFunction) {
+  async deleteMatch(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
       const { matchId } = req.params;
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       
       if (!matchId) {
         throw createError(400, '매치 ID가 필요합니다.');
@@ -87,13 +87,13 @@ export class MatchController {
     }
   }
 
-  async getMatchStats(req: AuthRequest, res: Response, next: NextFunction) {
+  async getMatchStats(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
-      const userId = req.user.id;
+      const userId = req.auth.userId;
 
       const stats = await matchingStatsService.getUserMatchingStatistics(userId);
 
@@ -106,13 +106,13 @@ export class MatchController {
     }
   }
 
-  async getRecommendations(req: AuthRequest, res: Response, next: NextFunction) {
+  async getRecommendations(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const { groupId, count = 10 } = req.query;
 
       if (!groupId) {
@@ -134,15 +134,15 @@ export class MatchController {
     }
   }
 
-  async reportMatch(req: AuthRequest, res: Response, next: NextFunction) {
+  async reportMatch(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
       const { matchId } = req.params;
       const { reason, description } = req.body;
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       
       if (!matchId) {
         throw createError(400, '매치 ID가 필요합니다.');
@@ -163,14 +163,14 @@ export class MatchController {
     }
   }
 
-  async extendMatch(req: AuthRequest, res: Response, next: NextFunction) {
+  async extendMatch(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
       const { matchId } = req.params;
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       
       if (!matchId) {
         throw createError(400, '매치 ID가 필요합니다.');
@@ -197,13 +197,13 @@ export class MatchController {
     }
   }
 
-  async getMatchingHistory(req: AuthRequest, res: Response, next: NextFunction) {
+  async getMatchingHistory(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const { page = 1, limit = 20, groupId } = req.query;
 
       const history = await matchingService.getMatchingHistory(
@@ -222,14 +222,14 @@ export class MatchController {
     }
   }
 
-  async getMutualConnections(req: AuthRequest, res: Response, next: NextFunction) {
+  async getMutualConnections(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
       const { matchId } = req.params;
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       
       if (!matchId) {
         throw createError(400, '매치 ID가 필요합니다.');

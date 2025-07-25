@@ -2,10 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+
+// Load and validate environment variables
+import env, { logConfigurationStatus } from './config/env';
 
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
@@ -19,19 +21,16 @@ import matchRoutes from './routes/matches';
 import chatRoutes from './routes/chat';
 import paymentRoutes from './routes/payments';
 
-// Load environment variables
-dotenv.config();
-
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:8081",
+    origin: env.FRONTEND_URL,
     methods: ["GET", "POST"]
   }
 });
 
-const PORT = process.env.PORT || 8080;
+const PORT = env.PORT;
 
 // Security middleware
 app.use(helmet());
@@ -73,24 +72,9 @@ app.use('/api/v1/matches', matchRoutes);
 app.use('/api/v1/chat', chatRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 
-// Socket.IO for real-time features
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-  
-  socket.on('join-room', (roomId: string) => {
-    socket.join(roomId);
-    console.log(`User ${socket.id} joined room ${roomId}`);
-  });
-  
-  socket.on('leave-room', (roomId: string) => {
-    socket.leave(roomId);
-    console.log(`User ${socket.id} left room ${roomId}`);
-  });
-  
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
-});
+// Initialize Socket.IO chat handlers
+import { initializeChatSocket } from './socket/chatSocket';
+initializeChatSocket(io);
 
 // Error handling middleware
 app.use(notFound);
@@ -99,8 +83,11 @@ app.use(errorHandler);
 // Start server
 server.listen(PORT, () => {
   console.log(`🚀 Glimpse Server running on port ${PORT}`);
-  console.log(`📱 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:8081'}`);
+  console.log(`📱 Frontend URL: ${env.FRONTEND_URL}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  
+  // Log configuration status
+  logConfigurationStatus();
 });
 
 export { app, io };

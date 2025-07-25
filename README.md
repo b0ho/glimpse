@@ -1,52 +1,65 @@
-# 🍃 Glimpse Dating App - Monorepo
+# 🍃 Glimpse - 익명 데이팅 앱
 
-Anonymous group-based dating app built with React Native + Node.js TypeScript stack.
+프라이버시 중심의 한국 데이팅 앱으로, 익명성과 그룹 기반 매칭을 핵심으로 합니다.
 
-## 📋 Project Structure
+## 📋 프로젝트 구조
 
 ```
-glimpse/
-├── mobile/          # React Native mobile app (Expo)
-├── server/          # Node.js + Express backend
-├── shared/          # Common types, utilities, constants
-├── tests/           # E2E tests (Playwright)
-└── docs/            # Documentation
+glimpse-monorepo/
+├── mobile/          # React Native 모바일 앱 (Expo)
+├── server/          # Node.js + Express 백엔드
+├── shared/          # 공유 타입, 유틸리티, 상수
+├── web/            # Next.js 관리자 대시보드
+└── tests/          # E2E 테스트 (Playwright)
 ```
 
-## 🚀 Quick Start
+## 🚀 빠른 시작
 
-### Prerequisites
+### 필수 요구사항
 - Node.js 18+ 
 - PostgreSQL 14+
-- Expo CLI
-- Android Studio or Xcode (for mobile development)
+- Redis (선택사항)
+- Expo CLI 50+
+- Android Studio 또는 Xcode (모바일 개발용)
 
-### Installation
+### 설치
 
 ```bash
-# Install all dependencies
+# 모든 의존성 설치
 npm install
 
-# Setup database
-createdb glimpse
-npm run db:migrate
+# 환경변수 설정
+cd server && cp .env.example .env
+cd ../mobile && cp .env.example .env
+# .env 파일들을 열어 필요한 값 설정
 
-# Start development servers
+# 데이터베이스 설정
+createdb glimpse_db
+cd server
+npx prisma migrate dev
+npx prisma generate
+
+# 개발 서버 시작
+cd ..
 npm run dev
 ```
 
-This will start:
-- Mobile app on http://localhost:8081 (Expo)
-- Server API on http://localhost:8080
+개발 서버:
+- 모바일 앱: http://localhost:8081 (Expo)
+- 서버 API: http://localhost:8080
+- 웹 대시보드: http://localhost:3000
 
-### Individual Services
+### 개별 서비스 실행
 
 ```bash
-# Mobile app only
+# 모바일 앱만
 npm run dev:mobile
 
-# Server only  
+# 서버만  
 npm run dev:server
+
+# 웹만
+npm run dev:web
 
 # Database management
 npm run db:studio

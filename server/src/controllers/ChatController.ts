@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { AuthRequest } from '../middleware/auth';
+import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
 import { ChatService } from '../services/ChatService';
 import { EncryptionService } from '../services/EncryptionService';
@@ -13,12 +13,12 @@ const encryptionService = new EncryptionService();
 const notificationService = new NotificationService();
 
 export class ChatController {
-  async getMessages(req: AuthRequest, res: Response, next: NextFunction) {
+  async getMessages(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { matchId } = req.params;
       const { page = 1, limit = 50 } = req.query;
       
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
       
@@ -26,7 +26,7 @@ export class ChatController {
         throw createError(400, '매치 ID가 필요합니다.');
       }
       
-      const userId = req.user.id;
+      const userId = req.auth.userId;
 
       // Verify user is part of this match
       const match = await prisma.match.findUnique({
@@ -56,12 +56,12 @@ export class ChatController {
     }
   }
 
-  async sendMessage(req: AuthRequest, res: Response, next: NextFunction) {
+  async sendMessage(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { matchId } = req.params;
       const { content, type = 'TEXT' } = req.body;
       
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
       
@@ -69,7 +69,7 @@ export class ChatController {
         throw createError(400, '매치 ID가 필요합니다.');
       }
       
-      const userId = req.user.id;
+      const userId = req.auth.userId;
 
       if (!content || content.trim().length === 0) {
         throw createError(400, '메시지 내용이 필요합니다.');
@@ -133,11 +133,11 @@ export class ChatController {
     }
   }
 
-  async markAsRead(req: AuthRequest, res: Response, next: NextFunction) {
+  async markAsRead(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.params;
       
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
       
@@ -145,7 +145,7 @@ export class ChatController {
         throw createError(400, '메시지 ID가 필요합니다.');
       }
       
-      const userId = req.user.id;
+      const userId = req.auth.userId;
 
       const message = await prisma.chatMessage.findUnique({
         where: { id: messageId },
@@ -193,11 +193,11 @@ export class ChatController {
     }
   }
 
-  async setTypingStatus(req: AuthRequest, res: Response, next: NextFunction) {
+  async setTypingStatus(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { matchId } = req.params;
       const { isTyping } = req.body;
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       
       if (!matchId) {
         throw createError(400, '매치 ID가 필요합니다.');
@@ -233,9 +233,9 @@ export class ChatController {
     }
   }
 
-  async getChatSummary(req: AuthRequest, res: Response, next: NextFunction) {
+  async getChatSummary(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       const { page = 1, limit = 20 } = req.query;
 
       const chatSummary = await chatService.getChatSummary(
@@ -253,10 +253,10 @@ export class ChatController {
     }
   }
 
-  async deleteMessage(req: AuthRequest, res: Response, next: NextFunction) {
+  async deleteMessage(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.params;
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       
       if (!messageId) {
         throw createError(400, '메시지 ID가 필요합니다.');
@@ -302,11 +302,11 @@ export class ChatController {
     }
   }
 
-  async reportMessage(req: AuthRequest, res: Response, next: NextFunction) {
+  async reportMessage(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.params;
       const { reason, description } = req.body;
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       
       if (!messageId) {
         throw createError(400, '메시지 ID가 필요합니다.');
@@ -353,11 +353,11 @@ export class ChatController {
     }
   }
 
-  async getMessageSearch(req: AuthRequest, res: Response, next: NextFunction) {
+  async getMessageSearch(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { matchId } = req.params;
       const { query, page = 1, limit = 20 } = req.query as any;
-      const userId = req.user!.id;
+      const userId = req.auth!.userId;
       
       if (!matchId) {
         throw createError(400, '매치 ID가 필요합니다.');

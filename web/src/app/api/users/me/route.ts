@@ -13,11 +13,12 @@ interface UserWithTokens extends User {
 
 function prismaUserToUserResponse(prismaUser: UserWithTokens): UserResponse {
   return {
-    id: prismaUser.clerkId,
+    id: prismaUser.clerkId || '',
+    anonymousId: prismaUser.anonymousId,
     phoneNumber: prismaUser.phoneNumber || '',
-    nickname: prismaUser.nickname,
+    nickname: prismaUser.nickname || undefined,
     age: prismaUser.age || undefined,
-    gender: prismaUser.gender || undefined,
+    gender: prismaUser.gender as 'MALE' | 'FEMALE' | 'OTHER' | undefined,
     profileImage: prismaUser.profileImage || undefined,
     bio: prismaUser.bio || undefined,
     isVerified: prismaUser.isVerified,

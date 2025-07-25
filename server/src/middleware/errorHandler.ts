@@ -11,7 +11,7 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  let { statusCode = 500, message } = error;
+  const { statusCode = 500, message } = error;
 
   // Development error response
   if (process.env.NODE_ENV === 'development') {

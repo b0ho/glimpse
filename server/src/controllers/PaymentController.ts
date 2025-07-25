@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { PrismaClient, PaymentType, PaymentStatus } from '@prisma/client';
-import { AuthRequest } from '../middleware/auth';
+import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
 import { PaymentService } from '../services/PaymentService';
 import { NotificationService } from '../services/NotificationService';
@@ -10,13 +10,13 @@ const paymentService = new PaymentService();
 const notificationService = new NotificationService();
 
 export class PaymentController {
-  async createPayment(req: AuthRequest, res: Response, next: NextFunction) {
+  async createPayment(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const { type, amount, currency = 'KRW', paymentMethod = 'TOSS' } = req.body;
 
       if (!type || !amount) {
@@ -45,15 +45,15 @@ export class PaymentController {
     }
   }
 
-  async processPayment(req: AuthRequest, res: Response, next: NextFunction) {
+  async processPayment(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
       const { paymentId } = req.params;
       const { paymentToken, paymentKey } = req.body;
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       
       if (!paymentId) {
         throw createError(400, '결제 ID가 필요합니다.');
@@ -91,13 +91,13 @@ export class PaymentController {
     }
   }
 
-  async getPaymentHistory(req: AuthRequest, res: Response, next: NextFunction) {
+  async getPaymentHistory(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const { page = 1, limit = 20, type } = req.query;
 
       const payments = await prisma.payment.findMany({
@@ -143,13 +143,13 @@ export class PaymentController {
     }
   }
 
-  async getCurrentSubscription(req: AuthRequest, res: Response, next: NextFunction) {
+  async getCurrentSubscription(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
-      const userId = req.user.id;
+      const userId = req.auth.userId;
 
       const subscription = await prisma.subscription.findFirst({
         where: {
@@ -189,13 +189,13 @@ export class PaymentController {
     }
   }
 
-  async cancelSubscription(req: AuthRequest, res: Response, next: NextFunction) {
+  async cancelSubscription(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
-      const userId = req.user.id;
+      const userId = req.auth.userId;
 
       const subscription = await prisma.subscription.findFirst({
         where: {
@@ -232,14 +232,14 @@ export class PaymentController {
     }
   }
 
-  async verifyPayment(req: AuthRequest, res: Response, next: NextFunction) {
+  async verifyPayment(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
       const { paymentId } = req.params;
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       
       if (!paymentId) {
         throw createError(400, '결제 ID가 필요합니다.');
@@ -273,15 +273,15 @@ export class PaymentController {
     }
   }
 
-  async refundPayment(req: AuthRequest, res: Response, next: NextFunction) {
+  async refundPayment(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         throw createError(401, '인증이 필요합니다.');
       }
 
       const { paymentId } = req.params;
       const { reason } = req.body;
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       
       if (!paymentId) {
         throw createError(400, '결제 ID가 필요합니다.');
@@ -377,7 +377,7 @@ export class PaymentController {
     }
   }
 
-  async getPaymentMethods(req: AuthRequest, res: Response, next: NextFunction) {
+  async getPaymentMethods(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const paymentMethods = [
         {
@@ -434,7 +434,7 @@ export class PaymentController {
     }
   }
 
-  async getPricingPackages(req: AuthRequest, res: Response, next: NextFunction) {
+  async getPricingPackages(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const packages = [
         // Credit packages
