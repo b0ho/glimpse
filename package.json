@@ -5,7 +5,7 @@
   "description": "Glimpse Dating App - Monorepo with Mobile + Server",
   "workspaces": [
     "web",
-    "mobile", 
+    "mobile",
     "server",
     "shared"
   ],
@@ -20,6 +20,9 @@
     "test": "npm run test:web && npm run test:mobile",
     "test:web": "cd web && jest",
     "test:mobile": "cd mobile && npm test",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
     "lint": "npm run lint:server && npm run lint:mobile",
     "lint:server": "cd server && npm run lint",
     "lint:mobile": "eslint mobile --ext .js,.jsx,.ts,.tsx",
@@ -82,6 +85,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-native": "^5.0.0",
+    "playwright": "^1.54.1",
     "prettier": "^3.6.2",
     "typescript": "~5.8.3"
   },
