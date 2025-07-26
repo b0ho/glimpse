@@ -10,7 +10,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix"
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "seed:companies": "tsx src/scripts/seedCompanyDomains.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.850.0",

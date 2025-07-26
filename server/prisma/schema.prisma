@@ -35,6 +35,7 @@ model User {
   deviceTokens       UserDeviceToken[]
   fcmTokens          FcmToken[]
   verifications      CompanyVerification[]
+  emailVerifications EmailVerification[]
   groupMemberships   GroupMember[]
   sentLikes          UserLike[] @relation("SentLikes")
   receivedLikes      UserLike[] @relation("ReceivedLikes")
@@ -439,4 +440,45 @@ model File {
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("files")
+}
+
+// Company Domain Verification
+model CompanyDomain {
+  id           String    @id @default(cuid())
+  domain       String    @unique
+  companyName  String
+  companyNameKr String?  // 한글 회사명
+  isVerified   Boolean   @default(true)
+  employeeCount Int?
+  industry     String?
+  logoUrl      String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([domain])
+  @@index([isVerified])
+  @@map("company_domains")
+}
+
+// Email Verification
+model EmailVerification {
+  id          String    @id @default(cuid())
+  userId      String
+  email       String
+  domain      String
+  code        String
+  isVerified  Boolean   @default(false)
+  expiresAt   DateTime
+  verifiedAt  DateTime?
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, email])
+  @@index([email])
+  @@index([code])
+  @@index([expiresAt])
+  @@map("email_verifications")
 }

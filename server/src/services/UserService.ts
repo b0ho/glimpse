@@ -1,5 +1,6 @@
 import { prisma } from "../config/database";
 import { createError } from '../middleware/errorHandler';
+import { contentFilterService } from './ContentFilterService';
 import { PRICING, APP_CONFIG } from '@shared/constants';
 import { getMatchCompatibilityScore } from '@shared/utils';
 
@@ -194,6 +195,62 @@ export class UserService {
       matches: matchesCount,
       groups: groupsCount
     };
+  }
+
+  async updateProfile(userId: string, data: {
+    nickname?: string;
+    bio?: string;
+    age?: number;
+    profileImage?: string;
+  }) {
+    const updateData: any = {};
+
+    // Nickname filtering
+    if (data.nickname) {
+      const nicknameFilter = await contentFilterService.filterText(data.nickname, 'profile');
+      if (nicknameFilter.severity === 'blocked') {
+        throw createError(400, '닉네임에 부적절한 내용이 포함되어 있습니다.');
+      }
+      updateData.nickname = nicknameFilter.filteredText || data.nickname;
+    }
+
+    // Bio filtering
+    if (data.bio) {
+      const bioFilter = await contentFilterService.filterText(data.bio, 'profile');
+      if (bioFilter.severity === 'blocked') {
+        throw createError(400, '자기소개에 부적절한 내용이 포함되어 있습니다.');
+      }
+      updateData.bio = bioFilter.filteredText || data.bio;
+    }
+
+    // Age validation
+    if (data.age !== undefined) {
+      if (data.age < 18 || data.age > 100) {
+        throw createError(400, '나이는 18세 이상 100세 이하여야 합니다.');
+      }
+      updateData.age = data.age;
+    }
+
+    // Profile image validation (if URL is provided)
+    if (data.profileImage) {
+      // Image content filtering can be added here
+      updateData.profileImage = data.profileImage;
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        nickname: true,
+        bio: true,
+        age: true,
+        gender: true,
+        profileImage: true
+      }
+    });
+
+    return updatedUser;
   }
 }
 

@@ -29,6 +29,10 @@ import groupRoutes from './routes/groups';
 import matchRoutes from './routes/matches';
 import chatRoutes from './routes/chat';
 import paymentRoutes from './routes/payments';
+import companyDomainRoutes from './routes/companyDomain';
+import contentFilterRoutes from './routes/contentFilter';
+import notificationRoutes from './routes/notifications';
+import adminRoutes from './routes/admin';
 
 const app = express();
 
@@ -82,7 +86,6 @@ app.get('/health', (req, res) => {
 
 // Metrics endpoint (Prometheus format)
 app.get('/metrics', async (req, res) => {
-  const { register } = await import('@opentelemetry/sdk-metrics');
   res.set('Content-Type', 'text/plain');
   res.end('# OpenTelemetry metrics available via OTLP exporter\n# Configure your metrics backend to scrape from OTLP endpoint');
 });
@@ -100,6 +103,10 @@ app.use('/api/v1/groups', groupRoutes);
 app.use('/api/v1/matches', matchRoutes);
 app.use('/api/v1/chat', chatRoutes);
 app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/company', companyDomainRoutes);
+app.use('/api/v1/content-filter', contentFilterRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // Initialize Socket.IO chat handlers
 import { initializeChatSocket } from './socket/chatSocket';

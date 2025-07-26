@@ -8,6 +8,82 @@ import { NOTIFICATION_TYPES } from '../../../shared/constants';
 const firebaseService = new FirebaseService();
 
 export class NotificationService {
+  private static instance: NotificationService;
+  
+  private constructor() {}
+  
+  static getInstance(): NotificationService {
+    if (!NotificationService.instance) {
+      NotificationService.instance = new NotificationService();
+    }
+    return NotificationService.instance;
+  }
+
+  // FCM 토큰 관리
+  async registerFCMToken(userId: string, token: string, deviceType: 'ios' | 'android'): Promise<void> {
+    try {
+      // 기존 토큰이 있는지 확인
+      const existingToken = await prisma.fcmToken.findUnique({
+        where: { token }
+      });
+
+      if (existingToken) {
+        // 다른 사용자의 토큰이면 비활성화
+        if (existingToken.userId !== userId) {
+          await prisma.fcmToken.update({
+            where: { id: existingToken.id },
+            data: { isActive: false }
+          });
+        } else {
+          // 같은 사용자의 토큰이면 활성화
+          await prisma.fcmToken.update({
+            where: { id: existingToken.id },
+            data: { isActive: true, updatedAt: new Date() }
+          });
+          return;
+        }
+      }
+
+      // 같은 사용자의 다른 디바이스 토큰 비활성화 (선택적)
+      // 한 사용자가 여러 디바이스를 사용할 수 있으므로 필요에 따라 조정
+      
+      // 새 토큰 등록
+      await prisma.fcmToken.create({
+        data: {
+          userId,
+          token,
+          deviceType,
+          isActive: true
+        }
+      });
+    } catch (error) {
+      console.error('FCM 토큰 등록 실패:', error);
+      throw createError(500, 'FCM 토큰 등록에 실패했습니다.');
+    }
+  }
+
+  async removeFCMToken(token: string): Promise<void> {
+    try {
+      await prisma.fcmToken.update({
+        where: { token },
+        data: { isActive: false }
+      });
+    } catch (error) {
+      console.error('FCM 토큰 제거 실패:', error);
+    }
+  }
+
+  async getActiveTokens(userId: string): Promise<string[]> {
+    const tokens = await prisma.fcmToken.findMany({
+      where: {
+        userId,
+        isActive: true
+      },
+      select: { token: true }
+    });
+
+    return tokens.map(t => t.token);
+  }
   async sendLikeNotification(userId: string, fromUserId: string, groupId: string) {
     try {
       const [toUser, fromUser, group] = await Promise.all([
@@ -383,7 +459,6 @@ export class NotificationService {
 
   private async sendPushNotification(userId: string, payload: any) {
     try {
-      // Send notification using FirebaseService
       await firebaseService.sendNotificationToUser({
         userId,
         payload: {
@@ -446,4 +521,4 @@ export class NotificationService {
   }
 }
 
-export const notificationService = new NotificationService();
+export const notificationService = NotificationService.getInstance();

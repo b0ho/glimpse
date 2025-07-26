@@ -2,6 +2,7 @@ import { MessageType } from '@prisma/client';
 import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import { encryptionService } from './EncryptionService';
+import { contentFilterService } from './ContentFilterService';
 import { CHAT_CONFIG } from '@shared/constants';
 
 
@@ -58,8 +59,17 @@ export class ChatService {
       throw createError(400, `메시지는 ${CHAT_CONFIG.MAX_MESSAGE_LENGTH}자 이하여야 합니다.`);
     }
 
+    // Content filtering
+    const filterResult = await contentFilterService.filterText(content, 'chat');
+    if (filterResult.severity === 'blocked') {
+      throw createError(400, '부적절한 내용이 포함되어 있습니다.');
+    }
+
+    // Use filtered content if there were warnings
+    const finalContent = filterResult.filteredText || content;
+
     // Encrypt content
-    const encryptedContent = await encryptionService.encrypt(content);
+    const encryptedContent = await encryptionService.encrypt(finalContent);
 
     const message = await prisma.chatMessage.create({
       data: {

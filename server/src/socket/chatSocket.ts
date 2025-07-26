@@ -3,13 +3,12 @@ import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { ChatService } from '../services/ChatService';
 import { MatchingService } from '../services/MatchingService';
-import { NotificationService } from '../services/NotificationService';
+import { notificationService } from '../services/NotificationService';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const chatService = new ChatService();
 const matchingService = new MatchingService();
-const notificationService = new NotificationService();
 
 // Store user socket mappings
 const userSocketMap = new Map<string, string>();

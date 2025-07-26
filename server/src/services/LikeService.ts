@@ -1,11 +1,8 @@
 import { prisma } from "../config/database";
 import { createError } from '../middleware/errorHandler';
-import { NotificationService } from './NotificationService';
+import { notificationService } from './NotificationService';
 import { APP_CONFIG } from '@shared/constants';
 import { canUserLike, calculateLikeCost } from '@shared/utils';
-
-
-const notificationService = new NotificationService();
 
 export class LikeService {
   async sendLike(fromUserId: string, toUserId: string, groupId: string) {

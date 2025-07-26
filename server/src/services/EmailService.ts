@@ -19,9 +19,10 @@ interface VerificationEmailData {
 }
 
 export class EmailService {
+  private static instance: EmailService;
   private transporter: nodemailer.Transporter;
 
-  constructor() {
+  private constructor() {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587'),
@@ -31,6 +32,13 @@ export class EmailService {
         pass: process.env.SMTP_PASSWORD
       }
     });
+  }
+
+  static getInstance(): EmailService {
+    if (!EmailService.instance) {
+      EmailService.instance = new EmailService();
+    }
+    return EmailService.instance;
   }
 
   async sendEmail(options: EmailOptions): Promise<boolean> {
@@ -475,4 +483,4 @@ export class EmailService {
   }
 }
 
-export const emailService = new EmailService();
+export const emailService = EmailService.getInstance();

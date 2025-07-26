@@ -1,6 +1,7 @@
 import { GroupType } from '@prisma/client';
 import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
+import { contentFilterService } from './ContentFilterService';
 import { GROUP_CONFIG } from '@shared/constants';
 import { generateId } from '@shared/utils';
 
@@ -96,10 +97,27 @@ export class GroupService {
       throw createError(400, '위치 기반 그룹은 위치 정보가 필요합니다.');
     }
 
+    // Filter group name
+    const nameFilter = await contentFilterService.filterText(name, 'group');
+    if (nameFilter.severity === 'blocked') {
+      throw createError(400, '그룹 이름에 부적절한 내용이 포함되어 있습니다.');
+    }
+    const filteredName = nameFilter.filteredText || name;
+
+    // Filter description if provided
+    let filteredDescription = description;
+    if (description) {
+      const descFilter = await contentFilterService.filterText(description, 'group');
+      if (descFilter.severity === 'blocked') {
+        throw createError(400, '그룹 설명에 부적절한 내용이 포함되어 있습니다.');
+      }
+      filteredDescription = descFilter.filteredText || description;
+    }
+
     const group = await prisma.group.create({
       data: {
-        name,
-        description,
+        name: filteredName,
+        description: filteredDescription,
         type,
         maxMembers,
         settings,
@@ -179,14 +197,35 @@ export class GroupService {
   async updateGroup(groupId: string, updateData: any) {
     const { name, description, settings, location, maxMembers } = updateData;
 
+    const filteredData: any = {};
+
+    // Filter group name if provided
+    if (name) {
+      const nameFilter = await contentFilterService.filterText(name, 'group');
+      if (nameFilter.severity === 'blocked') {
+        throw createError(400, '그룹 이름에 부적절한 내용이 포함되어 있습니다.');
+      }
+      filteredData.name = nameFilter.filteredText || name;
+    }
+
+    // Filter description if provided
+    if (description) {
+      const descFilter = await contentFilterService.filterText(description, 'group');
+      if (descFilter.severity === 'blocked') {
+        throw createError(400, '그룹 설명에 부적절한 내용이 포함되어 있습니다.');
+      }
+      filteredData.description = descFilter.filteredText || description;
+    }
+
+    // Add other fields without filtering
+    if (settings) filteredData.settings = settings;
+    if (location) filteredData.location = location;
+    if (maxMembers) filteredData.maxMembers = maxMembers;
+
     const group = await prisma.group.update({
       where: { id: groupId },
       data: {
-        ...(name && { name }),
-        ...(description && { description }),
-        ...(settings && { settings }),
-        ...(location && { location }),
-        ...(maxMembers && { maxMembers }),
+        ...filteredData,
         updatedAt: new Date()
       }
     });
