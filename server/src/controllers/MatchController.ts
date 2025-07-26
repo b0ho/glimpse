@@ -4,6 +4,7 @@ import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
 import { matchingService } from '../services/MatchingService';
 import { matchingStatisticsService } from '../services/MatchingStatisticsService';
+import { recordMatch, recordLike } from '../middleware/metrics';
 
 export class MatchController {
   async getMatches(req: ClerkAuthRequest, res: Response, next: NextFunction) {

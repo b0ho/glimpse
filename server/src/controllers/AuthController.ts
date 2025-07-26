@@ -5,6 +5,7 @@ import { authService } from '../services/AuthService';
 import { smsService } from '../services/SMSService';
 import { createError } from '../middleware/errorHandler';
 import { validatePhoneNumber } from '@shared/utils';
+import { recordUserRegistration } from '../middleware/metrics';
 
 export class AuthController {
   async sendSMS(req: Request, res: Response, next: NextFunction) {
@@ -58,6 +59,9 @@ export class AuthController {
             isVerified: true
           }
         });
+        
+        // Record user registration metric
+        recordUserRegistration('regular');
       } else {
         // Update verification status
         user = await prisma.user.update({

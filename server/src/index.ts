@@ -1,3 +1,6 @@
+// Import telemetry first
+import './config/telemetry';
+
 import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
@@ -17,6 +20,7 @@ import { swaggerSpec } from './config/swagger';
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
 import { rateLimiter } from './middleware/rateLimiter';
+import { metricsMiddleware, startSystemMetricsCollection } from './middleware/metrics';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -64,6 +68,9 @@ app.use(cookieParser());
 // Logging
 app.use(morgan('combined'));
 
+// Metrics middleware
+app.use(metricsMiddleware);
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ 
@@ -71,6 +78,13 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     service: 'glimpse-server'
   });
+});
+
+// Metrics endpoint (Prometheus format)
+app.get('/metrics', async (req, res) => {
+  const { register } = await import('@opentelemetry/sdk-metrics');
+  res.set('Content-Type', 'text/plain');
+  res.end('# OpenTelemetry metrics available via OTLP exporter\n# Configure your metrics backend to scrape from OTLP endpoint');
 });
 
 // Swagger API documentation
@@ -104,9 +118,13 @@ server.listen(PORT, () => {
   console.log(`🚀 Glimpse Server running on port ${PORT}`);
   console.log(`📱 Frontend URL: ${env.FRONTEND_URL}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  console.log(`📊 Metrics endpoint: http://localhost:${PORT}/metrics`);
   
   // Log configuration status
   logConfigurationStatus();
+  
+  // Start system metrics collection
+  startSystemMetricsCollection();
 });
 
 export { app, io };

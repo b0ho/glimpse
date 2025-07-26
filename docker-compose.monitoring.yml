@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: glimpse-otel-collector
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml
+    ports:
+      - "4317:4317"     # OTLP gRPC receiver
+      - "4318:4318"     # OTLP HTTP receiver
+      - "8888:8888"     # Prometheus metrics exposed by the collector
+      - "8889:8889"     # Prometheus exporter metrics
+      - "13133:13133"   # health_check extension
+      - "55679:55679"   # zpages extension
+    depends_on:
+      - prometheus
+      - tempo
+    networks:
+      - glimpse-network
+
+  # Prometheus for metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: glimpse-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - glimpse-network
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: glimpse-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=glimpse123
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+      - ./dashboards:/var/lib/grafana/dashboards
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3003:3000"
+    depends_on:
+      - prometheus
+      - tempo
+    networks:
+      - glimpse-network
+
+  # Tempo for distributed tracing
+  tempo:
+    image: grafana/tempo:latest
+    container_name: glimpse-tempo
+    command: [ "-config.file=/etc/tempo.yml" ]
+    volumes:
+      - ./tempo.yml:/etc/tempo.yml
+      - tempo_data:/tmp/tempo
+    ports:
+      - "3200:3200"   # tempo
+      - "4317"        # otlp grpc
+      - "4318"        # otlp http
+    networks:
+      - glimpse-network
+
+  # Loki for log aggregation
+  loki:
+    image: grafana/loki:latest
+    container_name: glimpse-loki
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    networks:
+      - glimpse-network
+
+  # Promtail for log collection
+  promtail:
+    image: grafana/promtail:latest
+    container_name: glimpse-promtail
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log:ro
+      - ./logs:/app/logs:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - glimpse-network
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  tempo_data:
+  loki_data:
+
+networks:
+  glimpse-network:
+    external: true
