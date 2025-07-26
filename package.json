@@ -35,6 +35,9 @@
     "db:migrate": "cd server && npx prisma migrate dev",
     "db:studio": "cd server && npx prisma studio",
     "db:generate": "cd server && npx prisma generate",
+    "env:setup": "node scripts/env-setup.js",
+    "env:check": "node scripts/env-check.js",
+    "env:vault": "npx dotenv-vault@latest",
     "postinstall": "npm run db:generate"
   },
   "dependencies": {
@@ -80,7 +83,9 @@
     "@typescript-eslint/eslint-plugin": "^8.37.0",
     "@typescript-eslint/parser": "^8.37.0",
     "babel-plugin-module-resolver": "^5.0.2",
+    "chalk": "^4.1.2",
     "concurrently": "^8.2.2",
+    "dotenv-vault": "^1.27.0",
     "eslint": "^9.31.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
