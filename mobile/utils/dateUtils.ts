@@ -22,6 +22,12 @@ export const formatTimeAgo = (date: Date): string => {
   } else if (diffInSeconds < 604800) {
     const days = Math.floor(diffInSeconds / 86400);
     return `${days}일 전`;
+  } else if (diffInSeconds < 2592000) { // 30일
+    const weeks = Math.floor(diffInSeconds / 604800);
+    return `${weeks}주 전`;
+  } else if (diffInSeconds < 31536000) { // 365일
+    const months = Math.floor(diffInSeconds / 2592000);
+    return `${months}개월 전`;
   } else {
     return date.toLocaleDateString('ko-KR', {
       month: 'short',
@@ -67,4 +73,81 @@ export const formatDetailedTimeAgo = (date: Date): string => {
   } else {
     return date.toLocaleDateString('ko-KR');
   }
+};
+
+/**
+ * 상대적 시간 표현 (formatTimeAgo의 별칭)
+ */
+export const formatRelativeTime = formatTimeAgo;
+
+/**
+ * 날짜를 한국어 형식으로 표현
+ * @param date - 포맷할 날짜
+ * @returns "YYYY년 M월 D일" 형식의 문자열
+ */
+export const formatDate = (date: Date | string): string => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
+/**
+ * 시간을 HH:mm 형식으로 표현
+ * @param date - 포맷할 날짜
+ * @returns "HH:mm" 형식의 문자열
+ */
+export const formatTime = (date: Date | string): string => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleTimeString('ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+};
+
+/**
+ * 오늘 날짜인지 확인
+ * @param date - 확인할 날짜
+ * @returns 오늘이면 true
+ */
+export const isToday = (date: Date | string): boolean => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const today = new Date();
+  return (
+    dateObj.getDate() === today.getDate() &&
+    dateObj.getMonth() === today.getMonth() &&
+    dateObj.getFullYear() === today.getFullYear()
+  );
+};
+
+/**
+ * 어제 날짜인지 확인
+ * @param date - 확인할 날짜
+ * @returns 어제면 true
+ */
+export const isYesterday = (date: Date | string): boolean => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return (
+    dateObj.getDate() === yesterday.getDate() &&
+    dateObj.getMonth() === yesterday.getMonth() &&
+    dateObj.getFullYear() === yesterday.getFullYear()
+  );
+};
+
+/**
+ * 두 날짜 사이의 일수 차이 계산
+ * @param date1 - 첫 번째 날짜
+ * @param date2 - 두 번째 날짜
+ * @returns 일수 차이 (date2 - date1)
+ */
+export const getDaysDifference = (date1: Date | string, date2: Date | string): number => {
+  const dateObj1 = typeof date1 === 'string' ? new Date(date1) : date1;
+  const dateObj2 = typeof date2 === 'string' ? new Date(date2) : date2;
+  const diffInTime = dateObj2.getTime() - dateObj1.getTime();
+  return Math.floor(diffInTime / (1000 * 60 * 60 * 24));
 };
