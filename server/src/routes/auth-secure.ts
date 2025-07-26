@@ -13,7 +13,7 @@ router.post('/verify-phone',
   validate([
     validators.phoneNumber
   ]),
-  authController.verifyPhone
+  authController.sendSMS
 );
 
 // SMS verification - with validation

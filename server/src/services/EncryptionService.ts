@@ -27,18 +27,18 @@ export class EncryptionService {
 
   decrypt(encryptedData: string): string {
     const parts = encryptedData.split(':');
-    if (parts.length !== 3) {
+    if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) {
       throw new Error('Invalid encrypted data format');
     }
     
-    const iv = Buffer.from(parts[0], 'hex');
-    const authTag = Buffer.from(parts[1], 'hex');
+    const iv = Buffer.from(parts[0], 'hex' as BufferEncoding);
+    const authTag = Buffer.from(parts[1], 'hex' as BufferEncoding);
     const encrypted = parts[2];
     
     const decipher = crypto.createDecipheriv(this.algorithm, this.key, iv);
     decipher.setAuthTag(authTag);
     
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    let decrypted = decipher.update(encrypted, 'hex' as BufferEncoding, 'utf8');
     decrypted += decipher.final('utf8');
     
     return decrypted;

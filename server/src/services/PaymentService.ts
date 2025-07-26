@@ -489,6 +489,94 @@ export class PaymentService {
     }
   }
 
+  async createCreditPurchase(data: { userId: string; amount: number; credits: number; paymentMethod: string }) {
+    const payment = await prisma.payment.create({
+      data: {
+        userId: data.userId,
+        type: 'LIKE_CREDITS',
+        amount: data.amount,
+        currency: 'KRW',
+        status: 'COMPLETED',
+        method: data.paymentMethod as PaymentMethod,
+        metadata: {
+          credits: data.credits
+        }
+      }
+    });
+
+    return payment;
+  }
+
+  async createSubscription(data: { userId: string; plan: string; paymentMethod: string }) {
+    const amount = data.plan === 'MONTHLY' ? 9900 : 99000;
+    const days = data.plan === 'MONTHLY' ? 30 : 365;
+    const endDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+    const subscription = await prisma.subscription.create({
+      data: {
+        userId: data.userId,
+        plan: data.plan as 'MONTHLY' | 'YEARLY',
+        status: 'ACTIVE',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: endDate
+      }
+    });
+
+    await prisma.payment.create({
+      data: {
+        userId: data.userId,
+        type: 'PREMIUM_SUBSCRIPTION',
+        amount,
+        currency: 'KRW',
+        status: 'COMPLETED',
+        method: data.paymentMethod as PaymentMethod,
+        metadata: {
+          subscriptionId: subscription.id,
+          plan: data.plan
+        }
+      }
+    });
+
+    return subscription;
+  }
+
+  async cancelSubscription(userId: string) {
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        userId,
+        status: 'ACTIVE'
+      }
+    });
+
+    if (!subscription) {
+      throw createError(404, '활성 구독을 찾을 수 없습니다.');
+    }
+
+    const cancelled = await prisma.subscription.update({
+      where: { id: subscription.id },
+      data: {
+        status: 'CANCELLED'
+      }
+    });
+
+    return cancelled;
+  }
+
+  async handleStripeWebhook(event: any) {
+    // Handle Stripe webhook events
+    switch (event.type) {
+      case 'checkout.session.completed':
+        // Process the successful payment
+        const session = event.data.object;
+        console.log('Stripe payment successful:', session);
+        break;
+      default:
+        console.log('Unhandled Stripe event type:', event.type);
+    }
+
+    return { success: true, processed: true };
+  }
+
   async handleTossWebhook(data: any) {
     const { eventType, data: eventData } = data;
 

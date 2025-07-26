@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { env } from '../config/env';
+import env from '../config/env';
 
 export class EncryptionServiceEnhanced {
   private readonly algorithm = 'aes-256-gcm';

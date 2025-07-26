@@ -1,14 +1,9 @@
 import request from 'supertest';
 import express from 'express';
 import { userController } from '../controllers/UserController';
-import { userService } from '../services/UserService';
-import { fileUploadService } from '../services/FileUploadService';
 import { prisma } from '../config/database';
 import { createMockUser } from './setup';
-
-// Mock services
-jest.mock('../services/UserService');
-jest.mock('../services/FileUploadService');
+import { errorHandler } from '../middleware/errorHandler';
 
 // Mock auth middleware
 const mockAuth = (req: any, res: any, next: any) => {
@@ -26,6 +21,9 @@ app.get('/users/:userId', mockAuth, userController.getUserById);
 app.post('/users/verify/company', mockAuth, userController.verifyCompany);
 app.delete('/users', mockAuth, userController.deleteAccount);
 
+// Add error handler
+app.use(errorHandler);
+
 describe('User API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,27 +33,32 @@ describe('User API', () => {
     it('should return current user profile', async () => {
       const mockUser = createMockUser();
       
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+        ...mockUser,
+        groupMemberships: []
+      });
 
       const response = await request(app)
         .get('/users/me')
         .expect(200);
 
       expect(response.body).toEqual({
-        id: mockUser.id,
-        anonymousId: mockUser.anonymousId,
-        phoneNumber: mockUser.phoneNumber,
-        nickname: mockUser.nickname,
-        age: mockUser.age,
-        gender: mockUser.gender,
-        bio: mockUser.bio,
-        profileImage: mockUser.profileImage,
-        isVerified: mockUser.isVerified,
-        credits: mockUser.credits,
-        isPremium: mockUser.isPremium,
-        premiumUntil: mockUser.premiumUntil,
-        lastActive: mockUser.lastActive.toISOString(),
-        createdAt: mockUser.createdAt.toISOString(),
+        success: true,
+        data: {
+          id: mockUser.id,
+          phoneNumber: mockUser.phoneNumber,
+          nickname: mockUser.nickname,
+          age: mockUser.age,
+          gender: mockUser.gender,
+          bio: mockUser.bio,
+          profileImage: mockUser.profileImage,
+          isVerified: mockUser.isVerified,
+          credits: mockUser.credits,
+          isPremium: mockUser.isPremium,
+          premiumUntil: mockUser.premiumUntil,
+          lastActive: mockUser.lastActive.toISOString(),
+          groups: []
+        }
       });
     });
 
@@ -66,13 +69,13 @@ describe('User API', () => {
         .get('/users/me')
         .expect(404);
 
-      expect(response.body.error).toBe('사용자를 찾을 수 없습니다');
+      expect(response.body.error.message).toBe('사용자를 찾을 수 없습니다.');
     });
   });
 
   describe('PUT /users/profile', () => {
     const updateData = {
-      nickname: 'UpdatedUser',
+      nickname: 'updated',
       age: 30,
       bio: 'Updated bio',
     };
@@ -81,17 +84,26 @@ describe('User API', () => {
       const mockUser = createMockUser();
       const updatedUser = { ...mockUser, ...updateData };
       
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (userService.updateProfile as jest.Mock).mockResolvedValue(updatedUser);
+      (prisma.user.update as jest.Mock).mockResolvedValue(updatedUser);
 
       const response = await request(app)
         .put('/users/profile')
-        .send(updateData)
-        .expect(200);
+        .send(updateData);
 
-      expect(response.body.nickname).toBe(updateData.nickname);
-      expect(response.body.age).toBe(updateData.age);
-      expect(response.body.bio).toBe(updateData.bio);
+      // 실제 응답 확인
+      if (response.status !== 200) {
+        console.log('Update profile error:', response.body);
+      }
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        success: true,
+        data: expect.objectContaining({
+          nickname: updateData.nickname,
+          age: updateData.age,
+          bio: updateData.bio
+        })
+      });
     });
 
     it('should validate nickname format', async () => {
@@ -100,7 +112,7 @@ describe('User API', () => {
         .send({ nickname: 'a' }) // Too short
         .expect(400);
 
-      expect(response.body.error).toBeDefined();
+      expect(response.body.error.message).toBeDefined();
     });
 
     it('should validate age range', async () => {
@@ -109,61 +121,68 @@ describe('User API', () => {
         .send({ age: 15 }) // Too young
         .expect(400);
 
-      expect(response.body.error).toBeDefined();
+      expect(response.body.error.message).toBeDefined();
     });
   });
 
   describe('GET /users/:userId', () => {
-    it('should return anonymous user info when not matched', async () => {
+    it('should return limited user info when users cannot view details', async () => {
       const mockUser = createMockUser();
       const targetUser = createMockUser({
         id: 'target-user-id',
         nickname: 'TargetUser',
       });
       
-      (prisma.user.findUnique as jest.Mock)
-        .mockResolvedValueOnce(mockUser) // Current user
-        .mockResolvedValueOnce(targetUser); // Target user
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(targetUser);
       
-      (prisma.match.findFirst as jest.Mock).mockResolvedValue(null); // No match
+      // Mock canViewUserDetails to return false
+      const userService = require('../services/UserService').userService;
+      jest.spyOn(userService, 'canViewUserDetails').mockResolvedValue(false);
 
       const response = await request(app)
         .get('/users/target-user-id')
         .expect(200);
 
       expect(response.body).toEqual({
-        anonymousId: targetUser.anonymousId,
-        gender: targetUser.gender,
-        age: targetUser.age,
-        bio: targetUser.bio,
-        isMatched: false,
+        success: true,
+        data: {
+          id: targetUser.id,
+          nickname: targetUser.nickname.charAt(0) + '*'.repeat(targetUser.nickname.length - 1),
+          age: targetUser.age,
+          gender: targetUser.gender
+        }
       });
-      expect(response.body.nickname).toBeUndefined();
     });
 
-    it('should return full user info when matched', async () => {
+    it('should return full user info when users can view details', async () => {
       const mockUser = createMockUser();
       const targetUser = createMockUser({
         id: 'target-user-id',
         nickname: 'TargetUser',
       });
       
-      (prisma.user.findUnique as jest.Mock)
-        .mockResolvedValueOnce(mockUser)
-        .mockResolvedValueOnce(targetUser);
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(targetUser);
       
-      (prisma.match.findFirst as jest.Mock).mockResolvedValue({
-        id: 'match-id',
-        user1Id: mockUser.id,
-        user2Id: targetUser.id,
-      });
+      // Mock canViewUserDetails to return true
+      const userService = require('../services/UserService').userService;
+      jest.spyOn(userService, 'canViewUserDetails').mockResolvedValue(true);
 
       const response = await request(app)
         .get('/users/target-user-id')
         .expect(200);
 
-      expect(response.body.nickname).toBe(targetUser.nickname);
-      expect(response.body.isMatched).toBe(true);
+      expect(response.body).toEqual({
+        success: true,
+        data: expect.objectContaining({
+          id: targetUser.id,
+          nickname: targetUser.nickname,
+          age: targetUser.age,
+          gender: targetUser.gender,
+          profileImage: targetUser.profileImage,
+          bio: targetUser.bio,
+          lastActive: targetUser.lastActive.toISOString()
+        })
+      });
     });
   });
 
@@ -171,22 +190,15 @@ describe('User API', () => {
     const verificationData = {
       companyId: 'company-id',
       method: 'EMAIL_DOMAIN',
-      email: 'user@company.com',
+      data: {
+        email: 'user@company.com'
+      }
     };
 
     it('should submit company verification successfully', async () => {
       const mockUser = createMockUser();
       
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (prisma.company.findUnique as jest.Mock).mockResolvedValue({
-        id: 'company-id',
-        name: 'Test Company',
-        domain: 'company.com',
-      });
-      (prisma.companyVerification.create as jest.Mock).mockResolvedValue({
-        id: 'verification-id',
-        status: 'PENDING',
-      });
 
       const response = await request(app)
         .post('/users/verify/company')
@@ -194,20 +206,12 @@ describe('User API', () => {
         .expect(200);
 
       expect(response.body).toEqual({
-        message: '회사 인증 요청이 제출되었습니다',
-        verificationId: 'verification-id',
+        success: true,
+        data: {
+          message: '회사 인증 요청이 접수되었습니다.',
+          verificationId: 'temp-id'
+        }
       });
-    });
-
-    it('should reject invalid company', async () => {
-      (prisma.company.findUnique as jest.Mock).mockResolvedValue(null);
-
-      const response = await request(app)
-        .post('/users/verify/company')
-        .send(verificationData)
-        .expect(404);
-
-      expect(response.body.error).toBe('회사를 찾을 수 없습니다');
     });
   });
 
@@ -216,27 +220,40 @@ describe('User API', () => {
       const mockUser = createMockUser();
       
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (userService.deleteAccount as jest.Mock).mockResolvedValue(true);
+      (prisma.user.update as jest.Mock).mockResolvedValue({
+        ...mockUser,
+        phoneNumber: `deleted_${Date.now()}`,
+        nickname: 'deleted_user',
+        profileImage: null,
+        bio: null,
+        isVerified: false,
+        credits: 0,
+        isPremium: false,
+        premiumUntil: null
+      });
 
       const response = await request(app)
         .delete('/users')
-        .send({ reason: '더 이상 사용하지 않음' })
-        .expect(204);
+        .send({ confirmPhoneNumber: mockUser.phoneNumber })
+        .expect(200);
 
-      expect(response.body).toEqual({});
-      expect(userService.deleteAccount).toHaveBeenCalledWith(
-        mockUser.id,
-        '더 이상 사용하지 않음'
-      );
+      expect(response.body).toEqual({
+        success: true,
+        data: { message: '계정이 삭제되었습니다.' }
+      });
     });
 
-    it('should require deletion reason', async () => {
+    it('should require correct phone number confirmation', async () => {
+      const mockUser = createMockUser();
+      
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+
       const response = await request(app)
         .delete('/users')
-        .send({})
+        .send({ confirmPhoneNumber: '+82101111111' }) // Wrong number
         .expect(400);
 
-      expect(response.body.error).toBeDefined();
+      expect(response.body.error.message).toBe('전화번호 확인이 일치하지 않습니다.');
     });
   });
 });

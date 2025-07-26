@@ -10,13 +10,46 @@ jest.mock('../config/database', () => ({
   prisma: prismaMock,
 }));
 
+// Mock index.ts to prevent server startup
+jest.mock('../index', () => ({
+  __esModule: true,
+  app: {},
+  io: {
+    to: jest.fn().mockReturnValue({ emit: jest.fn() })
+  }
+}));
+
 // Mock environment variables
 process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = 'test-jwt-secret';
-process.env.ENCRYPTION_KEY = 'test-encryption-key-32-characters';
+process.env.PORT = '3001';
+process.env.JWT_SECRET = '12345678901234567890123456789012'; // 32+ characters
+process.env.ENCRYPTION_KEY = '12345678901234567890123456789012'; // Exactly 32 characters
 process.env.CLERK_SECRET_KEY = 'test-clerk-secret';
 process.env.CLERK_PUBLISHABLE_KEY = 'test-clerk-publishable';
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
+process.env.FRONTEND_URL = 'http://localhost:8081';
+process.env.STRIPE_SECRET_KEY = 'sk_test_1234567890';
+process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test1234567890';
+process.env.SENTRY_DSN = 'https://test@sentry.io/123456';
+process.env.AWS_ACCESS_KEY_ID = 'test-aws-key';
+process.env.AWS_SECRET_ACCESS_KEY = 'test-aws-secret';
+process.env.AWS_REGION = 'us-east-1';
+process.env.AWS_S3_BUCKET = 'test-bucket';
+process.env.FCM_PROJECT_ID = 'test-fcm-project';
+process.env.FCM_CLIENT_EMAIL = 'test@test.com';
+process.env.FCM_PRIVATE_KEY = 'test-private-key';
+process.env.KAKAO_API_KEY = 'test-kakao-key';
+process.env.KAKAO_MAP_API_KEY = 'test-kakao-map-key';
+process.env.TOSS_SECRET_KEY = 'test-toss-key';
+process.env.KAKAOPAY_ADMIN_KEY = 'test-kakaopay-key';
+process.env.REDIS_URL = 'redis://localhost:6379';
+process.env.SMTP_HOST = 'smtp.test.com';
+process.env.SMTP_PORT = '587';
+process.env.SMTP_USER = 'test@test.com';
+process.env.SMTP_PASS = 'test-password';
+process.env.NAVER_CLIENT_ID = 'test-naver-id';
+process.env.NAVER_CLIENT_SECRET = 'test-naver-secret';
+process.env.GOOGLE_VISION_API_KEY = 'test-google-vision-key';
 
 // Mock external services
 jest.mock('../services/FirebaseService');

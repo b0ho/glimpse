@@ -7,6 +7,250 @@ import { paymentService } from '../services/PaymentService';
 import { notificationService } from '../services/NotificationService';
 
 export class PaymentController {
+  async purchaseCredits(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.auth.userId;
+      const { package: creditPackage, paymentMethod } = req.body;
+
+      if (!creditPackage || !paymentMethod) {
+        throw createError(400, '크레딧 패키지와 결제 방법이 필요합니다.');
+      }
+
+      const packages: Record<string, { credits: number; amount: number }> = {
+        SMALL: { credits: 5, amount: 2500 },
+        MEDIUM: { credits: 17, amount: 6900 },
+        LARGE: { credits: 35, amount: 12900 },
+        XLARGE: { credits: 60, amount: 19000 }
+      };
+
+      if (!packages[creditPackage]) {
+        throw createError(400, '유효하지 않은 크레딧 패키지입니다.');
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+
+      if (!user) {
+        throw createError(404, '사용자를 찾을 수 없습니다.');
+      }
+
+      const { credits, amount } = packages[creditPackage];
+      
+      const payment = await paymentService.createCreditPurchase({
+        userId,
+        amount,
+        credits,
+        paymentMethod
+      });
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: { credits: { increment: credits } }
+      });
+
+      await notificationService.sendPurchaseNotification(userId, credits, amount);
+
+      res.json({
+        success: true,
+        data: {
+          paymentId: payment.id,
+          newCreditBalance: user.credits + credits,
+          message: '크레딧 구매가 완료되었습니다.'
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async subscribePremium(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.auth.userId;
+      const { plan, paymentMethod } = req.body;
+
+      if (!plan || !paymentMethod) {
+        throw createError(400, '구독 플랜과 결제 방법이 필요합니다.');
+      }
+
+      if (!['MONTHLY', 'YEARLY'].includes(plan)) {
+        throw createError(400, '유효하지 않은 구독 플랜입니다.');
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+
+      if (!user) {
+        throw createError(404, '사용자를 찾을 수 없습니다.');
+      }
+
+      if (user.isPremium) {
+        throw createError(400, '이미 프리미엄 구독 중입니다.');
+      }
+
+      const subscription = await paymentService.createSubscription({
+        userId,
+        plan,
+        paymentMethod
+      });
+
+      const days = plan === 'MONTHLY' ? 30 : 365;
+      const premiumUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          isPremium: true,
+          premiumUntil
+        }
+      });
+
+      await notificationService.sendSubscriptionNotification(userId, plan);
+
+      res.json({
+        success: true,
+        data: {
+          subscriptionId: subscription.id,
+          premiumUntil,
+          message: '프리미엄 구독이 시작되었습니다.'
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async cancelPremium(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.auth.userId;
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+
+      if (!user) {
+        throw createError(404, '사용자를 찾을 수 없습니다.');
+      }
+
+      if (!user.isPremium) {
+        throw createError(400, '프리미엄 구독 중이 아닙니다.');
+      }
+
+      await paymentService.cancelSubscription(userId);
+
+      res.json({
+        success: true,
+        data: {
+          message: '프리미엄 구독이 취소되었습니다.'
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getSubscriptionStatus(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const userId = req.auth.userId;
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          isPremium: true,
+          premiumUntil: true
+        }
+      });
+
+      if (!user) {
+        throw createError(404, '사용자를 찾을 수 없습니다.');
+      }
+
+      const subscription = await prisma.subscription.findFirst({
+        where: {
+          userId,
+          status: { in: ['ACTIVE', 'CANCELLED'] }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      const daysRemaining = user.premiumUntil 
+        ? Math.ceil((user.premiumUntil.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+        : 0;
+
+      res.json({
+        success: true,
+        data: {
+          isActive: user.isPremium,
+          premiumUntil: user.premiumUntil,
+          daysRemaining: daysRemaining > 0 ? daysRemaining : 0,
+          subscription: subscription ? {
+            id: subscription.id,
+            plan: subscription.plan,
+            status: subscription.status,
+            currentPeriodEnd: subscription.currentPeriodEnd,
+            nextBillingDate: subscription.status === 'ACTIVE' ? subscription.currentPeriodEnd : null
+          } : null
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async handleStripeWebhook(req: any, res: Response, next: NextFunction) {
+    try {
+      const signature = req.headers['stripe-signature'];
+      const event = req.body;
+
+      await paymentService.handleStripeWebhook(event);
+
+      res.json({ received: true });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async handleTossPayWebhook(req: any, res: Response, next: NextFunction) {
+    try {
+      const body = req.body;
+
+      await paymentService.handleTossWebhook(body);
+
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async handleKakaoPayWebhook(req: any, res: Response, next: NextFunction) {
+    try {
+      const body = req.body;
+
+      await paymentService.handleKakaoWebhook(body);
+
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async createPayment(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {

@@ -41,7 +41,7 @@ export const errorHandler = (
   // Don't leak error details in production
   return res.status(500).json({
     error: {
-      message: 'Something went wrong!'
+      message: process.env.NODE_ENV === 'test' ? error.message : 'Something went wrong!'
     }
   });
 };

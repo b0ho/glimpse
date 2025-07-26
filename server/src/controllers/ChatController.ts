@@ -198,6 +198,10 @@ export class ChatController {
         throw createError(400, '매치 ID가 필요합니다.');
       }
 
+      if (isTyping === undefined) {
+        throw createError(400, '입력 상태 값이 필요합니다.');
+      }
+
       // Verify user is part of this match
       const match = await prisma.match.findUnique({
         where: { id: matchId }

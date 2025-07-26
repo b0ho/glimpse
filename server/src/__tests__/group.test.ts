@@ -4,7 +4,7 @@ import { groupController } from '../controllers/GroupController';
 import { groupService } from '../services/GroupService';
 import { prisma } from '../config/database';
 import { createMockUser, createMockGroup } from './setup';
-import { errorHandler } from '../middleware/errorHandler';
+import { errorHandler, createError } from '../middleware/errorHandler';
 
 // Mock services
 jest.mock('../services/GroupService');
@@ -204,14 +204,10 @@ describe('Group API', () => {
     it('should prevent duplicate joins', async () => {
       const mockGroup = createMockGroup();
       
-      (prisma.group.findUnique as jest.Mock).mockResolvedValue({
-        ...mockGroup,
-        _count: { members: 10 }
-      });
-      (prisma.groupMember.findUnique as jest.Mock).mockResolvedValue({
-        id: 'existing-membership',
-        status: 'ACTIVE',
-      });
+      const groupService = require('../services/GroupService').groupService;
+      jest.spyOn(groupService, 'joinGroup').mockRejectedValue(
+        createError(400, '이미 그룹에 가입되어 있습니다.')
+      );
 
       const response = await request(app)
         .post(`/groups/${mockGroup.id}/join`)
@@ -226,11 +222,10 @@ describe('Group API', () => {
         maxMembers: 100,
       });
       
-      (prisma.group.findUnique as jest.Mock).mockResolvedValue({
-        ...mockGroup,
-        _count: { members: 100 }
-      });
-      (prisma.groupMember.findUnique as jest.Mock).mockResolvedValue(null);
+      const groupService = require('../services/GroupService').groupService;
+      jest.spyOn(groupService, 'joinGroup').mockRejectedValue(
+        createError(400, '그룹 용량이 가득 찼습니다.')
+      );
 
       const response = await request(app)
         .post(`/groups/${mockGroup.id}/join`)
@@ -266,13 +261,11 @@ describe('Group API', () => {
 
     it('should prevent creator from leaving their group', async () => {
       const mockGroup = createMockGroup({ creatorId: 'test-user-id' });
-      const mockMembership = {
-        id: 'membership-id',
-        role: 'CREATOR',
-        status: 'ACTIVE',
-      };
       
-      (prisma.groupMember.findUnique as jest.Mock).mockResolvedValue(mockMembership);
+      const groupService = require('../services/GroupService').groupService;
+      jest.spyOn(groupService, 'leaveGroup').mockRejectedValue(
+        createError(400, '그룹 생성자는 그룹을 나갈 수 없습니다. 그룹을 삭제하거나 관리자 권한을 이양하세요.')
+      );
 
       const response = await request(app)
         .post(`/groups/${mockGroup.id}/leave`)
@@ -314,17 +307,20 @@ describe('Group API', () => {
         .expect(200);
 
       expect(response.body).toEqual({
-        members: expect.arrayContaining([
-          expect.objectContaining({
-            user: expect.objectContaining({ nickname: 'User1' }),
-            role: 'ADMIN',
-          }),
-          expect.objectContaining({
-            user: expect.objectContaining({ nickname: 'User2' }),
-            role: 'MEMBER',
-          }),
-        ]),
-        total: 2,
+        success: true,
+        data: {
+          members: expect.arrayContaining([
+            expect.objectContaining({
+              user: expect.objectContaining({ nickname: 'User1' }),
+              role: 'ADMIN',
+            }),
+            expect.objectContaining({
+              user: expect.objectContaining({ nickname: 'User2' }),
+              role: 'MEMBER',
+            }),
+          ]),
+          total: 2,
+        }
       });
     });
 

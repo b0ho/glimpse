@@ -245,6 +245,68 @@ export class NotificationService {
     }
   }
 
+  async sendPurchaseNotification(userId: string, credits: number, amount: number) {
+    try {
+      const notification = await prisma.notification.create({
+        data: {
+          userId,
+          type: 'PAYMENT_SUCCESS',
+          title: '크레딧 구매 완료',
+          message: `${credits}개의 크레딧을 구매했습니다.`,
+          data: {
+            credits,
+            amount
+          }
+        }
+      });
+
+      await this.sendPushNotification(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: {
+          type: 'PAYMENT_SUCCESS',
+          credits: credits.toString(),
+          amount: amount.toString()
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Failed to send purchase notification:', error);
+      return null;
+    }
+  }
+
+  async sendSubscriptionNotification(userId: string, plan: string) {
+    try {
+      const notification = await prisma.notification.create({
+        data: {
+          userId,
+          type: 'PAYMENT_SUCCESS',
+          title: '프리미엄 구독 시작',
+          message: `프리미엄 ${plan === 'MONTHLY' ? '월간' : '연간'} 구독이 시작되었습니다.`,
+          data: {
+            plan
+          }
+        }
+      });
+
+      await this.sendPushNotification(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: {
+          type: 'SUBSCRIPTION_STARTED',
+          plan
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Failed to send subscription notification:', error);
+      return null;
+    }
+  }
+
   async sendSubscriptionCancelledNotification(userId: string, expiresAt: Date) {
     try {
       const notification = await prisma.notification.create({

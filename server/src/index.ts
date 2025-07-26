@@ -8,7 +8,8 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 
 // Load and validate environment variables
-import { env, logConfigurationStatus } from './config/env';
+import env from './config/env';
+import { logConfigurationStatus } from './config/env';
 import { initializeSentry } from './config/sentry';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger';
@@ -38,7 +39,7 @@ const io = new Server(server, {
   }
 });
 
-const PORT = env.PORT;
+// PORT is declared later
 
 // Security middleware
 app.use(helmet());
@@ -90,11 +91,8 @@ app.use('/api/v1/payments', paymentRoutes);
 import { initializeChatSocket } from './socket/chatSocket';
 initializeChatSocket(io);
 
-// The Sentry request handler must be the first error handler
-app.use(Sentry.Handlers.requestHandler());
-
-// The Sentry error handler must be before any other error middleware
-app.use(Sentry.Handlers.errorHandler());
+// Sentry handlers are now integrated differently in v7+
+// The error handler is integrated through errorHandler middleware
 
 // Error handling middleware
 app.use(notFound);

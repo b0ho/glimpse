@@ -21,6 +21,11 @@ export const validate = (validations: any[]) => {
 
 // Common validators
 export const validators = {
+  // Export body, param, query for custom validations
+  body,
+  param,
+  query,
+  
   // User validators
   phoneNumber: body('phoneNumber')
     .trim()

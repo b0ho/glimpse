@@ -2,7 +2,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import { Express } from 'express';
-import { env } from './env';
+import env from './env';
 
 // Security headers configuration
 export const helmetConfig = helmet({

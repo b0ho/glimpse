@@ -82,7 +82,7 @@ function convertSwaggerToPostman(swagger: any): PostmanCollection {
             url: {
               raw: `{{baseUrl}}${path}`,
               host: ['{{baseUrl}}'],
-              path: path.split('/').filter(p => p)
+              path: path.split('/').filter((p: string) => p)
             }
           }
         };

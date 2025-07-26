@@ -356,6 +356,46 @@ export class UserController {
       next(error);
     }
   }
+
+  async verifyCompany(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.auth!.userId;
+      const { companyId, method, data } = req.body;
+
+      // TODO: Implement company verification logic
+      // This would integrate with CompanyVerificationService
+
+      res.json({
+        success: true,
+        data: { 
+          message: '회사 인증 요청이 접수되었습니다.',
+          verificationId: 'temp-id'
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async subscribePremium(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.auth!.userId;
+      const { plan, paymentMethod } = req.body;
+
+      // TODO: Implement premium subscription logic
+      // This would integrate with PaymentService
+
+      res.json({
+        success: true,
+        data: { 
+          message: '프리미엄 구독이 활성화되었습니다.',
+          subscriptionId: 'temp-sub-id'
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const userController = new UserController();

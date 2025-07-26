@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node';
-import { ProfilingIntegration } from '@sentry/profiling-node';
-import { env } from './env';
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
+import env from './env';
 
 export function initializeSentry(app: any) {
   if (env.SENTRY_DSN) {
@@ -9,25 +9,18 @@ export function initializeSentry(app: any) {
       environment: env.NODE_ENV,
       integrations: [
         // Enable HTTP calls tracing
-        new Sentry.Integrations.Http({ tracing: true }),
+        Sentry.httpIntegration(),
         // Enable Express.js middleware tracing
-        new Sentry.Integrations.Express({ app }),
-        // Enable Prisma tracing
-        new Sentry.Integrations.Prisma({ client: true }),
+        Sentry.expressIntegration(),
         // Enable profiling
-        new ProfilingIntegration(),
+        nodeProfilingIntegration(),
         // Additional integrations
-        new Sentry.Integrations.RequestData({
+        Sentry.requestDataIntegration({
           include: {
             data: true,
             headers: true,
             query_string: true,
             url: true,
-            user: {
-              id: true,
-              username: true,
-              email: true,
-            },
           },
         }),
       ],
@@ -37,7 +30,7 @@ export function initializeSentry(app: any) {
       profilesSampleRate: env.NODE_ENV === 'production' ? 0.1 : 1.0,
       
       // Release tracking
-      release: env.APP_VERSION || 'unknown',
+      release: 'unknown',
       
       // Environment-specific settings
       debug: env.NODE_ENV === 'development',
@@ -117,7 +110,7 @@ export function captureError(error: Error, context?: Record<string, any>) {
       extra: context,
       tags: {
         service: 'api',
-        version: env.APP_VERSION || 'unknown',
+        version: 'unknown',
       },
     });
   } else {
@@ -127,10 +120,10 @@ export function captureError(error: Error, context?: Record<string, any>) {
 
 // Performance monitoring helpers
 export function startTransaction(name: string, op: string = 'http') {
-  return Sentry.startTransaction({
+  return Sentry.startSpan({
     name,
     op,
-  });
+  }, () => {});
 }
 
 // User identification for error tracking
