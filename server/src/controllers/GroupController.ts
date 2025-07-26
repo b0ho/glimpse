@@ -1,15 +1,10 @@
 import { Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../config/database';
 import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
-import { GroupService } from '../services/GroupService';
-import { CompanyVerificationService } from '../services/CompanyVerificationService';
-import { LocationService } from '../services/LocationService';
-
-const prisma = new PrismaClient();
-const groupService = new GroupService();
-const companyVerificationService = new CompanyVerificationService();
-const locationService = new LocationService();
+import { groupService } from '../services/GroupService';
+import { companyVerificationService } from '../services/CompanyVerificationService';
+import { locationService } from '../services/LocationService';
 
 export class GroupController {
   async getGroups(req: ClerkAuthRequest, res: Response, next: NextFunction) {
@@ -49,6 +44,29 @@ export class GroupController {
 
       if (!name || !type) {
         throw createError(400, '그룹 이름과 타입이 필요합니다.');
+      }
+
+      if (name.length < 2 || name.length > 50) {
+        throw createError(400, '그룹 이름은 2자 이상 50자 이하로 입력해주세요.');
+      }
+
+      // Check group creation limits for non-premium users
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+
+      if (!user) {
+        throw createError(404, '사용자를 찾을 수 없습니다.');
+      }
+
+      if (!user.isPremium) {
+        const groupCount = await prisma.group.count({
+          where: { creatorId: userId }
+        });
+
+        if (groupCount >= 3) {
+          throw createError(403, '무료 사용자는 최대 3개의 그룹만 생성할 수 있습니다.');
+        }
       }
 
       // Validate user can create this type of group
@@ -556,3 +574,5 @@ export class GroupController {
     }
   }
 }
+
+export const groupController = new GroupController();

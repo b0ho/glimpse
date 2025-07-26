@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "../config/database";
 
-const prisma = new PrismaClient();
+
 
 export class MatchingStatisticsService {
   async getUserMatchingStatistics(userId: string) {
@@ -389,3 +389,5 @@ export class MatchingStatisticsService {
     }));
   }
 }
+
+export const matchingStatisticsService = new MatchingStatisticsService();

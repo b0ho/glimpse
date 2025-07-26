@@ -5,9 +5,9 @@ import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs/promises';
 import { createError } from '../middleware/errorHandler';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "../config/database";
 
-const prisma = new PrismaClient();
+
 
 interface UploadedFile {
   id: string;
@@ -477,3 +477,5 @@ export class FileUploadService {
       .toBuffer();
   }
 }
+
+export const fileUploadService = new FileUploadService();

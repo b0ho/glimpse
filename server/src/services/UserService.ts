@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "../config/database";
 import { createError } from '../middleware/errorHandler';
 import { PRICING, APP_CONFIG } from '@shared/constants';
 import { getMatchCompatibilityScore } from '@shared/utils';
 
-const prisma = new PrismaClient();
+
 
 export class UserService {
   async getRecommendations(userId: string, groupId: string, page: number, limit: number) {
@@ -196,3 +196,5 @@ export class UserService {
     };
   }
 }
+
+export const userService = new UserService();

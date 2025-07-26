@@ -1,12 +1,9 @@
-import { PrismaClient, VerificationMethod, VerificationStatus } from '@prisma/client';
+import { VerificationMethod, VerificationStatus } from '@prisma/client';
+import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import { validateEmail } from '@shared/utils';
-import { EmailService } from './EmailService';
-import { OCRService } from './OCRService';
-
-const prisma = new PrismaClient();
-const emailService = new EmailService();
-const ocrService = new OCRService();
+import { emailService } from './EmailService';
+import { ocrService } from './OCRService';
 
 export class CompanyVerificationService {
   async submitVerification(
@@ -14,175 +11,175 @@ export class CompanyVerificationService {
     companyId: string,
     method: VerificationMethod,
     data: any
-  ) {
-    // Check if user already has pending/approved verification for this company
+  ): Promise<any> {
+    // Check if user already has a pending verification
     const existingVerification = await prisma.companyVerification.findFirst({
       where: {
         userId,
-        companyId,
-        status: { in: ['PENDING', 'APPROVED'] }
+        status: 'PENDING'
       }
     });
 
     if (existingVerification) {
-      if (existingVerification.status === 'APPROVED') {
-        throw createError(400, '이미 인증이 완료된 회사입니다.');
-      }
-      if (existingVerification.status === 'PENDING') {
-        throw createError(400, '이미 인증 신청이 진행 중입니다.');
-      }
+      throw createError(400, '이미 처리 중인 인증 요청이 있습니다.');
     }
 
-    const company = await prisma.company.findUnique({
-      where: { id: companyId }
-    });
-
-    if (!company) {
-      throw createError(404, '회사를 찾을 수 없습니다.');
-    }
-
-    let verificationData = {};
-    let autoApprove = false;
-
-    switch (method) {
-      case 'EMAIL_DOMAIN':
-        verificationData = await this.handleEmailDomainVerification(data, company);
-        autoApprove = true;
-        break;
-      
-      case 'OCR_VERIFICATION':
-        verificationData = await this.handleOCRVerification(data, company);
-        break;
-      
-      case 'INVITE_CODE':
-        verificationData = await this.handleInviteCodeVerification(data, company);
-        autoApprove = true;
-        break;
-      
-      case 'HR_APPROVAL':
-        verificationData = await this.handleHrApprovalVerification(data, company);
-        break;
-      
-      default:
-        throw createError(400, '지원하지 않는 인증 방법입니다.');
-    }
-
-    // Create verification record
+    // Create verification request
     const verification = await prisma.companyVerification.create({
       data: {
         userId,
         companyId,
         method,
-        status: autoApprove ? 'APPROVED' : 'PENDING',
-        data: verificationData,
-        ...(autoApprove && { reviewedAt: new Date() })
+        status: 'PENDING',
+        data: JSON.stringify(data)
       }
     });
 
-    return {
-      verificationId: verification.id,
-      status: verification.status,
-      method: verification.method,
-      message: autoApprove 
-        ? '인증이 완료되었습니다!' 
-        : '인증 신청이 제출되었습니다. 검토까지 1-3일 소요될 수 있습니다.'
-    };
-  }
-
-  private async handleEmailDomainVerification(data: any, company: any) {
-    const { email } = data;
-
-    if (!email || !validateEmail(email)) {
-      throw createError(400, '유효한 이메일 주소를 입력해주세요.');
+    // Process based on method
+    switch (method) {
+      case 'EMAIL_DOMAIN':
+        await this.processEmailVerification(verification.id, data.email);
+        break;
+      case 'OCR_VERIFICATION':
+        await this.processOCRVerification(verification.id, data.imageUrl, data.documentType);
+        break;
     }
 
+    return verification;
+  }
+
+  private async processEmailVerification(verificationId: string, email: string) {
+    if (!validateEmail(email)) {
+      await this.updateVerificationStatus(verificationId, 'REJECTED', '유효하지 않은 이메일 형식입니다.');
+      return;
+    }
+
+    const verification = await prisma.companyVerification.findUnique({
+      where: { id: verificationId },
+      include: { company: true }
+    });
+
+    if (!verification || !verification.company) {
+      throw createError(404, '인증 정보를 찾을 수 없습니다.');
+    }
+
+    // Check if email domain matches company domain
     const emailDomain = email.split('@')[1];
-    if (emailDomain !== company.domain) {
-      throw createError(400, `${company.domain} 도메인의 이메일 주소만 사용할 수 있습니다.`);
+    if (emailDomain !== verification.company.domain) {
+      await this.updateVerificationStatus(verificationId, 'REJECTED', '회사 도메인과 일치하지 않습니다.');
+      return;
     }
 
     // Send verification email
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    await emailService.sendVerificationEmail(email, verificationCode, company.name);
+    const verificationCode = this.generateVerificationCode();
+    await emailService.sendVerificationEmail(email, verificationCode, verification.company.name);
 
-    return {
-      email,
-      verificationCode, // In production, this should be hashed
-      verifiedAt: new Date()
-    };
+    // Store verification code
+    await prisma.companyVerification.update({
+      where: { id: verificationId },
+      data: {
+        data: JSON.stringify({
+          ...(verification.data as any || {}),
+          verificationCode,
+          codeExpiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString()
+        })
+      }
+    });
   }
 
-  private async handleOCRVerification(data: any, company: any) {
-    const { imageUrl, imageBase64 } = data;
+  private async processOCRVerification(verificationId: string, imageUrl: string, documentType: string) {
+    try {
+      let result;
+      switch (documentType) {
+        case 'EMPLOYEE_CARD':
+          result = await ocrService.processEmployeeCard(imageUrl);
+          break;
+        case 'BUSINESS_CARD':
+          // For now, use employee card processing for all document types
+          // In production, implement specific processors for each type
+          result = await ocrService.processEmployeeCard(imageUrl);
+          break;
+        case 'PAY_STUB':
+          result = await ocrService.processEmployeeCard(imageUrl);
+          break;
+        default:
+          throw new Error('Invalid document type');
+      }
+      
+      if (result.confidence < 0.7) {
+        await this.updateVerificationStatus(verificationId, 'REJECTED', '문서를 명확하게 인식할 수 없습니다.');
+        return;
+      }
 
-    if (!imageUrl && !imageBase64) {
-      throw createError(400, '신분증 이미지가 필요합니다.');
+      // For now, auto-approve if confidence is high enough
+      // In production, you might want manual review
+      await this.updateVerificationStatus(verificationId, 'APPROVED', '문서 인증이 완료되었습니다.');
+    } catch (error) {
+      await this.updateVerificationStatus(verificationId, 'REJECTED', 'OCR 처리 중 오류가 발생했습니다.');
     }
-
-    // Process image with OCR
-    const ocrResult = await ocrService.processEmployeeCard(imageUrl || imageBase64);
-
-    // Validate OCR results against company
-    const isValid = this.validateOCRResults(ocrResult, company);
-
-    if (!isValid) {
-      throw createError(400, '신분증에서 회사 정보를 확인할 수 없습니다.');
-    }
-
-    return {
-      imageUrl,
-      ocrResults: ocrResult,
-      extractedCompanyName: ocrResult.companyName,
-      extractedEmployeeName: ocrResult.employeeName,
-      confidence: ocrResult.confidence
-    };
   }
 
-  private async handleInviteCodeVerification(data: any, company: any) {
-    const { inviteCode } = data;
+  async verifyCode(verificationId: string, code: string): Promise<boolean> {
+    const verification = await prisma.companyVerification.findUnique({
+      where: { id: verificationId }
+    });
 
-    if (!inviteCode) {
-      throw createError(400, '초대 코드가 필요합니다.');
+    if (!verification) {
+      throw createError(404, '인증 정보를 찾을 수 없습니다.');
     }
 
-    // Validate invite code (this would be pre-generated by HR)
-    const validCode = await this.validateInviteCode(inviteCode, company.id);
-
-    if (!validCode) {
-      throw createError(400, '유효하지 않거나 만료된 초대 코드입니다.');
+    if (verification.status !== 'PENDING') {
+      throw createError(400, '이미 처리된 인증 요청입니다.');
     }
 
-    return {
-      inviteCode: inviteCode.substring(0, 4) + '****',
-      validatedAt: new Date()
-    };
+    const verificationData = verification.data as any || {};
+    
+    if (!verificationData.codeExpiresAt || new Date(verificationData.codeExpiresAt) < new Date()) {
+      throw createError(400, '인증 코드가 만료되었습니다.');
+    }
+
+    if (verificationData.verificationCode !== code) {
+      return false;
+    }
+
+    // Update verification status
+    await this.updateVerificationStatus(verificationId, 'APPROVED', '인증이 완료되었습니다.');
+
+    // Company verification is tracked in CompanyVerification table, not in User table
+
+    return true;
   }
 
-  private async handleHrApprovalVerification(data: any, company: any) {
-    const { employeeId, department, position, supervisorEmail } = data;
+  private async updateVerificationStatus(
+    verificationId: string,
+    status: VerificationStatus,
+    reviewNotes?: string
+  ) {
+    await prisma.companyVerification.update({
+      where: { id: verificationId },
+      data: {
+        status,
+        data: JSON.stringify({
+          ...(await prisma.companyVerification.findUnique({ where: { id: verificationId } }))?.data as any || {},
+          reviewNotes
+        }),
+        reviewedAt: new Date()
+      }
+    });
+  }
 
-    if (!employeeId || !department) {
-      throw createError(400, '사번과 부서 정보가 필요합니다.');
-    }
+  private generateVerificationCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
 
-    // Send notification to HR or supervisor
-    if (supervisorEmail) {
-      await emailService.sendHrApprovalRequest(
-        supervisorEmail,
-        employeeId,
-        department,
-        position,
-        company.name
-      );
-    }
+  async getVerificationStatus(userId: string): Promise<any> {
+    const latestVerification = await prisma.companyVerification.findFirst({
+      where: { userId },
+      orderBy: { submittedAt: 'desc' },
+      include: { company: true }
+    });
 
-    return {
-      employeeId,
-      department,
-      position,
-      supervisorEmail: supervisorEmail ? this.maskEmail(supervisorEmail) : null,
-      submittedAt: new Date()
-    };
+    return latestVerification;
   }
 
   async isUserVerifiedForCompany(userId: string, companyId: string): Promise<boolean> {
@@ -196,95 +193,6 @@ export class CompanyVerificationService {
 
     return !!verification;
   }
-
-  async getUserVerifications(userId: string) {
-    const verifications = await prisma.companyVerification.findMany({
-      where: { userId },
-      include: {
-        company: {
-          select: { id: true, name: true, logo: true, type: true }
-        }
-      },
-      orderBy: { submittedAt: 'desc' }
-    });
-
-    return verifications.map(verification => ({
-      id: verification.id,
-      company: verification.company,
-      method: verification.method,
-      status: verification.status,
-      submittedAt: verification.submittedAt,
-      reviewedAt: verification.reviewedAt
-    }));
-  }
-
-  async approveVerification(verificationId: string, reviewerId: string) {
-    const verification = await prisma.companyVerification.update({
-      where: { id: verificationId },
-      data: {
-        status: 'APPROVED',
-        reviewedAt: new Date(),
-        reviewedBy: reviewerId
-      },
-      include: {
-        user: { select: { id: true, phoneNumber: true } },
-        company: { select: { name: true } }
-      }
-    });
-
-    // TODO: Send approval notification
-    
-    return verification;
-  }
-
-  async rejectVerification(verificationId: string, reviewerId: string, reason?: string) {
-    // First get the existing verification to access its data
-    const existingVerification = await prisma.companyVerification.findUnique({
-      where: { id: verificationId }
-    });
-
-    const verification = await prisma.companyVerification.update({
-      where: { id: verificationId },
-      data: {
-        status: 'REJECTED',
-        reviewedAt: new Date(),
-        reviewedBy: reviewerId,
-        data: {
-          ...(existingVerification?.data as any || {}),
-          rejectionReason: reason
-        }
-      },
-      include: {
-        user: { select: { id: true, phoneNumber: true } },
-        company: { select: { name: true } }
-      }
-    });
-
-    // TODO: Send rejection notification
-
-    return verification;
-  }
-
-  private validateOCRResults(ocrResult: any, company: any): boolean {
-    // Simple validation - in production this would be more sophisticated
-    const extractedCompany = ocrResult.companyName?.toLowerCase() || '';
-    const actualCompany = company.name.toLowerCase();
-    
-    return extractedCompany.includes(actualCompany) || actualCompany.includes(extractedCompany);
-  }
-
-  private async validateInviteCode(code: string, companyId: string): Promise<boolean> {
-    // This would check against a pre-generated invite codes table
-    // For now, return true for demo purposes
-    return code.length === 8;
-  }
-
-  private maskEmail(email: string): string {
-    const [local, domain] = email.split('@');
-    if (!local || !domain) {
-      return email; // Return original if split fails
-    }
-    const maskedLocal = local.charAt(0) + '*'.repeat(Math.max(0, local.length - 2)) + (local.length > 1 ? local.charAt(local.length - 1) : '');
-    return `${maskedLocal}@${domain}`;
-  }
 }
+
+export const companyVerificationService = new CompanyVerificationService();

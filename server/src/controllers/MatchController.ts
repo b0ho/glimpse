@@ -1,13 +1,9 @@
 import { Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../config/database';
 import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
-import { MatchingService } from '../services/MatchingService';
-import { MatchingStatisticsService } from '../services/MatchingStatisticsService';
-
-const prisma = new PrismaClient();
-const matchingService = new MatchingService();
-const matchingStatsService = new MatchingStatisticsService();
+import { matchingService } from '../services/MatchingService';
+import { matchingStatisticsService } from '../services/MatchingStatisticsService';
 
 export class MatchController {
   async getMatches(req: ClerkAuthRequest, res: Response, next: NextFunction) {
@@ -95,7 +91,7 @@ export class MatchController {
 
       const userId = req.auth.userId;
 
-      const stats = await matchingStatsService.getUserMatchingStatistics(userId);
+      const stats = await matchingStatisticsService.getUserMatchingStatistics(userId);
 
       res.json({
         success: true,
@@ -246,3 +242,5 @@ export class MatchController {
     }
   }
 }
+
+export const matchController = new MatchController();

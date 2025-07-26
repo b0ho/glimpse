@@ -1,9 +1,10 @@
-import { PrismaClient, NotificationType } from '@prisma/client';
+import { NotificationType } from '@prisma/client';
+import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import { FirebaseService } from './FirebaseService';
 import { NOTIFICATION_TYPES } from '../../../shared/constants';
 
-const prisma = new PrismaClient();
+
 const firebaseService = new FirebaseService();
 
 export class NotificationService {
@@ -382,3 +383,5 @@ export class NotificationService {
     }
   }
 }
+
+export const notificationService = new NotificationService();

@@ -65,3 +65,5 @@ export class SMSService {
     console.log(`Sending SMS via Aligo to ${phoneNumber}: 인증코드: ${code}`);
   }
 }
+
+export const smsService = new SMSService();

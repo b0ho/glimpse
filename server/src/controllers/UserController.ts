@@ -1,14 +1,10 @@
 import { Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../config/database';
 import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
-import { UserService } from '../services/UserService';
-import { LikeService } from '../services/LikeService';
+import { userService } from '../services/UserService';
+import { likeService } from '../services/LikeService';
 import { validateNickname } from '@shared/utils';
-
-const prisma = new PrismaClient();
-const userService = new UserService();
-const likeService = new LikeService();
 
 export class UserController {
   async getCurrentUser(req: ClerkAuthRequest, res: Response, next: NextFunction) {
@@ -361,3 +357,5 @@ export class UserController {
     }
   }
 }
+
+export const userController = new UserController();

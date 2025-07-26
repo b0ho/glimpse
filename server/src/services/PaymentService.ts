@@ -1,9 +1,10 @@
-import { PrismaClient, PaymentStatus, PaymentMethod, PaymentType } from '@prisma/client';
+import { PaymentStatus, PaymentMethod, PaymentType } from '@prisma/client';
+import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import axios from 'axios';
 import * as crypto from 'crypto';
 
-const prisma = new PrismaClient();
+
 
 interface CreatePaymentRequest {
   userId: string;
@@ -754,3 +755,5 @@ export class PaymentService {
     }
   }
 }
+
+export const paymentService = new PaymentService();

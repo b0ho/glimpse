@@ -1,9 +1,10 @@
-import { PrismaClient, MatchStatus } from '@prisma/client';
+import { MatchStatus } from '@prisma/client';
+import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import { APP_CONFIG } from '@shared/constants';
 import { getMatchCompatibilityScore, calculateDistance } from '@shared/utils';
 
-const prisma = new PrismaClient();
+
 
 export class MatchingService {
   async getUserMatches(userId: string, status: MatchStatus, page: number, limit: number) {
@@ -460,3 +461,5 @@ export class MatchingService {
     return expiredMatches.count;
   }
 }
+
+export const matchingService = new MatchingService();

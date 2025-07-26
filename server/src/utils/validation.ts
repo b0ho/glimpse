@@ -4,15 +4,16 @@ import { validationSchemas, sqlInjectionPatterns, sanitizeInput } from '../confi
 
 // Validation middleware wrapper
 export const validate = (validations: any[]) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     await Promise.all(validations.map(validation => validation.run(req)));
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Validation failed',
         details: errors.array() 
       });
+      return;
     }
     next();
   };

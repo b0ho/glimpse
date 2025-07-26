@@ -1,9 +1,10 @@
-import { PrismaClient, User } from '@prisma/client';
+import { User } from '@prisma/client';
+import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 
-const prisma = new PrismaClient();
+
 
 export class AuthService {
   private readonly clerkSecretKey = process.env.CLERK_SECRET_KEY || '';
@@ -233,3 +234,5 @@ export class AuthService {
     return jwt.verify(token, process.env.JWT_SECRET!);
   }
 }
+
+export const authService = new AuthService();

@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "../config/database";
 
-const prisma = new PrismaClient();
+
 
 interface EmailOptions {
   to: string;
@@ -474,3 +474,5 @@ export class EmailService {
     });
   }
 }
+
+export const emailService = new EmailService();

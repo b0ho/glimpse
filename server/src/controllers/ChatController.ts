@@ -1,16 +1,11 @@
 import { Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../config/database';
 import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
-import { ChatService } from '../services/ChatService';
-import { EncryptionService } from '../services/EncryptionService';
-import { NotificationService } from '../services/NotificationService';
+import { chatService } from '../services/ChatService';
+import { encryptionService } from '../services/EncryptionService';
+import { notificationService } from '../services/NotificationService';
 import { io } from '../index';
-
-const prisma = new PrismaClient();
-const chatService = new ChatService();
-const encryptionService = new EncryptionService();
-const notificationService = new NotificationService();
 
 export class ChatController {
   async getMessages(req: ClerkAuthRequest, res: Response, next: NextFunction) {
@@ -417,3 +412,5 @@ export class ChatController {
     }
   }
 }
+
+export const chatController = new ChatController();

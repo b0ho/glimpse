@@ -1,13 +1,10 @@
 import { Response, NextFunction } from 'express';
-import { PrismaClient, PaymentType, PaymentStatus } from '@prisma/client';
+import { PaymentType, PaymentStatus } from '@prisma/client';
+import { prisma } from '../config/database';
 import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
-import { PaymentService } from '../services/PaymentService';
-import { NotificationService } from '../services/NotificationService';
-
-const prisma = new PrismaClient();
-const paymentService = new PaymentService();
-const notificationService = new NotificationService();
+import { paymentService } from '../services/PaymentService';
+import { notificationService } from '../services/NotificationService';
 
 export class PaymentController {
   async createPayment(req: ClerkAuthRequest, res: Response, next: NextFunction) {
@@ -531,3 +528,5 @@ export class PaymentController {
     }
   }
 }
+
+export const paymentController = new PaymentController();

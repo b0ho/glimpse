@@ -1,9 +1,10 @@
-import { PrismaClient, GroupType } from '@prisma/client';
+import { GroupType } from '@prisma/client';
+import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import { GROUP_CONFIG } from '@shared/constants';
 import { generateId } from '@shared/utils';
 
-const prisma = new PrismaClient();
+
 
 interface CreateGroupData {
   name: string;
@@ -233,7 +234,7 @@ export class GroupService {
     });
 
     if (existingMembership?.status === 'ACTIVE') {
-      throw createError(400, '이미 그룹의 멤버입니다.');
+      throw createError(400, '이미 그룹에 가입되어 있습니다.');
     }
 
     if (existingMembership?.status === 'BANNED') {
@@ -242,7 +243,7 @@ export class GroupService {
 
     // Check group capacity
     if (group.maxMembers && group._count.members >= group.maxMembers) {
-      throw createError(400, '그룹이 가득 찼습니다.');
+      throw createError(400, '그룹 용량이 가득 찼습니다.');
     }
 
     // Check group settings
@@ -421,3 +422,5 @@ export class GroupService {
     };
   }
 }
+
+export const groupService = new GroupService();

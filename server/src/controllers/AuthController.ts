@@ -1,14 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
-import { AuthService } from '../services/AuthService';
-import { SMSService } from '../services/SMSService';
+import { prisma } from '../config/database';
+import { authService } from '../services/AuthService';
+import { smsService } from '../services/SMSService';
 import { createError } from '../middleware/errorHandler';
 import { validatePhoneNumber } from '@shared/utils';
-
-const prisma = new PrismaClient();
-const authService = new AuthService();
-const smsService = new SMSService();
 
 export class AuthController {
   async sendSMS(req: Request, res: Response, next: NextFunction) {
@@ -185,3 +181,5 @@ export class AuthController {
     }
   }
 }
+
+export const authController = new AuthController();

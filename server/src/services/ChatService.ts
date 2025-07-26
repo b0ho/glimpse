@@ -1,10 +1,9 @@
-import { PrismaClient, MessageType } from '@prisma/client';
+import { MessageType } from '@prisma/client';
+import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
-import { EncryptionService } from './EncryptionService';
+import { encryptionService } from './EncryptionService';
 import { CHAT_CONFIG } from '@shared/constants';
 
-const prisma = new PrismaClient();
-const encryptionService = new EncryptionService();
 
 export class ChatService {
   async getMessages(matchId: string, page: number, limit: number) {
@@ -353,3 +352,5 @@ export class ChatService {
     return chatBackup;
   }
 }
+
+export const chatService = new ChatService();

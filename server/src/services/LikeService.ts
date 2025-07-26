@@ -1,10 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "../config/database";
 import { createError } from '../middleware/errorHandler';
 import { NotificationService } from './NotificationService';
 import { APP_CONFIG } from '@shared/constants';
 import { canUserLike, calculateLikeCost } from '@shared/utils';
 
-const prisma = new PrismaClient();
+
 const notificationService = new NotificationService();
 
 export class LikeService {
@@ -241,3 +241,5 @@ export class LikeService {
     }));
   }
 }
+
+export const likeService = new LikeService();

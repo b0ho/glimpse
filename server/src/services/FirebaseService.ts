@@ -1,8 +1,8 @@
 import admin from 'firebase-admin';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "../config/database";
 import path from 'path';
 
-const prisma = new PrismaClient();
+
 
 interface NotificationPayload {
   title: string;
