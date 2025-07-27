@@ -9,12 +9,16 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { ContentItem } from '@/components/ContentItem';
+import { StoryList } from '@/components/story/StoryList';
+import { StoryViewer } from '@/components/story/StoryViewer';
+import { storyService, StoryGroup } from '@/services/storyService';
 import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { generateDummyContent } from '@/utils/mockData';
@@ -27,7 +31,13 @@ export const HomeScreen: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasMoreData, setHasMoreData] = useState(true);
   
-  const navigation = useNavigation();
+  // Story states
+  const [stories, setStories] = useState<StoryGroup[]>([]);
+  const [storiesLoading, setStoriesLoading] = useState(true);
+  const [showStoryViewer, setShowStoryViewer] = useState(false);
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
+  
+  const navigation = useNavigation() as any;
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
 
@@ -92,6 +102,51 @@ export const HomeScreen: React.FC = () => {
     }
   }, [contents, authStore.user?.id, likeStore]);
 
+  // 스토리 로드
+  const loadStories = useCallback(async () => {
+    try {
+      setStoriesLoading(true);
+      const storyGroups = await storyService.getStoriesFeed();
+      
+      // Add my stories if exists
+      const myStories = await storyService.getMyStories();
+      if (myStories.length > 0) {
+        const myStoryGroup: StoryGroup = {
+          user: authStore.user || { id: '', nickname: '', profileImage: '' },
+          stories: myStories,
+          hasUnviewed: false
+        };
+        setStories([myStoryGroup, ...storyGroups]);
+      } else {
+        setStories(storyGroups);
+      }
+    } catch (error) {
+      console.error('Failed to load stories:', error);
+    } finally {
+      setStoriesLoading(false);
+    }
+  }, [authStore.user]);
+
+  // 스토리 보기 핸들러
+  const handleStoryPress = useCallback((index: number) => {
+    setSelectedStoryIndex(index);
+    setShowStoryViewer(true);
+  }, []);
+
+  // 스토리 추가 핸들러
+  const handleAddStoryPress = useCallback(() => {
+    navigation.navigate('StoryUpload');
+  }, [navigation]);
+
+  // 스토리 조회 핸들러
+  const handleViewStory = useCallback(async (storyId: string) => {
+    try {
+      await storyService.viewStory(storyId);
+    } catch (error) {
+      console.error('Failed to mark story as viewed:', error);
+    }
+  }, []);
+
   // 콘텐츠 로드 함수 (실제로는 API 호출)
   const loadContents = useCallback(async (refresh = false) => {
     if (refresh) {
@@ -137,7 +192,8 @@ export const HomeScreen: React.FC = () => {
 
   useEffect(() => {
     loadContents();
-  }, [loadContents]);
+    loadStories();
+  }, [loadContents, loadStories]);
 
   const renderHeader = () => (
     <View style={styles.header}>
@@ -213,13 +269,30 @@ export const HomeScreen: React.FC = () => {
         data={contents}
         keyExtractor={(item) => item.id}
         renderItem={renderContentItem}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={
+          <>
+            {/* Stories */}
+            <StoryList
+              stories={stories}
+              onStoryPress={handleStoryPress}
+              onAddStoryPress={handleAddStoryPress}
+              currentUserId={authStore.user?.id || ''}
+              isLoading={storiesLoading}
+              onRefresh={loadStories}
+              refreshing={false}
+            />
+            {renderHeader()}
+          </>
+        }
         ListEmptyComponent={renderEmptyState}
         ListFooterComponent={renderFooter}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            onRefresh={() => loadContents(true)}
+            onRefresh={() => {
+              loadContents(true);
+              loadStories();
+            }}
             colors={[COLORS.PRIMARY]}
             tintColor={COLORS.PRIMARY}
           />
@@ -229,6 +302,24 @@ export const HomeScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={contents.length === 0 ? styles.emptyContainer : undefined}
       />
+      
+      {/* Story Viewer Modal */}
+      <Modal
+        visible={showStoryViewer}
+        animationType="slide"
+        statusBarTranslucent
+        onRequestClose={() => setShowStoryViewer(false)}
+      >
+        {stories.length > 0 && (
+          <StoryViewer
+            storyGroups={stories}
+            initialGroupIndex={selectedStoryIndex}
+            onClose={() => setShowStoryViewer(false)}
+            onViewStory={handleViewStory}
+            currentUserId={authStore.user?.id || ''}
+          />
+        )}
+      </Modal>
       
       {/* Floating Action Button */}
       <TouchableOpacity

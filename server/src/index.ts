@@ -35,6 +35,7 @@ import notificationRoutes from './routes/notifications';
 import adminRoutes from './routes/admin';
 import locationRoutes from './routes/location';
 import videoCallRoutes from './routes/videoCallRoutes';
+import storyRoutes from './routes/storyRoutes';
 
 const app = express();
 
@@ -105,6 +106,7 @@ app.use('/api/v1/groups', groupRoutes);
 app.use('/api/v1/matches', matchRoutes);
 app.use('/api/v1/chat', chatRoutes);
 app.use('/api/v1/video-calls', videoCallRoutes);
+app.use('/api/v1/stories', storyRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/company', companyDomainRoutes);
 app.use('/api/v1/content-filter', contentFilterRoutes);
@@ -115,6 +117,9 @@ app.use('/api/v1/location', locationRoutes);
 // Initialize Socket.IO chat handlers
 import { initializeChatSocket } from './socket/chatSocket';
 initializeChatSocket(io);
+
+// Import cron service
+import { cronService } from './services/CronService';
 
 // Sentry handlers are now integrated differently in v7+
 // The error handler is integrated through errorHandler middleware
@@ -136,6 +141,19 @@ server.listen(PORT, () => {
   
   // Start system metrics collection
   startSystemMetricsCollection();
+  
+  // Start cron jobs
+  cronService.start();
+  console.log(`⏰ Cron jobs started`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  cronService.stop();
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
 });
 
 export { app, io };

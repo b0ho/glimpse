@@ -45,6 +45,8 @@ model User {
   messageReactions   MessageReaction[]
   callsMade          VideoCall[] @relation("CallsMade")
   callsReceived      VideoCall[] @relation("CallsReceived")
+  stories            Story[]
+  storyViews         StoryView[]
   notifications      Notification[]
   scheduledNotifications ScheduledNotification[]
   payments           Payment[]
@@ -338,6 +340,47 @@ enum MessageType {
   TEXT
   IMAGE
   SYSTEM
+}
+
+// Stories
+model Story {
+  id          String   @id @default(cuid())
+  userId      String
+  mediaUrl    String   // S3 URL for image/video
+  mediaType   StoryMediaType
+  caption     String?  @db.Text
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime // 24 hours from creation
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  views       StoryView[]
+  
+  @@index([userId])
+  @@index([isActive])
+  @@index([expiresAt])
+  @@map("stories")
+}
+
+model StoryView {
+  id          String   @id @default(cuid())
+  storyId     String
+  viewerId    String
+  viewedAt    DateTime @default(now())
+  
+  story       Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  viewer      User     @relation(fields: [viewerId], references: [id], onDelete: Cascade)
+  
+  @@unique([storyId, viewerId])
+  @@index([storyId])
+  @@index([viewerId])
+  @@map("story_views")
+}
+
+enum StoryMediaType {
+  IMAGE
+  VIDEO
 }
 
 // Payments

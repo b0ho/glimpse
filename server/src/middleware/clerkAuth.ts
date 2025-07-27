@@ -92,3 +92,6 @@ export const optionalClerkAuthMiddleware = async (
   // If token is provided, validate it
   clerkAuthMiddleware(req, res, next);
 };
+
+// Alias for backward compatibility
+export const requireClerkAuth = clerkAuthMiddleware;

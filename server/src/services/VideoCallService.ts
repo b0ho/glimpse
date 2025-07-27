@@ -14,7 +14,7 @@ export class VideoCallService {
       data: {
         callerId,
         receiverId,
-        callType,
+        callType: callType === 'video' ? 'VIDEO' : 'AUDIO' as any,
         status: 'INITIATED',
       },
       include: {
@@ -314,7 +314,7 @@ export class VideoCallService {
     await notificationService.sendMissedCallNotification(
       call.receiverId,
       call.callerId,
-      call.callType
+      call.callType === 'VIDEO' ? 'video' : 'audio'
     );
   }
 }

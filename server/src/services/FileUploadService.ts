@@ -266,6 +266,44 @@ export class FileUploadService {
     };
   }
 
+  async uploadFile(file: Express.Multer.File, userId: string, category: string = 'OTHER'): Promise<UploadedFile> {
+    if (!this.allowedMimeTypes.includes(file.mimetype)) {
+      throw createError(400, '지원하지 않는 파일 형식입니다.');
+    }
+
+    if (file.size > this.maxFileSize) {
+      throw createError(400, '파일 크기가 너무 큽니다. (최대 10MB)');
+    }
+
+    const fileExt = path.extname(file.originalname);
+    const filename = `${category.toLowerCase()}/${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}${fileExt}`;
+    
+    const uploadResult = await this.uploadToS3(file.buffer, filename, file.mimetype);
+    
+    // Save file record
+    const fileRecord = await prisma.file.create({
+      data: {
+        userId,
+        originalName: file.originalname,
+        filename: uploadResult.filename,
+        url: uploadResult.url,
+        size: file.size,
+        mimeType: file.mimetype,
+        category
+      }
+    });
+
+    return {
+      id: fileRecord.id,
+      originalName: fileRecord.originalName,
+      filename: fileRecord.filename,
+      url: fileRecord.url,
+      size: fileRecord.size,
+      mimeType: fileRecord.mimeType,
+      userId: fileRecord.userId || userId
+    };
+  }
+
   async uploadVerificationDocument(userId: string, file: Express.Multer.File): Promise<UploadedFile> {
     const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
     
@@ -301,7 +339,28 @@ export class FileUploadService {
     };
   }
 
-  async deleteFile(fileId: string, userId: string): Promise<boolean> {
+  async deleteFile(fileUrl: string): Promise<boolean> {
+    try {
+      // Extract filename from URL
+      const urlParts = fileUrl.split('/');
+      const filename = urlParts.slice(3).join('/'); // Remove protocol and domain
+      
+      // Delete from S3
+      await this.deleteFromS3(filename);
+      
+      // Delete from database if exists
+      await prisma.file.deleteMany({
+        where: { url: fileUrl }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('File deletion failed:', error);
+      return false;
+    }
+  }
+
+  async deleteFileById(fileId: string, userId: string): Promise<boolean> {
     const file = await prisma.file.findUnique({
       where: { id: fileId }
     });

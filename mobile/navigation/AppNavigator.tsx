@@ -23,6 +23,7 @@ import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen';
 import { MapScreen } from '@/screens/MapScreen';
 import NotificationSettingsScreen from '@/screens/NotificationSettingsScreen';
 import { WhoLikesYouScreen } from '@/screens/WhoLikesYouScreen';
+import { StoryUploadScreen } from '@/screens/StoryUploadScreen';
 // import { RootStackParamList } from '@/types';
 
 // Navigation Types
@@ -33,6 +34,7 @@ type AuthStackParamList = {
 type HomeStackParamList = {
   HomeTab: undefined;
   CreateContent: undefined;
+  StoryUpload: undefined;
 };
 
 type GroupsStackParamList = {
@@ -135,6 +137,15 @@ function HomeStackNavigator() {
         options={{ 
           title: '새 게시물',
           headerShown: true,
+          presentation: 'modal',
+        }}
+      />
+      <HomeStack.Screen 
+        name="StoryUpload" 
+        component={StoryUploadScreen} 
+        options={{ 
+          title: '스토리 추가',
+          headerShown: false,
           presentation: 'modal',
         }}
       />
