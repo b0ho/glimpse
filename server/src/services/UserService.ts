@@ -3,6 +3,7 @@ import { createError } from '../middleware/errorHandler';
 import { contentFilterService } from './ContentFilterService';
 import { PRICING, APP_CONFIG } from '@shared/constants';
 import { getMatchCompatibilityScore } from '@shared/utils';
+import { cacheService, InvalidateCache } from './CacheService';
 
 
 

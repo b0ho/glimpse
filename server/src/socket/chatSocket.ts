@@ -4,6 +4,8 @@ import jwksClient from 'jwks-rsa';
 import { ChatService } from '../services/ChatService';
 import { notificationService } from '../services/NotificationService';
 import { PrismaClient } from '@prisma/client';
+import { socketRateLimiter, RATE_LIMIT_CONFIGS, MessageSizeLimiter, connectionLimiter } from './rateLimiter';
+import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
 const chatService = new ChatService();
