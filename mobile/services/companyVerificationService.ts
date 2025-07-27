@@ -1,5 +1,5 @@
-import { API_BASE_URL } from './config';
-import { getAuthToken } from './auth/authService';
+import { API_BASE_URL } from './api/config';
+import { authService } from './authService';
 
 export interface CompanyDomain {
   id: string;
@@ -62,7 +62,7 @@ class CompanyVerificationService {
 
   async sendVerificationEmail(email: string): Promise<EmailVerification> {
     try {
-      const token = await getAuthToken();
+      const token = await authService.getAccessToken();
       if (!token) {
         throw new Error('인증 토큰이 없습니다');
       }
@@ -91,7 +91,7 @@ class CompanyVerificationService {
 
   async verifyEmailCode(email: string, code: string): Promise<boolean> {
     try {
-      const token = await getAuthToken();
+      const token = await authService.getAccessToken();
       if (!token) {
         throw new Error('인증 토큰이 없습니다');
       }

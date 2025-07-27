@@ -1,5 +1,5 @@
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
-const SOCKET_URL = process.env.EXPO_PUBLIC_SOCKET_URL || 'ws://localhost:8080/api/v1/ws';
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
+export const SOCKET_URL = process.env.EXPO_PUBLIC_SOCKET_URL || 'ws://localhost:8080/api/v1/ws';
 
 export const apiConfig = {
   baseURL: API_BASE_URL,

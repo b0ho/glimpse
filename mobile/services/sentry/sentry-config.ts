@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/react-native';
-import { EXPO_PUBLIC_SENTRY_DSN } from '@env';
+// @env 모듈은 Expo에서 환경변수를 위해 설정이 필요합니다
+const EXPO_PUBLIC_SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN || '';
 
 export function initializeSentry() {
   if (EXPO_PUBLIC_SENTRY_DSN) {
@@ -20,14 +21,7 @@ export function initializeSentry() {
       
       // Integrations
       integrations: [
-        new Sentry.ReactNativeTracing({
-          routingInstrumentation: Sentry.reactNavigationInstrumentation,
-          tracingOrigins: ['localhost', /^https:\/\/api\.glimpse\.app\/api/],
-          // Trace interactions (touch events)
-          idleTimeout: 5000,
-          finalTimeout: 60000,
-          maxTransactionDuration: 60000,
-        }),
+        // React Native 트레이싱은 별도 설정이 필요합니다
       ],
       
       // Before send hook to filter out sensitive data
@@ -137,10 +131,9 @@ export function addBreadcrumb(
 
 // Performance monitoring
 export function startTransaction(name: string, op: string = 'navigation') {
-  return Sentry.startTransaction({
-    name,
-    op,
-  });
+  // startTransaction은 더 이상 사용되지 않습니다
+  // 대신 Sentry.startSpan을 사용하세요
+  return null;
 }
 
 // Screen tracking for analytics

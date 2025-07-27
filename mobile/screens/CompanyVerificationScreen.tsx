@@ -278,8 +278,7 @@ const styles = StyleSheet.create({
     marginRight: SIZES.padding,
   },
   title: {
-    fontSize: SIZES.h2,
-    fontFamily: FONTS.bold,
+    ...FONTS.h2,
     color: COLORS.text,
   },
   content: {
@@ -291,8 +290,7 @@ const styles = StyleSheet.create({
     marginVertical: SIZES.padding * 2,
   },
   description: {
-    fontSize: SIZES.body3,
-    fontFamily: FONTS.regular,
+    ...FONTS.body3,
     color: COLORS.textLight,
     textAlign: 'center',
     marginBottom: SIZES.padding * 2,
@@ -306,8 +304,7 @@ const styles = StyleSheet.create({
     borderRadius: SIZES.radius,
     paddingHorizontal: SIZES.padding,
     paddingVertical: SIZES.padding * 0.75,
-    fontSize: SIZES.body3,
-    fontFamily: FONTS.regular,
+    ...FONTS.body3,
     color: COLORS.text,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -320,8 +317,7 @@ const styles = StyleSheet.create({
     marginTop: SIZES.base,
   },
   selectedDomainText: {
-    fontSize: SIZES.body4,
-    fontFamily: FONTS.medium,
+    ...FONTS.body4,
     color: COLORS.primary,
   },
   suggestionsContainer: {
@@ -333,8 +329,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   suggestionsTitle: {
-    fontSize: SIZES.body4,
-    fontFamily: FONTS.medium,
+    ...FONTS.body4,
     color: COLORS.textLight,
     marginBottom: SIZES.base,
   },
@@ -350,13 +345,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   suggestionDomain: {
-    fontSize: SIZES.body3,
-    fontFamily: FONTS.medium,
+    ...FONTS.body3,
     color: COLORS.text,
   },
   suggestionCompany: {
-    fontSize: SIZES.body4,
-    fontFamily: FONTS.regular,
+    ...FONTS.body4,
     color: COLORS.textLight,
     marginTop: 2,
   },
@@ -371,22 +364,19 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.disabled,
   },
   buttonText: {
-    fontSize: SIZES.body3,
-    fontFamily: FONTS.bold,
+    ...FONTS.body3,
     color: 'white',
   },
   codeSection: {
     alignItems: 'center',
   },
   emailText: {
-    fontSize: SIZES.body3,
-    fontFamily: FONTS.medium,
+    ...FONTS.body3,
     color: COLORS.text,
     marginBottom: SIZES.base,
   },
   codeDescription: {
-    fontSize: SIZES.body4,
-    fontFamily: FONTS.regular,
+    ...FONTS.body4,
     color: COLORS.textLight,
     textAlign: 'center',
     marginBottom: SIZES.padding,
@@ -399,8 +389,7 @@ const styles = StyleSheet.create({
     borderRadius: SIZES.radius,
     paddingHorizontal: SIZES.padding * 2,
     paddingVertical: SIZES.padding,
-    fontSize: SIZES.h2,
-    fontFamily: FONTS.bold,
+    ...FONTS.h2,
     color: COLORS.text,
     textAlign: 'center',
     letterSpacing: 10,
@@ -409,8 +398,7 @@ const styles = StyleSheet.create({
     minWidth: 200,
   },
   timerText: {
-    fontSize: SIZES.body4,
-    fontFamily: FONTS.medium,
+    ...FONTS.body4,
     color: COLORS.error,
     marginBottom: SIZES.padding,
   },
@@ -421,8 +409,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   resendButtonText: {
-    fontSize: SIZES.body4,
-    fontFamily: FONTS.medium,
+    ...FONTS.body4,
     color: COLORS.primary,
     textDecorationLine: 'underline',
   },
@@ -439,8 +426,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    fontSize: SIZES.body4,
-    fontFamily: FONTS.regular,
+    ...FONTS.body4,
     color: COLORS.info,
     marginLeft: SIZES.base,
     lineHeight: 20,

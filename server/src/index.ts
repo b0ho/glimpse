@@ -33,6 +33,7 @@ import companyDomainRoutes from './routes/companyDomain';
 import contentFilterRoutes from './routes/contentFilter';
 import notificationRoutes from './routes/notifications';
 import adminRoutes from './routes/admin';
+import locationRoutes from './routes/location';
 
 const app = express();
 
@@ -107,6 +108,7 @@ app.use('/api/v1/company', companyDomainRoutes);
 app.use('/api/v1/content-filter', contentFilterRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/location', locationRoutes);
 
 // Initialize Socket.IO chat handlers
 import { initializeChatSocket } from './socket/chatSocket';

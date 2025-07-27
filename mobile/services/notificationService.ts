@@ -2,8 +2,8 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
-import { API_BASE_URL } from './config';
-import { getAuthToken } from './auth/authService';
+import { API_BASE_URL } from './api/config';
+import { authService } from './authService';
 
 // 알림 설정
 Notifications.setNotificationHandler({
@@ -11,6 +11,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -69,7 +71,7 @@ class NotificationService {
 
   private async registerTokenWithServer(token: string): Promise<void> {
     try {
-      const authToken = await getAuthToken();
+      const authToken = await authService.getAccessToken();
       if (!authToken) {
         console.log('인증 토큰이 없습니다.');
         return;
@@ -101,7 +103,7 @@ class NotificationService {
 
   async removePushToken(token: string): Promise<void> {
     try {
-      const authToken = await getAuthToken();
+      const authToken = await authService.getAccessToken();
       if (!authToken) return;
 
       await fetch(`${API_BASE_URL}/notifications/fcm/remove`, {
@@ -149,7 +151,7 @@ class NotificationService {
 
   async getNotifications(page: number = 1, limit: number = 20) {
     try {
-      const token = await getAuthToken();
+      const token = await authService.getAccessToken();
       if (!token) {
         throw new Error('인증 토큰이 없습니다');
       }
@@ -179,7 +181,7 @@ class NotificationService {
 
   async markAsRead(notificationId: string): Promise<void> {
     try {
-      const token = await getAuthToken();
+      const token = await authService.getAccessToken();
       if (!token) {
         throw new Error('인증 토큰이 없습니다');
       }
@@ -206,7 +208,7 @@ class NotificationService {
 
   async markAllAsRead(): Promise<void> {
     try {
-      const token = await getAuthToken();
+      const token = await authService.getAccessToken();
       if (!token) {
         throw new Error('인증 토큰이 없습니다');
       }
@@ -230,7 +232,7 @@ class NotificationService {
 
   async getUnreadCount(): Promise<number> {
     try {
-      const token = await getAuthToken();
+      const token = await authService.getAccessToken();
       if (!token) {
         return 0;
       }
@@ -257,7 +259,7 @@ class NotificationService {
 
   async deleteNotification(notificationId: string): Promise<void> {
     try {
-      const token = await getAuthToken();
+      const token = await authService.getAccessToken();
       if (!token) {
         throw new Error('인증 토큰이 없습니다');
       }

@@ -1,302 +1,430 @@
-import { Prisma, LocationCheckMethod } from '@prisma/client';
 import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import axios from 'axios';
+import QRCode from 'qrcode';
+import crypto from 'crypto';
 
 interface Coordinates {
   latitude: number;
   longitude: number;
 }
 
-interface LocationInfo {
-  address: string;
-  city: string;
-  district: string;
-  country: string;
+interface KakaoAddressResponse {
+  documents: Array<{
+    address: {
+      address_name: string;
+      region_1depth_name: string;
+      region_2depth_name: string;
+      region_3depth_name: string;
+    };
+    road_address?: {
+      address_name: string;
+      building_name?: string;
+    };
+  }>;
+}
+
+interface LocationGroupData {
+  name: string;
+  description?: string;
+  latitude: number;
+  longitude: number;
+  radius: number;
+  maxMembers?: number;
 }
 
 export class LocationService {
-  private readonly kakaoApiKey = process.env.KAKAO_API_KEY;
-
-  async validateCoordinates(latitude: number, longitude: number): Promise<boolean> {
-    // Validate coordinates are within valid range
-    if (latitude < -90 || latitude > 90) return false;
-    if (longitude < -180 || longitude > 180) return false;
-    
-    // Check if coordinates are within South Korea
-    const koreaLatRange = { min: 33, max: 39 };
-    const koreaLngRange = { min: 124, max: 132 };
-    
-    return (
-      latitude >= koreaLatRange.min &&
-      latitude <= koreaLatRange.max &&
-      longitude >= koreaLngRange.min &&
-      longitude <= koreaLngRange.max
-    );
+  private static instance: LocationService;
+  private kakaoApiKey: string;
+  
+  private constructor() {
+    this.kakaoApiKey = process.env.KAKAO_API_KEY || '';
+    if (!this.kakaoApiKey) {
+      console.warn('Kakao API key not configured');
+    }
+  }
+  
+  static getInstance(): LocationService {
+    if (!LocationService.instance) {
+      LocationService.instance = new LocationService();
+    }
+    return LocationService.instance;
   }
 
-  async getAddressFromCoordinates(lat: number, lng: number): Promise<LocationInfo> {
+  // 좌표로 주소 가져오기 (역지오코딩)
+  async getAddressFromCoordinates(coordinates: Coordinates): Promise<string> {
     if (!this.kakaoApiKey) {
-      throw createError(500, 'Kakao API key not configured');
+      throw createError(500, 'Kakao API가 설정되지 않았습니다.');
     }
 
     try {
-      const response = await axios.get(
-        `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${lng}&y=${lat}`,
+      const response = await axios.get<KakaoAddressResponse>(
+        'https://dapi.kakao.com/v2/local/geo/coord2address.json',
         {
+          params: {
+            x: coordinates.longitude,
+            y: coordinates.latitude,
+            input_coord: 'WGS84'
+          },
           headers: {
-            Authorization: `KakaoAK ${this.kakaoApiKey}`
+            'Authorization': `KakaoAK ${this.kakaoApiKey}`
           }
         }
       );
 
-      if (!response.data.documents || response.data.documents.length === 0) {
-        throw createError(404, '주소를 찾을 수 없습니다');
+      if (response.data.documents.length === 0) {
+        throw createError(404, '주소를 찾을 수 없습니다.');
       }
 
-      const address = response.data.documents[0].address;
-      const roadAddress = response.data.documents[0].road_address;
+      const doc = response.data.documents[0];
+      if (!doc) {
+        throw createError(404, '주소를 찾을 수 없습니다.');
+      }
+      return doc.road_address?.address_name || doc.address.address_name;
+    } catch (error) {
+      console.error('Kakao API error:', error);
+      throw createError(500, '주소 검색에 실패했습니다.');
+    }
+  }
+
+  // 두 지점 간의 거리 계산 (미터 단위)
+  calculateDistance(coord1: Coordinates, coord2: Coordinates): number {
+    const R = 6371e3; // 지구 반경 (미터)
+    const φ1 = coord1.latitude * Math.PI / 180;
+    const φ2 = coord2.latitude * Math.PI / 180;
+    const Δφ = (coord2.latitude - coord1.latitude) * Math.PI / 180;
+    const Δλ = (coord2.longitude - coord1.longitude) * Math.PI / 180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c;
+  }
+
+  // 위치 기반 그룹 생성
+  async createLocationGroup(creatorId: string, data: LocationGroupData) {
+    try {
+      // 주소 가져오기
+      const address = await this.getAddressFromCoordinates({
+        latitude: data.latitude,
+        longitude: data.longitude
+      });
+
+      // 위치 기반 그룹 생성
+      const group = await prisma.group.create({
+        data: {
+          name: data.name,
+          description: data.description,
+          type: 'LOCATION',
+          isActive: true,
+          maxMembers: data.maxMembers || 100,
+          creatorId,
+          settings: {}, // 기본 설정
+          location: {
+            latitude: data.latitude,
+            longitude: data.longitude,
+            radius: data.radius,
+            address
+          }
+        },
+        include: {
+          creator: {
+            select: {
+              id: true,
+              nickname: true
+            }
+          }
+        }
+      });
+
+      // 생성자를 그룹 멤버로 추가
+      await prisma.groupMember.create({
+        data: {
+          userId: creatorId,
+          groupId: group.id,
+          role: 'ADMIN',
+          status: 'ACTIVE'
+        }
+      });
+
+      // QR 코드 생성
+      const qrCode = await this.generateLocationQRCode(group.id);
 
       return {
-        address: roadAddress?.address_name || address.address_name,
-        city: address.region_1depth_name,
-        district: address.region_2depth_name,
-        country: 'KR'
+        ...group,
+        qrCode
       };
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        throw createError(401, 'Invalid Kakao API key');
-      }
-      throw createError(500, '주소 조회에 실패했습니다');
+    } catch (error) {
+      console.error('Failed to create location group:', error);
+      throw error;
     }
   }
 
-  async calculateDistance(coords1: Coordinates, coords2: Coordinates): Promise<number> {
-    // Haversine formula
-    const R = 6371; // Earth's radius in km
-    const dLat = this.toRad(coords2.latitude - coords1.latitude);
-    const dLon = this.toRad(coords2.longitude - coords1.longitude);
-    const lat1 = this.toRad(coords1.latitude);
-    const lat2 = this.toRad(coords2.latitude);
-
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    
-    return R * c; // Distance in km
-  }
-
-  private toRad(value: number): number {
-    return value * Math.PI / 180;
-  }
-
-  async findNearbyGroups(latitude: number, longitude: number, radiusKm: number = 5) {
-    // Calculate bounding box
-    const latDelta = radiusKm / 111; // 1 degree latitude = ~111km
-    const lngDelta = radiusKm / (111 * Math.cos(this.toRad(latitude)));
-
-    const groups = await prisma.group.findMany({
-      where: {
-        type: 'LOCATION',
-        location: {
-          not: Prisma.JsonNull
-        },
-        isActive: true
-      },
-      include: {
-        _count: {
-          select: { members: true }
-        }
-      }
-    });
-
-    // Calculate exact distances
-    const groupsWithDistance = await Promise.all(
-      groups.map(async (group) => {
-        const groupLocation = group.location as any;
-        const groupLat = groupLocation?.latitude as number;
-        const groupLng = groupLocation?.longitude as number;
-        
-        if (!groupLat || !groupLng) return null;
-        
-        const distance = await this.calculateDistance(
-          { latitude, longitude },
-          { latitude: groupLat, longitude: groupLng }
-        );
-        
-        if (distance > radiusKm) return null;
-        
-        return {
-          ...group,
-          distance: Math.round(distance * 1000) / 1000 // Round to 3 decimal places
-        };
-      })
-    );
-
-    return groupsWithDistance
-      .filter(g => g !== null)
-      .sort((a, b) => a!.distance - b!.distance);
-  }
-
-  async createLocationGroup(data: {
-    name: string;
-    description?: string;
-    latitude: number;
-    longitude: number;
-    radius: number;
-    creatorId: string;
-  }) {
-    const { latitude, longitude, radius, ...groupData } = data;
-
-    // Validate coordinates
-    if (!await this.validateCoordinates(latitude, longitude)) {
-      throw createError(400, '유효하지 않은 위치입니다');
-    }
-
-    // Get address info
-    const locationInfo = await this.getAddressFromCoordinates(latitude, longitude);
-
-    const group = await prisma.group.create({
-      data: {
-        ...groupData,
-        type: 'LOCATION',
-        location: {
-          latitude,
-          longitude,
-          radius,
-          address: locationInfo.address,
-          city: locationInfo.city,
-          district: locationInfo.district,
-          coordinates: [
-            longitude - radius / 111,
-            latitude - radius / 111,
-            longitude + radius / 111,
-            latitude + radius / 111
-          ]
-        },
-        settings: {
-          requiresLocationCheck: true,
-          locationCheckRadius: radius
-        }
-      }
-    });
-
-    return group;
-  }
-
-  async checkIn(userId: string, groupId: string, coordinates: {
-    latitude: number;
-    longitude: number;
-    accuracy?: number;
-    method?: string;
-  }) {
+  // 위치 기반 그룹 참여 검증
+  async verifyLocationForGroup(userId: string, groupId: string, userCoordinates: Coordinates) {
     const group = await prisma.group.findUnique({
-      where: { id: groupId }
+      where: { id: groupId },
+      include: {
+        members: {
+          where: { userId }
+        }
+      }
     });
 
-    if (!group || group.type !== 'LOCATION') {
-      throw createError(404, '위치 기반 그룹을 찾을 수 없습니다');
+    if (!group) {
+      throw createError(404, '그룹을 찾을 수 없습니다.');
+    }
+
+    if (group.type !== 'LOCATION') {
+      throw createError(400, '위치 기반 그룹이 아닙니다.');
     }
 
     const groupLocation = group.location as any;
-    const groupLat = groupLocation?.latitude as number;
-    const groupLng = groupLocation?.longitude as number;
-    const groupRadius = groupLocation?.radius as number || 0.5; // Default 500m
-
-    if (!groupLat || !groupLng) {
-      throw createError(500, '그룹 위치 정보가 없습니다');
+    if (!groupLocation) {
+      throw createError(500, '그룹 위치 정보가 없습니다.');
     }
 
-    // Calculate distance
-    const distance = await this.calculateDistance(
-      coordinates,
-      { latitude: groupLat, longitude: groupLng }
-    );
+    // 거리 확인
+    const distance = this.calculateDistance(userCoordinates, {
+      latitude: groupLocation.latitude,
+      longitude: groupLocation.longitude
+    });
 
-    if (distance > groupRadius) {
-      throw createError(400, `그룹 위치에서 ${Math.round(distance * 1000)}m 떨어져 있습니다. ${groupRadius * 1000}m 이내에서 체크인해주세요.`);
+    const allowedRadius = groupLocation.radius || 100; // 기본 100m
+
+    if (distance > allowedRadius) {
+      throw createError(400, `그룹 위치에서 ${allowedRadius}m 이내에 있어야 합니다. 현재 거리: ${Math.round(distance)}m`);
     }
 
-    // Create check-in record
-    const checkIn = await prisma.locationCheckIn.create({
+    // 위치 체크인 기록
+    await prisma.locationCheckIn.create({
       data: {
         userId,
         groupId,
-        latitude: coordinates.latitude,
-        longitude: coordinates.longitude,
-        accuracy: coordinates.accuracy || 0,
-        method: (coordinates.method || 'GPS') as LocationCheckMethod,
+        latitude: userCoordinates.latitude,
+        longitude: userCoordinates.longitude,
+        accuracy: distance,
+        method: 'GPS',
         isValid: true
       }
     });
 
-    // Update user's last active time
-    await prisma.user.update({
-      where: { id: userId },
+    // 이미 멤버인 경우
+    if (group.members.length > 0) {
+      return {
+        alreadyMember: true,
+        group
+      };
+    }
+
+    // 그룹 참여
+    await prisma.groupMember.create({
       data: {
-        lastActive: new Date()
+        userId,
+        groupId,
+        role: 'MEMBER',
+        status: 'ACTIVE'
       }
     });
 
     return {
-      checkIn,
-      distance: Math.round(distance * 1000),
-      message: '체크인 되었습니다'
+      alreadyMember: false,
+      group
     };
   }
 
-  async getCheckIns(groupId: string, page: number = 1, limit: number = 20) {
-    const [checkIns, total] = await Promise.all([
-      prisma.locationCheckIn.findMany({
-        where: { groupId },
+  // QR 코드 생성
+  async generateLocationQRCode(groupId: string): Promise<string> {
+    const qrData = {
+      type: 'location_group',
+      groupId,
+      timestamp: Date.now(),
+      signature: this.generateQRSignature(groupId)
+    };
+
+    const qrCodeDataUrl = await QRCode.toDataURL(JSON.stringify(qrData), {
+      width: 300,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+
+    return qrCodeDataUrl;
+  }
+
+  // QR 코드 검증 및 그룹 참여
+  async joinGroupByQRCode(userId: string, qrData: string) {
+    try {
+      const data = JSON.parse(qrData);
+      
+      if (data.type !== 'location_group') {
+        throw createError(400, '유효하지 않은 QR 코드입니다.');
+      }
+
+      // 서명 검증
+      const expectedSignature = this.generateQRSignature(data.groupId);
+      if (data.signature !== expectedSignature) {
+        throw createError(400, '유효하지 않은 QR 코드입니다.');
+      }
+
+      // 타임스탬프 검증 (5분 이내)
+      const now = Date.now();
+      if (now - data.timestamp > 5 * 60 * 1000) {
+        throw createError(400, 'QR 코드가 만료되었습니다.');
+      }
+
+      const group = await prisma.group.findUnique({
+        where: { id: data.groupId },
         include: {
-          user: {
-            select: {
-              id: true,
-              nickname: true,
-              profileImage: true
+          members: {
+            where: { userId }
+          }
+        }
+      });
+
+      if (!group) {
+        throw createError(404, '그룹을 찾을 수 없습니다.');
+      }
+
+      if (!group.isActive) {
+        throw createError(400, '비활성화된 그룹입니다.');
+      }
+
+      // 위치 체크인 기록 (QR 방식)
+      await prisma.locationCheckIn.create({
+        data: {
+          userId,
+          groupId: group.id,
+          latitude: 0, // QR 코드 방식은 좌표 없음
+          longitude: 0,
+          accuracy: 0,
+          method: 'QR_CODE',
+          isValid: true
+        }
+      });
+
+      // 이미 멤버인 경우
+      if (group.members.length > 0) {
+        return {
+          alreadyMember: true,
+          group
+        };
+      }
+
+      // 그룹 참여
+      await prisma.groupMember.create({
+        data: {
+          userId,
+          groupId: group.id,
+          role: 'MEMBER',
+          status: 'ACTIVE'
+        }
+      });
+
+      return {
+        alreadyMember: false,
+        group
+      };
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw createError(400, '유효하지 않은 QR 코드입니다.');
+      }
+      throw error;
+    }
+  }
+
+  // 주변 위치 기반 그룹 검색
+  async getNearbyGroups(coordinates: Coordinates, radiusKm: number = 5) {
+    const groups = await prisma.group.findMany({
+      where: {
+        type: 'LOCATION',
+        isActive: true
+      },
+      include: {
+        _count: {
+          select: {
+            members: {
+              where: {
+                status: 'ACTIVE'
+              }
             }
           }
         },
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit
-      }),
-      prisma.locationCheckIn.count({ where: { groupId } })
-    ]);
+        creator: {
+          select: {
+            id: true,
+            nickname: true
+          }
+        }
+      }
+    });
 
-    return {
-      checkIns,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit)
-    };
+    // 거리 계산 및 필터링
+    const nearbyGroups = groups.filter(group => {
+      const groupLocation = group.location as any;
+      if (!groupLocation) return false;
+
+      const distance = this.calculateDistance(coordinates, {
+        latitude: groupLocation.latitude,
+        longitude: groupLocation.longitude
+      });
+
+      return distance <= radiusKm * 1000; // km to meters
+    }).map(group => {
+      const groupLocation = group.location as any;
+      const distance = this.calculateDistance(coordinates, {
+        latitude: groupLocation.latitude,
+        longitude: groupLocation.longitude
+      });
+
+      return {
+        ...group,
+        distance: Math.round(distance),
+        address: groupLocation.address
+      };
+    });
+
+    // 거리순 정렬
+    nearbyGroups.sort((a, b) => a.distance - b.distance);
+
+    return nearbyGroups;
   }
 
-  async getUserLocationHistory(userId: string, days: number = 7) {
-    const since = new Date();
-    since.setDate(since.getDate() - days);
-
+  // 사용자의 위치 기반 그룹 히스토리
+  async getUserLocationHistory(userId: string) {
     const checkIns = await prisma.locationCheckIn.findMany({
-      where: {
-        userId,
-        createdAt: { gte: since }
-      },
+      where: { userId },
       include: {
         group: {
           select: {
             id: true,
             name: true,
-            location: true
+            type: true
           }
         }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 50
     });
 
     return checkIns;
   }
+
+  // QR 서명 생성
+  private generateQRSignature(groupId: string): string {
+    const secret = process.env.QR_CODE_SECRET || 'default-secret';
+    return crypto
+      .createHmac('sha256', secret)
+      .update(groupId)
+      .digest('hex')
+      .substring(0, 16);
+  }
 }
 
-export const locationService = new LocationService();
+export const locationService = LocationService.getInstance();

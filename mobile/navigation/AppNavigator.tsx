@@ -17,7 +17,7 @@ import { CreateGroupScreen } from '@/screens/CreateGroupScreen';
 import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
 import { ChatScreen } from '@/screens/ChatScreen';
 import { PremiumScreen } from '@/screens/PremiumScreen';
-import { LocationGroupScreen } from '@/screens/LocationGroupScreen';
+import LocationGroupScreen from '@/screens/LocationGroupScreen';
 import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen';
 import { MapScreen } from '@/screens/MapScreen';
 import NotificationSettingsScreen from '@/screens/NotificationSettingsScreen';
