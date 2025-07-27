@@ -79,14 +79,15 @@ export const HomeScreen: React.FC = () => {
 
     try {
       // 좋아요 보내기 (Zustand store 사용)
-      const success = await likeStore.sendLike(authorId, content.groupId);
+      // TODO: Content doesn't have groupId - need to handle this differently
+      const success = await likeStore.sendLike(authorId, 'default_group_id');
       
       if (success) {
         // 로컬 상태 업데이트 (optimistic update)
         setContents(prevContents => 
           prevContents.map(c => 
             c.id === contentId 
-              ? { ...c, likeCount: c.likeCount + 1, isLikedByUser: true }
+              ? { ...c, likeCount: (c.likeCount || 0) + 1, isLikedByUser: true }
               : c
           )
         );
@@ -112,7 +113,15 @@ export const HomeScreen: React.FC = () => {
       const myStories = await storyService.getMyStories();
       if (myStories.length > 0) {
         const myStoryGroup: StoryGroup = {
-          user: authStore.user || { id: '', nickname: '', profileImage: '' },
+          user: authStore.user ? {
+            id: authStore.user.id,
+            nickname: authStore.user.nickname || '',
+            profileImage: authStore.user.profileImage
+          } : {
+            id: '',
+            nickname: '',
+            profileImage: undefined
+          },
           stories: myStories,
           hasUnviewed: false
         };

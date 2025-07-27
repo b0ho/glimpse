@@ -29,9 +29,9 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   const { getUserDisplayName } = useLikeStore();
 
   // 익명성 시스템: 매칭 상태에 따라 표시명 결정
-  const displayName = currentUserId 
+  const displayName = currentUserId && item.authorId
     ? getUserDisplayName(item.authorId, currentUserId)
-    : item.authorNickname;
+    : item.authorNickname || '익명';
 
   return (
     <View style={styles.contentItem}>
@@ -39,7 +39,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
         <View style={styles.authorInfo}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
-              {displayName.charAt(0)}
+              {displayName?.charAt(0) || '?'}
             </Text>
           </View>
           <View>
@@ -64,8 +64,8 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={styles.likeButtonContainer}
-            onPress={() => onLikeToggle(item.id, item.authorId)}
-            disabled={item.isLikedByUser || isOwnContent}
+            onPress={() => item.authorId && onLikeToggle(item.id, item.authorId)}
+            disabled={item.isLikedByUser || isOwnContent || !item.authorId}
             accessibilityLabel={`${item.authorNickname}님의 게시물에 좋아요`}
             accessibilityHint={
               isOwnContent

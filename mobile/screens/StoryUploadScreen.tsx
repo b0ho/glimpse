@@ -18,10 +18,11 @@ import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 import { API_BASE_URL } from '../services/api/config';
-import { authService } from '../services/auth/auth-service';
+import { useAuthService } from '../services/auth/auth-service';
 
 export const StoryUploadScreen: React.FC = () => {
   const navigation = useNavigation();
+  const authService = useAuthService();
   const [media, setMedia] = useState<{ uri: string; type: 'image' | 'video' } | null>(null);
   const [caption, setCaption] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -120,7 +121,9 @@ export const StoryUploadScreen: React.FC = () => {
     setIsUploading(true);
 
     try {
-      const token = await authService.getAccessToken();
+      // Note: The current auth service doesn't have getAccessToken method
+      // This needs to be implemented or replaced with proper Clerk token fetching
+      const token = ''; // TODO: Get token from Clerk
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }

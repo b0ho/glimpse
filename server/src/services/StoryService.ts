@@ -3,6 +3,7 @@ import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import { fileUploadService } from './FileUploadService';
 import { contentFilterService } from './ContentFilterService';
+import type { Express } from 'express';
 
 export class StoryService {
   // Create a new story

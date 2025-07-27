@@ -42,7 +42,7 @@ interface ChatActions {
   
   // 메시지 관련
   loadMessages: (roomId: string, page?: number) => Promise<void>;
-  sendMessage: (roomId: string, content: string, type?: 'text' | 'image' | 'file') => Promise<void>;
+  sendMessage: (roomId: string, content: string, type?: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY') => Promise<void>;
   addMessage: (message: Message) => void;
   markMessageAsRead: (messageId: string, roomId: string) => void;
   
@@ -93,16 +93,16 @@ export const useChatStore = create<ChatStore>()(
 
             // 새 메시지 알림 (현재 활성 방이 아닌 경우에만)
             const state = get();
-            if (state.activeRoomId !== message.roomId && message.senderId !== userId) {
+            if (state.activeRoomId !== message.matchId && message.senderId !== userId) {
               // 알림 전송
               import('../../services/notifications/notification-service').then(({ notificationService }) => {
                 import('../slices/notificationSlice').then(({ useNotificationStore }) => {
                   const notificationState = useNotificationStore.getState();
                   if (notificationState.settings.newMessages && notificationState.settings.pushEnabled) {
-                    const senderName = message.senderNickname || '익명사용자';
-                    const preview = message.type === 'text' 
+                    const senderName = '익명사용자';
+                    const preview = message.type === 'TEXT' 
                       ? message.content 
-                      : message.type === 'image' 
+                      : message.type === 'IMAGE' 
                         ? '📷 사진을 보냈습니다' 
                         : '📎 파일을 보냈습니다';
                     
@@ -213,7 +213,7 @@ export const useChatStore = create<ChatStore>()(
       },
 
       // 메시지 전송
-      sendMessage: async (roomId: string, content: string, type = 'text') => {
+      sendMessage: async (roomId: string, content: string, type: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY' = 'TEXT') => {
         try {
           const message = await webSocketService.sendMessage(roomId, content, type);
           
@@ -236,7 +236,7 @@ export const useChatStore = create<ChatStore>()(
               const notificationState = useNotificationStore.getState();
               if (notificationState.settings.pushEnabled && notificationState.settings.newMessages) {
                 // 상대방 닉네임 가져오기 (메시지에서 또는 기본값 사용)
-                const otherUserNickname = message.senderNickname || '익명 사용자';
+                const otherUserNickname = '익명 사용자';
                 
                 // 메시지 미리보기 (최대 50자)
                 const preview = content.length > 50 ? content.substring(0, 47) + '...' : content;
@@ -258,7 +258,7 @@ export const useChatStore = create<ChatStore>()(
       // 메시지 추가 (실시간 수신)
       addMessage: (message: Message) => {
         set((state) => {
-          const roomMessages = state.messages[message.roomId] || [];
+          const roomMessages = state.messages[message.matchId] || [];
           
           // 중복 메시지 체크
           const messageExists = roomMessages.some(m => m.id === message.id);
@@ -269,7 +269,7 @@ export const useChatStore = create<ChatStore>()(
           return {
             messages: {
               ...state.messages,
-              [message.roomId]: [...roomMessages, message].sort(
+              [message.matchId]: [...roomMessages, message].sort(
                 (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
               ),
             },

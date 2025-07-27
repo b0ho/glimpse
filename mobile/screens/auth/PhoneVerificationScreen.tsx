@@ -68,7 +68,7 @@ export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = (
           ]
         );
       } else {
-        Alert.alert('오류', result.error || '인증번호 전송에 실패했습니다.');
+        Alert.alert('오류', typeof result.error === 'string' ? result.error : result.error?.message || '인증번호 전송에 실패했습니다.');
       }
     } catch (error) {
       console.error('Phone verification error:', error);

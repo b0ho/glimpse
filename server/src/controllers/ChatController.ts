@@ -3,7 +3,6 @@ import { prisma } from '../config/database';
 import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
 import { chatService } from '../services/ChatService';
-import { encryptionService } from '../services/EncryptionService';
 import { notificationService } from '../services/NotificationService';
 import { io } from '../index';
 

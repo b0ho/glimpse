@@ -100,11 +100,11 @@ export const metricsMiddleware = (req: Request, res: Response, next: NextFunctio
     // 응답 크기 기록
     let responseSize = 0;
     if (typeof body === 'string') {
-      responseSize = Buffer.byteLength(body);
-    } else if (Buffer.isBuffer(body)) {
+      responseSize = globalThis.Buffer.byteLength(body);
+    } else if (globalThis.Buffer.isBuffer(body)) {
       responseSize = body.length;
     } else if (body && typeof body === 'object') {
-      responseSize = Buffer.byteLength(JSON.stringify(body));
+      responseSize = globalThis.Buffer.byteLength(JSON.stringify(body));
     }
 
     if (responseSize > 0) {

@@ -70,7 +70,7 @@ export const clerkAuthMiddleware = async (
 
       next();
     });
-  } catch (error) {
+  } catch (_error) {
     next(createError(401, '인증에 실패했습니다.'));
   }
 };

@@ -5,6 +5,7 @@ export interface User {
   anonymousId: string;
   phoneNumber: string;
   nickname?: string;
+  realName?: string; // Real name (revealed after matching)
   age?: number;
   gender?: 'MALE' | 'FEMALE' | 'OTHER';
   profileImage?: string;
@@ -19,6 +20,9 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// Gender Type
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 
 export interface UserCreateRequest {
   phoneNumber: string;
@@ -49,11 +53,16 @@ export interface Group {
   type: GroupType;
   isActive: boolean;
   memberCount: number;
+  maleCount?: number;
+  femaleCount?: number;
   maxMembers?: number;
+  minimumMembers?: number;
+  isMatchingActive?: boolean;
   creatorId?: string;
   companyId?: string;
   location?: GroupLocation;
   settings: GroupSettings;
+  expiresAt?: Date; // For instance groups
   createdAt: Date;
   updatedAt: Date;
 }
@@ -153,8 +162,11 @@ export interface Match {
   groupId: string;
   status?: 'ACTIVE' | 'EXPIRED' | 'DELETED';
   isActive: boolean;
+  chatChannelId?: string;
+  matchedAt?: Date; // When match was created
   lastMessageAt: Date | null;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 // Chat Types
@@ -167,6 +179,62 @@ export interface ChatMessage {
   isEncrypted: boolean;
   readAt?: Date;
   createdAt: Date;
+}
+
+// Message Types (for mobile compatibility)
+export interface Message {
+  id: string;
+  matchId: string;
+  senderId: string;
+  content: string; // Encrypted
+  type: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY';
+  metadata?: Record<string, any>;
+  isRead: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Chat Room Types
+export interface ChatRoom {
+  id: string;
+  matchId: string;
+  participants: string[];
+  lastMessage?: Message;
+  unreadCount: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Content Types (for mobile compatibility)
+export interface Content {
+  id: string;
+  userId: string;
+  authorId?: string; // For compatibility
+  authorNickname?: string;
+  type: 'PHOTO' | 'VIDEO' | 'STORY' | 'image' | 'text'; // Support legacy types
+  mediaUrl?: string;
+  imageUrls?: string[];
+  text?: string;
+  thumbnailUrl?: string;
+  caption?: string;
+  tags?: string[];
+  likes: number;
+  likeCount?: number; // Alias for likes
+  views: number;
+  isPublic: boolean;
+  isLikedByUser?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Auth Types
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
+  token: string | null;
+  isLoading: boolean;
+  error: string | null;
 }
 
 // Payment Types

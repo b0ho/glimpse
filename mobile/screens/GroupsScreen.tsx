@@ -58,8 +58,8 @@ export const GroupsScreen: React.FC = () => {
     }
 
     // 성별 균형 확인 (실제로는 백엔드에서 처리)
-    const genderRatio = group.maleCount / group.femaleCount;
-    if (genderRatio > 2 || genderRatio < 0.5) {
+    const genderRatio = (group.maleCount || 0) / (group.femaleCount || 1);
+    if (group.maleCount && group.femaleCount && (genderRatio > 2 || genderRatio < 0.5)) {
       Alert.alert(
         '그룹 참여 제한',
         '성별 균형을 위해 현재 참여가 제한되어 있습니다.\n나중에 다시 시도해주세요.',

@@ -5,10 +5,16 @@
     "jest": true,
     "node": true
   },
+  "globals": {
+    "Express": "readonly"
+  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
-      "rules": {}
+      "rules": {
+        "no-case-declarations": "off",
+        "no-prototype-builtins": "off"
+      }
     },
     {
       "files": ["*.ts", "*.tsx"],

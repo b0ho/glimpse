@@ -2,13 +2,11 @@ import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { ChatService } from '../services/ChatService';
-import { MatchingService } from '../services/MatchingService';
 import { notificationService } from '../services/NotificationService';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const chatService = new ChatService();
-const matchingService = new MatchingService();
 
 // Store user socket mappings
 const userSocketMap = new Map<string, string>();
@@ -74,7 +72,7 @@ export function initializeChatSocket(io: Server) {
         (socket.data as SocketData).userId = user.id;
         next();
       });
-    } catch (error) {
+    } catch (_error) {
       next(new Error('Authentication failed'));
     }
   });
@@ -120,7 +118,6 @@ export function initializeChatSocket(io: Server) {
         await chatService.markAllMessagesAsRead(matchId, userId);
 
         // Notify other user that this user joined
-        const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
         socket.to(`match:${matchId}`).emit('user-joined', { userId });
 
         console.log(`User ${userId} joined match room ${matchId}`);

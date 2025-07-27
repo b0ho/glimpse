@@ -3,7 +3,7 @@ import * as TaskManager from 'expo-task-manager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import { API_BASE_URL } from './api/config';
-import { authService } from './auth/auth-service';
+// import { authService } from './auth/auth-service'; // TODO: Implement token handling
 
 const LOCATION_TASK_NAME = 'background-location-task';
 const LOCATION_STORAGE_KEY = 'user_location';
@@ -186,7 +186,8 @@ class LocationService {
         throw new Error('위치를 가져올 수 없습니다.');
       }
 
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }
@@ -227,7 +228,8 @@ class LocationService {
         throw new Error('위치를 가져올 수 없습니다.');
       }
 
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }
@@ -265,7 +267,8 @@ class LocationService {
         throw new Error('위치를 가져올 수 없습니다.');
       }
 
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }
@@ -298,7 +301,8 @@ class LocationService {
   // QR 코드로 그룹 참여
   async joinGroupByQRCode(qrData: string): Promise<any> {
     try {
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }
@@ -328,7 +332,8 @@ class LocationService {
   // 위치 히스토리 가져오기
   async getLocationHistory(): Promise<any[]> {
     try {
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }

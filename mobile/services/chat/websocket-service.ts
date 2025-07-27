@@ -118,7 +118,7 @@ class WebSocketService {
   async sendMessage(
     roomId: string, 
     content: string, 
-    type: 'text' | 'image' | 'file' = 'text'
+    type: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY' = 'TEXT'
   ): Promise<Message> {
     if (!this.socket || !this.isConnected) {
       throw new Error('WebSocket is not connected');
@@ -128,13 +128,12 @@ class WebSocketService {
       throw new Error('User ID is not set');
     }
 
-    const message: Omit<Message, 'id' | 'createdAt'> = {
-      roomId,
+    const message: Omit<Message, 'id' | 'createdAt' | 'updatedAt'> = {
+      matchId: roomId,
       senderId: this.currentUserId,
       content,
       type,
       isRead: false,
-      readBy: [],
     };
 
     return new Promise((resolve, reject) => {

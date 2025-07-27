@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { CompanyVerification } from '@/types';
+import { CompanyVerification, VerificationStatus, VerificationMethod } from '@/types';
 
 interface CompanyVerificationScreenProps {
   onVerificationSubmitted: () => void;
@@ -23,7 +23,7 @@ export const CompanyVerificationScreen: React.FC<CompanyVerificationScreenProps>
   onVerificationSubmitted,
   onSkip,
 }) => {
-  const [selectedMethod, setSelectedMethod] = useState<'EMAIL' | 'INVITE_CODE' | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<VerificationMethod | null>(null);
   const [email, setEmail] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -82,7 +82,7 @@ export const CompanyVerificationScreen: React.FC<CompanyVerificationScreenProps>
       return;
     }
 
-    if (selectedMethod === 'EMAIL') {
+    if (selectedMethod === VerificationMethod.EMAIL_DOMAIN) {
       if (!email.trim()) {
         Alert.alert('오류', '회사 이메일을 입력해주세요.');
         return;
@@ -97,7 +97,7 @@ export const CompanyVerificationScreen: React.FC<CompanyVerificationScreenProps>
       }
     }
 
-    if (selectedMethod === 'INVITE_CODE') {
+    if (selectedMethod === VerificationMethod.INVITE_CODE) {
       if (!inviteCode.trim()) {
         Alert.alert('오류', '초대 코드를 입력해주세요.');
         return;
@@ -117,10 +117,13 @@ export const CompanyVerificationScreen: React.FC<CompanyVerificationScreenProps>
     try {
       // TODO: 실제 API 호출로 교체
       const verificationData: Partial<CompanyVerification> = {
-        companyName: companyName.trim(),
-        verificationMethod: selectedMethod,
-        status: 'PENDING',
+        companyId: 'temp_company_id', // TODO: Get actual company ID from search/selection
+        method: selectedMethod!,
+        status: VerificationStatus.PENDING,
         submittedAt: new Date(),
+        data: {
+          companyName: companyName.trim(),
+        },
       };
 
       console.log('Submitting company verification:', verificationData);
@@ -171,13 +174,13 @@ export const CompanyVerificationScreen: React.FC<CompanyVerificationScreenProps>
               <TouchableOpacity
                 style={[
                   styles.methodButton,
-                  selectedMethod === 'EMAIL' && styles.methodButtonSelected,
+                  selectedMethod === VerificationMethod.EMAIL_DOMAIN && styles.methodButtonSelected,
                 ]}
-                onPress={() => setSelectedMethod('EMAIL')}
+                onPress={() => setSelectedMethod(VerificationMethod.EMAIL_DOMAIN)}
               >
                 <Text style={[
                   styles.methodButtonText,
-                  selectedMethod === 'EMAIL' && styles.methodButtonTextSelected,
+                  selectedMethod === VerificationMethod.EMAIL_DOMAIN && styles.methodButtonTextSelected,
                 ]}>
                   회사 이메일 인증
                 </Text>
@@ -189,13 +192,13 @@ export const CompanyVerificationScreen: React.FC<CompanyVerificationScreenProps>
               <TouchableOpacity
                 style={[
                   styles.methodButton,
-                  selectedMethod === 'INVITE_CODE' && styles.methodButtonSelected,
+                  selectedMethod === VerificationMethod.INVITE_CODE && styles.methodButtonSelected,
                 ]}
-                onPress={() => setSelectedMethod('INVITE_CODE')}
+                onPress={() => setSelectedMethod(VerificationMethod.INVITE_CODE)}
               >
                 <Text style={[
                   styles.methodButtonText,
-                  selectedMethod === 'INVITE_CODE' && styles.methodButtonTextSelected,
+                  selectedMethod === VerificationMethod.INVITE_CODE && styles.methodButtonTextSelected,
                 ]}>
                   초대 코드 인증
                 </Text>
@@ -206,7 +209,7 @@ export const CompanyVerificationScreen: React.FC<CompanyVerificationScreenProps>
             </View>
 
             {/* 이메일 인증 폼 */}
-            {selectedMethod === 'EMAIL' && (
+            {selectedMethod === VerificationMethod.EMAIL_DOMAIN && (
               <View style={styles.inputSection}>
                 <Text style={styles.inputLabel}>회사 이메일</Text>
                 <TextInput
@@ -237,7 +240,7 @@ export const CompanyVerificationScreen: React.FC<CompanyVerificationScreenProps>
             )}
 
             {/* 초대 코드 인증 폼 */}
-            {selectedMethod === 'INVITE_CODE' && (
+            {selectedMethod === VerificationMethod.INVITE_CODE && (
               <View style={styles.inputSection}>
                 <Text style={styles.inputLabel}>초대 코드</Text>
                 <TextInput

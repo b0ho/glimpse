@@ -22,8 +22,8 @@ export const getAnonymousUserInfo = (
     return {
       id: user.id,
       anonymousId: user.anonymousId,
-      displayName: user.realName || user.nickname,
-      nickname: user.nickname,
+      displayName: user.realName || user.nickname || 'Unknown',
+      nickname: user.nickname || 'Unknown',
       realName: user.realName,
       isMatched: true,
       gender: user.gender,
@@ -40,8 +40,8 @@ export const getAnonymousUserInfo = (
   return {
     id: user.id,
     anonymousId: user.anonymousId,
-    displayName: isMatched ? (user.realName || user.nickname) : user.nickname,
-    nickname: user.nickname,
+    displayName: isMatched ? (user.realName || user.nickname || 'Unknown') : (user.nickname || 'Unknown'),
+    nickname: user.nickname || 'Unknown',
     realName: isMatched ? user.realName : undefined,
     isMatched,
     gender: user.gender,
@@ -74,7 +74,7 @@ export const getUserDisplayName = (user: User, isMatched: boolean): string => {
   if (isMatched && user.realName) {
     return user.realName;
   }
-  return user.nickname;
+  return user.nickname || 'Unknown';
 };
 
 /**

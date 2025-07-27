@@ -1,6 +1,6 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { PeriodicExportingMetricReader, ConsoleMetricExporter } from '@opentelemetry/sdk-metrics';
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto';
 import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
@@ -76,9 +76,9 @@ const otelSDK = new NodeSDK({
             if ('url' in request && request.url) {
               try {
                 const host = request.headers?.host || 'localhost';
-                const url = new URL(request.url, `http://${host}`);
+                const url = new globalThis.URL(request.url, `http://${host}`);
                 span.setAttribute('http.url', `${url.origin}${url.pathname}`);
-              } catch (err) {
+              } catch (_err) {
                 // URL 파싱 실패 시 무시
               }
             }

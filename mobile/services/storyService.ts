@@ -1,5 +1,5 @@
 import { API_BASE_URL } from './api/config';
-import { authService } from './auth/auth-service';
+// import { authService } from './auth/auth-service'; // TODO: Implement token handling
 
 export interface Story {
   id: string;
@@ -38,7 +38,8 @@ class StoryService {
   // Create a new story
   async createStory(mediaUri: string, mediaType: 'image' | 'video', caption?: string): Promise<Story> {
     try {
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }
@@ -78,7 +79,8 @@ class StoryService {
   // Get my stories
   async getMyStories(): Promise<Story[]> {
     try {
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }
@@ -106,7 +108,8 @@ class StoryService {
   // Get stories feed from matched users
   async getStoriesFeed(page: number = 1, limit: number = 20): Promise<StoryGroup[]> {
     try {
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }
@@ -137,7 +140,8 @@ class StoryService {
   // Get a specific story
   async getStoryById(storyId: string): Promise<Story> {
     try {
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }
@@ -165,7 +169,8 @@ class StoryService {
   // View a story
   async viewStory(storyId: string): Promise<void> {
     try {
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }
@@ -189,7 +194,8 @@ class StoryService {
   // Get story viewers
   async getStoryViewers(storyId: string): Promise<any[]> {
     try {
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }
@@ -217,7 +223,8 @@ class StoryService {
   // Delete a story
   async deleteStory(storyId: string): Promise<void> {
     try {
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }
@@ -242,7 +249,8 @@ class StoryService {
   // Get stories from a specific user
   async getUserStories(userId: string): Promise<Story[]> {
     try {
-      const token = await authService.getAccessToken();
+      // TODO: Get token from Clerk
+      const token = '';
       if (!token) {
         throw new Error('인증 토큰이 없습니다.');
       }

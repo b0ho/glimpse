@@ -37,7 +37,7 @@ export const authRateLimiter = rateLimit({
   message: '인증 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.',
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => env.NODE_ENV === 'development',
+  skip: (_req) => env.NODE_ENV === 'development',
 });
 
 export const apiRateLimiter = rateLimit({
@@ -46,7 +46,7 @@ export const apiRateLimiter = rateLimit({
   message: 'API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.',
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => env.NODE_ENV === 'development',
+  skip: (_req) => env.NODE_ENV === 'development',
 });
 
 export const strictRateLimiter = rateLimit({

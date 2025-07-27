@@ -19,7 +19,7 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { ACTION_ICONS, UI_ICONS } from '@/utils/icons';
 
 interface MessageInputProps {
-  onSendMessage: (content: string, type?: 'text' | 'image' | 'file') => Promise<void>;
+  onSendMessage: (content: string, type?: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY') => Promise<void>;
   onTypingStatusChange?: (isTyping: boolean) => void;
   disabled?: boolean;
   placeholder?: string;
@@ -75,7 +75,7 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
     setIsSending(true);
     
     try {
-      await onSendMessage(trimmedMessage, 'text');
+      await onSendMessage(trimmedMessage, 'TEXT');
       setMessage('');
       
       // 타이핑 상태 중지
@@ -120,7 +120,7 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
         
         try {
           // 실제 구현에서는 이미지를 서버에 업로드하고 URL을 받아와야 함
-          await onSendMessage(asset.uri, 'image');
+          await onSendMessage(asset.uri, 'IMAGE');
         } catch (error) {
           console.error('Failed to send image:', error);
           Alert.alert('오류', '이미지 전송에 실패했습니다.');
@@ -159,7 +159,7 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
         setIsSending(true);
         
         try {
-          await onSendMessage(asset.uri, 'image');
+          await onSendMessage(asset.uri, 'IMAGE');
         } catch (error) {
           console.error('Failed to send camera image:', error);
           Alert.alert('오류', '사진 전송에 실패했습니다.');

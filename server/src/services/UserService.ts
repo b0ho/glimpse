@@ -92,7 +92,7 @@ export class UserService {
     return Math.max(0, APP_CONFIG.MAX_DAILY_LIKES - likesToday);
   }
 
-  async purchaseCredits(userId: string, packageId: string, paymentMethodId: string) {
+  async purchaseCredits(userId: string, packageId: string, _paymentMethodId: string) {
     const creditPackage = PRICING.LIKE_PACKAGES.find(pkg => 
       pkg.credits.toString() === packageId
     );
@@ -119,7 +119,7 @@ export class UserService {
 
     // TODO: Process actual payment with Stripe/Korean payment services
     // For now, simulate successful payment
-    const updatedPayment = await prisma.payment.update({
+    await prisma.payment.update({
       where: { id: payment.id },
       data: { status: 'COMPLETED' }
     });

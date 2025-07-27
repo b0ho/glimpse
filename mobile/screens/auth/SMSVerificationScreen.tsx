@@ -97,7 +97,11 @@ export const SMSVerificationScreen: React.FC<SMSVerificationScreenProps> = ({
             nickname: (currentUser as { firstName?: string }).firstName || '사용자',
             phoneNumber: phoneNumber, // 해시화된 전화번호 (실제로는 백엔드에서 처리)
             isVerified: true,
+            credits: 10, // 기본 크레딧
+            isPremium: false,
+            lastActive: new Date(),
             createdAt: new Date(),
+            updatedAt: new Date(),
           });
         }
         
@@ -112,7 +116,7 @@ export const SMSVerificationScreen: React.FC<SMSVerificationScreenProps> = ({
           ]
         );
       } else {
-        Alert.alert('오류', result.error || '인증번호가 올바르지 않습니다.');
+        Alert.alert('오류', typeof result.error === 'string' ? result.error : result.error?.message || '인증번호가 올바르지 않습니다.');
         setCode(''); // 코드 초기화
       }
     } catch (error) {
@@ -138,7 +142,7 @@ export const SMSVerificationScreen: React.FC<SMSVerificationScreenProps> = ({
         setCanResend(false);
         setCode('');
       } else {
-        Alert.alert('오류', result.error || '인증번호 재전송에 실패했습니다.');
+        Alert.alert('오류', typeof result.error === 'string' ? result.error : result.error?.message || '인증번호 재전송에 실패했습니다.');
       }
     } catch (error) {
       console.error('Resend code error:', error);

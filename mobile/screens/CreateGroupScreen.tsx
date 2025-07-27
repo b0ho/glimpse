@@ -96,19 +96,27 @@ export const CreateGroupScreen: React.FC = () => {
         name: formData.name.trim(),
         type: formData.type,
         description: formData.description.trim(),
+        isActive: true,
         memberCount: 1, // 생성자가 첫 멤버
         maleCount: authStore.user?.id ? 1 : 0, // TODO: 실제 성별 정보
         femaleCount: 0,
         minimumMembers: formData.minimumMembers,
         isMatchingActive: false, // 최소 인원 달성 후 활성화
         location: formData.location && formData.location.address ? {
-          ...formData.location,
+          name: formData.location.address,
+          address: formData.location.address,
           latitude: formData.location.latitude || 0,
           longitude: formData.location.longitude || 0,
         } : undefined,
+        settings: {
+          requiresApproval: false,
+          allowInvites: true,
+          isPrivate: false,
+        },
         expiresAt: formData.expiresAt,
-        createdBy: authStore.user?.id || 'current_user',
+        creatorId: authStore.user?.id || 'current_user',
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       // 로컬 스토어에 추가

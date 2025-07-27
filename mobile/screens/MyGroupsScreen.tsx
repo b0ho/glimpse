@@ -75,7 +75,7 @@ export const MyGroupsScreen: React.FC = () => {
   };
 
   const renderGroupItem = ({ item }: { item: Group }) => {
-    const isCreator = item.createdBy === 'current_user'; // TODO: 실제 사용자 ID와 비교
+    const isCreator = item.creatorId === 'current_user'; // TODO: 실제 사용자 ID와 비교
 
     return (
       <View style={styles.groupItem}>
@@ -162,7 +162,7 @@ export const MyGroupsScreen: React.FC = () => {
             selectedTab === 'created' && styles.tabButtonTextActive,
           ]}
         >
-          내가 만든 그룹 ({groupStore.joinedGroups.filter(g => g.createdBy === 'current_user').length})
+          내가 만든 그룹 ({groupStore.joinedGroups.filter(g => g.creatorId === 'current_user').length})
         </Text>
       </TouchableOpacity>
     </View>
@@ -215,7 +215,7 @@ export const MyGroupsScreen: React.FC = () => {
     if (selectedTab === 'joined') {
       return groupStore.joinedGroups;
     } else {
-      return groupStore.joinedGroups.filter(group => group.createdBy === 'current_user');
+      return groupStore.joinedGroups.filter(group => group.creatorId === 'current_user');
     }
   };
 

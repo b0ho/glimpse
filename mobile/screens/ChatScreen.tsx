@@ -146,7 +146,7 @@ export const ChatScreen: React.FC = () => {
   }, [matchId, otherUserNickname, initiateCall]);
 
   // 메시지 전송 핸들러
-  const handleSendMessage = useCallback(async (content: string, type?: 'text' | 'image' | 'file') => {
+  const handleSendMessage = useCallback(async (content: string, type?: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY') => {
     try {
       await sendMessage(roomId, content, type);
       

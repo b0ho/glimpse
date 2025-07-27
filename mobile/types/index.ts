@@ -2,30 +2,7 @@
 export * from '@shared/types';
 
 // Mobile-specific types only
-
-// 근처 사용자 타입 (위치 기반 매칭용)
-export interface NearbyUser {
-  id: string;
-  anonymousId: string;
-  nickname: string;
-  age?: number;
-  gender?: 'MALE' | 'FEMALE' | 'OTHER';
-  distance: number;
-  lastSeen: string;
-  isOnline: boolean;
-  commonGroups: string[];
-}
-
-// 익명성 컨텍스트별 사용자 정보
-export interface AnonymousUserInfo {
-  id: string;
-  anonymousId: string;
-  displayName: string; // 매칭 상태에 따라 nickname 또는 realName
-  nickname: string;
-  realName?: string; // 매칭된 경우에만 포함
-  isMatched: boolean;
-  gender?: 'MALE' | 'FEMALE' | 'OTHER';
-}
+// Note: NearbyUser and AnonymousUserInfo are already defined in shared/types
 
 // Mobile UI specific types
 export interface NavigationParams {

@@ -1,5 +1,6 @@
 import { body, param, query, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
+import type { Express } from 'express';
 import { validationSchemas, sqlInjectionPatterns, sanitizeInput } from '../config/security';
 
 // Validation middleware wrapper
@@ -163,7 +164,7 @@ export function sanitizeObject(obj: any): any {
   if (obj !== null && typeof obj === 'object') {
     const sanitized: any = {};
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         // Skip dangerous keys
         if (['__proto__', 'constructor', 'prototype'].includes(key)) {
           continue;

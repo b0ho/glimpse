@@ -173,6 +173,7 @@ export const useLikeStore = create<LikeStore>()(
               createdAt: new Date(),
               lastMessageAt: null,
               isActive: true,
+              updatedAt: new Date(),
             };
 
             state.createMatch(newMatch);
@@ -281,6 +282,7 @@ export const useLikeStore = create<LikeStore>()(
               createdAt: new Date(),
               lastMessageAt: null,
               isActive: true,
+              updatedAt: new Date(),
             };
 
             state.createMatch(newMatch);

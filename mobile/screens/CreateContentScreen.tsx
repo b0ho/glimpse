@@ -76,15 +76,19 @@ export const CreateContentScreen: React.FC = () => {
 
       const newContent: Content = {
         id: `content_${Date.now()}`,
+        userId: authStore.user?.id || 'current_user',
         authorId: authStore.user?.id || 'current_user',
         authorNickname: authStore.user?.nickname || '익명사용자',
-        groupId: selectedGroup.id,
         type: selectedImages.length > 0 ? 'image' : 'text',
         text: contentText.trim() || undefined,
         imageUrls: selectedImages.length > 0 ? selectedImages : undefined,
+        likes: 0,
         likeCount: 0,
+        views: 0,
+        isPublic: true,
         isLikedByUser: false,
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       // TODO: 실제로는 서버에 저장하고 홈 피드 새로고침

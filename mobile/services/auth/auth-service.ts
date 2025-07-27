@@ -21,7 +21,9 @@ export const useAuthService = (): AuthService => {
       if (!validatePhoneNumber(phoneNumber)) {
         return {
           success: false,
-          error: 'Invalid phone number format',
+          error: {
+            message: 'Invalid phone number format',
+          },
         };
       }
 
@@ -30,7 +32,9 @@ export const useAuthService = (): AuthService => {
       if (!signInLoaded || !signUpLoaded) {
         return {
           success: false,
-          error: 'Authentication service not ready',
+          error: {
+            message: 'Authentication service not ready',
+          },
         };
       }
 
@@ -54,7 +58,6 @@ export const useAuthService = (): AuthService => {
             return {
               success: true,
               data: { verificationId: phoneCodeFactor.phoneNumberId || '' },
-              message: 'SMS verification code sent',
             };
           }
         }
@@ -75,19 +78,22 @@ export const useAuthService = (): AuthService => {
         return {
           success: true,
           data: { verificationId: signUpAttempt.id || '' },
-          message: 'SMS verification code sent for new user',
         };
       }
 
       return {
         success: false,
-        error: 'Unexpected authentication state',
+        error: {
+          message: 'Unexpected authentication state',
+        },
       };
     } catch (error) {
       console.error('Phone authentication error:', error);
       return {
         success: false,
-        error: 'Failed to send verification code',
+        error: {
+          message: 'Failed to send verification code',
+        },
       };
     }
   };
@@ -97,7 +103,9 @@ export const useAuthService = (): AuthService => {
       if (!signInLoaded || !signUpLoaded) {
         return {
           success: false,
-          error: 'Authentication service not ready',
+          error: {
+            message: 'Authentication service not ready',
+          },
         };
       }
 
@@ -112,7 +120,6 @@ export const useAuthService = (): AuthService => {
           return {
             success: true,
             data: { user: (result.createdSessionId as unknown as object) || {} },
-            message: 'Successfully signed in',
           };
         }
       }
@@ -127,20 +134,23 @@ export const useAuthService = (): AuthService => {
           return {
             success: true,
             data: { user: (result.createdSessionId as unknown as object) || {} },
-            message: 'Successfully signed up',
           };
         }
       }
 
       return {
         success: false,
-        error: 'Invalid verification code',
+        error: {
+          message: 'Invalid verification code',
+        },
       };
     } catch (error) {
       console.error('Phone verification error:', error);
       return {
         success: false,
-        error: 'Failed to verify phone code',
+        error: {
+          message: 'Failed to verify phone code',
+        },
       };
     }
   };

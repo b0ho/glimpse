@@ -1,6 +1,5 @@
 import multer from 'multer';
-import path from 'path';
-import crypto from 'crypto';
+import type { Express } from 'express';
 
 // Configure memory storage for file uploads
 const storage = multer.memoryStorage();
