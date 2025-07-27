@@ -38,7 +38,11 @@ export class FileUploadService {
     'video/mp4',
     'video/mov',
     'video/avi',
-    'application/pdf'
+    'application/pdf',
+    'audio/mp4',
+    'audio/m4a',
+    'audio/mpeg',
+    'audio/webm'
   ];
 
   constructor() {
@@ -101,6 +105,50 @@ export class FileUploadService {
     await prisma.user.update({
       where: { id: userId },
       data: { profileImage: uploadResult.url }
+    });
+
+    return {
+      id: fileRecord.id,
+      originalName: fileRecord.originalName,
+      filename: fileRecord.filename,
+      url: fileRecord.url,
+      size: fileRecord.size,
+      mimeType: fileRecord.mimeType,
+      userId: fileRecord.userId || userId
+    };
+  }
+
+  async uploadChatAudio(userId: string, matchId: string, file: Express.Multer.File): Promise<UploadedFile> {
+    // Verify user is part of the match
+    const match = await prisma.match.findUnique({
+      where: { id: matchId }
+    });
+
+    if (!match || (match.user1Id !== userId && match.user2Id !== userId)) {
+      throw createError(403, '이 채팅에 음성을 업로드할 권한이 없습니다.');
+    }
+
+    const allowedAudioTypes = ['audio/mp4', 'audio/m4a', 'audio/mpeg', 'audio/webm'];
+    if (!allowedAudioTypes.includes(file.mimetype)) {
+      throw createError(400, '지원하지 않는 오디오 형식입니다.');
+    }
+
+    const filename = `chats/${matchId}/audio/${Date.now()}-${Math.random().toString(36).substring(2)}.${file.mimetype.split('/')[1]}`;
+    
+    const uploadResult = await this.uploadToS3(file.buffer, filename, file.mimetype);
+    
+    // Save file record
+    const fileRecord = await prisma.file.create({
+      data: {
+        userId,
+        originalName: file.originalname,
+        filename: uploadResult.filename,
+        url: uploadResult.url,
+        size: file.size,
+        mimeType: file.mimetype,
+        category: 'CHAT_AUDIO',
+        metadata: { matchId }
+      }
     });
 
     return {

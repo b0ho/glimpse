@@ -128,6 +128,39 @@ export class ChatController {
     }
   }
 
+  async markAllAsRead(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { matchId } = req.params;
+      
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+      
+      if (!matchId) {
+        throw createError(400, '매치 ID가 필요합니다.');
+      }
+      
+      const userId = req.auth.userId;
+
+      const result = await chatService.markAllMessagesAsRead(matchId, userId);
+
+      // Notify via WebSocket
+      const roomId = `match_${matchId}`;
+      io.to(roomId).emit('all-messages-read', {
+        matchId,
+        readBy: userId,
+        readAt: new Date()
+      });
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async markAsRead(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.params;
@@ -295,6 +328,143 @@ export class ChatController {
       res.json({
         success: true,
         data: { message: '메시지가 삭제되었습니다.' }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async addReaction(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { messageId } = req.params;
+      const { emoji } = req.body;
+      const userId = req.auth!.userId;
+      
+      if (!messageId) {
+        throw createError(400, '메시지 ID가 필요합니다.');
+      }
+
+      if (!emoji || emoji.length > 4) {
+        throw createError(400, '유효한 이모지가 필요합니다.');
+      }
+
+      const message = await prisma.chatMessage.findUnique({
+        where: { id: messageId },
+        include: { match: true }
+      });
+
+      if (!message) {
+        throw createError(404, '메시지를 찾을 수 없습니다.');
+      }
+
+      // Verify user is part of this match
+      if (message.match.user1Id !== userId && message.match.user2Id !== userId) {
+        throw createError(403, '이 메시지에 반응을 추가할 권한이 없습니다.');
+      }
+
+      // Check if reaction already exists
+      const existingReaction = await prisma.messageReaction.findUnique({
+        where: {
+          messageId_userId_emoji: {
+            messageId,
+            userId,
+            emoji
+          }
+        }
+      });
+
+      if (existingReaction) {
+        throw createError(400, '이미 추가한 반응입니다.');
+      }
+
+      // Add reaction
+      const reaction = await prisma.messageReaction.create({
+        data: {
+          messageId,
+          userId,
+          emoji
+        },
+        include: {
+          user: {
+            select: { id: true, nickname: true }
+          }
+        }
+      });
+
+      // Notify via WebSocket
+      const roomId = `match_${message.matchId}`;
+      io.to(roomId).emit('reaction-added', {
+        messageId,
+        reaction: {
+          id: reaction.id,
+          emoji: reaction.emoji,
+          user: reaction.user,
+          createdAt: reaction.createdAt
+        }
+      });
+
+      res.json({
+        success: true,
+        data: reaction
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async removeReaction(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { messageId } = req.params;
+      const { emoji } = req.body;
+      const userId = req.auth!.userId;
+      
+      if (!messageId) {
+        throw createError(400, '메시지 ID가 필요합니다.');
+      }
+
+      if (!emoji) {
+        throw createError(400, '이모지가 필요합니다.');
+      }
+
+      const reaction = await prisma.messageReaction.findUnique({
+        where: {
+          messageId_userId_emoji: {
+            messageId,
+            userId,
+            emoji
+          }
+        },
+        include: {
+          message: {
+            include: { match: true }
+          }
+        }
+      });
+
+      if (!reaction) {
+        throw createError(404, '반응을 찾을 수 없습니다.');
+      }
+
+      // Only the user who added the reaction can remove it
+      if (reaction.userId !== userId) {
+        throw createError(403, '본인이 추가한 반응만 제거할 수 있습니다.');
+      }
+
+      await prisma.messageReaction.delete({
+        where: { id: reaction.id }
+      });
+
+      // Notify via WebSocket
+      const roomId = `match_${reaction.message.matchId}`;
+      io.to(roomId).emit('reaction-removed', {
+        messageId,
+        emoji,
+        userId
+      });
+
+      res.json({
+        success: true,
+        data: { message: '반응이 제거되었습니다.' }
       });
     } catch (error) {
       next(error);

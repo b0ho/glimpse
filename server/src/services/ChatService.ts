@@ -17,6 +17,16 @@ export class ChatService {
             nickname: true,
             profileImage: true
           }
+        },
+        reactions: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                nickname: true
+              }
+            }
+          }
         }
       },
       orderBy: { createdAt: 'desc' },
@@ -38,13 +48,31 @@ export class ChatService {
           }
         }
 
+        // 반응들을 이모지별로 그룹화
+        const reactionsByEmoji = message.reactions.reduce((acc, reaction) => {
+          if (!acc[reaction.emoji]) {
+            acc[reaction.emoji] = {
+              emoji: reaction.emoji,
+              count: 0,
+              users: []
+            };
+          }
+          acc[reaction.emoji].count++;
+          acc[reaction.emoji].users.push({
+            id: reaction.user.id,
+            nickname: reaction.user.nickname
+          });
+          return acc;
+        }, {} as Record<string, any>);
+
         return {
           id: message.id,
           content,
           type: message.type,
           sender: message.sender,
           readAt: message.readAt,
-          createdAt: message.createdAt
+          createdAt: message.createdAt,
+          reactions: Object.values(reactionsByEmoji)
         };
       })
     );

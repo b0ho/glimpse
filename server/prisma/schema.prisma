@@ -42,6 +42,7 @@ model User {
   matches1           Match[] @relation("User1Matches")
   matches2           Match[] @relation("User2Matches")
   sentMessages       ChatMessage[]
+  messageReactions   MessageReaction[]
   notifications      Notification[]
   scheduledNotifications ScheduledNotification[]
   payments           Payment[]
@@ -275,8 +276,24 @@ model ChatMessage {
 
   match       Match           @relation(fields: [matchId], references: [id], onDelete: Cascade)
   sender      User            @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  reactions   MessageReaction[]
 
   @@map("chat_messages")
+}
+
+// Message Reactions
+model MessageReaction {
+  id          String   @id @default(cuid())
+  messageId   String
+  userId      String
+  emoji       String   // 이모지 유니코드
+  createdAt   DateTime @default(now())
+
+  message     ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@map("message_reactions")
 }
 
 enum MessageType {

@@ -65,7 +65,7 @@ export const ChatScreen: React.FC = () => {
   // Selectors
   const roomMessages = useChatStore(chatSelectors.getMessages(roomId));
   const typingUsers = useChatStore(chatSelectors.getTypingUsers(roomId));
-  const typingUserNicknames = typingUsers.map(user => user.nickname);
+  const isOtherUserTyping = typingUsers.some(user => user.userId !== authStore.user?.id);
 
   // 초기화
   useEffect(() => {
@@ -230,8 +230,8 @@ export const ChatScreen: React.FC = () => {
   const renderListFooter = () => {
     return (
       <TypingIndicator 
-        typingUsers={typingUserNicknames}
-        visible={typingUserNicknames.length > 0}
+        isTyping={isOtherUserTyping}
+        userName={otherUserNickname}
       />
     );
   };
