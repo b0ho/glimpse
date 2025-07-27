@@ -34,6 +34,7 @@ import contentFilterRoutes from './routes/contentFilter';
 import notificationRoutes from './routes/notifications';
 import adminRoutes from './routes/admin';
 import locationRoutes from './routes/location';
+import videoCallRoutes from './routes/videoCallRoutes';
 
 const app = express();
 
@@ -103,6 +104,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/groups', groupRoutes);
 app.use('/api/v1/matches', matchRoutes);
 app.use('/api/v1/chat', chatRoutes);
+app.use('/api/v1/video-calls', videoCallRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/company', companyDomainRoutes);
 app.use('/api/v1/content-filter', contentFilterRoutes);

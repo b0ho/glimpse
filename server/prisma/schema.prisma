@@ -43,6 +43,8 @@ model User {
   matches2           Match[] @relation("User2Matches")
   sentMessages       ChatMessage[]
   messageReactions   MessageReaction[]
+  callsMade          VideoCall[] @relation("CallsMade")
+  callsReceived      VideoCall[] @relation("CallsReceived")
   notifications      Notification[]
   scheduledNotifications ScheduledNotification[]
   payments           Payment[]
@@ -294,6 +296,42 @@ model MessageReaction {
 
   @@unique([messageId, userId, emoji])
   @@map("message_reactions")
+}
+
+// Video Calls
+model VideoCall {
+  id          String   @id @default(cuid())
+  callerId    String
+  receiverId  String
+  callType    CallType @default(VIDEO)
+  status      CallStatus @default(INITIATED)
+  startedAt   DateTime?
+  endedAt     DateTime?
+  duration    Int?     // in seconds
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  caller      User     @relation("CallsMade", fields: [callerId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("CallsReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  @@index([callerId])
+  @@index([receiverId])
+  @@index([status])
+  @@map("video_calls")
+}
+
+enum CallType {
+  VIDEO
+  AUDIO
+}
+
+enum CallStatus {
+  INITIATED
+  RINGING
+  CONNECTED
+  ENDED
+  MISSED
+  REJECTED
 }
 
 enum MessageType {

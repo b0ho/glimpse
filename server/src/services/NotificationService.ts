@@ -457,6 +457,83 @@ export class NotificationService {
     });
   }
 
+  async sendCallNotification(
+    receiverId: string,
+    callerId: string,
+    callerName: string,
+    callType: 'video' | 'audio'
+  ) {
+    try {
+      const notification = await prisma.notification.create({
+        data: {
+          userId: receiverId,
+          type: 'MESSAGE_RECEIVED', // Using existing type for now
+          title: `${callerName}님의 ${callType === 'video' ? '영상' : '음성'} 통화`,
+          message: '탭하여 통화에 응답하세요',
+          data: {
+            callerId,
+            callerName,
+            callType,
+            notificationType: 'INCOMING_CALL'
+          }
+        }
+      });
+
+      await this.sendPushNotification(receiverId, {
+        title: notification.title,
+        body: notification.message,
+        data: notification.data || {},
+        priority: 'high',
+        sound: 'ringtone.mp3'
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Failed to send call notification:', error);
+      throw error;
+    }
+  }
+
+  async sendMissedCallNotification(
+    receiverId: string,
+    callerId: string,
+    callType: 'video' | 'audio'
+  ) {
+    try {
+      const caller = await prisma.user.findUnique({
+        where: { id: callerId },
+        select: { nickname: true }
+      });
+
+      if (!caller) return null;
+
+      const notification = await prisma.notification.create({
+        data: {
+          userId: receiverId,
+          type: 'MESSAGE_RECEIVED', // Using existing type for now
+          title: '부재중 통화',
+          message: `${caller.nickname}님의 ${callType === 'video' ? '영상' : '음성'} 통화를 놓쳤습니다.`,
+          data: {
+            callerId,
+            callType,
+            notificationType: 'MISSED_CALL'
+          }
+        }
+      });
+
+      await this.sendPushNotification(receiverId, {
+        title: notification.title,
+        body: notification.message,
+        data: notification.data || {}
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Failed to send missed call notification:', error);
+      throw error;
+    }
+  }
+
   private async sendPushNotification(userId: string, payload: any) {
     try {
       await firebaseService.sendNotificationToUser({
@@ -464,7 +541,9 @@ export class NotificationService {
         payload: {
           title: payload.title,
           body: payload.body,
-          data: payload.data
+          data: payload.data,
+          ...(payload.priority && { priority: payload.priority }),
+          ...(payload.sound && { sound: payload.sound })
         }
       });
     } catch (error) {

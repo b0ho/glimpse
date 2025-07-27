@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '@clerk/clerk-expo';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { NAVIGATION_ICONS } from '@/utils/icons';
+import { CallProvider } from '@/providers/CallProvider';
 
 // Screens
 import { AuthScreen } from '@/screens/auth/AuthScreen';
@@ -338,7 +339,9 @@ function AppNavigator() {
 export default function RootNavigator() {
   return (
     <NavigationContainer>
-      <AppNavigator />
+      <CallProvider>
+        <AppNavigator />
+      </CallProvider>
     </NavigationContainer>
   );
 }

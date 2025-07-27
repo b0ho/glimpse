@@ -22,6 +22,8 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
+import { CallButton } from '@/components/call/CallButton';
+import { useCall } from '@/providers/CallProvider';
 import { Message } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
@@ -36,7 +38,8 @@ type ChatScreenRouteProp = RouteProp<{
 export const ChatScreen: React.FC = () => {
   const route = useRoute<ChatScreenRouteProp>();
   const navigation = useNavigation();
-  const { roomId, otherUserNickname } = route.params;
+  const { roomId, matchId, otherUserNickname } = route.params;
+  const { initiateCall, isInCall } = useCall();
 
   // Store states
   const authStore = useAuthStore();
@@ -116,8 +119,31 @@ export const ChatScreen: React.FC = () => {
         fontSize: FONT_SIZES.LG,
         fontWeight: '600',
       },
+      headerRight: () => (
+        <View style={styles.headerButtons}>
+          <CallButton
+            type="audio"
+            onPress={() => handleCall('audio')}
+            disabled={isInCall}
+            size={20}
+          />
+          <CallButton
+            type="video"
+            onPress={() => handleCall('video')}
+            disabled={isInCall}
+            size={20}
+          />
+        </View>
+      ),
     });
-  }, [navigation, otherUserNickname]);
+  }, [navigation, otherUserNickname, isInCall]);
+
+  // 통화 시작 핸들러
+  const handleCall = useCallback((callType: 'video' | 'audio') => {
+    // matchId에서 상대방 userId 추출 (실제로는 API에서 가져와야 함)
+    const otherUserId = matchId; // 임시로 matchId 사용
+    initiateCall(otherUserId, otherUserNickname, callType);
+  }, [matchId, otherUserNickname, initiateCall]);
 
   // 메시지 전송 핸들러
   const handleSendMessage = useCallback(async (content: string, type?: 'text' | 'image' | 'file') => {
@@ -319,6 +345,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.BACKGROUND,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: SPACING.SM,
   },
   loadingContainer: {
     flex: 1,

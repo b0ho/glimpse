@@ -230,6 +230,33 @@ class NotificationService {
     }
   }
 
+  async showCallNotification(callerName: string, callType: 'video' | 'audio') {
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `${callerName}님의 ${callType === 'video' ? '영상' : '음성'} 통화`,
+          body: '탭하여 통화에 응답하세요',
+          sound: 'default',
+          priority: Notifications.AndroidNotificationPriority.MAX,
+          categoryIdentifier: 'call',
+          data: { type: 'incoming_call', callType },
+        },
+        trigger: null,
+        identifier: 'incoming-call',
+      });
+    } catch (error) {
+      console.error('Failed to show call notification:', error);
+    }
+  }
+
+  async clearCallNotification() {
+    try {
+      await Notifications.dismissNotificationAsync('incoming-call');
+    } catch (error) {
+      console.error('Failed to clear call notification:', error);
+    }
+  }
+
   async getUnreadCount(): Promise<number> {
     try {
       const token = await authService.getAccessToken();
