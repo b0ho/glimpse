@@ -174,9 +174,93 @@ services:
     ports:
       - "3030:3000"
 
+  # Elasticsearch for log storage
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: glimpse-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Logstash for log processing
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    container_name: glimpse-logstash
+    restart: unless-stopped
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./monitoring/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+    ports:
+      - "5000:5000"
+      - "5044:5044"
+    environment:
+      LS_JAVA_OPTS: "-Xms256m -Xmx256m"
+
+  # Kibana for log visualization
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: glimpse-kibana
+    restart: unless-stopped
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      XPACK_SECURITY_ENABLED: false
+    ports:
+      - "5601:5601"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Filebeat for log collection
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.11.0
+    container_name: glimpse-filebeat
+    restart: unless-stopped
+    depends_on:
+      - logstash
+    user: root
+    volumes:
+      - ./monitoring/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - nginx_logs:/var/log/nginx:ro
+      - ./server/logs:/var/log/glimpse:ro
+    command: filebeat -e -strict.perms=false
+
+  # Jaeger for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: glimpse-jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14250:14250"  # gRPC
+
 volumes:
   postgres_data:
   redis_data:
   prometheus_data:
   grafana_data:
+  elasticsearch_data:
   nginx_logs:

@@ -21,6 +21,7 @@ import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
 import { rateLimiter } from './middleware/rateLimiter';
 import { metricsMiddleware, startSystemMetricsCollection } from './middleware/metrics';
+import { requestLoggingMiddleware, errorLoggingMiddleware, logger } from './middleware/logging';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -78,6 +79,9 @@ app.use(morgan('combined'));
 // Metrics middleware
 app.use(metricsMiddleware);
 
+// Request logging
+app.use(requestLoggingMiddleware);
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ 
@@ -126,11 +130,18 @@ import { cronService } from './services/CronService';
 
 // Error handling middleware
 app.use(notFound);
+app.use(errorLoggingMiddleware);
 app.use(errorHandler);
 
 // Start server
 const PORT = env.PORT || 3001;
 server.listen(PORT, () => {
+  logger.info('Server started', {
+    port: PORT,
+    environment: env.NODE_ENV,
+    frontendUrl: env.FRONTEND_URL
+  });
+  
   console.log(`🚀 Glimpse Server running on port ${PORT}`);
   console.log(`📱 Frontend URL: ${env.FRONTEND_URL}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);

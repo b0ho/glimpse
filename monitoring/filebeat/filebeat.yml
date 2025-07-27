@@ -1,0 +1,95 @@
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+filebeat.inputs:
+  # Docker container logs
+  - type: container
+    paths:
+      - '/var/lib/docker/containers/*/*.log'
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+      - decode_json_fields:
+          fields: ["message"]
+          target: "json"
+          overwrite_keys: true
+
+  # Nginx logs
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/nginx/access.log
+    fields:
+      service: nginx
+      type: access
+    multiline.pattern: '^\d{4}-\d{2}-\d{2}'
+    multiline.negate: true
+    multiline.match: after
+
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/nginx/error.log
+    fields:
+      service: nginx
+      type: error
+
+  # Application logs
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/glimpse/*.log
+    fields:
+      service: backend
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.message_key: message
+
+processors:
+  # Add host metadata
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+
+  # Add Docker metadata
+  - add_docker_metadata: ~
+
+  # Add Kubernetes metadata if running in K8s
+  - add_kubernetes_metadata: ~
+
+  # Drop empty logs
+  - drop_event:
+      when:
+        regexp:
+          message: '^\s*$'
+
+  # Parse user agent
+  - user_agent:
+      field: user_agent
+      target_field: user_agent_parsed
+      ignore_missing: true
+
+  # GeoIP enrichment
+  - geoip:
+      field: client_ip
+      target_field: geo
+      ignore_missing: true
+
+output.logstash:
+  hosts: ["logstash:5044"]
+  bulk_max_size: 2048
+
+# Logging configuration
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0640
+
+# Monitoring
+monitoring.enabled: true
+monitoring.elasticsearch:
+  hosts: ["elasticsearch:9200"]
