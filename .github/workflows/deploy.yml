@@ -1,182 +1,159 @@
-name: Deploy Pipeline
+name: Deploy to Production
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
-  workflow_dispatch:
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+      - '!.github/workflows/deploy.yml'
 
 env:
-  NODE_VERSION: '20'
-  AWS_REGION: 'ap-northeast-2'
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+  DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
 
 jobs:
-  # Deploy to Staging
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    environment: staging
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-    
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
-    
-    - name: Build, tag, and push server image to Amazon ECR
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: glimpse-server
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./server
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:staging
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:staging
-    
-    - name: Build, tag, and push web image to Amazon ECR
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: glimpse-web
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./web
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:staging
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:staging
-    
-    - name: Update ECS service (Server)
-      run: |
-        aws ecs update-service \
-          --cluster glimpse-staging \
-          --service glimpse-server-staging \
-          --force-new-deployment
-    
-    - name: Update ECS service (Web)
-      run: |
-        aws ecs update-service \
-          --cluster glimpse-staging \
-          --service glimpse-web-staging \
-          --force-new-deployment
-    
-    - name: Wait for services to stabilize
-      run: |
-        aws ecs wait services-stable \
-          --cluster glimpse-staging \
-          --services glimpse-server-staging glimpse-web-staging
-
-  # Run E2E Tests on Staging
-  e2e-tests-staging:
-    name: E2E Tests on Staging
-    runs-on: ubuntu-latest
-    needs: deploy-staging
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps
-    
-    - name: Run E2E tests
-      env:
-        BASE_URL: ${{ secrets.STAGING_URL }}
-        TEST_USER_PHONE: ${{ secrets.TEST_USER_PHONE }}
-        TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
-      run: npm run test:e2e
-    
-    - name: Upload test results
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
-
-  # Deploy to Production
-  deploy-production:
+  deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: e2e-tests-staging
     environment: production
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-    
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
-    
-    - name: Promote staging images to production
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      run: |
-        # Pull staging images
-        docker pull $ECR_REGISTRY/glimpse-server:staging
-        docker pull $ECR_REGISTRY/glimpse-web:staging
-        
-        # Tag as production
-        docker tag $ECR_REGISTRY/glimpse-server:staging $ECR_REGISTRY/glimpse-server:production
-        docker tag $ECR_REGISTRY/glimpse-web:staging $ECR_REGISTRY/glimpse-web:production
-        
-        # Push production tags
-        docker push $ECR_REGISTRY/glimpse-server:production
-        docker push $ECR_REGISTRY/glimpse-web:production
-    
-    - name: Update ECS service (Server)
-      run: |
-        aws ecs update-service \
-          --cluster glimpse-production \
-          --service glimpse-server-production \
-          --force-new-deployment
-    
-    - name: Update ECS service (Web)
-      run: |
-        aws ecs update-service \
-          --cluster glimpse-production \
-          --service glimpse-web-production \
-          --force-new-deployment
-    
-    - name: Wait for services to stabilize
-      run: |
-        aws ecs wait services-stable \
-          --cluster glimpse-production \
-          --services glimpse-server-production glimpse-web-production
-    
-    - name: Send deployment notification
-      if: success()
-      uses: 8398a7/action-slack@v3
-      with:
-        status: success
-        text: 'Production deployment completed successfully! 🚀'
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-    
-    - name: Send failure notification
-      if: failure()
-      uses: 8398a7/action-slack@v3
-      with:
-        status: failure
-        text: 'Production deployment failed! ❌'
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      - uses: actions/checkout@v4
+      
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ env.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Create deployment directory
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} \
+            "mkdir -p ~/glimpse/{nginx/ssl,monitoring/grafana/{dashboards,provisioning}}"
+      
+      - name: Copy deployment files
+        run: |
+          scp -i ~/.ssh/deploy_key docker-compose.yml \
+            ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:~/glimpse/
+          
+          scp -i ~/.ssh/deploy_key nginx/nginx.conf \
+            ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:~/glimpse/nginx/
+          
+          scp -i ~/.ssh/deploy_key monitoring/*.yml monitoring/*.yaml \
+            ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:~/glimpse/monitoring/
+      
+      - name: Create environment file
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} << 'EOF'
+            cat > ~/glimpse/.env << EOL
+            # Database
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            
+            # Redis
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+            
+            # Clerk Auth
+            CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}
+            CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}
+            
+            # AWS
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=${{ secrets.AWS_REGION }}
+            S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+            
+            # Payment
+            STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            TOSS_CLIENT_KEY=${{ secrets.TOSS_CLIENT_KEY }}
+            TOSS_SECRET_KEY=${{ secrets.TOSS_SECRET_KEY }}
+            KAKAO_PAY_CID=${{ secrets.KAKAO_PAY_CID }}
+            KAKAO_PAY_SECRET=${{ secrets.KAKAO_PAY_SECRET }}
+            
+            # Firebase
+            FIREBASE_SERVICE_ACCOUNT='${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+            
+            # External APIs
+            KAKAO_API_KEY=${{ secrets.KAKAO_API_KEY }}
+            NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}
+            NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}
+            
+            # Monitoring
+            SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+            GRAFANA_USER=${{ secrets.GRAFANA_USER }}
+            GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
+            
+            # App URLs
+            FRONTEND_URL=https://glimpse.app
+            EOL
+          EOF
+      
+      - name: Log in to GitHub Container Registry
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} \
+            "echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.DOCKER_REGISTRY }} -u ${{ github.actor }} --password-stdin"
+      
+      - name: Pull latest images
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} << EOF
+            cd ~/glimpse
+            docker-compose pull
+          EOF
+      
+      - name: Run database migrations
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} << EOF
+            cd ~/glimpse
+            docker-compose run --rm backend npx prisma migrate deploy
+          EOF
+      
+      - name: Deploy with zero downtime
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} << EOF
+            cd ~/glimpse
+            
+            # Start new containers
+            docker-compose up -d --no-deps --scale backend=2 backend
+            
+            # Wait for health checks
+            sleep 30
+            
+            # Remove old containers
+            docker-compose up -d --no-deps --remove-orphans
+            
+            # Clean up
+            docker system prune -f
+          EOF
+      
+      - name: Health check
+        run: |
+          for i in {1..10}; do
+            if curl -f https://glimpse.app/health; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Health check attempt $i failed, retrying..."
+            sleep 10
+          done
+          echo "Health check failed after 10 attempts"
+          exit 1
+      
+      - name: Notify deployment status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            Deployment ${{ job.status }}
+            Branch: ${{ github.ref }}
+            Commit: ${{ github.sha }}
+            Actor: ${{ github.actor }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          channel: '#deployments'

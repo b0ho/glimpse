@@ -1,28 +1,25 @@
 # Build stage
 FROM node:20-alpine AS builder
 
-# Install build dependencies
-RUN apk add --no-cache python3 make g++
+# Install dependencies for native modules
+RUN apk add --no-cache python3 make g++ 
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci --only=production
-RUN cp -R node_modules prod_node_modules
+# Install all dependencies (including dev for build)
 RUN npm ci
 
-# Copy prisma files
-COPY prisma ./prisma/
+# Copy prisma schema first
+COPY prisma ./prisma
 
-# Generate Prisma client
+# Generate Prisma Client
 RUN npx prisma generate
 
-# Copy source code
-COPY src ./src/
+# Copy application code
+COPY . .
 
 # Build TypeScript
 RUN npm run build
@@ -30,30 +27,36 @@ RUN npm run build
 # Production stage
 FROM node:20-alpine
 
-# Install production dependencies
-RUN apk add --no-cache openssl
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
 
 WORKDIR /app
 
-# Copy built application
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prod_node_modules ./node_modules
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/package*.json ./
+# Copy node_modules and built application from builder
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
 
-# Create uploads directory
-RUN mkdir -p /app/uploads
+# Create logs directory
+RUN mkdir -p logs && chown -R nodejs:nodejs logs
 
-# Set environment to production
-ENV NODE_ENV=production
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || 3001) + '/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"
+# Switch to non-root user
+USER nodejs
 
 # Expose port
 EXPOSE 3001
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/health', (res) => res.statusCode === 200 ? process.exit(0) : process.exit(1))"
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
 # Start the application
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]

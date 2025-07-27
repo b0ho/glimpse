@@ -4,155 +4,179 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:16-alpine
-    container_name: glimpse-postgres
+    container_name: glimpse-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-glimpse}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-glimpse_password}
-      POSTGRES_DB: ${POSTGRES_DB:-glimpse_db}
-      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: ${DB_USER:-glimpse}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-glimpse123}
+      POSTGRES_DB: ${DB_NAME:-glimpse_prod}
+      PGDATA: /var/lib/postgresql/data
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-glimpse}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-glimpse}"]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - glimpse-network
 
-  # Redis for session management and caching
+  # Redis for caching and sessions
   redis:
     image: redis:7-alpine
     container_name: glimpse-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
     volumes:
       - redis_data:/data
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD:-redis_password}", "ping"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - glimpse-network
 
   # Backend Server
-  server:
+  backend:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: glimpse-server
+    container_name: glimpse-backend
     restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      PORT: 3001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-glimpse}:${POSTGRES_PASSWORD:-glimpse_password}@postgres:5432/${POSTGRES_DB:-glimpse_db}?schema=public
-      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379
-      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
-      CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
-      JWT_SECRET: ${JWT_SECRET}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
-      AWS_REGION: ${AWS_REGION}
-      FIREBASE_SERVICE_ACCOUNT: ${FIREBASE_SERVICE_ACCOUNT}
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
-      TOSSPAY_CLIENT_KEY: ${TOSSPAY_CLIENT_KEY}
-      TOSSPAY_SECRET_KEY: ${TOSSPAY_SECRET_KEY}
-      KAKAO_PAY_CID: ${KAKAO_PAY_CID}
-      KAKAO_PAY_SECRET_KEY: ${KAKAO_PAY_SECRET_KEY}
-      KAKAO_MAPS_API_KEY: ${KAKAO_MAPS_API_KEY}
-      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID}
-      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
-      GOOGLE_VISION_API_KEY: ${GOOGLE_VISION_API_KEY}
-    volumes:
-      - server_uploads:/app/uploads
-      - ./server/prisma:/app/prisma
-    ports:
-      - "3001:3001"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    networks:
-      - glimpse-network
-    command: >
-      sh -c "
-        npx prisma migrate deploy &&
-        npm start
-      "
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${DB_USER:-glimpse}:${DB_PASSWORD:-glimpse123}@postgres:5432/${DB_NAME:-glimpse_prod}
+      REDIS_URL: redis://default:${REDIS_PASSWORD:-redis123}@redis:6379
+      CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-ap-northeast-2}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      TOSS_CLIENT_KEY: ${TOSS_CLIENT_KEY}
+      TOSS_SECRET_KEY: ${TOSS_SECRET_KEY}
+      KAKAO_PAY_CID: ${KAKAO_PAY_CID}
+      KAKAO_PAY_SECRET: ${KAKAO_PAY_SECRET}
+      FIREBASE_SERVICE_ACCOUNT: ${FIREBASE_SERVICE_ACCOUNT}
+      KAKAO_API_KEY: ${KAKAO_API_KEY}
+      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID}
+      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
+      SENTRY_DSN: ${SENTRY_DSN}
+      OTEL_SERVICE_NAME: glimpse-backend
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    volumes:
+      - ./server/logs:/app/logs
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # Web Admin Dashboard (Next.js)
-  web:
+  # Frontend (Web)
+  frontend:
     build:
       context: ./web
       dockerfile: Dockerfile
-    container_name: glimpse-web
+    container_name: glimpse-frontend
     restart: unless-stopped
+    depends_on:
+      - backend
     environment:
       NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://backend:3001/api/v1
+      NEXT_PUBLIC_WEBSOCKET_URL: ws://backend:3001
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
-      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
-      NEXT_PUBLIC_API_URL: http://server:3001/api/v1
-      NEXT_PUBLIC_WEBSOCKET_URL: ws://server:3001
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
     ports:
       - "3000:3000"
-    depends_on:
-      - server
-    networks:
-      - glimpse-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
     container_name: glimpse-nginx
     restart: unless-stopped
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - nginx_logs:/var/log/nginx
+    depends_on:
+      - backend
+      - frontend
     ports:
       - "80:80"
       - "443:443"
-    depends_on:
-      - server
-      - web
-    networks:
-      - glimpse-network
-
-  # pgAdmin for database management
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: glimpse-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@glimpse.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin_password}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-    networks:
-      - glimpse-network
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-networks:
-  glimpse-network:
-    driver: bridge
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: glimpse-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./monitoring/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4318:4318"   # OTLP HTTP
+      - "4317:4317"   # OTLP gRPC
+      - "8888:8888"   # Prometheus metrics
+
+  # Prometheus for metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: glimpse-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: glimpse-grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin123}
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3030:3000"
 
 volumes:
   postgres_data:
   redis_data:
-  server_uploads:
+  prometheus_data:
+  grafana_data:
   nginx_logs:
-  pgadmin_data:
