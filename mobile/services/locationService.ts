@@ -3,7 +3,7 @@ import * as TaskManager from 'expo-task-manager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import { API_BASE_URL } from './api/config';
-import { authService } from './authService';
+import { authService } from './auth/auth-service';
 
 const LOCATION_TASK_NAME = 'background-location-task';
 const LOCATION_STORAGE_KEY = 'user_location';

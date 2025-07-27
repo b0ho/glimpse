@@ -86,3 +86,32 @@ server/uploads/
 postgres_data/
 redis_data/
 pgadmin_data/
+
+# Environment files
+.env
+.env.production
+.env.development
+.env.test
+
+# Backup files
+*.backup
+*.bak
+
+# Next.js
+.next/
+out/
+
+# Testing
+.nyc_output/
+jest-results/
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+.turbo
+
+# Monitoring data
+monitoring/elasticsearch/data/
+monitoring/prometheus/data/
+monitoring/grafana/data/

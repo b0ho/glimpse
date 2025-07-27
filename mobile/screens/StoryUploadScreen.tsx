@@ -18,7 +18,7 @@ import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 import { API_BASE_URL } from '../services/api/config';
-import { authService } from '../services/authService';
+import { authService } from '../services/auth/auth-service';
 
 export const StoryUploadScreen: React.FC = () => {
   const navigation = useNavigation();

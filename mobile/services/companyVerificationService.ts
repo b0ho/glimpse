@@ -1,5 +1,5 @@
 import { API_BASE_URL } from './api/config';
-import { authService } from './authService';
+import { authService } from './auth/auth-service';
 
 export interface CompanyDomain {
   id: string;

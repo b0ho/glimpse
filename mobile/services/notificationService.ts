@@ -3,7 +3,7 @@ import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import { API_BASE_URL } from './api/config';
-import { authService } from './authService';
+import { authService } from './auth/auth-service';
 
 // 알림 설정
 Notifications.setNotificationHandler({

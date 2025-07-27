@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+.expo/
+out/
+
+# Generated files
+generated/
+*.generated.*
+prisma/migrations/
+
+# Coverage
+coverage/
+
+# Logs
+*.log
+
+# Environment
+.env*
+
+# Mobile
+ios/
+android/
+
+# Archives
+*.zip
+*.tar.gz
+
+# Monitoring data
+monitoring/elasticsearch/data/
+monitoring/prometheus/data/
+monitoring/grafana/data/
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+
+# Documentation
+*.md
