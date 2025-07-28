@@ -645,6 +645,109 @@ export class GroupService {
       totalMatches
     };
   }
+
+  async getPendingMembers(groupId: string, adminUserId: string) {
+    // Check if user is admin
+    const adminMembership = await prisma.groupMember.findFirst({
+      where: {
+        groupId,
+        userId: adminUserId,
+        role: { in: ['CREATOR', 'ADMIN'] },
+        status: 'ACTIVE'
+      }
+    });
+
+    if (!adminMembership) {
+      throw createError(403, '대기 중인 멤버를 조회할 권한이 없습니다.');
+    }
+
+    const pendingMembers = await prisma.groupMember.findMany({
+      where: {
+        groupId,
+        status: 'PENDING'
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            nickname: true,
+            profileImage: true,
+            age: true,
+            gender: true,
+            bio: true
+          }
+        }
+      },
+      orderBy: { joinedAt: 'asc' }
+    });
+
+    return pendingMembers;
+  }
+
+  async approveMember(groupId: string, userId: string, adminUserId: string) {
+    // Check if admin has permission
+    const adminMembership = await prisma.groupMember.findFirst({
+      where: {
+        groupId,
+        userId: adminUserId,
+        role: { in: ['CREATOR', 'ADMIN'] },
+        status: 'ACTIVE'
+      }
+    });
+
+    if (!adminMembership) {
+      throw createError(403, '멤버를 승인할 권한이 없습니다.');
+    }
+
+    // Update member status
+    const membership = await prisma.groupMember.update({
+      where: {
+        userId_groupId: { userId, groupId }
+      },
+      data: {
+        status: 'ACTIVE'
+      }
+    });
+
+    // TODO: Send notification to approved user
+    // await notificationService.sendNotification(userId, {
+    //   type: 'GROUP_APPROVED',
+    //   message: '그룹 가입이 승인되었습니다.'
+    // });
+
+    return membership;
+  }
+
+  async rejectMember(groupId: string, userId: string, adminUserId: string, reason?: string) {
+    // Check if admin has permission
+    const adminMembership = await prisma.groupMember.findFirst({
+      where: {
+        groupId,
+        userId: adminUserId,
+        role: { in: ['CREATOR', 'ADMIN'] },
+        status: 'ACTIVE'
+      }
+    });
+
+    if (!adminMembership) {
+      throw createError(403, '멤버를 거절할 권한이 없습니다.');
+    }
+
+    // Delete membership request
+    await prisma.groupMember.delete({
+      where: {
+        userId_groupId: { userId, groupId }
+      }
+    });
+
+    // TODO: Send notification to rejected user with reason
+    // await notificationService.sendNotification(userId, {
+    //   type: 'GROUP_REJECTED',
+    //   message: reason || '그룹 가입이 거절되었습니다.'
+    // });
+
+    return { success: true };
+  }
 }
 
 export const groupService = new GroupService();

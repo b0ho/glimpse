@@ -659,6 +659,68 @@ export class GroupController {
       next(error);
     }
   }
+
+  async getPendingMembers(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const { groupId } = req.params;
+      const userId = req.auth.userId;
+
+      const pendingMembers = await groupService.getPendingMembers(groupId, userId);
+
+      res.json({
+        success: true,
+        data: pendingMembers
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async approveMember(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const { groupId, userId: targetUserId } = req.params;
+      const adminUserId = req.auth.userId;
+
+      const result = await groupService.approveMember(groupId, targetUserId, adminUserId);
+
+      res.json({
+        success: true,
+        data: result,
+        message: '멤버 가입이 승인되었습니다.'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async rejectMember(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const { groupId, userId: targetUserId } = req.params;
+      const { reason } = req.body;
+      const adminUserId = req.auth.userId;
+
+      await groupService.rejectMember(groupId, targetUserId, adminUserId, reason);
+
+      res.json({
+        success: true,
+        message: '멤버 가입이 거절되었습니다.'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const groupController = new GroupController();

@@ -39,4 +39,9 @@ router.get('/:groupId/invites', groupController.getGroupInvites);
 router.delete('/invites/:inviteId', groupController.revokeInvite);
 router.post('/join/:inviteCode', groupController.joinGroupByInvite);
 
+// Member approval system
+router.get('/:groupId/pending-members', groupController.getPendingMembers);
+router.put('/:groupId/members/:userId/approve', groupController.approveMember);
+router.delete('/:groupId/members/:userId/reject', groupController.rejectMember);
+
 export default router;

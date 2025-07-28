@@ -26,6 +26,7 @@ import { WhoLikesYouScreen } from '@/screens/WhoLikesYouScreen';
 import { StoryUploadScreen } from '@/screens/StoryUploadScreen';
 import { GroupInviteScreen } from '@/screens/GroupInviteScreen';
 import { JoinGroupScreen } from '@/screens/JoinGroupScreen';
+import { GroupManageScreen } from '@/screens/GroupManageScreen';
 // import { RootStackParamList } from '@/types';
 
 // Navigation Types
@@ -47,6 +48,7 @@ type GroupsStackParamList = {
   Map: undefined;
   GroupInvite: { groupId: string };
   JoinGroup: { inviteCode: string };
+  GroupManage: { groupId: string };
 };
 
 type ProfileStackParamList = {
@@ -88,6 +90,7 @@ export type RootNavigationParamList = MainTabParamList & {
   WhoLikesYou: undefined;
   GroupInvite: { groupId: string };
   JoinGroup: { inviteCode: string };
+  GroupManage: { groupId: string };
 };
 
 type AppStackParamList = {
@@ -215,6 +218,15 @@ function GroupsStackNavigator() {
         component={JoinGroupScreen} 
         options={{ 
           title: '그룹 가입',
+          headerShown: false,
+          presentation: 'modal',
+        }}
+      />
+      <GroupsStack.Screen 
+        name="GroupManage" 
+        component={GroupManageScreen} 
+        options={{ 
+          title: '그룹 관리',
           headerShown: false,
           presentation: 'modal',
         }}

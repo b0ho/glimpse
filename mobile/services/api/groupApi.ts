@@ -155,5 +155,23 @@ export const groupApi = {
       params: { page, limit }
     });
     return response.data.data;
+  },
+
+  // Get pending members
+  async getPendingMembers(groupId: string): Promise<any[]> {
+    const response = await apiClient.get(`/groups/${groupId}/pending-members`);
+    return response.data.data;
+  },
+
+  // Approve member
+  async approveMember(groupId: string, userId: string): Promise<void> {
+    await apiClient.put(`/groups/${groupId}/members/${userId}/approve`);
+  },
+
+  // Reject member
+  async rejectMember(groupId: string, userId: string, reason?: string): Promise<void> {
+    await apiClient.delete(`/groups/${groupId}/members/${userId}/reject`, {
+      data: { reason }
+    });
   }
 };
