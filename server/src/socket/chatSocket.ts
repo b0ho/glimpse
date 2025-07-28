@@ -87,7 +87,14 @@ export function initializeChatSocket(io: Server) {
       return;
     }
 
-    console.log(`User ${userId} connected with socket ${socket.id}`);
+    // Check connection limit
+    if (!connectionLimiter.addConnection(userId, socket.id)) {
+      socket.emit('error', { message: '최대 연결 수를 초과했습니다. 다른 연결을 종료하고 다시 시도해주세요.' });
+      socket.disconnect();
+      return;
+    }
+
+    logger.info(`User ${userId} connected with socket ${socket.id}`);
 
     // Store socket mapping
     userSocketMap.set(userId, socket.id);
@@ -148,6 +155,21 @@ export function initializeChatSocket(io: Server) {
       try {
         const { matchId, content, type = 'TEXT' } = data;
 
+        // Rate limiting
+        if (!socketRateLimiter.checkLimit(userId, RATE_LIMIT_CONFIGS.CHAT_MESSAGE)) {
+          socket.emit('error', { message: '메시지 전송 한도를 초과했습니다. 잠시 후 다시 시도해주세요.' });
+          return;
+        }
+
+        // Message size validation
+        if (type === 'TEXT') {
+          const validation = MessageSizeLimiter.validateTextMessage(content);
+          if (!validation.valid) {
+            socket.emit('error', { message: validation.error });
+            return;
+          }
+        }
+
         // Verify user is part of this match
         const match = await prisma.match.findUnique({
           where: { id: matchId },
@@ -196,6 +218,11 @@ export function initializeChatSocket(io: Server) {
     // Handle typing indicators
     socket.on('typing-start', async (matchId: string) => {
       try {
+        // Rate limiting for typing indicators
+        if (!socketRateLimiter.checkLimit(userId, RATE_LIMIT_CONFIGS.TYPING_INDICATOR)) {
+          return; // Silently ignore without error
+        }
+
         await chatService.setTypingStatus(matchId, userId, true);
         socket.to(`match:${matchId}`).emit('user-typing', { userId, isTyping: true });
       } catch (error) {
@@ -205,6 +232,11 @@ export function initializeChatSocket(io: Server) {
 
     socket.on('typing-stop', async (matchId: string) => {
       try {
+        // Rate limiting for typing indicators
+        if (!socketRateLimiter.checkLimit(userId, RATE_LIMIT_CONFIGS.TYPING_INDICATOR)) {
+          return; // Silently ignore without error
+        }
+
         await chatService.setTypingStatus(matchId, userId, false);
         socket.to(`match:${matchId}`).emit('user-typing', { userId, isTyping: false });
       } catch (error) {
@@ -269,7 +301,10 @@ export function initializeChatSocket(io: Server) {
 
     // Handle disconnection
     socket.on('disconnect', () => {
-      console.log(`User ${userId} disconnected`);
+      logger.info(`User ${userId} disconnected`);
+
+      // Remove from connection limiter
+      connectionLimiter.removeConnection(userId, socket.id);
 
       // Remove socket mapping
       userSocketMap.delete(userId);
