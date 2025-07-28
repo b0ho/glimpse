@@ -57,6 +57,12 @@ const securitySuspiciousRequestsTotal = new prometheus.Counter({
   labelNames: ['pattern']
 });
 
+const smsMessagesSentTotal = new prometheus.Counter({
+  name: 'sms_messages_sent_total',
+  help: 'Total number of SMS messages sent',
+  labelNames: ['provider', 'status']
+});
+
 // Register all metrics
 register.registerMetric(httpRequestDuration);
 register.registerMetric(httpRequestsTotal);
@@ -66,6 +72,7 @@ register.registerMetric(paymentFailuresTotal);
 register.registerMetric(matchingDuration);
 register.registerMetric(authLoginFailuresTotal);
 register.registerMetric(securitySuspiciousRequestsTotal);
+register.registerMetric(smsMessagesSentTotal);
 
 // Middleware to track HTTP metrics
 export const metricsMiddleware = (req: Request, res: Response, next: NextFunction) => {
@@ -98,7 +105,8 @@ export const metrics = {
   paymentFailuresTotal,
   matchingDuration,
   authLoginFailuresTotal,
-  securitySuspiciousRequestsTotal
+  securitySuspiciousRequestsTotal,
+  smsMessagesSentTotal
 };
 
 // Utility function to track async operations

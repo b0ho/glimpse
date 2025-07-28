@@ -33,6 +33,25 @@ const envSchema = z.object({
   KAKAO_SECRET_KEY: z.string().optional(),
   KAKAO_CID: z.string().default('TC0ONETIME'),
   PAYMENT_WEBHOOK_SECRET: z.string().optional(),
+  
+  // SMS Provider Configuration
+  SMS_PROVIDER: z.enum(['twilio', 'aligo', 'toast', 'dev']).default('dev'),
+  
+  // Twilio Configuration
+  TWILIO_ACCOUNT_SID: z.string().optional(),
+  TWILIO_AUTH_TOKEN: z.string().optional(),
+  TWILIO_PHONE_NUMBER: z.string().optional(),
+  
+  // Aligo Configuration
+  ALIGO_API_KEY: z.string().optional(),
+  ALIGO_USER_ID: z.string().optional(),
+  ALIGO_SENDER: z.string().optional(),
+  
+  // Toast SMS Configuration
+  TOAST_SMS_API_URL: z.string().default('https://api-sms.cloud.toast.com'),
+  TOAST_APP_KEY: z.string().optional(),
+  TOAST_SECRET_KEY: z.string().optional(),
+  TOAST_SEND_NO: z.string().optional(),
 
   // AWS S3 Configuration
   AWS_ACCESS_KEY_ID: z.string().optional(),
@@ -85,7 +104,7 @@ try {
 }
 
 // Helper function to check if a service is configured
-export function isServiceConfigured(service: 'stripe' | 'toss' | 'kakao' | 'aws' | 'firebase' | 'email' | 'redis' | 'sentry'): boolean {
+export function isServiceConfigured(service: 'stripe' | 'toss' | 'kakao' | 'aws' | 'firebase' | 'email' | 'redis' | 'sentry' | 'sms'): boolean {
   switch (service) {
     case 'stripe':
       return !!(env.STRIPE_SECRET_KEY && env.STRIPE_WEBHOOK_SECRET);
@@ -103,6 +122,12 @@ export function isServiceConfigured(service: 'stripe' | 'toss' | 'kakao' | 'aws'
       return !!env.REDIS_URL;
     case 'sentry':
       return !!env.SENTRY_DSN;
+    case 'sms':
+      if (env.SMS_PROVIDER === 'dev') return true;
+      if (env.SMS_PROVIDER === 'twilio') return !!(env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_PHONE_NUMBER);
+      if (env.SMS_PROVIDER === 'aligo') return !!(env.ALIGO_API_KEY && env.ALIGO_USER_ID && env.ALIGO_SENDER);
+      if (env.SMS_PROVIDER === 'toast') return !!(env.TOAST_APP_KEY && env.TOAST_SECRET_KEY && env.TOAST_SEND_NO);
+      return false;
     default:
       return false;
   }
@@ -125,6 +150,7 @@ export function logConfigurationStatus(): void {
   console.log(`   ${isServiceConfigured('email') ? '✅' : '⚠️ '} Email: ${isServiceConfigured('email') ? 'Configured' : 'Not configured'}`);
   console.log(`   ${isServiceConfigured('redis') ? '✅' : '⚠️ '} Redis: ${isServiceConfigured('redis') ? 'Configured' : 'Not configured'}`);
   console.log(`   ${isServiceConfigured('sentry') ? '✅' : '⚠️ '} Sentry: ${isServiceConfigured('sentry') ? 'Configured' : 'Not configured'}`);
+  console.log(`   ${isServiceConfigured('sms') ? '✅' : '⚠️ '} SMS (${env.SMS_PROVIDER}): ${isServiceConfigured('sms') ? 'Configured' : 'Not configured'}`);
   console.log('\n');
 }
 

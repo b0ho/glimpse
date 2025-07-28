@@ -553,6 +553,23 @@ model EmailLog {
   @@map("email_logs")
 }
 
+// SMS Logs
+model SMSLog {
+  id          String   @id @default(cuid())
+  phoneNumber String
+  message     String   @db.Text
+  messageType String   // verification, notification, marketing
+  provider    String   // twilio, aligo, toast, dev
+  status      String   // sent, failed, delivered
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  
+  @@index([phoneNumber])
+  @@index([status])
+  @@index([createdAt])
+  @@map("sms_logs")
+}
+
 // Company Domain Verification
 model CompanyDomain {
   id           String    @id @default(cuid())

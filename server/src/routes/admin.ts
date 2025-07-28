@@ -32,4 +32,26 @@ router.get('/analytics/user-activity', adminController.getUserActivityAnalytics)
 router.get('/settings', adminController.getSystemSettings);
 router.put('/settings', adminController.updateSystemSettings);
 
+// SMS 관리
+router.get('/sms/balance', async (req, res, next) => {
+  try {
+    const { smsService } = await import('../services/SMSService');
+    const balance = await smsService.checkBalance();
+    res.json(balance);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/sms/statistics', async (req, res, next) => {
+  try {
+    const { smsService } = await import('../services/SMSService');
+    const days = parseInt(req.query.days as string) || 7;
+    const stats = await smsService.getStatistics(days);
+    res.json(stats);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;
