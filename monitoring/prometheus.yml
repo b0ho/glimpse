@@ -25,8 +25,8 @@ scrape_configs:
   # Backend service metrics
   - job_name: 'glimpse-backend'
     static_configs:
-      - targets: ['backend:3001']
-    metrics_path: '/metrics'
+      - targets: ['server:8080']
+    metrics_path: '/api/metrics'
     scrape_interval: 30s
 
   # Node exporter for system metrics

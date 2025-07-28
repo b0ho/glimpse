@@ -46,8 +46,42 @@ npm run dev
 
 개발 서버:
 - 모바일 앱: http://localhost:8081 (Expo)
-- 서버 API: http://localhost:3001
+- 서버 API: http://localhost:8080
 - 웹 대시보드: http://localhost:3000
+
+## 🐳 프로덕션 배포
+
+### Docker를 사용한 배포
+
+```bash
+# 환경변수 설정
+cp .env.production.example .env.production
+# .env.production 파일 편집하여 실제 값 입력
+
+# 배포
+./deploy.sh
+
+# 또는 수동으로
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+### 포함된 서비스
+- **Node.js Server**: 메인 API 서버
+- **PostgreSQL**: 주 데이터베이스
+- **Redis**: 캐싱 및 세션 관리
+- **Nginx**: 리버스 프록시 및 SSL
+- **Prometheus & Grafana**: 모니터링
+- **Backup Service**: 자동 백업 (6시간마다)
+
+### 백업 및 복원
+
+```bash
+# 수동 백업
+docker-compose -f docker-compose.prod.yml exec backup /scripts/backup.sh
+
+# 복원 (백업 파일명 필요)
+docker-compose -f docker-compose.prod.yml exec backup /scripts/restore.sh postgres_20250128_120000.sql.gz
+```
 
 ## 🐳 Docker로 실행하기
 
