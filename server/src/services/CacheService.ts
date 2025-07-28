@@ -107,6 +107,16 @@ class CacheService {
       logger.error(`Redis invalidate error for pattern ${pattern}:`, error);
     }
   }
+  
+  async keys(pattern: string): Promise<string[]> {
+    try {
+      this.ensureConnected();
+      return await this.client.keys(pattern);
+    } catch (error) {
+      logger.error(`Redis keys error for pattern ${pattern}:`, error);
+      return [];
+    }
+  }
 
   async exists(key: string, options?: CacheOptions): Promise<boolean> {
     try {

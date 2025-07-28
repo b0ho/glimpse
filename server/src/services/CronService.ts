@@ -1,11 +1,16 @@
 import cron from 'node-cron';
-import prisma from '../db';
-import { logger } from '../utils/logger';
+import { prisma } from '../config/database';
+import { logger } from '../middleware/logging';
+import { paymentRetryService } from './PaymentRetryService';
+import { businessMetrics } from '../utils/monitoring';
 
 export class CronService {
   private static instance: CronService;
   private expiredStoriesJob?: cron.ScheduledTask;
   private storyCleanupJob?: cron.ScheduledTask;
+  private paymentRetryJob?: cron.ScheduledTask;
+  private dailyStatsJob?: cron.ScheduledTask;
+  private creditResetJob?: cron.ScheduledTask;
 
   private constructor() {}
 
@@ -26,6 +31,21 @@ export class CronService {
     this.storyCleanupJob = cron.schedule('0 * * * *', async () => {
       await this.cleanupOldInactiveStories();
     });
+    
+    // Run every 10 minutes to process payment retries
+    this.paymentRetryJob = cron.schedule('*/10 * * * *', async () => {
+      await this.processPaymentRetries();
+    });
+    
+    // Run daily at 2 AM to update statistics
+    this.dailyStatsJob = cron.schedule('0 2 * * *', async () => {
+      await this.updateDailyStats();
+    });
+    
+    // Run daily at midnight to reset daily free credits
+    this.creditResetJob = cron.schedule('0 0 * * *', async () => {
+      await this.resetDailyCredits();
+    });
 
     logger.info('Cron jobs started');
   }
@@ -36,6 +56,15 @@ export class CronService {
     }
     if (this.storyCleanupJob) {
       this.storyCleanupJob.stop();
+    }
+    if (this.paymentRetryJob) {
+      this.paymentRetryJob.stop();
+    }
+    if (this.dailyStatsJob) {
+      this.dailyStatsJob.stop();
+    }
+    if (this.creditResetJob) {
+      this.creditResetJob.stop();
     }
     logger.info('Cron jobs stopped');
   }
@@ -91,10 +120,72 @@ export class CronService {
     }
   }
 
+  private async processPaymentRetries(): Promise<void> {
+    try {
+      await paymentRetryService.processPendingRetries();
+    } catch (error) {
+      logger.error('Error processing payment retries:', error);
+    }
+  }
+  
+  private async updateDailyStats(): Promise<void> {
+    try {
+      // Update active users count
+      const activeUsers = await prisma.user.count({
+        where: {
+          lastActive: {
+            gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
+          }
+        }
+      });
+      
+      businessMetrics.activeUsersGauge.set(activeUsers);
+      
+      // Update premium subscriptions count
+      const premiumUsers = await prisma.user.count({
+        where: {
+          isPremium: true
+        }
+      });
+      
+      businessMetrics.premiumSubscriptionsActive.set(premiumUsers);
+      
+      logger.info(`Daily stats updated: ${activeUsers} active users, ${premiumUsers} premium users`);
+    } catch (error) {
+      logger.error('Error updating daily stats:', error);
+    }
+  }
+  
+  private async resetDailyCredits(): Promise<void> {
+    try {
+      // Reset daily credits for non-premium users
+      const result = await prisma.user.updateMany({
+        where: {
+          isPremium: false,
+          credits: {
+            lt: 1
+          }
+        },
+        data: {
+          credits: 1
+        }
+      });
+      
+      logger.info(`Reset daily credits for ${result.count} users`);
+    } catch (error) {
+      logger.error('Error resetting daily credits:', error);
+    }
+  }
+
   // Manual cleanup method for testing
   public async runCleanupNow(): Promise<void> {
     await this.markExpiredStoriesAsInactive();
     await this.cleanupOldInactiveStories();
+  }
+  
+  // Manual payment retry processing for testing
+  public async runPaymentRetryNow(): Promise<void> {
+    await this.processPaymentRetries();
   }
 }
 
