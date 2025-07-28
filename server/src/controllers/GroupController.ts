@@ -100,6 +100,86 @@ export class GroupController {
     }
   }
 
+  async generateInviteLink(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const { groupId } = req.params;
+      const userId = req.auth.userId;
+
+      const inviteLink = await groupService.generateInviteLink(groupId, userId);
+
+      res.json({
+        success: true,
+        data: { inviteLink }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async joinGroupByInvite(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const { inviteCode } = req.params;
+      const userId = req.auth.userId;
+
+      const result = await groupService.joinGroupByInvite(inviteCode, userId);
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getGroupInvites(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const { groupId } = req.params;
+      const userId = req.auth.userId;
+
+      const invites = await groupService.getGroupInvites(groupId, userId);
+
+      res.json({
+        success: true,
+        data: invites
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async revokeInvite(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.auth) {
+        throw createError(401, '인증이 필요합니다.');
+      }
+
+      const { inviteId } = req.params;
+      const userId = req.auth.userId;
+
+      await groupService.revokeInvite(inviteId, userId);
+
+      res.json({
+        success: true,
+        message: '초대가 취소되었습니다.'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getGroupById(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;

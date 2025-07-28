@@ -16,6 +16,7 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { GroupType, Group } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { groupApi } from '@/services/api/groupApi';
 
 interface GroupFormData {
   name: string;
@@ -88,36 +89,22 @@ export const CreateGroupScreen: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      // 실제로는 API 호출
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      const newGroup: Group = {
-        id: `group_${Date.now()}`,
+      // API 호출하여 그룹 생성
+      const newGroup = await groupApi.createGroup({
         name: formData.name.trim(),
-        type: formData.type,
         description: formData.description.trim(),
-        isActive: true,
-        memberCount: 1, // 생성자가 첫 멤버
-        maleCount: authStore.user?.id ? 1 : 0, // TODO: 실제 성별 정보
-        femaleCount: 0,
-        minimumMembers: formData.minimumMembers,
-        isMatchingActive: false, // 최소 인원 달성 후 활성화
-        location: formData.location && formData.location.address ? {
-          name: formData.location.address,
-          address: formData.location.address,
-          latitude: formData.location.latitude || 0,
-          longitude: formData.location.longitude || 0,
-        } : undefined,
+        type: formData.type,
         settings: {
           requiresApproval: false,
           allowInvites: true,
-          isPrivate: false,
+          isPrivate: formData.isPrivate,
         },
-        expiresAt: formData.expiresAt,
-        creatorId: authStore.user?.id || 'current_user',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+        location: formData.type === GroupType.LOCATION && formData.location?.address ? {
+          address: formData.location.address,
+          latitude: formData.location.latitude,
+          longitude: formData.location.longitude,
+        } : undefined,
+      });
 
       // 로컬 스토어에 추가
       groupStore.createGroup(newGroup);
@@ -127,14 +114,19 @@ export const CreateGroupScreen: React.FC = () => {
         `"${newGroup.name}" 그룹이 성공적으로 생성되었습니다.\n다른 사용자들이 참여하면 매칭이 활성화됩니다.`,
         [
           {
+            text: '초대하기',
+            onPress: () => navigation.navigate('GroupInvite', { groupId: newGroup.id }),
+          },
+          {
             text: '확인',
             onPress: () => navigation.goBack(),
+            style: 'cancel',
           },
         ]
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Group creation error:', error);
-      Alert.alert('오류', '그룹 생성 중 오류가 발생했습니다.');
+      Alert.alert('오류', error.response?.data?.message || '그룹 생성 중 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }

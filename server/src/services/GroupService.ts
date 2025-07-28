@@ -194,6 +194,191 @@ export class GroupService {
     };
   }
 
+  async generateInviteLink(groupId: string, userId: string): Promise<string> {
+    // Check if user has permission to generate invite link
+    const membership = await prisma.groupMember.findFirst({
+      where: {
+        groupId,
+        userId,
+        status: 'ACTIVE',
+        role: { in: ['CREATOR', 'ADMIN'] }
+      }
+    });
+
+    if (!membership) {
+      throw createError(403, '초대 링크를 생성할 권한이 없습니다.');
+    }
+
+    // Generate unique invite code
+    const inviteCode = generateId(8);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
+
+    // Store invite in database
+    await prisma.groupInvite.create({
+      data: {
+        groupId,
+        inviteCode,
+        createdByUserId: userId,
+        expiresAt,
+        maxUses: 100,
+        uses: 0
+      }
+    });
+
+    // Return the invite link
+    const baseUrl = process.env.FRONTEND_URL || 'https://glimpse.app';
+    return `${baseUrl}/invite/${inviteCode}`;
+  }
+
+  async joinGroupByInvite(inviteCode: string, userId: string) {
+    // Find the invite
+    const invite = await prisma.groupInvite.findUnique({
+      where: { inviteCode },
+      include: {
+        group: {
+          include: {
+            _count: {
+              select: { members: { where: { status: 'ACTIVE' } } }
+            }
+          }
+        }
+      }
+    });
+
+    if (!invite) {
+      throw createError(404, '유효하지 않은 초대 코드입니다.');
+    }
+
+    if (invite.expiresAt < new Date()) {
+      throw createError(400, '만료된 초대 코드입니다.');
+    }
+
+    if (invite.maxUses && invite.uses >= invite.maxUses) {
+      throw createError(400, '초대 코드 사용 횟수를 초과했습니다.');
+    }
+
+    // Check if user is already a member
+    const existingMembership = await prisma.groupMember.findFirst({
+      where: {
+        groupId: invite.groupId,
+        userId
+      }
+    });
+
+    if (existingMembership) {
+      if (existingMembership.status === 'ACTIVE') {
+        throw createError(400, '이미 그룹의 멤버입니다.');
+      } else if (existingMembership.status === 'BANNED') {
+        throw createError(403, '이 그룹에서 차단되었습니다.');
+      }
+    }
+
+    // Check if group is full
+    if (invite.group._count.members >= invite.group.maxMembers) {
+      throw createError(400, '그룹이 가득 찼습니다.');
+    }
+
+    // Add user to group
+    await prisma.$transaction(async (tx) => {
+      // Create membership
+      await tx.groupMember.create({
+        data: {
+          userId,
+          groupId: invite.groupId,
+          role: 'MEMBER',
+          status: invite.group.settings?.requireApproval ? 'PENDING' : 'ACTIVE'
+        }
+      });
+
+      // Update invite usage
+      await tx.groupInvite.update({
+        where: { id: invite.id },
+        data: { uses: { increment: 1 } }
+      });
+    });
+
+    return {
+      success: true,
+      requiresApproval: invite.group.settings?.requireApproval || false,
+      group: {
+        id: invite.group.id,
+        name: invite.group.name,
+        type: invite.group.type
+      }
+    };
+  }
+
+  async getGroupInvites(groupId: string, userId: string) {
+    // Check if user has permission
+    const membership = await prisma.groupMember.findFirst({
+      where: {
+        groupId,
+        userId,
+        status: 'ACTIVE',
+        role: { in: ['CREATOR', 'ADMIN'] }
+      }
+    });
+
+    if (!membership) {
+      throw createError(403, '초대 링크를 조회할 권한이 없습니다.');
+    }
+
+    const invites = await prisma.groupInvite.findMany({
+      where: {
+        groupId,
+        expiresAt: { gt: new Date() }
+      },
+      include: {
+        createdBy: {
+          select: { id: true, nickname: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return invites.map(invite => ({
+      id: invite.id,
+      inviteCode: invite.inviteCode,
+      createdBy: invite.createdBy,
+      createdAt: invite.createdAt,
+      expiresAt: invite.expiresAt,
+      uses: invite.uses,
+      maxUses: invite.maxUses,
+      link: `${process.env.FRONTEND_URL || 'https://glimpse.app'}/invite/${invite.inviteCode}`
+    }));
+  }
+
+  async revokeInvite(inviteId: string, userId: string) {
+    const invite = await prisma.groupInvite.findUnique({
+      where: { id: inviteId },
+      include: {
+        group: {
+          include: {
+            members: {
+              where: { userId, status: 'ACTIVE' }
+            }
+          }
+        }
+      }
+    });
+
+    if (!invite) {
+      throw createError(404, '초대를 찾을 수 없습니다.');
+    }
+
+    const userMembership = invite.group.members[0];
+    if (!userMembership || !['CREATOR', 'ADMIN'].includes(userMembership.role)) {
+      throw createError(403, '초대를 취소할 권한이 없습니다.');
+    }
+
+    await prisma.groupInvite.delete({
+      where: { id: inviteId }
+    });
+
+    return { success: true };
+  }
+
   async updateGroup(groupId: string, updateData: any) {
     const { name, description, settings, location, maxMembers } = updateData;
 

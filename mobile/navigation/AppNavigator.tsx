@@ -24,6 +24,8 @@ import { MapScreen } from '@/screens/MapScreen';
 import NotificationSettingsScreen from '@/screens/NotificationSettingsScreen';
 import { WhoLikesYouScreen } from '@/screens/WhoLikesYouScreen';
 import { StoryUploadScreen } from '@/screens/StoryUploadScreen';
+import { GroupInviteScreen } from '@/screens/GroupInviteScreen';
+import { JoinGroupScreen } from '@/screens/JoinGroupScreen';
 // import { RootStackParamList } from '@/types';
 
 // Navigation Types
@@ -43,6 +45,8 @@ type GroupsStackParamList = {
   LocationGroup: undefined;
   NearbyUsers: undefined;
   Map: undefined;
+  GroupInvite: { groupId: string };
+  JoinGroup: { inviteCode: string };
 };
 
 type ProfileStackParamList = {
@@ -82,6 +86,8 @@ export type RootNavigationParamList = MainTabParamList & {
   CreateContent: undefined;
   CreateGroup: undefined;
   WhoLikesYou: undefined;
+  GroupInvite: { groupId: string };
+  JoinGroup: { inviteCode: string };
 };
 
 type AppStackParamList = {
@@ -193,6 +199,24 @@ function GroupsStackNavigator() {
         options={{ 
           title: '지도',
           headerShown: false,
+        }}
+      />
+      <GroupsStack.Screen 
+        name="GroupInvite" 
+        component={GroupInviteScreen} 
+        options={{ 
+          title: '그룹 초대',
+          headerShown: false,
+          presentation: 'modal',
+        }}
+      />
+      <GroupsStack.Screen 
+        name="JoinGroup" 
+        component={JoinGroupScreen} 
+        options={{ 
+          title: '그룹 가입',
+          headerShown: false,
+          presentation: 'modal',
         }}
       />
     </GroupsStack.Navigator>

@@ -29,8 +29,14 @@ router.delete('/:groupId/members/:userId', groupController.removeMember);
 router.post('/:groupId/checkin', groupController.locationCheckIn);
 router.get('/:groupId/checkins', groupController.getCheckIns);
 
-// Invite codes
+// Invite codes (legacy)
 router.post('/:groupId/invite-codes', groupController.createInviteCode);
 router.post('/join-by-code', groupController.joinByInviteCode);
+
+// New invite system
+router.post('/:groupId/invites', groupController.generateInviteLink);
+router.get('/:groupId/invites', groupController.getGroupInvites);
+router.delete('/invites/:inviteId', groupController.revokeInvite);
+router.post('/join/:inviteCode', groupController.joinGroupByInvite);
 
 export default router;

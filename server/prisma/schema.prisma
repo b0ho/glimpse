@@ -53,6 +53,7 @@ model User {
   subscriptions      Subscription[]
   locationCheckIns   LocationCheckIn[]
   createdGroups      Group[] @relation("GroupCreator")
+  createdInvites     GroupInvite[]
   files              File[]
 
   @@map("users")
@@ -170,6 +171,7 @@ model Group {
   likes         UserLike[]
   matches       Match[]
   inviteCodes   InviteCode[]
+  groupInvites  GroupInvite[]
   checkIns      LocationCheckIn[]
 
   @@map("groups")
@@ -209,7 +211,26 @@ enum GroupMemberStatus {
   BANNED
 }
 
-// Invite Codes
+// Group Invites
+model GroupInvite {
+  id              String   @id @default(cuid())
+  groupId         String
+  inviteCode      String   @unique
+  createdByUserId String
+  expiresAt       DateTime
+  maxUses         Int?
+  uses            Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  group           Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdBy       User     @relation(fields: [createdByUserId], references: [id])
+
+  @@index([inviteCode])
+  @@index([expiresAt])
+  @@map("group_invites")
+}
+
+// Invite Codes (legacy - to be removed)
 model InviteCode {
   id        String   @id @default(cuid())
   code      String   @unique
