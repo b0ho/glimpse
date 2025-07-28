@@ -3,6 +3,7 @@ import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import { APP_CONFIG } from '@shared/constants';
 import { getMatchCompatibilityScore, calculateDistance } from '@shared/utils';
+import { metrics, trackAsyncOperation } from '../utils/monitoring';
 
 
 
@@ -217,15 +218,21 @@ export class MatchingService {
     });
 
     // Calculate compatibility scores and apply matching algorithm
-    const scoredMatches = potentialMatches
-      .map(user => ({
-        ...user,
-        compatibilityScore: this.calculateAdvancedCompatibilityScore(currentUser, user),
-        // Anonymize until liked
-        nickname: user.nickname ? user.nickname.charAt(0) + '*'.repeat(user.nickname.length - 1) : '',
-        bio: null // Hide bio until matched
-      }))
-      .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
+    const scoredMatches = await trackAsyncOperation(
+      async () => {
+        return potentialMatches
+          .map(user => ({
+            ...user,
+            compatibilityScore: this.calculateAdvancedCompatibilityScore(currentUser, user),
+            // Anonymize until liked
+            nickname: user.nickname ? user.nickname.charAt(0) + '*'.repeat(user.nickname.length - 1) : '',
+            bio: null // Hide bio until matched
+          }))
+          .sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+      },
+      metrics.matchingDuration,
+      { type: 'discovery' }
+    )
       .slice(0, count);
 
     return scoredMatches;

@@ -22,6 +22,7 @@ import { notFound } from './middleware/notFound';
 import { rateLimiter } from './middleware/rateLimiter';
 import { metricsMiddleware, startSystemMetricsCollection } from './middleware/metrics';
 import { requestLoggingMiddleware, errorLoggingMiddleware, logger } from './middleware/logging';
+import { metricsHandler, metrics, updateHealthStatus } from './utils/monitoring';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -83,19 +84,42 @@ app.use(metricsMiddleware);
 app.use(requestLoggingMiddleware);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    service: 'glimpse-server'
-  });
+app.get('/health', async (req, res) => {
+  try {
+    // Check database connection
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+    await prisma.$queryRaw`SELECT 1`;
+    await prisma.$disconnect();
+    
+    updateHealthStatus('database', true);
+    updateHealthStatus('server', true);
+    
+    res.status(200).json({ 
+      status: 'OK', 
+      timestamp: new Date().toISOString(),
+      service: 'glimpse-server',
+      checks: {
+        database: 'healthy',
+        server: 'healthy'
+      }
+    });
+  } catch (error) {
+    updateHealthStatus('database', false);
+    res.status(503).json({ 
+      status: 'ERROR',
+      timestamp: new Date().toISOString(),
+      service: 'glimpse-server',
+      checks: {
+        database: 'unhealthy',
+        server: 'healthy'
+      }
+    });
+  }
 });
 
 // Metrics endpoint (Prometheus format)
-app.get('/metrics', async (req, res) => {
-  res.set('Content-Type', 'text/plain');
-  res.end('# OpenTelemetry metrics available via OTLP exporter\n# Configure your metrics backend to scrape from OTLP endpoint');
-});
+app.get('/metrics', metricsHandler);
 
 // Swagger API documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
@@ -121,6 +145,15 @@ app.use('/api/v1/location', locationRoutes);
 // Initialize Socket.IO chat handlers
 import { initializeChatSocket } from './socket/chatSocket';
 initializeChatSocket(io);
+
+// Track WebSocket connections for monitoring
+io.on('connection', (socket) => {
+  metrics.websocketConnectionsActive.inc();
+  
+  socket.on('disconnect', () => {
+    metrics.websocketConnectionsActive.dec();
+  });
+});
 
 // Import cron service
 import { cronService } from './services/CronService';

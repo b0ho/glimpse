@@ -3,6 +3,7 @@ import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import { metrics } from '../utils/monitoring';
 
 
 
@@ -113,22 +114,32 @@ export class PaymentService {
     }
 
     let result;
-    switch (payment.method) {
-      case 'TOSS_PAY':
-        result = await this.processTossPayment(payment, data.paymentKey!);
-        break;
-      case 'KAKAO_PAY':
-        result = await this.processKakaoPayment(payment, data.paymentToken!);
-        break;
-      default:
-        result = await this.processGenericPayment(payment, data);
+    
+    // Track payment attempt
+    metrics.paymentAttemptsTotal.labels(payment.method, 'processing').inc();
+    
+    try {
+      switch (payment.method) {
+        case 'TOSS_PAY':
+          result = await this.processTossPayment(payment, data.paymentKey!);
+          break;
+        case 'KAKAO_PAY':
+          result = await this.processKakaoPayment(payment, data.paymentToken!);
+          break;
+        default:
+          result = await this.processGenericPayment(payment, data);
+      }
+    } catch (error) {
+      metrics.paymentFailuresTotal.labels(payment.method, 'processing_error').inc();
+      throw error;
     }
 
     // Update payment status
+    const finalStatus = result.success ? 'COMPLETED' : 'FAILED';
     await prisma.payment.update({
       where: { id: paymentId },
       data: {
-        status: result.success ? 'COMPLETED' : 'FAILED',
+        status: finalStatus,
         metadata: {
           ...payment.metadata as object,
           externalData: {
@@ -138,6 +149,12 @@ export class PaymentService {
         },
       }
     });
+    
+    // Track payment result
+    metrics.paymentAttemptsTotal.labels(payment.method, finalStatus.toLowerCase()).inc();
+    if (!result.success) {
+      metrics.paymentFailuresTotal.labels(payment.method, result.data?.errorCode || 'unknown').inc();
+    }
 
     if (result.success) {
       // Apply payment benefits

@@ -1,0 +1,101 @@
+global:
+  # SMTP configuration
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@glimpse.app'
+  smtp_auth_username: 'alerts@glimpse.app'
+  smtp_auth_password: '$SMTP_PASSWORD'
+  
+  # Slack configuration
+  slack_api_url: '$SLACK_WEBHOOK_URL'
+
+# The root route
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+  
+  routes:
+    # Critical alerts
+    - match:
+        severity: critical
+      receiver: 'critical'
+      repeat_interval: 1h
+      
+    # Payment alerts
+    - match:
+        team: payments
+      receiver: 'payments-team'
+      
+    # Security alerts
+    - match:
+        team: security
+      receiver: 'security-team'
+      repeat_interval: 15m
+      
+    # Backend alerts
+    - match:
+        team: backend
+      receiver: 'backend-team'
+      
+    # DevOps alerts
+    - match:
+        team: devops
+      receiver: 'devops-team'
+
+receivers:
+  - name: 'default'
+    email_configs:
+      - to: 'team@glimpse.app'
+        headers:
+          Subject: '[Glimpse Alert] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - channel: '#alerts'
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        
+  - name: 'critical'
+    email_configs:
+      - to: 'oncall@glimpse.app'
+        headers:
+          Subject: '[CRITICAL] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - channel: '#critical-alerts'
+        title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    pagerduty_configs:
+      - service_key: '$PAGERDUTY_SERVICE_KEY'
+        description: '{{ .GroupLabels.alertname }}: {{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        
+  - name: 'payments-team'
+    email_configs:
+      - to: 'payments@glimpse.app'
+    slack_configs:
+      - channel: '#payments-alerts'
+        title: '💳 Payment Alert: {{ .GroupLabels.alertname }}'
+        
+  - name: 'security-team'
+    email_configs:
+      - to: 'security@glimpse.app'
+    slack_configs:
+      - channel: '#security-alerts'
+        title: '🔒 Security Alert: {{ .GroupLabels.alertname }}'
+        
+  - name: 'backend-team'
+    slack_configs:
+      - channel: '#backend-alerts'
+        title: '⚙️ Backend Alert: {{ .GroupLabels.alertname }}'
+        
+  - name: 'devops-team'
+    slack_configs:
+      - channel: '#devops-alerts'
+        title: '🔧 DevOps Alert: {{ .GroupLabels.alertname }}'
+
+# Inhibition rules
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']

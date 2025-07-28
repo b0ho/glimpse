@@ -3,6 +3,7 @@ import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
+import { metrics } from '../utils/monitoring';
 
 
 
@@ -31,6 +32,7 @@ export class AuthService {
       );
 
       if (!clerkResponse.data.verified) {
+        metrics.authLoginFailuresTotal.labels('invalid_verification_code').inc();
         throw createError(400, '전화번호 인증에 실패했습니다.');
       }
 

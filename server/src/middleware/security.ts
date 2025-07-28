@@ -106,6 +106,11 @@ export const securityMonitoring = (req: Request, res: Response, next: NextFuncti
         timestamp: new Date().toISOString()
       });
       
+      // Track suspicious activity in metrics
+      import('../utils/monitoring').then(({ metrics }) => {
+        metrics.securitySuspiciousRequestsTotal.labels(pattern.toString()).inc();
+      });
+      
       // In production, you might want to:
       // - Send to SIEM
       // - Block the request

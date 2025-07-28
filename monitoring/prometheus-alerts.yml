@@ -1,0 +1,211 @@
+groups:
+  - name: glimpse_alerts
+    interval: 30s
+    rules:
+      # API Performance Alerts
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "API 응답 시간이 느립니다"
+          description: "95th percentile 응답 시간이 500ms를 초과했습니다. 현재: {{ $value }}s"
+          
+      - alert: VeryHighResponseTime
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "API 응답 시간이 매우 느립니다"
+          description: "95th percentile 응답 시간이 1초를 초과했습니다. 현재: {{ $value }}s"
+      
+      # Error Rate Alerts
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "API 에러율이 높습니다"
+          description: "5xx 에러율이 5%를 초과했습니다. 현재: {{ $value | humanizePercentage }}"
+          
+      - alert: VeryHighErrorRate
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "API 에러율이 매우 높습니다"
+          description: "5xx 에러율이 10%를 초과했습니다. 현재: {{ $value | humanizePercentage }}"
+      
+      # Resource Usage Alerts
+      - alert: HighCPUUsage
+        expr: 100 * (1 - avg(irate(node_cpu_seconds_total{mode="idle"}[5m]))) > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "CPU 사용률이 높습니다"
+          description: "CPU 사용률이 80%를 초과했습니다. 현재: {{ $value }}%"
+          
+      - alert: VeryHighCPUUsage
+        expr: 100 * (1 - avg(irate(node_cpu_seconds_total{mode="idle"}[5m]))) > 90
+        for: 5m
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "CPU 사용률이 매우 높습니다"
+          description: "CPU 사용률이 90%를 초과했습니다. 현재: {{ $value }}%"
+      
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "메모리 사용률이 높습니다"
+          description: "메모리 사용률이 85%를 초과했습니다. 현재: {{ $value | humanizePercentage }}"
+          
+      - alert: VeryHighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "메모리 사용률이 매우 높습니다"
+          description: "메모리 사용률이 95%를 초과했습니다. 현재: {{ $value | humanizePercentage }}"
+      
+      # Database Alerts
+      - alert: DatabaseConnectionsHigh
+        expr: pg_stat_database_numbackends{datname="glimpse"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "데이터베이스 연결 수가 많습니다"
+          description: "활성 DB 연결이 80개를 초과했습니다. 현재: {{ $value }}"
+          
+      - alert: DatabaseConnectionsCritical
+        expr: pg_stat_database_numbackends{datname="glimpse"} > 95
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "데이터베이스 연결 수가 한계에 도달했습니다"
+          description: "활성 DB 연결이 95개를 초과했습니다. 현재: {{ $value }}"
+      
+      - alert: DatabaseDeadlocks
+        expr: increase(pg_stat_database_deadlocks{datname="glimpse"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "데이터베이스 데드락이 발생했습니다"
+          description: "지난 5분간 {{ $value }}건의 데드락이 발생했습니다"
+      
+      # Redis Alerts
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "Redis가 다운되었습니다"
+          description: "Redis 서버에 연결할 수 없습니다"
+          
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Redis 메모리 사용률이 높습니다"
+          description: "Redis 메모리 사용률이 85%를 초과했습니다. 현재: {{ $value | humanizePercentage }}"
+      
+      # Application-specific Alerts
+      - alert: PaymentServiceDown
+        expr: up{job="payment-service"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: payments
+        annotations:
+          summary: "결제 서비스가 다운되었습니다"
+          description: "결제 서비스가 5분 이상 응답하지 않습니다"
+          
+      - alert: HighPaymentFailureRate
+        expr: sum(rate(payment_failures_total[5m])) / sum(rate(payment_attempts_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          team: payments
+        annotations:
+          summary: "결제 실패율이 높습니다"
+          description: "결제 실패율이 5%를 초과했습니다. 현재: {{ $value | humanizePercentage }}"
+      
+      - alert: WebSocketConnectionsHigh
+        expr: websocket_connections_active > 10000
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "WebSocket 연결 수가 많습니다"
+          description: "활성 WebSocket 연결이 10,000개를 초과했습니다. 현재: {{ $value }}"
+          
+      - alert: MatchingServiceSlow
+        expr: histogram_quantile(0.95, sum(rate(matching_duration_seconds_bucket[5m])) by (le)) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "매칭 서비스가 느립니다"
+          description: "매칭 처리 시간이 2초를 초과했습니다. 현재: {{ $value }}s"
+      
+      # Security Alerts
+      - alert: HighLoginFailureRate
+        expr: sum(rate(auth_login_failures_total[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "로그인 실패가 많이 발생하고 있습니다"
+          description: "분당 {{ $value }}건의 로그인 실패가 발생하고 있습니다"
+          
+      - alert: SuspiciousActivityDetected
+        expr: sum(rate(security_suspicious_requests_total[5m])) > 5
+        for: 5m
+        labels:
+          severity: critical
+          team: security
+        annotations:
+          summary: "의심스러운 활동이 감지되었습니다"
+          description: "분당 {{ $value }}건의 의심스러운 요청이 감지되었습니다"
+      
+      # Service Health Checks
+      - alert: ServiceDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "서비스가 다운되었습니다"
+          description: "{{ $labels.job }} 서비스가 5분 이상 응답하지 않습니다"
