@@ -1,0 +1,175 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run E2E tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: glimpse_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Setup test environment
+        run: |
+          cp server/.env.example server/.env.test
+          cp mobile/.env.example mobile/.env.test
+          
+          # Update test environment variables
+          echo "DATABASE_URL=postgresql://test:test@localhost:5432/glimpse_e2e" >> server/.env.test
+          echo "REDIS_URL=redis://localhost:6379" >> server/.env.test
+          echo "NODE_ENV=test" >> server/.env.test
+          echo "JWT_SECRET=e2e-test-secret" >> server/.env.test
+          echo "CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY_TEST }}" >> server/.env.test
+          echo "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY_TEST }}" >> server/.env.test
+      
+      - name: Setup database
+        working-directory: ./server
+        run: |
+          npx prisma generate
+          npx prisma migrate deploy
+          npx prisma db seed
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/glimpse_e2e
+      
+      - name: Start server
+        working-directory: ./server
+        run: |
+          npm run build
+          nohup npm start &
+          sleep 5
+        env:
+          NODE_ENV: test
+          PORT: 8080
+      
+      - name: Install Playwright browsers
+        working-directory: ./tests/e2e
+        run: npx playwright install --with-deps chromium
+      
+      - name: Run E2E tests
+        working-directory: ./tests/e2e
+        run: npm run test:e2e
+        env:
+          API_URL: http://localhost:8080
+          HEADLESS: true
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: tests/e2e/playwright-report/
+          retention-days: 7
+      
+      - name: Upload test videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-videos
+          path: tests/e2e/test-results/
+          retention-days: 7
+      
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots
+          path: tests/e2e/screenshots/
+          retention-days: 7
+
+  mobile-e2e:
+    name: Mobile E2E Tests (Detox)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Cache CocoaPods
+        uses: actions/cache@v3
+        with:
+          path: mobile/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+      
+      - name: Install Detox dependencies
+        working-directory: ./mobile
+        run: |
+          brew tap wix/brew
+          brew install applesimutils
+          npm install -g detox-cli
+      
+      - name: Build iOS app for testing
+        working-directory: ./mobile
+        run: |
+          npx detox build --configuration ios.sim.debug
+      
+      - name: Run Detox tests
+        working-directory: ./mobile
+        run: |
+          npx detox test --configuration ios.sim.debug --cleanup --headless --record-videos all --record-logs all
+      
+      - name: Upload Detox artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detox-artifacts
+          path: mobile/artifacts/
+          retention-days: 7

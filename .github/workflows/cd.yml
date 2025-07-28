@@ -1,0 +1,187 @@
+name: CD - Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DEPLOY_USER: deploy
+  DEPLOY_PATH: /opt/glimpse
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment || 'production' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set deployment variables
+        id: vars
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "staging" ]; then
+            echo "deploy_host=${{ secrets.STAGING_HOST }}" >> $GITHUB_OUTPUT
+            echo "deploy_key=${{ secrets.STAGING_SSH_KEY }}" >> $GITHUB_OUTPUT
+            echo "env_file=.env.staging" >> $GITHUB_OUTPUT
+          else
+            echo "deploy_host=${{ secrets.PRODUCTION_HOST }}" >> $GITHUB_OUTPUT
+            echo "deploy_key=${{ secrets.PRODUCTION_SSH_KEY }}" >> $GITHUB_OUTPUT
+            echo "env_file=.env.production" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ steps.vars.outputs.deploy_key }}
+          known_hosts: ${{ steps.vars.outputs.deploy_host }}
+      
+      - name: Add known hosts
+        run: |
+          ssh-keyscan -H ${{ steps.vars.outputs.deploy_host }} >> ~/.ssh/known_hosts
+      
+      - name: Copy deployment files
+        run: |
+          scp docker-compose.prod.yml ${{ env.DEPLOY_USER }}@${{ steps.vars.outputs.deploy_host }}:${{ env.DEPLOY_PATH }}/
+          scp nginx/nginx.conf ${{ env.DEPLOY_USER }}@${{ steps.vars.outputs.deploy_host }}:${{ env.DEPLOY_PATH }}/nginx/
+          scp monitoring/prometheus.yml ${{ env.DEPLOY_USER }}@${{ steps.vars.outputs.deploy_host }}:${{ env.DEPLOY_PATH }}/monitoring/
+      
+      - name: Deploy application
+        run: |
+          ssh ${{ env.DEPLOY_USER }}@${{ steps.vars.outputs.deploy_host }} << 'EOF'
+            cd ${{ env.DEPLOY_PATH }}
+            
+            # Pull latest images
+            docker-compose -f docker-compose.prod.yml pull
+            
+            # Run database migrations
+            docker-compose -f docker-compose.prod.yml run --rm server npx prisma migrate deploy
+            
+            # Deploy with zero downtime
+            docker-compose -f docker-compose.prod.yml up -d --no-deps --scale server=2 server
+            
+            # Wait for new containers to be healthy
+            sleep 30
+            
+            # Remove old containers
+            docker-compose -f docker-compose.prod.yml up -d --no-deps --remove-orphans server
+            
+            # Clean up
+            docker system prune -f
+          EOF
+      
+      - name: Health check
+        run: |
+          echo "Waiting for service to be healthy..."
+          sleep 10
+          
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://${{ steps.vars.outputs.deploy_host }}/api/health)
+          if [ $response -eq 200 ]; then
+            echo "✅ Health check passed"
+          else
+            echo "❌ Health check failed with status code: $response"
+            exit 1
+          fi
+      
+      - name: Send deployment notification
+        if: always()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Deployment Status",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment to ${{ github.event.inputs.environment || 'production' }}*\n*Status:* ${{ job.status }}\n*Commit:* ${{ github.sha }}\n*Branch:* ${{ github.ref_name }}\n*Deployed by:* ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: failure()
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set deployment variables
+        id: vars
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "staging" ]; then
+            echo "deploy_host=${{ secrets.STAGING_HOST }}" >> $GITHUB_OUTPUT
+            echo "deploy_key=${{ secrets.STAGING_SSH_KEY }}" >> $GITHUB_OUTPUT
+          else
+            echo "deploy_host=${{ secrets.PRODUCTION_HOST }}" >> $GITHUB_OUTPUT
+            echo "deploy_key=${{ secrets.PRODUCTION_SSH_KEY }}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ steps.vars.outputs.deploy_key }}
+          known_hosts: ${{ steps.vars.outputs.deploy_host }}
+      
+      - name: Rollback to previous version
+        run: |
+          ssh ${{ env.DEPLOY_USER }}@${{ steps.vars.outputs.deploy_host }} << 'EOF'
+            cd ${{ env.DEPLOY_PATH }}
+            
+            # Get previous image tag
+            PREVIOUS_TAG=$(docker images --format "table {{.Repository}}:{{.Tag}}" | grep glimpse-server | head -2 | tail -1 | awk '{print $1}')
+            
+            if [ -n "$PREVIOUS_TAG" ]; then
+              echo "Rolling back to $PREVIOUS_TAG"
+              
+              # Update docker-compose to use previous tag
+              sed -i "s|image: .*glimpse-server:.*|image: $PREVIOUS_TAG|g" docker-compose.prod.yml
+              
+              # Deploy previous version
+              docker-compose -f docker-compose.prod.yml up -d server
+              
+              echo "✅ Rollback completed"
+            else
+              echo "❌ No previous version found for rollback"
+              exit 1
+            fi
+          EOF
+      
+      - name: Send rollback notification
+        if: always()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "⚠️ Deployment Rollback",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Rollback triggered for ${{ github.event.inputs.environment || 'production' }}*\n*Reason:* Deployment failed\n*Commit:* ${{ github.sha }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

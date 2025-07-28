@@ -28,6 +28,11 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
+.env.production
+.env.staging
+.env.development
+.env.test
 
 # typescript
 *.tsbuildinfo
@@ -48,6 +53,46 @@ yarn-error.*
 ehthumbs.db
 Thumbs.db
 *.pem
+
+# Security
+firebase-admin-sdk.json
+serviceAccountKey.json
+*.crt
+*.csr
+*.pfx
+
+# Logs
+logs/
+combined.log
+error.log
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+postgres-data/
+redis-data/
+
+# Uploads  
+uploads/
+temp/
+tmp/
+
+# Monitoring
+prometheus_data/
+grafana_data/
+
+# Backup
+backup_temp/
+*.backup
+*.dump
+
+# Docker
+docker-compose.override.yml
+
+# Certificates
+ssl/
+certificates/
 
 # Runtime data
 pids
