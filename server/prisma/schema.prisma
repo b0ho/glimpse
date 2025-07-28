@@ -540,6 +540,19 @@ model File {
   @@map("files")
 }
 
+// Email Logs
+model EmailLog {
+  id          String   @id @default(cuid())
+  to          String
+  subject     String
+  provider    String
+  status      String
+  sent_at     DateTime @default(now())
+  metadata    Json?
+  
+  @@map("email_logs")
+}
+
 // Company Domain Verification
 model CompanyDomain {
   id           String    @id @default(cuid())

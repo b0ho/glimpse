@@ -32,7 +32,7 @@ export class PaymentRetryManager {
   };
 
   private retryQueue: Map<string, RetryTask<any>> = new Map();
-  private processingInterval: NodeJS.Timeout | null = null;
+  private processingInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     this.startProcessing();
