@@ -5,6 +5,7 @@ import { createError } from '../middleware/errorHandler';
 import { userService } from '../services/UserService';
 import { likeService } from '../services/LikeService';
 import { validateNickname } from '@shared/utils';
+import { firebaseService } from '../services/FirebaseService';
 
 export class UserController {
   async getCurrentUser(req: ClerkAuthRequest, res: Response, next: NextFunction) {
@@ -391,6 +392,84 @@ export class UserController {
           message: '프리미엄 구독이 활성화되었습니다.',
           subscriptionId: 'temp-sub-id'
         }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async registerFCMToken(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.auth!.userId;
+      const { token, deviceType } = req.body;
+
+      if (!token || !deviceType) {
+        throw createError(400, 'FCM 토큰과 디바이스 타입이 필요합니다.');
+      }
+
+      if (!['ios', 'android'].includes(deviceType)) {
+        throw createError(400, '유효하지 않은 디바이스 타입입니다.');
+      }
+
+      await firebaseService.addUserFCMToken(userId, token, deviceType as 'ios' | 'android');
+
+      res.json({
+        success: true,
+        message: 'FCM 토큰이 등록되었습니다.'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async removeFCMToken(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.auth!.userId;
+      const { token } = req.body;
+
+      if (!token) {
+        throw createError(400, 'FCM 토큰이 필요합니다.');
+      }
+
+      await firebaseService.removeUserFCMToken(userId, token);
+
+      res.json({
+        success: true,
+        message: 'FCM 토큰이 제거되었습니다.'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateNotificationSettings(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.auth!.userId;
+      const settings = req.body;
+
+      // Validate settings
+      const allowedSettings = ['pushEnabled', 'newMessages', 'newMatches', 'likes', 'groupInvites', 'marketing'];
+      const filteredSettings: any = {};
+
+      for (const key of allowedSettings) {
+        if (key in settings && typeof settings[key] === 'boolean') {
+          filteredSettings[key] = settings[key];
+        }
+      }
+
+      // Store notification settings in user metadata or separate table
+      // For now, we'll store in user model (you may want to create a separate NotificationSettings model)
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          // You might want to add a notificationSettings JSON field to User model
+          // notificationSettings: filteredSettings
+        }
+      });
+
+      res.json({
+        success: true,
+        data: filteredSettings
       });
     } catch (error) {
       next(error);

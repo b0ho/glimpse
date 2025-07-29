@@ -292,4 +292,142 @@ router.delete('/',
   userController.deleteAccount
 );
 
+/**
+ * @swagger
+ * /users/fcm/token:
+ *   post:
+ *     summary: FCM 토큰 등록
+ *     tags: [Users, Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - deviceType
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: FCM 등록 토큰
+ *               deviceType:
+ *                 type: string
+ *                 enum: [ios, android]
+ *                 description: 디바이스 타입
+ *     responses:
+ *       200:
+ *         description: 토큰 등록 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ */
+router.post('/fcm/token',
+  clerkAuthMiddleware,
+  userController.registerFCMToken
+);
+
+/**
+ * @swagger
+ * /users/fcm/token:
+ *   delete:
+ *     summary: FCM 토큰 제거
+ *     tags: [Users, Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: 제거할 FCM 토큰
+ *     responses:
+ *       200:
+ *         description: 토큰 제거 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ */
+router.delete('/fcm/token',
+  clerkAuthMiddleware,
+  userController.removeFCMToken
+);
+
+/**
+ * @swagger
+ * /users/notifications/settings:
+ *   put:
+ *     summary: 알림 설정 업데이트
+ *     tags: [Users, Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pushEnabled:
+ *                 type: boolean
+ *                 description: 푸시 알림 활성화 여부
+ *               newMessages:
+ *                 type: boolean
+ *                 description: 새 메시지 알림
+ *               newMatches:
+ *                 type: boolean
+ *                 description: 새 매치 알림
+ *               likes:
+ *                 type: boolean
+ *                 description: 좋아요 알림
+ *               groupInvites:
+ *                 type: boolean
+ *                 description: 그룹 초대 알림
+ *               marketing:
+ *                 type: boolean
+ *                 description: 마케팅 알림
+ *     responses:
+ *       200:
+ *         description: 설정 업데이트 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ */
+router.put('/notifications/settings',
+  clerkAuthMiddleware,
+  userController.updateNotificationSettings
+);
+
 export default router;

@@ -496,3 +496,5 @@ export class FirebaseService {
     };
   }
 }
+
+export const firebaseService = new FirebaseService();

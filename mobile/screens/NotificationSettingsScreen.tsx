@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNotificationStore } from '@/store/slices/notificationSlice';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants/index';
+import { fcmService } from '@/services/notifications/fcmService';
 
 interface SettingItemProps {
   title: string;
@@ -108,6 +109,13 @@ export default function NotificationSettingsScreen() {
       initializeNotifications();
     }
   }, [isInitialized, initializeNotifications]);
+
+  // Initialize FCM when push is enabled
+  React.useEffect(() => {
+    if (settings.pushEnabled) {
+      fcmService.initialize();
+    }
+  }, [settings.pushEnabled]);
 
   const handleSendTestNotification = async () => {
     try {

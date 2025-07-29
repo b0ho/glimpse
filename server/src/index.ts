@@ -33,7 +33,7 @@ import chatRoutes from './routes/chat';
 import paymentRoutes from './routes/payments';
 import companyDomainRoutes from './routes/companyDomain';
 import contentFilterRoutes from './routes/contentFilter';
-import notificationRoutes from './routes/notifications';
+import notificationRoutes from './routes/notificationRoutes';
 import adminRoutes from './routes/admin';
 import locationRoutes from './routes/location';
 import videoCallRoutes from './routes/videoCallRoutes';

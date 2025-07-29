@@ -1,11 +1,13 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useRef, useEffect } from 'react';
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '@clerk/clerk-expo';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { NAVIGATION_ICONS } from '@/utils/icons';
 import { CallProvider } from '@/providers/CallProvider';
+import { navigationService } from '@/services/navigation/navigationService';
+import { initializeFCM, cleanupFCM } from '@/services/notifications/initializeFCM';
 
 // Screens
 import { AuthScreen } from '@/screens/auth/AuthScreen';
@@ -384,8 +386,26 @@ function AppNavigator() {
 
 // 네비게이션 컨테이너를 포함한 루트 네비게이터
 export default function RootNavigator() {
+  const navigationRef = useRef<NavigationContainerRef<RootNavigationParamList>>(null);
+  const { isSignedIn } = useAuth();
+
+  useEffect(() => {
+    if (navigationRef.current) {
+      navigationService.setNavigationRef(navigationRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Initialize FCM when user is signed in
+    if (isSignedIn) {
+      initializeFCM();
+    } else {
+      cleanupFCM();
+    }
+  }, [isSignedIn]);
+
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <CallProvider>
         <AppNavigator />
       </CallProvider>
