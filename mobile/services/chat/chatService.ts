@@ -46,7 +46,7 @@ interface ChatServiceInterface {
 }
 
 class ChatService implements ChatServiceInterface {
-  private listeners: Map<string, Function[]> = new Map();
+  private listeners: Map<string, ((...args: any[]) => void)[]> = new Map();
 
   async connect(userId: string, authToken: string): Promise<void> {
     await socketService.connect(userId, authToken);
@@ -166,7 +166,7 @@ class ChatService implements ChatServiceInterface {
 
   // Event listeners
   onNewMessage(callback: (data: { matchId: string; message: Message }) => void): void {
-    this.addEventListener('new-message', async (data) => {
+    this.addEventListener('new-message', async (data: any) => {
       // Decrypt message if needed
       if (data.message.isEncrypted && data.message.type === 'TEXT') {
         try {
@@ -209,7 +209,7 @@ class ChatService implements ChatServiceInterface {
   }
 
   // Helper methods
-  private addEventListener(event: string, callback: Function): void {
+  private addEventListener(event: string, callback: (...args: any[]) => void): void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, []);
     }

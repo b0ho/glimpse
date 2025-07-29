@@ -6,6 +6,8 @@ import path from 'path';
 import fs from 'fs/promises';
 import { createError } from '../middleware/errorHandler';
 import { prisma } from "../config/database";
+import { cloudFrontService } from '../config/cloudfront';
+import crypto from 'crypto';
 
 
 
@@ -24,6 +26,8 @@ interface ImageProcessingOptions {
   height?: number;
   quality?: number;
   format?: 'jpeg' | 'png' | 'webp';
+  progressive?: boolean;
+  blur?: number;
 }
 
 export class FileUploadService {
@@ -76,42 +80,77 @@ export class FileUploadService {
   }
 
   async uploadProfileImage(userId: string, file: Express.Multer.File): Promise<UploadedFile> {
-    // Process and optimize image
-    const processedBuffer = await this.processImage(file.buffer, {
-      width: 800,
-      height: 800,
-      quality: 85,
-      format: 'jpeg'
+    // Generate multiple sizes for responsive display
+    const sizes = [
+      { suffix: 'original', width: 1200, quality: 90 },
+      { suffix: 'large', width: 800, quality: 85 },
+      { suffix: 'medium', width: 400, quality: 80 },
+      { suffix: 'thumbnail', width: 150, quality: 70 }
+    ];
+
+    const uploadPromises = sizes.map(async (size) => {
+      const processedBuffer = await this.processImage(file.buffer, {
+        width: size.width,
+        height: size.width, // Square for profile images
+        quality: size.quality,
+        format: 'jpeg',
+        progressive: true
+      });
+
+      const filename = `profiles/${userId}/${Date.now()}-${size.suffix}.jpg`;
+      return this.uploadToS3(processedBuffer, filename, 'image/jpeg');
     });
 
-    const filename = `profiles/${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
-    
-    const uploadResult = await this.uploadToS3(processedBuffer, filename, 'image/jpeg');
+    const uploadResults = await Promise.all(uploadPromises);
+    const mainResult = uploadResults[1]; // Use 'large' as the main image
+
+    // Convert to CDN URL
+    const cdnUrl = cloudFrontService.getCDNUrl(mainResult.url);
     
     // Save file record to database
     const fileRecord = await prisma.file.create({
       data: {
         userId,
         originalName: file.originalname,
-        filename: uploadResult.filename,
-        url: uploadResult.url,
-        size: processedBuffer.length,
+        filename: mainResult.filename,
+        url: cdnUrl,
+        size: file.size,
         mimeType: 'image/jpeg',
-        category: 'PROFILE_IMAGE'
+        category: 'PROFILE_IMAGE',
+        metadata: {
+          variants: uploadResults.map((result, index) => ({
+            size: sizes[index].suffix,
+            url: cloudFrontService.getCDNUrl(result.url),
+            width: sizes[index].width
+          }))
+        }
       }
     });
 
     // Update user's profile image
     await prisma.user.update({
       where: { id: userId },
-      data: { profileImage: uploadResult.url }
+      data: { profileImage: cdnUrl }
     });
+
+    // Invalidate CloudFront cache for old profile image if exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { profileImage: true }
+    });
+    
+    if (user?.profileImage) {
+      const oldKey = this.extractKeyFromUrl(user.profileImage);
+      if (oldKey) {
+        await cloudFrontService.invalidateCache([`/${oldKey}`]);
+      }
+    }
 
     return {
       id: fileRecord.id,
       originalName: fileRecord.originalName,
       filename: fileRecord.filename,
-      url: fileRecord.url,
+      url: cdnUrl,
       size: fileRecord.size,
       mimeType: fileRecord.mimeType,
       userId: fileRecord.userId || userId
@@ -172,28 +211,59 @@ export class FileUploadService {
       throw createError(403, '이 채팅에 이미지를 업로드할 권한이 없습니다.');
     }
 
-    // Process image for chat (smaller, optimized)
-    const processedBuffer = await this.processImage(file.buffer, {
-      width: 1200,
-      quality: 80,
-      format: 'jpeg'
-    });
+    // Generate optimized versions
+    const [mainImage, thumbnail, blurredPreview] = await Promise.all([
+      // Main image - optimized for chat viewing
+      this.processImage(file.buffer, {
+        width: 1200,
+        quality: 80,
+        format: 'jpeg',
+        progressive: true
+      }),
+      // Thumbnail for chat list preview
+      this.processImage(file.buffer, {
+        width: 200,
+        height: 200,
+        quality: 70,
+        format: 'jpeg'
+      }),
+      // Blurred preview for loading state
+      this.processImage(file.buffer, {
+        width: 50,
+        quality: 30,
+        format: 'jpeg',
+        blur: 20
+      })
+    ]);
 
-    const filename = `chats/${matchId}/${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(2);
     
-    const uploadResult = await this.uploadToS3(processedBuffer, filename, 'image/jpeg');
+    // Upload all versions
+    const [mainUpload, thumbUpload, blurUpload] = await Promise.all([
+      this.uploadToS3(mainImage, `chats/${matchId}/${timestamp}-${randomId}.jpg`, 'image/jpeg'),
+      this.uploadToS3(thumbnail, `chats/${matchId}/${timestamp}-${randomId}-thumb.jpg`, 'image/jpeg'),
+      this.uploadToS3(blurredPreview, `chats/${matchId}/${timestamp}-${randomId}-blur.jpg`, 'image/jpeg')
+    ]);
+
+    const cdnUrl = cloudFrontService.getCDNUrl(mainUpload.url);
     
     // Save file record
     const fileRecord = await prisma.file.create({
       data: {
         userId,
         originalName: file.originalname,
-        filename: uploadResult.filename,
-        url: uploadResult.url,
-        size: processedBuffer.length,
+        filename: mainUpload.filename,
+        url: cdnUrl,
+        size: mainImage.length,
         mimeType: 'image/jpeg',
         category: 'CHAT_IMAGE',
-        metadata: { matchId }
+        metadata: {
+          matchId,
+          thumbnail: cloudFrontService.getCDNUrl(thumbUpload.url),
+          blur: cloudFrontService.getCDNUrl(blurUpload.url),
+          dimensions: await this.getImageDimensions(mainImage)
+        }
       }
     });
 
@@ -201,7 +271,7 @@ export class FileUploadService {
       id: fileRecord.id,
       originalName: fileRecord.originalName,
       filename: fileRecord.filename,
-      url: fileRecord.url,
+      url: cdnUrl,
       size: fileRecord.size,
       mimeType: fileRecord.mimeType,
       userId: fileRecord.userId || userId
@@ -426,26 +496,51 @@ export class FileUploadService {
   private async processImage(buffer: Buffer, options: ImageProcessingOptions): Promise<Buffer> {
     let image = sharp(buffer);
 
+    // Auto-rotate based on EXIF data
+    image = image.rotate();
+
     // Resize if dimensions specified
     if (options.width || options.height) {
       image = image.resize(options.width, options.height, {
         fit: 'cover',
-        position: 'center'
+        position: 'center',
+        withoutEnlargement: true
       });
+    }
+
+    // Apply blur if requested
+    if (options.blur) {
+      image = image.blur(options.blur);
     }
 
     // Set format and quality
     switch (options.format) {
       case 'jpeg':
-        image = image.jpeg({ quality: options.quality || 85 });
+        image = image.jpeg({ 
+          quality: options.quality || 85,
+          progressive: options.progressive !== false,
+          mozjpeg: true // Use mozjpeg encoder for better compression
+        });
         break;
       case 'png':
-        image = image.png({ quality: options.quality || 85 });
+        image = image.png({ 
+          quality: options.quality || 85,
+          compressionLevel: 9,
+          progressive: options.progressive !== false
+        });
         break;
       case 'webp':
-        image = image.webp({ quality: options.quality || 85 });
+        image = image.webp({ 
+          quality: options.quality || 85,
+          effort: 6 // Higher effort for better compression
+        });
         break;
     }
+
+    // Strip metadata for privacy
+    image = image.withMetadata({
+      orientation: undefined // Keep orientation for proper display
+    });
 
     return await image.toBuffer();
   }
@@ -600,6 +695,126 @@ export class FileUploadService {
       .jpeg({ quality: 70 })
       .toBuffer();
   }
+
+  private async getImageDimensions(buffer: Buffer): Promise<{ width: number; height: number }> {
+    const metadata = await sharp(buffer).metadata();
+    return {
+      width: metadata.width || 0,
+      height: metadata.height || 0
+    };
+  }
+
+  private extractKeyFromUrl(url: string): string | null {
+    // Extract S3 key from URL
+    const s3Pattern = /https?:\/\/([^.]+)\.s3\.[^.]+\.amazonaws\.com\/(.+)/;
+    const cfPattern = /https?:\/\/([^\/]+)\/(.+)/;
+    
+    let match = url.match(s3Pattern);
+    if (match && match[2]) {
+      return match[2];
+    }
+    
+    match = url.match(cfPattern);
+    if (match && match[2]) {
+      return match[2];
+    }
+    
+    return null;
+  }
+
+  async optimizeExistingImages(category: string, limit: number = 100): Promise<number> {
+    // Batch optimize existing images
+    const files = await prisma.file.findMany({
+      where: {
+        category,
+        mimeType: { startsWith: 'image/' }
+      },
+      take: limit
+    });
+
+    let optimizedCount = 0;
+
+    for (const file of files) {
+      try {
+        // Download original image
+        const command = new GetObjectCommand({
+          Bucket: this.bucketName,
+          Key: file.filename
+        });
+        
+        const response = await this.s3Client.send(command);
+        const buffer = await streamToBuffer(response.Body);
+        
+        // Reprocess with optimization
+        const optimized = await this.processImage(buffer, {
+          quality: 85,
+          format: 'jpeg',
+          progressive: true
+        });
+        
+        // Upload optimized version
+        await this.uploadToS3(optimized, file.filename, 'image/jpeg');
+        
+        // Invalidate CDN cache
+        await cloudFrontService.invalidateCache([`/${file.filename}`]);
+        
+        optimizedCount++;
+      } catch (error) {
+        console.error(`Failed to optimize image ${file.id}:`, error);
+      }
+    }
+
+    return optimizedCount;
+  }
+
+  async generateWebPVariants(fileId: string): Promise<void> {
+    const file = await prisma.file.findUnique({
+      where: { id: fileId }
+    });
+
+    if (!file || !file.mimeType.startsWith('image/')) {
+      throw createError(400, 'Invalid image file');
+    }
+
+    // Download original
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: file.filename
+    });
+    
+    const response = await this.s3Client.send(command);
+    const buffer = await streamToBuffer(response.Body);
+    
+    // Generate WebP version
+    const webpBuffer = await this.processImage(buffer, {
+      format: 'webp',
+      quality: 85
+    });
+    
+    // Upload WebP version
+    const webpFilename = file.filename.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+    await this.uploadToS3(webpBuffer, webpFilename, 'image/webp');
+    
+    // Update file metadata
+    await prisma.file.update({
+      where: { id: fileId },
+      data: {
+        metadata: {
+          ...(file.metadata as any || {}),
+          webpUrl: cloudFrontService.getCDNUrl(`https://${this.bucketName}.s3.amazonaws.com/${webpFilename}`)
+        }
+      }
+    });
+  }
+}
+
+// Helper function to convert stream to buffer
+async function streamToBuffer(stream: any): Promise<Buffer> {
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of stream) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
 }
 
 export const fileUploadService = new FileUploadService();

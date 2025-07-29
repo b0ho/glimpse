@@ -157,7 +157,7 @@ export const calculatePagination = (page: number, limit: number, total: number) 
 };
 
 // Encryption utilities (for client-side use)
-export const generateId = (): string => {
+export const generateUniqueId = (): string => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 };
 
