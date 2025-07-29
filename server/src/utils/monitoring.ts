@@ -162,14 +162,96 @@ const premiumSubscriptionsActive = new prometheus.Gauge({
   help: 'Number of active premium subscriptions'
 });
 
+// Message Queue metrics
+const mqOfflineMessages = new prometheus.Gauge({
+  name: 'message_queue_offline_messages',
+  help: 'Number of offline messages in queue',
+  labelNames: ['user_id']
+});
+
+const mqPushRetries = new prometheus.Counter({
+  name: 'message_queue_push_retries_total',
+  help: 'Total number of push notification retries'
+});
+
+const mqProcessingDuration = new prometheus.Histogram({
+  name: 'message_queue_processing_duration_seconds',
+  help: 'Duration of message queue processing',
+  labelNames: ['queue_type'],
+  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5]
+});
+
+// WebSocket event metrics
+const wsMessagesSent = new prometheus.Counter({
+  name: 'websocket_messages_sent_total',
+  help: 'Total number of WebSocket messages sent',
+  labelNames: ['event_type']
+});
+
+const wsMessagesReceived = new prometheus.Counter({
+  name: 'websocket_messages_received_total',
+  help: 'Total number of WebSocket messages received',
+  labelNames: ['event_type']
+});
+
+const wsErrors = new prometheus.Counter({
+  name: 'websocket_errors_total',
+  help: 'Total number of WebSocket errors',
+  labelNames: ['error_type']
+});
+
+const wsReconnections = new prometheus.Counter({
+  name: 'websocket_reconnections_total',
+  help: 'Total number of WebSocket reconnections'
+});
+
+// Chat room metrics
+const chatRoomActive = new prometheus.Gauge({
+  name: 'chat_rooms_active',
+  help: 'Number of active chat rooms'
+});
+
+const chatTypingUsers = new prometheus.Gauge({
+  name: 'chat_typing_users',
+  help: 'Number of users currently typing'
+});
+
 register.registerMetric(activeUsersGauge);
 register.registerMetric(matchesCreatedTotal);
 register.registerMetric(messageseSentTotal);
 register.registerMetric(premiumSubscriptionsActive);
+register.registerMetric(mqOfflineMessages);
+register.registerMetric(mqPushRetries);
+register.registerMetric(mqProcessingDuration);
+register.registerMetric(wsMessagesSent);
+register.registerMetric(wsMessagesReceived);
+register.registerMetric(wsErrors);
+register.registerMetric(wsReconnections);
+register.registerMetric(chatRoomActive);
+register.registerMetric(chatTypingUsers);
 
 export const businessMetrics = {
   activeUsersGauge,
   matchesCreatedTotal,
   messageseSentTotal,
   premiumSubscriptionsActive
+};
+
+export const messageQueueMetrics = {
+  mqOfflineMessages,
+  mqPushRetries,
+  mqProcessingDuration
+};
+
+export const websocketMetrics = {
+  wsMessagesSent,
+  wsMessagesReceived,
+  wsErrors,
+  wsReconnections,
+  websocketConnectionsActive
+};
+
+export const chatMetrics = {
+  chatRoomActive,
+  chatTypingUsers
 };

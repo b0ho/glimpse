@@ -6,6 +6,8 @@ import { notificationService } from '../services/NotificationService';
 import { PrismaClient } from '@prisma/client';
 import { socketRateLimiter, RATE_LIMIT_CONFIGS, MessageSizeLimiter, connectionLimiter } from './rateLimiter';
 import { logger } from '../utils/logger';
+import { messageQueueService } from '../services/MessageQueueService';
+import { websocketMetrics, chatMetrics } from '../utils/monitoring';
 
 const prisma = new PrismaClient();
 const chatService = new ChatService();
@@ -90,11 +92,13 @@ export function initializeChatSocket(io: Server) {
     // Check connection limit
     if (!connectionLimiter.addConnection(userId, socket.id)) {
       socket.emit('error', { message: '최대 연결 수를 초과했습니다. 다른 연결을 종료하고 다시 시도해주세요.' });
+      websocketMetrics.wsErrors.labels('connection_limit_exceeded').inc();
       socket.disconnect();
       return;
     }
 
     logger.info(`User ${userId} connected with socket ${socket.id}`);
+    websocketMetrics.websocketConnectionsActive.inc();
 
     // Store socket mapping
     userSocketMap.set(userId, socket.id);
@@ -106,8 +110,13 @@ export function initializeChatSocket(io: Server) {
     // Join user's personal room for notifications
     socket.join(`user:${userId}`);
 
+    // Send offline messages
+    sendOfflineMessages(socket, userId);
+
     // Handle joining a match room
     socket.on('join-match', async (matchId: string) => {
+      websocketMetrics.wsMessagesReceived.labels('join-match').inc();
+      
       try {
         // Verify user is part of this match
         const match = await prisma.match.findUnique({
@@ -116,18 +125,21 @@ export function initializeChatSocket(io: Server) {
 
         if (!match || (match.user1Id !== userId && match.user2Id !== userId)) {
           socket.emit('error', { message: '이 채팅방에 접근할 권한이 없습니다.' });
+          websocketMetrics.wsErrors.labels('unauthorized_room_access').inc();
           return;
         }
 
         // Join the match room
         socket.join(`match:${matchId}`);
         (socket.data as SocketData).matchId = matchId;
+        chatMetrics.chatRoomActive.inc();
 
         // Mark messages as read
         await chatService.markAllMessagesAsRead(matchId, userId);
 
         // Notify other user that this user joined
         socket.to(`match:${matchId}`).emit('user-joined', { userId });
+        websocketMetrics.wsMessagesSent.labels('user-joined').inc();
 
         console.log(`User ${userId} joined match room ${matchId}`);
       } catch (error) {
@@ -152,12 +164,15 @@ export function initializeChatSocket(io: Server) {
       content: string;
       type?: 'TEXT' | 'IMAGE';
     }) => {
+      websocketMetrics.wsMessagesReceived.labels('send-message').inc();
+      
       try {
         const { matchId, content, type = 'TEXT' } = data;
 
         // Rate limiting
         if (!socketRateLimiter.checkLimit(userId, RATE_LIMIT_CONFIGS.CHAT_MESSAGE)) {
           socket.emit('error', { message: '메시지 전송 한도를 초과했습니다. 잠시 후 다시 시도해주세요.' });
+          websocketMetrics.wsErrors.labels('rate_limit_exceeded').inc();
           return;
         }
 
@@ -192,13 +207,19 @@ export function initializeChatSocket(io: Server) {
           matchId,
           message
         });
+        websocketMetrics.wsMessagesSent.labels('new-message').inc();
 
-        // Send push notification to offline user
+        // Handle offline user
         const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
         const otherUserSocketId = userSocketMap.get(otherUserId);
         
         if (!otherUserSocketId) {
-          // User is offline, send push notification
+          // User is offline, queue message and send push notification
+          await messageQueueService.enqueueOfflineMessage(otherUserId, {
+            matchId,
+            message
+          });
+
           const sender = match.user1Id === userId ? match.user1 : match.user2;
           await notificationService.sendMessageNotification(
             otherUserId,
@@ -327,13 +348,20 @@ export function initializeChatSocket(io: Server) {
       userSocketMap.delete(userId);
       socketUserMap.delete(socket.id);
 
+      // Update metrics
+      websocketMetrics.websocketConnectionsActive.dec();
+      const matchId = (socket.data as SocketData).matchId;
+      if (matchId) {
+        chatMetrics.chatRoomActive.dec();
+      }
+
       // Update user offline status
       updateUserOnlineStatus(userId, false);
 
       // Notify match rooms about disconnection
-      const matchId = (socket.data as SocketData).matchId;
       if (matchId) {
         socket.to(`match:${matchId}`).emit('user-offline', { userId });
+        websocketMetrics.wsMessagesSent.labels('user-offline').inc();
       }
     });
 
@@ -355,6 +383,36 @@ async function updateUserOnlineStatus(userId: string, isOnline: boolean) {
     });
   } catch (error) {
     console.error('Error updating user online status:', error);
+  }
+}
+
+// Send offline messages when user comes online
+async function sendOfflineMessages(socket: Socket, userId: string) {
+  try {
+    const offlineMessages = await messageQueueService.getOfflineMessages(userId);
+    
+    if (offlineMessages.length > 0) {
+      logger.info(`Sending ${offlineMessages.length} offline messages to user ${userId}`);
+      
+      // Send messages in batches to avoid overwhelming the client
+      const batchSize = 10;
+      for (let i = 0; i < offlineMessages.length; i += batchSize) {
+        const batch = offlineMessages.slice(i, i + batchSize);
+        
+        socket.emit('offline-messages', {
+          messages: batch,
+          hasMore: i + batchSize < offlineMessages.length
+        });
+        
+        // Small delay between batches
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      // Clear offline messages after successful delivery
+      await messageQueueService.clearOfflineMessages(userId);
+    }
+  } catch (error) {
+    logger.error(`Failed to send offline messages to user ${userId}:`, error);
   }
 }
 

@@ -7,6 +7,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Message, ChatRoom } from '@/types';
 import { chatService } from '@/services/chat/chatService';
+import { socketService } from '@/services/chat/socketService';
 
 interface TypingUser {
   userId: string;
@@ -28,6 +29,19 @@ interface ChatState {
   isLoading: boolean;
   // 에러 메시지
   error: string | null;
+  // 연결 상태
+  connectionState: {
+    isConnected: boolean;
+    isReconnecting: boolean;
+    lastConnectedAt: number | null;
+  };
+  // 오프라인 메시지 큐
+  offlineMessageQueue: Array<{
+    roomId: string;
+    content: string;
+    type: 'TEXT' | 'IMAGE';
+    timestamp: number;
+  }>;
 }
 
 interface ChatActions {
@@ -45,6 +59,7 @@ interface ChatActions {
   sendMessage: (roomId: string, content: string, type?: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY') => Promise<void>;
   addMessage: (message: Message) => void;
   markMessageAsRead: (messageId: string, roomId: string) => void;
+  processOfflineMessages: () => void;
   
   // 타이핑 상태
   setTypingStatus: (roomId: string, isTyping: boolean) => void;
@@ -53,6 +68,10 @@ interface ChatActions {
   clearTypingUsers: (roomId: string) => void;
   startTypingCleanup: () => void;
   stopTypingCleanup: () => void;
+  
+  // 연결 상태
+  updateConnectionState: (isConnected: boolean, isReconnecting: boolean) => void;
+  handleReconnect: () => void;
   
   // 유틸리티
   clearError: () => void;
@@ -69,6 +88,12 @@ const initialState: ChatState = {
   typingUsers: [],
   isLoading: false,
   error: null,
+  connectionState: {
+    isConnected: false,
+    isReconnecting: false,
+    lastConnectedAt: null,
+  },
+  offlineMessageQueue: [],
 };
 
 // 타이핑 사용자 정리를 위한 전역 타이머
@@ -86,6 +111,15 @@ export const useChatStore = create<ChatStore>()(
         try {
           // Socket.IO 연결
           await chatService.connect(userId, authToken);
+
+          // 연결 상태 업데이트
+          set({ 
+            connectionState: { 
+              isConnected: true, 
+              isReconnecting: false, 
+              lastConnectedAt: Date.now() 
+            } 
+          });
 
           // 이벤트 리스너 설정
           chatService.onNewMessage(({ matchId, message }) => {
@@ -133,6 +167,25 @@ export const useChatStore = create<ChatStore>()(
           chatService.onError(({ message }) => {
             set({ error: message });
           });
+
+          // 연결 상태 이벤트 리스너
+          const socket = chatService.isConnected() ? socketService.getSocket() : null;
+          if (socket) {
+            socket.on('connect', () => {
+              console.log('Chat reconnected');
+              get().handleReconnect();
+            });
+
+            socket.on('disconnect', () => {
+              console.log('Chat disconnected');
+              get().updateConnectionState(false, false);
+            });
+
+            socket.on('reconnecting', () => {
+              console.log('Chat reconnecting...');
+              get().updateConnectionState(false, true);
+            });
+          }
 
           // 채팅방 목록 로드
           await get().loadChatRooms();
@@ -220,39 +273,30 @@ export const useChatStore = create<ChatStore>()(
       // 메시지 전송
       sendMessage: async (roomId: string, content: string, type: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY' = 'TEXT') => {
         try {
+          const state = get();
+          
+          // 연결 상태 확인
+          if (!state.connectionState.isConnected) {
+            // 오프라인 상태에서는 메시지를 큐에 저장
+            set((state) => ({
+              offlineMessageQueue: [
+                ...state.offlineMessageQueue,
+                {
+                  roomId,
+                  content,
+                  type: type as 'TEXT' | 'IMAGE',
+                  timestamp: Date.now(),
+                },
+              ],
+            }));
+            
+            console.log('Message queued for offline sending');
+            return;
+          }
+          
           // Socket.IO로 메시지 전송 (서버에서 응답 이벤트로 받음)
           await chatService.sendMessage(roomId, content, type as 'TEXT' | 'IMAGE');
           
-          // Optimistic update는 서버 이벤트로 처리됨
-          
-          // 채팅방 목록의 lastMessage 업데이트
-          set((state) => ({
-            chatRooms: state.chatRooms.map(room =>
-              room.id === roomId
-                ? { ...room, lastMessage: message, updatedAt: new Date() }
-                : room
-            ),
-          }));
-          
-          // 상대방에게 새 메시지 알림 전송
-          if (typeof window !== 'undefined') {
-            // 알림 설정 확인 후 전송
-            import('../slices/notificationSlice').then(({ useNotificationStore }) => {
-              const notificationState = useNotificationStore.getState();
-              if (notificationState.settings.pushEnabled && notificationState.settings.newMessages) {
-                // 상대방 닉네임 가져오기 (메시지에서 또는 기본값 사용)
-                const otherUserNickname = '익명 사용자';
-                
-                // 메시지 미리보기 (최대 50자)
-                const preview = content.length > 50 ? content.substring(0, 47) + '...' : content;
-                
-                import('../../services/notifications/notification-service').then(({ notificationService }) => {
-                  // 상대방에게 알림 전송 (메시지 전송자는 자신이므로 알림 받지 않음)
-                  notificationService.notifyNewMessage(message.id, otherUserNickname, preview);
-                });
-              }
-            });
-          }
           
         } catch (error) {
           console.error('Failed to send message:', error);
@@ -386,6 +430,43 @@ export const useChatStore = create<ChatStore>()(
           clearInterval(typingCleanupInterval);
           typingCleanupInterval = null;
         }
+      },
+
+      // 오프라인 메시지 처리
+      processOfflineMessages: async () => {
+        const state = get();
+        if (state.connectionState.isConnected && state.offlineMessageQueue.length > 0) {
+          console.log(`Processing ${state.offlineMessageQueue.length} offline messages`);
+          
+          for (const msg of state.offlineMessageQueue) {
+            try {
+              await chatService.sendMessage(msg.roomId, msg.content, msg.type);
+            } catch (error) {
+              console.error('Failed to send offline message:', error);
+            }
+          }
+          
+          // 큐 비우기
+          set({ offlineMessageQueue: [] });
+        }
+      },
+
+      // 연결 상태 업데이트
+      updateConnectionState: (isConnected: boolean, isReconnecting: boolean) => {
+        set((state) => ({
+          connectionState: {
+            isConnected,
+            isReconnecting,
+            lastConnectedAt: isConnected ? Date.now() : state.connectionState.lastConnectedAt,
+          },
+        }));
+      },
+
+      // 재연결 처리
+      handleReconnect: () => {
+        get().updateConnectionState(true, false);
+        get().processOfflineMessages();
+        get().loadChatRooms();
       },
 
       // 상태 초기화

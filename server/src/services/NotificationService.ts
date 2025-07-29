@@ -3,6 +3,8 @@ import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import { FirebaseService } from './FirebaseService';
 import { NOTIFICATION_TYPES } from '../../../shared/constants';
+import { messageQueueService } from './MessageQueueService';
+import { logger } from '../middleware/logging';
 
 
 const firebaseService = new FirebaseService();
@@ -10,13 +12,23 @@ const firebaseService = new FirebaseService();
 export class NotificationService {
   private static instance: NotificationService;
   
-  private constructor() {}
+  private constructor() {
+    this.setupMessageQueueHandlers();
+  }
   
   static getInstance(): NotificationService {
     if (!NotificationService.instance) {
       NotificationService.instance = new NotificationService();
     }
     return NotificationService.instance;
+  }
+
+  private setupMessageQueueHandlers() {
+    // Handle push notification retries
+    messageQueueService.on('push_notification_retry', async (notification) => {
+      logger.info(`Retrying push notification for user ${notification.userId}, attempt ${notification.attempts}`);
+      await this.sendPushNotification(notification.userId, notification.payload);
+    });
   }
 
   // FCM 토큰 관리
@@ -546,9 +558,40 @@ export class NotificationService {
           ...(payload.sound && { sound: payload.sound })
         }
       });
-    } catch (error) {
-      console.error('Failed to send push notification:', error);
+    } catch (error: any) {
+      logger.error('Failed to send push notification:', error);
+      
+      // Queue for retry if it's a temporary failure
+      if (this.isRetryableError(error)) {
+        await messageQueueService.enqueuePushNotificationRetry({
+          userId,
+          payload,
+          attempts: 0
+        });
+      }
     }
+  }
+
+  private isRetryableError(error: any): boolean {
+    // Check if error is retryable (network issues, temporary failures)
+    const retryableMessages = [
+      'ECONNREFUSED',
+      'ETIMEDOUT',
+      'ENOTFOUND',
+      'network',
+      'timeout',
+      '503',
+      '502',
+      '429' // Rate limit
+    ];
+
+    const errorMessage = error.message?.toLowerCase() || '';
+    const errorCode = error.code?.toLowerCase() || '';
+
+    return retryableMessages.some(msg => 
+      errorMessage.includes(msg.toLowerCase()) || 
+      errorCode.includes(msg.toLowerCase())
+    );
   }
 
   async deleteNotification(notificationId: string, userId: string) {
