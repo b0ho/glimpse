@@ -1,0 +1,224 @@
+{
+  "colors": {
+    "primary": {
+      "main": {
+        "value": "#FF6B6B",
+        "type": "color"
+      },
+      "dark": {
+        "value": "#FA5252",
+        "type": "color"
+      },
+      "light": {
+        "value": "#FFE0E0",
+        "type": "color"
+      }
+    },
+    "neutral": {
+      "900": {
+        "value": "#212529",
+        "type": "color"
+      },
+      "800": {
+        "value": "#343A40",
+        "type": "color"
+      },
+      "700": {
+        "value": "#495057",
+        "type": "color"
+      },
+      "600": {
+        "value": "#868E96",
+        "type": "color"
+      },
+      "500": {
+        "value": "#ADB5BD",
+        "type": "color"
+      },
+      "400": {
+        "value": "#CED4DA",
+        "type": "color"
+      },
+      "300": {
+        "value": "#DEE2E6",
+        "type": "color"
+      },
+      "200": {
+        "value": "#E9ECEF",
+        "type": "color"
+      },
+      "100": {
+        "value": "#F1F3F5",
+        "type": "color"
+      },
+      "50": {
+        "value": "#F8F9FA",
+        "type": "color"
+      },
+      "0": {
+        "value": "#FFFFFF",
+        "type": "color"
+      }
+    },
+    "semantic": {
+      "success": {
+        "value": "#51CF66",
+        "type": "color"
+      },
+      "warning": {
+        "value": "#FFD43B",
+        "type": "color"
+      },
+      "error": {
+        "value": "#FF6B6B",
+        "type": "color"
+      },
+      "info": {
+        "value": "#339AF0",
+        "type": "color"
+      }
+    },
+    "premium": {
+      "gold": {
+        "value": "#FFD700",
+        "type": "color"
+      },
+      "purple": {
+        "value": "#6C5CE7",
+        "type": "color"
+      }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "korean": {
+        "value": "Pretendard",
+        "type": "fontFamilies"
+      },
+      "english": {
+        "value": "Inter",
+        "type": "fontFamilies"
+      }
+    },
+    "fontSize": {
+      "h1": {
+        "value": "28",
+        "type": "fontSizes"
+      },
+      "h2": {
+        "value": "24",
+        "type": "fontSizes"
+      },
+      "h3": {
+        "value": "20",
+        "type": "fontSizes"
+      },
+      "body": {
+        "value": "16",
+        "type": "fontSizes"
+      },
+      "caption": {
+        "value": "14",
+        "type": "fontSizes"
+      },
+      "small": {
+        "value": "12",
+        "type": "fontSizes"
+      }
+    },
+    "fontWeight": {
+      "bold": {
+        "value": "700",
+        "type": "fontWeights"
+      },
+      "semibold": {
+        "value": "600",
+        "type": "fontWeights"
+      },
+      "regular": {
+        "value": "400",
+        "type": "fontWeights"
+      },
+      "light": {
+        "value": "300",
+        "type": "fontWeights"
+      }
+    }
+  },
+  "spacing": {
+    "xs": {
+      "value": "4",
+      "type": "spacing"
+    },
+    "sm": {
+      "value": "8",
+      "type": "spacing"
+    },
+    "md": {
+      "value": "16",
+      "type": "spacing"
+    },
+    "lg": {
+      "value": "24",
+      "type": "spacing"
+    },
+    "xl": {
+      "value": "32",
+      "type": "spacing"
+    },
+    "xxl": {
+      "value": "48",
+      "type": "spacing"
+    }
+  },
+  "borderRadius": {
+    "sm": {
+      "value": "8",
+      "type": "borderRadius"
+    },
+    "md": {
+      "value": "12",
+      "type": "borderRadius"
+    },
+    "lg": {
+      "value": "16",
+      "type": "borderRadius"
+    },
+    "full": {
+      "value": "9999",
+      "type": "borderRadius"
+    }
+  },
+  "shadows": {
+    "sm": {
+      "value": {
+        "x": "0",
+        "y": "2",
+        "blur": "8",
+        "spread": "0",
+        "color": "rgba(0,0,0,0.08)"
+      },
+      "type": "boxShadow"
+    },
+    "md": {
+      "value": {
+        "x": "0",
+        "y": "4",
+        "blur": "16",
+        "spread": "0",
+        "color": "rgba(0,0,0,0.12)"
+      },
+      "type": "boxShadow"
+    },
+    "lg": {
+      "value": {
+        "x": "0",
+        "y": "8",
+        "blur": "24",
+        "spread": "0",
+        "color": "rgba(0,0,0,0.16)"
+      },
+      "type": "boxShadow"
+    }
+  }
+}

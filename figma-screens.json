@@ -1,0 +1,215 @@
+{
+  "screens": {
+    "onboarding": {
+      "dimensions": {
+        "width": 375,
+        "height": 812
+      },
+      "screens": [
+        {
+          "name": "Splash",
+          "elements": [
+            {
+              "type": "logo",
+              "position": { "x": "center", "y": 300 },
+              "size": { "width": 120, "height": 120 }
+            },
+            {
+              "type": "text",
+              "content": "Glimpse",
+              "style": "h1",
+              "position": { "x": "center", "y": 440 }
+            },
+            {
+              "type": "text",
+              "content": "진짜 만남, 진짜 인연",
+              "style": "caption",
+              "position": { "x": "center", "y": 480 }
+            }
+          ]
+        },
+        {
+          "name": "Onboarding1",
+          "elements": [
+            {
+              "type": "illustration",
+              "asset": "anonymous-profile.svg",
+              "position": { "x": "center", "y": 200 },
+              "size": { "width": 240, "height": 240 }
+            },
+            {
+              "type": "text",
+              "content": "매칭 전까지 완벽한 익명",
+              "style": "h2",
+              "position": { "x": "center", "y": 480 }
+            },
+            {
+              "type": "text",
+              "content": "서로 좋아요를 보낸 후에만\n프로필이 공개됩니다",
+              "style": "body",
+              "position": { "x": "center", "y": 520 },
+              "align": "center"
+            }
+          ]
+        }
+      ]
+    },
+    "main": {
+      "home": {
+        "structure": {
+          "statusBar": { "height": 44 },
+          "header": { "height": 56 },
+          "storySection": { "height": 100 },
+          "cardStack": { "height": "flex" },
+          "actionBar": { "height": 80 },
+          "tabBar": { "height": 60 }
+        },
+        "components": [
+          {
+            "type": "header",
+            "elements": [
+              { "type": "logo", "position": "left" },
+              { "type": "icon", "name": "notification", "position": "right" },
+              { "type": "credits", "value": "5", "position": "right" }
+            ]
+          },
+          {
+            "type": "storyCarousel",
+            "items": [
+              { "type": "addStory", "label": "내 스토리" },
+              { "type": "story", "user": "user1", "new": true },
+              { "type": "story", "user": "user2", "new": false }
+            ]
+          },
+          {
+            "type": "profileCardStack",
+            "cards": [
+              {
+                "anonymous": true,
+                "nickname": "봄바람",
+                "age": 28,
+                "gender": "여성",
+                "bio": "커피와 책을 좋아해요"
+              }
+            ]
+          },
+          {
+            "type": "actionButtons",
+            "buttons": [
+              { "type": "pass", "icon": "x", "color": "#CED4DA" },
+              { "type": "superLike", "icon": "star", "color": "#FFD700" },
+              { "type": "like", "icon": "heart", "color": "#FF6B6B" }
+            ]
+          }
+        ]
+      },
+      "chat": {
+        "structure": {
+          "header": { "height": 56 },
+          "messages": { "height": "flex" },
+          "input": { "height": 80 }
+        },
+        "components": [
+          {
+            "type": "chatHeader",
+            "elements": [
+              { "type": "back", "position": "left" },
+              { "type": "username", "text": "겨울바람", "position": "center" },
+              { "type": "menu", "position": "right" }
+            ]
+          },
+          {
+            "type": "messageList",
+            "messages": [
+              {
+                "type": "system",
+                "content": "매칭되었습니다! 대화를 시작해보세요 🎉"
+              },
+              {
+                "type": "received",
+                "content": "안녕하세요! 프로필 잘 봤어요 😊",
+                "time": "오후 2:30"
+              },
+              {
+                "type": "sent",
+                "content": "안녕하세요! 저도 프로필 인상 깊게 봤어요",
+                "time": "오후 2:32",
+                "read": true
+              }
+            ]
+          },
+          {
+            "type": "inputBar",
+            "elements": [
+              { "type": "emoji", "position": "left" },
+              { "type": "textInput", "placeholder": "메시지 입력..." },
+              { "type": "attach", "position": "right" },
+              { "type": "send", "position": "right" }
+            ]
+          }
+        ]
+      }
+    },
+    "premium": {
+      "dimensions": {
+        "width": 375,
+        "height": 812
+      },
+      "elements": [
+        {
+          "type": "header",
+          "gradient": ["#FFD700", "#FFA500"],
+          "height": 200,
+          "content": {
+            "icon": "crown",
+            "title": "Glimpse Premium",
+            "subtitle": "더 많은 인연을 만나보세요"
+          }
+        },
+        {
+          "type": "benefitsList",
+          "items": [
+            {
+              "icon": "heart-infinity",
+              "title": "무제한 좋아요",
+              "description": "하루 제한 없이 마음껏"
+            },
+            {
+              "icon": "eye",
+              "title": "누가 날 좋아했는지 확인",
+              "description": "먼저 다가온 인연 확인"
+            },
+            {
+              "icon": "star",
+              "title": "슈퍼 좋아요",
+              "description": "하루 5개 특별한 관심 표현"
+            },
+            {
+              "icon": "undo",
+              "title": "되돌리기",
+              "description": "실수로 넘긴 프로필 복구"
+            }
+          ]
+        },
+        {
+          "type": "pricingCards",
+          "plans": [
+            {
+              "name": "월간 플랜",
+              "price": "₩9,900",
+              "period": "/월",
+              "popular": false
+            },
+            {
+              "name": "연간 플랜",
+              "price": "₩99,000",
+              "period": "/년",
+              "popular": true,
+              "badge": "17% 할인"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
