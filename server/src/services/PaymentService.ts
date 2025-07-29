@@ -1,4 +1,4 @@
-import { PaymentStatus, PaymentMethod, PaymentType } from '@prisma/client';
+import { PaymentStatus, PaymentMethod, PaymentType, Payment } from '@prisma/client';
 import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import axios from 'axios';
@@ -273,7 +273,7 @@ export class PaymentService {
     };
   }
 
-  private async createTossPayment(payment: any) {
+  private async createTossPayment(payment: Payment) {
     const orderId = payment.externalId;
     const orderName = this.getOrderName(payment.type, payment.packageType);
     
@@ -306,7 +306,7 @@ export class PaymentService {
     }
   }
 
-  private async createKakaoPayment(payment: any) {
+  private async createKakaoPayment(payment: Payment) {
     const orderId = payment.externalId;
     const itemName = this.getOrderName(payment.type, payment.packageType);
     
@@ -341,7 +341,7 @@ export class PaymentService {
     }
   }
 
-  private async createGenericPayment(payment: any) {
+  private async createGenericPayment(payment: Payment) {
     // For card/bank payments, create a generic payment URL
     const paymentUrl = `${process.env.BASE_URL}/payment/generic/${payment.externalId}`;
     
@@ -356,7 +356,7 @@ export class PaymentService {
     };
   }
 
-  private async processTossPayment(payment: any, paymentKey: string) {
+  private async processTossPayment(payment: Payment, paymentKey: string) {
     try {
       const response = await axios.post(`https://api.tosspayments.com/v1/payments/${paymentKey}`, {
         orderId: payment.externalId,
@@ -383,7 +383,7 @@ export class PaymentService {
     }
   }
 
-  private async processKakaoPayment(payment: any, pgToken: string) {
+  private async processKakaoPayment(payment: Payment, pgToken: string) {
     try {
       const response = await axios.post('https://kapi.kakao.com/v1/payment/approve', {
         cid: process.env.KAKAO_CID || 'TC0ONETIME',
@@ -413,7 +413,7 @@ export class PaymentService {
     }
   }
 
-  private async processGenericPayment(payment: any, data: ProcessPaymentRequest) {
+  private async processGenericPayment(payment: Payment, data: ProcessPaymentRequest) {
     // For generic payments, simulate processing
     // In production, you'd integrate with actual payment processors
     return {
@@ -628,7 +628,7 @@ export class PaymentService {
     }
   }
 
-  private async handlePaymentConfirmed(data: any, method: string) {
+  private async handlePaymentConfirmed(data: any, method: 'TOSS' | 'KAKAO') {
     const orderId = method === 'TOSS' ? data.orderId : data.partner_order_id;
     
     // Find payment by external ID in metadata using Prisma's JSON filtering
@@ -667,7 +667,7 @@ export class PaymentService {
     }
   }
 
-  private async handlePaymentCanceled(data: any, method: string) {
+  private async handlePaymentCanceled(data: any, method: 'TOSS' | 'KAKAO') {
     const orderId = method === 'TOSS' ? data.orderId : data.partner_order_id;
     
     // Find payment by external ID in metadata using Prisma's JSON filtering
@@ -696,7 +696,7 @@ export class PaymentService {
     }
   }
 
-  private async applyPaymentBenefits(payment: any) {
+  private async applyPaymentBenefits(payment: Payment) {
     switch (payment.type) {
       case 'LIKE_CREDITS':
         await this.applyCredits(payment);
@@ -707,7 +707,7 @@ export class PaymentService {
     }
   }
 
-  private async applyCredits(payment: any) {
+  private async applyCredits(payment: Payment) {
     const creditAmounts: Record<string, number> = {
       SMALL: 5,
       MEDIUM: 17, // 15 + 2 bonus
@@ -728,7 +728,7 @@ export class PaymentService {
     });
   }
 
-  private async applyPremiumSubscription(payment: any) {
+  private async applyPremiumSubscription(payment: Payment) {
     const packageType = (payment.metadata as any)?.packageType;
     const duration = packageType === 'PREMIUM_YEARLY' ? 365 : 30;
     const startDate = new Date();

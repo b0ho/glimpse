@@ -54,6 +54,21 @@ const io = new Server(server, {
 
 // PORT is declared later
 
+// Compression middleware
+import compression from 'compression';
+app.use(compression({
+  level: 6, // Compression level (0-9)
+  threshold: 1024, // Only compress responses larger than 1KB
+  filter: (req, res) => {
+    // Don't compress responses with no-compress header
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    // Use compression filter function
+    return compression.filter(req, res);
+  }
+}));
+
 // Security middleware
 app.use(helmet());
 app.use(cors({

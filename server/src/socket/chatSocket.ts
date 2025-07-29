@@ -209,9 +209,26 @@ export function initializeChatSocket(io: Server) {
         }
 
         console.log(`Message sent in match ${matchId} by user ${userId}`);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error sending message:', error);
-        socket.emit('error', { message: '메시지 전송 중 오류가 발생했습니다.' });
+        
+        // Send more specific error messages
+        if (error.message?.includes('권한이 없습니다')) {
+          socket.emit('error', { 
+            code: 'UNAUTHORIZED',
+            message: '이 채팅방에 접근할 권한이 없습니다.' 
+          });
+        } else if (error.message?.includes('매치를 찾을 수 없습니다')) {
+          socket.emit('error', { 
+            code: 'MATCH_NOT_FOUND',
+            message: '매치 정보를 찾을 수 없습니다.' 
+          });
+        } else {
+          socket.emit('error', { 
+            code: 'MESSAGE_SEND_ERROR',
+            message: '메시지 전송 중 오류가 발생했습니다.' 
+          });
+        }
       }
     });
 
