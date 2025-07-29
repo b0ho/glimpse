@@ -1,0 +1,68 @@
+# Build stage
+FROM node:18-alpine AS builder
+
+# Install dependencies needed for node-gyp
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+# Copy workspace configuration
+COPY package*.json ./
+COPY server/package*.json ./server/
+COPY shared/package*.json ./shared/
+
+# Install dependencies
+RUN npm ci --workspace=glimpse-server --workspace=glimpse-shared
+
+# Copy source code
+COPY shared ./shared
+COPY server ./server
+
+# Build shared and server
+RUN npm run build:shared
+RUN npm run build:server
+
+# Production stage
+FROM node:18-alpine
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY server/package*.json ./server/
+COPY shared/package*.json ./shared/
+
+# Install production dependencies only
+RUN npm ci --workspace=glimpse-server --workspace=glimpse-shared --production && \
+    npm cache clean --force
+
+# Copy built application
+COPY --from=builder /app/shared/dist ./shared/dist
+COPY --from=builder /app/server/dist ./server/dist
+COPY --from=builder /app/server/prisma ./server/prisma
+
+# Change ownership to nodejs user
+RUN chown -R nodejs:nodejs /app
+
+USER nodejs
+
+# Expose port
+EXPOSE 3000
+
+# Set environment
+ENV NODE_ENV=production
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"
+
+# Start server with dumb-init
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "server/dist/index.js"]

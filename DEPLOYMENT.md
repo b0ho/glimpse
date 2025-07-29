@@ -1,258 +1,220 @@
 # Glimpse Deployment Guide
 
-## Overview
-
-This guide covers the deployment process for the Glimpse dating app, including Docker containerization, CI/CD pipelines, and production deployment.
-
-## Architecture
-
-The production deployment consists of:
-- **Backend API** (Node.js/Express)
-- **Frontend Web** (Next.js)
-- **PostgreSQL Database**
-- **Redis Cache**
-- **Nginx Reverse Proxy**
-- **Monitoring Stack** (Prometheus, Grafana)
+This guide covers the deployment process for the Glimpse dating app.
 
 ## Prerequisites
 
-### Server Requirements
-- Ubuntu 22.04 LTS or later
-- Docker 24.0+
-- Docker Compose 2.20+
-- 4GB+ RAM
-- 50GB+ Storage
-- SSL Certificate
+- Docker & Docker Compose installed
+- Domain names configured (glimpse.app, api.glimpse.app)
+- SSL certificates
+- AWS account for S3 storage
+- Firebase project for push notifications
+- Clerk account for authentication
+- Stripe account for payments
+- Korean payment gateway accounts (TossPay, KakaoPay)
 
-### GitHub Secrets Required
-Configure these secrets in your GitHub repository:
-- `DEPLOY_HOST` - Production server hostname
-- `DEPLOY_USER` - SSH user for deployment
-- `DEPLOY_SSH_KEY` - SSH private key
-- All environment variables from `.env.example`
+## Environment Setup
+
+1. Copy the environment template:
+```bash
+cp .env.production.example .env.production
+```
+
+2. Fill in all required environment variables in `.env.production`
 
 ## Local Development with Docker
 
 ```bash
-# Build and start all services
+# Start all services
 docker-compose up -d
 
 # View logs
 docker-compose logs -f
 
-# Stop all services
+# Stop services
 docker-compose down
 ```
 
-## CI/CD Pipeline
-
-### Continuous Integration
-The CI pipeline runs on every push and PR:
-1. Linting and type checking
-2. Unit tests for all packages
-3. Integration tests with PostgreSQL
-4. Docker image building
-5. Security vulnerability scanning
-
-### Continuous Deployment
-Deployment happens automatically when pushing to `main`:
-1. SSH into production server
-2. Pull latest Docker images
-3. Run database migrations
-4. Zero-downtime deployment
-5. Health checks
-6. Slack notifications
-
 ## Production Deployment
 
-### Initial Setup
+### 1. Initial Server Setup
 
-1. **Server Preparation**
 ```bash
 # Update system
 sudo apt update && sudo apt upgrade -y
 
 # Install Docker
-curl -fsSL https://get.docker.com | sudo sh
+curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
 
 # Install Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-2. **SSL Certificate Setup**
-```bash
-# Install certbot
-sudo apt install certbot python3-certbot-nginx
+### 2. SSL Certificate Setup
 
-# Generate certificate
-sudo certbot certonly --standalone -d glimpse.app -d www.glimpse.app
+```bash
+# Install Certbot
+sudo apt install certbot
+
+# Generate certificates
+sudo certbot certonly --standalone -d glimpse.app -d api.glimpse.app
 
 # Copy certificates
-sudo cp /etc/letsencrypt/live/glimpse.app/fullchain.pem ~/glimpse/nginx/ssl/cert.pem
-sudo cp /etc/letsencrypt/live/glimpse.app/privkey.pem ~/glimpse/nginx/ssl/key.pem
+sudo cp /etc/letsencrypt/live/glimpse.app/fullchain.pem ./nginx/ssl/cert.pem
+sudo cp /etc/letsencrypt/live/glimpse.app/privkey.pem ./nginx/ssl/key.pem
 ```
 
-3. **Environment Configuration**
-- Copy `.env.example` to `.env`
-- Fill in all production values
-- Ensure strong passwords and secrets
-
-### Manual Deployment
-
-If you need to deploy manually:
+### 3. Deploy Application
 
 ```bash
-# SSH into server
-ssh deploy@your-server.com
+# Clone repository
+git clone https://github.com/your-org/glimpse.git
+cd glimpse
 
-# Navigate to project
-cd ~/glimpse
+# Run deployment script
+./scripts/deploy.sh production
+```
 
-# Pull latest code
-git pull origin main
+### 4. Database Setup
 
-# Pull and restart services
-docker-compose pull
-docker-compose up -d
-
+```bash
 # Run migrations
-docker-compose exec backend npx prisma migrate deploy
+docker-compose exec backend npm run db:migrate
 
-# Check status
-docker-compose ps
-docker-compose logs -f
+# Create admin user (optional)
+docker-compose exec backend npm run db:seed
 ```
 
 ## Monitoring
 
-### Access Points
-- **Application**: https://glimpse.app
-- **Grafana**: https://glimpse.app:3030
-- **Prometheus**: https://glimpse.app:9090
+### Access monitoring tools:
+- Grafana: http://your-server:3030
+- Prometheus: http://your-server:9090
+- Kibana: http://your-server:5601
+- Jaeger: http://your-server:16686
 
-### Key Metrics
-- API response times
-- Database query performance
-- WebSocket connections
-- Error rates
-- Resource usage
+### Health Checks
+- Frontend: https://glimpse.app/health
+- Backend: https://api.glimpse.app/health
 
-### Alerts
-Configure alerts in Grafana for:
-- High error rates (>1%)
-- Slow API responses (>500ms p95)
-- Database connection issues
-- High memory usage (>80%)
-- Disk space low (<20%)
+## Backup and Recovery
 
-## Backup Strategy
-
-### Database Backups
+### Database Backup
 ```bash
-# Automated daily backup (add to crontab)
-0 2 * * * docker-compose exec -T postgres pg_dump -U glimpse glimpse_prod | gzip > ~/backups/db-$(date +\%Y\%m\%d).sql.gz
-
 # Manual backup
-docker-compose exec postgres pg_dump -U glimpse glimpse_prod > backup.sql
+docker-compose exec postgres pg_dump -U glimpse glimpse_prod > backup_$(date +%Y%m%d).sql
 
-# Restore backup
-docker-compose exec -T postgres psql -U glimpse glimpse_prod < backup.sql
+# Restore from backup
+docker-compose exec -T postgres psql -U glimpse glimpse_prod < backup_20240124.sql
 ```
 
-### File Storage
-- S3 bucket versioning enabled
-- Cross-region replication
-- Lifecycle policies for old files
+### Automated Backups
+Add to crontab:
+```bash
+0 2 * * * /app/scripts/backup.sh
+```
+
+## Scaling
+
+### Horizontal Scaling
+```bash
+# Scale backend instances
+docker-compose up -d --scale backend=3
+
+# Scale with specific resources
+docker-compose up -d --scale backend=3 --scale redis=2
+```
+
+### Vertical Scaling
+Edit `docker-compose.yml` to adjust resource limits:
+```yaml
+services:
+  backend:
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+```
 
 ## Troubleshooting
 
+### Check Service Status
+```bash
+docker-compose ps
+docker-compose logs backend --tail=100
+```
+
 ### Common Issues
 
-1. **Container Won't Start**
-```bash
-# Check logs
-docker-compose logs backend
+1. **Database Connection Failed**
+   - Check DATABASE_URL in environment
+   - Verify postgres service is running
+   - Check network connectivity
 
-# Check resource usage
-docker system df
-docker system prune -a
-```
+2. **Redis Connection Failed**
+   - Verify redis password in environment
+   - Check redis service status
 
-2. **Database Connection Issues**
-```bash
-# Test connection
-docker-compose exec postgres psql -U glimpse -d glimpse_prod
+3. **File Upload Issues**
+   - Verify AWS credentials
+   - Check S3 bucket permissions
+   - Ensure bucket CORS is configured
 
-# Check migrations
-docker-compose exec backend npx prisma migrate status
-```
-
-3. **SSL Certificate Issues**
-```bash
-# Renew certificate
-sudo certbot renew
-
-# Copy new certificates
-sudo cp /etc/letsencrypt/live/glimpse.app/*.pem ~/glimpse/nginx/ssl/
-```
-
-### Performance Optimization
-
-1. **Database**
-- Enable query logging for slow queries
-- Add indexes for common queries
-- Use connection pooling
-
-2. **Redis**
-- Monitor memory usage
-- Set appropriate eviction policies
-- Use Redis Sentinel for HA
-
-3. **Application**
-- Enable Node.js clustering
-- Implement response caching
-- Use CDN for static assets
+4. **Push Notifications Not Working**
+   - Verify FCM credentials
+   - Check Firebase project settings
+   - Ensure FCM tokens are being saved
 
 ## Security Checklist
 
-- [ ] All secrets in environment variables
-- [ ] SSL/TLS properly configured
-- [ ] Database passwords strong and unique
-- [ ] Regular security updates applied
-- [ ] Firewall rules configured
-- [ ] Rate limiting enabled
-- [ ] Input validation on all endpoints
-- [ ] Regular security scans
-- [ ] Backup encryption enabled
-- [ ] Access logs monitored
+- [ ] All environment variables set securely
+- [ ] SSL certificates installed and auto-renewal configured
+- [ ] Firewall configured (only necessary ports open)
+- [ ] Database passwords changed from defaults
+- [ ] Admin panel access restricted by IP
+- [ ] Rate limiting configured in nginx
+- [ ] Regular security updates scheduled
 
-## Rollback Procedure
+## Performance Optimization
 
-If deployment fails:
+1. **Enable Redis Caching**
+   - Ensure Redis is properly configured
+   - Monitor cache hit rates
 
+2. **CDN Configuration**
+   - Configure CloudFront for static assets
+   - Set appropriate cache headers
+
+3. **Database Optimization**
+   - Run ANALYZE periodically
+   - Monitor slow queries
+   - Adjust connection pool settings
+
+## Maintenance
+
+### Regular Tasks
+- Monitor disk space
+- Check log rotation
+- Update dependencies
+- Review security alerts
+- Backup verification
+
+### Update Process
 ```bash
-# Stop current deployment
-docker-compose down
+# Pull latest changes
+git pull origin master
 
-# Restore previous images
-docker-compose pull backend:previous
-docker-compose pull frontend:previous
-
-# Start services
+# Rebuild and deploy
+docker-compose build
 docker-compose up -d
-
-# Restore database if needed
-docker-compose exec -T postgres psql -U glimpse glimpse_prod < last-known-good.sql
 ```
 
 ## Support
 
-For deployment issues:
-1. Check container logs
-2. Review monitoring dashboards
-3. Check GitHub Actions logs
-4. Contact DevOps team
-
-Remember to always test deployments in staging before production!
+For issues or questions:
+- Technical documentation: `/docs`
+- GitHub Issues: https://github.com/your-org/glimpse/issues
+- Slack: #glimpse-support
