@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Install dependencies for native modules
 RUN apk add --no-cache python3 make g++ 
@@ -25,7 +25,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine
+FROM node:24-alpine
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
