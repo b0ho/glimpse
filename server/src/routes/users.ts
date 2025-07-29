@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { clerkAuthMiddleware } from '../middleware/clerkAuth';
 import { userController } from '../controllers/UserController';
 import { validate, validators } from '../utils/validation';
+import { likeSendingLimiter, paymentCreationLimiter } from '../middleware/specificRateLimiters';
 
 const router = Router();
 
@@ -428,6 +429,221 @@ router.delete('/fcm/token',
 router.put('/notifications/settings',
   clerkAuthMiddleware,
   userController.updateNotificationSettings
+);
+
+/**
+ * @swagger
+ * /users/likes/send:
+ *   post:
+ *     summary: 좋아요 보내기
+ *     tags: [Users, Likes]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - toUserId
+ *               - groupId
+ *             properties:
+ *               toUserId:
+ *                 type: string
+ *                 format: uuid
+ *                 description: 좋아요를 받을 사용자 ID
+ *               groupId:
+ *                 type: string
+ *                 format: uuid
+ *                 description: 그룹 ID
+ *     responses:
+ *       200:
+ *         description: 좋아요 전송 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     likeId:
+ *                       type: string
+ *                     isMatch:
+ *                       type: boolean
+ *                       description: 상호 좋아요로 매치가 생성되었는지 여부
+ *                     matchId:
+ *                       type: string
+ *                       description: 매치가 생성된 경우 매치 ID
+ *                     remainingCredits:
+ *                       type: integer
+ *                       description: 남은 크레딧 수
+ *       400:
+ *         description: 잘못된 요청 (크레딧 부족, 쿨다운 기간 등)
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.post('/likes/send',
+  clerkAuthMiddleware,
+  likeSendingLimiter,
+  userController.sendLike
+);
+
+/**
+ * @swagger
+ * /users/likes/received:
+ *   get:
+ *     summary: 받은 좋아요 목록 조회
+ *     tags: [Users, Likes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: 페이지 번호
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: 페이지당 항목 수
+ *     responses:
+ *       200:
+ *         description: 받은 좋아요 목록
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       user:
+ *                         type: object
+ *                         description: 좋아요를 보낸 사용자 정보 (프리미엄 사용자만 볼 수 있음)
+ *                       group:
+ *                         type: object
+ *                       isMatch:
+ *                         type: boolean
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.get('/likes/received',
+  clerkAuthMiddleware,
+  userController.getReceivedLikes
+);
+
+/**
+ * @swagger
+ * /users/likes/sent:
+ *   get:
+ *     summary: 보낸 좋아요 목록 조회
+ *     tags: [Users, Likes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: 페이지 번호
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: 페이지당 항목 수
+ *     responses:
+ *       200:
+ *         description: 보낸 좋아요 목록
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       user:
+ *                         type: object
+ *                         description: 좋아요를 받은 사용자 정보
+ *                       group:
+ *                         type: object
+ *                       isMatch:
+ *                         type: boolean
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.get('/likes/sent',
+  clerkAuthMiddleware,
+  userController.getSentLikes
+);
+
+/**
+ * @swagger
+ * /users/credits:
+ *   get:
+ *     summary: 크레딧 정보 조회
+ *     tags: [Users, Credits]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 크레딧 정보
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     credits:
+ *                       type: integer
+ *                       description: 현재 보유 크레딧
+ *                     isPremium:
+ *                       type: boolean
+ *                       description: 프리미엄 회원 여부
+ *                     premiumUntil:
+ *                       type: string
+ *                       format: date-time
+ *                       description: 프리미엄 만료일
+ *                     dailyLikesRemaining:
+ *                       type: integer
+ *                       description: 오늘 남은 무료 좋아요 수 (무료 회원만)
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.get('/credits',
+  clerkAuthMiddleware,
+  userController.getCredits
 );
 
 export default router;

@@ -9,6 +9,13 @@ import { cacheService, InvalidateCache } from './CacheService';
 
 export class UserService {
   async getRecommendations(userId: string, groupId: string, page: number, limit: number) {
+    // Check cache first
+    const cacheKey = `recommendations:${groupId}:page${page}`;
+    const cached = await cacheService.getUserCache(userId, cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     // Get user's basic info for filtering
     const currentUser = await prisma.user.findUnique({
       where: { id: userId },
@@ -60,6 +67,9 @@ export class UserService {
       // Anonymize data until matched
       nickname: user.nickname ? user.nickname.charAt(0) + '*'.repeat(user.nickname.length - 1) : ''
     })).sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+
+    // Cache the recommendations
+    await cacheService.setUserCache(userId, cacheKey, recommendations, 900); // 15 minutes
 
     return recommendations;
   }

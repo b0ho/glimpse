@@ -451,17 +451,25 @@ export class FileUploadService {
   }
 
   private async uploadToS3(buffer: Buffer, filename: string, contentType: string): Promise<{ filename: string; url: string }> {
+    // Determine ACL based on file type
+    const isPublicFile = contentType.startsWith('image/') && 
+                        (filename.includes('profile/') || filename.includes('story/'));
+    
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: filename,
       Body: buffer,
       ContentType: contentType,
-      ACL: 'public-read'
+      // Only make profile and story images public
+      ...(isPublicFile && { ACL: 'public-read' })
     });
 
     await this.s3Client.send(command);
 
-    const url = `https://${this.bucketName}.s3.${process.env.AWS_REGION || 'ap-northeast-2'}.amazonaws.com/${filename}`;
+    // For private files, we'll generate pre-signed URLs later
+    const url = isPublicFile 
+      ? `https://${this.bucketName}.s3.${process.env.AWS_REGION || 'ap-northeast-2'}.amazonaws.com/${filename}`
+      : filename; // Store just the key for private files
 
     return { filename, url };
   }
@@ -473,6 +481,15 @@ export class FileUploadService {
     });
 
     await this.s3Client.send(command);
+  }
+
+  async generatePresignedUrl(filename: string, expiresIn: number = 3600): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: filename
+    });
+
+    return await getSignedUrl(this.s3Client, command, { expiresIn });
   }
 
   async getUserFiles(userId: string, category?: string, page: number = 1, limit: number = 20) {

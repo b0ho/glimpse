@@ -376,15 +376,27 @@ export class ChatService {
       throw createError(403, '이 채팅의 백업을 생성할 권한이 없습니다.');
     }
 
-    // Get all messages
-    const messages = await this.getMessages(matchId, 1, 10000); // Get all messages
+    // Get message count first
+    const messageCount = await prisma.chatMessage.count({
+      where: { matchId }
+    });
+
+    // Use pagination to avoid memory issues
+    const batchSize = 100;
+    const totalBatches = Math.ceil(messageCount / batchSize);
+    const allMessages: any[] = [];
+
+    for (let i = 0; i < totalBatches; i++) {
+      const messages = await this.getMessages(matchId, i + 1, batchSize);
+      allMessages.push(...messages);
+    }
 
     const chatBackup = {
       matchId,
       participants: [match.user1, match.user2],
-      messageCount: messages.length,
+      messageCount: allMessages.length,
       exportedAt: new Date(),
-      messages
+      messages: allMessages
     };
 
     return chatBackup;

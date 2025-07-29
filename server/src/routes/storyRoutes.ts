@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireClerkAuth } from '../middleware/clerkAuth';
 import { storyController } from '../controllers/StoryController';
 import { upload } from '../config/multer';
+import { fileUploadLimiter } from '../middleware/specificRateLimiters';
 
 const router = Router();
 
@@ -9,7 +10,7 @@ const router = Router();
 router.use(requireClerkAuth);
 
 // Create a new story
-router.post('/', upload.single('media'), storyController.createStory);
+router.post('/', fileUploadLimiter, upload.single('media'), storyController.createStory);
 
 // Get user's own stories
 router.get('/my', storyController.getMyStories);

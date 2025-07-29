@@ -260,6 +260,9 @@ model UserLike {
   group      Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@unique([fromUserId, toUserId, groupId])
+  @@index([fromUserId, groupId])
+  @@index([toUserId, groupId])
+  @@index([groupId, createdAt])
   @@map("user_likes")
 }
 
@@ -303,6 +306,8 @@ model ChatMessage {
   sender      User            @relation(fields: [senderId], references: [id], onDelete: Cascade)
   reactions   MessageReaction[]
 
+  @@index([matchId, createdAt])
+  @@index([senderId])
   @@map("chat_messages")
 }
 
@@ -419,6 +424,8 @@ model Payment {
 
   user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, status])
+  @@index([status, createdAt])
   @@map("payments")
 }
 

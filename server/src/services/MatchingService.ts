@@ -387,13 +387,8 @@ export class MatchingService {
       group.members.length === 2
     );
 
-    // Find mutual matches (other users both have matched with)
-    const userMatches = await this.getUserMatchedUserIds(userId);
-    const otherUserMatches = await this.getUserMatchedUserIds(otherUserId);
-    
-    const mutualMatches = userMatches.filter(id => 
-      otherUserMatches.includes(id)
-    );
+    // Find mutual matches (other users both have matched with) - Single query
+    const mutualMatches = await this.getMutualMatchedUserIds(userId, otherUserId);
 
     return {
       mutualGroups: trulyMutualGroups.map(group => ({
@@ -420,6 +415,59 @@ export class MatchingService {
     return matches.map(match => 
       match.user1Id === userId ? match.user2Id : match.user1Id
     );
+  }
+
+  private async getMutualMatchedUserIds(userId1: string, userId2: string): Promise<string[]> {
+    // Get all matches for both users in a single query
+    const matches = await prisma.match.findMany({
+      where: {
+        AND: [
+          { status: 'ACTIVE' },
+          {
+            OR: [
+              {
+                OR: [
+                  { user1Id: userId1 },
+                  { user2Id: userId1 }
+                ]
+              },
+              {
+                OR: [
+                  { user1Id: userId2 },
+                  { user2Id: userId2 }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      select: { user1Id: true, user2Id: true }
+    });
+
+    // Extract all matched user IDs for each user
+    const user1Matches = new Set<string>();
+    const user2Matches = new Set<string>();
+
+    matches.forEach(match => {
+      if (match.user1Id === userId1) {
+        user1Matches.add(match.user2Id);
+      } else if (match.user2Id === userId1) {
+        user1Matches.add(match.user1Id);
+      }
+
+      if (match.user1Id === userId2) {
+        user2Matches.add(match.user2Id);
+      } else if (match.user2Id === userId2) {
+        user2Matches.add(match.user1Id);
+      }
+    });
+
+    // Find mutual matches (excluding userId1 and userId2 themselves)
+    const mutualMatches = Array.from(user1Matches).filter(id => 
+      user2Matches.has(id) && id !== userId1 && id !== userId2
+    );
+
+    return mutualMatches;
   }
 
   private calculateAdvancedCompatibilityScore(currentUser: any, targetUser: any): number {

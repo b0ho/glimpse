@@ -3,20 +3,21 @@ import { PaymentController } from '../controllers/PaymentController';
 import { authMiddleware } from '../middleware/auth';
 import { paymentRetryService } from '../services/PaymentRetryService';
 import { idempotent, requireIdempotencyKey } from '../middleware/idempotency';
+import { paymentCreationLimiter, webhookLimiter } from '../middleware/specificRateLimiters';
 
 const router = express.Router();
 const paymentController = new PaymentController();
 
-// Payment routes (with idempotency protection)
-router.post('/create', authMiddleware, requireIdempotencyKey, idempotent(), paymentController.createPayment);
-router.post('/process/:paymentId', authMiddleware, requireIdempotencyKey, idempotent(), paymentController.processPayment);
+// Payment routes (with idempotency protection and rate limiting)
+router.post('/create', authMiddleware, paymentCreationLimiter, requireIdempotencyKey, idempotent(), paymentController.createPayment);
+router.post('/process/:paymentId', authMiddleware, paymentCreationLimiter, requireIdempotencyKey, idempotent(), paymentController.processPayment);
 router.get('/history', authMiddleware, paymentController.getPaymentHistory);
 router.get('/verify/:paymentId', authMiddleware, paymentController.verifyPayment);
 router.post('/refund/:paymentId', authMiddleware, requireIdempotencyKey, idempotent(), paymentController.refundPayment);
 
-// Webhook endpoints (no auth required)
-router.post('/webhook/toss', paymentController.webhookToss);
-router.post('/webhook/kakao', paymentController.webhookKakao);
+// Webhook endpoints (no auth required, with rate limiting)
+router.post('/webhook/toss', webhookLimiter, paymentController.webhookToss);
+router.post('/webhook/kakao', webhookLimiter, paymentController.webhookKakao);
 
 // Subscription management
 router.get('/subscription/current', authMiddleware, paymentController.getCurrentSubscription);

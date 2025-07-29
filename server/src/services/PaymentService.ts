@@ -585,7 +585,11 @@ export class PaymentService {
       case 'checkout.session.completed':
         // Process the successful payment
         const session = event.data.object;
-        console.log('Stripe payment successful:', session);
+        console.log('Stripe payment successful:', {
+        id: session.id,
+        payment_status: session.payment_status,
+        amount_total: session.amount_total
+      });
         break;
       default:
         console.log('Unhandled Stripe event type:', event.type);
@@ -627,50 +631,54 @@ export class PaymentService {
   private async handlePaymentConfirmed(data: any, method: string) {
     const orderId = method === 'TOSS' ? data.orderId : data.partner_order_id;
     
-    // Find payment by searching in metadata
-    const payments = await prisma.payment.findMany({
+    // Find payment by external ID in metadata using Prisma's JSON filtering
+    const payment = await prisma.payment.findFirst({
       where: {
-        metadata: {
-          not: {}
-        }
+        AND: [
+          { status: 'PENDING' },
+          {
+            metadata: {
+              path: ['externalId'],
+              equals: orderId
+            }
+          }
+        ]
       }
     });
-    
-    const payment = payments.find(p => 
-      (p.metadata as any)?.externalId === orderId
-    );
 
-    if (payment && payment.status === 'PENDING') {
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: {
-          status: 'COMPLETED',
-          metadata: {
-            ...payment.metadata as object,
-            externalData: data
+    if (payment) {
+      // Use transaction to ensure data consistency
+      await prisma.$transaction(async (tx) => {
+        await tx.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: 'COMPLETED',
+            metadata: {
+              ...payment.metadata as object,
+              externalData: data
+            }
           }
-        }
-      });
+        });
 
-      await this.applyPaymentBenefits(payment);
+        await this.applyPaymentBenefits(payment);
+      });
+    } else {
+      console.warn(`Payment not found for order ID: ${orderId}`);
     }
   }
 
   private async handlePaymentCanceled(data: any, method: string) {
     const orderId = method === 'TOSS' ? data.orderId : data.partner_order_id;
     
-    // Find payment by searching in metadata
-    const payments = await prisma.payment.findMany({
+    // Find payment by external ID in metadata using Prisma's JSON filtering
+    const payment = await prisma.payment.findFirst({
       where: {
         metadata: {
-          not: {}
+          path: ['externalId'],
+          equals: orderId
         }
       }
     });
-    
-    const payment = payments.find(p => 
-      (p.metadata as any)?.externalId === orderId
-    );
 
     if (payment) {
       await prisma.payment.update({
@@ -679,10 +687,12 @@ export class PaymentService {
           status: 'FAILED',
           metadata: {
             ...payment.metadata as object,
-            externalData: data
+            cancelData: data
           }
         }
       });
+    } else {
+      console.warn(`Payment not found for canceled order ID: ${orderId}`);
     }
   }
 

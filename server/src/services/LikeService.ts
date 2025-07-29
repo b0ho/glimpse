@@ -82,55 +82,66 @@ export class LikeService {
 
     const isMatch = !!mutualLike;
 
-    // Create like record
-    const like = await prisma.userLike.create({
-      data: {
-        fromUserId,
-        toUserId,
-        groupId,
-        isMatch
-      }
-    });
-
-    // Deduct credit if not premium
-    const creditCost = calculateLikeCost(fromUser.isPremium);
-    if (creditCost > 0) {
-      await prisma.user.update({
-        where: { id: fromUserId },
+    // Use transaction for atomic operations
+    const result = await prisma.$transaction(async (tx) => {
+      // Create like record
+      const like = await tx.userLike.create({
         data: {
-          credits: { decrement: creditCost }
+          fromUserId,
+          toUserId,
+          groupId,
+          isMatch
         }
       });
-    }
 
-    // If mutual like, create match and update both likes
-    if (isMatch && mutualLike) {
-      // Update the existing mutual like
-      await prisma.userLike.update({
-        where: { id: mutualLike.id },
-        data: { isMatch: true }
-      });
+      // Deduct credit if not premium
+      const creditCost = calculateLikeCost(fromUser.isPremium);
+      if (creditCost > 0) {
+        await tx.user.update({
+          where: { id: fromUserId },
+          data: {
+            credits: { decrement: creditCost }
+          }
+        });
+      }
 
-      // Create match record
-      const match = await prisma.match.create({
-        data: {
-          user1Id: fromUserId < toUserId ? fromUserId : toUserId,
-          user2Id: fromUserId < toUserId ? toUserId : fromUserId,
-          groupId,
+      // If mutual like, create match and update both likes
+      let match = null;
+      if (isMatch && mutualLike) {
+        // Update the existing mutual like
+        await tx.userLike.update({
+          where: { id: mutualLike.id },
+          data: { isMatch: true }
+        });
+
+        // Create match record
+        match = await tx.match.create({
+          data: {
+            user1Id: fromUserId < toUserId ? fromUserId : toUserId,
+            user2Id: fromUserId < toUserId ? toUserId : fromUserId,
+            groupId,
           status: 'ACTIVE'
         }
       });
 
+        }
+      }
+
+      return { like, match };
+    });
+
+    // Send notifications after transaction succeeds
+    if (result.match) {
       // Send match notifications to both users
       await Promise.all([
-        notificationService.sendMatchNotification(fromUserId, toUserId, match.id),
-        notificationService.sendMatchNotification(toUserId, fromUserId, match.id)
+        notificationService.sendMatchNotification(fromUserId, toUserId, result.match.id),
+        notificationService.sendMatchNotification(toUserId, fromUserId, result.match.id)
       ]);
 
       return {
-        likeId: like.id,
+        likeId: result.like.id,
         isMatch: true,
-        matchId: match.id,
+        matchId: result.match.id,
         message: '축하합니다! 새로운 매치가 생성되었습니다.'
       };
     } else {
@@ -138,7 +149,7 @@ export class LikeService {
       await notificationService.sendLikeNotification(toUserId, fromUserId, groupId);
 
       return {
-        likeId: like.id,
+        likeId: result.like.id,
         isMatch: false,
         message: '좋아요를 보냈습니다!'
       };
