@@ -187,3 +187,6 @@ export const ERROR_MESSAGES = {
   STORAGE_DENIED: '저장소 권한이 필요합니다.',
   GENERIC_ERROR: '오류가 발생했습니다. 다시 시도해주세요.',
 } as const;
+
+// 스타일 관련 export
+export * from './styles';

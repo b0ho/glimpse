@@ -9,21 +9,24 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { RootNavigationProp } from '@/types/navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useInstantMeetingStore } from '@/store/instantMeetingStore';
-import { COLORS, FONTS, SIZES } from '@/utils/constants';
+import { COLORS_EXTENDED as COLORS, FONTS, SIZES } from '@/utils/constants';
 
 export function InstantMeetingScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<RootNavigationProp>();
   const { 
     currentMeeting, 
     participantCount,
     myStats,
     fetchMeetingDetails,
     leaveInstantMeeting,
+    updateFeatures,
   } = useInstantMeetingStore();
 
   const [timeLeft, setTimeLeft] = useState('');
+  const [isMatching, setIsMatching] = useState(false);
 
   useEffect(() => {
     if (currentMeeting) {
@@ -49,15 +52,15 @@ export function InstantMeetingScreen() {
     }
   }, [currentMeeting]);
 
-  const handleExpressInterest = () => {
-    navigation.navigate('ExpressInterest', { 
-      meetingId: currentMeeting.id 
+  const handleUpdateFeatures = () => {
+    navigation.navigate('UpdateFeatures', { 
+      meetingId: currentMeeting!.id 
     });
   };
 
   const handleViewMatches = () => {
     navigation.navigate('InstantMatches', { 
-      meetingId: currentMeeting.id 
+      meetingId: currentMeeting!.id 
     });
   };
 
@@ -103,34 +106,29 @@ export function InstantMeetingScreen() {
           <Text style={styles.timeLeft}>남은 시간: {timeLeft}</Text>
         </View>
 
-        {/* 호감 표현 버튼 */}
-        <TouchableOpacity 
-          style={styles.primaryButton}
-          onPress={handleExpressInterest}
-        >
-          <Icon name="heart" size={32} color={COLORS.white} />
-          <Text style={styles.primaryButtonText}>호감 표현하기</Text>
-          <Text style={styles.primaryButtonSubtext}>
-            주변을 둘러보고 마음에 드는 사람을 찾아보세요
+        {/* 자동 매칭 상태 */}
+        <View style={styles.matchingCard}>
+          <Icon name="sync" size={32} color={COLORS.primary} />
+          <Text style={styles.matchingTitle}>자동 매칭 중</Text>
+          <Text style={styles.matchingSubtext}>
+            내 특징과 찾는 사람 특징을 분석하고 있어요
           </Text>
-        </TouchableOpacity>
+          {myStats.matches === 0 && (
+            <TouchableOpacity 
+              style={styles.updateButton}
+              onPress={handleUpdateFeatures}
+            >
+              <Text style={styles.updateButtonText}>특징 수정하기</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
-        {/* 내 활동 */}
+        {/* 내 매칭 현황 */}
         <View style={styles.activityCard}>
-          <Text style={styles.activityTitle}>내 활동</Text>
+          <Text style={styles.activityTitle}>내 매칭</Text>
           <View style={styles.activityStats}>
             <View style={styles.statItem}>
-              <Text style={styles.statLabel}>보낸 호감</Text>
-              <Text style={styles.statValue}>{myStats.sentInterests}</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statLabel}>받은 호감</Text>
-              <Text style={styles.statValue}>{myStats.receivedInterests}</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statLabel}>매칭</Text>
+              <Text style={styles.statLabel}>매칭 수</Text>
               <Text style={styles.statValue}>{myStats.matches}</Text>
             </View>
           </View>
@@ -197,25 +195,36 @@ const styles = StyleSheet.create({
     ...FONTS.body4,
     color: COLORS.primary,
   },
-  primaryButton: {
-    backgroundColor: COLORS.primary,
+  matchingCard: {
+    backgroundColor: COLORS.white,
     borderRadius: SIZES.radius,
     padding: SIZES.padding * 1.5,
     alignItems: 'center',
     marginBottom: SIZES.padding,
     ...SIZES.shadow,
   },
-  primaryButtonText: {
+  matchingTitle: {
     ...FONTS.h3,
-    color: COLORS.white,
+    color: COLORS.text,
     marginTop: SIZES.base,
   },
-  primaryButtonSubtext: {
+  matchingSubtext: {
     ...FONTS.body4,
-    color: COLORS.white,
-    opacity: 0.8,
+    color: COLORS.textLight,
     marginTop: SIZES.base / 2,
     textAlign: 'center',
+  },
+  updateButton: {
+    marginTop: SIZES.padding,
+    paddingVertical: SIZES.padding * 0.75,
+    paddingHorizontal: SIZES.padding * 1.5,
+    backgroundColor: COLORS.primary,
+    borderRadius: SIZES.radius,
+  },
+  updateButtonText: {
+    ...FONTS.body3,
+    color: COLORS.white,
+    fontWeight: '600',
   },
   activityCard: {
     backgroundColor: COLORS.white,

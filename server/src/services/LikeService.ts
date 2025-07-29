@@ -120,11 +120,9 @@ export class LikeService {
             user1Id: fromUserId < toUserId ? fromUserId : toUserId,
             user2Id: fromUserId < toUserId ? toUserId : fromUserId,
             groupId,
-          status: 'ACTIVE'
-        }
-      });
-
-        }
+            status: 'ACTIVE'
+          }
+        });
       }
 
       return { like, match };
