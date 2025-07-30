@@ -1,3 +1,9 @@
+// App Mode Types
+export enum AppMode {
+  DATING = 'DATING',
+  FRIENDSHIP = 'FRIENDSHIP'
+}
+
 // User Types
 export interface User {
   id: string;
@@ -14,6 +20,7 @@ export interface User {
   credits: number;
   isPremium: boolean;
   premiumUntil?: Date;
+  currentMode?: AppMode; // Current app mode (dating or friendship)
   lastActive: Date;
   lastOnline?: Date;
   deletedAt?: Date;
@@ -147,6 +154,7 @@ export interface Like {
   groupId: string;
   isAnonymous: boolean;
   isSuper: boolean;
+  mode?: AppMode; // Dating or Friendship mode
   createdAt: Date;
 }
 
@@ -163,6 +171,7 @@ export interface Match {
   status?: 'ACTIVE' | 'EXPIRED' | 'DELETED';
   isActive: boolean;
   chatChannelId?: string;
+  type?: 'DATING' | 'FRIENDSHIP'; // Match type
   matchedAt?: Date; // When match was created
   lastMessageAt: Date | null;
   createdAt: Date;
@@ -368,3 +377,132 @@ export interface NearbyUser extends User {
   isOnline: boolean;
   commonGroups: string[];
 }
+
+// Community Types
+export interface CommunityPost {
+  id: string;
+  authorId: string;
+  groupId: string;
+  title: string;
+  content: string;
+  imageUrls?: string[];
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  isPinned?: boolean;
+  category?: string;
+  tags?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // Relations
+  author?: User;
+  group?: Group;
+  comments?: Comment[];
+  likes?: PostLike[];
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  authorId: string;
+  content: string;
+  parentId?: string; // For nested comments
+  likeCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // Relations
+  author?: User;
+  post?: CommunityPost;
+  parent?: Comment;
+  replies?: Comment[];
+}
+
+export interface PostLike {
+  id: string;
+  postId: string;
+  userId: string;
+  createdAt: Date;
+}
+
+// Group Chat Types
+export interface GroupChat {
+  id: string;
+  groupId: string;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  maxMembers: number;
+  memberCount: number;
+  isPublic: boolean;
+  lastMessageAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // Relations
+  group?: Group;
+  members?: GroupChatMember[];
+  lastMessage?: GroupChatMessage;
+}
+
+export interface GroupChatMember {
+  id: string;
+  chatId: string;
+  userId: string;
+  role: 'ADMIN' | 'MODERATOR' | 'MEMBER';
+  joinedAt: Date;
+  lastReadAt?: Date;
+  
+  // Relations
+  user?: User;
+  chat?: GroupChat;
+}
+
+export interface GroupChatMessage {
+  id: string;
+  chatId: string;
+  senderId: string;
+  content: string;
+  type: 'TEXT' | 'IMAGE' | 'SYSTEM' | 'EMOJI';
+  isEncrypted: boolean;
+  replyToId?: string;
+  createdAt: Date;
+  
+  // Relations
+  sender?: User;
+  chat?: GroupChat;
+  replyTo?: GroupChatMessage;
+}
+
+// UI Text Mapping for different modes
+export interface ModeTexts {
+  like: string;
+  match: string;
+  matchList: string;
+  profileAction: string;
+  sendRequest: string;
+  requestSent: string;
+  viewProfile: string;
+}
+
+export const MODE_TEXTS: Record<AppMode, ModeTexts> = {
+  [AppMode.DATING]: {
+    like: '호감있어요',
+    match: '매칭',
+    matchList: '매칭 목록',
+    profileAction: '프로필 보기',
+    sendRequest: '호감 보내기',
+    requestSent: '호감을 보냈습니다',
+    viewProfile: '프로필 보기'
+  },
+  [AppMode.FRIENDSHIP]: {
+    like: '친해지고 싶어요',
+    match: '친구',
+    matchList: '친구 목록',
+    profileAction: '같이 놀기',
+    sendRequest: '친구 신청',
+    requestSent: '친구 신청을 보냈습니다',
+    viewProfile: '프로필 보기'
+  }
+};

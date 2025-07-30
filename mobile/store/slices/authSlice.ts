@@ -1,9 +1,12 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import * as SecureStore from 'expo-secure-store';
-import { User, AuthState } from '@/types';
+import { User, AuthState, AppMode } from '@shared/types';
 
 interface AuthStore extends AuthState {
+  // State
+  currentMode: AppMode;
+  
   // Actions
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
@@ -11,6 +14,8 @@ interface AuthStore extends AuthState {
   setError: (error: string | null) => void;
   clearAuth: () => void;
   updateUser: (updates: Partial<User>) => void;
+  setAppMode: (mode: AppMode) => void;
+  toggleAppMode: () => void;
 }
 
 // SecureStore를 위한 커스텀 스토리지
@@ -48,6 +53,7 @@ export const useAuthStore = create<AuthStore>()(
       token: null,
       isLoading: false,
       error: null,
+      currentMode: AppMode.DATING,
 
       // Actions
       setUser: (user: User | null) => {
@@ -88,14 +94,32 @@ export const useAuthStore = create<AuthStore>()(
           });
         }
       },
+      
+      setAppMode: (mode: AppMode) => {
+        set({ currentMode: mode });
+        // Update user's current mode in the backend
+        const currentUser = get().user;
+        if (currentUser) {
+          set({
+            user: { ...currentUser, currentMode: mode },
+          });
+        }
+      },
+      
+      toggleAppMode: () => {
+        const currentMode = get().currentMode;
+        const newMode = currentMode === AppMode.DATING ? AppMode.FRIENDSHIP : AppMode.DATING;
+        get().setAppMode(newMode);
+      },
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => secureStorage),
-      // 토큰만 persist (보안상 민감한 데이터)
+      // 토큰과 모드 정보 persist
       partialize: (state) => ({
         token: state.token,
         isAuthenticated: state.isAuthenticated,
+        currentMode: state.currentMode,
       }),
     }
   )

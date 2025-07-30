@@ -8,6 +8,8 @@ import { NAVIGATION_ICONS } from '@/utils/icons';
 import { CallProvider } from '@/providers/CallProvider';
 import { navigationService } from '@/services/navigation/navigationService';
 import { initializeFCM, cleanupFCM } from '@/services/notifications/initializeFCM';
+import { useAuthStore } from '@/store/slices/authSlice';
+import { AppMode, MODE_TEXTS } from '@shared/types';
 
 // Screens
 import { AuthScreen } from '@/screens/auth/AuthScreen';
@@ -29,6 +31,9 @@ import { StoryUploadScreen } from '@/screens/StoryUploadScreen';
 import { GroupInviteScreen } from '@/screens/GroupInviteScreen';
 import { JoinGroupScreen } from '@/screens/JoinGroupScreen';
 import { GroupManageScreen } from '@/screens/GroupManageScreen';
+import { ModeSelectionScreen } from '@/screens/ModeSelectionScreen';
+import { CommunityScreen } from '@/screens/community/CommunityScreen';
+import { GroupChatListScreen } from '@/screens/groupchat/GroupChatListScreen';
 // import { RootStackParamList } from '@/types';
 
 // Navigation Types
@@ -75,6 +80,9 @@ type MainTabParamList = {
   Groups: undefined;
   Matches: undefined;
   Profile: undefined;
+  Community: undefined;
+  GroupChat: undefined;
+  Friends: undefined;
 };
 
 // Combined navigation type for global use
@@ -97,6 +105,7 @@ export type RootNavigationParamList = MainTabParamList & {
 
 type AppStackParamList = {
   Auth: undefined;
+  ModeSelection: undefined;
   Main: undefined;
 };
 
@@ -299,8 +308,11 @@ function ProfileStackNavigator() {
   );
 }
 
-// 인증된 사용자용 탭 네비게이터
-function MainTabNavigator() {
+// Dating Mode Tab Navigator
+function DatingTabNavigator() {
+  const { currentMode } = useAuthStore();
+  const modeTexts = MODE_TEXTS[currentMode];
+  
   return (
     <Tab.Navigator
       screenOptions={{
@@ -341,7 +353,7 @@ function MainTabNavigator() {
         name="Matches" 
         component={MatchesStackNavigator}
         options={{
-          title: '매칭',
+          title: modeTexts.matchList,
           tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.MATCHES} color={color} size={size || 24} />,
           tabBarAccessibilityLabel: '매칭 화면으로 이동',
         }}
@@ -359,9 +371,94 @@ function MainTabNavigator() {
   );
 }
 
+// Friendship Mode Tab Navigator
+function FriendshipTabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: '#E9ECEF',
+          height: 60,
+        },
+        tabBarActiveTintColor: '#4ECDC4',
+        tabBarInactiveTintColor: '#6C757D',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+        },
+      }}
+    >
+      <Tab.Screen 
+        name="Home" 
+        component={HomeStackNavigator}
+        options={{
+          title: '홈',
+          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.HOME} color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '홈 화면으로 이동',
+        }}
+      />
+      <Tab.Screen 
+        name="Community" 
+        component={CommunityScreen}
+        options={{
+          title: '커뮤니티',
+          tabBarIcon: ({ color, size }) => <Icon name="newspaper-outline" color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '커뮤니티 화면으로 이동',
+        }}
+      />
+      <Tab.Screen 
+        name="GroupChat" 
+        component={GroupChatListScreen}
+        options={{
+          title: '단체채팅',
+          tabBarIcon: ({ color, size }) => <Icon name="chatbubbles-outline" color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '단체채팅 화면으로 이동',
+        }}
+      />
+      <Tab.Screen 
+        name="Friends" 
+        component={MatchesStackNavigator}
+        options={{
+          title: '친구목록',
+          tabBarIcon: ({ color, size }) => <Icon name="people-outline" color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '친구 목록으로 이동',
+        }}
+      />
+      <Tab.Screen 
+        name="Profile" 
+        component={ProfileStackNavigator}
+        options={{
+          title: '프로필',
+          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.PROFILE} color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '프로필 화면으로 이동',
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+// Main Tab Navigator (mode selector)
+function MainTabNavigator() {
+  const { currentMode } = useAuthStore();
+  
+  return currentMode === AppMode.DATING ? <DatingTabNavigator /> : <FriendshipTabNavigator />;
+}
+
 // 메인 앱 네비게이터
 function AppNavigator() {
   const { isSignedIn, isLoaded } = useAuth();
+  const { currentMode } = useAuthStore();
+  const [hasSelectedMode, setHasSelectedMode] = React.useState(false);
+
+  useEffect(() => {
+    // Check if user has selected a mode
+    if (isSignedIn && currentMode) {
+      setHasSelectedMode(true);
+    }
+  }, [isSignedIn, currentMode]);
 
   if (!isLoaded) {
     return null; // 로딩 화면은 App.tsx에서 처리
@@ -370,10 +467,19 @@ function AppNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {isSignedIn ? (
-        <Stack.Screen 
-          name="Main" 
-          component={MainTabNavigator} 
-        />
+        <>
+          {!hasSelectedMode ? (
+            <Stack.Screen 
+              name="ModeSelection" 
+              component={ModeSelectionScreen} 
+            />
+          ) : (
+            <Stack.Screen 
+              name="Main" 
+              component={MainTabNavigator} 
+            />
+          )}
+        </>
       ) : (
         <Stack.Screen 
           name="Auth" 

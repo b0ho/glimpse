@@ -81,6 +81,11 @@ export const formatDetailedTimeAgo = (date: Date): string => {
 export const formatRelativeTime = formatTimeAgo;
 
 /**
+ * formatTimeAgo의 별칭 (date-fns와 유사한 이름)
+ */
+export const formatDistanceToNow = formatTimeAgo;
+
+/**
  * 날짜를 한국어 형식으로 표현
  * @param date - 포맷할 날짜
  * @returns "YYYY년 M월 D일" 형식의 문자열

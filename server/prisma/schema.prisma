@@ -55,6 +55,12 @@ model User {
   createdGroups      Group[] @relation("GroupCreator")
   createdInvites     GroupInvite[]
   files              File[]
+  communityPosts     CommunityPost[]
+  comments           Comment[]
+  postLikes          PostLike[]
+  commentLikes       CommentLike[]
+  groupChatMembers   GroupChatMember[]
+  groupChatMessages  GroupChatMessage[]
 
   @@map("users")
 }
@@ -173,6 +179,8 @@ model Group {
   inviteCodes   InviteCode[]
   groupInvites  GroupInvite[]
   checkIns      LocationCheckIn[]
+  communityPosts CommunityPost[]
+  groupChats     GroupChat[]
 
   @@map("groups")
 }
@@ -253,6 +261,7 @@ model UserLike {
   toUserId   String
   groupId    String
   isMatch    Boolean  @default(false)
+  mode       String?  // 'DATING' or 'FRIENDSHIP'
   createdAt  DateTime @default(now())
 
   fromUser   User     @relation("SentLikes", fields: [fromUserId], references: [id], onDelete: Cascade)
@@ -272,6 +281,7 @@ model Match {
   user2Id       String
   groupId       String
   status        MatchStatus @default(ACTIVE)
+  type          String?     // 'DATING' or 'FRIENDSHIP'
   lastMessageAt DateTime?
   isActive      Boolean     @default(true)
   createdAt     DateTime    @default(now())
@@ -566,6 +576,159 @@ model File {
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("files")
+}
+
+// Community Feature Models
+model CommunityPost {
+  id           String        @id @default(cuid())
+  authorId     String
+  groupId      String
+  title        String
+  content      String        @db.Text
+  imageUrls    String[]
+  viewCount    Int           @default(0)
+  likeCount    Int           @default(0)
+  commentCount Int           @default(0)
+  isPinned     Boolean       @default(false)
+  category     String?
+  tags         String[]
+  isDeleted    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  // Relations
+  author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  group        Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  comments     Comment[]
+  likes        PostLike[]
+  
+  @@index([groupId, createdAt])
+  @@index([authorId])
+  @@map("community_posts")
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  postId    String
+  authorId  String
+  content   String    @db.Text
+  parentId  String?
+  likeCount Int       @default(0)
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // Relations
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent    Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[]     @relation("CommentReplies")
+  likes     CommentLike[]
+  
+  @@index([postId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model PostLike {
+  id        String        @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime      @default(now())
+  
+  // Relations
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([postId, userId])
+  @@map("post_likes")
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  userId    String
+  createdAt DateTime @default(now())
+  
+  // Relations
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([commentId, userId])
+  @@map("comment_likes")
+}
+
+// Group Chat Feature Models
+model GroupChat {
+  id            String               @id @default(cuid())
+  groupId       String
+  name          String
+  description   String?
+  imageUrl      String?
+  maxMembers    Int                  @default(50)
+  isPublic      Boolean              @default(true)
+  lastMessageAt DateTime?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  
+  // Relations
+  group         Group                @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  members       GroupChatMember[]
+  messages      GroupChatMessage[]
+  
+  @@index([groupId])
+  @@map("group_chats")
+}
+
+model GroupChatMember {
+  id         String              @id @default(cuid())
+  chatId     String
+  userId     String
+  role       GroupChatRole       @default(MEMBER)
+  joinedAt   DateTime            @default(now())
+  lastReadAt DateTime?
+  
+  // Relations
+  chat       GroupChat           @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([chatId, userId])
+  @@index([userId])
+  @@map("group_chat_members")
+}
+
+model GroupChatMessage {
+  id          String              @id @default(cuid())
+  chatId      String
+  senderId    String
+  content     String              @db.Text
+  type        GroupMessageType    @default(TEXT)
+  isEncrypted Boolean             @default(true)
+  replyToId   String?
+  createdAt   DateTime            @default(now())
+  
+  // Relations
+  chat        GroupChat           @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender      User                @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo     GroupChatMessage?   @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     GroupChatMessage[]  @relation("MessageReplies")
+  
+  @@index([chatId, createdAt])
+  @@map("group_chat_messages")
+}
+
+// New Enums
+enum GroupChatRole {
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+enum GroupMessageType {
+  TEXT
+  IMAGE
+  SYSTEM
+  EMOJI
 }
 
 // Email Logs

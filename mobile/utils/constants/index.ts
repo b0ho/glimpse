@@ -79,6 +79,7 @@ export const COLORS = {
     SECONDARY: '#6C757D',
     LIGHT: '#ADB5BD',
     WHITE: '#FFFFFF',
+    MUTED: '#ADB5BD',
   },
   BORDER: '#E9ECEF',
   // 공통 UI 색상들
@@ -97,6 +98,7 @@ export const COLORS = {
   gray300: '#DEE2E6',
   gray500: '#ADB5BD',
   premium: '#FFD700',
+  WHITE: '#FFFFFF',
 } as const;
 
 // 스타일 상수
