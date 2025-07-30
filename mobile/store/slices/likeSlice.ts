@@ -39,6 +39,11 @@ interface LikeStore extends LikeState {
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
   
+  // Cancel and history management
+  cancelLike: (likeId: string) => Promise<boolean>;
+  deleteLikeHistory: (likeIds: string[]) => Promise<boolean>;
+  refreshLikes: () => Promise<void>;
+  
   // Premium actions
   purchasePremiumLikes: (count: number) => void;
   setPremiumStatus: (hasPremium: boolean) => void;
@@ -364,6 +369,108 @@ export const useLikeStore = create<LikeStore>()(
 
       setError: (error: string | null) => {
         set({ error });
+      },
+
+      // Cancel a sent like
+      cancelLike: async (likeId: string): Promise<boolean> => {
+        const state = get();
+        
+        // Find the like to cancel
+        const likeToCancel = state.sentLikes.find(like => like.id === likeId);
+        if (!likeToCancel) {
+          set({ error: '취소할 좋아요를 찾을 수 없습니다.' });
+          return false;
+        }
+        
+        // Check if cancellation is allowed (within 24 hours)
+        const timePassed = Date.now() - new Date(likeToCancel.createdAt).getTime();
+        if (timePassed > 24 * 60 * 60 * 1000) {
+          set({ error: '24시간이 지난 좋아요는 취소할 수 없습니다.' });
+          return false;
+        }
+        
+        try {
+          set({ isLoading: true, error: null });
+          
+          // API 호출 (실제 구현에서는 서버 API 호출)
+          // TODO: 실제 API 엔드포인트 구현 필요
+          
+          // Remove from sentLikes
+          set((state) => ({
+            sentLikes: state.sentLikes.filter(like => like.id !== likeId),
+            isLoading: false,
+          }));
+          
+          // If there was a match with this user, remove it
+          const existingMatch = state.matches.find(
+            match => (match.user1Id === likeToCancel.fromUserId && match.user2Id === likeToCancel.toUserId) ||
+                     (match.user2Id === likeToCancel.fromUserId && match.user1Id === likeToCancel.toUserId)
+          );
+          
+          if (existingMatch) {
+            set((state) => ({
+              matches: state.matches.filter(match => match.id !== existingMatch.id)
+            }));
+          }
+          
+          return true;
+        } catch (error) {
+          console.error('Cancel like error:', error);
+          set({ 
+            error: '좋아요 취소에 실패했습니다.',
+            isLoading: false,
+          });
+          return false;
+        }
+      },
+
+      // Delete like history
+      deleteLikeHistory: async (likeIds: string[]): Promise<boolean> => {
+        if (likeIds.length === 0) {
+          set({ error: '삭제할 항목이 없습니다.' });
+          return false;
+        }
+        
+        try {
+          set({ isLoading: true, error: null });
+          
+          // API 호출 (실제 구현에서는 서버 API 호출)
+          // TODO: 실제 API 엔드포인트 구현 필요
+          
+          // Remove from sentLikes
+          set((state) => ({
+            sentLikes: state.sentLikes.filter(like => !likeIds.includes(like.id)),
+            isLoading: false,
+          }));
+          
+          return true;
+        } catch (error) {
+          console.error('Delete like history error:', error);
+          set({ 
+            error: '이력 삭제에 실패했습니다.',
+            isLoading: false,
+          });
+          return false;
+        }
+      },
+
+      // Refresh likes from server
+      refreshLikes: async (): Promise<void> => {
+        try {
+          set({ isLoading: true, error: null });
+          
+          // API 호출 (실제 구현에서는 서버 API 호출)
+          // TODO: 실제 API 엔드포인트 구현 필요
+          
+          // For now, just set loading to false
+          set({ isLoading: false });
+        } catch (error) {
+          console.error('Refresh likes error:', error);
+          set({ 
+            error: '좋아요 목록을 불러오는데 실패했습니다.',
+            isLoading: false,
+          });
+        }
       },
 
       // Premium actions

@@ -14,6 +14,7 @@ interface AuthStore extends AuthState {
   setError: (error: string | null) => void;
   clearAuth: () => void;
   updateUser: (updates: Partial<User>) => void;
+  updateUserProfile: (updates: Partial<User>) => void;
   setAppMode: (mode: AppMode) => void;
   toggleAppMode: () => void;
 }
@@ -87,6 +88,15 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       updateUser: (updates: Partial<User>) => {
+        const currentUser = get().user;
+        if (currentUser) {
+          set({
+            user: { ...currentUser, ...updates },
+          });
+        }
+      },
+      
+      updateUserProfile: (updates: Partial<User>) => {
         const currentUser = get().user;
         if (currentUser) {
           set({

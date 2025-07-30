@@ -34,6 +34,8 @@ import { GroupManageScreen } from '@/screens/GroupManageScreen';
 import { ModeSelectionScreen } from '@/screens/ModeSelectionScreen';
 import { CommunityScreen } from '@/screens/community/CommunityScreen';
 import { GroupChatListScreen } from '@/screens/groupchat/GroupChatListScreen';
+import { LikeHistoryScreen } from '@/screens/LikeHistoryScreen';
+import { DeleteAccountScreen } from '@/screens/DeleteAccountScreen';
 // import { RootStackParamList } from '@/types';
 
 // Navigation Types
@@ -64,6 +66,8 @@ type ProfileStackParamList = {
   Premium: undefined;
   NotificationSettings: undefined;
   WhoLikesYou: undefined;
+  LikeHistory: undefined;
+  DeleteAccount: undefined;
 };
 
 type MatchesStackParamList = {
@@ -98,6 +102,8 @@ export type RootNavigationParamList = MainTabParamList & {
   CreateContent: undefined;
   CreateGroup: undefined;
   WhoLikesYou: undefined;
+  LikeHistory: undefined;
+  DeleteAccount: undefined;
   GroupInvite: { groupId: string };
   JoinGroup: { inviteCode: string };
   GroupManage: { groupId: string };
@@ -300,6 +306,20 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen 
         name="WhoLikesYou" 
         component={WhoLikesYouScreen} 
+        options={{ 
+          headerShown: false,
+        }}
+      />
+      <ProfileStack.Screen 
+        name="LikeHistory" 
+        component={LikeHistoryScreen} 
+        options={{ 
+          headerShown: false,
+        }}
+      />
+      <ProfileStack.Screen 
+        name="DeleteAccount" 
+        component={DeleteAccountScreen} 
         options={{ 
           headerShown: false,
         }}

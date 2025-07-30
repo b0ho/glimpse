@@ -10,14 +10,18 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { EditNicknameModal } from '@/components/modals/EditNicknameModal';
+import { AppMode, MODE_TEXTS } from '@shared/types';
 
 export const ProfileScreen: React.FC = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isNicknameModalVisible, setIsNicknameModalVisible] = useState(false);
   
   const navigation = useNavigation();
   const { signOut } = useAuth();
@@ -27,6 +31,8 @@ export const ProfileScreen: React.FC = () => {
   
   const isPremiumUser = usePremiumStore(premiumSelectors.isPremiumUser());
   const currentPlan = usePremiumStore(premiumSelectors.getCurrentPlan());
+  const currentMode = authStore.currentMode || AppMode.DATING;
+  const modeTexts = MODE_TEXTS[currentMode];
 
   const handleSignOut = () => {
     Alert.alert(
@@ -56,32 +62,11 @@ export const ProfileScreen: React.FC = () => {
   };
 
   const handleEditNickname = () => {
-    Alert.alert(
-      '닉네임 변경',
-      '닉네임 변경 기능은 곧 추가될 예정입니다.',
-      [{ text: '확인' }]
-    );
+    setIsNicknameModalVisible(true);
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      '계정 삭제',
-      '정말 계정을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없으며, 모든 데이터가 영구적으로 삭제됩니다.',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              '알림',
-              '계정 삭제 기능은 곧 추가될 예정입니다.',
-              [{ text: '확인' }]
-            );
-          },
-        },
-      ]
-    );
+    navigation.navigate('DeleteAccount' as never);
   };
 
   const handleRewindLike = async () => {
@@ -151,7 +136,7 @@ export const ProfileScreen: React.FC = () => {
           style={styles.editButton}
           onPress={handleEditNickname}
         >
-          <Text style={styles.editButtonText}>편집</Text>
+          <Ionicons name="pencil" size={16} color={COLORS.TEXT.PRIMARY} />
         </TouchableOpacity>
       </View>
     </View>
@@ -310,13 +295,35 @@ export const ProfileScreen: React.FC = () => {
       <View style={styles.settingsCard}>
         <TouchableOpacity 
           style={styles.settingItem}
+          onPress={() => navigation.navigate('LikeHistory' as never)}
+        >
+          <View style={styles.settingContent}>
+            <Ionicons 
+              name={currentMode === AppMode.DATING ? "heart-outline" : "people-outline"} 
+              size={20} 
+              color={COLORS.TEXT.PRIMARY} 
+            />
+            <Text style={styles.settingText}>
+              {currentMode === AppMode.DATING ? '호감 관리' : '친구 요청 관리'}
+            </Text>
+          </View>
+          <Text style={styles.settingArrow}>{'>'}</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.settingItem}
           onPress={() => navigation.navigate('WhoLikesYou' as never)}
         >
-          <View style={styles.settingTextContainer}>
-            <Text style={styles.settingText}>좋아요 받은 사람 보기</Text>
-            {!isPremiumUser && (
-              <Text style={styles.premiumBadge}>PRO</Text>
-            )}
+          <View style={styles.settingContent}>
+            <Ionicons name="eye-outline" size={20} color={COLORS.TEXT.PRIMARY} />
+            <View style={styles.settingTextContainer}>
+              <Text style={styles.settingText}>
+                {currentMode === AppMode.DATING ? '받은 호감 보기' : '받은 친구 요청 보기'}
+              </Text>
+              {!isPremiumUser && (
+                <Text style={styles.premiumBadge}>PRO</Text>
+              )}
+            </View>
           </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
@@ -325,7 +332,10 @@ export const ProfileScreen: React.FC = () => {
           style={styles.settingItem}
           onPress={() => navigation.navigate('MyGroups' as never)}
         >
-          <Text style={styles.settingText}>내 그룹 관리</Text>
+          <View style={styles.settingContent}>
+            <Ionicons name="layers-outline" size={20} color={COLORS.TEXT.PRIMARY} />
+            <Text style={styles.settingText}>내 그룹 관리</Text>
+          </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
         
@@ -333,22 +343,34 @@ export const ProfileScreen: React.FC = () => {
           style={styles.settingItem}
           onPress={() => navigation.navigate('NotificationSettings' as never)}
         >
-          <Text style={styles.settingText}>알림 설정</Text>
+          <View style={styles.settingContent}>
+            <Ionicons name="notifications-outline" size={20} color={COLORS.TEXT.PRIMARY} />
+            <Text style={styles.settingText}>알림 설정</Text>
+          </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>개인정보 처리방침</Text>
+          <View style={styles.settingContent}>
+            <Ionicons name="document-text-outline" size={20} color={COLORS.TEXT.PRIMARY} />
+            <Text style={styles.settingText}>개인정보 처리방침</Text>
+          </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>서비스 이용약관</Text>
+          <View style={styles.settingContent}>
+            <Ionicons name="book-outline" size={20} color={COLORS.TEXT.PRIMARY} />
+            <Text style={styles.settingText}>서비스 이용약관</Text>
+          </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>고객지원</Text>
+          <View style={styles.settingContent}>
+            <Ionicons name="help-circle-outline" size={20} color={COLORS.TEXT.PRIMARY} />
+            <Text style={styles.settingText}>고객지원</Text>
+          </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
       </View>
@@ -403,6 +425,14 @@ export const ProfileScreen: React.FC = () => {
           </Text>
         </View>
       </ScrollView>
+      
+      <EditNicknameModal
+        visible={isNicknameModalVisible}
+        onClose={() => setIsNicknameModalVisible(false)}
+        onSuccess={() => {
+          Alert.alert('성공', '닉네임이 변경되었습니다.');
+        }}
+      />
     </SafeAreaView>
   );
 };
@@ -490,16 +520,10 @@ const styles = StyleSheet.create({
   },
   editButton: {
     backgroundColor: COLORS.BACKGROUND,
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    borderRadius: 8,
+    padding: SPACING.SM,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: COLORS.BORDER,
-  },
-  editButtonText: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.PRIMARY,
-    fontWeight: '500',
   },
   statsGrid: {
     flexDirection: 'row',
@@ -615,6 +639,12 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.MD,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.BORDER,
+  },
+  settingContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: SPACING.SM,
   },
   settingTextContainer: {
     flexDirection: 'row',

@@ -14,8 +14,10 @@ import { RootNavigationParamList } from '@/navigation/AppNavigator';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotificationStore } from '@/store/slices/notificationSlice';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
+import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants/index';
 import { fcmService } from '@/services/notifications/fcmService';
+import { AppMode, MODE_TEXTS } from '@shared/types';
 
 interface SettingItemProps {
   title: string;
@@ -93,6 +95,7 @@ function SettingItem({
 
 export default function NotificationSettingsScreen() {
   const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
+  const { currentMode } = useAuthStore();
   const {
     settings,
     isInitialized,
@@ -103,6 +106,7 @@ export default function NotificationSettingsScreen() {
   } = useNotificationStore();
 
   const isPremium = usePremiumStore(premiumSelectors.isPremiumUser());
+  const modeTexts = MODE_TEXTS[currentMode || AppMode.DATING];
 
   React.useEffect(() => {
     if (!isInitialized) {
@@ -177,31 +181,45 @@ export default function NotificationSettingsScreen() {
 
         {/* 매치 관련 알림 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>매치</Text>
+          <Text style={styles.sectionTitle}>
+            {currentMode === AppMode.DATING ? '매치' : '친구'}
+          </Text>
           <SettingItem
-            title="새로운 매치"
-            description="서로 좋아요를 눌렀을 때 알림을 받습니다"
+            title={currentMode === AppMode.DATING ? "새로운 매치" : "새로운 친구"}
+            description={
+              currentMode === AppMode.DATING 
+                ? "서로 좋아요를 눌렀을 때 알림을 받습니다"
+                : "서로 친구가 되었을 때 알림을 받습니다"
+            }
             value={settings.newMatches}
             onToggle={() => toggleNotificationType('newMatches')}
             disabled={!settings.pushEnabled}
           />
           <View style={styles.separator} />
           <SettingItem
-            title="좋아요 받음"
-            description="누군가 나에게 좋아요를 보냈을 때 알림을 받습니다"
+            title={currentMode === AppMode.DATING ? "좋아요 받음" : "친구 요청 받음"}
+            description={
+              currentMode === AppMode.DATING
+                ? "누군가 나에게 좋아요를 보냈을 때 알림을 받습니다"
+                : "누군가 나에게 친구 요청을 보냈을 때 알림을 받습니다"
+            }
             value={settings.likesReceived}
             onToggle={() => toggleNotificationType('likesReceived')}
             disabled={!settings.pushEnabled}
             isPremiumFeature={true}
           />
-          <View style={styles.separator} />
-          <SettingItem
-            title="슈퍼 좋아요"
-            description="슈퍼 좋아요를 받았을 때 알림을 받습니다"
-            value={settings.superLikes}
-            onToggle={() => toggleNotificationType('superLikes')}
-            disabled={!settings.pushEnabled}
-          />
+          {currentMode === AppMode.DATING && (
+            <>
+              <View style={styles.separator} />
+              <SettingItem
+                title="슈퍼 좋아요"
+                description="슈퍼 좋아요를 받았을 때 알림을 받습니다"
+                value={settings.superLikes}
+                onToggle={() => toggleNotificationType('superLikes')}
+                disabled={!settings.pushEnabled}
+              />
+            </>
+          )}
         </View>
 
         {/* 메시지 관련 알림 */}
