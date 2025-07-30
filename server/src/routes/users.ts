@@ -43,8 +43,8 @@ router.get('/me', clerkAuthMiddleware, userController.getCurrentUser);
  *             properties:
  *               nickname:
  *                 type: string
- *                 minLength: 2
- *                 maxLength: 20
+ *                 minLength: 1
+ *                 maxLength: 40
  *               age:
  *                 type: integer
  *                 minimum: 18
@@ -644,6 +644,121 @@ router.get('/likes/sent',
 router.get('/credits',
   clerkAuthMiddleware,
   userController.getCredits
+);
+
+/**
+ * @swagger
+ * /users/account:
+ *   delete:
+ *     summary: 계정 삭제
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reason:
+ *                 type: string
+ *                 description: 탈퇴 사유
+ *     responses:
+ *       200:
+ *         description: 계정 비활성화 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ */
+router.delete('/account',
+  clerkAuthMiddleware,
+  userController.deleteAccount
+);
+
+/**
+ * @swagger
+ * /users/likes/{likeId}/cancel:
+ *   post:
+ *     summary: 좋아요 취소
+ *     tags: [Users, Likes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: likeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 취소할 좋아요 ID
+ *     responses:
+ *       200:
+ *         description: 좋아요 취소 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: 24시간이 지난 좋아요는 취소 불가
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ */
+router.post('/likes/:likeId/cancel',
+  clerkAuthMiddleware,
+  userController.cancelLike
+);
+
+/**
+ * @swagger
+ * /users/likes/history:
+ *   delete:
+ *     summary: 좋아요 이력 삭제
+ *     tags: [Users, Likes]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               likeIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: 삭제할 좋아요 ID 목록
+ *     responses:
+ *       200:
+ *         description: 이력 삭제 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.delete('/likes/history',
+  clerkAuthMiddleware,
+  userController.deleteLikeHistory
 );
 
 export default router;

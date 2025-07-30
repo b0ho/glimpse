@@ -216,13 +216,20 @@ export class UserService {
   }) {
     const updateData: any = {};
 
-    // Nickname filtering
+    // Nickname validation (1-40 chars, duplicates allowed)
     if (data.nickname) {
-      const nicknameFilter = await contentFilterService.filterText(data.nickname, 'profile');
+      const trimmedNickname = data.nickname.trim();
+      
+      if (trimmedNickname.length < 1 || trimmedNickname.length > 40) {
+        throw createError(400, '닉네임은 1자 이상 40자 이하여야 합니다.');
+      }
+      
+      // Nickname filtering
+      const nicknameFilter = await contentFilterService.filterText(trimmedNickname, 'profile');
       if (nicknameFilter.severity === 'blocked') {
         throw createError(400, '닉네임에 부적절한 내용이 포함되어 있습니다.');
       }
-      updateData.nickname = nicknameFilter.filteredText || data.nickname;
+      updateData.nickname = nicknameFilter.filteredText || trimmedNickname;
     }
 
     // Bio filtering
@@ -262,6 +269,36 @@ export class UserService {
     });
 
     return updatedUser;
+  }
+
+  async deleteAccount(userId: string, reason?: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      throw createError(404, '사용자를 찾을 수 없습니다.');
+    }
+
+    // Soft delete - mark as deleted with reason
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        deletedAt: new Date(),
+        deletionReason: reason,
+        // Keep data for 30 days for recovery
+      }
+    });
+
+    // Cancel all active subscriptions
+    if (user.isPremium) {
+      // TODO: Cancel subscription through payment provider
+    }
+
+    // Invalidate all sessions
+    await cacheService.invalidateUserCache(userId);
+
+    return true;
   }
 }
 

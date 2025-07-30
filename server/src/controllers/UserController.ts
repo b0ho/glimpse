@@ -232,7 +232,11 @@ export class UserController {
       const { page = 1, limit = 20 } = req.query;
 
       const likes = await prisma.userLike.findMany({
-        where: { fromUserId: userId },
+        where: { 
+          fromUserId: userId,
+          cancelledAt: null,
+          deletedAt: null
+        },
         include: {
           toUser: {
             select: {
@@ -262,6 +266,8 @@ export class UserController {
           user: like.toUser,
           group: like.group,
           isMatch: like.isMatch,
+          isSuper: like.isSuper,
+          mode: like.mode,
           createdAt: like.createdAt
         }))
       });
@@ -324,34 +330,104 @@ export class UserController {
   async deleteAccount(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
-      const { confirmPhoneNumber } = req.body;
+      const { reason } = req.body;
 
       const user = await prisma.user.findUnique({
         where: { id: userId }
       });
 
-      if (!user || user.phoneNumber !== confirmPhoneNumber) {
-        throw createError(400, '전화번호 확인이 일치하지 않습니다.');
+      if (!user) {
+        throw createError(404, '사용자를 찾을 수 없습니다.');
       }
 
-      // Soft delete - anonymize user data
+      // Soft delete - mark as deleted with reason
       await prisma.user.update({
         where: { id: userId },
         data: {
-          phoneNumber: `deleted_${Date.now()}`,
-          nickname: 'deleted_user',
-          profileImage: null,
-          bio: null,
-          isVerified: false,
-          credits: 0,
-          isPremium: false,
-          premiumUntil: null
+          deletedAt: new Date(),
+          deletionReason: reason,
+          // Keep data for 30 days for recovery
         }
       });
 
       res.json({
         success: true,
-        data: { message: '계정이 삭제되었습니다.' }
+        data: { message: '계정이 비활성화되었습니다. 30일 내 로그인 시 복구됩니다.' }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async cancelLike(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.auth!.userId;
+      const { likeId } = req.params;
+
+      const like = await prisma.userLike.findFirst({
+        where: {
+          id: likeId,
+          fromUserId: userId,
+          cancelledAt: null
+        }
+      });
+
+      if (!like) {
+        throw createError(404, '취소할 좋아요를 찾을 수 없습니다.');
+      }
+
+      // Check if within 24 hours
+      const timePassed = Date.now() - like.createdAt.getTime();
+      if (timePassed > 24 * 60 * 60 * 1000) {
+        throw createError(400, '24시간이 지난 좋아요는 취소할 수 없습니다.');
+      }
+
+      // Cancel the like
+      await prisma.userLike.update({
+        where: { id: likeId },
+        data: { cancelledAt: new Date() }
+      });
+
+      // Remove match if exists
+      await prisma.match.deleteMany({
+        where: {
+          OR: [
+            { user1Id: userId, user2Id: like.toUserId },
+            { user1Id: like.toUserId, user2Id: userId }
+          ]
+        }
+      });
+
+      res.json({
+        success: true,
+        data: { message: '좋아요가 취소되었습니다.' }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteLikeHistory(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.auth!.userId;
+      const { likeIds } = req.body;
+
+      if (!Array.isArray(likeIds) || likeIds.length === 0) {
+        throw createError(400, '삭제할 항목을 선택해주세요.');
+      }
+
+      // Soft delete likes
+      await prisma.userLike.updateMany({
+        where: {
+          id: { in: likeIds },
+          fromUserId: userId
+        },
+        data: { deletedAt: new Date() }
+      });
+
+      res.json({
+        success: true,
+        data: { message: `${likeIds.length}개의 이력이 삭제되었습니다.` }
       });
     } catch (error) {
       next(error);

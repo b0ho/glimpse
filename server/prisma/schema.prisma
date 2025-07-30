@@ -28,6 +28,7 @@ model User {
   lastActive    DateTime @default(now())
   lastOnline    DateTime?
   deletedAt     DateTime?
+  deletionReason String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -262,6 +263,9 @@ model UserLike {
   groupId    String
   isMatch    Boolean  @default(false)
   mode       String?  // 'DATING' or 'FRIENDSHIP'
+  isSuper    Boolean  @default(false)
+  cancelledAt DateTime?
+  deletedAt  DateTime?
   createdAt  DateTime @default(now())
 
   fromUser   User     @relation("SentLikes", fields: [fromUserId], references: [id], onDelete: Cascade)
