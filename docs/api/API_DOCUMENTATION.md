@@ -35,6 +35,62 @@ Content-Type: application/json
 }
 ```
 
+## 🚦 Rate Limiting
+
+### 기본 Rate Limit 정책
+
+| 엔드포인트 카테고리 | 제한 | 시간 창 | 버스트 허용 |
+|-------------------|------|---------|------------|
+| 인증 (로그인/회원가입) | 5 | 1분 | 10 |
+| 일반 API | 100 | 1분 | 200 |
+| 좋아요 전송 | 10 | 1분 | 20 |
+| 메시지 전송 | 30 | 1분 | 50 |
+| 파일 업로드 | 10 | 5분 | 15 |
+| 검색 | 20 | 1분 | 30 |
+
+### Rate Limit 헤더
+
+모든 API 응답에는 다음 헤더가 포함됩니다:
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1643723400
+X-RateLimit-Reset-After: 45
+X-RateLimit-Bucket: general
+```
+
+### Rate Limit 초과 시 응답
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 45
+
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "API rate limit exceeded",
+    "details": {
+      "limit": 100,
+      "reset": 1643723400,
+      "retryAfter": 45
+    }
+  }
+}
+```
+
+### 프리미엄 사용자 Rate Limit
+
+프리미엄 사용자는 향상된 Rate Limit이 적용됩니다:
+
+| 엔드포인트 카테고리 | 일반 사용자 | 프리미엄 사용자 |
+|-------------------|------------|----------------|
+| 일반 API | 100/분 | 500/분 |
+| 좋아요 전송 | 10/분 | 무제한 |
+| 메시지 전송 | 30/분 | 100/분 |
+| 검색 | 20/분 | 100/분 |
+
 ## 🔐 인증 API
 
 ### 회원가입
@@ -581,30 +637,314 @@ GET /stats/profile
 
 ## 🔧 WebSocket Events
 
-### 연결
+### WebSocket 연결 상세
+
+#### 연결 URL
+```
+wss://api.glimpse.kr/socket.io/?EIO=4&transport=websocket
+```
+
+#### 연결 예제
 ```javascript
-socket.connect({
+import { io } from 'socket.io-client';
+
+const socket = io('wss://api.glimpse.kr', {
   auth: {
-    token: "JWT_TOKEN"
+    token: localStorage.getItem('authToken')
+  },
+  reconnection: true,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  reconnectionAttempts: 5,
+  transports: ['websocket'],
+  upgrade: false
+});
+
+// 연결 이벤트
+socket.on('connect', () => {
+  console.log('Connected:', socket.id);
+});
+
+socket.on('connect_error', (error) => {
+  console.error('Connection error:', error.message);
+});
+
+socket.on('disconnect', (reason) => {
+  console.log('Disconnected:', reason);
+});
+```
+
+### 인증 및 오류 처리
+
+#### 인증 실패 이벤트
+```javascript
+socket.on('auth_error', (error) => {
+  // 토큰 만료 또는 유효하지 않음
+  console.error('Authentication failed:', error);
+  // 재로그인 필요
+});
+```
+
+#### 재연결 전략
+```javascript
+socket.io.on('reconnect_attempt', (attemptNumber) => {
+  console.log('Reconnection attempt:', attemptNumber);
+});
+
+socket.io.on('reconnect', (attemptNumber) => {
+  console.log('Reconnected after', attemptNumber, 'attempts');
+  // 채팅방 재입장 등 필요한 작업
+});
+```
+
+### 채팅 이벤트 상세
+
+#### join-room (채팅방 입장)
+**클라이언트 → 서버**
+```javascript
+socket.emit('join-room', {
+  roomId: 'chat_123',
+  lastMessageId: 'msg_456' // 선택적: 마지막 수신 메시지
+});
+```
+
+**서버 응답**
+```javascript
+socket.on('room-joined', (data) => {
+  console.log('Joined room:', data.roomId);
+  console.log('Missed messages:', data.missedMessages);
+});
+
+socket.on('join-error', (error) => {
+  console.error('Failed to join room:', error.message);
+});
+```
+
+#### send-message (메시지 전송)
+**클라이언트 → 서버**
+```javascript
+socket.emit('send-message', {
+  roomId: 'chat_123',
+  content: '안녕하세요!',
+  type: 'text', // text, image, sticker
+  clientId: 'temp_123', // 클라이언트 임시 ID
+  replyTo: 'msg_789' // 선택적: 답장 메시지 ID
+});
+```
+
+**서버 응답**
+```javascript
+// 성공
+socket.on('message-sent', (data) => {
+  console.log('Message sent:', data.messageId);
+  console.log('Server time:', data.timestamp);
+  // clientId로 임시 메시지를 실제 메시지로 교체
+});
+
+// 실패
+socket.on('message-error', (error) => {
+  console.error('Failed to send:', error.message);
+  console.error('Client ID:', error.clientId);
+});
+```
+
+#### new-message (새 메시지 수신)
+**서버 → 클라이언트**
+```javascript
+socket.on('new-message', (message) => {
+  console.log('New message:', {
+    id: message.id,
+    roomId: message.roomId,
+    senderId: message.senderId,
+    content: message.content,
+    type: message.type,
+    timestamp: message.timestamp,
+    isEdited: message.isEdited,
+    replyTo: message.replyTo
+  });
+});
+```
+
+#### typing 이벤트
+**타이핑 시작**
+```javascript
+socket.emit('typing-start', {
+  roomId: 'chat_123'
+});
+```
+
+**타이핑 중지**
+```javascript
+socket.emit('typing-stop', {
+  roomId: 'chat_123'
+});
+```
+
+**타이핑 상태 수신**
+```javascript
+socket.on('user-typing', (data) => {
+  console.log('User typing:', {
+    userId: data.userId,
+    roomId: data.roomId,
+    isTyping: data.isTyping
+  });
+});
+```
+
+#### mark-read (읽음 처리)
+**클라이언트 → 서버**
+```javascript
+socket.emit('mark-read', {
+  roomId: 'chat_123',
+  messageId: 'msg_456' // 마지막 읽은 메시지 ID
+});
+```
+
+**서버 응답**
+```javascript
+socket.on('read-receipt', (data) => {
+  console.log('Read receipt:', {
+    roomId: data.roomId,
+    userId: data.userId,
+    lastReadMessageId: data.lastReadMessageId,
+    readAt: data.readAt
+  });
+});
+```
+
+### 상태 관리 이벤트
+
+#### 사용자 온라인/오프라인 상태
+```javascript
+// 온라인 상태
+socket.on('user-online', (data) => {
+  console.log('User online:', {
+    userId: data.userId,
+    lastSeen: data.lastSeen
+  });
+});
+
+// 오프라인 상태
+socket.on('user-offline', (data) => {
+  console.log('User offline:', {
+    userId: data.userId,
+    lastSeen: data.lastSeen
+  });
+});
+
+// 상태 구독
+socket.emit('subscribe-presence', {
+  userIds: ['user_123', 'user_456']
+});
+
+// 상태 구독 취소
+socket.emit('unsubscribe-presence', {
+  userIds: ['user_123']
+});
+```
+
+### 알림 이벤트
+
+#### 새로운 매칭
+```javascript
+socket.on('new-match', (match) => {
+  console.log('New match:', {
+    matchId: match.id,
+    matchedUser: match.matchedUser,
+    matchedAt: match.matchedAt,
+    chatRoomId: match.chatRoomId
+  });
+});
+```
+
+#### 새로운 좋아요
+```javascript
+socket.on('new-like', (like) => {
+  console.log('New like received:', {
+    likeId: like.id,
+    fromUserId: like.fromUserId, // 익명 상태에서는 null
+    groupId: like.groupId,
+    createdAt: like.createdAt
+  });
+});
+```
+
+### 에러 처리
+
+#### 공통 에러 이벤트
+```javascript
+socket.on('error', (error) => {
+  console.error('Socket error:', {
+    code: error.code,
+    message: error.message,
+    details: error.details
+  });
+});
+```
+
+#### 에러 코드
+- `WS_AUTH_FAILED`: 인증 실패
+- `WS_ROOM_NOT_FOUND`: 채팅방을 찾을 수 없음
+- `WS_PERMISSION_DENIED`: 권한 없음
+- `WS_RATE_LIMIT`: Rate limit 초과
+- `WS_INVALID_DATA`: 유효하지 않은 데이터
+
+### 베스트 프랙티스
+
+#### 재연결 후 상태 복구
+```javascript
+socket.on('reconnect', () => {
+  // 현재 채팅방 다시 입장
+  const currentRooms = getRoomsFromLocalStorage();
+  currentRooms.forEach(roomId => {
+    socket.emit('join-room', { roomId });
+  });
+  
+  // 온라인 상태 구독 복구
+  const subscribedUsers = getSubscribedUsersFromLocalStorage();
+  if (subscribedUsers.length > 0) {
+    socket.emit('subscribe-presence', { userIds: subscribedUsers });
   }
 });
 ```
 
-### 이벤트 목록
+#### 메시지 중복 방지
+```javascript
+const processedMessages = new Set();
 
-**클라이언트 → 서버:**
-- `join-room`: 채팅방 입장
-- `leave-room`: 채팅방 퇴장
-- `send-message`: 메시지 전송
-- `typing-start`: 타이핑 시작
-- `typing-stop`: 타이핑 중지
-- `mark-read`: 읽음 표시
+socket.on('new-message', (message) => {
+  if (processedMessages.has(message.id)) {
+    return; // 이미 처리된 메시지
+  }
+  processedMessages.add(message.id);
+  
+  // 메시지 처리
+  handleNewMessage(message);
+  
+  // 메모리 관리
+  if (processedMessages.size > 1000) {
+    const messagesToKeep = Array.from(processedMessages).slice(-500);
+    processedMessages.clear();
+    messagesToKeep.forEach(id => processedMessages.add(id));
+  }
+});
+```
 
-**서버 → 클라이언트:**
-- `new-message`: 새 메시지 수신
-- `message-sent`: 메시지 전송 확인
-- `user-typing`: 상대방 타이핑 중
-- `user-online`: 사용자 온라인
-- `user-offline`: 사용자 오프라인
-- `new-match`: 새로운 매칭
-- `new-like`: 새로운 좋아요
+#### 타이핑 디바운싱
+```javascript
+let typingTimer;
+const TYPING_TIMER_LENGTH = 3000;
+
+function handleTyping(roomId) {
+  if (!typingTimer) {
+    socket.emit('typing-start', { roomId });
+  }
+  
+  clearTimeout(typingTimer);
+  
+  typingTimer = setTimeout(() => {
+    socket.emit('typing-stop', { roomId });
+    typingTimer = null;
+  }, TYPING_TIMER_LENGTH);
+}
+```

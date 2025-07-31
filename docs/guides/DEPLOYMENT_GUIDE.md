@@ -635,3 +635,365 @@ kubectl rollout status deployment/glimpse-api
 # 4. 데이터베이스 롤백 (필요시)
 DATABASE_URL=$PRODUCTION_DATABASE_URL npx prisma migrate rollback
 ```
+
+## 💾 백업 및 복구
+
+### 데이터베이스 백업
+
+#### 수동 백업
+```bash
+# PostgreSQL 백업
+docker-compose exec postgres pg_dump -U glimpse glimpse_prod > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# 압축 백업
+docker-compose exec postgres pg_dump -U glimpse glimpse_prod | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
+
+# S3로 백업 업로드
+aws s3 cp backup_*.sql.gz s3://glimpse-backups/database/
+```
+
+#### 자동 백업 설정
+```bash
+# /etc/cron.d/glimpse-backup
+0 2 * * * root /opt/glimpse/scripts/backup.sh >> /var/log/glimpse-backup.log 2>&1
+```
+
+#### 백업 스크립트
+```bash
+#!/bin/bash
+# scripts/backup.sh
+
+set -e
+
+# 설정
+BACKUP_DIR="/backup/glimpse"
+S3_BUCKET="glimpse-backups"
+RETENTION_DAYS=30
+
+# 백업 생성
+timestamp=$(date +%Y%m%d_%H%M%S)
+backup_file="${BACKUP_DIR}/glimpse_${timestamp}.sql.gz"
+
+# 데이터베이스 덤프
+pg_dump -h $DB_HOST -U $DB_USER -d $DB_NAME | gzip > $backup_file
+
+# S3 업로드
+aws s3 cp $backup_file s3://${S3_BUCKET}/database/
+
+# 로컬 백업 정리 (30일 이상)
+find $BACKUP_DIR -name "*.sql.gz" -mtime +$RETENTION_DAYS -delete
+
+# S3 백업 정리
+aws s3 ls s3://${S3_BUCKET}/database/ | while read -r line; do
+  createDate=$(echo $line | awk '{print $1" "$2}')
+  createDate=$(date -d "$createDate" +%s)
+  olderThan=$(date -d "$RETENTION_DAYS days ago" +%s)
+  if [[ $createDate -lt $olderThan ]]; then
+    fileName=$(echo $line | awk '{print $4}')
+    aws s3 rm s3://${S3_BUCKET}/database/$fileName
+  fi
+done
+
+echo "Backup completed: $backup_file"
+```
+
+### 복구 절차
+
+```bash
+# 최신 백업 확인
+aws s3 ls s3://glimpse-backups/database/ --recursive | sort | tail -5
+
+# 백업 다운로드
+aws s3 cp s3://glimpse-backups/database/glimpse_20240124_020000.sql.gz .
+
+# 복구 실행
+gunzip -c glimpse_20240124_020000.sql.gz | docker-compose exec -T postgres psql -U glimpse glimpse_prod
+
+# 또는 새 데이터베이스로 복구
+gunzip -c glimpse_20240124_020000.sql.gz | docker-compose exec -T postgres psql -U glimpse -d glimpse_restore
+```
+
+## 🔧 문제 해결 가이드
+
+### 일반적인 문제와 해결 방법
+
+#### 1. 데이터베이스 연결 실패
+```bash
+# 연결 테스트
+docker-compose exec postgres pg_isready -U glimpse
+
+# 연결 정보 확인
+echo $DATABASE_URL
+
+# PostgreSQL 로그 확인
+docker-compose logs postgres --tail=50
+
+# 네트워크 확인
+docker network ls
+docker network inspect glimpse_default
+```
+
+#### 2. Redis 연결 문제
+```bash
+# Redis 상태 확인
+docker-compose exec redis redis-cli ping
+
+# Redis 비밀번호 테스트
+docker-compose exec redis redis-cli -a $REDIS_PASSWORD ping
+
+# Redis 메모리 사용량 확인
+docker-compose exec redis redis-cli info memory
+```
+
+#### 3. 파일 업로드 실패
+```bash
+# AWS 자격 증명 확인
+aws s3 ls s3://glimpse-uploads/
+
+# S3 버킷 정책 확인
+aws s3api get-bucket-policy --bucket glimpse-uploads
+
+# CORS 설정 확인
+aws s3api get-bucket-cors --bucket glimpse-uploads
+```
+
+#### 4. 푸시 알림 실패
+```bash
+# FCM 토큰 확인
+curl -X POST https://fcm.googleapis.com/fcm/send \
+  -H "Authorization: key=$FCM_SERVER_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "TEST_TOKEN",
+    "notification": {
+      "title": "Test",
+      "body": "Test notification"
+    }
+  }'
+```
+
+#### 5. 메모리 부족
+```bash
+# 메모리 사용량 확인
+docker stats
+
+# 컨테이너별 상세 정보
+docker-compose exec api cat /proc/meminfo
+
+# 메모리 제한 조정
+docker-compose down
+# docker-compose.yml 수정 후
+docker-compose up -d
+```
+
+## 🚀 성능 최적화
+
+### 1. 데이터베이스 최적화
+
+```sql
+-- 인덱스 상태 확인
+SELECT 
+  schemaname,
+  tablename,
+  indexname,
+  idx_scan,
+  idx_tup_read,
+  idx_tup_fetch
+FROM pg_stat_user_indexes
+ORDER BY idx_scan;
+
+-- 느린 쿼리 찾기
+SELECT 
+  query,
+  calls,
+  total_time,
+  mean_time,
+  max_time
+FROM pg_stat_statements
+WHERE mean_time > 100
+ORDER BY mean_time DESC
+LIMIT 10;
+
+-- VACUUM 실행
+VACUUM ANALYZE;
+```
+
+### 2. Redis 캐싱 최적화
+
+```bash
+# Redis 메모리 정책 설정
+docker-compose exec redis redis-cli CONFIG SET maxmemory-policy allkeys-lru
+
+# 캐시 히트율 확인
+docker-compose exec redis redis-cli INFO stats | grep keyspace
+```
+
+### 3. CDN 설정 (CloudFront)
+
+```json
+{
+  "Origins": [{
+    "DomainName": "api.glimpse.kr",
+    "OriginPath": "/static",
+    "CustomOriginConfig": {
+      "OriginProtocolPolicy": "https-only"
+    }
+  }],
+  "DefaultCacheBehavior": {
+    "TargetOriginId": "glimpse-static",
+    "ViewerProtocolPolicy": "redirect-to-https",
+    "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+    "Compress": true
+  }
+}
+```
+
+## 🔒 보안 체크리스트
+
+### 서버 보안
+- [ ] 방화벽 설정 (ufw 또는 iptables)
+- [ ] SSH 키 기반 인증만 허용
+- [ ] fail2ban 설치 및 설정
+- [ ] 정기적인 시스템 업데이트
+- [ ] 불필요한 포트 차단
+
+### 애플리케이션 보안
+- [ ] 모든 환경 변수 암호화
+- [ ] SSL/TLS 인증서 설치
+- [ ] HTTPS 강제 적용
+- [ ] Rate limiting 설정
+- [ ] SQL injection 방지
+- [ ] XSS 방지 헤더 설정
+- [ ] CORS 정책 설정
+
+### 데이터 보안
+- [ ] 데이터베이스 암호화
+- [ ] 백업 암호화
+- [ ] 민감 정보 마스킹
+- [ ] 로그 정리 정책
+
+## 📈 모니터링 확장
+
+### Grafana 대시보드 설정
+
+```json
+{
+  "dashboard": {
+    "title": "Glimpse Production Metrics",
+    "panels": [
+      {
+        "title": "API Response Time",
+        "targets": [{
+          "expr": "histogram_quantile(0.95, http_request_duration_seconds_bucket)"
+        }]
+      },
+      {
+        "title": "Active Users",
+        "targets": [{
+          "expr": "sum(rate(user_activity_total[5m]))"
+        }]
+      },
+      {
+        "title": "Match Success Rate",
+        "targets": [{
+          "expr": "rate(matches_created_total[1h]) / rate(likes_sent_total[1h])"
+        }]
+      }
+    ]
+  }
+}
+```
+
+### 알림 규칙
+
+```yaml
+# prometheus/alerts.yml
+groups:
+  - name: glimpse
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          
+      - alert: DatabaseConnectionPoolExhausted
+        expr: pg_stat_database_numbackends / pg_stat_database_conn_limit > 0.8
+        for: 5m
+        labels:
+          severity: warning
+```
+
+## 🚧 유지보수
+
+### 정기 작업 스케줄
+
+| 작업 | 주기 | 명령어/스크립트 |
+|------|------|----------------|
+| 데이터베이스 백업 | 일일 | `/opt/glimpse/scripts/backup.sh` |
+| 로그 정리 | 주간 | `find /var/log/glimpse -mtime +7 -delete` |
+| 시스템 업데이트 | 월간 | `apt update && apt upgrade` |
+| SSL 인증서 갱신 | 90일 | `certbot renew` |
+| 데이터베이스 VACUUM | 주간 | `vacuumdb -a -z` |
+| 디스크 공간 확인 | 일일 | `df -h` 알림 설정 |
+
+### 업데이트 절차
+
+```bash
+#!/bin/bash
+# scripts/update.sh
+
+set -e
+
+# 1. 현재 버전 태그
+CURRENT_VERSION=$(git describe --tags)
+echo "Current version: $CURRENT_VERSION"
+
+# 2. 최신 코드 가져오기
+git fetch origin
+git checkout main
+git pull origin main
+
+# 3. 새 버전 태그
+NEW_VERSION=$(git describe --tags)
+echo "New version: $NEW_VERSION"
+
+# 4. 의존성 업데이트
+npm ci
+
+# 5. 데이터베이스 마이그레이션
+npm run db:migrate
+
+# 6. 빌드
+npm run build
+
+# 7. 블루-그린 배포
+./scripts/deploy-blue-green.sh $NEW_VERSION
+
+# 8. 헬스체크
+./scripts/health-check.sh
+
+echo "Update completed: $CURRENT_VERSION -> $NEW_VERSION"
+```
+
+## 📞 지원 및 연락처
+
+### 긴급 연락처
+- **온콜 엔지니어**: +82-10-XXXX-XXXX
+- **CTO**: +82-10-XXXX-XXXX
+- **AWS Support**: https://console.aws.amazon.com/support
+
+### 문서 및 리소스
+- **기술 문서**: `/docs`
+- **API 문서**: `/docs/api`
+- **GitHub**: https://github.com/glimpse-app/glimpse-fe
+- **Slack**: #glimpse-ops, #glimpse-alerts
+- **Wiki**: https://wiki.glimpse.kr
+
+### 외부 서비스 대시보드
+- **AWS Console**: https://console.aws.amazon.com
+- **Clerk Dashboard**: https://dashboard.clerk.com
+- **Stripe Dashboard**: https://dashboard.stripe.com
+- **Firebase Console**: https://console.firebase.google.com
