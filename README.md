@@ -1,16 +1,53 @@
-# 🍃 Glimpse - 익명 데이팅 앱
+# Glimpse - 익명 소셜 데이팅 앱
 
-프라이버시 중심의 한국 데이팅 앱으로, 익명성과 그룹 기반 매칭을 핵심으로 합니다.
+<p align="center">
+  <img src="assets/icon.png" alt="Glimpse Logo" width="120" height="120">
+</p>
+
+<p align="center">
+  <strong>프라이버시를 최우선으로 하는 한국형 소셜 데이팅 플랫폼</strong>
+</p>
+
+<p align="center">
+  <a href="https://expo.dev">
+    <img src="https://img.shields.io/badge/Expo-SDK%2050-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo">
+  </a>
+  <a href="https://reactnative.dev">
+    <img src="https://img.shields.io/badge/React%20Native-0.79.x-61DAFB?style=flat-square&logo=react&logoColor=white" alt="React Native">
+  </a>
+  <a href="https://nodejs.org">
+    <img src="https://img.shields.io/badge/Node.js-20.x-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js">
+  </a>
+  <a href="https://www.typescriptlang.org">
+    <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
+  </a>
+</p>
+
+## 📱 프로젝트 소개
+
+Glimpse는 익명성과 프라이버시를 보장하면서도 진정성 있는 만남을 추구하는 혁신적인 데이팅 앱입니다. 회사, 대학교, 관심사 기반의 그룹 시스템을 통해 안전하고 신뢰할 수 있는 환경에서 새로운 인연을 만날 수 있습니다.
+
+### 🎯 핵심 기능
+
+- **익명 좋아요 시스템**: 상호 관심 확인 전까지 완전한 익명성 보장
+- **다양한 그룹 유형**: 공식(회사/대학), 생성(취미), 즉석, 위치 기반 그룹
+- **실시간 암호화 채팅**: Socket.IO + AES-GCM 종단간 암호화
+- **프리미엄 구독**: 무제한 좋아요, 받은 좋아요 확인 등 프리미엄 기능
+- **친구 시스템**: 친구 요청, 관리, 우선 매칭
 
 ## 📋 프로젝트 구조
 
 ```
-glimpse-monorepo/
-├── mobile/          # React Native 모바일 앱 (Expo)
-├── server/          # Node.js + Express 백엔드
-├── shared/          # 공유 타입, 유틸리티, 상수
+glimpse-fe/
+├── mobile/          # React Native 모바일 앱
+├── server/          # Node.js/Express 백엔드
+├── shared/          # 공유 타입 및 유틸리티
 ├── web/            # Next.js 관리자 대시보드
-└── tests/          # E2E 테스트 (Playwright)
+├── docs/           # 프로젝트 문서
+├── scripts/        # 유틸리티 스크립트
+├── docker/         # Docker 설정 파일
+├── monitoring/     # 모니터링 설정
+└── tests/          # E2E 테스트
 ```
 
 ## 🚀 빠른 시작
@@ -273,51 +310,56 @@ STRIPE_SECRET_KEY="sk_test_..."
 FIREBASE_PRIVATE_KEY="..."
 ```
 
-## 🏗 Architecture
+## 📚 프로젝트 문서
 
-### API Design
-- **RESTful APIs** for CRUD operations
-- **WebSocket** for real-time features (chat, typing, presence)
-- **JWT Authentication** with refresh tokens
-- **Rate limiting** for security
+자세한 문서는 [docs](./docs/INDEX.md) 폴더를 참조하세요:
 
-### Database Schema
-- **Users** - Profile, verification, credits, premium status
-- **Groups** - 4 types with different business rules
-- **Matches** - Mutual likes create matches
-- **Messages** - Encrypted chat history
-- **Payments** - Stripe transaction records
+- [프로젝트 개요](./docs/PROJECT_OVERVIEW.md)
+- [개발 가이드](./docs/guides/DEVELOPMENT_GUIDE.md)
+- [API 문서](./docs/api/API_DOCUMENTATION.md)
+- [아키텍처](./docs/architecture/ARCHITECTURE.md)
+- [배포 가이드](./docs/guides/DEPLOYMENT_GUIDE.md)
+- [보안 가이드](./docs/guides/SECURITY_GUIDE.md)
 
-### Mobile App Structure
-- **Screens** - React Native screens with navigation
-- **Components** - Reusable UI components
-- **Services** - API calls, WebSocket, push notifications
-- **Stores** - Zustand state management
-- **Utils** - Helper functions, constants
+## 🛠 기술 스택
 
-## 📚 Documentation
+### Frontend
+- React Native + Expo SDK 50
+- TypeScript 5.x
+- Zustand (상태 관리)
+- Socket.IO Client
+- React Navigation 6.x
 
-- [API Documentation](./docs/api.md)
-- [Mobile App Guide](./docs/mobile.md)
-- [Database Schema](./docs/database.md)
-- [Deployment Guide](./docs/deployment.md)
+### Backend
+- Node.js 20.x LTS + Express.js
+- TypeScript 5.x
+- Prisma ORM + PostgreSQL
+- Redis (캐시/세션)
+- Socket.IO Server
 
-## 🤝 Contributing
+### Infrastructure
+- AWS (EC2, RDS, S3, CloudFront)
+- Docker + Kubernetes
+- GitHub Actions (CI/CD)
+- Prometheus + Grafana (모니터링)
+
+## 🤝 기여하기
 
 1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📄 License
+## 📄 라이선스
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+이 프로젝트는 비공개 소프트웨어입니다. 무단 복제 및 배포를 금지합니다.
 
-## 🔗 Links
+## 📞 문의
 
-- [Expo Documentation](https://docs.expo.dev/)
-- [React Native Documentation](https://reactnative.dev/)
-- [Express.js Documentation](https://expressjs.com/)
-- [Prisma Documentation](https://www.prisma.io/docs/)
-- [Stripe Documentation](https://stripe.com/docs/)
+- Email: contact@glimpse.kr
+- Website: https://glimpse.kr
+
+---
+
+<p align="center">Made with ❤️ by Glimpse Team</p>

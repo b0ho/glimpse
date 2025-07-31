@@ -1,8 +1,4 @@
 #!/bin/bash
-
-# Glimpse Production Deployment Script
-# Usage: ./scripts/deploy.sh [staging|production]
-
 set -e
 
 # Colors for output
@@ -11,137 +7,86 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Configuration
-ENVIRONMENT=${1:-staging}
-DOCKER_REGISTRY="your-registry.com"
-IMAGE_TAG=$(git rev-parse --short HEAD)
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+echo -e "${GREEN}🚀 Glimpse Production Deployment Script${NC}"
 
-# Function to print colored output
-print_status() {
-    echo -e "${GREEN}[$(date '+%Y-%m-%d %H:%M:%S')]${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}[$(date '+%Y-%m-%d %H:%M:%S')] ERROR:${NC} $1"
-}
-
-print_warning() {
-    echo -e "${YELLOW}[$(date '+%Y-%m-%d %H:%M:%S')] WARNING:${NC} $1"
-}
-
-# Check if environment file exists
-if [ ! -f ".env.${ENVIRONMENT}" ]; then
-    print_error "Environment file .env.${ENVIRONMENT} not found!"
+# Check if .env file exists
+if [ ! -f .env.production ]; then
+    echo -e "${RED}❌ Error: .env.production file not found!${NC}"
+    echo "Please copy .env.production.example to .env.production and fill in the values."
     exit 1
 fi
 
-print_status "Starting deployment to ${ENVIRONMENT} environment..."
+# Load environment variables
+export $(cat .env.production | grep -v '^#' | xargs)
 
-# 1. Run tests
-print_status "Running tests..."
-npm test -- --coverage --passWithNoTests || {
-    print_error "Tests failed! Aborting deployment."
-    exit 1
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
 }
 
-# 2. Build Docker images
-print_status "Building Docker images..."
-docker build -t ${DOCKER_REGISTRY}/glimpse-backend:${IMAGE_TAG} -f server/Dockerfile .
-docker build -t ${DOCKER_REGISTRY}/glimpse-frontend:${IMAGE_TAG} -f web/Dockerfile .
+# Check prerequisites
+echo -e "${YELLOW}📋 Checking prerequisites...${NC}"
 
-# 3. Tag images
-docker tag ${DOCKER_REGISTRY}/glimpse-backend:${IMAGE_TAG} ${DOCKER_REGISTRY}/glimpse-backend:latest
-docker tag ${DOCKER_REGISTRY}/glimpse-frontend:${IMAGE_TAG} ${DOCKER_REGISTRY}/glimpse-frontend:latest
+if ! command_exists docker; then
+    echo -e "${RED}❌ Docker is not installed${NC}"
+    exit 1
+fi
 
-# 4. Push images to registry
-print_status "Pushing images to registry..."
-docker push ${DOCKER_REGISTRY}/glimpse-backend:${IMAGE_TAG}
-docker push ${DOCKER_REGISTRY}/glimpse-backend:latest
-docker push ${DOCKER_REGISTRY}/glimpse-frontend:${IMAGE_TAG}
-docker push ${DOCKER_REGISTRY}/glimpse-frontend:latest
+if ! command_exists docker-compose; then
+    echo -e "${RED}❌ Docker Compose is not installed${NC}"
+    exit 1
+fi
 
-# 5. Create deployment directory
-DEPLOY_DIR="deployments/${ENVIRONMENT}_${TIMESTAMP}"
-mkdir -p ${DEPLOY_DIR}
+echo -e "${GREEN}✅ All prerequisites met${NC}"
 
-# 6. Copy necessary files
-print_status "Preparing deployment files..."
-cp docker-compose.yml ${DEPLOY_DIR}/
-cp .env.${ENVIRONMENT} ${DEPLOY_DIR}/.env
-cp -r nginx ${DEPLOY_DIR}/
-cp -r monitoring ${DEPLOY_DIR}/
+# Build and deploy
+echo -e "${YELLOW}🔨 Building containers...${NC}"
+docker-compose -f docker-compose.prod.yml build
 
-# 7. Update image tags in docker-compose
-sed -i.bak "s|image: .*glimpse-backend.*|image: ${DOCKER_REGISTRY}/glimpse-backend:${IMAGE_TAG}|g" ${DEPLOY_DIR}/docker-compose.yml
-sed -i.bak "s|image: .*glimpse-frontend.*|image: ${DOCKER_REGISTRY}/glimpse-frontend:${IMAGE_TAG}|g" ${DEPLOY_DIR}/docker-compose.yml
-rm ${DEPLOY_DIR}/docker-compose.yml.bak
+echo -e "${YELLOW}🔄 Pulling latest images...${NC}"
+docker-compose -f docker-compose.prod.yml pull
 
-# 8. Create deployment archive
-print_status "Creating deployment archive..."
-tar -czf ${DEPLOY_DIR}.tar.gz -C deployments ${ENVIRONMENT}_${TIMESTAMP}
+echo -e "${YELLOW}🗃️ Running database migrations...${NC}"
+docker-compose -f docker-compose.prod.yml run --rm server npx prisma migrate deploy
 
-# 9. Deploy to server (example using SSH)
-if [ "${ENVIRONMENT}" == "production" ]; then
-    SERVER="production.glimpse.app"
+echo -e "${YELLOW}🚀 Starting services...${NC}"
+docker-compose -f docker-compose.prod.yml up -d
+
+echo -e "${YELLOW}🏥 Waiting for services to be healthy...${NC}"
+sleep 10
+
+# Check service health
+echo -e "${YELLOW}🔍 Checking service status...${NC}"
+docker-compose -f docker-compose.prod.yml ps
+
+# Run health checks
+echo -e "${YELLOW}🏥 Running health checks...${NC}"
+
+# Check server health
+if curl -f http://localhost:8080/api/health > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ Server is healthy${NC}"
 else
-    SERVER="staging.glimpse.app"
+    echo -e "${RED}❌ Server health check failed${NC}"
+    docker-compose -f docker-compose.prod.yml logs server
+    exit 1
 fi
 
-print_status "Deploying to ${SERVER}..."
-scp ${DEPLOY_DIR}.tar.gz deploy@${SERVER}:/home/deploy/
-ssh deploy@${SERVER} << EOF
-    cd /home/deploy
-    tar -xzf ${ENVIRONMENT}_${TIMESTAMP}.tar.gz
-    cd ${ENVIRONMENT}_${TIMESTAMP}
-    
-    # Backup current deployment
-    if [ -d "/app/current" ]; then
-        mv /app/current /app/backup_${TIMESTAMP}
-    fi
-    
-    # Deploy new version
-    mv * /app/current/
-    cd /app/current
-    
-    # Pull images
-    docker-compose pull
-    
-    # Run database migrations
-    docker-compose run --rm backend npm run db:migrate
-    
-    # Start services with zero downtime
-    docker-compose up -d --scale backend=2
-    sleep 30
-    docker-compose up -d --scale backend=1
-    
-    # Health check
-    curl -f http://localhost/health || exit 1
-    
-    # Clean up old containers
-    docker system prune -f
-EOF
+# Check Redis
+if docker-compose -f docker-compose.prod.yml exec -T redis redis-cli ping | grep -q PONG; then
+    echo -e "${GREEN}✅ Redis is healthy${NC}"
+else
+    echo -e "${RED}❌ Redis health check failed${NC}"
+    exit 1
+fi
 
-# 10. Clean up local files
-print_status "Cleaning up..."
-rm -rf ${DEPLOY_DIR}
-rm ${DEPLOY_DIR}.tar.gz
+# Check PostgreSQL
+if docker-compose -f docker-compose.prod.yml exec -T postgres pg_isready -U glimpse | grep -q "accepting connections"; then
+    echo -e "${GREEN}✅ PostgreSQL is healthy${NC}"
+else
+    echo -e "${RED}❌ PostgreSQL health check failed${NC}"
+    exit 1
+fi
 
-# 11. Send deployment notification
-print_status "Sending deployment notification..."
-curl -X POST https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK \
-    -H 'Content-type: application/json' \
-    -d '{
-        "text": "🚀 Deployment to '${ENVIRONMENT}' completed successfully!",
-        "attachments": [{
-            "color": "good",
-            "fields": [
-                {"title": "Environment", "value": "'${ENVIRONMENT}'", "short": true},
-                {"title": "Version", "value": "'${IMAGE_TAG}'", "short": true},
-                {"title": "Timestamp", "value": "'${TIMESTAMP}'", "short": true}
-            ]
-        }]
-    }'
-
-print_status "Deployment completed successfully! 🎉"
-print_status "Version ${IMAGE_TAG} is now live on ${ENVIRONMENT}"
+echo -e "${GREEN}✨ Deployment completed successfully!${NC}"
+echo -e "${YELLOW}📊 View logs: docker-compose -f docker-compose.prod.yml logs -f${NC}"
+echo -e "${YELLOW}🛑 Stop services: docker-compose -f docker-compose.prod.yml down${NC}"
