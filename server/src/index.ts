@@ -38,6 +38,7 @@ import adminRoutes from './routes/admin';
 import locationRoutes from './routes/location';
 import videoCallRoutes from './routes/videoCallRoutes';
 import storyRoutes from './routes/storyRoutes';
+import friendRoutes from './routes/friends';
 
 const app = express();
 
@@ -156,6 +157,7 @@ app.use('/api/v1/content-filter', contentFilterRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/location', locationRoutes);
+app.use('/api/v1/friends', friendRoutes);
 
 // Initialize Socket.IO chat handlers
 import { initializeChatSocket } from './socket/chatSocket';

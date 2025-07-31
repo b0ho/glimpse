@@ -53,7 +53,11 @@ export class UserController {
   async updateProfile(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
-      const { nickname, age, bio, profileImage } = req.body;
+      const { 
+        nickname, age, bio, profileImage,
+        companyName, education, location, interests,
+        height, mbti, drinking, smoking 
+      } = req.body;
 
       // Validate inputs
       if (nickname && !validateNickname(nickname)) {
@@ -71,6 +75,14 @@ export class UserController {
           ...(age && { age }),
           ...(bio && { bio }),
           ...(profileImage && { profileImage }),
+          ...(companyName && { companyName }),
+          ...(education && { education }),
+          ...(location && { location }),
+          ...(interests && { interests }),
+          ...(height && { height }),
+          ...(mbti && { mbti }),
+          ...(drinking && { drinking }),
+          ...(smoking && { smoking }),
           updatedAt: new Date()
         }
       });
@@ -187,6 +199,16 @@ export class UserController {
       const userId = req.auth!.userId;
       const { page = 1, limit = 20 } = req.query;
 
+      // Check if user is premium
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { isPremium: true }
+      });
+
+      if (!user?.isPremium) {
+        throw createError(403, '프리미엄 사용자만 받은 좋아요를 볼 수 있습니다.');
+      }
+
       const likes = await prisma.userLike.findMany({
         where: { toUserId: userId },
         include: {
@@ -215,8 +237,11 @@ export class UserController {
         success: true,
         data: likes.map(like => ({
           id: like.id,
-          user: like.fromUser,
+          fromUserId: like.fromUserId,
+          fromUser: like.fromUser,
+          groupId: like.groupId,
           group: like.group,
+          isSuper: like.isSuper,
           isMatch: like.isMatch,
           createdAt: like.createdAt
         }))
@@ -524,7 +549,7 @@ export class UserController {
       const settings = req.body;
 
       // Validate settings
-      const allowedSettings = ['pushEnabled', 'newMessages', 'newMatches', 'likes', 'groupInvites', 'marketing'];
+      const allowedSettings = ['likes', 'matches', 'messages', 'friendRequests'];
       const filteredSettings: any = {};
 
       for (const key of allowedSettings) {
@@ -533,13 +558,41 @@ export class UserController {
         }
       }
 
-      // Store notification settings in user metadata or separate table
-      // For now, we'll store in user model (you may want to create a separate NotificationSettings model)
       await prisma.user.update({
         where: { id: userId },
         data: {
-          // You might want to add a notificationSettings JSON field to User model
-          // notificationSettings: filteredSettings
+          notificationSettings: filteredSettings
+        }
+      });
+
+      res.json({
+        success: true,
+        data: filteredSettings
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updatePrivacySettings(req: ClerkAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.auth!.userId;
+      const settings = req.body;
+
+      // Validate settings
+      const allowedSettings = ['showProfile', 'showOnlineStatus', 'showLastSeen', 'allowFriendRequests'];
+      const filteredSettings: any = {};
+
+      for (const key of allowedSettings) {
+        if (key in settings && typeof settings[key] === 'boolean') {
+          filteredSettings[key] = settings[key];
+        }
+      }
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          privacySettings: filteredSettings
         }
       });
 

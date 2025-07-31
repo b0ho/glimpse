@@ -761,4 +761,8 @@ router.delete('/likes/history',
   userController.deleteLikeHistory
 );
 
+// Privacy & Notification Settings
+router.put('/privacy-settings', clerkAuthMiddleware, userController.updatePrivacySettings);
+router.put('/notification-settings', clerkAuthMiddleware, userController.updateNotificationSettings);
+
 export default router;

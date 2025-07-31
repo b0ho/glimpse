@@ -31,6 +31,20 @@ model User {
   deletionReason String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  
+  // Additional profile fields
+  companyName   String?
+  education     String?
+  location      String?
+  interests     String[] // Array of interests
+  height        Int?
+  mbti          String?
+  drinking      String?
+  smoking       String?
+  
+  // Settings
+  privacySettings Json?
+  notificationSettings Json?
 
   // Relations
   deviceTokens       UserDeviceToken[]
@@ -62,6 +76,12 @@ model User {
   commentLikes       CommentLike[]
   groupChatMembers   GroupChatMember[]
   groupChatMessages  GroupChatMessage[]
+  
+  // Friend relations
+  sentFriendRequests     FriendRequest[] @relation("SentRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
+  friendships1           Friendship[] @relation("User1Friends")
+  friendships2           Friendship[] @relation("User2Friends")
 
   @@map("users")
 }
@@ -804,4 +824,42 @@ model EmailVerification {
   @@index([code])
   @@index([expiresAt])
   @@map("email_verifications")
+}
+
+// Friend System
+model FriendRequest {
+  id         String   @id @default(cuid())
+  fromUserId String
+  toUserId   String
+  message    String?
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  fromUser   User     @relation("SentRequests", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser     User     @relation("ReceivedRequests", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId])
+  @@index([toUserId, status])
+  @@map("friend_requests")
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model Friendship {
+  id        String   @id @default(cuid())
+  user1Id   String
+  user2Id   String
+  createdAt DateTime @default(now())
+
+  user1     User     @relation("User1Friends", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2     User     @relation("User2Friends", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  @@unique([user1Id, user2Id])
+  @@index([user2Id])
+  @@map("friendships")
 }

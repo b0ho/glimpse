@@ -26,6 +26,25 @@ export interface User {
   deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  
+  // Additional profile fields
+  companyName?: string;
+  education?: string;
+  location?: string;
+  interests?: string[];
+  height?: number;
+  mbti?: string;
+  drinking?: string;
+  smoking?: string;
+  
+  // Relations
+  matches?: Match[];
+  friends?: User[];
+  groupMemberships?: GroupMember[];
+  
+  // Settings
+  privacySettings?: PrivacySettings;
+  notificationSettings?: NotificationSettings;
 }
 
 // Gender Type
@@ -156,6 +175,11 @@ export interface Like {
   isSuper: boolean;
   mode?: AppMode; // Dating or Friendship mode
   createdAt: Date;
+  
+  // Relations
+  fromUser?: User;
+  toUser?: User;
+  group?: Group;
 }
 
 // Legacy interface for backwards compatibility
@@ -170,12 +194,18 @@ export interface Match {
   groupId: string;
   status?: 'ACTIVE' | 'EXPIRED' | 'DELETED';
   isActive: boolean;
+  isMutual?: boolean;
   chatChannelId?: string;
   type?: 'DATING' | 'FRIENDSHIP'; // Match type
   matchedAt?: Date; // When match was created
   lastMessageAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  
+  // Relations
+  user1?: User;
+  user2?: User;
+  group?: Group;
 }
 
 // Chat Types
@@ -350,6 +380,58 @@ export interface UserDeviceToken {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Friend Request Types
+export interface FriendRequest {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  message?: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // Relations
+  fromUser?: User;
+  toUser?: User;
+}
+
+// Settings Types
+export interface PrivacySettings {
+  showProfile: boolean;
+  showOnlineStatus: boolean;
+  showLastSeen: boolean;
+  allowFriendRequests: boolean;
+}
+
+export interface NotificationSettings {
+  likes: boolean;
+  matches: boolean;
+  messages: boolean;
+  friendRequests: boolean;
+}
+
+// Profile Update Types
+export interface UpdateProfileData {
+  nickname?: string;
+  bio?: string;
+  age?: number;
+  gender?: Gender;
+  companyName?: string;
+  education?: string;
+  location?: string;
+  interests?: string[];
+  height?: number;
+  mbti?: string;
+  drinking?: string;
+  smoking?: string;
+}
+
+export interface ProfileUpdateResponse {
+  success: boolean;
+  data?: User;
+  message?: string;
 }
 
 // Anonymous User Info for privacy system
