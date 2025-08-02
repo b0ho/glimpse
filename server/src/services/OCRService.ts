@@ -3,40 +3,87 @@ import { createError } from '../middleware/errorHandler';
 import sharp from 'sharp';
 import FormData from 'form-data';
 
+/**
+ * OCR 결과 인터페이스
+ * @interface OCRResult
+ */
 interface OCRResult {
+  /** 추출된 텍스트 */
   text: string;
+  /** 신뢰도 (0-1) */
   confidence: number;
+  /** 경계 상자 배열 */
   boundingBoxes?: BoundingBox[];
 }
 
+/**
+ * 텍스트 경계 상자 인터페이스
+ * @interface BoundingBox
+ */
 interface BoundingBox {
+  /** 텍스트 내용 */
   text: string;
+  /** X 좌표 */
   x: number;
+  /** Y 좌표 */
   y: number;
+  /** 너비 */
   width: number;
+  /** 높이 */
   height: number;
+  /** 신뢰도 */
   confidence: number;
 }
 
+/**
+ * 회사 정보 인터페이스
+ * @interface CompanyInfo
+ */
 interface CompanyInfo {
+  /** 회사명 */
   companyName?: string;
+  /** 이메일 도메인 */
   domain?: string;
+  /** 신뢰도 */
   confidence: number;
 }
 
+/**
+ * 신분증 정보 인터페이스
+ * @interface IDCardInfo
+ */
 interface IDCardInfo {
+  /** 이름 */
   name?: string;
+  /** 주민등록번호 */
   idNumber?: string;
+  /** 발급일 */
   issueDate?: string;
+  /** 신뢰도 */
   confidence: number;
 }
 
+/**
+ * OCR 서비스 - 문서 인식 및 정보 추출
+ * @class OCRService
+ */
 export class OCRService {
+  /** 네이버 OCR API URL */
   private readonly naverApiUrl = 'https://naveropenapi.apigw.ntruss.com/vision/v1/ocr';
+  /** 네이버 클라이언트 ID */
   private readonly naverClientId = process.env.NAVER_OCR_CLIENT_ID || '';
+  /** 네이버 클라이언트 시크릿 */
   private readonly naverClientSecret = process.env.NAVER_OCR_CLIENT_SECRET || '';
+  /** 구글 Vision API 키 */
   private readonly googleApiKey = process.env.GOOGLE_VISION_API_KEY || '';
 
+  /**
+   * 이미지에서 텍스트 추출
+   * @param {Buffer} imageBuffer - 이미지 버퍼
+   * @param {'naver' | 'google'} [ocrProvider='naver'] - OCR 제공자
+   * @returns {Promise<OCRResult>} OCR 결과
+   * @throws {Error} OCR 추출 실패 시
+   */
   async extractTextFromImage(imageBuffer: Buffer, ocrProvider: 'naver' | 'google' = 'naver'): Promise<OCRResult> {
     try {
       // Preprocess image for better OCR results
@@ -56,6 +103,12 @@ export class OCRService {
     }
   }
 
+  /**
+   * 회사 카드 인증
+   * @param {Buffer} imageBuffer - 이미지 버퍼
+   * @returns {Promise<CompanyInfo>} 추출된 회사 정보
+   * @throws {Error} 인증 실패 시
+   */
   async verifyCompanyCard(imageBuffer: Buffer): Promise<CompanyInfo> {
     try {
       const ocrResult = await this.extractTextFromImage(imageBuffer);
@@ -73,6 +126,12 @@ export class OCRService {
     }
   }
 
+  /**
+   * 신분증 인증
+   * @param {Buffer} imageBuffer - 이미지 버퍼
+   * @returns {Promise<IDCardInfo>} 추출된 신분증 정보
+   * @throws {Error} 인증 실패 시
+   */
   async verifyIDCard(imageBuffer: Buffer): Promise<IDCardInfo> {
     try {
       const ocrResult = await this.extractTextFromImage(imageBuffer);
@@ -90,6 +149,12 @@ export class OCRService {
     }
   }
 
+  /**
+   * 학생증 인증
+   * @param {Buffer} imageBuffer - 이미지 버퍼
+   * @returns {Promise<Object>} 추출된 학생증 정보
+   * @throws {Error} 인증 실패 시
+   */
   async verifyStudentCard(imageBuffer: Buffer): Promise<{ university?: string; studentId?: string; name?: string; confidence: number }> {
     try {
       const ocrResult = await this.extractTextFromImage(imageBuffer);
@@ -107,6 +172,12 @@ export class OCRService {
     }
   }
 
+  /**
+   * OCR을 위한 이미지 전처리
+   * @private
+   * @param {Buffer} imageBuffer - 원본 이미지 버퍼
+   * @returns {Promise<Buffer>} 전처리된 이미지 버퍼
+   */
   private async preprocessImage(imageBuffer: Buffer): Promise<Buffer> {
     try {
       // Enhance image for better OCR results
@@ -125,6 +196,13 @@ export class OCRService {
     }
   }
 
+  /**
+   * 네이버 OCR로 텍스트 추출
+   * @private
+   * @param {Buffer} imageBuffer - 이미지 버퍼
+   * @returns {Promise<OCRResult>} OCR 결과
+   * @throws {Error} API 호출 실패 시
+   */
   private async extractWithNaverOCR(imageBuffer: Buffer): Promise<OCRResult> {
     if (!this.naverClientId || !this.naverClientSecret) {
       throw new Error('Naver OCR credentials not configured');
@@ -186,6 +264,13 @@ export class OCRService {
     }
   }
 
+  /**
+   * Google Vision API로 텍스트 추출
+   * @private
+   * @param {Buffer} imageBuffer - 이미지 버퍼
+   * @returns {Promise<OCRResult>} OCR 결과
+   * @throws {Error} API 호출 실패 시
+   */
   private async extractWithGoogleVision(imageBuffer: Buffer): Promise<OCRResult> {
     if (!this.googleApiKey) {
       throw new Error('Google Vision API key not configured');
@@ -243,6 +328,12 @@ export class OCRService {
     }
   }
 
+  /**
+   * 텍스트에서 회사 정보 추출
+   * @private
+   * @param {string} text - OCR로 추출된 텍스트
+   * @returns {CompanyInfo} 추출된 회사 정보
+   */
   private extractCompanyInfo(text: string): CompanyInfo {
     const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     let companyName: string | undefined;
@@ -298,6 +389,12 @@ export class OCRService {
     };
   }
 
+  /**
+   * 텍스트에서 신분증 정보 추출
+   * @private
+   * @param {string} text - OCR로 추출된 텍스트
+   * @returns {IDCardInfo} 추출된 신분증 정보
+   */
   private extractIDCardInfo(text: string): IDCardInfo {
     const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     let name: string | undefined;
@@ -363,6 +460,12 @@ export class OCRService {
     };
   }
 
+  /**
+   * 텍스트에서 학생증 정보 추출
+   * @private
+   * @param {string} text - OCR로 추출된 텍스트
+   * @returns {Object} 추출된 학생증 정보
+   */
   private extractStudentCardInfo(text: string): { university?: string; studentId?: string; name?: string; confidence: number } {
     const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     let university: string | undefined;
@@ -425,6 +528,12 @@ export class OCRService {
     };
   }
 
+  /**
+   * 한국 주민등록번호 유효성 검사
+   * @private
+   * @param {string} idNumber - 주민등록번호
+   * @returns {boolean} 유효성 여부
+   */
   private validateKoreanIDNumber(idNumber: string): boolean {
     // Remove any dashes or spaces
     const cleanId = idNumber.replace(/[-\s]/g, '');
@@ -449,6 +558,11 @@ export class OCRService {
     return checkDigit === lastDigit;
   }
 
+  /**
+   * 문서 타입 감지
+   * @param {Buffer} imageBuffer - 이미지 버퍼
+   * @returns {Promise<'id_card' | 'company_card' | 'student_card' | 'unknown'>} 문서 타입
+   */
   async detectDocumentType(imageBuffer: Buffer): Promise<'id_card' | 'company_card' | 'student_card' | 'unknown'> {
     try {
       const ocrResult = await this.extractTextFromImage(imageBuffer);
@@ -476,6 +590,11 @@ export class OCRService {
     }
   }
 
+  /**
+   * 문서 품질 검증
+   * @param {Buffer} imageBuffer - 이미지 버퍼
+   * @returns {Promise<Object>} 품질 검증 결과
+   */
   async validateDocumentQuality(imageBuffer: Buffer): Promise<{ isValid: boolean; issues: string[] }> {
     const issues: string[] = [];
 
@@ -524,7 +643,12 @@ export class OCRService {
     }
   }
 
-  // Method alias for compatibility
+  /**
+   * 사원증 처리 (호환성을 위한 별칭)
+   * @param {string | Buffer} imageInput - 이미지 입력 (base64 또는 버퍼)
+   * @returns {Promise<Object>} 처리 결과
+   * @throws {Error} 지원하지 않는 입력 형식
+   */
   async processEmployeeCard(imageInput: string | Buffer): Promise<{ companyName?: string; employeeName?: string; confidence: number }> {
     let imageBuffer: Buffer;
     

@@ -20,19 +20,38 @@ import {
   MatchTemplate 
 } from './email/templates';
 
+/**
+ * 이메일 서비스 - 다양한 이메일 제공자를 통한 이메일 전송 관리
+ * @class EmailService
+ */
 export class EmailService {
+  /** 싱글톤 인스턴스 */
   private static instance: EmailService;
+  /** 이메일 제공자 */
   private provider: EmailProvider;
+  /** 시간당 전송 제한 */
   private readonly rateLimitPerHour = 100;
+  /** 대량 전송 배치 크기 */
   private readonly bulkBatchSize = 50;
+  /** 대량 전송 지연 시간 (ms) */
   private readonly bulkDelayMs = 1000;
 
+  /**
+   * EmailService 생성자
+   * @private
+   */
   private constructor() {
     // Select provider based on configuration
     const emailProvider = process.env.EMAIL_PROVIDER || 'dev';
     this.provider = this.initializeProvider(emailProvider);
   }
 
+  /**
+   * 이메일 제공자 초기화
+   * @private
+   * @param {string} providerName - 제공자 이름
+   * @returns {EmailProvider} 이메일 제공자 인스턴스
+   */
   private initializeProvider(providerName: string): EmailProvider {
     try {
       switch (providerName) {
@@ -51,6 +70,11 @@ export class EmailService {
     }
   }
 
+  /**
+   * 싱글톤 인스턴스 조회
+   * @static
+   * @returns {EmailService} 이메일 서비스 인스턴스
+   */
   static getInstance(): EmailService {
     if (!EmailService.instance) {
       EmailService.instance = new EmailService();
@@ -58,6 +82,12 @@ export class EmailService {
     return EmailService.instance;
   }
 
+  /**
+   * 이메일 전송
+   * @param {EmailOptions} options - 이메일 옵션
+   * @returns {Promise<boolean>} 전송 성공 여부
+   * @throws {Error} 전송 제한 초과 또는 중요 이메일 전송 실패 시
+   */
   async sendEmail(options: EmailOptions): Promise<boolean> {
     // Check rate limit
     const rateLimitKey = `email:ratelimit:${options.to}`;
@@ -92,6 +122,12 @@ export class EmailService {
     }
   }
 
+  /**
+   * 이메일 활동 로깅
+   * @private
+   * @param {EmailOptions} options - 이메일 옵션
+   * @returns {Promise<void>}
+   */
   private async logEmailActivity(options: EmailOptions): Promise<void> {
     try {
       await prisma.emailLog.create({
@@ -108,12 +144,22 @@ export class EmailService {
     }
   }
 
+  /**
+   * 중요 이메일 여부 확인
+   * @private
+   * @param {string} subject - 이메일 제목
+   * @returns {boolean} 중요 이메일 여부
+   */
   private isCriticalEmail(subject: string): boolean {
     const criticalKeywords = ['인증', '비밀번호', '결제', '보안'];
     return criticalKeywords.some(keyword => subject.includes(keyword));
   }
 
-  // Template-based email methods
+  /**
+   * 회사 인증 이메일 전송
+   * @param {VerificationEmailData} data - 인증 이메일 데이터
+   * @returns {Promise<boolean>} 전송 성공 여부
+   */
   async sendCompanyVerificationEmail(data: VerificationEmailData): Promise<boolean> {
     const { html, text } = VerificationTemplate.generateCompanyVerificationEmail(data);
     
@@ -125,6 +171,12 @@ export class EmailService {
     });
   }
 
+  /**
+   * 환영 이메일 전송
+   * @param {string} userEmail - 사용자 이메일
+   * @param {string} nickname - 사용자 닉네임
+   * @returns {Promise<boolean>} 전송 성공 여부
+   */
   async sendWelcomeEmail(userEmail: string, nickname: string): Promise<boolean> {
     const { html, text } = WelcomeTemplate.generateWelcomeEmail(nickname);
     
@@ -136,6 +188,11 @@ export class EmailService {
     });
   }
 
+  /**
+   * 매칭 알림 이메일 전송
+   * @param {MatchNotificationData} data - 매칭 알림 데이터
+   * @returns {Promise<boolean>} 전송 성공 여부
+   */
   async sendMatchNotificationEmail(data: MatchNotificationData): Promise<boolean> {
     const { html, text } = MatchTemplate.generateMatchNotificationEmail(data);
     
@@ -147,6 +204,12 @@ export class EmailService {
     });
   }
 
+  /**
+   * 비밀번호 재설정 이메일 전송
+   * @param {string} userEmail - 사용자 이메일
+   * @param {string} resetToken - 재설정 토큰
+   * @returns {Promise<boolean>} 전송 성공 여부
+   */
   async sendPasswordResetEmail(userEmail: string, resetToken: string): Promise<boolean> {
     const resetLink = `${process.env.APP_URL}/reset-password?token=${resetToken}`;
     
@@ -181,6 +244,11 @@ export class EmailService {
     });
   }
 
+  /**
+   * 대량 이메일 전송
+   * @param {EmailOptions[]} emails - 이메일 옵션 배열
+   * @returns {Promise<Object>} 전송 결과 (성공, 실패, 오류 정보)
+   */
   async sendBulkEmails(emails: EmailOptions[]): Promise<{
     successful: number;
     failed: number;
@@ -220,6 +288,10 @@ export class EmailService {
     return results;
   }
 
+  /**
+   * 이메일 제공자 상태 확인
+   * @returns {Promise<boolean>} 제공자 정상 동작 여부
+   */
   async checkProviderHealth(): Promise<boolean> {
     try {
       return await this.provider.checkHealth();
@@ -229,6 +301,11 @@ export class EmailService {
     }
   }
 
+  /**
+   * 사용자 이메일 통계 조회
+   * @param {string} userEmail - 사용자 이메일
+   * @returns {Promise<Object>} 이메일 통계 (전송 수, 마지막 전송 시간)
+   */
   async getEmailStats(userEmail: string): Promise<{
     sent: number;
     lastSent: Date | null;

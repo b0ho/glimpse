@@ -7,18 +7,40 @@ import { createError } from '../middleware/errorHandler';
 import { prisma } from '../config/database';
 import { metrics } from '../utils/monitoring';
 
+/**
+ * 인증 코드 인터페이스
+ * @interface VerificationCode
+ */
 interface VerificationCode {
+  /** 인증 코드 */
   code: string;
+  /** 휴대폰 번호 */
   phoneNumber: string;
+  /** 만료 시간 */
   expiresAt: Date;
+  /** 시도 횟수 */
   attempts: number;
 }
 
+/**
+ * SMS 제공자 인터페이스
+ * @interface SMSProvider
+ */
 interface SMSProvider {
+  /**
+   * SMS 전송
+   * @param {string} phoneNumber - 휴대폰 번호
+   * @param {string} message - 메시지 내용
+   * @returns {Promise<void>}
+   */
   send(phoneNumber: string, message: string): Promise<void>;
 }
 
-// Twilio SMS Provider
+/**
+ * Twilio SMS 제공자 구현
+ * @class TwilioProvider
+ * @implements {SMSProvider}
+ */
 class TwilioProvider implements SMSProvider {
   private client: twilio.Twilio;
 
@@ -64,7 +86,11 @@ class TwilioProvider implements SMSProvider {
   }
 }
 
-// Korean SMS Provider (Aligo API)
+/**
+ * 한국 SMS 제공자 (Aligo API) 구현
+ * @class AligoProvider
+ * @implements {SMSProvider}
+ */
 class AligoProvider implements SMSProvider {
   private readonly apiUrl = 'https://apis.aligo.in/send/';
   private readonly apiKey: string;
@@ -114,7 +140,11 @@ class AligoProvider implements SMSProvider {
   }
 }
 
-// NHN Toast SMS Provider
+/**
+ * NHN Toast SMS 제공자 구현
+ * @class ToastSMSProvider
+ * @implements {SMSProvider}
+ */
 class ToastSMSProvider implements SMSProvider {
   private readonly apiUrl: string;
   private readonly appKey: string;
@@ -169,17 +199,33 @@ class ToastSMSProvider implements SMSProvider {
   }
 }
 
+/**
+ * SMS 서비스 - 인증 코드 및 알림 전송 관리
+ * @class SMSService
+ */
 export class SMSService {
+  /** SMS 제공자 */
   private provider: SMSProvider;
+  /** 최대 인증 시도 횟수 */
   private readonly maxAttempts = 3;
+  /** 인증 코드 길이 */
   private readonly codeLength = 6;
+  /** 인증 코드 만료 시간 (분) */
   private readonly expiryMinutes = 5;
+  /** 재전송 쿨다운 (초) */
   private readonly resendCooldown = 60; // seconds
+  /** 제공자별 실패 횟수 */
   private failureCount: Map<string, number> = new Map();
+  /** 마지막 실패 시간 */
   private lastFailureTime: Map<string, number> = new Map();
+  /** 전환 전 최대 실패 횟수 */
   private readonly maxFailuresBeforeSwitch = 3;
+  /** 실패 초기화 시간 */
   private readonly failureResetTime = 300000; // 5 minutes
 
+  /**
+   * SMSService 생성자
+   */
   constructor() {
     // Select provider based on configuration
     const smsProvider = process.env.SMS_PROVIDER || 'dev';
@@ -214,6 +260,11 @@ export class SMSService {
     }
   }
 
+  /**
+   * 개발용 SMS 제공자 생성
+   * @private
+   * @returns {SMSProvider} 개발용 제공자
+   */
   private createDevProvider(): SMSProvider {
     return {
       async send(phoneNumber: string, message: string): Promise<void> {
@@ -223,6 +274,12 @@ export class SMSService {
     };
   }
 
+  /**
+   * 인증 코드 전송
+   * @param {string} phoneNumber - 휴대폰 번호
+   * @returns {Promise<{ verificationId: string }>} 인증 ID
+   * @throws {Error} 쿨다운 중이거나 전송 실패 시
+   */
   async sendVerificationCode(phoneNumber: string): Promise<{ verificationId: string }> {
     // Check for recent send to prevent spam
     const recentKey = `sms:recent:${phoneNumber}`;
@@ -307,6 +364,13 @@ export class SMSService {
     return { verificationId };
   }
 
+  /**
+   * 인증 코드 검증
+   * @param {string} verificationId - 인증 ID
+   * @param {string} code - 입력한 인증 코드
+   * @returns {Promise<boolean>} 인증 성공 여부
+   * @throws {Error} 유효하지 않은 요청, 만료, 최대 시도 초과, 잘못된 코드
+   */
   async verifyCode(verificationId: string, code: string): Promise<boolean> {
     const key = `sms:verification:${verificationId}`;
     const verification = await cacheService.get<VerificationCode>(key);
@@ -345,6 +409,12 @@ export class SMSService {
     return true;
   }
 
+  /**
+   * 알림 SMS 전송
+   * @param {string} phoneNumber - 휴대폰 번호
+   * @param {string} message - 메시지 내용
+   * @returns {Promise<void>}
+   */
   async sendNotification(phoneNumber: string, message: string): Promise<void> {
     try {
       await this.provider.send(phoneNumber, message);
@@ -354,23 +424,49 @@ export class SMSService {
     }
   }
 
+  /**
+   * 매칭 알림 전송
+   * @param {string} phoneNumber - 휴대폰 번호
+   * @param {string} matchedUserNickname - 매칭된 사용자 닉네임
+   * @returns {Promise<void>}
+   */
   async sendMatchNotification(phoneNumber: string, matchedUserNickname: string): Promise<void> {
     const message = `[Glimpse] 축하합니다! ${matchedUserNickname}님과 매칭되었습니다. 앱에서 확인해주세요!`;
     await this.sendNotification(phoneNumber, message);
   }
 
+  /**
+   * 결제 확인 SMS 전송
+   * @param {string} phoneNumber - 휴대폰 번호
+   * @param {number} amount - 결제 금액
+   * @param {string} itemName - 상품명
+   * @returns {Promise<void>}
+   */
   async sendPaymentConfirmation(phoneNumber: string, amount: number, itemName: string): Promise<void> {
     const message = `[Glimpse] ${itemName} 결제가 완료되었습니다. 금액: ${amount.toLocaleString()}원`;
     await this.sendNotification(phoneNumber, message);
   }
 
+  /**
+   * 인증 코드 생성
+   * @private
+   * @returns {string} 생성된 인증 코드
+   */
   private generateCode(): string {
     const min = Math.pow(10, this.codeLength - 1);
     const max = Math.pow(10, this.codeLength) - 1;
     return Math.floor(min + Math.random() * (max - min + 1)).toString();
   }
 
-  // Send with retry and failover mechanism
+  /**
+   * 재시도 및 펴오버 메커니즘으로 SMS 전송
+   * @private
+   * @param {string} phoneNumber - 휴대폰 번호
+   * @param {string} message - 메시지 내용
+   * @param {number} [retries=2] - 재시도 횟수
+   * @returns {Promise<void>}
+   * @throws {Error} 모든 재시도 실패 시
+   */
   private async sendWithRetry(phoneNumber: string, message: string, retries = 2): Promise<void> {
     const currentProviderName = process.env.SMS_PROVIDER || 'dev';
     
@@ -408,6 +504,12 @@ export class SMSService {
     }
   }
   
+  /**
+   * 펴백 제공자 조회
+   * @private
+   * @param {string} currentProvider - 현재 제공자
+   * @returns {string | null} 펴백 제공자 이름
+   */
   private getFallbackProvider(currentProvider: string): string | null {
     const providers = ['twilio', 'aligo', 'toast'];
     const available = providers.filter(p => p !== currentProvider);
@@ -436,6 +538,12 @@ export class SMSService {
     return null;
   }
   
+  /**
+   * 제공자 초기화
+   * @private
+   * @param {string} providerName - 제공자 이름
+   * @returns {void}
+   */
   private initializeProvider(providerName: string): void {
     try {
       switch (providerName) {
@@ -458,7 +566,10 @@ export class SMSService {
     }
   }
   
-  // Admin function to check SMS balance (provider-specific)
+  /**
+   * SMS 잔액 확인 (관리자 기능, 제공자별)
+   * @returns {Promise<Object>} 잔액 및 상태 정보
+   */
   async checkBalance(): Promise<{ provider: string; balance?: number; status: string; failureStats?: any }> {
     const provider = process.env.SMS_PROVIDER || 'dev';
     
@@ -515,7 +626,11 @@ export class SMSService {
     }
   }
   
-  // Get SMS statistics
+  /**
+   * SMS 통계 조회
+   * @param {number} [days=7] - 조회 기간 (일)
+   * @returns {Promise<any>} SMS 통계
+   */
   async getStatistics(days = 7): Promise<any> {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);

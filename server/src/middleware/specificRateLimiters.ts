@@ -1,7 +1,11 @@
 import rateLimit from 'express-rate-limit';
 import { createError } from './errorHandler';
 
-// File upload rate limiter (10 uploads per hour per user)
+/**
+ * 파일 업로드 속도 제한기
+ * @constant
+ * @description 사용자당 시간당 10개 파일 업로드 제한
+ */
 export const fileUploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10,
@@ -17,7 +21,11 @@ export const fileUploadLimiter = rateLimit({
   }
 });
 
-// Like sending rate limiter (30 likes per minute per user)
+/**
+ * 좋아요 전송 속도 제한기
+ * @constant
+ * @description 사용자당 분당 30개 좋아요 제한
+ */
 export const likeSendingLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 30,
@@ -32,7 +40,11 @@ export const likeSendingLimiter = rateLimit({
   }
 });
 
-// Payment creation rate limiter (5 attempts per hour per user)
+/**
+ * 결제 생성 속도 제한기
+ * @constant
+ * @description 사용자당 시간당 5회 결제 시도 제한
+ */
 export const paymentCreationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
@@ -47,7 +59,11 @@ export const paymentCreationLimiter = rateLimit({
   }
 });
 
-// Webhook rate limiter (100 requests per minute per IP)
+/**
+ * 웹훅 속도 제한기
+ * @constant
+ * @description IP당 분당 100개 웹훅 요청 제한
+ */
 export const webhookLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 100,
@@ -60,7 +76,11 @@ export const webhookLimiter = rateLimit({
   }
 });
 
-// Premium API rate limiter (1000 requests per hour for premium users)
+/**
+ * 프리미엄 API 속도 제한기
+ * @constant
+ * @description 프리미엄 사용자: 시간당 1000개, 일반 사용자: 시간당 100개 요청 제한
+ */
 export const premiumApiLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: async (req) => {

@@ -6,17 +6,33 @@ import { PaymentService } from './PaymentService';
 import { cacheService } from './CacheService';
 import { createError } from '../middleware/errorHandler';
 
+/**
+ * 재시도 설정 인터페이스
+ * @interface RetryConfig
+ */
 interface RetryConfig {
+  /** 최대 재시도 횟수 */
   maxRetries: number;
+  /** 초기 지연 시간 (ms) */
   initialDelay: number;
+  /** 최대 지연 시간 (ms) */
   maxDelay: number;
+  /** 백오프 계수 */
   backoffFactor: number;
 }
 
+/**
+ * 재시도 상태 인터페이스
+ * @interface RetryState
+ */
 interface RetryState {
+  /** 시도 횟수 */
   attempts: number;
+  /** 마지막 시도 시간 */
   lastAttemptAt: Date;
+  /** 다음 재시도 시간 */
   nextRetryAt: Date;
+  /** 오류 이력 */
   errorHistory: Array<{
     timestamp: Date;
     error: string;
@@ -24,6 +40,10 @@ interface RetryState {
   }>;
 }
 
+/**
+ * 결제 재시도 서비스 - 자동 재시도 및 서킷 브레이커 관리
+ * @class PaymentRetryService
+ */
 export class PaymentRetryService {
   private readonly defaultConfig: RetryConfig = {
     maxRetries: 3,
@@ -42,7 +62,13 @@ export class PaymentRetryService {
   }
   
   /**
-   * Process a payment with automatic retry on failure
+   * 실패 시 자동 재시도로 결제 처리
+   * @param {string} paymentId - 결제 ID
+   * @param {string} userId - 사용자 ID
+   * @param {any} paymentData - 결제 데이터
+   * @param {Partial<RetryConfig>} [config] - 재시도 설정
+   * @returns {Promise<any>} 결제 결과
+   * @throws {Error} 최대 재시도 초과 또는 서킷 오픈
    */
   async processPaymentWithRetry(
     paymentId: string,
@@ -140,7 +166,12 @@ export class PaymentRetryService {
   }
   
   /**
-   * Handle webhook retry for failed webhook deliveries
+   * 실패한 웹훅 전송 재시도 처리
+   * @param {string} webhookId - 웹훅 ID
+   * @param {string} url - 웹훅 URL
+   * @param {any} payload - 웹훅 페이로드
+   * @param {Record<string, string>} headers - HTTP 헤더
+   * @returns {Promise<void>}
    */
   async retryWebhook(
     webhookId: string,
@@ -203,7 +234,8 @@ export class PaymentRetryService {
   }
   
   /**
-   * Get all payments pending retry
+   * 재시도 대기 중인 모든 결제 조회
+   * @returns {Promise<any[]>} 대기 중인 결제 목록
    */
   async getPendingRetries(): Promise<any[]> {
     const pattern = 'payment:retry:*';
@@ -240,7 +272,8 @@ export class PaymentRetryService {
   }
   
   /**
-   * Process all pending retries (called by cron job)
+   * 모든 대기 중인 재시도 처리 (cron job에서 호출)
+   * @returns {Promise<void>}
    */
   async processPendingRetries(): Promise<void> {
     const pendingRetries = await this.getPendingRetries();
@@ -263,18 +296,44 @@ export class PaymentRetryService {
   
   // Helper methods
   
+  /**
+   * 재시도 상태 조회
+   * @private
+   * @param {string} paymentId - 결제 ID
+   * @returns {Promise<RetryState | null>} 재시도 상태
+   */
   private async getRetryState(paymentId: string): Promise<RetryState | null> {
     return cacheService.get<RetryState>(`payment:retry:${paymentId}`);
   }
   
+  /**
+   * 재시도 상태 저장
+   * @private
+   * @param {string} paymentId - 결제 ID
+   * @param {RetryState} state - 재시도 상태
+   * @returns {Promise<void>}
+   */
   private async saveRetryState(paymentId: string, state: RetryState): Promise<void> {
     await cacheService.set(`payment:retry:${paymentId}`, state, { ttl: 86400 }); // 24 hours
   }
   
+  /**
+   * 재시도 상태 삭제
+   * @private
+   * @param {string} paymentId - 결제 ID
+   * @returns {Promise<void>}
+   */
   private async clearRetryState(paymentId: string): Promise<void> {
     await cacheService.delete(`payment:retry:${paymentId}`);
   }
   
+  /**
+   * 백오프 지연 시간 계산
+   * @private
+   * @param {number} attempt - 시도 횟수
+   * @param {RetryConfig} config - 재시도 설정
+   * @returns {number} 지연 시간 (ms)
+   */
   private calculateBackoff(attempt: number, config: RetryConfig): number {
     const delay = Math.min(
       config.initialDelay * Math.pow(config.backoffFactor, attempt - 1),
@@ -284,6 +343,12 @@ export class PaymentRetryService {
     return delay + Math.random() * delay * 0.1;
   }
   
+  /**
+   * 재시도 가능한 오류인지 확인
+   * @private
+   * @param {any} error - 오류 객체
+   * @returns {boolean} 재시도 가능 여부
+   */
   private isRetryableError(error: any): boolean {
     const errorMessage = error.message || '';
     const statusCode = error.statusCode || error.status;
@@ -312,6 +377,16 @@ export class PaymentRetryService {
     );
   }
   
+  /**
+   * 재시도 스케줄링
+   * @private
+   * @param {string} paymentId - 결제 ID
+   * @param {string} userId - 사용자 ID
+   * @param {any} paymentData - 결제 데이터
+   * @param {number} delay - 지연 시간 (ms)
+   * @param {RetryConfig} config - 재시도 설정
+   * @returns {Promise<void>}
+   */
   private async scheduleRetry(
     paymentId: string,
     userId: string,
@@ -328,6 +403,13 @@ export class PaymentRetryService {
     }, delay);
   }
   
+  /**
+   * 결제를 실패로 표시
+   * @private
+   * @param {string} paymentId - 결제 ID
+   * @param {string} reason - 실패 사유
+   * @returns {Promise<void>}
+   */
   private async markPaymentAsFailed(paymentId: string, reason: string): Promise<void> {
     await prisma.payment.update({
       where: { id: paymentId },
@@ -343,6 +425,12 @@ export class PaymentRetryService {
   
   // Circuit breaker implementation
   
+  /**
+   * 서킷 브레이커 오픈 상태 확인
+   * @private
+   * @param {string} provider - 결제 제공자
+   * @returns {boolean} 서킷 오픈 여부
+   */
   private isCircuitOpen(provider: string): boolean {
     const state = this.circuitBreaker.get(provider);
     if (!state) return false;
@@ -356,6 +444,12 @@ export class PaymentRetryService {
     return state.isOpen;
   }
   
+  /**
+   * 성공 기록
+   * @private
+   * @param {string} provider - 결제 제공자
+   * @returns {void}
+   */
   private recordSuccess(provider: string): void {
     const state = this.circuitBreaker.get(provider);
     if (state) {
@@ -364,6 +458,12 @@ export class PaymentRetryService {
     }
   }
   
+  /**
+   * 실패 기록
+   * @private
+   * @param {string} provider - 결제 제공자
+   * @returns {void}
+   */
   private recordFailure(provider: string): void {
     let state = this.circuitBreaker.get(provider);
     if (!state) {
@@ -385,9 +485,16 @@ export class PaymentRetryService {
   }
 }
 
+/**
+ * 서킷 브레이커 상태 인터페이스
+ * @interface CircuitBreakerState
+ */
 interface CircuitBreakerState {
+  /** 실패 횟수 */
   failures: number;
+  /** 오픈 상태 */
   isOpen: boolean;
+  /** 오픈 시간 */
   openedAt: number;
 }
 

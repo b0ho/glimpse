@@ -4,30 +4,59 @@ import path from 'path';
 
 
 
+/**
+ * 알림 페이로드 인터페이스
+ * @interface NotificationPayload
+ */
 interface NotificationPayload {
+  /** 알림 제목 */
   title: string;
+  /** 알림 본문 */
   body: string;
+  /** 알림 아이콘 */
   icon?: string;
+  /** 알림 이미지 */
   image?: string;
+  /** 알림 사운드 */
   sound?: string;
+  /** 뱃지 숫자 (iOS) */
   badge?: number;
+  /** 추가 데이터 */
   data?: Record<string, string>;
 }
 
+/**
+ * 알림 전송 옵션 인터페이스
+ * @interface SendNotificationOptions
+ */
 interface SendNotificationOptions {
+  /** 사용자 ID */
   userId: string;
+  /** 알림 페이로드 */
   payload: NotificationPayload;
+  /** 주제 (토픽) */
   topic?: string;
+  /** 조건식 */
   condition?: string;
 }
 
+/**
+ * Firebase 푸시 알림 서비스
+ * @class FirebaseService
+ */
 export class FirebaseService {
+  /** Firebase 초기화 상태 */
   private initialized = false;
 
   constructor() {
     this.initializeFirebase();
   }
 
+  /**
+   * Firebase Admin SDK 초기화
+   * @private
+   * @returns {void}
+   */
   private initializeFirebase() {
     try {
       if (!admin.apps.length) {
@@ -63,6 +92,11 @@ export class FirebaseService {
     }
   }
 
+  /**
+   * 특정 사용자에게 푸시 알림 전송
+   * @param {SendNotificationOptions} options - 알림 전송 옵션
+   * @returns {Promise<boolean>} 전송 성공 여부
+   */
   async sendNotificationToUser(options: SendNotificationOptions): Promise<boolean> {
     if (!this.initialized) {
       console.warn('Firebase not initialized, skipping notification');
@@ -142,6 +176,11 @@ export class FirebaseService {
     }
   }
 
+  /**
+   * 대량 알림 전송
+   * @param {SendNotificationOptions[]} notifications - 알림 목록
+   * @returns {Promise<number>} 성공적으로 전송된 알림 수
+   */
   async sendBulkNotifications(notifications: SendNotificationOptions[]): Promise<number> {
     let successCount = 0;
     
@@ -168,6 +207,12 @@ export class FirebaseService {
     return successCount;
   }
 
+  /**
+   * 특정 주제 구독자들에게 알림 전송
+   * @param {string} topic - 주제명
+   * @param {NotificationPayload} payload - 알림 페이로드
+   * @returns {Promise<boolean>} 전송 성공 여부
+   */
   async sendNotificationToTopic(topic: string, payload: NotificationPayload): Promise<boolean> {
     if (!this.initialized) {
       console.warn('Firebase not initialized, skipping topic notification');
@@ -194,6 +239,12 @@ export class FirebaseService {
     }
   }
 
+  /**
+   * FCM 토큰을 특정 주제에 구독
+   * @param {string[]} tokens - FCM 토큰 목록
+   * @param {string} topic - 구독할 주제
+   * @returns {Promise<boolean>} 구독 성공 여부
+   */
   async subscribeToTopic(tokens: string[], topic: string): Promise<boolean> {
     if (!this.initialized) {
       return false;
@@ -209,6 +260,12 @@ export class FirebaseService {
     }
   }
 
+  /**
+   * FCM 토큰을 특정 주제에서 구독 해제
+   * @param {string[]} tokens - FCM 토큰 목록
+   * @param {string} topic - 구독 해제할 주제
+   * @returns {Promise<boolean>} 구독 해제 성공 여부
+   */
   async unsubscribeFromTopic(tokens: string[], topic: string): Promise<boolean> {
     if (!this.initialized) {
       return false;
@@ -224,6 +281,13 @@ export class FirebaseService {
     }
   }
 
+  /**
+   * 사용자 FCM 토큰 추가
+   * @param {string} userId - 사용자 ID
+   * @param {string} token - FCM 토큰
+   * @param {'ios' | 'android'} deviceType - 디바이스 타입
+   * @returns {Promise<void>}
+   */
   async addUserFCMToken(userId: string, token: string, deviceType: 'ios' | 'android'): Promise<void> {
     try {
       // Check if token already exists
@@ -257,6 +321,12 @@ export class FirebaseService {
     }
   }
 
+  /**
+   * 사용자 FCM 토큰 제거
+   * @param {string} userId - 사용자 ID
+   * @param {string} token - 제거할 FCM 토큰
+   * @returns {Promise<void>}
+   */
   async removeUserFCMToken(userId: string, token: string): Promise<void> {
     try {
       await prisma.fcmToken.deleteMany({
@@ -269,6 +339,12 @@ export class FirebaseService {
     }
   }
 
+  /**
+   * 사용자 FCM 토큰 일괄 제거
+   * @param {string} userId - 사용자 ID
+   * @param {string[]} tokens - 제거할 FCM 토큰 목록
+   * @returns {Promise<void>}
+   */
   async removeUserFCMTokens(userId: string, tokens: string[]): Promise<void> {
     try {
       await prisma.fcmToken.deleteMany({
@@ -284,6 +360,11 @@ export class FirebaseService {
     }
   }
 
+  /**
+   * 사용자의 활성 FCM 토큰 목록 조회
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<string[]>} FCM 토큰 목록
+   */
   async getUserFCMTokens(userId: string): Promise<string[]> {
     try {
       const tokens = await prisma.fcmToken.findMany({
@@ -301,6 +382,10 @@ export class FirebaseService {
     }
   }
 
+  /**
+   * 비활성 FCM 토큰 정리
+   * @returns {Promise<number>} 정리된 토큰 수
+   */
   async cleanupInactiveFCMTokens(): Promise<number> {
     if (!this.initialized) {
       return 0;
@@ -364,6 +449,10 @@ export class FirebaseService {
 
 
 
+  /**
+   * 예약된 알림 전송
+   * @returns {Promise<number>} 전송된 알림 수
+   */
   async sendScheduledNotifications(): Promise<number> {
     try {
       const scheduledNotifications = await prisma.scheduledNotification.findMany({
@@ -407,6 +496,13 @@ export class FirebaseService {
     }
   }
 
+  /**
+   * 알림 예약
+   * @param {string} userId - 사용자 ID
+   * @param {NotificationPayload} payload - 알림 페이로드
+   * @param {Date} scheduledAt - 예약 시간
+   * @returns {Promise<string>} 예약된 알림 ID
+   */
   async scheduleNotification(
     userId: string,
     payload: NotificationPayload,
@@ -426,6 +522,12 @@ export class FirebaseService {
     return notification.id;
   }
 
+  /**
+   * 예약된 알림 취소
+   * @param {string} notificationId - 알림 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<boolean>} 취소 성공 여부
+   */
   async cancelScheduledNotification(notificationId: string, userId: string): Promise<boolean> {
     try {
       const result = await prisma.scheduledNotification.deleteMany({
@@ -443,7 +545,11 @@ export class FirebaseService {
     }
   }
 
-  // Notification templates for common use cases
+  /**
+   * 매칭 알림 템플릿 생성
+   * @param {string} matchedUserNickname - 매칭된 사용자 닉네임
+   * @returns {NotificationPayload} 알림 페이로드
+   */
   createMatchNotification(matchedUserNickname: string): NotificationPayload {
     return {
       title: '새로운 매치! 🎉',
@@ -457,6 +563,12 @@ export class FirebaseService {
     };
   }
 
+  /**
+   * 메시지 알림 템플릿 생성
+   * @param {string} senderNickname - 발신자 닉네임
+   * @param {string} message - 메시지 내용
+   * @returns {NotificationPayload} 알림 페이로드
+   */
   createMessageNotification(senderNickname: string, message: string): NotificationPayload {
     return {
       title: senderNickname,
@@ -470,6 +582,10 @@ export class FirebaseService {
     };
   }
 
+  /**
+   * 좋아요 알림 템플릿 생성
+   * @returns {NotificationPayload} 알림 페이로드
+   */
   createLikeNotification(): NotificationPayload {
     return {
       title: '누군가 당신을 좋아해요! 💖',
@@ -483,6 +599,11 @@ export class FirebaseService {
     };
   }
 
+  /**
+   * 그룹 초대 알림 템플릿 생성
+   * @param {string} groupName - 그룹명
+   * @returns {NotificationPayload} 알림 페이로드
+   */
   createGroupInviteNotification(groupName: string): NotificationPayload {
     return {
       title: '그룹 초대 🎪',

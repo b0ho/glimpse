@@ -12,12 +12,26 @@ import { audioService } from '../../services/audioService';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 
+/**
+ * VoiceMessagePlayer 컴포넌트 Props
+ * @interface VoiceMessagePlayerProps
+ */
 interface VoiceMessagePlayerProps {
+  /** 음성 파일 URI */
   uri: string;
+  /** 음성 메시지 길이(초) */
   duration: number;
+  /** 내 메시지 여부 */
   isOwnMessage?: boolean;
 }
 
+/**
+ * 음성 메시지 플레이어 컴포넌트 - 음성 메시지 재생 및 제어
+ * @component
+ * @param {VoiceMessagePlayerProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 음성 메시지 플레이어 UI
+ * @description 음성 메시지를 재생하고 진행 상황을 표시하는 플레이어 컴포넌트
+ */
 export const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({
   uri,
   duration,
@@ -34,6 +48,10 @@ export const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({
     };
   }, []);
 
+  /**
+   * 재생/일시정지 토글 핸들러
+   * @returns {Promise<void>}
+   */
   const handlePlayPause = async () => {
     try {
       if (isPlaying) {
@@ -51,6 +69,11 @@ export const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({
     }
   };
 
+  /**
+   * 재생 상태 업데이트 핸들러
+   * @param {AVPlaybackStatus} status - 재생 상태
+   * @returns {void}
+   */
   const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
       setCurrentPosition(status.positionMillis / 1000);
@@ -65,6 +88,11 @@ export const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({
     }
   };
 
+  /**
+   * 슬라이더 값 변경 핸들러
+   * @param {number} value - 슬라이더 값(초)
+   * @returns {Promise<void>}
+   */
   const handleSliderValueChange = async (value: number) => {
     try {
       await audioService.setPlaybackPosition(value * 1000);
@@ -74,6 +102,11 @@ export const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({
     }
   };
 
+  /**
+   * 시간 포맷팅
+   * @param {number} seconds - 초 단위 시간
+   * @returns {string} 포맷된 시간 문자열 (mm:ss)
+   */
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);

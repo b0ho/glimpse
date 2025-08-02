@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import { v4 as uuidv4 } from 'uuid';
 
-// Content Security Policy configuration
+/**
+ * Content Security Policy 설정
+ * @constant
+ * @description 콘텐츠 보안 정책 지시자 설정
+ */
 const contentSecurityPolicy = {
   directives: {
     defaultSrc: ["'self'"],
@@ -51,7 +55,11 @@ const contentSecurityPolicy = {
   }
 };
 
-// Security headers middleware
+/**
+ * 보안 헤더 미들웨어 - Helmet을 사용한 보안 헤더 설정
+ * @constant
+ * @description XSS, 클릭재킹, 스니핑 등 다양한 공격 방어
+ */
 export const securityHeaders = helmet({
   contentSecurityPolicy: process.env.NODE_ENV === 'production' ? contentSecurityPolicy : false,
   crossOriginEmbedderPolicy: { policy: "require-corp" },
@@ -73,14 +81,26 @@ export const securityHeaders = helmet({
   xssFilter: true
 });
 
-// Request ID middleware for tracing
+/**
+ * 요청 ID 미들웨어 - 요청 추적을 위한 고유 ID 생성
+ * @param {Request} req - Express 요청 객체
+ * @param {Response} res - Express 응답 객체
+ * @param {NextFunction} next - 다음 미들웨어 함수
+ * @returns {void}
+ */
 export const requestId = (req: Request, res: Response, next: NextFunction) => {
   req.id = req.headers['x-request-id'] as string || uuidv4();
   res.setHeader('X-Request-ID', req.id);
   next();
 };
 
-// Security monitoring middleware
+/**
+ * 보안 모니터링 미들웨어 - 의심스러운 요청 탐지
+ * @param {Request} req - Express 요청 객체
+ * @param {Response} res - Express 응답 객체
+ * @param {NextFunction} next - 다음 미들웨어 함수
+ * @returns {void}
+ */
 export const securityMonitoring = (req: Request, res: Response, next: NextFunction) => {
   // Log suspicious activities
   const suspiciousPatterns = [
@@ -122,7 +142,13 @@ export const securityMonitoring = (req: Request, res: Response, next: NextFuncti
   next();
 };
 
-// API Key validation for internal services
+/**
+ * API 키 인증 미들웨어 - 내부 서비스용
+ * @param {Request} req - Express 요청 객체
+ * @param {Response} res - Express 응답 객체
+ * @param {NextFunction} next - 다음 미들웨어 함수
+ * @returns {void | Response}
+ */
 export const apiKeyAuth = (req: Request, res: Response, next: NextFunction) => {
   const apiKey = req.headers['x-api-key'];
   
@@ -138,7 +164,12 @@ export const apiKeyAuth = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-// Prevent timing attacks on string comparison
+/**
+ * 안전한 문자열 비교 - 타이밍 공격 방어
+ * @param {string} a - 첫 번째 문자열
+ * @param {string} b - 두 번째 문자열
+ * @returns {boolean} 두 문자열이 같은지 여부
+ */
 export const safeCompare = (a: string, b: string): boolean => {
   if (a.length !== b.length) return false;
   
@@ -150,7 +181,11 @@ export const safeCompare = (a: string, b: string): boolean => {
   return result === 0;
 };
 
-// Apply all security middleware
+/**
+ * 모든 보안 미들웨어 적용
+ * @param {any} app - Express 애플리케이션 인스턴스
+ * @returns {void}
+ */
 export const applySecurity = (app: any) => {
   // Basic security headers
   app.use(securityHeaders);
@@ -179,10 +214,15 @@ export const applySecurity = (app: any) => {
   });
 };
 
-// Extend Express Request type
+/**
+ * Express Request 타입 확장
+ * @global
+ * @description 요청 ID를 Request 객체에 추가
+ */
 declare global {
   namespace Express {
     interface Request {
+      /** 요청 ID */
       id?: string;
     }
   }

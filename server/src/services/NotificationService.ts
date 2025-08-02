@@ -9,7 +9,12 @@ import { logger } from '../middleware/logging';
 
 const firebaseService = new FirebaseService();
 
+/**
+ * 알림 서비스 - 푸시 알림 및 인앱 알림 관리
+ * @class NotificationService
+ */
 export class NotificationService {
+  /** 싱글턴 인스턴스 */
   private static instance: NotificationService;
   
   private constructor() {
@@ -23,6 +28,11 @@ export class NotificationService {
     return NotificationService.instance;
   }
 
+  /**
+   * 메시지 큐 핸들러 설정
+   * @private
+   * @returns {void}
+   */
   private setupMessageQueueHandlers() {
     // Handle push notification retries
     messageQueueService.on('push_notification_retry', async (notification) => {
@@ -31,7 +41,14 @@ export class NotificationService {
     });
   }
 
-  // FCM 토큰 관리
+  /**
+   * FCM 토큰 등록
+   * @param {string} userId - 사용자 ID
+   * @param {string} token - FCM 토큰
+   * @param {'ios' | 'android'} deviceType - 디바이스 타입
+   * @returns {Promise<void>}
+   * @throws {Error} 토큰 등록 실패 시
+   */
   async registerFCMToken(userId: string, token: string, deviceType: 'ios' | 'android'): Promise<void> {
     try {
       // 기존 토큰이 있는지 확인
@@ -74,6 +91,11 @@ export class NotificationService {
     }
   }
 
+  /**
+   * FCM 토큰 제거
+   * @param {string} token - 제거할 FCM 토큰
+   * @returns {Promise<void>}
+   */
   async removeFCMToken(token: string): Promise<void> {
     try {
       await prisma.fcmToken.update({
@@ -85,6 +107,11 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 활성 FCM 토큰 조회
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<string[]>} 활성 토큰 배열
+   */
   async getActiveTokens(userId: string): Promise<string[]> {
     const tokens = await prisma.fcmToken.findMany({
       where: {
@@ -96,6 +123,13 @@ export class NotificationService {
 
     return tokens.map(t => t.token);
   }
+  /**
+   * 좋아요 알림 전송
+   * @param {string} userId - 알림 받을 사용자 ID
+   * @param {string} fromUserId - 좋아요 보낸 사용자 ID
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<Object|null>} 생성된 알림 또는 null
+   */
   async sendLikeNotification(userId: string, fromUserId: string, groupId: string) {
     try {
       const [toUser, fromUser, group] = await Promise.all([
@@ -140,6 +174,13 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 매칭 알림 전송
+   * @param {string} userId - 알림 받을 사용자 ID
+   * @param {string} matchedUserId - 매칭된 사용자 ID
+   * @param {string} matchId - 매칭 ID
+   * @returns {Promise<Object|null>} 생성된 알림 또는 null
+   */
   async sendMatchNotification(userId: string, matchedUserId: string, matchId: string) {
     try {
       const [user, matchedUser] = await Promise.all([
@@ -181,6 +222,14 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 메시지 알림 전송
+   * @param {string} userId - 알림 받을 사용자 ID
+   * @param {string} fromUserId - 메시지 보낸 사용자 ID
+   * @param {string} matchId - 매칭 ID
+   * @param {string} messagePreview - 메시지 미리보기
+   * @returns {Promise<Object|null>} 생성된 알림 또는 null
+   */
   async sendMessageNotification(userId: string, fromUserId: string, matchId: string, messagePreview: string) {
     try {
       const fromUser = await prisma.user.findUnique({ where: { id: fromUserId } });
@@ -218,6 +267,13 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 그룹 초대 알림 전송
+   * @param {string} userId - 알림 받을 사용자 ID
+   * @param {string} groupId - 그룹 ID
+   * @param {string} invitedBy - 초대한 사용자 ID
+   * @returns {Promise<Object|null>} 생성된 알림 또는 null
+   */
   async sendGroupInvitationNotification(userId: string, groupId: string, invitedBy: string) {
     try {
       const [group, inviter] = await Promise.all([
@@ -260,6 +316,13 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 인증 상태 알림 전송
+   * @param {string} userId - 알림 받을 사용자 ID
+   * @param {boolean} isApproved - 승인 여부
+   * @param {string} companyName - 회사명
+   * @returns {Promise<Object|null>} 생성된 알림 또는 null
+   */
   async sendVerificationStatusNotification(userId: string, isApproved: boolean, companyName: string) {
     try {
       const type = isApproved ? 'VERIFICATION_APPROVED' : 'VERIFICATION_REJECTED';
@@ -297,6 +360,14 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 결제 성공 알림 전송
+   * @param {string} userId - 알림 받을 사용자 ID
+   * @param {number} amount - 결제 금액
+   * @param {'PREMIUM' | 'CREDITS'} type - 결제 타입
+   * @param {number} [credits] - 크레딧 수 (CREDITS 타입의 경우)
+   * @returns {Promise<Object|null>} 생성된 알림 또는 null
+   */
   async sendPaymentSuccessNotification(userId: string, amount: number, type: 'PREMIUM' | 'CREDITS', credits?: number) {
     try {
       const notification = await prisma.notification.create({
@@ -333,6 +404,13 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 크레딧 구매 알림 전송
+   * @param {string} userId - 알림 받을 사용자 ID
+   * @param {number} credits - 구매한 크레딧 수
+   * @param {number} amount - 결제 금액
+   * @returns {Promise<Object|null>} 생성된 알림 또는 null
+   */
   async sendPurchaseNotification(userId: string, credits: number, amount: number) {
     try {
       const notification = await prisma.notification.create({
@@ -365,6 +443,12 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 구독 시작 알림 전송
+   * @param {string} userId - 알림 받을 사용자 ID
+   * @param {string} plan - 구독 플랜
+   * @returns {Promise<Object|null>} 생성된 알림 또는 null
+   */
   async sendSubscriptionNotification(userId: string, plan: string) {
     try {
       const notification = await prisma.notification.create({
@@ -395,6 +479,12 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 구독 취소 알림 전송
+   * @param {string} userId - 알림 받을 사용자 ID
+   * @param {Date} expiresAt - 만료일
+   * @returns {Promise<Object|null>} 생성된 알림 또는 null
+   */
   async sendSubscriptionCancelledNotification(userId: string, expiresAt: Date) {
     try {
       const notification = await prisma.notification.create({
@@ -426,6 +516,13 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 사용자 알림 목록 조회
+   * @param {string} userId - 사용자 ID
+   * @param {number} [page=1] - 페이지 번호
+   * @param {number} [limit=20] - 페이지당 항목 수
+   * @returns {Promise<Array>} 알림 목록
+   */
   async getUserNotifications(userId: string, page: number = 1, limit: number = 20) {
     const notifications = await prisma.notification.findMany({
       where: { userId },
@@ -437,6 +534,13 @@ export class NotificationService {
     return notifications;
   }
 
+  /**
+   * 알림 읽음 처리
+   * @param {string} notificationId - 알림 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 처리 결과
+   * @throws {Error} 알림을 찾을 수 없을 때
+   */
   async markAsRead(notificationId: string, userId: string) {
     const notification = await prisma.notification.findFirst({
       where: { id: notificationId, userId }
@@ -454,6 +558,11 @@ export class NotificationService {
     return { message: '알림을 읽음으로 표시했습니다.' };
   }
 
+  /**
+   * 모든 알림 읽음 처리
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 처리 결과
+   */
   async markAllAsRead(userId: string) {
     await prisma.notification.updateMany({
       where: { userId, isRead: false },
@@ -463,12 +572,26 @@ export class NotificationService {
     return { message: '모든 알림을 읽음으로 표시했습니다.' };
   }
 
+  /**
+   * 읽지 않은 알림 수 조회
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<number>} 읽지 않은 알림 수
+   */
   async getUnreadCount(userId: string): Promise<number> {
     return await prisma.notification.count({
       where: { userId, isRead: false }
     });
   }
 
+  /**
+   * 통화 알림 전송
+   * @param {string} receiverId - 수신자 ID
+   * @param {string} callerId - 발신자 ID
+   * @param {string} callerName - 발신자 이름
+   * @param {'video' | 'audio'} callType - 통화 타입
+   * @returns {Promise<Object>} 생성된 알림
+   * @throws {Error} 알림 전송 실패 시
+   */
   async sendCallNotification(
     receiverId: string,
     callerId: string,
@@ -506,6 +629,14 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 부재중 통화 알림 전송
+   * @param {string} receiverId - 수신자 ID
+   * @param {string} callerId - 발신자 ID
+   * @param {'video' | 'audio'} callType - 통화 타입
+   * @returns {Promise<Object|null>} 생성된 알림 또는 null
+   * @throws {Error} 알림 전송 실패 시
+   */
   async sendMissedCallNotification(
     receiverId: string,
     callerId: string,
@@ -546,6 +677,13 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 푸시 알림 전송 (내부 메서드)
+   * @private
+   * @param {string} userId - 사용자 ID
+   * @param {Object} payload - 알림 페이로드
+   * @returns {Promise<void>}
+   */
   private async sendPushNotification(userId: string, payload: any) {
     try {
       await firebaseService.sendNotificationToUser({
@@ -572,6 +710,12 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 재시도 가능한 오류인지 확인
+   * @private
+   * @param {any} error - 오류 객체
+   * @returns {boolean} 재시도 가능 여부
+   */
   private isRetryableError(error: any): boolean {
     // Check if error is retryable (network issues, temporary failures)
     const retryableMessages = [
@@ -594,6 +738,13 @@ export class NotificationService {
     );
   }
 
+  /**
+   * 알림 삭제
+   * @param {string} notificationId - 알림 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 삭제 결과
+   * @throws {Error} 알림을 찾을 수 없을 때
+   */
   async deleteNotification(notificationId: string, userId: string) {
     try {
       const notification = await prisma.notification.findFirst({
@@ -615,6 +766,14 @@ export class NotificationService {
     }
   }
 
+  /**
+   * 디바이스 토큰 업데이트
+   * @param {string} userId - 사용자 ID
+   * @param {string} token - 디바이스 토큰
+   * @param {string} platform - 플랫폼
+   * @returns {Promise<Object>} 업데이트 결과
+   * @throws {Error} 업데이트 실패 시
+   */
   async updateDeviceToken(userId: string, token: string, platform: string) {
     try {
       // Deactivate old tokens for this platform

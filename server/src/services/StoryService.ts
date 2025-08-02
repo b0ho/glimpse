@@ -5,8 +5,19 @@ import { fileUploadService } from './FileUploadService';
 import { contentFilterService } from './ContentFilterService';
 import type { Express } from 'express';
 
+/**
+ * 스토리 서비스 - 스토리(24시간 한시적 콘텐츠) 관리
+ * @class StoryService
+ */
 export class StoryService {
-  // Create a new story
+  /**
+   * 새 스토리 생성
+   * @param {string} userId - 사용자 ID
+   * @param {Express.Multer.File} mediaFile - 미디어 파일
+   * @param {string} [caption] - 스토리 캐프션
+   * @returns {Promise<Object>} 생성된 스토리
+   * @throws {Error} 스토리 제한 초과, 부적절한 내용
+   */
   async createStory(
     userId: string,
     mediaFile: Express.Multer.File,
@@ -77,7 +88,11 @@ export class StoryService {
     }
   }
 
-  // Get user's active stories
+  /**
+   * 사용자의 활성 스토리 조회
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Array>} 활성 스토리 목록
+   */
   async getUserStories(userId: string) {
     const stories = await prisma.story.findMany({
       where: {
@@ -106,7 +121,13 @@ export class StoryService {
     }));
   }
 
-  // Get stories from matched users
+  /**
+   * 매칭된 사용자들의 스토리 조회
+   * @param {string} userId - 사용자 ID
+   * @param {number} [page=1] - 페이지 번호
+   * @param {number} [limit=20] - 페이지당 항목 수
+   * @returns {Promise<Array>} 사용자별 그룹화된 스토리
+   */
   async getMatchedUsersStories(userId: string, page: number = 1, limit: number = 20) {
     // First, get all matched user IDs
     const matches = await prisma.match.findMany({
@@ -183,7 +204,13 @@ export class StoryService {
     return Object.values(storiesByUser);
   }
 
-  // View a story
+  /**
+   * 스토리 조회
+   * @param {string} storyId - 스토리 ID
+   * @param {string} viewerId - 조회자 ID
+   * @returns {Promise<Object>} 조회 기록
+   * @throws {Error} 스토리 없음, 만료됨, 권한 없음
+   */
   async viewStory(storyId: string, viewerId: string) {
     const story = await prisma.story.findUnique({
       where: { id: storyId },
@@ -224,7 +251,13 @@ export class StoryService {
     return view;
   }
 
-  // Get story viewers
+  /**
+   * 스토리 조회자 목록 조회
+   * @param {string} storyId - 스토리 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Array>} 조회자 목록
+   * @throws {Error} 스토리 없음, 권한 없음
+   */
   async getStoryViewers(storyId: string, userId: string) {
     const story = await prisma.story.findUnique({
       where: { id: storyId }
@@ -255,7 +288,13 @@ export class StoryService {
     return views;
   }
 
-  // Delete a story
+  /**
+   * 스토리 삭제
+   * @param {string} storyId - 스토리 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 삭제 결과
+   * @throws {Error} 스토리 없음, 권한 없음
+   */
   async deleteStory(storyId: string, userId: string) {
     const story = await prisma.story.findUnique({
       where: { id: storyId }
@@ -281,7 +320,10 @@ export class StoryService {
     return { success: true };
   }
 
-  // Clean up expired stories (called by cron job)
+  /**
+   * 만료된 스토리 정리 (cron job에서 호출)
+   * @returns {Promise<Object>} 삭제된 스토리 수
+   */
   async cleanupExpiredStories() {
     const expiredStories = await prisma.story.findMany({
       where: {
@@ -309,7 +351,13 @@ export class StoryService {
     return { deletedCount: expiredStories.length };
   }
 
-  // Helper: Check if two users are matched
+  /**
+   * 두 사용자의 매칭 여부 확인
+   * @private
+   * @param {string} userId1 - 첫 번째 사용자 ID
+   * @param {string} userId2 - 두 번째 사용자 ID
+   * @returns {Promise<boolean>} 매칭 여부
+   */
   private async checkIfMatched(userId1: string, userId2: string): Promise<boolean> {
     const match = await prisma.match.findFirst({
       where: {
@@ -324,7 +372,13 @@ export class StoryService {
     return !!match;
   }
 
-  // Get story by ID
+  /**
+   * ID로 스토리 조회
+   * @param {string} storyId - 스토리 ID
+   * @param {string} viewerId - 조회자 ID
+   * @returns {Promise<Object>} 스토리 상세 정보
+   * @throws {Error} 스토리 없음, 만료됨, 권한 없음
+   */
   async getStoryById(storyId: string, viewerId: string) {
     const story = await prisma.story.findUnique({
       where: { id: storyId },

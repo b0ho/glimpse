@@ -4,7 +4,19 @@ import { notificationService } from './NotificationService';
 import { APP_CONFIG } from '@shared/constants';
 import { canUserLike, calculateLikeCost } from '@shared/utils';
 
+/**
+ * 좋아요 서비스 - 좋아요 및 매칭 관리
+ * @class LikeService
+ */
 export class LikeService {
+  /**
+   * 좋아요 전송
+   * @param {string} fromUserId - 좋아요 보내는 사용자 ID
+   * @param {string} toUserId - 좋아요 받는 사용자 ID
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<Object>} 좋아요 결과 (매칭 여부 포함)
+   * @throws {Error} 같은 그룹 아님, 중복 좋아요, 쿨다운, 크레딧 부족 등
+   */
   async sendLike(fromUserId: string, toUserId: string, groupId: string) {
     // Check if users are in the same group
     const [fromUserInGroup, toUserInGroup] = await Promise.all([
@@ -154,6 +166,14 @@ export class LikeService {
     }
   }
 
+  /**
+   * 좋아요 취소
+   * @param {string} fromUserId - 좋아요 보낸 사용자 ID
+   * @param {string} toUserId - 좋아요 받은 사용자 ID
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<Object>} 취소 결과
+   * @throws {Error} 좋아요 기록을 찾을 수 없을 때
+   */
   async unlikeUser(fromUserId: string, toUserId: string, groupId: string) {
     const like = await prisma.userLike.findFirst({
       where: { fromUserId, toUserId, groupId }
@@ -191,6 +211,11 @@ export class LikeService {
     return { message: '좋아요가 취소되었습니다.' };
   }
 
+  /**
+   * 좋아요 통계 조회
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 좋아요 통계 (보낸 수, 받은 수, 매칭 수)
+   */
   async getLikeStats(userId: string) {
     const [sent, received, matches] = await Promise.all([
       prisma.userLike.count({ where: { fromUserId: userId } }),
@@ -201,6 +226,14 @@ export class LikeService {
     return { sent, received, matches };
   }
 
+  /**
+   * 나를 좋아한 사람 목록 조회 (프리미엄 전용)
+   * @param {string} userId - 사용자 ID
+   * @param {number} [page=1] - 페이지 번호
+   * @param {number} [limit=20] - 페이지당 항목 수
+   * @returns {Promise<Array>} 좋아요한 사람 목록
+   * @throws {Error} 프리미엄 회원이 아닐 때
+   */
   async getWhoLikesYou(userId: string, page: number = 1, limit: number = 20) {
     const user = await prisma.user.findUnique({
       where: { id: userId },

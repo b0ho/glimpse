@@ -11,14 +11,30 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
+/**
+ * IncomingCallModal 컴포넌트 Props
+ * @interface IncomingCallModalProps
+ */
 interface IncomingCallModalProps {
+  /** 모달 표시 여부 */
   visible: boolean;
+  /** 통화 요청자 이름 */
   callerName: string;
+  /** 통화 타입 */
   callType: 'video' | 'audio';
+  /** 통화 수락 핸들러 */
   onAccept: () => void;
+  /** 통화 거절 핸들러 */
   onReject: () => void;
 }
 
+/**
+ * 수신 전화 모달 컴포넌트 - 음성/영상 통화 수신 알림
+ * @component
+ * @param {IncomingCallModalProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 수신 전화 모달 UI
+ * @description 통화 수신 시 표시되는 모달로 진동과 애니메이션 효과 포함
+ */
 export const IncomingCallModal: React.FC<IncomingCallModalProps> = ({
   visible,
   callerName,

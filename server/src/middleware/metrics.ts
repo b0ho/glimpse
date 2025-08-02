@@ -2,14 +2,27 @@ import { Request, Response, NextFunction } from 'express';
 import { metrics } from '@opentelemetry/api';
 import { performance } from 'perf_hooks';
 
-// 메트릭 미터 생성
+/**
+ * OpenTelemetry 메트릭 미터
+ * @constant
+ * @description 애플리케이션 메트릭 수집을 위한 미터
+ */
 const meter = metrics.getMeter('glimpse-server', '1.0.0');
 
-// 카운터와 히스토그램 생성
+/**
+ * HTTP 요청 카운터
+ * @constant
+ * @description 총 HTTP 요청 수 추적
+ */
 const httpRequestCounter = meter.createCounter('http_requests_total', {
   description: 'Total number of HTTP requests',
 });
 
+/**
+ * HTTP 요청 시간 히스토그램
+ * @constant
+ * @description HTTP 요청 처리 시간 분포
+ */
 const httpRequestDuration = meter.createHistogram('http_request_duration_seconds', {
   description: 'Duration of HTTP requests in seconds',
   unit: 's',
@@ -29,29 +42,59 @@ const responseSizeHistogram = meter.createHistogram('http_response_size_bytes', 
   unit: 'By',
 });
 
-// 비즈니스 메트릭
+/**
+ * 사용자 등록 카운터
+ * @constant
+ * @description 총 사용자 등록 수 추적
+ */
 const userRegistrationCounter = meter.createCounter('user_registrations_total', {
   description: 'Total number of user registrations',
 });
 
+/**
+ * 매칭 카운터
+ * @constant
+ * @description 총 매칭 수 추적
+ */
 const matchCounter = meter.createCounter('matches_total', {
   description: 'Total number of matches created',
 });
 
+/**
+ * 좋아요 카운터
+ * @constant
+ * @description 총 좋아요 수 추적
+ */
 const likeCounter = meter.createCounter('likes_total', {
   description: 'Total number of likes',
 });
 
+/**
+ * 결제 카운터
+ * @constant
+ * @description 총 결제 수 추적
+ */
 const paymentCounter = meter.createCounter('payments_total', {
   description: 'Total number of payments',
 });
 
+/**
+ * 결제 금액 히스토그램
+ * @constant
+ * @description 결제 금액 분포 (KRW)
+ */
 const paymentAmountHistogram = meter.createHistogram('payment_amount_krw', {
   description: 'Payment amounts in KRW',
   unit: 'KRW',
 });
 
-// 메트릭 미들웨어
+/**
+ * 메트릭 수집 미들웨어 - HTTP 요청/응답 메트릭 수집
+ * @param {Request} req - Express 요청 객체
+ * @param {Response} res - Express 응답 객체
+ * @param {NextFunction} next - 다음 미들웨어 함수
+ * @returns {void}
+ */
 export const metricsMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const startTime = performance.now();
 
@@ -121,19 +164,40 @@ export const metricsMiddleware = (req: Request, res: Response, next: NextFunctio
   next();
 };
 
-// 비즈니스 메트릭 헬퍼 함수들
+/**
+ * 사용자 등록 메트릭 기록
+ * @param {string} [userType='regular'] - 사용자 타입
+ * @returns {void}
+ */
 export const recordUserRegistration = (userType: string = 'regular') => {
   userRegistrationCounter.add(1, { user_type: userType });
 };
 
+/**
+ * 매칭 메트릭 기록
+ * @param {string} groupType - 그룹 타입
+ * @returns {void}
+ */
 export const recordMatch = (groupType: string) => {
   matchCounter.add(1, { group_type: groupType });
 };
 
+/**
+ * 좋아요 메트릭 기록
+ * @param {boolean} isPremium - 프리미엄 사용자 여부
+ * @returns {void}
+ */
 export const recordLike = (isPremium: boolean) => {
   likeCounter.add(1, { user_type: isPremium ? 'premium' : 'free' });
 };
 
+/**
+ * 결제 메트릭 기록
+ * @param {string} type - 결제 타입
+ * @param {number} amount - 결제 금액
+ * @param {string} [currency='KRW'] - 통화
+ * @returns {void}
+ */
 export const recordPayment = (type: string, amount: number, currency: string = 'KRW') => {
   paymentCounter.add(1, { 
     payment_type: type,
@@ -147,7 +211,11 @@ export const recordPayment = (type: string, amount: number, currency: string = '
   }
 };
 
-// 시스템 메트릭 수집 (1분마다)
+/**
+ * 시스템 메트릭 수집 시작
+ * @description Node.js 시스템 리소스 메트릭을 주기적으로 수집
+ * @returns {void}
+ */
 export const startSystemMetricsCollection = () => {
   const memoryUsageGauge = meter.createObservableGauge('nodejs_memory_usage_bytes', {
     description: 'Node.js memory usage',

@@ -16,12 +16,26 @@ import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { authService } from '@/services/api/authService';
 
+/**
+ * EditNicknameModal 컴포넌트 Props
+ * @interface EditNicknameModalProps
+ */
 interface EditNicknameModalProps {
+  /** 모달 표시 여부 */
   visible: boolean;
+  /** 닫기 핸들러 */
   onClose: () => void;
+  /** 성공 후 콜백 */
   onSuccess?: () => void;
 }
 
+/**
+ * 닉네임 수정 모달 컴포넌트 - 사용자 닉네임 변경
+ * @component
+ * @param {EditNicknameModalProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 닉네임 수정 모달 UI
+ * @description 사용자가 자신의 닉네임을 수정할 수 있는 모달 컴포넌트
+ */
 export const EditNicknameModal: React.FC<EditNicknameModalProps> = ({
   visible,
   onClose,
@@ -39,6 +53,10 @@ export const EditNicknameModal: React.FC<EditNicknameModalProps> = ({
     }
   }, [visible, user]);
 
+  /**
+   * 닉네임 저장 핸들러
+   * @returns {Promise<void>}
+   */
   const handleSave = async () => {
     const trimmedNickname = nickname.trim();
     
@@ -95,6 +113,11 @@ export const EditNicknameModal: React.FC<EditNicknameModalProps> = ({
     }
   };
 
+  /**
+   * 텍스트 변경 핸들러
+   * @param {string} text - 입력된 텍스트
+   * @returns {void}
+   */
   const handleTextChange = (text: string) => {
     // 최대 40자 제한
     if (text.length <= 40) {

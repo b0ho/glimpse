@@ -11,11 +11,24 @@ import { Ionicons } from '@expo/vector-icons';
 import { audioService } from '../../services/audioService';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
+/**
+ * VoiceMessageRecorder 컴포넌트 Props
+ * @interface VoiceMessageRecorderProps
+ */
 interface VoiceMessageRecorderProps {
+  /** 음성 메시지 전송 핸들러 */
   onSend: (audioUri: string, duration: number) => void;
+  /** 녹음 취소 핸들러 */
   onCancel: () => void;
 }
 
+/**
+ * 음성 메시지 녹음 컴포넌트 - 음성 메시지 녹음 및 전송
+ * @component
+ * @param {VoiceMessageRecorderProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 음성 녹음 UI
+ * @description 음성 녹음, 일시정지, 재개, 취소 및 전송 기능을 제공하는 컴포넌트
+ */
 export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
   onSend,
   onCancel,
@@ -73,6 +86,10 @@ export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
     };
   }, [isRecording, isPaused, animatedValue]);
 
+  /**
+   * 음성 녹음 시작
+   * @returns {Promise<void>}
+   */
   const startRecording = async () => {
     try {
       await audioService.startRecording({
@@ -86,6 +103,10 @@ export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
     }
   };
 
+  /**
+   * 음성 녹음 중지 및 전송
+   * @returns {Promise<void>}
+   */
   const stopRecording = async () => {
     try {
       const result = await audioService.stopRecording();
@@ -104,6 +125,10 @@ export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
     }
   };
 
+  /**
+   * 음성 녹음 일시정지
+   * @returns {Promise<void>}
+   */
   const pauseRecording = async () => {
     try {
       await audioService.pauseRecording();
@@ -113,6 +138,10 @@ export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
     }
   };
 
+  /**
+   * 음성 녹음 재개
+   * @returns {Promise<void>}
+   */
   const resumeRecording = async () => {
     try {
       await audioService.resumeRecording();
@@ -122,6 +151,10 @@ export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
     }
   };
 
+  /**
+   * 음성 녹음 취소
+   * @returns {Promise<void>}
+   */
   const cancelRecording = async () => {
     try {
       await audioService.stopRecording();
@@ -135,6 +168,11 @@ export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
     }
   };
 
+  /**
+   * 녹음 시간 포맷팅
+   * @param {number} seconds - 초 단위 시간
+   * @returns {string} 포맷된 시간 문자열 (mm:ss)
+   */
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;

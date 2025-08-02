@@ -9,27 +9,50 @@ import { prisma } from "../config/database";
 import { cloudFrontService } from '../config/cloudfront';
 import crypto from 'crypto';
 
-
-
+/**
+ * 업로드된 파일 인터페이스
+ * @interface UploadedFile
+ */
 interface UploadedFile {
+  /** 파일 ID */
   id: string;
+  /** 원본 파일명 */
   originalName: string;
+  /** 저장된 파일명 */
   filename: string;
+  /** 파일 URL */
   url: string;
+  /** 파일 크기 */
   size: number;
+  /** MIME 타입 */
   mimeType: string;
+  /** 사용자 ID */
   userId: string;
 }
 
+/**
+ * 이미지 처리 옵션 인터페이스
+ * @interface ImageProcessingOptions
+ */
 interface ImageProcessingOptions {
+  /** 너비 */
   width?: number;
+  /** 높이 */
   height?: number;
+  /** 품질 (0-100) */
   quality?: number;
+  /** 이미지 형식 */
   format?: 'jpeg' | 'png' | 'webp';
+  /** 프로그레시브 로딩 여부 */
   progressive?: boolean;
+  /** 블러 강도 */
   blur?: number;
 }
 
+/**
+ * 파일 업로드 서비스 - S3 및 이미지 최적화
+ * @class FileUploadService
+ */
 export class FileUploadService {
   private s3Client: S3Client;
   private bucketName: string;
@@ -60,6 +83,10 @@ export class FileUploadService {
     this.bucketName = process.env.S3_BUCKET_NAME || 'glimpse-uploads';
   }
 
+  /**
+   * Multer 설정 반환
+   * @returns {multer.Multer} Multer 인스턴스
+   */
   getMulterConfig() {
     const storage = multer.memoryStorage();
     
@@ -79,6 +106,12 @@ export class FileUploadService {
     });
   }
 
+  /**
+   * 프로필 이미지 업로드
+   * @param {string} userId - 사용자 ID
+   * @param {Express.Multer.File} file - 업로드할 파일
+   * @returns {Promise<UploadedFile>} 업로드된 파일 정보
+   */
   async uploadProfileImage(userId: string, file: Express.Multer.File): Promise<UploadedFile> {
     // Generate multiple sizes for responsive display
     const sizes = [
@@ -157,6 +190,14 @@ export class FileUploadService {
     };
   }
 
+  /**
+   * 채팅 음성 파일 업로드
+   * @param {string} userId - 사용자 ID
+   * @param {string} matchId - 매치 ID
+   * @param {Express.Multer.File} file - 음성 파일
+   * @returns {Promise<UploadedFile>} 업로드된 파일 정보
+   * @throws {Error} 권한이 없거나 지원하지 않는 형식일 때
+   */
   async uploadChatAudio(userId: string, matchId: string, file: Express.Multer.File): Promise<UploadedFile> {
     // Verify user is part of the match
     const match = await prisma.match.findUnique({
@@ -201,6 +242,14 @@ export class FileUploadService {
     };
   }
 
+  /**
+   * 채팅 이미지 업로드
+   * @param {string} userId - 사용자 ID
+   * @param {string} matchId - 매치 ID
+   * @param {Express.Multer.File} file - 이미지 파일
+   * @returns {Promise<UploadedFile>} 업로드된 파일 정보
+   * @throws {Error} 권한이 없을 때
+   */
   async uploadChatImage(userId: string, matchId: string, file: Express.Multer.File): Promise<UploadedFile> {
     // Verify user is part of the match
     const match = await prisma.match.findUnique({
@@ -278,6 +327,14 @@ export class FileUploadService {
     };
   }
 
+  /**
+   * 그룹 이미지 업로드
+   * @param {string} userId - 사용자 ID
+   * @param {string} groupId - 그룹 ID
+   * @param {Express.Multer.File} file - 이미지 파일
+   * @returns {Promise<UploadedFile>} 업로드된 파일 정보
+   * @throws {Error} 관리자 권한이 없을 때
+   */
   async uploadGroupImage(userId: string, groupId: string, file: Express.Multer.File): Promise<UploadedFile> {
     // Verify user is admin of the group
     const groupMember = await prisma.groupMember.findFirst({
@@ -336,6 +393,14 @@ export class FileUploadService {
     };
   }
 
+  /**
+   * 일반 파일 업로드
+   * @param {Express.Multer.File} file - 업로드할 파일
+   * @param {string} userId - 사용자 ID
+   * @param {string} [category='OTHER'] - 파일 카테고리
+   * @returns {Promise<UploadedFile>} 업로드된 파일 정보
+   * @throws {Error} 지원하지 않는 형식이거나 크기 초과 시
+   */
   async uploadFile(file: Express.Multer.File, userId: string, category: string = 'OTHER'): Promise<UploadedFile> {
     if (!this.allowedMimeTypes.includes(file.mimetype)) {
       throw createError(400, '지원하지 않는 파일 형식입니다.');
@@ -374,6 +439,13 @@ export class FileUploadService {
     };
   }
 
+  /**
+   * 인증 문서 업로드
+   * @param {string} userId - 사용자 ID
+   * @param {Express.Multer.File} file - 인증 문서 파일
+   * @returns {Promise<UploadedFile>} 업로드된 파일 정보
+   * @throws {Error} 지원하지 않는 형식일 때
+   */
   async uploadVerificationDocument(userId: string, file: Express.Multer.File): Promise<UploadedFile> {
     const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
     
@@ -409,6 +481,11 @@ export class FileUploadService {
     };
   }
 
+  /**
+   * URL로 파일 삭제
+   * @param {string} fileUrl - 파일 URL
+   * @returns {Promise<boolean>} 삭제 성공 여부
+   */
   async deleteFile(fileUrl: string): Promise<boolean> {
     try {
       // Extract filename from URL
@@ -430,6 +507,13 @@ export class FileUploadService {
     }
   }
 
+  /**
+   * ID로 파일 삭제
+   * @param {string} fileId - 파일 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<boolean>} 삭제 성공 여부
+   * @throws {Error} 파일을 찾을 수 없거나 권한이 없을 때
+   */
   async deleteFileById(fileId: string, userId: string): Promise<boolean> {
     const file = await prisma.file.findUnique({
       where: { id: fileId }
@@ -459,6 +543,14 @@ export class FileUploadService {
     }
   }
 
+  /**
+   * 사전 서명된 업로드 URL 생성
+   * @param {string} userId - 사용자 ID
+   * @param {string} filename - 파일명
+   * @param {string} contentType - 콘텐츠 타입
+   * @returns {Promise<string>} 사전 서명된 URL
+   * @throws {Error} 지원하지 않는 형식일 때
+   */
   async getPresignedUploadUrl(userId: string, filename: string, contentType: string): Promise<string> {
     if (!this.allowedMimeTypes.includes(contentType)) {
       throw createError(400, '지원하지 않는 파일 형식입니다.');
@@ -480,6 +572,11 @@ export class FileUploadService {
     return signedUrl;
   }
 
+  /**
+   * 사전 서명된 다운로드 URL 생성
+   * @param {string} filename - 파일명
+   * @returns {Promise<string>} 사전 서명된 URL
+   */
   async getPresignedDownloadUrl(filename: string): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
@@ -493,6 +590,13 @@ export class FileUploadService {
     return signedUrl;
   }
 
+  /**
+   * 이미지 처리 및 최적화
+   * @private
+   * @param {Buffer} buffer - 이미지 버퍼
+   * @param {ImageProcessingOptions} options - 처리 옵션
+   * @returns {Promise<Buffer>} 처리된 이미지 버퍼
+   */
   private async processImage(buffer: Buffer, options: ImageProcessingOptions): Promise<Buffer> {
     let image = sharp(buffer);
 
@@ -545,6 +649,14 @@ export class FileUploadService {
     return await image.toBuffer();
   }
 
+  /**
+   * S3에 파일 업로드
+   * @private
+   * @param {Buffer} buffer - 파일 버퍼
+   * @param {string} filename - 파일명
+   * @param {string} contentType - 콘텐츠 타입
+   * @returns {Promise<{filename: string, url: string}>} 업로드 결과
+   */
   private async uploadToS3(buffer: Buffer, filename: string, contentType: string): Promise<{ filename: string; url: string }> {
     // Determine ACL based on file type
     const isPublicFile = contentType.startsWith('image/') && 
@@ -569,6 +681,12 @@ export class FileUploadService {
     return { filename, url };
   }
 
+  /**
+   * S3에서 파일 삭제
+   * @private
+   * @param {string} filename - 파일명
+   * @returns {Promise<void>}
+   */
   private async deleteFromS3(filename: string): Promise<void> {
     const command = new DeleteObjectCommand({
       Bucket: this.bucketName,
@@ -578,6 +696,12 @@ export class FileUploadService {
     await this.s3Client.send(command);
   }
 
+  /**
+   * 사전 서명된 URL 생성
+   * @param {string} filename - 파일명
+   * @param {number} [expiresIn=3600] - 만료 시간 (초)
+   * @returns {Promise<string>} 사전 서명된 URL
+   */
   async generatePresignedUrl(filename: string, expiresIn: number = 3600): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
@@ -587,6 +711,14 @@ export class FileUploadService {
     return await getSignedUrl(this.s3Client, command, { expiresIn });
   }
 
+  /**
+   * 사용자 파일 목록 조회
+   * @param {string} userId - 사용자 ID
+   * @param {string} [category] - 파일 카테고리
+   * @param {number} [page=1] - 페이지 번호
+   * @param {number} [limit=20] - 페이지당 항목 수
+   * @returns {Promise<Object>} 파일 목록과 페이지네이션 정보
+   */
   async getUserFiles(userId: string, category?: string, page: number = 1, limit: number = 20) {
     const where: any = { userId };
     if (category) {
@@ -623,6 +755,11 @@ export class FileUploadService {
     };
   }
 
+  /**
+   * 사용자 파일 사용량 통계
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 파일 사용량 통계
+   */
   async getFileUsageStats(userId: string) {
     const [totalFiles, totalSize, categoryStats] = await Promise.all([
       prisma.file.count({ where: { userId } }),
@@ -649,6 +786,10 @@ export class FileUploadService {
     };
   }
 
+  /**
+   * 임시 파일 정리
+   * @returns {Promise<number>} 정리된 파일 수
+   */
   async cleanupTempFiles(): Promise<number> {
     const oneDayAgo = new Date();
     oneDayAgo.setDate(oneDayAgo.getDate() - 1);
@@ -677,6 +818,12 @@ export class FileUploadService {
     return cleanedCount;
   }
 
+  /**
+   * 파일 소유권 검증
+   * @param {string} fileId - 파일 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<boolean>} 소유권 여부
+   */
   async validateFileOwnership(fileId: string, userId: string): Promise<boolean> {
     const file = await prisma.file.findUnique({
       where: { id: fileId },
@@ -686,6 +833,11 @@ export class FileUploadService {
     return file?.userId === userId;
   }
 
+  /**
+   * 썸네일 생성
+   * @param {Buffer} buffer - 원본 이미지 버퍼
+   * @returns {Promise<Buffer>} 썸네일 버퍼
+   */
   generateThumbnail(buffer: Buffer): Promise<Buffer> {
     return sharp(buffer)
       .resize(150, 150, {
@@ -696,6 +848,12 @@ export class FileUploadService {
       .toBuffer();
   }
 
+  /**
+   * 이미지 크기 정보 추출
+   * @private
+   * @param {Buffer} buffer - 이미지 버퍼
+   * @returns {Promise<{width: number, height: number}>} 이미지 크기
+   */
   private async getImageDimensions(buffer: Buffer): Promise<{ width: number; height: number }> {
     const metadata = await sharp(buffer).metadata();
     return {
@@ -704,6 +862,12 @@ export class FileUploadService {
     };
   }
 
+  /**
+   * URL에서 S3 키 추출
+   * @private
+   * @param {string} url - 파일 URL
+   * @returns {string | null} S3 키 또는 null
+   */
   private extractKeyFromUrl(url: string): string | null {
     // Extract S3 key from URL
     const s3Pattern = /https?:\/\/([^.]+)\.s3\.[^.]+\.amazonaws\.com\/(.+)/;
@@ -722,6 +886,12 @@ export class FileUploadService {
     return null;
   }
 
+  /**
+   * 기존 이미지 최적화
+   * @param {string} category - 파일 카테고리
+   * @param {number} [limit=100] - 처리할 최대 파일 수
+   * @returns {Promise<number>} 최적화된 파일 수
+   */
   async optimizeExistingImages(category: string, limit: number = 100): Promise<number> {
     // Batch optimize existing images
     const files = await prisma.file.findMany({
@@ -767,6 +937,12 @@ export class FileUploadService {
     return optimizedCount;
   }
 
+  /**
+   * WebP 형식 변환 생성
+   * @param {string} fileId - 파일 ID
+   * @returns {Promise<void>}
+   * @throws {Error} 유효하지 않은 이미지 파일일 때
+   */
   async generateWebPVariants(fileId: string): Promise<void> {
     const file = await prisma.file.findUnique({
       where: { id: fileId }
@@ -808,7 +984,11 @@ export class FileUploadService {
   }
 }
 
-// Helper function to convert stream to buffer
+/**
+ * 스트림을 버퍼로 변환
+ * @param {any} stream - 입력 스트림
+ * @returns {Promise<Buffer>} 변환된 버퍼
+ */
 async function streamToBuffer(stream: any): Promise<Buffer> {
   const chunks: Uint8Array[] = [];
   for await (const chunk of stream) {

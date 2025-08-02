@@ -7,25 +7,54 @@ import { generateId } from '@shared/utils';
 
 
 
+/**
+ * 그룹 생성 데이터 인터페이스
+ * @interface CreateGroupData
+ */
 interface CreateGroupData {
+  /** 그룹명 */
   name: string;
+  /** 그룹 설명 */
   description?: string;
+  /** 그룹 타입 */
   type: GroupType;
+  /** 그룹 설정 */
   settings: any;
+  /** 위치 정보 (LOCATION 타입) */
   location?: any;
+  /** 회사 ID (OFFICIAL 타입) */
   companyId?: string;
+  /** 생성자 ID */
   creatorId: string;
 }
 
+/**
+ * 그룹 조회 옵션 인터페이스
+ * @interface GetGroupsOptions
+ */
 interface GetGroupsOptions {
+  /** 사용자 ID */
   userId: string;
+  /** 그룹 타입 필터 */
   type?: GroupType;
+  /** 검색어 */
   search?: string;
+  /** 페이지 번호 */
   page: number;
+  /** 페이지당 항목 수 */
   limit: number;
 }
 
+/**
+ * 그룹 관리 서비스
+ * @class GroupService
+ */
 export class GroupService {
+  /**
+   * 그룹 목록 조회
+   * @param {GetGroupsOptions} options - 조회 옵션
+   * @returns {Promise<Array>} 그룹 목록
+   */
   async getGroups(options: GetGroupsOptions) {
     const { userId, type, search, page, limit } = options;
 
@@ -86,6 +115,12 @@ export class GroupService {
     }));
   }
 
+  /**
+   * 그룹 생성
+   * @param {CreateGroupData} data - 그룹 생성 데이터
+   * @returns {Promise<Object>} 생성된 그룹
+   * @throws {Error} 부적절한 내용이나 위치 정보 누락 시
+   */
   async createGroup(data: CreateGroupData) {
     const { name, description, type, settings, location, companyId, creatorId } = data;
 
@@ -140,6 +175,12 @@ export class GroupService {
     return group;
   }
 
+  /**
+   * ID로 그룹 상세 정보 조회
+   * @param {string} groupId - 그룹 ID
+   * @param {string} userId - 요청 사용자 ID
+   * @returns {Promise<Object|null>} 그룹 상세 정보
+   */
   async getGroupById(groupId: string, userId: string) {
     const group = await prisma.group.findUnique({
       where: { id: groupId },
@@ -194,6 +235,13 @@ export class GroupService {
     };
   }
 
+  /**
+   * 그룹 초대 링크 생성
+   * @param {string} groupId - 그룹 ID
+   * @param {string} userId - 요청 사용자 ID
+   * @returns {Promise<string>} 초대 링크 URL
+   * @throws {Error} 권한이 없을 때
+   */
   async generateInviteLink(groupId: string, userId: string): Promise<string> {
     // Check if user has permission to generate invite link
     const membership = await prisma.groupMember.findFirst({
@@ -231,6 +279,13 @@ export class GroupService {
     return `${baseUrl}/invite/${inviteCode}`;
   }
 
+  /**
+   * 초대 코드로 그룹 가입
+   * @param {string} inviteCode - 초대 코드
+   * @param {string} userId - 가입할 사용자 ID
+   * @returns {Promise<Object>} 가입 결과
+   * @throws {Error} 유효하지 않은 코드, 만료, 정원 초과 등
+   */
   async joinGroupByInvite(inviteCode: string, userId: string) {
     // Find the invite
     const invite = await prisma.groupInvite.findUnique({
@@ -309,6 +364,13 @@ export class GroupService {
     };
   }
 
+  /**
+   * 그룹의 활성 초대 목록 조회
+   * @param {string} groupId - 그룹 ID
+   * @param {string} userId - 요청 사용자 ID
+   * @returns {Promise<Array>} 초대 목록
+   * @throws {Error} 권한이 없을 때
+   */
   async getGroupInvites(groupId: string, userId: string) {
     // Check if user has permission
     const membership = await prisma.groupMember.findFirst({
@@ -349,6 +411,13 @@ export class GroupService {
     }));
   }
 
+  /**
+   * 초대 취소
+   * @param {string} inviteId - 초대 ID
+   * @param {string} userId - 요청 사용자 ID
+   * @returns {Promise<Object>} 취소 결과
+   * @throws {Error} 초대를 찾을 수 없거나 권한이 없을 때
+   */
   async revokeInvite(inviteId: string, userId: string) {
     const invite = await prisma.groupInvite.findUnique({
       where: { id: inviteId },
@@ -379,6 +448,13 @@ export class GroupService {
     return { success: true };
   }
 
+  /**
+   * 그룹 정보 수정
+   * @param {string} groupId - 그룹 ID
+   * @param {Object} updateData - 수정할 데이터
+   * @returns {Promise<Object>} 수정된 그룹
+   * @throws {Error} 부적절한 내용 포함 시
+   */
   async updateGroup(groupId: string, updateData: any) {
     const { name, description, settings, location, maxMembers } = updateData;
 
@@ -418,6 +494,11 @@ export class GroupService {
     return group;
   }
 
+  /**
+   * 그룹 삭제
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<void>}
+   */
   async deleteGroup(groupId: string) {
     // Check if group has active matches or conversations
     const hasActiveMatches = await prisma.match.count({
@@ -438,6 +519,13 @@ export class GroupService {
     }
   }
 
+  /**
+   * 그룹 가입
+   * @param {string} userId - 사용자 ID
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<Object>} 가입 결과
+   * @throws {Error} 이미 가입됨, 차단됨, 정원 초과 등
+   */
   async joinGroup(userId: string, groupId: string) {
     const group = await prisma.group.findUnique({
       where: { id: groupId },
@@ -502,6 +590,13 @@ export class GroupService {
     };
   }
 
+  /**
+   * 그룹 탈퇴
+   * @param {string} userId - 사용자 ID
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<void>}
+   * @throws {Error} 멤버십을 찾을 수 없거나 생성자인 경우
+   */
   async leaveGroup(userId: string, groupId: string) {
     const membership = await prisma.groupMember.findUnique({
       where: {
@@ -522,6 +617,13 @@ export class GroupService {
     });
   }
 
+  /**
+   * 그룹 멤버 목록 조회
+   * @param {string} groupId - 그룹 ID
+   * @param {number} page - 페이지 번호
+   * @param {number} limit - 페이지당 항목 수
+   * @returns {Promise<Array>} 멤버 목록
+   */
   async getGroupMembers(groupId: string, page: number, limit: number) {
     const members = await prisma.groupMember.findMany({
       where: { groupId, status: 'ACTIVE' },
@@ -551,6 +653,13 @@ export class GroupService {
     }));
   }
 
+  /**
+   * 전화번호로 사용자 초대
+   * @param {string} groupId - 그룹 ID
+   * @param {string[]} phoneNumbers - 전화번호 목록
+   * @param {string} inviterId - 초대자 ID
+   * @returns {Promise<Array>} 초대 결과 목록
+   */
   async inviteUsersToGroup(groupId: string, phoneNumbers: string[], inviterId: string) {
     const results = [];
 
@@ -576,6 +685,14 @@ export class GroupService {
     return results;
   }
 
+  /**
+   * 초대 코드 생성
+   * @param {string} groupId - 그룹 ID
+   * @param {string} createdBy - 생성자 ID
+   * @param {number} maxUses - 최대 사용 횟수
+   * @param {number} expiresInHours - 만료 시간 (시간)
+   * @returns {Promise<Object>} 생성된 초대 코드 정보
+   */
   async createInviteCode(groupId: string, createdBy: string, maxUses: number, expiresInHours: number) {
     const code = generateId().substring(0, 8).toUpperCase();
     const expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000);
@@ -597,6 +714,13 @@ export class GroupService {
     };
   }
 
+  /**
+   * 초대 코드로 그룹 가입
+   * @param {string} userId - 사용자 ID
+   * @param {string} code - 초대 코드
+   * @returns {Promise<Object>} 가입 결과와 그룹명
+   * @throws {Error} 유효하지 않거나 만료된 코드
+   */
   async joinByInviteCode(userId: string, code: string) {
     const inviteCode = await prisma.inviteCode.findUnique({
       where: { code },
@@ -630,6 +754,11 @@ export class GroupService {
     };
   }
 
+  /**
+   * 그룹 통계 조회
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<Object>} 그룹 통계 (멤버 수, 좋아요 수, 매칭 수)
+   */
   async getGroupStats(groupId: string) {
     const [totalMembers, activeMembers, totalLikes, totalMatches] = await Promise.all([
       prisma.groupMember.count({ where: { groupId } }),
@@ -646,6 +775,13 @@ export class GroupService {
     };
   }
 
+  /**
+   * 승인 대기 중인 멤버 목록 조회
+   * @param {string} groupId - 그룹 ID
+   * @param {string} adminUserId - 관리자 사용자 ID
+   * @returns {Promise<Array>} 대기 중인 멤버 목록
+   * @throws {Error} 권한이 없을 때
+   */
   async getPendingMembers(groupId: string, adminUserId: string) {
     // Check if user is admin
     const adminMembership = await prisma.groupMember.findFirst({
@@ -684,6 +820,14 @@ export class GroupService {
     return pendingMembers;
   }
 
+  /**
+   * 멤버 가입 승인
+   * @param {string} groupId - 그룹 ID
+   * @param {string} userId - 승인할 사용자 ID
+   * @param {string} adminUserId - 관리자 사용자 ID
+   * @returns {Promise<Object>} 업데이트된 멤버십
+   * @throws {Error} 권한이 없을 때
+   */
   async approveMember(groupId: string, userId: string, adminUserId: string) {
     // Check if admin has permission
     const adminMembership = await prisma.groupMember.findFirst({
@@ -718,6 +862,15 @@ export class GroupService {
     return membership;
   }
 
+  /**
+   * 멤버 가입 거절
+   * @param {string} groupId - 그룹 ID
+   * @param {string} userId - 거절할 사용자 ID
+   * @param {string} adminUserId - 관리자 사용자 ID
+   * @param {string} [reason] - 거절 사유
+   * @returns {Promise<Object>} 거절 결과
+   * @throws {Error} 권한이 없을 때
+   */
   async rejectMember(groupId: string, userId: string, adminUserId: string, reason?: string) {
     // Check if admin has permission
     const adminMembership = await prisma.groupMember.findFirst({

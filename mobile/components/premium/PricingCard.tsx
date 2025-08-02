@@ -14,15 +14,32 @@ import { PaymentProduct } from '@/services/payment/premium-service';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { STATE_ICONS } from '@/utils/icons';
 
+/**
+ * PricingCard 컴포넌트 Props
+ * @interface PricingCardProps
+ */
 interface PricingCardProps {
+  /** 결제 상품 정보 */
   product: PaymentProduct;
+  /** 선택 여부 */
   isSelected?: boolean;
+  /** 인기 상품 여부 */
   isPopular?: boolean;
+  /** 로딩 상태 */
   isLoading?: boolean;
+  /** 상품 선택 핸들러 */
   onSelect: (productId: string) => void;
+  /** 가격 포맷팅 함수 */
   formatPrice: (price: number) => string;
 }
 
+/**
+ * 프리미엄 요금제 카드 컴포넌트 - 프리미엄 상품 표시
+ * @component
+ * @param {PricingCardProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 요금제 카드 UI
+ * @description 프리미엄 구독 및 일회성 결제 상품을 표시하는 카드 컴포넌트
+ */
 export const PricingCard: React.FC<PricingCardProps> = React.memo(({
   product,
   isSelected = false,

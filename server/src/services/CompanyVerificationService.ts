@@ -5,7 +5,20 @@ import { validateEmail } from '@shared/utils';
 import { emailService } from './EmailService';
 import { ocrService } from './OCRService';
 
+/**
+ * 회사 인증 서비스 - 이메일 도메인 및 OCR 기반 인증
+ * @class CompanyVerificationService
+ */
 export class CompanyVerificationService {
+  /**
+   * 회사 인증 요청 제출
+   * @param {string} userId - 사용자 ID
+   * @param {string} companyId - 회사 ID
+   * @param {VerificationMethod} method - 인증 방법 (EMAIL_DOMAIN, OCR_VERIFICATION)
+   * @param {any} data - 인증 데이터
+   * @returns {Promise<any>} 생성된 인증 요청
+   * @throws {Error} 이미 대기 중인 인증이 있을 때
+   */
   async submitVerification(
     userId: string,
     companyId: string,
@@ -48,6 +61,13 @@ export class CompanyVerificationService {
     return verification;
   }
 
+  /**
+   * 이메일 도메인 인증 처리
+   * @private
+   * @param {string} verificationId - 인증 ID
+   * @param {string} email - 회사 이메일 주소
+   * @returns {Promise<void>}
+   */
   private async processEmailVerification(verificationId: string, email: string) {
     if (!validateEmail(email)) {
       await this.updateVerificationStatus(verificationId, 'REJECTED', '유효하지 않은 이메일 형식입니다.');
@@ -87,6 +107,14 @@ export class CompanyVerificationService {
     });
   }
 
+  /**
+   * OCR 기반 문서 인증 처리
+   * @private
+   * @param {string} verificationId - 인증 ID
+   * @param {string} imageUrl - 문서 이미지 URL
+   * @param {string} documentType - 문서 타입 (EMPLOYEE_CARD, BUSINESS_CARD, PAY_STUB)
+   * @returns {Promise<void>}
+   */
   private async processOCRVerification(verificationId: string, imageUrl: string, documentType: string) {
     try {
       let result;
@@ -119,6 +147,13 @@ export class CompanyVerificationService {
     }
   }
 
+  /**
+   * 인증 코드 확인
+   * @param {string} verificationId - 인증 ID
+   * @param {string} code - 입력한 인증 코드
+   * @returns {Promise<boolean>} 인증 성공 여부
+   * @throws {Error} 인증 정보를 찾을 수 없거나 만료된 경우
+   */
   async verifyCode(verificationId: string, code: string): Promise<boolean> {
     const verification = await prisma.companyVerification.findUnique({
       where: { id: verificationId }
@@ -150,6 +185,14 @@ export class CompanyVerificationService {
     return true;
   }
 
+  /**
+   * 인증 상태 업데이트
+   * @private
+   * @param {string} verificationId - 인증 ID
+   * @param {VerificationStatus} status - 새로운 상태
+   * @param {string} [reviewNotes] - 검토 메모
+   * @returns {Promise<void>}
+   */
   private async updateVerificationStatus(
     verificationId: string,
     status: VerificationStatus,
@@ -168,10 +211,20 @@ export class CompanyVerificationService {
     });
   }
 
+  /**
+   * 6자리 인증 코드 생성
+   * @private
+   * @returns {string} 6자리 인증 코드
+   */
   private generateVerificationCode(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
+  /**
+   * 사용자의 최신 인증 상태 조회
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<any>} 최신 인증 정보
+   */
   async getVerificationStatus(userId: string): Promise<any> {
     const latestVerification = await prisma.companyVerification.findFirst({
       where: { userId },
@@ -182,6 +235,12 @@ export class CompanyVerificationService {
     return latestVerification;
   }
 
+  /**
+   * 사용자의 특정 회사 인증 여부 확인
+   * @param {string} userId - 사용자 ID
+   * @param {string} companyId - 회사 ID
+   * @returns {Promise<boolean>} 인증 여부
+   */
   async isUserVerifiedForCompany(userId: string, companyId: string): Promise<boolean> {
     const verification = await prisma.companyVerification.findFirst({
       where: {

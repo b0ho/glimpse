@@ -4,14 +4,28 @@ import { createError } from '../middleware/errorHandler';
 import { EmailService } from './EmailService';
 import crypto from 'crypto';
 
+/**
+ * 회사 도메인 서비스 - 회사/학교 이메일 도메인 관리 및 인증
+ * @class CompanyDomainService
+ */
 export class CompanyDomainService {
+  /** 싱글턴 인스턴스 */
   private static instance: CompanyDomainService;
+  /** 이메일 서비스 인스턴스 */
   private emailService: EmailService;
 
+  /**
+   * CompanyDomainService 생성자
+   * @private
+   */
   private constructor() {
     this.emailService = EmailService.getInstance();
   }
 
+  /**
+   * 싱글턴 인스턴스 반환
+   * @returns {CompanyDomainService} CompanyDomainService 인스턴스
+   */
   static getInstance(): CompanyDomainService {
     if (!CompanyDomainService.instance) {
       CompanyDomainService.instance = new CompanyDomainService();
@@ -19,6 +33,11 @@ export class CompanyDomainService {
     return CompanyDomainService.instance;
   }
 
+  /**
+   * 이메일로 회사 도메인 정보 조회
+   * @param {string} email - 이메일 주소
+   * @returns {Promise<CompanyDomain | null>} 회사 도메인 정보 또는 null
+   */
   async getDomainByEmail(email: string): Promise<CompanyDomain | null> {
     const domain = email.split('@')[1];
     if (!domain) return null;
@@ -28,6 +47,13 @@ export class CompanyDomainService {
     });
   }
 
+  /**
+   * 이메일 인증 생성 및 인증 코드 전송
+   * @param {string} userId - 사용자 ID
+   * @param {string} email - 인증할 이메일 주소
+   * @returns {Promise<EmailVerification>} 생성된 이메일 인증 정보
+   * @throws {Error} 유효하지 않은 이메일 형식, 등록되지 않은 도메인, 이미 인증된 이메일
+   */
   async createEmailVerification(userId: string, email: string): Promise<EmailVerification> {
     const domain = email.split('@')[1];
     if (!domain) {
@@ -86,6 +112,14 @@ export class CompanyDomainService {
     return verification;
   }
 
+  /**
+   * 이메일 인증 코드 검증
+   * @param {string} userId - 사용자 ID
+   * @param {string} email - 이메일 주소
+   * @param {string} code - 인증 코드
+   * @returns {Promise<boolean>} 인증 성공 여부
+   * @throws {Error} 인증 요청 없음, 이미 인증됨, 시도 횟수 초과, 만료됨, 잘못된 코드
+   */
   async verifyEmailCode(userId: string, email: string, code: string): Promise<boolean> {
     const verification = await prisma.emailVerification.findUnique({
       where: {
@@ -142,6 +176,13 @@ export class CompanyDomainService {
     return true;
   }
 
+  /**
+   * 회사 그룹 자동 가입 처리
+   * @private
+   * @param {string} userId - 사용자 ID
+   * @param {CompanyDomain} companyDomain - 회사 도메인 정보
+   * @returns {Promise<void>}
+   */
   private async joinCompanyGroup(userId: string, companyDomain: CompanyDomain) {
     // 회사와 연결된 공식 그룹 찾기
     const company = await prisma.company.findUnique({
@@ -175,10 +216,27 @@ export class CompanyDomainService {
     }
   }
 
+  /**
+   * 6자리 인증 코드 생성
+   * @private
+   * @returns {string} 6자리 숫자 인증 코드
+   */
   private generateVerificationCode(): string {
     return crypto.randomInt(100000, 999999).toString();
   }
 
+  /**
+   * 회사 도메인 추가
+   * @param {Object} data - 회사 도메인 정보
+   * @param {string} data.domain - 도메인 주소
+   * @param {string} data.companyName - 회사명 (영문)
+   * @param {string} [data.companyNameKr] - 회사명 (한글)
+   * @param {number} [data.employeeCount] - 직원 수
+   * @param {string} [data.industry] - 산업 분야
+   * @param {string} [data.logoUrl] - 로고 URL
+   * @returns {Promise<CompanyDomain>} 생성된 회사 도메인
+   * @throws {Error} 이미 등록된 도메인
+   */
   async addCompanyDomain(data: {
     domain: string;
     companyName: string;
@@ -201,6 +259,10 @@ export class CompanyDomainService {
     });
   }
 
+  /**
+   * 인증된 도메인 목록 조회
+   * @returns {Promise<CompanyDomain[]>} 인증된 도메인 목록 (회사명 순)
+   */
   async getVerifiedDomains(): Promise<CompanyDomain[]> {
     return prisma.companyDomain.findMany({
       where: { isVerified: true },
@@ -208,6 +270,11 @@ export class CompanyDomainService {
     });
   }
 
+  /**
+   * 도메인 검색
+   * @param {string} query - 검색어
+   * @returns {Promise<CompanyDomain[]>} 검색 결과 (최대 20개)
+   */
   async searchDomains(query: string): Promise<CompanyDomain[]> {
     return prisma.companyDomain.findMany({
       where: {

@@ -1,6 +1,10 @@
 import * as crypto from 'crypto';
 import env from '../config/env';
 
+/**
+ * 암호화 서비스 - AES-256-GCM 기반 데이터 암호화
+ * @class EncryptionService
+ */
 export class EncryptionService {
   private readonly algorithm = 'aes-256-gcm';
   private readonly keyDerivationIterations = 100000;
@@ -19,7 +23,11 @@ export class EncryptionService {
   }
   
   /**
-   * Encrypt data with AES-256-GCM
+   * AES-256-GCM으로 데이터 암호화
+   * @param {string} data - 암호화할 데이터
+   * @param {string} [additionalData] - 추가 인증 데이터 (AAD)
+   * @returns {string} base64로 인코딩된 암호화 데이터
+   * @throws {Error} 암호화 실패 시
    */
   encrypt(data: string, additionalData?: string): string {
     try {
@@ -55,7 +63,11 @@ export class EncryptionService {
   }
   
   /**
-   * Decrypt data encrypted with AES-256-GCM
+   * AES-256-GCM으로 암호화된 데이터 복호화
+   * @param {string} encryptedData - base64로 인코딩된 암호화 데이터
+   * @param {string} [additionalData] - 추가 인증 데이터 (AAD)
+   * @returns {string} 복호화된 데이터
+   * @throws {Error} 복호화 실패 시
    */
   decrypt(encryptedData: string, additionalData?: string): string {
     try {
@@ -90,21 +102,28 @@ export class EncryptionService {
   }
   
   /**
-   * Generate a secure random key
+   * 안전한 랜덤 키 생성
+   * @param {number} [length=32] - 키 길이 (바이트)
+   * @returns {string} 16진수 문자열 키
    */
   generateKey(length: number = 32): string {
     return crypto.randomBytes(length).toString('hex');
   }
   
   /**
-   * Hash data with SHA-256
+   * SHA-256으로 데이터 해시
+   * @param {string} data - 해시할 데이터
+   * @returns {string} 16진수 해시 값
    */
   hash(data: string): string {
     return crypto.createHash('sha256').update(data).digest('hex');
   }
   
   /**
-   * Hash password with PBKDF2
+   * PBKDF2로 비밀번호 해시
+   * @param {string} password - 비밀번호
+   * @param {string} [salt] - 소금 (선택사항, 미제공시 자동 생성)
+   * @returns {Promise<{hash: string, salt: string}>} 해시와 소금
    */
   async hashPassword(password: string, salt?: string): Promise<{ hash: string; salt: string }> {
     const useSalt = salt || crypto.randomBytes(this.saltLength).toString('hex');
@@ -121,7 +140,11 @@ export class EncryptionService {
   }
   
   /**
-   * Verify password against hash
+   * 비밀번호 해시 검증
+   * @param {string} password - 검증할 비밀번호
+   * @param {string} hash - 비교할 해시
+   * @param {string} salt - 사용된 소금
+   * @returns {Promise<boolean>} 일치 여부
    */
   async verifyPassword(password: string, hash: string, salt: string): Promise<boolean> {
     const result = await this.hashPassword(password, salt);
@@ -129,14 +152,18 @@ export class EncryptionService {
   }
   
   /**
-   * Generate secure random token
+   * 안전한 랜덤 토큰 생성
+   * @param {number} [length=32] - 토큰 길이 (바이트)
+   * @returns {string} base64url 인코딩된 토큰
    */
   generateSecureToken(length: number = 32): string {
     return crypto.randomBytes(length).toString('base64url');
   }
   
   /**
-   * Generate random numeric code (for SMS verification)
+   * 랜덤 숫자 코드 생성 (SMS 인증용)
+   * @param {number} [length=6] - 코드 길이
+   * @returns {string} 숫자 코드
    */
   generateRandomCode(length: number = 6): string {
     const characters = '0123456789';
@@ -148,14 +175,21 @@ export class EncryptionService {
   }
   
   /**
-   * Create HMAC signature
+   * HMAC 서명 생성
+   * @param {string} data - 서명할 데이터
+   * @param {string} [key=env.JWT_SECRET] - HMAC 키
+   * @returns {string} 16진수 HMAC 서명
    */
   createHmac(data: string, key: string = env.JWT_SECRET): string {
     return crypto.createHmac('sha256', key).update(data).digest('hex');
   }
   
   /**
-   * Verify HMAC signature
+   * HMAC 서명 검증
+   * @param {string} data - 원본 데이터
+   * @param {string} signature - 검증할 서명
+   * @param {string} [key=env.JWT_SECRET] - HMAC 키
+   * @returns {boolean} 서명 유효성
    */
   verifyHmac(data: string, signature: string, key: string = env.JWT_SECRET): boolean {
     const expectedSignature = this.createHmac(data, key);
@@ -163,7 +197,11 @@ export class EncryptionService {
   }
   
   /**
-   * Encrypt sensitive fields in an object
+   * 객체의 민감한 필드 암호화
+   * @template T
+   * @param {T} obj - 원본 객체
+   * @param {(keyof T)[]} fieldsToEncrypt - 암호화할 필드 명
+   * @returns {T} 필드가 암호화된 객체
    */
   encryptObject<T extends Record<string, any>>(
     obj: T,
@@ -181,7 +219,11 @@ export class EncryptionService {
   }
   
   /**
-   * Decrypt sensitive fields in an object
+   * 객체의 암호화된 필드 복호화
+   * @template T
+   * @param {T} obj - 암호화된 객체
+   * @param {(keyof T)[]} fieldsToDecrypt - 복호화할 필드 명
+   * @returns {T} 필드가 복호화된 객체
    */
   decryptObject<T extends Record<string, any>>(
     obj: T,
@@ -204,8 +246,11 @@ export class EncryptionService {
   }
   
   /**
-   * Generate deterministic encryption key from user data
-   * Used for end-to-end encryption between matched users
+   * 사용자 데이터로부터 결정적 암호화 키 생성
+   * 매칭된 사용자 간 종단간 암호화에 사용
+   * @param {string} userId1 - 첫 번째 사용자 ID
+   * @param {string} userId2 - 두 번째 사용자 ID
+   * @returns {string} 매칭 키
    */
   generateMatchKey(userId1: string, userId2: string): string {
     // Sort user IDs to ensure same key regardless of order
@@ -217,7 +262,10 @@ export class EncryptionService {
   }
   
   /**
-   * Encrypt message for a specific match
+   * 특정 매칭을 위한 메시지 암호화
+   * @param {string} message - 암호화할 메시지
+   * @param {string} matchKey - 매칭 키
+   * @returns {string} base64로 인코딩된 암호화 메시지
    */
   encryptMessage(message: string, matchKey: string): string {
     // Use first 32 bytes of match key as encryption key
@@ -238,7 +286,11 @@ export class EncryptionService {
   }
   
   /**
-   * Decrypt message for a specific match
+   * 특정 매칭을 위한 메시지 복호화
+   * @param {string} encryptedMessage - 암호화된 메시지
+   * @param {string} matchKey - 매칭 키
+   * @returns {string} 복호화된 메시지
+   * @throws {Error} 복호화 실패 시
    */
   decryptMessage(encryptedMessage: string, matchKey: string): string {
     try {

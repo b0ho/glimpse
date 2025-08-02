@@ -23,14 +23,30 @@ import { usePremiumStore } from '@/store/slices/premiumSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { UI_ICONS } from '@/utils/icons';
 
+/**
+ * PaymentModal 컴포넌트 Props
+ * @interface PaymentModalProps
+ */
 interface PaymentModalProps {
+  /** 모달 표시 여부 */
   visible: boolean;
+  /** 결제할 상품 */
   product: PaymentProduct | null;
+  /** 닫기 핸들러 */
   onClose: () => void;
+  /** 결제 성공 핸들러 */
   onSuccess: () => void;
+  /** 가격 포맷팅 함수 */
   formatPrice: (price: number) => string;
 }
 
+/**
+ * 결제 모달 컴포넌트 - Stripe 결제 처리
+ * @component
+ * @param {PaymentModalProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 결제 모달 UI
+ * @description Stripe를 사용한 프리미엄 구독 및 좋아요 결제 처리 모달
+ */
 export const PaymentModal: React.FC<PaymentModalProps> = ({
   visible,
   product,
@@ -53,6 +69,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, product, user]);
 
+  /**
+   * 결제 시트 초기화
+   * @returns {Promise<void>}
+   */
   const initializePaymentSheet = async () => {
     if (!product || !user) return;
 
@@ -107,6 +127,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     }
   };
 
+  /**
+   * 결제 처리 핸들러
+   * @returns {Promise<void>}
+   */
   const handlePayment = async () => {
     if (!isInitialized || !product || !user || !clientSecret) {
       Alert.alert('오류', '결제가 준비되지 않았습니다.');
@@ -148,6 +172,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     }
   };
 
+  /**
+   * 상품 상세 정보 렌더링
+   * @returns {JSX.Element | null} 상품 상세 UI
+   */
   const renderProductDetails = () => {
     if (!product) return null;
 

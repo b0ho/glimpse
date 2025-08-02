@@ -22,14 +22,27 @@ import {
 import { PaymentValidator } from './payment/validators';
 import { notificationService } from './NotificationService';
 
+/**
+ * 결제 서비스 - 다양한 결제 제공자를 통한 결제 처리 관리
+ * @class PaymentService
+ */
 export class PaymentService {
+  /** 결제 제공자 맵 */
   private providers: Map<PaymentMethod, PaymentProvider>;
 
+  /**
+   * PaymentService 생성자
+   */
   constructor() {
     this.providers = new Map();
     this.initializeProviders();
   }
 
+  /**
+   * 결제 제공자 초기화
+   * @private
+   * @returns {void}
+   */
   private initializeProviders(): void {
     try {
       this.providers.set('TOSS_PAY', new TossPayProvider());
@@ -52,6 +65,12 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 결제 생성
+   * @param {CreatePaymentRequest} data - 결제 생성 요청 데이터
+   * @returns {Promise<PaymentResult>} 결제 결과
+   * @throws {Error} 유효성 검사 실패, 지원하지 않는 결제 방법
+   */
   async createPayment(data: CreatePaymentRequest): Promise<PaymentResult> {
     const { userId, type, packageType, amount, currency, paymentMethod } = data;
 
@@ -134,6 +153,14 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 결제 처리
+   * @param {string} paymentId - 결제 ID
+   * @param {string} userId - 사용자 ID
+   * @param {ProcessPaymentRequest} data - 결제 처리 요청 데이터
+   * @returns {Promise<PaymentResult>} 결제 결과
+   * @throws {Error} 결제 정보 없음, 권한 없음, 이미 처리됨, 처리 실패
+   */
   async processPayment(paymentId: string, userId: string, data: ProcessPaymentRequest): Promise<PaymentResult> {
     const payment = await prisma.payment.findUnique({
       where: { id: paymentId }
@@ -213,6 +240,12 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 결제 환불
+   * @param {RefundRequest} data - 환불 요청 데이터
+   * @returns {Promise<Object>} 환불 결과 (성공 여부, 환불 금액, 환불 ID)
+   * @throws {Error} 결제 정보 없음, 완료되지 않은 결제, 환불 금액 초과
+   */
   async refundPayment(data: RefundRequest): Promise<{
     success: boolean;
     refundAmount: number;
@@ -296,6 +329,14 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 웹훅 처리
+   * @param {PaymentMethod} provider - 결제 제공자
+   * @param {any} data - 웹훅 데이터
+   * @param {string} [signature] - 웹훅 서명
+   * @returns {Promise<void>}
+   * @throws {Error} 잘못된 서명, 알 수 없는 제공자
+   */
   async handleWebhook(provider: PaymentMethod, data: any, signature?: string): Promise<void> {
     // Verify webhook signature if provided
     if (signature && !this.verifyWebhookSignature(provider, data, signature)) {
@@ -350,6 +391,12 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 결제 완료 처리
+   * @private
+   * @param {Payment} payment - 결제 정보
+   * @returns {Promise<void>}
+   */
   private async handlePaymentCompletion(payment: Payment): Promise<void> {
     switch (payment.type) {
       case 'CREDIT_PURCHASE':
@@ -368,6 +415,12 @@ export class PaymentService {
     );
   }
 
+  /**
+   * 크레딧 구매 처리
+   * @private
+   * @param {Payment} payment - 결제 정보
+   * @returns {Promise<void>}
+   */
   private async handleCreditPurchase(payment: Payment): Promise<void> {
     const packageType = (payment.metadata as any)?.packageType;
     const credits = PaymentValidator.getCreditsFromPackage(packageType);
@@ -384,6 +437,12 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 프리미엄 구독 처리
+   * @private
+   * @param {Payment} payment - 결제 정보
+   * @returns {Promise<void>}
+   */
   private async handlePremiumSubscription(payment: Payment): Promise<void> {
     const packageType = (payment.metadata as any)?.packageType;
     let expiresAt: Date;
@@ -413,6 +472,13 @@ export class PaymentService {
     logger.info(`Activated premium subscription for user ${payment.userId} until ${expiresAt}`);
   }
 
+  /**
+   * 환불 완료 처리
+   * @private
+   * @param {Payment} payment - 결제 정보
+   * @param {number} refundAmount - 환불 금액
+   * @returns {Promise<void>}
+   */
   private async handleRefundCompletion(payment: Payment, refundAmount: number): Promise<void> {
     // Handle based on payment type
     switch (payment.type) {
@@ -454,10 +520,23 @@ export class PaymentService {
     );
   }
 
+  /**
+   * 결제 ID 생성
+   * @private
+   * @returns {string} 생성된 결제 ID
+   */
   private generatePaymentId(): string {
     return `PAY_${Date.now()}_${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
   }
 
+  /**
+   * 웹훅 서명 검증
+   * @private
+   * @param {PaymentMethod} provider - 결제 제공자
+   * @param {any} data - 웹훅 데이터
+   * @param {string} signature - 서명
+   * @returns {boolean} 검증 성공 여부
+   */
   private verifyWebhookSignature(provider: PaymentMethod, data: any, signature: string): boolean {
     const secret = process.env.PAYMENT_WEBHOOK_SECRET;
     if (!secret) {
@@ -488,6 +567,13 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 사용자 결제 내역 조회
+   * @param {string} userId - 사용자 ID
+   * @param {number} [limit=20] - 조회 개수 제한
+   * @param {number} [offset=0] - 오프셋
+   * @returns {Promise<Payment[]>} 결제 내역
+   */
   async getUserPaymentHistory(userId: string, limit: number = 20, offset: number = 0): Promise<Payment[]> {
     return await prisma.payment.findMany({
       where: { userId },
@@ -497,6 +583,11 @@ export class PaymentService {
     });
   }
 
+  /**
+   * 사용자 결제 통계 조회
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 결제 통계 (총 지출, 총 크레딧, 프리미엄 여부, 마지막 결제)
+   */
   async getPaymentStatistics(userId: string): Promise<{
     totalSpent: number;
     totalCredits: number;

@@ -7,7 +7,20 @@ import { cacheService, InvalidateCache } from './CacheService';
 
 
 
+/**
+ * 사용자 서비스 - 추천, 프로필 관리, 통계
+ * @class UserService
+ */
 export class UserService {
+  /**
+   * 사용자 추천 목록 조회
+   * @param {string} userId - 사용자 ID
+   * @param {string} groupId - 그룹 ID
+   * @param {number} page - 페이지 번호
+   * @param {number} limit - 페이지당 항목 수
+   * @returns {Promise<Array>} 추천 사용자 목록
+   * @throws {Error} 사용자를 찾을 수 없을 때
+   */
   async getRecommendations(userId: string, groupId: string, page: number, limit: number) {
     // Check cache first
     const cacheKey = `recommendations:${groupId}:page${page}`;
@@ -74,6 +87,12 @@ export class UserService {
     return recommendations;
   }
 
+  /**
+   * 사용자 상세 정보 열람 가능 여부 확인
+   * @param {string} requesterId - 요청자 ID
+   * @param {string} targetUserId - 대상 사용자 ID
+   * @returns {Promise<boolean>} 열람 가능 여부
+   */
   async canViewUserDetails(requesterId: string, targetUserId: string): Promise<boolean> {
     // Check if users have matched
     const match = await prisma.match.findFirst({
@@ -89,6 +108,11 @@ export class UserService {
     return !!match;
   }
 
+  /**
+   * 일일 남은 좋아요 수 조회
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<number>} 남은 좋아요 수
+   */
   async getDailyLikesRemaining(userId: string): Promise<number> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -103,6 +127,14 @@ export class UserService {
     return Math.max(0, APP_CONFIG.MAX_DAILY_LIKES - likesToday);
   }
 
+  /**
+   * 크레딧 구매
+   * @param {string} userId - 사용자 ID
+   * @param {string} packageId - 패키지 ID
+   * @param {string} _paymentMethodId - 결제 수단 ID
+   * @returns {Promise<Object>} 구매 결과
+   * @throws {Error} 유효하지 않은 패키지
+   */
   async purchaseCredits(userId: string, packageId: string, _paymentMethodId: string) {
     const creditPackage = PRICING.LIKE_PACKAGES.find(pkg => 
       pkg.credits.toString() === packageId
@@ -152,6 +184,13 @@ export class UserService {
     };
   }
 
+  /**
+   * 호환성 점수 계산
+   * @private
+   * @param {Object} currentUser - 현재 사용자
+   * @param {Object} targetUser - 대상 사용자
+   * @returns {number} 호환성 점수 (0-100)
+   */
   private calculateCompatibilityScore(currentUser: any, targetUser: any): number {
     let score = 50; // Base score
 
@@ -170,6 +209,11 @@ export class UserService {
     return Math.round(score);
   }
 
+  /**
+   * 마지막 활동 시간 업데이트
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<void>}
+   */
   async updateLastActive(userId: string) {
     await prisma.user.update({
       where: { id: userId },
@@ -177,6 +221,11 @@ export class UserService {
     });
   }
 
+  /**
+   * 사용자 통계 조회
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 사용자 통계
+   */
   async getUserStats(userId: string) {
     const [
       sentLikesCount,
@@ -208,6 +257,17 @@ export class UserService {
     };
   }
 
+  /**
+   * 프로필 업데이트
+   * @param {string} userId - 사용자 ID
+   * @param {Object} data - 업데이트할 데이터
+   * @param {string} [data.nickname] - 닉네임
+   * @param {string} [data.bio] - 자기소개
+   * @param {number} [data.age] - 나이
+   * @param {string} [data.profileImage] - 프로필 이미지 URL
+   * @returns {Promise<Object>} 업데이트된 사용자 정보
+   * @throws {Error} 유효성 검사 실패 또는 부적절한 내용 포함 시
+   */
   async updateProfile(userId: string, data: {
     nickname?: string;
     bio?: string;
@@ -271,6 +331,13 @@ export class UserService {
     return updatedUser;
   }
 
+  /**
+   * 계정 삭제
+   * @param {string} userId - 사용자 ID
+   * @param {string} [reason] - 삭제 사유
+   * @returns {Promise<boolean>} 삭제 성공 여부
+   * @throws {Error} 사용자를 찾을 수 없을 때
+   */
   async deleteAccount(userId: string, reason?: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId }

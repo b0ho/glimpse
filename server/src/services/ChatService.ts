@@ -5,8 +5,18 @@ import { encryptionService } from './EncryptionService';
 import { contentFilterService } from './ContentFilterService';
 import { CHAT_CONFIG } from '@shared/constants';
 
-
+/**
+ * 채팅 서비스 - 실시간 메시징 및 채팅 관리
+ * @class ChatService
+ */
 export class ChatService {
+  /**
+   * 특정 매치의 메시지 목록 조회
+   * @param {string} matchId - 매치 ID
+   * @param {number} page - 페이지 번호
+   * @param {number} limit - 페이지당 메시지 수
+   * @returns {Promise<Array>} 복호화된 메시지 목록
+   */
   async getMessages(matchId: string, page: number, limit: number) {
     const messages = await prisma.chatMessage.findMany({
       where: { matchId },
@@ -81,6 +91,15 @@ export class ChatService {
     return decryptedMessages.reverse();
   }
 
+  /**
+   * 메시지 전송
+   * @param {string} matchId - 매치 ID
+   * @param {string} senderId - 발신자 ID
+   * @param {string} content - 메시지 내용
+   * @param {MessageType} [type='TEXT'] - 메시지 타입
+   * @returns {Promise<Object>} 전송된 메시지 정보
+   * @throws {Error} 메시지 길이 초과 또는 부적절한 내용 포함 시
+   */
   async sendMessage(matchId: string, senderId: string, content: string, type: MessageType = 'TEXT') {
     // Validate content length
     if (content.length > CHAT_CONFIG.MAX_MESSAGE_LENGTH) {
@@ -127,6 +146,13 @@ export class ChatService {
     };
   }
 
+  /**
+   * 사용자의 채팅 목록 요약 조회
+   * @param {string} userId - 사용자 ID
+   * @param {number} page - 페이지 번호
+   * @param {number} limit - 페이지당 항목 수
+   * @returns {Promise<Array>} 채팅 요약 목록
+   */
   async getChatSummary(userId: string, page: number, limit: number) {
     // Get all active matches for the user
     const matches = await prisma.match.findMany({
@@ -229,6 +255,13 @@ export class ChatService {
     return chatSummaries;
   }
 
+  /**
+   * 모든 메시지를 읽음으로 표시
+   * @param {string} matchId - 매치 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 읽음 처리 결과
+   * @throws {Error} 매치를 찾을 수 없거나 권한이 없을 때
+   */
   async markAllMessagesAsRead(matchId: string, userId: string) {
     // Verify user is part of this match
     const match = await prisma.match.findUnique({
@@ -263,6 +296,12 @@ export class ChatService {
     };
   }
 
+  /**
+   * 메시지 통계 조회
+   * @param {string} matchId - 매치 ID
+   * @returns {Promise<Object>} 메시지 통계 정보
+   * @throws {Error} 매치를 찾을 수 없을 때
+   */
   async getMessageStats(matchId: string) {
     const [totalMessages, messagesByUser] = await Promise.all([
       prisma.chatMessage.count({ where: { matchId } }),
@@ -301,6 +340,15 @@ export class ChatService {
     };
   }
 
+  /**
+   * 메시지 검색
+   * @param {string} matchId - 매치 ID
+   * @param {string} query - 검색어
+   * @param {number} page - 페이지 번호
+   * @param {number} limit - 페이지당 메시지 수
+   * @returns {Promise<Array>} 검색된 메시지 목록
+   * @note 암호화된 메시지는 검색이 제한될 수 있음
+   */
   async searchMessages(matchId: string, query: string, page: number, limit: number) {
     // Note: This is a basic search. For production, consider using a full-text search
     const messages = await prisma.chatMessage.findMany({
@@ -326,6 +374,11 @@ export class ChatService {
     return messages;
   }
 
+  /**
+   * 오래된 메시지 삭제
+   * @param {number} olderThanDays - 삭제할 메시지의 기준 일수
+   * @returns {Promise<number>} 삭제된 메시지 수
+   */
   async deleteOldMessages(olderThanDays: number) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
@@ -341,23 +394,51 @@ export class ChatService {
     return deletedMessages.count;
   }
 
+  /**
+   * 타이핑 중인 사용자 목록 조회
+   * @param {string} matchId - 매치 ID
+   * @returns {Promise<string[]>} 타이핑 중인 사용자 ID 목록
+   * @todo Redis를 사용한 실시간 타이핑 상태 구현 필요
+   */
   async getTypingUsers(matchId: string): Promise<string[]> {
     // In a real implementation, you'd store typing status in Redis or similar
     // For now, return empty array
     return [];
   }
 
+  /**
+   * 타이핑 상태 설정
+   * @param {string} matchId - 매치 ID
+   * @param {string} userId - 사용자 ID
+   * @param {boolean} isTyping - 타이핑 여부
+   * @returns {Promise<Object>} 타이핑 상태 정보
+   * @todo Redis를 사용한 TTL 기반 구현 필요
+   */
   async setTypingStatus(matchId: string, userId: string, isTyping: boolean) {
     // In a real implementation, you'd store this in Redis with TTL
     // For now, just return success
     return { matchId, userId, isTyping };
   }
 
+  /**
+   * 일평균 메시지 수 계산
+   * @private
+   * @param {Date} matchCreatedAt - 매치 생성일
+   * @param {number} totalMessages - 전체 메시지 수
+   * @returns {number} 일평균 메시지 수
+   */
   private calculateAverageMessagesPerDay(matchCreatedAt: Date, totalMessages: number): number {
     const daysSinceMatch = Math.ceil((Date.now() - matchCreatedAt.getTime()) / (1000 * 60 * 60 * 24));
     return daysSinceMatch > 0 ? Math.round((totalMessages / daysSinceMatch) * 100) / 100 : 0;
   }
 
+  /**
+   * 채팅 백업 생성
+   * @param {string} matchId - 매치 ID
+   * @param {string} userId - 요청 사용자 ID
+   * @returns {Promise<Object>} 채팅 백업 데이터
+   * @throws {Error} 매치를 찾을 수 없거나 권한이 없을 때
+   */
   async generateChatBackup(matchId: string, userId: string) {
     // Verify user is part of this match
     const match = await prisma.match.findUnique({

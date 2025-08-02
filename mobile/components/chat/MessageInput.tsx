@@ -18,13 +18,28 @@ import * as ImagePicker from 'expo-image-picker';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { ACTION_ICONS, UI_ICONS } from '@/utils/icons';
 
+/**
+ * MessageInput 컴포넌트 Props
+ * @interface MessageInputProps
+ */
 interface MessageInputProps {
+  /** 메시지 전송 핸들러 */
   onSendMessage: (content: string, type?: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY') => Promise<void>;
+  /** 타이핑 상태 변경 핸들러 */
   onTypingStatusChange?: (isTyping: boolean) => void;
+  /** 비활성화 여부 */
   disabled?: boolean;
+  /** 플레이스홀더 텍스트 */
   placeholder?: string;
 }
 
+/**
+ * 메시지 입력 컴포넌트 - 채팅 메시지 입력 및 전송
+ * @component
+ * @param {MessageInputProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 메시지 입력 UI
+ * @description 텍스트 입력, 이미지 첨부, 타이핑 상태 관리 등 채팅 입력 기능 제공
+ */
 export const MessageInput: React.FC<MessageInputProps> = React.memo(({
   onSendMessage,
   onTypingStatusChange,
@@ -48,7 +63,11 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
     };
   }, []);
 
-  // 텍스트 변경 핸들러
+  /**
+   * 텍스트 변경 핸들러
+   * @param {string} text - 입력된 텍스트
+   * @returns {void}
+   */
   const handleTextChange = useCallback((text: string) => {
     setMessage(text);
     
@@ -67,7 +86,10 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
     }
   }, [onTypingStatusChange]);
 
-  // 메시지 전송
+  /**
+   * 메시지 전송 처리
+   * @returns {Promise<void>}
+   */
   const handleSendMessage = useCallback(async () => {
     const trimmedMessage = message.trim();
     if (!trimmedMessage || isSending || disabled) return;
@@ -93,7 +115,10 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
     }
   }, [message, isSending, disabled, onSendMessage, onTypingStatusChange]);
 
-  // 이미지 선택 및 전송
+  /**
+   * 갤러리에서 이미지 선택 및 전송
+   * @returns {Promise<void>}
+   */
   const handleImagePicker = useCallback(async () => {
     setShowAttachmentOptions(false);
     
@@ -134,7 +159,10 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
     }
   }, [onSendMessage]);
 
-  // 카메라로 사진 촬영
+  /**
+   * 카메라로 사진 촬영 및 전송
+   * @returns {Promise<void>}
+   */
   const handleCamera = useCallback(async () => {
     setShowAttachmentOptions(false);
     
@@ -173,7 +201,10 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
     }
   }, [onSendMessage]);
 
-  // 첨부파일 옵션 토글
+  /**
+   * 첨부파일 옵션 토글
+   * @returns {void}
+   */
   const toggleAttachmentOptions = useCallback(() => {
     setShowAttachmentOptions(!showAttachmentOptions);
     Keyboard.dismiss();
@@ -186,7 +217,10 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
     }
   }, [handleSendMessage]);
 
-  // 첨부파일 옵션 렌더링
+  /**
+   * 첨부파일 옵션 렌더링
+   * @returns {JSX.Element | null} 첨부파일 옵션 UI
+   */
   const renderAttachmentOptions = () => {
     if (!showAttachmentOptions) return null;
 

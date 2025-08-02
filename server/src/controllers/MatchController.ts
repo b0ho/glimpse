@@ -6,7 +6,18 @@ import { matchingService } from '../services/MatchingService';
 import { matchingStatisticsService } from '../services/MatchingStatisticsService';
 import { recordMatch, recordLike } from '../middleware/metrics';
 
+/**
+ * 매칭 컨트롤러 - 매칭 및 추천 기능
+ * @class MatchController
+ */
 export class MatchController {
+  /**
+   * 사용자의 매칭 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (query: status, page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getMatches(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -32,6 +43,13 @@ export class MatchController {
     }
   }
 
+  /**
+   * 특정 매칭 상세 정보 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: matchId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getMatchById(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -60,6 +78,13 @@ export class MatchController {
     }
   }
 
+  /**
+   * 매칭 삭제
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: matchId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async deleteMatch(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -84,6 +109,13 @@ export class MatchController {
     }
   }
 
+  /**
+   * 사용자의 매칭 통계 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getMatchStats(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -103,6 +135,13 @@ export class MatchController {
     }
   }
 
+  /**
+   * 매칭 추천 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (query: groupId, count)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getRecommendations(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -131,6 +170,13 @@ export class MatchController {
     }
   }
 
+  /**
+   * 매칭 신고
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: matchId, body: reason, description)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async reportMatch(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -160,6 +206,13 @@ export class MatchController {
     }
   }
 
+  /**
+   * 매칭 기간 연장 (프리미엄 전용)
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: matchId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async extendMatch(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -194,6 +247,13 @@ export class MatchController {
     }
   }
 
+  /**
+   * 매칭 이력 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (query: page, limit, groupId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getMatchingHistory(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -219,6 +279,13 @@ export class MatchController {
     }
   }
 
+  /**
+   * 상호 연결 관계 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: matchId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getMutualConnections(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {

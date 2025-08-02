@@ -7,17 +7,36 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
+/**
+ * ProfileInfoCards 컴포넌트 Props
+ * @interface ProfileInfoCardsProps
+ */
 interface ProfileInfoCardsProps {
+  /** 회사명 */
   companyName?: string;
+  /** 학력 */
   education?: string;
+  /** 위치 */
   location?: string;
+  /** 관심사 목록 */
   interests?: string[];
+  /** 키 (cm) */
   height?: number;
+  /** MBTI 성격 유형 */
   mbti?: string;
+  /** 음주 여부 */
   drinking?: string;
+  /** 흡연 여부 */
   smoking?: string;
 }
 
+/**
+ * 프로필 정보 카드 컴포넌트 - 사용자 기본 정보 표시
+ * @component
+ * @param {ProfileInfoCardsProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 프로필 정보 카드 UI
+ * @description 직장, 학교, 지역, 키 등 사용자 기본 정보를 카드 형식으로 표시
+ */
 export const ProfileInfoCards: React.FC<ProfileInfoCardsProps> = ({
   companyName,
   education,

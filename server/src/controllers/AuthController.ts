@@ -7,7 +7,18 @@ import { createError } from '../middleware/errorHandler';
 import { validatePhoneNumber } from '@shared/utils';
 import { recordUserRegistration } from '../middleware/metrics';
 
+/**
+ * 인증 컨트롤러 - 사용자 인증 및 회원가입 처리
+ * @class AuthController
+ */
 export class AuthController {
+  /**
+   * SMS 인증 코드 전송
+   * @param {Request} req - Express request 객체 (body: phoneNumber)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async sendSMS(req: Request, res: Response, next: NextFunction) {
     try {
       const { phoneNumber } = req.body;
@@ -30,6 +41,13 @@ export class AuthController {
     }
   }
 
+  /**
+   * SMS 인증 코드 확인
+   * @param {Request} req - Express request 객체 (body: phoneNumber, verificationCode, verificationId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async verifySMS(req: Request, res: Response, next: NextFunction) {
     try {
       const { phoneNumber, verificationCode, verificationId } = req.body;
@@ -91,6 +109,13 @@ export class AuthController {
     }
   }
 
+  /**
+   * 사용자 회원가입 완료 (프로필 설정)
+   * @param {Request} req - Express request 객체 (body: phoneNumber, nickname, age, gender, bio)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async register(req: Request, res: Response, next: NextFunction) {
     try {
       const { phoneNumber, nickname, age, gender, bio } = req.body;
@@ -143,6 +168,13 @@ export class AuthController {
     }
   }
 
+  /**
+   * 토큰 갱신
+   * @param {Request} req - Express request 객체 (body: token)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async refreshToken(req: Request, res: Response, next: NextFunction) {
     try {
       const { token } = req.body;
@@ -172,6 +204,13 @@ export class AuthController {
     }
   }
 
+  /**
+   * 로그아웃
+   * @param {Request} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async logout(req: Request, res: Response, next: NextFunction) {
     try {
       // In a more complex setup, you might want to blacklist the token

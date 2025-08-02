@@ -6,7 +6,18 @@ import { groupService } from '../services/GroupService';
 import { companyVerificationService } from '../services/CompanyVerificationService';
 import { locationService } from '../services/LocationService';
 
+/**
+ * 그룹 컨트롤러 - 그룹 생성, 관리 및 가입 기능
+ * @class GroupController
+ */
 export class GroupController {
+  /**
+   * 그룹 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (query: type, search, page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getGroups(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -33,6 +44,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 새 그룹 생성
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: name, description, type, settings, location, companyId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async createGroup(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -100,6 +118,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 그룹 초대 링크 생성
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async generateInviteLink(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -120,6 +145,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 초대 링크로 그룹 가입
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: inviteCode)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async joinGroupByInvite(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -140,6 +172,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 그룹 초대 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getGroupInvites(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -160,6 +199,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 초대 취소
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: inviteId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async revokeInvite(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -180,6 +226,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 특정 그룹 상세 정보 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getGroupById(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
@@ -209,6 +262,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 그룹 정보 업데이트
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId, body: updateData)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async updateGroup(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
@@ -249,6 +309,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 그룹 삭제
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async deleteGroup(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
@@ -284,6 +351,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 그룹 가입
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async joinGroup(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
@@ -309,6 +383,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 그룹 탈퇴
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async leaveGroup(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
@@ -334,6 +415,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 그룹 멤버 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId, query: page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getGroupMembers(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
@@ -373,6 +461,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 그룹에 사용자 초대
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId, body: phoneNumbers)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async inviteToGroup(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
@@ -417,6 +512,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 멤버 역할 변경
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId, userId, body: role)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async updateMemberRole(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId, userId: targetUserId } = req.params;
@@ -473,6 +575,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 그룹에서 멤버 제거
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId, userId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async removeMember(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId, userId: targetUserId } = req.params;
@@ -524,6 +633,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 위치 기반 그룹 체크인
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId, body: latitude, longitude, accuracy, method)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async locationCheckIn(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
@@ -562,6 +678,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 그룹 체크인 내역 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId, query: page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getCheckIns(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
@@ -595,6 +718,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 초대 코드 생성
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId, body: maxUses, expiresInHours)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async createInviteCode(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { groupId } = req.params;
@@ -635,6 +765,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 초대 코드로 그룹 가입
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: code)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async joinByInviteCode(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { code } = req.body;
@@ -660,6 +797,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 대기 중인 멤버 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getPendingMembers(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -680,6 +824,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 멤버 가입 승인
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId, userId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async approveMember(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -701,6 +852,13 @@ export class GroupController {
     }
   }
 
+  /**
+   * 멤버 가입 거절
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: groupId, userId, body: reason)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async rejectMember(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {

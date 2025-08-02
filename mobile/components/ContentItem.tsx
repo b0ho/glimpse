@@ -12,13 +12,28 @@ import { formatTimeAgo } from '@/utils/dateUtils';
 import { STATE_ICONS } from '@/utils/icons';
 import { useLikeStore } from '@/store/slices/likeSlice';
 
+/**
+ * ContentItem 컴포넌트 Props
+ * @interface ContentItemProps
+ */
 interface ContentItemProps {
+  /** 컨텐츠 아이템 데이터 */
   item: Content;
+  /** 현재 사용자 ID */
   currentUserId?: string;
+  /** 남은 좋아요 수 */
   remainingLikes: number;
+  /** 좋아요 토글 핸들러 */
   onLikeToggle: (contentId: string, authorId: string) => void;
 }
 
+/**
+ * 컨텐츠 아이템 컴포넌트 - 피드의 각 컨텐츠 표시
+ * @component
+ * @param {ContentItemProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 컨텐츠 아이템 UI
+ * @description 사용자 게시물을 표시하고 좋아요 기능 제공. 익명성 시스템에 따라 작성자 표시
+ */
 export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   item,
   currentUserId,

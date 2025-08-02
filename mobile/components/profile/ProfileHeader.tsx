@@ -10,27 +10,54 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { User } from '@shared/types';
 
+/**
+ * ProfileHeader 컴포넌트 Props
+ * @interface ProfileHeaderProps
+ */
 interface ProfileHeaderProps {
+  /** 사용자 정보 */
   user: User;
+  /** 통계 정보 */
   stats: {
+    /** 받은 좋아요 수 */
     totalLikes: number;
+    /** 상호 매칭 수 */
     mutualMatches: number;
+    /** 친구 수 */
     friendCount: number;
+    /** 소속 그룹 수 */
     groupCount: number;
   };
+  /** 배지 목록 */
   badges: Array<{
+    /** 배지 ID */
     id: string;
+    /** 배지 아이콘 */
     icon: string;
+    /** 배지 색상 */
     color: string;
+    /** 배지 레이블 */
     label: string;
   }>;
+  /** 프로필 수정 핸들러 */
   onEditPress: () => void;
+  /** 좋아요 클릭 핸들러 */
   onLikesPress: () => void;
+  /** 매칭 클릭 핸들러 */
   onMatchesPress: () => void;
+  /** 친구 클릭 핸들러 */
   onFriendsPress: () => void;
+  /** 그룹 클릭 핸들러 */
   onGroupsPress: () => void;
 }
 
+/**
+ * 프로필 헤더 컴포넌트 - 사용자 프로필 정보 표시
+ * @component
+ * @param {ProfileHeaderProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 프로필 헤더 UI
+ * @description 사용자 프로필 이미지, 이름, 통계, 배지 및 자기소개를 표시하는 헤더 컴포넌트
+ */
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   user,
   stats,

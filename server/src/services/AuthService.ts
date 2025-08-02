@@ -5,14 +5,20 @@ import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import { metrics } from '../utils/monitoring';
 
-
-
+/**
+ * 인증 서비스 - Clerk 연동 및 JWT 관리
+ * @class AuthService
+ */
 export class AuthService {
   private readonly clerkSecretKey = process.env.CLERK_SECRET_KEY || '';
   private readonly clerkApiUrl = 'https://api.clerk.com/v1';
 
   /**
-   * Verify phone number with Clerk and create/update user in database
+   * 전화번호 인증 및 사용자 생성/업데이트
+   * @param {string} phoneNumber - 전화번호
+   * @param {string} verificationCode - 인증 코드
+   * @returns {Promise<User>} 사용자 객체
+   * @throws {Error} 인증 실패 시
    */
   async verifyPhoneNumber(phoneNumber: string, verificationCode: string): Promise<User> {
     try {
@@ -70,7 +76,9 @@ export class AuthService {
   }
 
   /**
-   * Get user by Clerk user ID
+   * Clerk 사용자 ID로 사용자 조회
+   * @param {string} clerkUserId - Clerk 사용자 ID
+   * @returns {Promise<User|null>} 사용자 객체 또는 null
    */
   async getUserByClerkId(clerkUserId: string): Promise<User | null> {
     try {
@@ -102,7 +110,10 @@ export class AuthService {
   }
 
   /**
-   * Sync user data with Clerk
+   * Clerk와 사용자 데이터 동기화
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<void>}
+   * @throws {Error} 사용자를 찾을 수 없을 때
    */
   async syncWithClerk(userId: string): Promise<void> {
     const user = await prisma.user.findUnique({
@@ -139,7 +150,10 @@ export class AuthService {
   }
 
   /**
-   * Send SMS verification code via Clerk
+   * SMS 인증 코드 전송
+   * @param {string} phoneNumber - 전화번호
+   * @returns {Promise<void>}
+   * @throws {Error} SMS 전송 실패 시
    */
   async sendVerificationCode(phoneNumber: string): Promise<void> {
     try {
@@ -168,7 +182,10 @@ export class AuthService {
   }
 
   /**
-   * Resend SMS verification code
+   * SMS 인증 코드 재전송
+   * @param {string} phoneNumber - 전화번호
+   * @returns {Promise<void>}
+   * @throws {Error} SMS 재전송 실패 시
    */
   async resendVerificationCode(phoneNumber: string): Promise<void> {
     try {
@@ -190,7 +207,10 @@ export class AuthService {
   }
 
   /**
-   * Delete user account
+   * 사용자 계정 삭제 (소프트 삭제)
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<void>}
+   * @throws {Error} 사용자를 찾을 수 없을 때
    */
   async deleteAccount(userId: string): Promise<void> {
     const user = await prisma.user.findUnique({
@@ -214,8 +234,10 @@ export class AuthService {
   }
 
   /**
-   * Generate JWT token for legacy support or internal use
-   * Note: Primary authentication should use Clerk tokens
+   * JWT 토큰 생성 (레거시 지원 및 내부 사용)
+   * @param {User} user - 사용자 객체
+   * @returns {string} JWT 토큰
+   * @note 기본 인증은 Clerk 토큰을 사용해야 함
    */
   generateToken(user: User): string {
     const payload = {
@@ -230,7 +252,10 @@ export class AuthService {
   }
 
   /**
-   * Verify legacy JWT token
+   * 레거시 JWT 토큰 검증
+   * @param {string} token - JWT 토큰
+   * @returns {any} 디코드된 토큰 페이로드
+   * @throws {Error} 토큰 검증 실패 시
    */
   verifyToken(token: string): any {
     return jwt.verify(token, process.env.JWT_SECRET!);

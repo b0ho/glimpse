@@ -12,26 +12,54 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
+/**
+ * 스토리 사용자 인터페이스
+ * @interface StoryUser
+ */
 interface StoryUser {
+  /** 사용자 정보 */
   user: {
+    /** 사용자 ID */
     id: string;
+    /** 닉네임 */
     nickname: string;
+    /** 프로필 이미지 URL */
     profileImage?: string;
   };
+  /** 스토리 리스트 */
   stories: any[];
+  /** 보지 않은 스토리 여부 */
   hasUnviewed: boolean;
 }
 
+/**
+ * StoryList 컴포넌트 Props
+ * @interface StoryListProps
+ */
 interface StoryListProps {
+  /** 스토리 목록 */
   stories: StoryUser[];
+  /** 스토리 클릭 핸들러 */
   onStoryPress: (userIndex: number) => void;
+  /** 스토리 추가 핸들러 */
   onAddStoryPress: () => void;
+  /** 현재 사용자 ID */
   currentUserId: string;
+  /** 로딩 상태 */
   isLoading?: boolean;
+  /** 새로고침 핸들러 */
   onRefresh?: () => void;
+  /** 새로고침 상태 */
   refreshing?: boolean;
 }
 
+/**
+ * 스토리 리스트 컴포넌트 - 인스타그램 스타일 스토리 목록
+ * @component
+ * @param {StoryListProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 스토리 리스트 UI
+ * @description 사용자 스토리를 가로 스크롤 리스트로 표시하고 미확인 스토리 강조
+ */
 export const StoryList: React.FC<StoryListProps> = ({
   stories,
   onStoryPress,
@@ -45,6 +73,13 @@ export const StoryList: React.FC<StoryListProps> = ({
   const myStories = stories.find(story => story.user.id === currentUserId);
   const otherStories = stories.filter(story => story.user.id !== currentUserId);
 
+  /**
+   * 개별 스토리 아이템 렌더링
+   * @param {Object} params - 리스트 아이템 파라미터
+   * @param {StoryUser} params.item - 스토리 사용자
+   * @param {number} params.index - 리스트 인덱스
+   * @returns {JSX.Element} 스토리 아이템 UI
+   */
   const renderStoryItem = ({ item, index }: { item: StoryUser; index: number }) => {
     const actualIndex = myStories ? index + 1 : index;
     
@@ -94,6 +129,10 @@ export const StoryList: React.FC<StoryListProps> = ({
     );
   };
 
+  /**
+   * 내 스토리 렌더링
+   * @returns {JSX.Element} 내 스토리 또는 스토리 추가 버튼 UI
+   */
   const renderMyStory = () => {
     if (myStories) {
       return (

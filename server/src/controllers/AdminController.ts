@@ -2,7 +2,18 @@ import { Request, Response, NextFunction } from 'express';
 import { adminService } from '../services/AdminService';
 import { createError } from '../middleware/errorHandler';
 
+/**
+ * 관리자 컨트롤러 - 관리자 대시보드 및 시스템 관리 기능
+ * @class AdminController
+ */
 export class AdminController {
+  /**
+   * 대시보드 통계 조회
+   * @param {Request} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getDashboardStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const stats = await adminService.getDashboardStats();
@@ -16,6 +27,13 @@ export class AdminController {
     }
   }
 
+  /**
+   * 사용자 목록 조회
+   * @param {Request} req - Express request 객체 (query: page, limit, search, isPremium, isVerified, sortBy, sortOrder)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page = 1, limit = 20, search, isPremium, isVerified, sortBy, sortOrder } = req.query;
@@ -39,6 +57,13 @@ export class AdminController {
     }
   }
 
+  /**
+   * 특정 사용자 상세 정보 조회
+   * @param {Request} req - Express request 객체 (params: userId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getUserDetail(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { userId } = req.params;
@@ -58,6 +83,13 @@ export class AdminController {
     }
   }
 
+  /**
+   * 그룹 목록 조회
+   * @param {Request} req - Express request 객체 (query: page, limit, search, type, isActive)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getGroups(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page = 1, limit = 20, search, type, isActive } = req.query;
@@ -79,6 +111,13 @@ export class AdminController {
     }
   }
 
+  /**
+   * 신고 목록 조회
+   * @param {Request} req - Express request 객체 (query: page, limit, status, type)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getReports(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page = 1, limit = 20, status, type } = req.query;
@@ -99,6 +138,13 @@ export class AdminController {
     }
   }
 
+  /**
+   * 수익 분석 데이터 조회
+   * @param {Request} req - Express request 객체 (query: period)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getRevenueAnalytics(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { period = 'month' } = req.query;
@@ -114,6 +160,13 @@ export class AdminController {
     }
   }
 
+  /**
+   * 사용자 활동 분석 데이터 조회
+   * @param {Request} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getUserActivityAnalytics(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const analytics = await adminService.getUserActivityAnalytics();
@@ -127,6 +180,13 @@ export class AdminController {
     }
   }
 
+  /**
+   * 사용자 차단/차단 해제
+   * @param {Request} req - Express request 객체 (params: userId, body: block)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async toggleUserBlock(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { userId } = req.params;
@@ -151,6 +211,13 @@ export class AdminController {
     }
   }
 
+  /**
+   * 그룹 활성화/비활성화
+   * @param {Request} req - Express request 객체 (params: groupId, body: active)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async toggleGroupActive(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { groupId } = req.params;
@@ -175,6 +242,13 @@ export class AdminController {
     }
   }
 
+  /**
+   * 시스템 설정 조회
+   * @param {Request} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getSystemSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const settings = await adminService.getSystemSettings();
@@ -188,6 +262,13 @@ export class AdminController {
     }
   }
 
+  /**
+   * 시스템 설정 업데이트
+   * @param {Request} req - Express request 객체 (body: settings)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async updateSystemSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const settings = req.body;

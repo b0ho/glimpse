@@ -2,27 +2,56 @@ import Redis from 'ioredis';
 import { logger } from '../middleware/logging';
 import { EventEmitter } from 'events';
 
+/**
+ * 큐 메시지 인터페이스
+ * @interface QueueMessage
+ */
 interface QueueMessage {
+  /** 메시지 ID */
   id: string;
+  /** 메시지 타입 */
   type: string;
+  /** 메시지 페이로드 */
   payload: any;
+  /** 타임스탬프 */
   timestamp: number;
+  /** 시도 횟수 */
   attempts: number;
+  /** 사용자 ID */
   userId?: string;
+  /** 매칭 ID */
   matchId?: string;
 }
 
+/**
+ * 큐 옵션 인터페이스
+ * @interface QueueOptions
+ */
 interface QueueOptions {
+  /** 최대 재시도 횟수 */
   maxRetries?: number;
+  /** 재시도 지연 시간 */
   retryDelay?: number;
+  /** TTL (초) */
   ttl?: number;
 }
 
+/**
+ * 메시지 큐 서비스 - Redis 기반 메시지 큐 관리
+ * @class MessageQueueService
+ * @extends {EventEmitter}
+ */
 export class MessageQueueService extends EventEmitter {
+  /** Redis publisher 클라이언트 */
   private publisher: Redis;
+  /** Redis subscriber 클라이언트 */
   private subscriber: Redis;
+  /** 연결 상태 */
   private isConnected: boolean = false;
 
+  /**
+   * MessageQueueService 생성자
+   */
   constructor() {
     super();
     
@@ -45,6 +74,11 @@ export class MessageQueueService extends EventEmitter {
     this.startQueueProcessor();
   }
 
+  /**
+   * 이벤트 핸들러 설정
+   * @private
+   * @returns {void}
+   */
   private setupEventHandlers() {
     this.publisher.on('connect', () => {
       logger.info('Message queue publisher connected');
@@ -65,7 +99,14 @@ export class MessageQueueService extends EventEmitter {
     });
   }
 
-  // Enqueue a message for offline users
+  /**
+   * 오프라인 사용자를 위한 메시지 큐 추가
+   * @param {string} userId - 사용자 ID
+   * @param {any} message - 메시지
+   * @param {QueueOptions} [options={}] - 큐 옵션
+   * @returns {Promise<void>}
+   * @throws {Error} 큐 추가 실패 시
+   */
   async enqueueOfflineMessage(userId: string, message: any, options: QueueOptions = {}) {
     if (!this.isConnected) {
       logger.warn('Message queue not connected, message may be lost');
@@ -95,7 +136,11 @@ export class MessageQueueService extends EventEmitter {
     }
   }
 
-  // Get offline messages for a user
+  /**
+   * 사용자의 오프라인 메시지 조회
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<any[]>} 오프라인 메시지 목록
+   */
   async getOfflineMessages(userId: string): Promise<any[]> {
     if (!this.isConnected) return [];
 
@@ -119,7 +164,11 @@ export class MessageQueueService extends EventEmitter {
     }
   }
 
-  // Clear offline messages for a user
+  /**
+   * 사용자의 오프라인 메시지 삭제
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<void>}
+   */
   async clearOfflineMessages(userId: string): Promise<void> {
     if (!this.isConnected) return;
 
@@ -133,7 +182,12 @@ export class MessageQueueService extends EventEmitter {
     }
   }
 
-  // Enqueue failed push notification for retry
+  /**
+   * 실패한 푸시 알림 재시도 큐 추가
+   * @param {any} notification - 알림 데이터
+   * @param {QueueOptions} [options={}] - 큐 옵션
+   * @returns {Promise<void>}
+   */
   async enqueuePushNotificationRetry(notification: any, options: QueueOptions = {}) {
     if (!this.isConnected) {
       logger.warn('Message queue not connected, push notification retry may be lost');
@@ -169,7 +223,11 @@ export class MessageQueueService extends EventEmitter {
     }
   }
 
-  // Process retry queue
+  /**
+   * 큐 처리기 시작
+   * @private
+   * @returns {Promise<void>}
+   */
   private async startQueueProcessor() {
     setInterval(async () => {
       if (!this.isConnected) return;
@@ -182,6 +240,11 @@ export class MessageQueueService extends EventEmitter {
     }, 30000); // Process every 30 seconds
   }
 
+  /**
+   * 푸시 알림 재시도 처리
+   * @private
+   * @returns {Promise<void>}
+   */
   private async processPushNotificationRetries() {
     const queueKey = 'push_notification_retry_queue';
     const now = Date.now();
@@ -208,7 +271,12 @@ export class MessageQueueService extends EventEmitter {
     }
   }
 
-  // Log failed notification for analysis
+  /**
+   * 실패한 알림 로깅 (분석용)
+   * @private
+   * @param {any} notification - 알림 데이터
+   * @returns {Promise<void>}
+   */
   private async logFailedNotification(notification: any) {
     const failedKey = `failed_notifications:${new Date().toISOString().split('T')[0]}`;
     
@@ -225,7 +293,12 @@ export class MessageQueueService extends EventEmitter {
     }
   }
 
-  // Publish real-time event
+  /**
+   * 실시간 이벤트 발행
+   * @param {string} channel - 채널 이름
+   * @param {any} event - 이벤트 데이터
+   * @returns {Promise<void>}
+   */
   async publishEvent(channel: string, event: any) {
     if (!this.isConnected) {
       logger.warn('Message queue not connected, event may be lost');
@@ -239,7 +312,12 @@ export class MessageQueueService extends EventEmitter {
     }
   }
 
-  // Subscribe to real-time events
+  /**
+   * 실시간 이벤트 구독
+   * @param {string} channel - 채널 이름
+   * @param {Function} callback - 메시지 처리 콜백
+   * @returns {Promise<void>}
+   */
   async subscribeToChannel(channel: string, callback: (message: any) => void) {
     try {
       await this.subscriber.subscribe(channel);
@@ -259,7 +337,10 @@ export class MessageQueueService extends EventEmitter {
     }
   }
 
-  // Graceful shutdown
+  /**
+   * 서비스 종료
+   * @returns {Promise<void>}
+   */
   async disconnect() {
     await Promise.all([
       this.publisher.quit(),

@@ -1,11 +1,26 @@
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * 즉석 매칭 서비스 - 즉석 모임 및 매칭 관리
+ * @class InstantMatchingService
+ */
 export class InstantMatchingService {
+  /**
+   * InstantMatchingService 생성자
+   * @param {PrismaClient} prisma - Prisma 클라이언트
+   */
   constructor(private prisma: PrismaClient) {}
 
   /**
    * 즉석 모임 생성
+   * @param {string} creatorId - 생성자 ID
+   * @param {Object} data - 모임 데이터
+   * @param {string} data.name - 모임 이름
+   * @param {number} data.duration - 유효 시간 (시간 단위)
+   * @param {Object} [data.location] - 위치 정보
+   * @param {string[]} data.featureCategories - 특징 카테고리
+   * @returns {Promise<Object>} 생성된 모임
    */
   async createInstantMeeting(creatorId: string, data: {
     name: string;
@@ -36,6 +51,11 @@ export class InstantMatchingService {
 
   /**
    * 즉석 모임 참가
+   * @param {string} userId - 사용자 ID
+   * @param {string} code - 모임 코드
+   * @param {string} nickname - 닉네임
+   * @returns {Promise<Object>} 모임 및 참가자 정보
+   * @throws {Error} 모임 없음, 만료됨, 이미 참가중
    */
   async joinInstantMeeting(userId: string, code: string, nickname: string) {
     // 모임 찾기
@@ -110,6 +130,11 @@ export class InstantMatchingService {
 
   /**
    * 호감 표현 (구체적 특징 허용)
+   * @param {string} participantId - 참가자 ID
+   * @param {string} meetingId - 모임 ID
+   * @param {any} targetFeatures - 대상 특징
+   * @returns {Promise<Object>} 호감 표현 결과
+   * @throws {Error} 참가자 정보를 찾을 수 없을 때
    */
   async expressInterest(
     participantId: string,
@@ -158,6 +183,11 @@ export class InstantMatchingService {
 
   /**
    * 매칭 찾기 및 생성
+   * @private
+   * @param {string} fromParticipantId - 보낸 참가자 ID
+   * @param {string} meetingId - 모임 ID
+   * @param {any} targetFeatures - 대상 특징
+   * @returns {Promise<Array>} 생성된 매칭 목록
    */
   private async findAndCreateMatches(
     fromParticipantId: string,
@@ -205,6 +235,10 @@ export class InstantMatchingService {
 
   /**
    * 특징 매칭 확인 (실제 구현 필요)
+   * @private
+   * @param {any} targetFeatures - 대상 특징
+   * @param {string} participantId - 참가자 ID
+   * @returns {Promise<boolean>} 매칭 여부
    */
   private async checkFeatureMatch(
     targetFeatures: any,
@@ -217,6 +251,11 @@ export class InstantMatchingService {
 
   /**
    * 매칭 생성
+   * @private
+   * @param {string} participant1Id - 첫 번째 참가자 ID
+   * @param {string} participant2Id - 두 번째 참가자 ID
+   * @param {string} meetingId - 모임 ID
+   * @returns {Promise<Object|null>} 생성된 매칭 또는 null
    */
   private async createMatch(
     participant1Id: string,
@@ -269,6 +308,9 @@ export class InstantMatchingService {
 
   /**
    * 매칭 목록 조회 (닉네임만 공개)
+   * @param {string} participantId - 참가자 ID
+   * @param {string} meetingId - 모임 ID
+   * @returns {Promise<Array>} 매칭 목록
    */
   async getMyMatches(participantId: string, meetingId: string) {
     const matches = await this.prisma.instantMatch.findMany({
@@ -307,6 +349,12 @@ export class InstantMatchingService {
 
   /**
    * 메시지 전송
+   * @param {string} participantId - 참가자 ID
+   * @param {string} chatRoomId - 채팅방 ID
+   * @param {string} content - 메시지 내용
+   * @param {'TEXT' | 'IMAGE' | 'EMOJI'} [messageType='TEXT'] - 메시지 타입
+   * @returns {Promise<Object>} 전송된 메시지
+   * @throws {Error} 채팅방을 찾을 수 없을 때
    */
   async sendMessage(
     participantId: string,
@@ -358,6 +406,12 @@ export class InstantMatchingService {
 
   /**
    * 활동 로그 기록
+   * @private
+   * @param {string} userId - 사용자 ID
+   * @param {string} meetingId - 모임 ID
+   * @param {any} activityType - 활동 타입
+   * @param {any} [activityData] - 활동 데이터
+   * @returns {Promise<void>}
    */
   private async logActivity(
     userId: string,
@@ -377,6 +431,8 @@ export class InstantMatchingService {
 
   /**
    * 모임 코드 생성
+   * @private
+   * @returns {string} 8자리 모임 코드
    */
   private generateMeetingCode(): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -389,6 +445,9 @@ export class InstantMatchingService {
 
   /**
    * 메시지 암호화 (실제 구현 필요)
+   * @private
+   * @param {string} content - 원본 메시지
+   * @returns {string} 암호화된 메시지
    */
   private encryptMessage(content: string): string {
     // TODO: 실제 암호화 구현
@@ -397,6 +456,9 @@ export class InstantMatchingService {
 
   /**
    * 메시지 복호화 (실제 구현 필요)
+   * @private
+   * @param {string} content - 암호화된 메시지
+   * @returns {string} 복호화된 메시지
    */
   private decryptMessage(content: string): string {
     // TODO: 실제 복호화 구현

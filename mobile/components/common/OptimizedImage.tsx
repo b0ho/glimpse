@@ -8,26 +8,50 @@ import {
   Dimensions,
 } from 'react-native';
 
+/**
+ * OptimizedImage 컴포넌트 Props
+ * @interface OptimizedImageProps
+ */
 interface OptimizedImageProps extends Omit<ImageProps, 'source'> {
+  /** 이미지 소스 */
   source: {
+    /** 기본 이미지 URI */
     uri: string;
+    /** 블러 이미지 URI */
     blur?: string;
+    /** 썸네일 이미지 URI */
     thumbnail?: string;
+    /** 이미지 변형 목록 */
     variants?: Array<{
+      /** 크기 이름 */
       size: string;
+      /** 이미지 URL */
       url: string;
+      /** 이미지 너비 */
       width: number;
     }>;
   };
+  /** 이미지 너비 */
   width?: number;
+  /** 이미지 높이 */
   height?: number;
+  /** 로딩 표시기 표시 여부 */
   showLoading?: boolean;
+  /** 블러 효과 활성화 여부 */
   enableBlur?: boolean;
+  /** 이미지 품질 */
   quality?: 'low' | 'medium' | 'high' | 'original';
 }
 
 const { width: screenWidth } = Dimensions.get('window');
 
+/**
+ * 최적화된 이미지 컴포넌트 - 다양한 크기와 품질의 이미지 표시
+ * @component
+ * @param {OptimizedImageProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 최적화된 이미지 UI
+ * @description 화면 크기와 품질 설정에 따라 최적의 이미지 변형을 선택하여 표시
+ */
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   source,
   width,
@@ -86,16 +110,28 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     setBlurUri(source.blur || '');
   }, [source, width, quality]);
 
+  /**
+   * 이미지 로드 완료 핸들러
+   * @returns {void}
+   */
   const handleLoad = () => {
     setLoading(false);
     setError(false);
   };
 
+  /**
+   * 이미지 로드 오류 핸들러
+   * @returns {void}
+   */
   const handleError = () => {
     setLoading(false);
     setError(true);
   };
 
+  /**
+   * 이미지 렌더링
+   * @returns {JSX.Element} 이미지 UI
+   */
   const renderImage = () => {
     if (error) {
       return (
@@ -149,7 +185,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 // Memoized version for lists
 export const MemoizedOptimizedImage = React.memo(OptimizedImage);
 
-// Hook for preloading images
+/**
+ * 이미지 미리 로드 훅
+ * @param {string[]} urls - 미리 로드할 이미지 URL 목록
+ * @returns {void}
+ * @description 사용자가 보기 전에 이미지를 미리 로드하여 성능 향상
+ */
 export const useImagePreload = (urls: string[]) => {
   useEffect(() => {
     urls.forEach(url => {
@@ -160,7 +201,13 @@ export const useImagePreload = (urls: string[]) => {
   }, [urls]);
 };
 
-// Utility to get optimal image URL based on device
+/**
+ * 최적 이미지 URL 가져오기
+ * @param {OptimizedImageProps['source']} source - 이미지 소스 객체
+ * @param {number} targetWidth - 목표 너비
+ * @returns {string} 최적화된 이미지 URL
+ * @description 디바이스 해상도와 목표 너비에 따라 최적의 이미지 URL 반환
+ */
 export const getOptimalImageUrl = (
   source: OptimizedImageProps['source'],
   targetWidth: number

@@ -1,10 +1,18 @@
-// App Mode Types
+/**
+ * 앱 모드 타입 - 데이팅과 친구 찾기 모드를 구분
+ * @enum {string}
+ */
 export enum AppMode {
+  /** 데이팅 모드 - 연애 상대를 찾는 모드 */
   DATING = 'DATING',
+  /** 친구 찾기 모드 - 친구를 찾는 모드 */
   FRIENDSHIP = 'FRIENDSHIP'
 }
 
-// User Types
+/**
+ * 사용자 인터페이스 - 모든 사용자 정보를 포함하는 기본 타입
+ * @interface User
+ */
 export interface User {
   id: string;
   clerkId?: string;
@@ -47,9 +55,16 @@ export interface User {
   notificationSettings?: NotificationSettings;
 }
 
-// Gender Type
+/**
+ * 성별 타입
+ * @typedef {('MALE'|'FEMALE'|'OTHER')} Gender
+ */
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 
+/**
+ * 사용자 생성 요청 인터페이스
+ * @interface UserCreateRequest
+ */
 export interface UserCreateRequest {
   phoneNumber: string;
   nickname: string;
@@ -58,6 +73,10 @@ export interface UserCreateRequest {
   bio?: string;
 }
 
+/**
+ * 사용자 정보 업데이트 요청 인터페이스
+ * @interface UserUpdateRequest
+ */
 export interface UserUpdateRequest {
   nickname?: string;
   age?: number;
@@ -65,13 +84,21 @@ export interface UserUpdateRequest {
   profileImage?: string;
 }
 
+/**
+ * 사용자 응답 인터페이스 - API 응답용 확장 타입
+ * @interface UserResponse
+ * @extends {User}
+ */
 export interface UserResponse extends User {
   // Additional computed fields for API responses
   premiumUntil?: Date;
   deviceTokens?: UserDeviceToken[];
 }
 
-// Group Types
+/**
+ * 그룹 인터페이스 - 사용자들이 속할 수 있는 그룹 정보
+ * @interface Group
+ */
 export interface Group {
   id: string;
   name: string;
@@ -93,6 +120,10 @@ export interface Group {
   updatedAt: Date;
 }
 
+/**
+ * 그룹 타입 열거형
+ * @enum {string}
+ */
 export enum GroupType {
   OFFICIAL = 'OFFICIAL',     // Company/University groups
   CREATED = 'CREATED',       // User-created groups
@@ -100,6 +131,10 @@ export enum GroupType {
   LOCATION = 'LOCATION'      // Location-based groups
 }
 
+/**
+ * 그룹 위치 정보 인터페이스
+ * @interface GroupLocation
+ */
 export interface GroupLocation {
   name: string;
   address: string;
@@ -108,6 +143,10 @@ export interface GroupLocation {
   radius?: number; // in meters
 }
 
+/**
+ * 그룹 설정 인터페이스
+ * @interface GroupSettings
+ */
 export interface GroupSettings {
   requiresApproval: boolean;
   allowInvites: boolean;
@@ -117,6 +156,10 @@ export interface GroupSettings {
   genderRestriction?: 'MALE_ONLY' | 'FEMALE_ONLY' | 'MIXED';
 }
 
+/**
+ * 그룹 멤버 인터페이스 - 그룹과 사용자 간의 관계 정보
+ * @interface GroupMember
+ */
 export interface GroupMember {
   id: string;
   userId: string;
@@ -126,7 +169,10 @@ export interface GroupMember {
   joinedAt: Date;
 }
 
-// Company & Verification Types
+/**
+ * 회사/기관 인터페이스
+ * @interface Company
+ */
 export interface Company {
   id: string;
   name: string;
@@ -139,6 +185,10 @@ export interface Company {
   createdAt: Date;
 }
 
+/**
+ * 회사 인증 정보 인터페이스
+ * @interface CompanyVerification
+ */
 export interface CompanyVerification {
   id: string;
   userId: string;
@@ -151,6 +201,10 @@ export interface CompanyVerification {
   reviewedBy?: string;
 }
 
+/**
+ * 인증 방법 열거형
+ * @enum {string}
+ */
 export enum VerificationMethod {
   EMAIL_DOMAIN = 'EMAIL_DOMAIN',
   OCR_VERIFICATION = 'OCR_VERIFICATION',
@@ -158,6 +212,10 @@ export enum VerificationMethod {
   HR_APPROVAL = 'HR_APPROVAL'
 }
 
+/**
+ * 인증 상태 열거형
+ * @enum {string}
+ */
 export enum VerificationStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
@@ -165,7 +223,10 @@ export enum VerificationStatus {
   EXPIRED = 'EXPIRED'
 }
 
-// Like & Match Types
+/**
+ * 좋아요 인터페이스 - 사용자 간 호감 표현 정보
+ * @interface Like
+ */
 export interface Like {
   id: string;
   fromUserId: string;
@@ -182,11 +243,20 @@ export interface Like {
   group?: Group;
 }
 
-// Legacy interface for backwards compatibility
+/**
+ * 사용자 좋아요 인터페이스 - 하위 호환성을 위한 레거시 타입
+ * @interface UserLike
+ * @extends {Like}
+ * @deprecated Use Like interface instead
+ */
 export interface UserLike extends Like {
   isMatch: boolean;
 }
 
+/**
+ * 매칭 인터페이스 - 상호 호감으로 연결된 사용자 정보
+ * @interface Match
+ */
 export interface Match {
   id: string;
   user1Id: string;
@@ -208,7 +278,10 @@ export interface Match {
   group?: Group;
 }
 
-// Chat Types
+/**
+ * 채팅 메시지 인터페이스
+ * @interface ChatMessage
+ */
 export interface ChatMessage {
   id: string;
   matchId: string;
@@ -220,7 +293,10 @@ export interface ChatMessage {
   createdAt: Date;
 }
 
-// Message Types (for mobile compatibility)
+/**
+ * 메시지 인터페이스 - 모바일 호환성을 위한 확장 타입
+ * @interface Message
+ */
 export interface Message {
   id: string;
   matchId: string;
@@ -233,7 +309,10 @@ export interface Message {
   updatedAt: Date;
 }
 
-// Chat Room Types
+/**
+ * 채팅방 인터페이스
+ * @interface ChatRoom
+ */
 export interface ChatRoom {
   id: string;
   matchId: string;
@@ -245,7 +324,10 @@ export interface ChatRoom {
   updatedAt: Date;
 }
 
-// Content Types (for mobile compatibility)
+/**
+ * 콘텐츠 인터페이스 - 사용자가 업로드하는 콘텐츠 정보
+ * @interface Content
+ */
 export interface Content {
   id: string;
   userId: string;
@@ -267,7 +349,10 @@ export interface Content {
   updatedAt: Date;
 }
 
-// Auth Types
+/**
+ * 인증 상태 인터페이스 - 사용자 인증 관련 상태 정보
+ * @interface AuthState
+ */
 export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
@@ -276,7 +361,10 @@ export interface AuthState {
   error: string | null;
 }
 
-// Payment Types
+/**
+ * 결제 정보 인터페이스
+ * @interface Payment
+ */
 export interface Payment {
   id: string;
   userId: string;
@@ -290,6 +378,10 @@ export interface Payment {
   createdAt: Date;
 }
 
+/**
+ * 결제 상태 열거형
+ * @enum {string}
+ */
 export enum PaymentStatus {
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
@@ -297,6 +389,10 @@ export enum PaymentStatus {
   REFUNDED = 'REFUNDED'
 }
 
+/**
+ * 결제 수단 열거형
+ * @enum {string}
+ */
 export enum PaymentMethod {
   CARD = 'CARD',
   KAKAO_PAY = 'KAKAO_PAY',
@@ -304,7 +400,10 @@ export enum PaymentMethod {
   NAVER_PAY = 'NAVER_PAY'
 }
 
-// Notification Types
+/**
+ * 알림 인터페이스
+ * @interface Notification
+ */
 export interface Notification {
   id: string;
   userId: string;
@@ -316,6 +415,10 @@ export interface Notification {
   createdAt: Date;
 }
 
+/**
+ * 알림 타입 열거형
+ * @enum {string}
+ */
 export enum NotificationType {
   LIKE_RECEIVED = 'LIKE_RECEIVED',
   MATCH_CREATED = 'MATCH_CREATED',
@@ -325,7 +428,11 @@ export enum NotificationType {
   VERIFICATION_REJECTED = 'VERIFICATION_REJECTED'
 }
 
-// API Response Types
+/**
+ * API 응답 인터페이스 - 표준화된 API 응답 형식
+ * @interface ApiResponse
+ * @template T - 응답 데이터 타입
+ */
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -344,20 +451,30 @@ export interface ApiResponse<T = any> {
   };
 }
 
-// WebSocket Types
+/**
+ * 웹소켓 메시지 인터페이스
+ * @interface SocketMessage
+ */
 export interface SocketMessage {
   type: string;
   payload: any;
   timestamp: Date;
 }
 
+/**
+ * 타이핑 이벤트 인터페이스 - 채팅 중 타이핑 표시를 위한 이벤트
+ * @interface TypingEvent
+ */
 export interface TypingEvent {
   matchId: string;
   userId: string;
   isTyping: boolean;
 }
 
-// Location Types
+/**
+ * 위치 체크인 인터페이스 - GPS 또는 QR코드를 통한 위치 확인
+ * @interface LocationCheckIn
+ */
 export interface LocationCheckIn {
   id: string;
   userId: string;
@@ -370,7 +487,10 @@ export interface LocationCheckIn {
   createdAt: Date;
 }
 
-// Device Token Types
+/**
+ * 사용자 디바이스 토큰 인터페이스 - 푸시 알림을 위한 FCM 토큰 정보
+ * @interface UserDeviceToken
+ */
 export interface UserDeviceToken {
   id: string;
   userId: string;
@@ -382,7 +502,10 @@ export interface UserDeviceToken {
   updatedAt: Date;
 }
 
-// Friend Request Types
+/**
+ * 친구 요청 인터페이스
+ * @interface FriendRequest
+ */
 export interface FriendRequest {
   id: string;
   fromUserId: string;
@@ -397,7 +520,10 @@ export interface FriendRequest {
   toUser?: User;
 }
 
-// Settings Types
+/**
+ * 개인정보 설정 인터페이스
+ * @interface PrivacySettings
+ */
 export interface PrivacySettings {
   showProfile: boolean;
   showOnlineStatus: boolean;
@@ -405,6 +531,10 @@ export interface PrivacySettings {
   allowFriendRequests: boolean;
 }
 
+/**
+ * 알림 설정 인터페이스
+ * @interface NotificationSettings
+ */
 export interface NotificationSettings {
   likes: boolean;
   matches: boolean;
@@ -412,7 +542,10 @@ export interface NotificationSettings {
   friendRequests: boolean;
 }
 
-// Profile Update Types
+/**
+ * 프로필 업데이트 데이터 인터페이스
+ * @interface UpdateProfileData
+ */
 export interface UpdateProfileData {
   nickname?: string;
   bio?: string;
@@ -428,13 +561,20 @@ export interface UpdateProfileData {
   smoking?: string;
 }
 
+/**
+ * 프로필 업데이트 응답 인터페이스
+ * @interface ProfileUpdateResponse
+ */
 export interface ProfileUpdateResponse {
   success: boolean;
   data?: User;
   message?: string;
 }
 
-// Anonymous User Info for privacy system
+/**
+ * 익명 사용자 정보 인터페이스 - 프라이버시 보호를 위한 익명화된 사용자 정보
+ * @interface AnonymousUserInfo
+ */
 export interface AnonymousUserInfo {
   id: string;
   anonymousId: string;
@@ -445,13 +585,21 @@ export interface AnonymousUserInfo {
   gender?: 'MALE' | 'FEMALE' | 'OTHER';
 }
 
-// User with anonymous ID for privacy
+/**
+ * 익명 ID를 가진 사용자 인터페이스 - 프라이버시 보호를 위한 확장 타입
+ * @interface UserWithAnonymousId
+ * @extends {User}
+ */
 export interface UserWithAnonymousId extends User {
   anonymousId: string;
   realName?: string;
 }
 
-// Nearby Users for location-based matching
+/**
+ * 근처 사용자 인터페이스 - 위치 기반 매칭을 위한 확장 타입
+ * @interface NearbyUser
+ * @extends {User}
+ */
 export interface NearbyUser extends User {
   anonymousId: string;
   distance: number;
@@ -460,7 +608,10 @@ export interface NearbyUser extends User {
   commonGroups: string[];
 }
 
-// Community Types
+/**
+ * 커뮤니티 게시글 인터페이스
+ * @interface CommunityPost
+ */
 export interface CommunityPost {
   id: string;
   authorId: string;
@@ -484,6 +635,10 @@ export interface CommunityPost {
   likes?: PostLike[];
 }
 
+/**
+ * 댓글 인터페이스
+ * @interface Comment
+ */
 export interface Comment {
   id: string;
   postId: string;
@@ -501,6 +656,10 @@ export interface Comment {
   replies?: Comment[];
 }
 
+/**
+ * 게시글 좋아요 인터페이스
+ * @interface PostLike
+ */
 export interface PostLike {
   id: string;
   postId: string;
@@ -508,7 +667,10 @@ export interface PostLike {
   createdAt: Date;
 }
 
-// Group Chat Types
+/**
+ * 그룹 채팅 인터페이스
+ * @interface GroupChat
+ */
 export interface GroupChat {
   id: string;
   groupId: string;
@@ -528,6 +690,10 @@ export interface GroupChat {
   lastMessage?: GroupChatMessage;
 }
 
+/**
+ * 그룹 채팅 멤버 인터페이스
+ * @interface GroupChatMember
+ */
 export interface GroupChatMember {
   id: string;
   chatId: string;
@@ -541,6 +707,10 @@ export interface GroupChatMember {
   chat?: GroupChat;
 }
 
+/**
+ * 그룹 채팅 메시지 인터페이스
+ * @interface GroupChatMessage
+ */
 export interface GroupChatMessage {
   id: string;
   chatId: string;
@@ -557,7 +727,10 @@ export interface GroupChatMessage {
   replyTo?: GroupChatMessage;
 }
 
-// UI Text Mapping for different modes
+/**
+ * 모드별 UI 텍스트 매핑 인터페이스 - 데이팅/친구 모드에 따른 UI 텍스트 변경
+ * @interface ModeTexts
+ */
 export interface ModeTexts {
   like: string;
   match: string;
@@ -568,6 +741,10 @@ export interface ModeTexts {
   viewProfile: string;
 }
 
+/**
+ * 모드별 UI 텍스트 상수 - 데이팅/친구 모드에 따른 UI 텍스트 정의
+ * @constant {Record<AppMode, ModeTexts>}
+ */
 export const MODE_TEXTS: Record<AppMode, ModeTexts> = {
   [AppMode.DATING]: {
     like: '호감있어요',

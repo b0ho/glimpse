@@ -2,7 +2,16 @@ import { prisma } from "../config/database";
 
 
 
+/**
+ * 매칭 통계 서비스 - 매칭 및 활동 통계 분석
+ * @class MatchingStatisticsService
+ */
 export class MatchingStatisticsService {
+  /**
+   * 사용자 매칭 통계 조회
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 사용자 통계 정보
+   */
   async getUserMatchingStatistics(userId: string) {
     const [
       totalLikesSent,
@@ -60,6 +69,10 @@ export class MatchingStatisticsService {
     };
   }
 
+  /**
+   * 전체 통계 조회
+   * @returns {Promise<Object>} 전체 통계 정보
+   */
   async getGlobalStatistics() {
     const [
       totalUsers,
@@ -106,6 +119,11 @@ export class MatchingStatisticsService {
     };
   }
 
+  /**
+   * 그룹 통계 조회
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<Object>} 그룹 통계 정보
+   */
   async getGroupStatistics(groupId: string) {
     const [
       memberCount,
@@ -146,6 +164,12 @@ export class MatchingStatisticsService {
     };
   }
 
+  /**
+   * 주간 좋아요 수 조회
+   * @private
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<number>} 주간 좋아요 수
+   */
   private async getWeeklyLikes(userId: string): Promise<number> {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -158,6 +182,12 @@ export class MatchingStatisticsService {
     });
   }
 
+  /**
+   * 주간 매칭 수 조회
+   * @private
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<number>} 주간 매칭 수
+   */
   private async getWeeklyMatches(userId: string): Promise<number> {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -170,6 +200,12 @@ export class MatchingStatisticsService {
     });
   }
 
+  /**
+   * 사용자 활동 통계 조회
+   * @private
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Array>} 30일간 활동 통계
+   */
   private async getUserActivityStats(userId: string) {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -200,6 +236,12 @@ export class MatchingStatisticsService {
     return Array.from(activityMap.entries()).map(([date, count]) => ({ date, count }));
   }
 
+  /**
+   * 사용자 상위 그룹 조회
+   * @private
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Array>} 상위 5개 그룹
+   */
   private async getUserTopGroups(userId: string) {
     const topGroups = await prisma.group.findMany({
       where: {
@@ -235,6 +277,11 @@ export class MatchingStatisticsService {
     }));
   }
 
+  /**
+   * 사용자당 평균 매칭 수 계산
+   * @private
+   * @returns {Promise<number>} 평균 매칭 수
+   */
   private async getAverageMatchesPerUser(): Promise<number> {
     const result = await prisma.match.groupBy({
       by: ['user1Id'],
@@ -248,6 +295,11 @@ export class MatchingStatisticsService {
     return Math.round((totalMatches / result.length) * 100) / 100;
   }
 
+  /**
+   * 상위 성과 그룹 조회
+   * @private
+   * @returns {Promise<Array>} 상위 10개 그룹
+   */
   private async getTopPerformingGroups() {
     return await prisma.group.findMany({
       where: { isActive: true },
@@ -277,6 +329,12 @@ export class MatchingStatisticsService {
     );
   }
 
+  /**
+   * 그룹 평균 나이 계산
+   * @private
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<number | null>} 평균 나이
+   */
   private async getGroupAverageAge(groupId: string): Promise<number | null> {
     const result = await prisma.user.aggregate({
       where: {
@@ -291,6 +349,12 @@ export class MatchingStatisticsService {
     return result._avg.age ? Math.round(result._avg.age) : null;
   }
 
+  /**
+   * 그룹 성별 분포 조회
+   * @private
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<Object>} 성별 분포
+   */
   private async getGroupGenderDistribution(groupId: string) {
     const distribution = await prisma.user.groupBy({
       by: ['gender'],
@@ -311,6 +375,12 @@ export class MatchingStatisticsService {
     }, {} as Record<string, number>);
   }
 
+  /**
+   * 그룹 최근 활동 조회
+   * @private
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<Object>} 최근 7일 활동
+   */
   private async getGroupRecentActivity(groupId: string) {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -337,6 +407,11 @@ export class MatchingStatisticsService {
     };
   }
 
+  /**
+   * 매칭 트렌드 조회
+   * @param {number} [days=30] - 조회 기간 (일)
+   * @returns {Promise<Array>} 일별 매칭 트렌드
+   */
   async getMatchingTrends(days: number = 30) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);

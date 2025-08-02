@@ -6,7 +6,18 @@ import { createError } from '../middleware/errorHandler';
 import { paymentService } from '../services/PaymentService';
 import { notificationService } from '../services/NotificationService';
 
+/**
+ * 결제 컨트롤러 - 크레딧 구매 및 프리미엄 구독
+ * @class PaymentController
+ */
 export class PaymentController {
+  /**
+   * 크레딧 구매
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: package, paymentMethod)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async purchaseCredits(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -68,6 +79,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 프리미엄 구독
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: plan, paymentMethod)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async subscribePremium(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -129,6 +147,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 프리미엄 구독 취소
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async cancelPremium(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -162,6 +187,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 구독 상태 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getSubscriptionStatus(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -214,6 +246,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * Stripe 웹훅 처리
+   * @param {any} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async handleStripeWebhook(req: any, res: Response, next: NextFunction) {
     try {
       const signature = req.headers['stripe-signature'];
@@ -227,6 +266,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * TossPay 웹훅 처리
+   * @param {any} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async handleTossPayWebhook(req: any, res: Response, next: NextFunction) {
     try {
       const body = req.body;
@@ -239,6 +285,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * KakaoPay 웹훅 처리
+   * @param {any} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async handleKakaoPayWebhook(req: any, res: Response, next: NextFunction) {
     try {
       const body = req.body;
@@ -251,6 +304,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 결제 생성
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: type, amount, currency, paymentMethod)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async createPayment(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -286,6 +346,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 결제 처리
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: paymentId, body: paymentToken, paymentKey)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async processPayment(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -332,6 +399,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 결제 이력 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (query: page, limit, type)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getPaymentHistory(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -384,6 +458,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 현재 구독 정보 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getCurrentSubscription(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -430,6 +511,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 구독 취소
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async cancelSubscription(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -473,6 +561,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 결제 검증
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: paymentId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async verifyPayment(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -514,6 +609,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 결제 환불
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: paymentId, body: reason)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async refundPayment(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -582,6 +684,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * Toss 웹훅 처리 (signature 검증 포함)
+   * @param {any} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async webhookToss(req: any, res: Response, next: NextFunction) {
     try {
       const signature = req.headers['toss-signature'] as string;
@@ -600,6 +709,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * Kakao 웹훅 처리 (signature 검증 포함)
+   * @param {any} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async webhookKakao(req: any, res: Response, next: NextFunction) {
     try {
       const signature = req.headers['kakao-signature'] as string;
@@ -618,6 +734,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 사용 가능한 결제 수단 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getPaymentMethods(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const paymentMethods = [
@@ -675,6 +798,13 @@ export class PaymentController {
     }
   }
 
+  /**
+   * 가격 패키지 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getPricingPackages(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const packages = [

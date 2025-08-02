@@ -16,15 +16,32 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { STATE_ICONS } from '@/utils/icons';
 
+/**
+ * MessageBubble 컴포넌트 Props
+ * @interface MessageBubbleProps
+ */
 interface MessageBubbleProps {
+  /** 메시지 데이터 */
   message: Message;
+  /** 내 메시지 여부 */
   isOwnMessage: boolean;
+  /** 아바타 표시 여부 */
   showAvatar?: boolean;
+  /** 타임스탬프 표시 여부 */
   showTimestamp?: boolean;
+  /** 이미지 클릭 핸들러 */
   onImagePress?: (imageUrl: string) => void;
+  /** 길게 누르기 핸들러 */
   onLongPress?: (message: Message) => void;
 }
 
+/**
+ * 메시지 버블 컴포넌트 - 채팅 메시지 표시
+ * @component
+ * @param {MessageBubbleProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 메시지 버블 UI
+ * @description 텍스트, 이미지, 음성 등 다양한 타입의 메시지를 버블 형태로 표시
+ */
 export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
   message,
   isOwnMessage,
@@ -33,6 +50,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
   onImagePress,
   onLongPress,
 }) => {
+  /**
+   * 메시지 컨텐츠 렌더링
+   * @returns {JSX.Element | null} 메시지 타입에 따른 컨텐츠
+   */
   const renderMessageContent = () => {
     switch (message.type) {
       case 'TEXT':
@@ -96,6 +117,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
     }
   };
 
+  /**
+   * 아바타 렌더링
+   * @returns {JSX.Element | null} 상대방 아바타
+   */
   const renderAvatar = () => {
     if (!showAvatar || isOwnMessage) return null;
     
@@ -106,6 +131,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
     );
   };
 
+  /**
+   * 읽음 상태 렌더링
+   * @returns {JSX.Element | null} 읽음 상태 아이콘
+   */
   const renderReadStatus = () => {
     if (!isOwnMessage) return null;
 
@@ -120,6 +149,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
     );
   };
 
+  /**
+   * 타임스탬프 렌더링
+   * @returns {JSX.Element | null} 시간 표시
+   */
   const renderTimestamp = () => {
     if (!showTimestamp) return null;
 

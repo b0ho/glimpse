@@ -6,7 +6,18 @@ import { chatService } from '../services/ChatService';
 import { notificationService } from '../services/NotificationService';
 import { io } from '../index';
 
+/**
+ * 채팅 컨트롤러 - 실시간 메시지 및 채팅 관련 기능
+ * @class ChatController
+ */
 export class ChatController {
+  /**
+   * 특정 매칭의 메시지 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: matchId, query: page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getMessages(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { matchId } = req.params;
@@ -50,6 +61,13 @@ export class ChatController {
     }
   }
 
+  /**
+   * 메시지 전송
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: matchId, body: content, type)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async sendMessage(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { matchId } = req.params;
@@ -127,6 +145,13 @@ export class ChatController {
     }
   }
 
+  /**
+   * 특정 매칭의 모든 메시지를 읽음으로 표시
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: matchId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async markAllAsRead(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { matchId } = req.params;
@@ -160,6 +185,13 @@ export class ChatController {
     }
   }
 
+  /**
+   * 특정 메시지를 읽음으로 표시
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: messageId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async markAsRead(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.params;
@@ -220,6 +252,13 @@ export class ChatController {
     }
   }
 
+  /**
+   * 타이핑 상태 설정
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: matchId, body: isTyping)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async setTypingStatus(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { matchId } = req.params;
@@ -264,6 +303,13 @@ export class ChatController {
     }
   }
 
+  /**
+   * 사용자의 채팅 요약 정보 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (query: page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getChatSummary(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -284,6 +330,13 @@ export class ChatController {
     }
   }
 
+  /**
+   * 메시지 삭제 (5분 이내만 가능)
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: messageId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async deleteMessage(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.params;
@@ -333,6 +386,13 @@ export class ChatController {
     }
   }
 
+  /**
+   * 메시지에 이모지 반응 추가
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: messageId, body: emoji)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async addReaction(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.params;
@@ -411,6 +471,13 @@ export class ChatController {
     }
   }
 
+  /**
+   * 메시지에서 이모지 반응 제거
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: messageId, body: emoji)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async removeReaction(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.params;
@@ -470,6 +537,13 @@ export class ChatController {
     }
   }
 
+  /**
+   * 메시지 신고
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: messageId, body: reason, description)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async reportMessage(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.params;
@@ -521,6 +595,13 @@ export class ChatController {
     }
   }
 
+  /**
+   * 메시지 검색
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: matchId, query: query, page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getMessageSearch(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { matchId } = req.params;

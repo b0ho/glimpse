@@ -15,11 +15,24 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useProfileStore } from '@/store/slices/profileSlice';
 import { FriendRequest } from '@shared/types';
 
+/**
+ * FriendRequestsModal 컴포넌트 Props
+ * @interface FriendRequestsModalProps
+ */
 interface FriendRequestsModalProps {
+  /** 모달 표시 여부 */
   visible: boolean;
+  /** 닫기 핸들러 */
   onClose: () => void;
 }
 
+/**
+ * 친구 요청 모달 컴포넌트 - 받은 친구 요청 관리
+ * @component
+ * @param {FriendRequestsModalProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 친구 요청 모달 UI
+ * @description 받은 친구 요청을 표시하고 수락/거절할 수 있는 모달 컴포넌트
+ */
 export const FriendRequestsModal: React.FC<FriendRequestsModalProps> = ({
   visible,
   onClose,
@@ -38,6 +51,11 @@ export const FriendRequestsModal: React.FC<FriendRequestsModalProps> = ({
     }
   }, [visible]);
 
+  /**
+   * 친구 요청 수락 핸들러
+   * @param {string} requestId - 요청 ID
+   * @returns {Promise<void>}
+   */
   const handleAccept = async (requestId: string) => {
     Alert.alert(
       '친구 요청 수락',
@@ -59,6 +77,11 @@ export const FriendRequestsModal: React.FC<FriendRequestsModalProps> = ({
     );
   };
 
+  /**
+   * 친구 요청 거절 핸들러
+   * @param {string} requestId - 요청 ID
+   * @returns {Promise<void>}
+   */
   const handleReject = async (requestId: string) => {
     Alert.alert(
       '친구 요청 거절',
@@ -81,6 +104,12 @@ export const FriendRequestsModal: React.FC<FriendRequestsModalProps> = ({
     );
   };
 
+  /**
+   * 친구 요청 아이템 렌더링
+   * @param {Object} params - 리스트 아이템 파라미터
+   * @param {FriendRequest} params.item - 친구 요청 객체
+   * @returns {JSX.Element} 친구 요청 아이템 UI
+   */
   const renderRequestItem = ({ item }: { item: FriendRequest }) => {
     const timeAgo = getTimeAgo(new Date(item.createdAt));
     
@@ -123,6 +152,11 @@ export const FriendRequestsModal: React.FC<FriendRequestsModalProps> = ({
     );
   };
 
+  /**
+   * 시간 차이 계산
+   * @param {Date} date - 날짜 객체
+   * @returns {string} 시간 차이 문자열
+   */
   const getTimeAgo = (date: Date) => {
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
     

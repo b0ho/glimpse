@@ -7,11 +7,24 @@ import {
 } from 'react-native';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
+/**
+ * TypingIndicator 컴포넌트 Props
+ * @interface TypingIndicatorProps
+ */
 interface TypingIndicatorProps {
+  /** 타이핑 상태 */
   isTyping: boolean;
+  /** 타이핑 중인 사용자 이름 */
   userName?: string;
 }
 
+/**
+ * 타이핑 표시기 컴포넌트 - 상대방이 입력 중임을 표시
+ * @component
+ * @param {TypingIndicatorProps} props - 컴포넌트 속성
+ * @returns {JSX.Element | null} 타이핑 표시기 UI
+ * @description 세 개의 점이 위아래로 움직이는 애니메이션으로 타이핑 상태 표시
+ */
 export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
   isTyping,
   userName = '상대방',

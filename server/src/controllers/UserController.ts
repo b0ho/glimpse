@@ -7,7 +7,18 @@ import { likeService } from '../services/LikeService';
 import { validateNickname } from '@shared/utils';
 import { firebaseService } from '../services/FirebaseService';
 
+/**
+ * 사용자 컨트롤러 - 사용자 프로필 및 좋아요 기능
+ * @class UserController
+ */
 export class UserController {
+  /**
+   * 현재 로그인한 사용자 정보 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getCurrentUser(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -50,6 +61,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 사용자 프로필 업데이트
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: nickname, age, bio, profileImage, etc.)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async updateProfile(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -102,6 +120,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 사용자 추천 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (query: groupId, page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getRecommendations(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -127,6 +152,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 특정 사용자 정보 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: userId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getUserById(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { userId } = req.params;
@@ -170,6 +202,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 좋아요 보내기
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: toUserId, groupId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async sendLike(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -194,6 +233,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 받은 좋아요 목록 조회 (프리미엄 전용)
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (query: page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getReceivedLikes(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -251,6 +297,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 보낸 좋아요 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (query: page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getSentLikes(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -301,6 +354,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 사용자 크레딧 정보 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getCredits(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -332,6 +392,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 크레딧 구매
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: packageId, paymentMethodId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async purchaseCredits(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -352,6 +419,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 계정 삭제 (소프트 삭제)
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: reason)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async deleteAccount(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -384,6 +458,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 좋아요 취소 (24시간 이내만 가능)
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (params: likeId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async cancelLike(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -432,6 +513,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 좋아요 이력 삭제
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: likeIds)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async deleteLikeHistory(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -459,6 +547,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 회사 인증 요청
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: companyId, method, data)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async verifyCompany(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -479,6 +574,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 프리미엄 구독
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: plan, paymentMethod)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async subscribePremium(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -499,6 +601,13 @@ export class UserController {
     }
   }
 
+  /**
+   * FCM 토큰 등록
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: token, deviceType)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async registerFCMToken(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -523,6 +632,13 @@ export class UserController {
     }
   }
 
+  /**
+   * FCM 토큰 제거
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: token)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async removeFCMToken(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -543,6 +659,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 알림 설정 업데이트
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: notification settings)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async updateNotificationSettings(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -574,6 +697,13 @@ export class UserController {
     }
   }
 
+  /**
+   * 개인정보 설정 업데이트
+   * @param {ClerkAuthRequest} req - Clerk 인증이 포함된 request 객체 (body: privacy settings)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async updatePrivacySettings(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;

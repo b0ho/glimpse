@@ -7,25 +7,54 @@ import { metrics } from '../utils/monitoring';
 
 
 
+/**
+ * 결제 생성 요청 인터페이스
+ * @interface CreatePaymentRequest
+ */
 interface CreatePaymentRequest {
+  /** 사용자 ID */
   userId: string;
+  /** 결제 타입 */
   type: PaymentType;
+  /** 패키지 타입 */
   packageType?: string;
+  /** 결제 금액 */
   amount: number;
+  /** 통화 */
   currency: string;
+  /** 결제 수단 */
   paymentMethod: PaymentMethod;
 }
 
+/**
+ * 결제 처리 요청 인터페이스
+ * @interface ProcessPaymentRequest
+ */
 interface ProcessPaymentRequest {
+  /** 결제 토큰 */
   paymentToken?: string;
+  /** 결제 키 */
   paymentKey?: string;
 }
 
+/**
+ * 결제 서비스 - 결제 처리, 환불, 구독 관리
+ * @class PaymentService
+ */
 export class PaymentService {
+  /** 토스 시크릿 키 */
   private readonly tossSecretKey = process.env.TOSS_SECRET_KEY || '';
+  /** 카카오 시크릿 키 */
   private readonly kakaoSecretKey = process.env.KAKAO_SECRET_KEY || '';
+  /** 웹훅 시크릿 */
   private readonly webhookSecret = process.env.PAYMENT_WEBHOOK_SECRET || '';
 
+  /**
+   * 결제 생성
+   * @param {CreatePaymentRequest} data - 결제 생성 데이터
+   * @returns {Promise<Object>} 생성된 결제 정보
+   * @throws {Error} 최소 금액 미달 또는 지원하지 않는 결제 수단
+   */
   async createPayment(data: CreatePaymentRequest) {
     const { userId, type, packageType, amount, currency, paymentMethod } = data;
 
@@ -96,6 +125,14 @@ export class PaymentService {
     };
   }
 
+  /**
+   * 결제 처리
+   * @param {string} paymentId - 결제 ID
+   * @param {string} userId - 사용자 ID
+   * @param {ProcessPaymentRequest} data - 처리 데이터
+   * @returns {Promise<Object>} 처리 결과
+   * @throws {Error} 결제를 찾을 수 없거나 권한이 없을 때
+   */
   async processPayment(paymentId: string, userId: string, data: ProcessPaymentRequest) {
     const payment = await prisma.payment.findUnique({
       where: { id: paymentId }
@@ -171,6 +208,12 @@ export class PaymentService {
     };
   }
 
+  /**
+   * 결제 검증
+   * @param {string} paymentId - 결제 ID
+   * @returns {Promise<Object>} 검증 결과
+   * @throws {Error} 결제를 찾을 수 없을 때
+   */
   async verifyPayment(paymentId: string) {
     const payment = await prisma.payment.findUnique({
       where: { id: paymentId }
@@ -203,6 +246,13 @@ export class PaymentService {
     };
   }
 
+  /**
+   * 결제 환불
+   * @param {string} paymentId - 결제 ID
+   * @param {string} reason - 환불 사유
+   * @returns {Promise<Object>} 환불 결과
+   * @throws {Error} 결제를 찾을 수 없거나 환불 불가능한 상태
+   */
   async refundPayment(paymentId: string, reason: string) {
     const payment = await prisma.payment.findUnique({
       where: { id: paymentId }
@@ -273,6 +323,13 @@ export class PaymentService {
     };
   }
 
+  /**
+   * 토스 결제 생성
+   * @private
+   * @param {Payment} payment - 결제 엔티티
+   * @returns {Promise<Object>} 결제 URL과 데이터
+   * @throws {Error} 토스페이 결제 생성 실패 시
+   */
   private async createTossPayment(payment: Payment) {
     const orderId = payment.externalId;
     const orderName = this.getOrderName(payment.type, payment.packageType);
@@ -306,6 +363,13 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 카카오 결제 생성
+   * @private
+   * @param {Payment} payment - 결제 엔티티
+   * @returns {Promise<Object>} 결제 URL과 데이터
+   * @throws {Error} 카카오페이 결제 생성 실패 시
+   */
   private async createKakaoPayment(payment: Payment) {
     const orderId = payment.externalId;
     const itemName = this.getOrderName(payment.type, payment.packageType);
@@ -506,6 +570,15 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 크레딧 구매 처리
+   * @param {Object} data - 구매 데이터
+   * @param {string} data.userId - 사용자 ID
+   * @param {number} data.amount - 결제 금액
+   * @param {number} data.credits - 크레딧 수
+   * @param {string} data.paymentMethod - 결제 수단
+   * @returns {Promise<Payment>} 생성된 결제
+   */
   async createCreditPurchase(data: { userId: string; amount: number; credits: number; paymentMethod: string }) {
     const payment = await prisma.payment.create({
       data: {
@@ -524,6 +597,14 @@ export class PaymentService {
     return payment;
   }
 
+  /**
+   * 프리미엄 구독 생성
+   * @param {Object} data - 구독 데이터
+   * @param {string} data.userId - 사용자 ID
+   * @param {string} data.plan - 구독 플랜
+   * @param {string} data.paymentMethod - 결제 수단
+   * @returns {Promise<Object>} 생성된 구독
+   */
   async createSubscription(data: { userId: string; plan: string; paymentMethod: string }) {
     const amount = data.plan === 'MONTHLY' ? 9900 : 99000;
     const days = data.plan === 'MONTHLY' ? 30 : 365;
@@ -557,6 +638,12 @@ export class PaymentService {
     return subscription;
   }
 
+  /**
+   * 구독 취소
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 취소된 구독
+   * @throws {Error} 활성 구독을 찾을 수 없을 때
+   */
   async cancelSubscription(userId: string) {
     const subscription = await prisma.subscription.findFirst({
       where: {
@@ -579,6 +666,11 @@ export class PaymentService {
     return cancelled;
   }
 
+  /**
+   * Stripe 웹훅 처리
+   * @param {Object} event - Stripe 웹훅 이벤트
+   * @returns {Promise<Object>} 처리 결과
+   */
   async handleStripeWebhook(event: any) {
     // Handle Stripe webhook events
     switch (event.type) {
@@ -598,6 +690,11 @@ export class PaymentService {
     return { success: true, processed: true };
   }
 
+  /**
+   * 토스 웹훅 처리
+   * @param {Object} data - 토스 웹훅 데이터
+   * @returns {Promise<void>}
+   */
   async handleTossWebhook(data: any) {
     const { eventType, data: eventData } = data;
 
@@ -613,6 +710,11 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 카카오 웹훅 처리
+   * @param {Object} data - 카카오 웹훅 데이터
+   * @returns {Promise<void>}
+   */
   async handleKakaoWebhook(data: any) {
     const { eventType, data: eventData } = data;
 
@@ -628,6 +730,13 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 결제 확인 처리
+   * @private
+   * @param {Object} data - 결제 데이터
+   * @param {'TOSS' | 'KAKAO'} method - 결제 수단
+   * @returns {Promise<void>}
+   */
   private async handlePaymentConfirmed(data: any, method: 'TOSS' | 'KAKAO') {
     const orderId = method === 'TOSS' ? data.orderId : data.partner_order_id;
     
@@ -667,6 +776,13 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 결제 취소 처리
+   * @private
+   * @param {Object} data - 취소 데이터
+   * @param {'TOSS' | 'KAKAO'} method - 결제 수단
+   * @returns {Promise<void>}
+   */
   private async handlePaymentCanceled(data: any, method: 'TOSS' | 'KAKAO') {
     const orderId = method === 'TOSS' ? data.orderId : data.partner_order_id;
     
@@ -696,6 +812,12 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 결제 혜택 적용
+   * @private
+   * @param {Payment} payment - 결제 엔티티
+   * @returns {Promise<void>}
+   */
   private async applyPaymentBenefits(payment: Payment) {
     switch (payment.type) {
       case 'LIKE_CREDITS':
@@ -707,6 +829,12 @@ export class PaymentService {
     }
   }
 
+  /**
+   * 크레딧 적용
+   * @private
+   * @param {Payment} payment - 결제 엔티티
+   * @returns {Promise<void>}
+   */
   private async applyCredits(payment: Payment) {
     const creditAmounts: Record<string, number> = {
       SMALL: 5,
@@ -728,6 +856,12 @@ export class PaymentService {
     });
   }
 
+  /**
+   * 프리미엄 구독 적용
+   * @private
+   * @param {Payment} payment - 결제 엔티티
+   * @returns {Promise<void>}
+   */
   private async applyPremiumSubscription(payment: Payment) {
     const packageType = (payment.metadata as any)?.packageType;
     const duration = packageType === 'PREMIUM_YEARLY' ? 365 : 30;
@@ -829,6 +963,12 @@ export class PaymentService {
     });
   }
 
+  /**
+   * 토스 웹훅 서명 검증
+   * @param {string} signature - 서명
+   * @param {Object} body - 웹훅 바디
+   * @returns {boolean} 검증 결과
+   */
   verifyTossWebhook(signature: string, body: any): boolean {
     const expectedSignature = crypto
       .createHmac('sha256', this.webhookSecret)
@@ -838,6 +978,12 @@ export class PaymentService {
     return signature === expectedSignature;
   }
 
+  /**
+   * 카카오 웹훅 서명 검증
+   * @param {string} signature - 서명
+   * @param {Object} body - 웹훅 바디
+   * @returns {boolean} 검증 결과
+   */
   verifyKakaoWebhook(signature: string, body: any): boolean {
     const expectedSignature = crypto
       .createHmac('sha256', this.webhookSecret)
@@ -847,12 +993,24 @@ export class PaymentService {
     return signature === expectedSignature;
   }
 
+  /**
+   * 결제 ID 생성
+   * @private
+   * @returns {string} 결제 ID
+   */
   private generatePaymentId(): string {
     const timestamp = Date.now().toString();
     const random = Math.random().toString(36).substring(2, 8);
     return `PAY_${timestamp}_${random}`.toUpperCase();
   }
 
+  /**
+   * 주문명 생성
+   * @private
+   * @param {string} type - 결제 타입
+   * @param {string} [packageType] - 패키지 타입
+   * @returns {string} 주문명
+   */
   private getOrderName(type: string, packageType?: string): string {
     switch (type) {
       case 'LIKE_CREDITS':

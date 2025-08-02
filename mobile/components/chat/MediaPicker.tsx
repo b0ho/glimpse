@@ -11,27 +11,52 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, SIZES } from '../../constants/theme';
 
+/**
+ * MediaPicker 컴포넌트 Props
+ * @interface MediaPickerProps
+ */
 interface MediaPickerProps {
+  /** 미디어 선택 핸들러 */
   onMediaSelected: (assets: ImagePicker.ImagePickerAsset[]) => void;
+  /** 비활성화 여부 */
   disabled?: boolean;
 }
 
+/**
+ * 미디어 선택기 컴포넌트 - 사진/비디오 선택 및 촬영
+ * @component
+ * @param {MediaPickerProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 미디어 선택기 UI
+ * @description 카메라 촬영 또는 라이브러리에서 사진/비디오를 선택할 수 있는 컴포넌트
+ */
 export const MediaPicker: React.FC<MediaPickerProps> = ({
   onMediaSelected,
   disabled = false,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
+  /**
+   * 카메라 권한 요청
+   * @returns {Promise<boolean>} 권한 허용 여부
+   */
   const requestCameraPermission = async (): Promise<boolean> => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     return status === 'granted';
   };
 
+  /**
+   * 사진 라이브러리 권한 요청
+   * @returns {Promise<boolean>} 권한 허용 여부
+   */
   const requestLibraryPermission = async (): Promise<boolean> => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     return status === 'granted';
   };
 
+  /**
+   * 카메라로 사진 촬영
+   * @returns {Promise<void>}
+   */
   const takePhoto = async () => {
     const hasPermission = await requestCameraPermission();
     if (!hasPermission) {
@@ -59,6 +84,10 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
     }
   };
 
+  /**
+   * 라이브러리에서 미디어 선택
+   * @returns {Promise<void>}
+   */
   const selectFromLibrary = async () => {
     const hasPermission = await requestLibraryPermission();
     if (!hasPermission) {
@@ -87,6 +116,11 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
     }
   };
 
+  /**
+   * 미디어 선택 옵션 표시
+   * @returns {void}
+   * @description 플랫폼에 따라 적절한 UI로 옵션 표시
+   */
   const showMediaOptions = () => {
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(

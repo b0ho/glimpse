@@ -14,12 +14,26 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useProfileStore } from '@/store/slices/profileSlice';
 import { Like } from '@shared/types';
 
+/**
+ * LikesReceivedModal 컴포넌트 Props
+ * @interface LikesReceivedModalProps
+ */
 interface LikesReceivedModalProps {
+  /** 모달 표시 여부 */
   visible: boolean;
+  /** 닫기 핸들러 */
   onClose: () => void;
+  /** 좋아요 클릭 핸들러 */
   onLikePress: (like: Like) => void;
 }
 
+/**
+ * 받은 좋아요 모달 컴포넌트 - 내가 받은 좋아요 목록 표시
+ * @component
+ * @param {LikesReceivedModalProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 받은 좋아요 모달 UI
+ * @description 다른 사용자로부터 받은 좋아요 목록을 표시하는 모달 컴포넌트
+ */
 export const LikesReceivedModal: React.FC<LikesReceivedModalProps> = ({
   visible,
   onClose,
@@ -33,6 +47,12 @@ export const LikesReceivedModal: React.FC<LikesReceivedModalProps> = ({
     }
   }, [visible]);
 
+  /**
+   * 좋아요 아이템 렌더링
+   * @param {Object} params - 리스트 아이템 파라미터
+   * @param {Like} params.item - 좋아요 객체
+   * @returns {JSX.Element} 좋아요 아이템 UI
+   */
   const renderLikeItem = ({ item }: { item: Like }) => {
     const timeAgo = getTimeAgo(new Date(item.createdAt));
     
@@ -70,6 +90,11 @@ export const LikesReceivedModal: React.FC<LikesReceivedModalProps> = ({
     );
   };
 
+  /**
+   * 시간 차이 계산
+   * @param {Date} date - 날짜 객체
+   * @returns {string} 시간 차이 문자열
+   */
   const getTimeAgo = (date: Date) => {
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
     

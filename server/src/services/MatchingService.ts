@@ -7,7 +7,19 @@ import { metrics, trackAsyncOperation } from '../utils/monitoring';
 
 
 
+/**
+ * 매칭 서비스 - 매칭 관리, 추천, 호환성 계산
+ * @class MatchingService
+ */
 export class MatchingService {
+  /**
+   * 사용자의 매칭 목록 조회
+   * @param {string} userId - 사용자 ID
+   * @param {MatchStatus} status - 매칭 상태
+   * @param {number} page - 페이지 번호
+   * @param {number} limit - 페이지당 항목 수
+   * @returns {Promise<Array>} 매칭 목록
+   */
   async getUserMatches(userId: string, status: MatchStatus, page: number, limit: number) {
     const matches = await prisma.match.findMany({
       where: {
@@ -80,6 +92,13 @@ export class MatchingService {
     });
   }
 
+  /**
+   * ID로 매칭 상세 정보 조회
+   * @param {string} matchId - 매칭 ID
+   * @param {string} userId - 요청 사용자 ID
+   * @returns {Promise<Object|null>} 매칭 상세 정보
+   * @throws {Error} 접근 권한이 없을 때
+   */
   async getMatchById(matchId: string, userId: string) {
     const match = await prisma.match.findUnique({
       where: { id: matchId },
@@ -135,6 +154,13 @@ export class MatchingService {
     };
   }
 
+  /**
+   * 매칭 삭제
+   * @param {string} matchId - 매칭 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<void>}
+   * @throws {Error} 매칭을 찾을 수 없거나 권한이 없을 때
+   */
   async deleteMatch(matchId: string, userId: string) {
     const match = await prisma.match.findUnique({
       where: { id: matchId }
@@ -166,6 +192,14 @@ export class MatchingService {
     });
   }
 
+  /**
+   * 매칭 추천 목록 조회
+   * @param {string} userId - 사용자 ID
+   * @param {string} groupId - 그룹 ID
+   * @param {number} count - 추천 수
+   * @returns {Promise<Array>} 추천 사용자 목록 (호환성 점수 포함)
+   * @throws {Error} 그룹 멤버가 아닐 때
+   */
   async getMatchingRecommendations(userId: string, groupId: string, count: number) {
     const currentUser = await prisma.user.findUnique({
       where: { id: userId },
@@ -238,6 +272,15 @@ export class MatchingService {
     return scoredMatches;
   }
 
+  /**
+   * 매칭 신고
+   * @param {string} matchId - 매칭 ID
+   * @param {string} reporterId - 신고자 ID
+   * @param {string} reason - 신고 사유
+   * @param {string} [description] - 상세 설명
+   * @returns {Promise<Object>} 신고 결과
+   * @throws {Error} 매칭을 찾을 수 없거나 권한이 없을 때
+   */
   async reportMatch(matchId: string, reporterId: string, reason: string, description?: string) {
     const match = await prisma.match.findUnique({
       where: { id: matchId }
@@ -271,6 +314,13 @@ export class MatchingService {
     };
   }
 
+  /**
+   * 매칭 기간 연장 (프리미엄 기능)
+   * @param {string} matchId - 매칭 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 연장 결과
+   * @throws {Error} 매칭을 찾을 수 없거나 권한이 없을 때
+   */
   async extendMatch(matchId: string, userId: string) {
     const match = await prisma.match.findUnique({
       where: { id: matchId }
@@ -301,6 +351,14 @@ export class MatchingService {
     };
   }
 
+  /**
+   * 매칭 히스토리 조회
+   * @param {string} userId - 사용자 ID
+   * @param {number} page - 페이지 번호
+   * @param {number} limit - 페이지당 항목 수
+   * @param {string} [groupId] - 그룹 ID (선택사항)
+   * @returns {Promise<Array>} 매칭 히스토리
+   */
   async getMatchingHistory(userId: string, page: number, limit: number, groupId?: string) {
     const where: any = {
       OR: [
@@ -344,6 +402,13 @@ export class MatchingService {
     });
   }
 
+  /**
+   * 상호 연결 조회 (공통 그룹, 공통 매칭)
+   * @param {string} matchId - 매칭 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<Object>} 상호 연결 정보
+   * @throws {Error} 매칭을 찾을 수 없거나 권한이 없을 때
+   */
   async getMutualConnections(matchId: string, userId: string) {
     const match = await prisma.match.findUnique({
       where: { id: matchId }
@@ -400,6 +465,12 @@ export class MatchingService {
     };
   }
 
+  /**
+   * 사용자의 매칭된 사용자 ID 목록 조회
+   * @private
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<string[]>} 매칭된 사용자 ID 배열
+   */
   private async getUserMatchedUserIds(userId: string): Promise<string[]> {
     const matches = await prisma.match.findMany({
       where: {
@@ -417,6 +488,13 @@ export class MatchingService {
     );
   }
 
+  /**
+   * 두 사용자의 공통 매칭된 사용자 ID 목록 조회
+   * @private
+   * @param {string} userId1 - 첫 번째 사용자 ID
+   * @param {string} userId2 - 두 번째 사용자 ID
+   * @returns {Promise<string[]>} 공통 매칭된 사용자 ID 배열
+   */
   private async getMutualMatchedUserIds(userId1: string, userId2: string): Promise<string[]> {
     // Get all matches for both users in a single query
     const matches = await prisma.match.findMany({
@@ -470,6 +548,13 @@ export class MatchingService {
     return mutualMatches;
   }
 
+  /**
+   * 고급 호환성 점수 계산
+   * @private
+   * @param {Object} currentUser - 현재 사용자
+   * @param {Object} targetUser - 대상 사용자
+   * @returns {number} 호환성 점수 (0-100)
+   */
   private calculateAdvancedCompatibilityScore(currentUser: any, targetUser: any): number {
     let score = 50; // Base score
 
@@ -499,6 +584,10 @@ export class MatchingService {
     return Math.round(Math.min(100, Math.max(0, score)));
   }
 
+  /**
+   * 만료된 매칭 정리
+   * @returns {Promise<number>} 만료 처리된 매칭 수
+   */
   async cleanupExpiredMatches() {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - APP_CONFIG.MATCH_EXPIRY_DAYS);

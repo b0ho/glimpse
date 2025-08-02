@@ -1,25 +1,54 @@
 import { PrismaClient } from '@prisma/client';
 import { EventEmitter } from 'events';
 
+/**
+ * 참가자 특징 인터페이스
+ * @interface Features
+ */
 interface Features {
+  /** 상의 타입 */
   upperWear?: string;
+  /** 하의 타입 */
   lowerWear?: string;
+  /** 안경 착용 여부 */
   glasses?: boolean | null;
+  /** 특별한 특징 */
   specialFeatures?: string;
 }
 
+/**
+ * 참가자 특징 정보 인터페이스
+ * @interface ParticipantFeatures
+ */
 interface ParticipantFeatures {
+  /** 내 특징 */
   myFeatures: Features;
+  /** 찾는 특징 */
   lookingForFeatures: Features;
 }
 
+/**
+ * 즉석 자동 매칭 서비스 - 특징 기반 자동 매칭
+ * @class InstantAutoMatchingService
+ * @extends {EventEmitter}
+ */
 export class InstantAutoMatchingService extends EventEmitter {
+  /**
+   * InstantAutoMatchingService 생성자
+   * @param {PrismaClient} prisma - Prisma 클라이언트
+   */
   constructor(private prisma: PrismaClient) {
     super();
   }
 
   /**
    * 모임 참가 및 특징 입력
+   * @param {string} userId - 사용자 ID
+   * @param {string} code - 모임 코드
+   * @param {string} nickname - 닉네임
+   * @param {ParticipantFeatures} features - 참가자 특징
+   * @returns {Promise<Object>} 모임 및 참가자 정보
+   * @throws {Error} 모임을 찾을 수 없을 때
    */
   async joinMeetingWithFeatures(
     userId: string,
@@ -97,6 +126,10 @@ export class InstantAutoMatchingService extends EventEmitter {
 
   /**
    * 특징 업데이트 및 재매칭
+   * @param {string} participantId - 참가자 ID
+   * @param {ParticipantFeatures} features - 업데이트할 특징
+   * @returns {Promise<Object>} 매칭 결과
+   * @throws {Error} 참가자를 찾을 수 없을 때
    */
   async updateFeaturesAndMatch(
     participantId: string,
@@ -147,6 +180,10 @@ export class InstantAutoMatchingService extends EventEmitter {
 
   /**
    * 자동 매칭 실행
+   * @private
+   * @param {string} participantId - 참가자 ID
+   * @param {string} meetingId - 모임 ID
+   * @returns {Promise<number>} 매칭된 수
    */
   private async performAutoMatching(
     participantId: string,
@@ -223,6 +260,10 @@ export class InstantAutoMatchingService extends EventEmitter {
 
   /**
    * 특징 매칭 체크
+   * @private
+   * @param {Features} lookingFor - 찾는 특징
+   * @param {Features} actual - 실제 특징
+   * @returns {boolean} 매칭 여부
    */
   private checkFeatureMatch(lookingFor: Features, actual: Features): boolean {
     // 상의 체크
@@ -260,6 +301,9 @@ export class InstantAutoMatchingService extends EventEmitter {
 
   /**
    * 키워드 추출
+   * @private
+   * @param {string} text - 텍스트
+   * @returns {string[]} 추출된 키워드 배열
    */
   private extractKeywords(text: string): string[] {
     // 공백과 특수문자로 분리
@@ -271,6 +315,11 @@ export class InstantAutoMatchingService extends EventEmitter {
 
   /**
    * 매칭 생성
+   * @private
+   * @param {string} participant1Id - 첫 번째 참가자 ID
+   * @param {string} participant2Id - 두 번째 참가자 ID
+   * @param {string} meetingId - 모임 ID
+   * @returns {Promise<Object>} 생성된 매칭
    */
   private async createMatch(
     participant1Id: string,
@@ -315,6 +364,8 @@ export class InstantAutoMatchingService extends EventEmitter {
 
   /**
    * 내 매칭 조회
+   * @param {string} participantId - 참가자 ID
+   * @returns {Promise<Array>} 매칭 목록
    */
   async getMyMatches(participantId: string) {
     const matches = await this.prisma.instantAutoMatch.findMany({
@@ -352,6 +403,9 @@ export class InstantAutoMatchingService extends EventEmitter {
 
   /**
    * 참가자 통계
+   * @param {string} participantId - 참가자 ID
+   * @returns {Promise<Object>} 통계 정보
+   * @throws {Error} 참가자를 찾을 수 없을 때
    */
   async getParticipantStats(participantId: string) {
     const participant = await this.prisma.instantParticipant.findUnique({
@@ -386,7 +440,13 @@ export class InstantAutoMatchingService extends EventEmitter {
   }
 
   /**
-   * 활동 로그
+   * 활동 로그 기록
+   * @private
+   * @param {string} userId - 사용자 ID
+   * @param {string} meetingId - 모임 ID
+   * @param {any} activityType - 활동 타입
+   * @param {any} [activityData] - 활동 데이터
+   * @returns {Promise<void>}
    */
   private async logActivity(
     userId: string,

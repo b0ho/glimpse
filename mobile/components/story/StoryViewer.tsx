@@ -18,41 +18,84 @@ import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+/**
+ * 스토리 인터페이스
+ * @interface Story
+ */
 interface Story {
+  /** 스토리 ID */
   id: string;
+  /** 미디어 URL */
   mediaUrl: string;
+  /** 미디어 타입 */
   mediaType: 'IMAGE' | 'VIDEO';
+  /** 캐픍션 */
   caption?: string;
+  /** 생성 시간 */
   createdAt: string;
+  /** 조회수 */
   viewCount?: number;
+  /** 사용자 정보 */
   user: {
+    /** 사용자 ID */
     id: string;
+    /** 닉네임 */
     nickname: string;
+    /** 프로필 이미지 URL */
     profileImage?: string;
   };
+  /** 시청 여부 */
   isViewed?: boolean;
 }
 
+/**
+ * 스토리 그룹 인터페이스
+ * @interface StoryGroup
+ */
 interface StoryGroup {
+  /** 사용자 정보 */
   user: {
+    /** 사용자 ID */
     id: string;
+    /** 닉네임 */
     nickname: string;
+    /** 프로필 이미지 URL */
     profileImage?: string;
   };
+  /** 스토리 목록 */
   stories: Story[];
+  /** 미확인 스토리 여부 */
   hasUnviewed: boolean;
 }
 
+/**
+ * StoryViewer 컴포넌트 Props
+ * @interface StoryViewerProps
+ */
 interface StoryViewerProps {
+  /** 스토리 그룹 목록 */
   storyGroups: StoryGroup[];
+  /** 초기 그룹 인덱스 */
   initialGroupIndex?: number;
+  /** 초기 스토리 인덱스 */
   initialStoryIndex?: number;
+  /** 닫기 핸들러 */
   onClose: () => void;
+  /** 스토리 시청 핸들러 */
   onViewStory: (storyId: string) => void;
+  /** 마지막 스토리 도달 핸들러 */
   onEndReached?: () => void;
+  /** 현재 사용자 ID */
   currentUserId: string;
 }
 
+/**
+ * 스토리 뷰어 컴포넌트 - 전체 화면 스토리 표시
+ * @component
+ * @param {StoryViewerProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 스토리 뷰어 UI
+ * @description 인스타그램 스타일의 전체 화면 스토리 뷰어로 자동 재생 및 터치 제어 포함
+ */
 export const StoryViewer: React.FC<StoryViewerProps> = ({
   storyGroups,
   initialGroupIndex = 0,
@@ -92,7 +135,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     };
   }, [currentGroupIndex, currentStoryIndex]);
 
-  // Start story timer and progress animation
+  /**
+   * 스토리 타이머 및 진행 애니메이션 시작
+   * @returns {void}
+   */
   const startStoryTimer = () => {
     if (storyTimer.current) {
       clearTimeout(storyTimer.current);
@@ -115,7 +161,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     // For videos, duration is handled by video playback completion
   };
 
-  // Handle video playback status
+  /**
+   * 비디오 재생 상태 핸들러
+   * @param {AVPlaybackStatus} status - 비디오 재생 상태
+   * @returns {void}
+   */
   const handleVideoPlaybackStatus = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
       setIsLoading(false);
@@ -132,7 +182,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
-  // Navigate to next story
+  /**
+   * 다음 스토리로 이동
+   * @returns {void}
+   */
   const nextStory = () => {
     if (currentStoryIndex < currentGroup.stories.length - 1) {
       // Next story in current group
@@ -151,7 +204,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
-  // Navigate to previous story
+  /**
+   * 이전 스토리로 이동
+   * @returns {void}
+   */
   const previousStory = () => {
     if (currentStoryIndex > 0) {
       // Previous story in current group
@@ -165,7 +221,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
-  // Handle tap on left/right side
+  /**
+   * 왼쪽/오른쪽 터치 핸들러
+   * @param {'left' | 'right'} side - 터치한 쪽
+   * @returns {void}
+   */
   const handleTap = (side: 'left' | 'right') => {
     if (side === 'left') {
       previousStory();
@@ -174,7 +234,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
-  // Handle long press (pause story)
+  /**
+   * 길게 누르기 핸들러 (스토리 일시정지)
+   * @returns {void}
+   */
   const handleLongPress = () => {
     setPaused(true);
     progressAnimation.stopAnimation();
@@ -183,7 +246,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
-  // Handle press out (resume story)
+  /**
+   * 누르기 해제 핸들러 (스토리 재개)
+   * @returns {void}
+   */
   const handlePressOut = () => {
     setPaused(false);
     if (currentStory?.mediaType === 'IMAGE') {
@@ -191,7 +257,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
-  // Format time ago
+  /**
+   * 시간 차이 포맷팅
+   * @param {string} dateString - 날짜 문자열
+   * @returns {string} 포맷된 시간 차이
+   */
   const formatTimeAgo = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
@@ -206,7 +276,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
-  // Render progress bars
+  /**
+   * 진행 바 렌더링
+   * @returns {JSX.Element} 진행 바 UI
+   */
   const renderProgressBars = () => {
     return (
       <View style={styles.progressContainer}>

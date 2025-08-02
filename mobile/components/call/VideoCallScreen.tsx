@@ -15,13 +15,28 @@ import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+/**
+ * VideoCallScreen 컴포넌트 Props
+ * @interface VideoCallScreenProps
+ */
 interface VideoCallScreenProps {
+  /** 상대방 사용자 ID */
   remoteUserId: string;
+  /** 상대방 사용자 이름 */
   remoteUserName: string;
+  /** 수신 통화 여부 */
   isIncoming: boolean;
+  /** 통화 종료 핸들러 */
   onCallEnd: () => void;
 }
 
+/**
+ * 영상 통화 화면 컴포넌트 - WebRTC 기반 영상 통화 UI
+ * @component
+ * @param {VideoCallScreenProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 영상 통화 화면 UI
+ * @description 영상/음성 통화를 위한 전체 화면 컴포넌트로 PIP 모드 및 컨트롤 버튼 포함
+ */
 export const VideoCallScreen: React.FC<VideoCallScreenProps> = ({
   remoteUserId,
   remoteUserName,
@@ -64,6 +79,10 @@ export const VideoCallScreen: React.FC<VideoCallScreenProps> = ({
     };
   }, []);
 
+  /**
+   * 통화 초기화
+   * @returns {Promise<void>}
+   */
   const initializeCall = async () => {
     try {
       if (isIncoming) {
@@ -84,6 +103,10 @@ export const VideoCallScreen: React.FC<VideoCallScreenProps> = ({
     }
   };
 
+  /**
+   * 통화 수락 핸들러
+   * @returns {Promise<void>}
+   */
   const handleAcceptCall = async () => {
     try {
       await webRTCService.acceptCall();
@@ -94,11 +117,19 @@ export const VideoCallScreen: React.FC<VideoCallScreenProps> = ({
     }
   };
 
+  /**
+   * 통화 거절 핸들러
+   * @returns {void}
+   */
   const handleRejectCall = () => {
     webRTCService.rejectCall();
     handleEndCall();
   };
 
+  /**
+   * 통화 종료 핸들러
+   * @returns {void}
+   */
   const handleEndCall = () => {
     webRTCService.endCall();
     if (callTimer) {
@@ -107,21 +138,37 @@ export const VideoCallScreen: React.FC<VideoCallScreenProps> = ({
     onCallEnd();
   };
 
+  /**
+   * 비디오 토글
+   * @returns {void}
+   */
   const toggleVideo = () => {
     const enabled = webRTCService.toggleVideo();
     setIsVideoEnabled(enabled ?? false);
   };
 
+  /**
+   * 오디오 토글
+   * @returns {void}
+   */
   const toggleAudio = () => {
     const enabled = webRTCService.toggleAudio();
     setIsAudioEnabled(enabled ?? false);
   };
 
+  /**
+   * 카메라 전환
+   * @returns {Promise<void>}
+   */
   const switchCamera = async () => {
     await webRTCService.switchCamera();
     setIsFrontCamera(!isFrontCamera);
   };
 
+  /**
+   * 통화 타이머 시작
+   * @returns {void}
+   */
   const startCallTimer = () => {
     const timer = setInterval(() => {
       setCallDuration((prev) => prev + 1);
@@ -129,6 +176,11 @@ export const VideoCallScreen: React.FC<VideoCallScreenProps> = ({
     setCallTimer(timer);
   };
 
+  /**
+   * 통화 시간 포맷팅
+   * @param {number} seconds - 초 단위 시간
+   * @returns {string} 포맷된 시간 문자열
+   */
   const formatDuration = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -140,6 +192,10 @@ export const VideoCallScreen: React.FC<VideoCallScreenProps> = ({
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
+  /**
+   * 통화 상태 텍스트 렌더링
+   * @returns {string} 통화 상태 텍스트
+   */
   const renderCallStatus = () => {
     switch (callStatus) {
       case 'calling':

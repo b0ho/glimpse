@@ -6,12 +6,22 @@ import { createError } from '../middleware/errorHandler';
 import { cacheService } from './CacheService';
 import { prisma } from "../config/database";
 
+/**
+ * 이메일 옵션 인터페이스
+ * @interface EmailOptions
+ */
 interface EmailOptions {
+  /** 수신자 이메일 주소 */
   to: string;
+  /** 이메일 제목 */
   subject: string;
+  /** HTML 콘텐츠 */
   html: string;
+  /** 텍스트 콘텐츠 */
   text?: string;
+  /** 발신자 이메일 주소 */
   from?: string;
+  /** 첨부 파일 리스트 */
   attachments?: Array<{
     filename: string;
     content: Buffer | string;
@@ -19,19 +29,37 @@ interface EmailOptions {
   }>;
 }
 
+/**
+ * 인증 이메일 데이터 인터페이스
+ * @interface VerificationEmailData
+ */
 interface VerificationEmailData {
+  /** 사용자 이메일 주소 */
   userEmail: string;
+  /** 회사명 */
   companyName: string;
+  /** 인증 코드 */
   verificationCode: string;
+  /** 만료 시간(분) */
   expiresInMinutes: number;
 }
 
+/**
+ * 이메일 제공자 인터페이스
+ * @interface EmailProvider
+ */
 interface EmailProvider {
+  /** 이메일 발송 */
   sendEmail(options: EmailOptions): Promise<boolean>;
+  /** 서비스 상태 확인 */
   checkHealth(): Promise<boolean>;
 }
 
-// SMTP Provider (Gmail, Naver, etc.)
+/**
+ * SMTP 제공자 (Gmail, Naver 등)
+ * @class SMTPProvider
+ * @implements {EmailProvider}
+ */
 class SMTPProvider implements EmailProvider {
   private transporter: nodemailer.Transporter;
 
@@ -75,7 +103,11 @@ class SMTPProvider implements EmailProvider {
   }
 }
 
-// SendGrid Provider
+/**
+ * SendGrid 제공자
+ * @class SendGridProvider
+ * @implements {EmailProvider}
+ */
 class SendGridProvider implements EmailProvider {
   constructor() {
     const apiKey = process.env.SENDGRID_API_KEY;
@@ -115,7 +147,11 @@ class SendGridProvider implements EmailProvider {
   }
 }
 
-// AWS SES Provider
+/**
+ * AWS SES 제공자
+ * @class SESProvider
+ * @implements {EmailProvider}
+ */
 class SESProvider implements EmailProvider {
   private client: SESClient;
 
@@ -168,7 +204,11 @@ class SESProvider implements EmailProvider {
   }
 }
 
-// Development Provider (console logging)
+/**
+ * 개발 환경용 제공자 (콘솔 로그)
+ * @class DevelopmentProvider
+ * @implements {EmailProvider}
+ */
 class DevelopmentProvider implements EmailProvider {
   async sendEmail(options: EmailOptions): Promise<boolean> {
     logger.info('📧 [DEV EMAIL]', {
@@ -184,6 +224,14 @@ class DevelopmentProvider implements EmailProvider {
   }
 }
 
+/**
+ * 이메일 서비스 - 다양한 제공자를 통한 이메일 발송
+ * @class EmailService
+ */
+/**
+ * 이메일 서비스 - 다양한 제공자를 통한 이메일 발송
+ * @class EmailService
+ */
 export class EmailService {
   private static instance: EmailService;
   private provider: EmailProvider;
@@ -232,6 +280,12 @@ export class EmailService {
     return EmailService.instance;
   }
 
+  /**
+   * 이메일 발송
+   * @param {EmailOptions} options - 이메일 옵션
+   * @returns {Promise<boolean>} 발송 성공 여부
+   * @throws {Error} 속도 제한 초과 시
+   */
   async sendEmail(options: EmailOptions): Promise<boolean> {
     // Check rate limit
     const rateLimitKey = `email:ratelimit:${options.to}`;
@@ -266,6 +320,12 @@ export class EmailService {
     }
   }
 
+  /**
+   * 이메일 활동 로그 기록
+   * @private
+   * @param {EmailOptions} options - 이메일 옵션
+   * @returns {Promise<void>}
+   */
   private async logEmailActivity(options: EmailOptions): Promise<void> {
     try {
       await prisma.emailLog.create({
@@ -282,11 +342,22 @@ export class EmailService {
     }
   }
 
+  /**
+   * 중요 이메일 여부 확인
+   * @private
+   * @param {string} subject - 이메일 제목
+   * @returns {boolean} 중요 이메일 여부
+   */
   private isCriticalEmail(subject: string): boolean {
     const criticalKeywords = ['인증', '비밀번호', '결제', '보안'];
     return criticalKeywords.some(keyword => subject.includes(keyword));
   }
 
+  /**
+   * 회사 인증 이메일 발송
+   * @param {VerificationEmailData} data - 인증 이메일 데이터
+   * @returns {Promise<boolean>} 발송 성공 여부
+   */
   async sendCompanyVerificationEmail(data: VerificationEmailData): Promise<boolean> {
     const { userEmail, companyName, verificationCode, expiresInMinutes } = data;
 
@@ -360,6 +431,12 @@ export class EmailService {
     });
   }
 
+  /**
+   * 환영 이메일 발송
+   * @param {string} userEmail - 사용자 이메일
+   * @param {string} nickname - 사용자 닉네임
+   * @returns {Promise<boolean>} 발송 성공 여부
+   */
   async sendWelcomeEmail(userEmail: string, nickname: string): Promise<boolean> {
     const html = `
       <!DOCTYPE html>
@@ -443,6 +520,12 @@ export class EmailService {
     });
   }
 
+  /**
+   * 비밀번호 재설정 이메일 발송
+   * @param {string} userEmail - 사용자 이메일
+   * @param {string} resetToken - 재설정 토큰
+   * @returns {Promise<boolean>} 발송 성공 여부
+   */
   async sendPasswordResetEmail(userEmail: string, resetToken: string): Promise<boolean> {
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
@@ -524,6 +607,14 @@ export class EmailService {
     });
   }
 
+  /**
+   * 신고 알림 이메일 발송 (관리자용)
+   * @param {string} reportType - 신고 유형
+   * @param {string} reportedUser - 신고 대상
+   * @param {string} reason - 신고 사유
+   * @param {string} [details] - 상세 내용
+   * @returns {Promise<boolean>} 발송 성공 여부
+   */
   async sendReportNotificationEmail(reportType: string, reportedUser: string, reason: string, details?: string): Promise<boolean> {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@glimpse.app';
 
@@ -588,6 +679,13 @@ export class EmailService {
     });
   }
 
+  /**
+   * 구독 갱신 알림 이메일 발송
+   * @param {string} userEmail - 사용자 이메일
+   * @param {string} nickname - 사용자 닉네임
+   * @param {Date} expiresAt - 만료일
+   * @returns {Promise<boolean>} 발송 성공 여부
+   */
   async sendSubscriptionRenewalReminder(userEmail: string, nickname: string, expiresAt: Date): Promise<boolean> {
     const daysLeft = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
@@ -686,6 +784,14 @@ export class EmailService {
     });
   }
 
+  /**
+   * 매칭 알림 이메일 발송
+   * @param {string} userEmail - 사용자 이메일
+   * @param {string} userNickname - 사용자 닉네임
+   * @param {string} matchedNickname - 매칭된 상대 닉네임
+   * @param {string} groupName - 그룹명
+   * @returns {Promise<boolean>} 발송 성공 여부
+   */
   async sendMatchNotificationEmail(userEmail: string, userNickname: string, matchedNickname: string, groupName: string): Promise<boolean> {
     const html = `
       <!DOCTYPE html>
@@ -737,6 +843,14 @@ export class EmailService {
     });
   }
 
+  /**
+   * 대량 이메일 발송
+   * @param {string[]} recipients - 수신자 리스트
+   * @param {string} subject - 이메일 제목
+   * @param {string} html - HTML 콘텐츠
+   * @param {Object} [options] - 추가 옵션
+   * @returns {Promise<{sent: number, failed: number}>} 발송 결과
+   */
   async sendBulkEmail(recipients: string[], subject: string, html: string, options?: { text?: string }): Promise<{ sent: number; failed: number }> {
     let sent = 0;
     let failed = 0;
@@ -782,6 +896,10 @@ export class EmailService {
     return { sent, failed };
   }
 
+  /**
+   * 이메일 서비스 상태 확인
+   * @returns {Promise<{provider: string, healthy: boolean}>} 서비스 상태
+   */
   async checkHealth(): Promise<{ provider: string; healthy: boolean }> {
     const provider = process.env.EMAIL_PROVIDER || 'dev';
     const healthy = await this.provider.checkHealth();
@@ -789,12 +907,24 @@ export class EmailService {
     return { provider, healthy };
   }
 
-  // Backward compatibility methods
+  /**
+   * 이메일 연결 테스트 (하위 호환성)
+   * @returns {Promise<boolean>} 연결 성공 여부
+   * @deprecated checkHealth 사용 권장
+   */
   async testEmailConnection(): Promise<boolean> {
     const health = await this.checkHealth();
     return health.healthy;
   }
 
+  /**
+   * 인증 이메일 발송 (하위 호환성)
+   * @param {string} email - 수신자 이메일
+   * @param {string} verificationCode - 인증 코드
+   * @param {string} companyName - 회사명
+   * @returns {Promise<boolean>} 발송 성공 여부
+   * @deprecated sendCompanyVerificationEmail 사용 권장
+   */
   async sendVerificationEmail(email: string, verificationCode: string, companyName: string): Promise<boolean> {
     return this.sendCompanyVerificationEmail({
       userEmail: email,
@@ -804,6 +934,15 @@ export class EmailService {
     });
   }
 
+  /**
+   * HR 승인 요청 이메일 발송
+   * @param {string} supervisorEmail - 승인자 이메일
+   * @param {string} employeeId - 사번
+   * @param {string} department - 부서
+   * @param {string} position - 직급
+   * @param {string} companyName - 회사명
+   * @returns {Promise<boolean>} 발송 성공 여부
+   */
   async sendHrApprovalRequest(
     supervisorEmail: string,
     employeeId: string,
