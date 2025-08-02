@@ -5,7 +5,10 @@ import Constants from 'expo-constants';
 import { API_BASE_URL } from './api/config';
 // import { authService } from './auth/auth-service'; // TODO: Implement token handling
 
-// 알림 설정
+/**
+ * 알림 핸들러 설정
+ * @description 알림이 수신될 때의 기본 동작 설정
+ */
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -16,6 +19,18 @@ Notifications.setNotificationHandler({
   }),
 });
 
+/**
+ * 알림 데이터 인터페이스
+ * @interface NotificationData
+ * @property {string} type - 알림 유형
+ * @property {string} [notificationId] - 알림 ID
+ * @property {string} [fromUserId] - 발신자 ID
+ * @property {string} [toUserId] - 수신자 ID
+ * @property {string} [groupId] - 그룹 ID
+ * @property {string} [matchId] - 매칭 ID
+ * @property {string} [amount] - 금액
+ * @property {string} [credits] - 크레딧
+ */
 export interface NotificationData {
   type: string;
   notificationId?: string;
@@ -28,10 +43,23 @@ export interface NotificationData {
   [key: string]: any;
 }
 
+/**
+ * 알림 서비스 클래스
+ * @class NotificationService
+ * @description 푸시 알림 등록, 수신, 관리 기능 제공
+ */
 class NotificationService {
+  /** 알림 수신 리스너 */
   private notificationListener: any;
+  /** 알림 응답 리스너 */
   private responseListener: any;
 
+  /**
+   * 푸시 알림 등록
+   * @async
+   * @returns {Promise<string | null>} 푸시 토큰 또는 null
+   * @description 디바이스에 푸시 알림을 등록하고 토큰을 서버에 전송
+   */
   async registerForPushNotifications(): Promise<string | null> {
     if (!Device.isDevice) {
       console.log('물리적 디바이스가 아니면 푸시 알림을 사용할 수 없습니다.');
@@ -69,6 +97,14 @@ class NotificationService {
     }
   }
 
+  /**
+   * 서버에 토큰 등록
+   * @private
+   * @async
+   * @param {string} token - FCM 토큰
+   * @returns {Promise<void>}
+   * @description FCM 토큰을 백엔드 서버에 등록
+   */
   private async registerTokenWithServer(token: string): Promise<void> {
     try {
       // TODO: Get token from Clerk
@@ -102,6 +138,13 @@ class NotificationService {
     }
   }
 
+  /**
+   * 푸시 토큰 제거
+   * @async
+   * @param {string} token - 제거할 FCM 토큰
+   * @returns {Promise<void>}
+   * @description 서버에서 FCM 토큰을 제거
+   */
   async removePushToken(token: string): Promise<void> {
     try {
       // TODO: Get token from Clerk
@@ -121,6 +164,12 @@ class NotificationService {
     }
   }
 
+  /**
+   * 알림 리스너 설정
+   * @param {Function} [onNotificationReceived] - 알림 수신 콜백
+   * @param {Function} [onNotificationResponse] - 알림 탭 콜백
+   * @description 알림 수신 및 사용자 응답 리스너 설정
+   */
   setupNotificationListeners(
     onNotificationReceived?: (notification: Notifications.Notification) => void,
     onNotificationResponse?: (response: Notifications.NotificationResponse) => void
@@ -142,6 +191,10 @@ class NotificationService {
     });
   }
 
+  /**
+   * 알림 리스너 제거
+   * @description 등록된 알림 리스너를 모두 제거
+   */
   removeNotificationListeners(): void {
     if (this.notificationListener) {
       Notifications.removeNotificationSubscription(this.notificationListener);
@@ -151,6 +204,15 @@ class NotificationService {
     }
   }
 
+  /**
+   * 알림 목록 조회
+   * @async
+   * @param {number} [page=1] - 페이지 번호
+   * @param {number} [limit=20] - 페이지당 항목 수
+   * @returns {Promise<any>} 알림 목록
+   * @throws {Error} 조회 실패 시
+   * @description 서버에서 알림 목록을 가져오기
+   */
   async getNotifications(page: number = 1, limit: number = 20) {
     try {
       // TODO: Get token from Clerk
@@ -182,6 +244,14 @@ class NotificationService {
     }
   }
 
+  /**
+   * 알림 읽음 처리
+   * @async
+   * @param {string} notificationId - 알림 ID
+   * @returns {Promise<void>}
+   * @throws {Error} 읽음 처리 실패 시
+   * @description 특정 알림을 읽음 상태로 변경
+   */
   async markAsRead(notificationId: string): Promise<void> {
     try {
       // TODO: Get token from Clerk
@@ -210,6 +280,13 @@ class NotificationService {
     }
   }
 
+  /**
+   * 모든 알림 읽음 처리
+   * @async
+   * @returns {Promise<void>}
+   * @throws {Error} 읽음 처리 실패 시
+   * @description 모든 미읽은 알림을 읽음 상태로 변경
+   */
   async markAllAsRead(): Promise<void> {
     try {
       // TODO: Get token from Clerk
@@ -235,6 +312,14 @@ class NotificationService {
     }
   }
 
+  /**
+   * 통화 알림 표시
+   * @async
+   * @param {string} callerName - 발신자 이름
+   * @param {'video' | 'audio'} callType - 통화 유형
+   * @returns {Promise<void>}
+   * @description 수신 통화 알림을 로컬로 표시
+   */
   async showCallNotification(callerName: string, callType: 'video' | 'audio') {
     try {
       await Notifications.scheduleNotificationAsync({
@@ -254,6 +339,12 @@ class NotificationService {
     }
   }
 
+  /**
+   * 통화 알림 제거
+   * @async
+   * @returns {Promise<void>}
+   * @description 표시된 통화 알림을 제거
+   */
   async clearCallNotification() {
     try {
       await Notifications.dismissNotificationAsync('incoming-call');
@@ -262,6 +353,12 @@ class NotificationService {
     }
   }
 
+  /**
+   * 미읽은 알림 개수 조회
+   * @async
+   * @returns {Promise<number>} 미읽은 알림 개수
+   * @description 서버에서 미읽은 알림 개수를 가져오기
+   */
   async getUnreadCount(): Promise<number> {
     try {
       // TODO: Get token from Clerk
@@ -290,6 +387,14 @@ class NotificationService {
     }
   }
 
+  /**
+   * 알림 삭제
+   * @async
+   * @param {string} notificationId - 삭제할 알림 ID
+   * @returns {Promise<void>}
+   * @throws {Error} 삭제 실패 시
+   * @description 특정 알림을 삭제
+   */
   async deleteNotification(notificationId: string): Promise<void> {
     try {
       // TODO: Get token from Clerk
@@ -318,7 +423,15 @@ class NotificationService {
     }
   }
 
-  // 로컬 알림 표시 (앱이 포그라운드에 있을 때)
+  /**
+   * 로컬 알림 표시
+   * @async
+   * @param {string} title - 알림 제목
+   * @param {string} body - 알림 내용
+   * @param {NotificationData} [data] - 알림 데이터
+   * @returns {Promise<void>}
+   * @description 앱이 포그라운드에 있을 때 로컬 알림 표시
+   */
   async showLocalNotification(
     title: string,
     body: string,
@@ -335,14 +448,25 @@ class NotificationService {
     });
   }
 
-  // 배지 카운트 설정
+  /**
+   * 배지 카운트 설정
+   * @async
+   * @param {number} count - 배지 카운트
+   * @returns {Promise<void>}
+   * @description iOS에서 앱 아이콘의 배지 카운트 설정
+   */
   async setBadgeCount(count: number): Promise<void> {
     if (Platform.OS === 'ios') {
       await Notifications.setBadgeCountAsync(count);
     }
   }
 
-  // 배지 카운트 가져오기
+  /**
+   * 배지 카운트 가져오기
+   * @async
+   * @returns {Promise<number>} 현재 배지 카운트
+   * @description iOS에서 현재 앱 아이콘의 배지 카운트 가져오기
+   */
   async getBadgeCount(): Promise<number> {
     if (Platform.OS === 'ios') {
       return await Notifications.getBadgeCountAsync();
@@ -351,4 +475,9 @@ class NotificationService {
   }
 }
 
+/**
+ * 알림 서비스 싱글톤 인스턴스
+ * @constant {NotificationService}
+ * @description 앱 전체에서 사용할 알림 서비스 인스턴스
+ */
 export const notificationService = new NotificationService();

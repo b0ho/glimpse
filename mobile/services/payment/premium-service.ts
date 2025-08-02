@@ -1,6 +1,7 @@
 /**
  * 프리미엄 구독 및 결제 서비스
- * Clerk + Stripe 통합
+ * @module premium-service
+ * @description Clerk + Stripe 통합을 통한 프리미엄 기능 및 결제 관리
  */
 
 import * as SecureStore from 'expo-secure-store';
@@ -8,58 +9,118 @@ import * as SecureStore from 'expo-secure-store';
 // React Native global fetch
 declare const fetch: typeof globalThis.fetch;
 
-// 프리미엄 플랜 타입
+/**
+ * 프리미엄 플랜 열거형
+ * @enum {string} PremiumPlan
+ * @description 사용 가능한 프리미엄 구독 플랜
+ */
 export enum PremiumPlan {
+  /** 무료 플랜 */
   FREE = 'free',
+  /** 월간 프리미엄 플랜 */
   PREMIUM_MONTHLY = 'premium_monthly',
+  /** 연간 프리미엄 플랜 */
   PREMIUM_YEARLY = 'premium_yearly',
 }
 
-// 좋아요 패키지 타입
+/**
+ * 좋아요 패키지 열거형
+ * @enum {string} LikePackage
+ * @description 일회성 좋아요 구매 패키지
+ */
 export enum LikePackage {
-  SMALL = 'likes_5',    // 5개 좋아요 - 2,500원
-  MEDIUM = 'likes_10',  // 10개 좋아요 - 4,500원
-  LARGE = 'likes_20',   // 20개 좋아요 - 8,000원
-  EXTRA = 'likes_50',   // 50개 좋아요 - 19,000원
+  /** 5개 좋아요 - 2,500원 */
+  SMALL = 'likes_5',
+  /** 10개 좋아요 - 4,500원 */
+  MEDIUM = 'likes_10',
+  /** 20개 좋아요 - 8,000원 */
+  LARGE = 'likes_20',
+  /** 50개 좋아요 - 19,000원 */
+  EXTRA = 'likes_50',
 }
 
-// 프리미엄 기능 타입
+/**
+ * 프리미엄 기능 인터페이스
+ * @interface PremiumFeatures
+ * @description 프리미엄 구독자가 사용할 수 있는 기능 목록
+ */
 export interface PremiumFeatures {
+  /** 무제한 좋아요 */
   unlimitedLikes: boolean;
+  /** 나를 좋아한 사람 보기 */
   seeWhoLikesYou: boolean;
+  /** 우선 매칭 */
   priorityMatching: boolean;
+  /** 좋아요 되돌리기 */
   rewindLikes: boolean;
+  /** 슈퍼 좋아요 */
   superLikes: boolean;
+  /** 읽음 표시 */
   readReceipts: boolean;
+  /** 온라인 상태 표시 */
   onlineStatus: boolean;
+  /** 프리미엄 배지 */
   premiumBadge: boolean;
 }
 
-// 구독 정보
+/**
+ * 구독 정보 인터페이스
+ * @interface SubscriptionInfo
+ * @description 사용자의 현재 구독 상태 및 정보
+ */
 export interface SubscriptionInfo {
+  /** 현재 플랜 */
   plan: PremiumPlan;
+  /** 구독 활성화 여부 */
   isActive: boolean;
+  /** 구독 만료일 */
   expiresAt?: Date;
+  /** 기간 종료 시 취소 여부 */
   cancelAtPeriodEnd?: boolean;
+  /** 사용 가능한 기능 */
   features: PremiumFeatures;
+  /** 오늘 남은 무료 좋아요 수 */
   dailyLikesRemaining: number;
+  /** 구매한 총 좋아요 수 */
   totalPurchasedLikes: number;
 }
 
-// 결제 상품 정보
+/**
+ * 결제 상품 정보 인터페이스
+ * @interface PaymentProduct
+ * @description 구매 가능한 상품 정보
+ */
 export interface PaymentProduct {
+  /** 상품 ID */
   id: string;
+  /** 상품명 */
   name: string;
+  /** 상품 설명 */
   description: string;
+  /** 가격 */
   price: number;
+  /** 통화 */
   currency: string;
+  /** 상품 유형 */
   type: 'subscription' | 'one_time';
+  /** 혜택 목록 */
   benefits: string[];
 }
 
+/**
+ * 프리미엄 서비스 클래스
+ * @class PremiumService
+ * @description 프리미엄 구독, 결제, 좋아요 관리 기능 제공
+ */
 class PremiumService {
+  /** 싱글톤 인스턴스 */
   private static instance: PremiumService;
 
+  /**
+   * 싱글톤 인스턴스 가져오기
+   * @static
+   * @returns {PremiumService} 프리미엄 서비스 인스턴스
+   */
   public static getInstance(): PremiumService {
     if (!PremiumService.instance) {
       PremiumService.instance = new PremiumService();
@@ -69,6 +130,10 @@ class PremiumService {
 
   /**
    * 사용자의 현재 구독 상태 가져오기
+   * @async
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<SubscriptionInfo>} 구독 정보
+   * @description 서버에서 사용자의 구독 상태를 조회하고 기본값 처리
    */
   async getCurrentSubscription(userId: string): Promise<SubscriptionInfo> {
     try {
@@ -110,6 +175,10 @@ class PremiumService {
 
   /**
    * 플랜별 기능 정의
+   * @private
+   * @param {PremiumPlan} plan - 프리미엄 플랜
+   * @returns {PremiumFeatures} 플랜에 따른 기능 목록
+   * @description 각 플랜에서 사용 가능한 기능을 반환
    */
   private getPlanFeatures(plan: PremiumPlan): PremiumFeatures {
     const baseFeatures: PremiumFeatures = {
@@ -145,6 +214,8 @@ class PremiumService {
 
   /**
    * 결제 상품 목록 가져오기
+   * @returns {PaymentProduct[]} 구매 가능한 상품 목록
+   * @description 프리미엄 구독과 좋아요 패키지 상품 정보 반환
    */
   getPaymentProducts(): PaymentProduct[] {
     return [
@@ -229,6 +300,12 @@ class PremiumService {
 
   /**
    * Stripe Payment Intent 생성
+   * @async
+   * @param {string} productId - 상품 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<{clientSecret: string}>} 결제 시크릿
+   * @throws {Error} 결제 인텐트 생성 실패 시
+   * @description Stripe 결제를 위한 Payment Intent 생성
    */
   async createPaymentIntent(productId: string, userId: string): Promise<{clientSecret: string}> {
     try {
@@ -259,6 +336,12 @@ class PremiumService {
 
   /**
    * 구독 생성
+   * @async
+   * @param {string} planId - 플랜 ID
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<{clientSecret: string}>} 구독 시크릿
+   * @throws {Error} 구독 생성 실패 시
+   * @description 프리미엄 구독을 생성하고 결제 준비
    */
   async createSubscription(planId: string, userId: string): Promise<{clientSecret: string}> {
     try {
@@ -289,6 +372,11 @@ class PremiumService {
 
   /**
    * 구독 취소
+   * @async
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<void>}
+   * @throws {Error} 구독 취소 실패 시
+   * @description 현재 활성화된 구독을 취소 (기간 종료 시 만료)
    */
   async cancelSubscription(userId: string): Promise<void> {
     try {
@@ -312,6 +400,11 @@ class PremiumService {
 
   /**
    * 좋아요 사용
+   * @async
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<{success: boolean; remainingLikes: number}>} 사용 결과 및 남은 좋아요 수
+   * @throws {Error} 좋아요 사용 실패 시
+   * @description 일일 무료 좋아요 또는 구매한 좋아요 차감
    */
   async useLike(userId: string): Promise<{success: boolean; remainingLikes: number}> {
     try {
@@ -337,6 +430,10 @@ class PremiumService {
 
   /**
    * 일일 무료 좋아요 리셋 확인
+   * @async
+   * @param {string} userId - 사용자 ID
+   * @returns {Promise<void>}
+   * @description 매일 자정에 무료 좋아요를 1개로 리셋
    */
   async checkDailyReset(userId: string): Promise<void> {
     try {
@@ -355,6 +452,11 @@ class PremiumService {
 
   /**
    * 프리미엄 기능 사용 가능 여부 확인
+   * @async
+   * @param {string} userId - 사용자 ID
+   * @param {keyof PremiumFeatures} feature - 확인할 기능
+   * @returns {Promise<boolean>} 기능 사용 가능 여부
+   * @description 특정 프리미엄 기능의 사용 권한 확인
    */
   async canUseFeature(userId: string, feature: keyof PremiumFeatures): Promise<boolean> {
     try {
@@ -368,6 +470,11 @@ class PremiumService {
 
   /**
    * 인증 토큰 가져오기
+   * @private
+   * @async
+   * @returns {Promise<string>} Clerk 인증 토큰
+   * @throws {Error} 토큰이 없을 때
+   * @description SecureStore에서 저장된 인증 토큰 조회
    */
   private async getAuthToken(): Promise<string> {
     try {
@@ -384,6 +491,10 @@ class PremiumService {
 
   /**
    * 가격 포맷팅
+   * @param {number} price - 가격
+   * @param {string} [currency='KRW'] - 통화
+   * @returns {string} 포맷팅된 가격 문자열
+   * @description 통화에 맞게 가격을 포맷팅하여 표시
    */
   formatPrice(price: number, currency: string = 'KRW'): string {
     if (currency === 'KRW') {
@@ -394,10 +505,19 @@ class PremiumService {
 
   /**
    * 할인율 계산
+   * @param {number} originalPrice - 원가
+   * @param {number} discountedPrice - 할인가
+   * @returns {number} 할인율 (퍼센트)
+   * @description 원가 대비 할인율을 계산하여 반환
    */
   calculateDiscount(originalPrice: number, discountedPrice: number): number {
     return Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
   }
 }
 
+/**
+ * 프리미엄 서비스 싱글톤 인스턴스
+ * @constant {PremiumService}
+ * @description 앱 전체에서 사용할 프리미엄 서비스 인스턴스
+ */
 export const premiumService = PremiumService.getInstance();
