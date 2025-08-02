@@ -1,23 +1,42 @@
+/**
+ * 입력 유효성 검사 유틸리티
+ * @module utils/inputValidation
+ * @description 사용자 입력 데이터 유효성 검사 함수
+ */
+
 import { createError } from '../middleware/errorHandler';
 
 /**
- * Enhanced input validation utilities
+ * 한국 휴대폰 번호 형식 검증
+ * @function validatePhoneNumber
+ * @param {string} phoneNumber - 검증할 휴대폰 번호
+ * @returns {boolean} 유효성 여부
+ * @description +82 또는 0으로 시작하는 한국 휴대폰 번호 형식 검증
  */
-
-// Validate phone number format (Korean)
 export function validatePhoneNumber(phoneNumber: string): boolean {
   const koreanPhoneRegex = /^(\+82|0)(10|11|16|17|18|19)\d{7,8}$/;
   const cleanedNumber = phoneNumber.replace(/[-\s]/g, '');
   return koreanPhoneRegex.test(cleanedNumber);
 }
 
-// Validate email format
+/**
+ * 이메일 형식 검증
+ * @function validateEmail
+ * @param {string} email - 검증할 이메일 주소
+ * @returns {boolean} 유효성 여부
+ */
 export function validateEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
 
-// Validate nickname
+/**
+ * 닉네임 유효성 검증
+ * @function validateNickname
+ * @param {string} nickname - 검증할 닉네임
+ * @returns {{isValid: boolean, error?: string}} 유효성 결과와 에러 메시지
+ * @description 2-20자, 특수문자 제한, 공백만 불가
+ */
 export function validateNickname(nickname: string): { isValid: boolean; error?: string } {
   if (!nickname || nickname.trim().length === 0) {
     return { isValid: false, error: '닉네임을 입력해주세요.' };
@@ -41,12 +60,24 @@ export function validateNickname(nickname: string): { isValid: boolean; error?: 
   return { isValid: true };
 }
 
-// Validate age
+/**
+ * 나이 유효성 검증
+ * @function validateAge
+ * @param {number} age - 검증할 나이
+ * @returns {boolean} 유효성 여부
+ * @description 18세 이상 100세 이하만 허용
+ */
 export function validateAge(age: number): boolean {
   return age >= 18 && age <= 100;
 }
 
-// Validate group name
+/**
+ * 그룹명 유효성 검증
+ * @function validateGroupName
+ * @param {string} name - 검증할 그룹명
+ * @returns {{isValid: boolean, error?: string}} 유효성 결과와 에러 메시지
+ * @description 2-50자, 특수문자 제한
+ */
 export function validateGroupName(name: string): { isValid: boolean; error?: string } {
   if (!name || name.trim().length === 0) {
     return { isValid: false, error: '그룹 이름을 입력해주세요.' };
@@ -65,7 +96,13 @@ export function validateGroupName(name: string): { isValid: boolean; error?: str
   return { isValid: true };
 }
 
-// Validate message content
+/**
+ * 메시지 내용 유효성 검증
+ * @function validateMessageContent
+ * @param {string} content - 검증할 메시지 내용
+ * @returns {{isValid: boolean, error?: string}} 유효성 결과와 에러 메시지
+ * @description 최대 1000자, 빈 메시지 불가
+ */
 export function validateMessageContent(content: string): { isValid: boolean; error?: string } {
   if (!content || content.trim().length === 0) {
     return { isValid: false, error: '메시지 내용을 입력해주세요.' };
@@ -78,7 +115,13 @@ export function validateMessageContent(content: string): { isValid: boolean; err
   return { isValid: true };
 }
 
-// Validate file upload
+/**
+ * 파일 업로드 유효성 검증
+ * @function validateFileUpload
+ * @param {Express.Multer.File} file - 검증할 파일
+ * @returns {{isValid: boolean, error?: string}} 유효성 결과와 에러 메시지
+ * @description 최대 10MB, 이미지 파일만 허용 (JPEG, PNG, GIF, WebP)
+ */
 export function validateFileUpload(file: Express.Multer.File): { isValid: boolean; error?: string } {
   const maxSize = 10 * 1024 * 1024; // 10MB
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -98,7 +141,14 @@ export function validateFileUpload(file: Express.Multer.File): { isValid: boolea
   return { isValid: true };
 }
 
-// Validate pagination parameters
+/**
+ * 페이지네이션 파라미터 유효성 검증
+ * @function validatePagination
+ * @param {any} page - 페이지 번호
+ * @param {any} limit - 페이지당 항목 수
+ * @returns {{page: number, limit: number}} 유효한 페이지네이션 값
+ * @description 기본값 page=1, limit=20, 최대 limit=100
+ */
 export function validatePagination(page: any, limit: any): { page: number; limit: number } {
   const parsedPage = parseInt(page) || 1;
   const parsedLimit = parseInt(limit) || 20;
@@ -110,7 +160,13 @@ export function validatePagination(page: any, limit: any): { page: number; limit
   return { page: validPage, limit: validLimit };
 }
 
-// Validate UUID format
+/**
+ * UUID 형식 유효성 검증
+ * @function validateUUID
+ * @param {string} uuid - 검증할 UUID
+ * @returns {boolean} 유효성 여부
+ * @description 표준 UUID 형식과 CUID 형식 모두 지원
+ */
 export function validateUUID(uuid: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   // Also support cuid format
@@ -118,7 +174,14 @@ export function validateUUID(uuid: string): boolean {
   return uuidRegex.test(uuid) || cuidRegex.test(uuid);
 }
 
-// Validate coordinate (for location-based features)
+/**
+ * 좌표 유효성 검증
+ * @function validateCoordinate
+ * @param {any} lat - 위도
+ * @param {any} lng - 경도
+ * @returns {boolean} 유효성 여부
+ * @description 위치 기반 기능을 위한 위도(-90~90), 경도(-180~180) 검증
+ */
 export function validateCoordinate(lat: any, lng: any): boolean {
   const latitude = parseFloat(lat);
   const longitude = parseFloat(lng);
@@ -130,7 +193,13 @@ export function validateCoordinate(lat: any, lng: any): boolean {
   return latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
 }
 
-// Sanitize and validate search query
+/**
+ * 검색 쿼리 유효성 검증 및 정화
+ * @function validateSearchQuery
+ * @param {string} query - 검색 쿼리
+ * @returns {string} 정화된 검색 쿼리
+ * @description 특수문자 제거, 최대 100자 제한
+ */
 export function validateSearchQuery(query: string): string {
   if (!query || typeof query !== 'string') {
     return '';
@@ -145,12 +214,27 @@ export function validateSearchQuery(query: string): string {
   return sanitized;
 }
 
-// Validate payment amount
+/**
+ * 결제 금액 유효성 검증
+ * @function validatePaymentAmount
+ * @param {number} amount - 검증할 금액
+ * @param {number} [min=100] - 최소 금액
+ * @param {number} [max=10000000] - 최대 금액
+ * @returns {boolean} 유효성 여부
+ * @description 정수 금액만 허용
+ */
 export function validatePaymentAmount(amount: number, min: number = 100, max: number = 10000000): boolean {
   return !isNaN(amount) && amount >= min && amount <= max && Number.isInteger(amount);
 }
 
-// Validate date range
+/**
+ * 날짜 범위 유효성 검증
+ * @function validateDateRange
+ * @param {any} startDate - 시작 날짜
+ * @param {any} endDate - 종료 날짜
+ * @returns {boolean} 유효성 여부
+ * @description 시작 날짜가 종료 날짜보다 이전인지 검증
+ */
 export function validateDateRange(startDate: any, endDate: any): boolean {
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -162,7 +246,13 @@ export function validateDateRange(startDate: any, endDate: any): boolean {
   return start <= end;
 }
 
-// Create validation middleware
+/**
+ * 유효성 검사 미들웨어 생성
+ * @function createValidator
+ * @param {Record<string, Function>} validationRules - 필드별 유효성 검사 규칙
+ * @returns {Function} Express 미들웨어 함수
+ * @description 주어진 규칙에 따라 요청 데이터를 검증하는 미들웨어 생성
+ */
 export function createValidator(validationRules: Record<string, (value: any) => boolean | { isValid: boolean; error?: string }>) {
   return (req: any, res: any, next: any) => {
     const errors: Record<string, string> = {};

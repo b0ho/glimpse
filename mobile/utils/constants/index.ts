@@ -1,18 +1,36 @@
-// 앱 상수
+/**
+ * 앱 상수 정의
+ * @module constants
+ * @description 애플리케이션 전체에서 사용하는 상수들
+ */
+
+/**
+ * 앱 기본 설정
+ * @constant APP_CONFIG
+ * @description 앱 이름, 버전, 설명 등 기본 정보
+ */
 export const APP_CONFIG = {
   NAME: 'Glimpse',
   VERSION: '0.1.0',
   DESCRIPTION: 'Anonymous group-based dating app',
 } as const;
 
-// 좋아요 시스템 상수
+/**
+ * 좋아요 시스템 상수
+ * @constant LIKE_SYSTEM
+ * @description 좋아요 기능 관련 제한 및 설정
+ */
 export const LIKE_SYSTEM = {
   DAILY_FREE_LIKES: 1,
   COOLDOWN_PERIOD_DAYS: 14,
   MAX_LIKES_PER_DAY: 10,
 } as const;
 
-// 그룹 상수
+/**
+ * 그룹 제한 상수
+ * @constant GROUP_LIMITS
+ * @description 그룹 생성 및 매칭 관련 제한
+ */
 export const GROUP_LIMITS = {
   MIN_MEMBERS_FOR_MATCHING: 4,
   MIN_MALE_MEMBERS: 2,
@@ -21,14 +39,22 @@ export const GROUP_LIMITS = {
   MAX_GROUP_DESCRIPTION_LENGTH: 200,
 } as const;
 
-// 채팅 상수
+/**
+ * 채팅 설정 상수
+ * @constant CHAT_CONFIG
+ * @description 채팅 기능 관련 설정 및 제한
+ */
 export const CHAT_CONFIG = {
   MESSAGE_MAX_LENGTH: 500,
   TYPING_TIMEOUT: 3000,
   CONNECTION_TIMEOUT: 10000,
 } as const;
 
-// 알림 상수
+/**
+ * 알림 설정 상수
+ * @constant NOTIFICATION_CONFIG
+ * @description 푸시 알림 채널 및 이름 설정
+ */
 export const NOTIFICATION_CONFIG = {
   CHANNELS: {
     MATCHES: 'matches',
@@ -42,7 +68,11 @@ export const NOTIFICATION_CONFIG = {
   },
 } as const;
 
-// 보안 상수
+/**
+ * 보안 설정 상수
+ * @constant SECURITY
+ * @description 인증, 세션, 비밀번호 관련 설정
+ */
 export const SECURITY = {
   TOKEN_REFRESH_INTERVAL: 15 * 60 * 1000, // 15분
   SESSION_TIMEOUT: 24 * 60 * 60 * 1000, // 24시간
@@ -51,7 +81,11 @@ export const SECURITY = {
   OTP_EXPIRY_MINUTES: 5,
 } as const;
 
-// 애니메이션 상수
+/**
+ * 애니메이션 설정 상수
+ * @constant ANIMATION
+ * @description UI 애니메이션 지속 시간 및 이징 함수
+ */
 export const ANIMATION = {
   DURATION: {
     SHORT: 200,
@@ -65,7 +99,11 @@ export const ANIMATION = {
   },
 } as const;
 
-// 컬러 테마
+/**
+ * 컴러 테마 상수
+ * @constant COLORS
+ * @description 앱 전체에서 사용하는 색상 팔레트
+ */
 export const COLORS = {
   PRIMARY: '#FF6B6B',
   SECONDARY: '#4ECDC4',
@@ -101,7 +139,11 @@ export const COLORS = {
   WHITE: '#FFFFFF',
 } as const;
 
-// 스타일 상수
+/**
+ * 스타일 간격 상수
+ * @constant SPACING
+ * @description 레이아웃 및 컴포넌트 간격 설정
+ */
 export const SPACING = {
   XS: 4,
   SM: 8,
@@ -118,6 +160,11 @@ export const SPACING = {
   xxl: 48,
 } as const;
 
+/**
+ * 폰트 크기 상수
+ * @constant FONT_SIZES
+ * @description 텍스트 크기 설정
+ */
 export const FONT_SIZES = {
   XS: 12,
   SM: 14,
@@ -128,7 +175,11 @@ export const FONT_SIZES = {
   XXXL: 32,
 } as const;
 
-// 타이포그래피 스타일
+/**
+ * 타이포그래피 스타일
+ * @constant TYPOGRAPHY
+ * @description 텍스트 스타일 프리셋 (h1, h2, body 등)
+ */
 export const TYPOGRAPHY = {
   h1: {
     fontSize: FONT_SIZES.XXXL,
@@ -167,7 +218,11 @@ export const TYPOGRAPHY = {
   },
 } as const;
 
-// 정규 표현식
+/**
+ * 정규 표현식 상수
+ * @constant REGEX
+ * @description 입력 유효성 검사용 정규식
+ */
 export const REGEX = {
   PHONE: /^\+?[1-9]\d{1,14}$/,
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -175,7 +230,11 @@ export const REGEX = {
   COMPANY_EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 } as const;
 
-// 에러 메시지
+/**
+ * 에러 메시지 상수
+ * @constant ERROR_MESSAGES
+ * @description 사용자에게 표시할 에러 메시지
+ */
 export const ERROR_MESSAGES = {
   NETWORK_ERROR: '네트워크 연결을 확인해주세요.',
   INVALID_PHONE: '올바른 전화번호를 입력해주세요.',
@@ -190,5 +249,8 @@ export const ERROR_MESSAGES = {
   GENERIC_ERROR: '오류가 발생했습니다. 다시 시도해주세요.',
 } as const;
 
-// 스타일 관련 export
+/**
+ * 스타일 관련 export
+ * @see {@link ./styles}
+ */
 export * from './styles';

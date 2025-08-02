@@ -1,6 +1,16 @@
+/**
+ * 유효성 검사 스키마 모음
+ * @module utils/validationSchemas
+ * @description Express Validator를 사용한 애플리케이션 전체 유효성 검사 규칙
+ */
+
 import { body, param, query, ValidationChain } from 'express-validator';
 
-// Common validators
+/**
+ * 공통 유효성 검사기
+ * @constant validators
+ * @description 애플리케이션 전체에서 재사용되는 기본 유효성 검사 규칙
+ */
 export const validators = {
   // ID validators
   id: param('id')
@@ -144,7 +154,11 @@ export const validators = {
     .withMessage('스토리 재생 시간은 1초 이상 60초 이하여야 합니다')
 };
 
-// Composite validators for specific endpoints
+/**
+ * 인증 관련 유효성 검사기
+ * @constant authValidators
+ * @description 회원가입, 로그인, SMS 인증 등 인증 엔드포인트용 검사기
+ */
 export const authValidators = {
   register: [
     validators.phoneNumber,
@@ -172,6 +186,11 @@ export const authValidators = {
   ]
 };
 
+/**
+ * 사용자 관련 유효성 검사기
+ * @constant userValidators
+ * @description 프로필 업데이트, 이미지 업로드 등 사용자 엔드포인트용 검사기
+ */
 export const userValidators = {
   updateProfile: [
     validators.nickname.optional(),
@@ -188,6 +207,11 @@ export const userValidators = {
   ]
 };
 
+/**
+ * 그룹 관련 유효성 검사기
+ * @constant groupValidators
+ * @description 그룹 생성, 수정, 참여 등 그룹 엔드포인트용 검사기
+ */
 export const groupValidators = {
   create: [
     validators.groupName,
@@ -217,6 +241,11 @@ export const groupValidators = {
   ]
 };
 
+/**
+ * 메시지 관련 유효성 검사기
+ * @constant messageValidators
+ * @description 메시지 전송, 읽음 표시 등 메시지 엔드포인트용 검사기
+ */
 export const messageValidators = {
   send: [
     validators.messageContent,
@@ -233,6 +262,11 @@ export const messageValidators = {
   ]
 };
 
+/**
+ * 좋아요 관련 유효성 검사기
+ * @constant likeValidators
+ * @description 좋아요 전송 등 좋아요 기능 엔드포인트용 검사기
+ */
 export const likeValidators = {
   sendLike: [
     body('targetUserId')
@@ -244,6 +278,11 @@ export const likeValidators = {
   ]
 };
 
+/**
+ * 결제 관련 유효성 검사기
+ * @constant paymentValidators
+ * @description 결제 생성, 웹훅 처리 등 결제 엔드포인트용 검사기
+ */
 export const paymentValidators = {
   createPayment: [
     validators.paymentMethod,
@@ -263,6 +302,11 @@ export const paymentValidators = {
   ]
 };
 
+/**
+ * 위치 관련 유효성 검사기
+ * @constant locationValidators
+ * @description 위치 업데이트, 근처 사용자 검색 등 위치 엔드포인트용 검사기
+ */
 export const locationValidators = {
   updateLocation: [
     validators.latitude,
@@ -283,6 +327,11 @@ export const locationValidators = {
   ]
 };
 
+/**
+ * 스토리 관련 유효성 검사기
+ * @constant storyValidators
+ * @description 스토리 생성, 반응 등 스토리 기능 엔드포인트용 검사기
+ */
 export const storyValidators = {
   create: [
     validators.storyContent,
@@ -307,7 +356,13 @@ export const storyValidators = {
   ]
 };
 
-// SQL Injection prevention helpers
+/**
+ * SQL 인젝션 방지를 위한 입력값 정화
+ * @function sanitizeInput
+ * @param {string} input - 정화할 입력값
+ * @returns {string} 정화된 문자열
+ * @description SQL 키워드와 특수문자를 제거하여 SQL 인젝션 공격 방지
+ */
 export function sanitizeInput(input: string): string {
   // Remove SQL keywords and special characters
   const sqlKeywords = /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|WHERE|FROM|JOIN|OR|AND|EXEC|EXECUTE|SCRIPT|JAVASCRIPT|ALERT)\b)/gi;
@@ -319,7 +374,13 @@ export function sanitizeInput(input: string): string {
     .trim();
 }
 
-// XSS prevention helpers
+/**
+ * XSS 방지를 위한 HTML 이스케이프
+ * @function escapeHtml
+ * @param {string} text - 이스케이프할 텍스트
+ * @returns {string} HTML 엔티티로 변환된 문자열
+ * @description HTML 특수문자를 엔티티로 변환하여 XSS 공격 방지
+ */
 export function escapeHtml(text: string): string {
   const map: { [key: string]: string } = {
     '&': '&amp;',
@@ -332,13 +393,25 @@ export function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (m) => map[m]);
 }
 
-// Custom validation for Korean phone numbers
+/**
+ * 한국 휴대폰 번호 유효성 검사
+ * @function isValidKoreanPhoneNumber
+ * @param {string} phone - 검사할 휴대폰 번호
+ * @returns {boolean} 유효성 여부
+ * @description 010-XXXX-XXXX 형식의 한국 휴대폰 번호 검증
+ */
 export function isValidKoreanPhoneNumber(phone: string): boolean {
   const regex = /^010-\d{4}-\d{4}$/;
   return regex.test(phone);
 }
 
-// Custom validation for Korean business registration number
+/**
+ * 한국 사업자등록번호 유효성 검사
+ * @function isValidBusinessNumber
+ * @param {string} number - 검사할 사업자등록번호
+ * @returns {boolean} 유효성 여부
+ * @description XXX-XX-XXXXX 형식의 한국 사업자등록번호 검증
+ */
 export function isValidBusinessNumber(number: string): boolean {
   const regex = /^\d{3}-\d{2}-\d{5}$/;
   return regex.test(number);

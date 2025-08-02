@@ -22,6 +22,7 @@ interface RetryTask<T> {
  * Exponential backoff retry utility for payment operations
  */
 export class PaymentRetryManager {
+  /** 기본 재시도 옵션 설정 */
   private readonly defaultOptions: Required<RetryOptions> = {
     maxAttempts: 5,
     initialDelayMs: 1000, // 1 second
@@ -31,7 +32,9 @@ export class PaymentRetryManager {
     onRetry: () => {}
   };
 
+  /** 재시도 대기열 (작업 ID -> 작업 정보) */
   private retryQueue: Map<string, RetryTask<any>> = new Map();
+  /** 재시도 처리 인터벌 타이머 */
   private processingInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
@@ -281,6 +284,7 @@ export function RetryablePayment(options?: RetryOptions) {
  * Idempotency manager for payment operations
  */
 export class IdempotencyManager {
+  /** 멱등성 키 TTL (초) - 24시간 */
   private readonly ttl = 86400; // 24 hours
 
   async checkAndSet(key: string, value: any): Promise<boolean> {
@@ -310,12 +314,18 @@ export const idempotencyManager = new IdempotencyManager();
  * Circuit breaker for payment providers
  */
 export class PaymentCircuitBreaker {
+  /** 제공자별 실패 횟수 */
   private failures = new Map<string, number>();
+  /** 제공자별 마지막 실패 시간 */
   private lastFailureTime = new Map<string, number>();
+  /** 제공자별 서킷 상태 */
   private state = new Map<string, 'CLOSED' | 'OPEN' | 'HALF_OPEN'>();
 
+  /** 서킷 오픈 임계값 (실패 횟수) */
   private readonly threshold = 5; // failures before opening
+  /** 서킷 타임아웃 (밀리초) - 1분 */
   private readonly timeout = 60000; // 1 minute
+  /** 서킷 닫기 성공 임계값 */
   private readonly successThreshold = 3; // successes to close
 
   async execute<T>(

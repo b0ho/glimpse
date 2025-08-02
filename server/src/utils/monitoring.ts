@@ -1,7 +1,17 @@
+/**
+ * 애플리케이션 모니터링
+ * @module utils/monitoring
+ * @description Prometheus를 사용한 메트릭 수집 및 모니터링
+ */
+
 import { Request, Response, NextFunction } from 'express';
 import * as prometheus from 'prom-client';
 
-// Create a Registry
+/**
+ * Prometheus 레지스트리
+ * @constant register
+ * @description 모든 메트릭을 등록하는 중앙 레지스트리
+ */
 const register = new prometheus.Registry();
 
 // Add default metrics
@@ -74,7 +84,14 @@ register.registerMetric(authLoginFailuresTotal);
 register.registerMetric(securitySuspiciousRequestsTotal);
 register.registerMetric(smsMessagesSentTotal);
 
-// Middleware to track HTTP metrics
+/**
+ * HTTP 메트릭 추적 미들웨어
+ * @function metricsMiddleware
+ * @param {Request} req - Express 요청 객체
+ * @param {Response} res - Express 응답 객체
+ * @param {NextFunction} next - 다음 미들웨어 함수
+ * @description HTTP 요청의 지속 시간과 수를 추적
+ */
 export const metricsMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   
@@ -91,14 +108,25 @@ export const metricsMiddleware = (req: Request, res: Response, next: NextFunctio
   next();
 };
 
-// Metrics endpoint handler
+/**
+ * 메트릭 엔드포인트 핸들러
+ * @async
+ * @function metricsHandler
+ * @param {Request} req - Express 요청 객체
+ * @param {Response} res - Express 응답 객체
+ * @description /metrics 엔드포인트에서 Prometheus 형식의 메트릭 제공
+ */
 export const metricsHandler = async (req: Request, res: Response) => {
   res.set('Content-Type', register.contentType);
   const metrics = await register.metrics();
   res.end(metrics);
 };
 
-// Export metrics for use in other parts of the application
+/**
+ * 애플리케이션 메트릭 객체
+ * @constant metrics
+ * @description 다른 모듈에서 사용할 수 있는 메트릭 모음
+ */
 export const metrics = {
   websocketConnectionsActive,
   paymentAttemptsTotal,
@@ -109,7 +137,17 @@ export const metrics = {
   smsMessagesSentTotal
 };
 
-// Utility function to track async operations
+/**
+ * 비동기 작업 추적 유틸리티
+ * @async
+ * @function trackAsyncOperation
+ * @template T - 작업 결과 타입
+ * @param {Function} operation - 추적할 비동기 작업
+ * @param {prometheus.Histogram} metric - 사용할 Prometheus 히스토그램
+ * @param {Record<string, string>} labels - 메트릭 레이블
+ * @returns {Promise<T>} 작업 결과
+ * @description 비동기 작업의 실행 시간을 자동으로 추적
+ */
 export const trackAsyncOperation = async <T>(
   operation: () => Promise<T>,
   metric: prometheus.Histogram<string>,
@@ -135,6 +173,13 @@ const healthCheckGauge = new prometheus.Gauge({
 
 register.registerMetric(healthCheckGauge);
 
+/**
+ * 헬스 체크 상태 업데이트
+ * @function updateHealthStatus
+ * @param {string} service - 서비스 이름
+ * @param {boolean} isHealthy - 건강 상태
+ * @description 특정 서비스의 건강 상태를 메트릭에 업데이트
+ */
 export const updateHealthStatus = (service: string, isHealthy: boolean) => {
   healthCheckGauge.labels(service).set(isHealthy ? 1 : 0);
 };
@@ -230,6 +275,11 @@ register.registerMetric(wsReconnections);
 register.registerMetric(chatRoomActive);
 register.registerMetric(chatTypingUsers);
 
+/**
+ * 비즈니스 메트릭
+ * @constant businessMetrics
+ * @description 사용자, 매칭, 메시지, 구독 등 비즈니스 지표
+ */
 export const businessMetrics = {
   activeUsersGauge,
   matchesCreatedTotal,
@@ -237,12 +287,22 @@ export const businessMetrics = {
   premiumSubscriptionsActive
 };
 
+/**
+ * 메시지 큐 메트릭
+ * @constant messageQueueMetrics
+ * @description 오프라인 메시지, 푸시 알림 재시도 등 큐 관련 지표
+ */
 export const messageQueueMetrics = {
   mqOfflineMessages,
   mqPushRetries,
   mqProcessingDuration
 };
 
+/**
+ * WebSocket 메트릭
+ * @constant websocketMetrics
+ * @description WebSocket 연결, 메시지, 에러 관련 지표
+ */
 export const websocketMetrics = {
   wsMessagesSent,
   wsMessagesReceived,
@@ -251,6 +311,11 @@ export const websocketMetrics = {
   websocketConnectionsActive
 };
 
+/**
+ * 채팅 메트릭
+ * @constant chatMetrics
+ * @description 활성 채팅방, 타이핑 사용자 등 채팅 관련 지표
+ */
 export const chatMetrics = {
   chatRoomActive,
   chatTypingUsers

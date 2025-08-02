@@ -1,9 +1,21 @@
+/**
+ * 유효성 검사 유틸리티
+ * @module utils/validation
+ * @description Express Validator를 사용한 요청 데이터 유효성 검사
+ */
+
 import { body, param, query, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 import type { Express } from 'express';
 import { validationSchemas, sqlInjectionPatterns, sanitizeInput } from '../config/security';
 
-// Validation middleware wrapper
+/**
+ * 유효성 검사 미들웨어 래퍼
+ * @function validate
+ * @param {any[]} validations - Express Validator 검증 규칙 배열
+ * @returns {Function} Express 미들웨어 함수
+ * @description 유효성 검사 실행 및 에러 처리
+ */
 export const validate = (validations: any[]) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     await Promise.all(validations.map(validation => validation.run(req)));
@@ -20,7 +32,11 @@ export const validate = (validations: any[]) => {
   };
 };
 
-// Common validators
+/**
+ * 공통 유효성 검사기 모음
+ * @constant validators
+ * @description 애플리케이션 전체에서 사용하는 유효성 검사 규칙
+ */
 export const validators = {
   // Export body, param, query for custom validations
   body,
@@ -146,12 +162,24 @@ export const validators = {
     .withMessage('유효하지 않은 파일 타입입니다'),
 };
 
-// Check for SQL injection patterns
+/**
+ * SQL 인젝션 패턴 검사
+ * @function containsSQLInjection
+ * @param {string} value - 검사할 문자열
+ * @returns {boolean} SQL 인젝션 패턴 포함 여부
+ * @description 입력값에 SQL 인젝션 패턴이 있는지 검사
+ */
 function containsSQLInjection(value: string): boolean {
   return sqlInjectionPatterns.some(pattern => pattern.test(value));
 }
 
-// Sanitize object recursively
+/**
+ * 객체 재귀적 정화
+ * @function sanitizeObject
+ * @param {any} obj - 정화할 객체
+ * @returns {any} 정화된 객체
+ * @description 객체의 모든 문자열 값을 재귀적으로 정화
+ */
 export function sanitizeObject(obj: any): any {
   if (typeof obj === 'string') {
     return sanitizeInput(obj);
@@ -178,7 +206,14 @@ export function sanitizeObject(obj: any): any {
   return obj;
 }
 
-// Validate file upload
+/**
+ * 파일 업로드 유효성 검사
+ * @function validateFileUpload
+ * @param {Express.Multer.File} file - 검사할 파일
+ * @returns {boolean} 유효성 여부
+ * @throws {Error} 파일 크기, 형식, 확장자 오류
+ * @description 파일 크기, MIME 타입, 확장자 검사
+ */
 export function validateFileUpload(file: Express.Multer.File) {
   const { fileUploadConfig } = require('../config/security');
   
@@ -206,7 +241,13 @@ export function validateFileUpload(file: Express.Multer.File) {
   return true;
 }
 
-// Validate Korean phone number with carrier check
+/**
+ * 한국 휴대폰 번호 유효성 검사
+ * @function validateKoreanPhoneNumber
+ * @param {string} phoneNumber - 검사할 휴대폰 번호
+ * @returns {boolean} 유효성 여부
+ * @description 통신사 식별번호 포함 한국 휴대폰 번호 검사
+ */
 export function validateKoreanPhoneNumber(phoneNumber: string): boolean {
   // Remove hyphens and spaces
   const cleaned = phoneNumber.replace(/[-\s]/g, '');
@@ -223,7 +264,13 @@ export function validateKoreanPhoneNumber(phoneNumber: string): boolean {
   return carrierPrefixes.includes(prefix);
 }
 
-// Validate password strength
+/**
+ * 비밀번호 강도 검사
+ * @function validatePasswordStrength
+ * @param {string} password - 검사할 비밀번호
+ * @returns {{isValid: boolean, errors: string[]}} 유효성 결과와 오류 목록
+ * @description 비밀번호 정책에 따른 강도 검사
+ */
 export function validatePasswordStrength(password: string): {
   isValid: boolean;
   errors: string[];

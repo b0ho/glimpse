@@ -1,10 +1,26 @@
+/**
+ * 좋아요 기능 액션
+ * @module like/actions
+ * @description 좋아요 전송, 되돌리기, 일일 리셋 등의 액션 함수
+ */
+
 import { likeApi } from '@/services/api/likeApi';
 import { Like, Match } from '@/types';
 import { LikeState } from './types';
 import { canUserSendLike, getTodayDateString } from './utils';
 import { LIKE_SYSTEM } from '@/utils/constants';
 
-// Like sending actions
+/**
+ * 좋아요 전송 액션
+ * @async
+ * @function sendLikeAction
+ * @param {LikeState} state - 현재 좋아요 상태
+ * @param {string} toUserId - 받는 사용자 ID
+ * @param {string} groupId - 그룹 ID
+ * @param {boolean} [isSuperLike=false] - 슈퍼 좋아요 여부
+ * @returns {Promise<{success: boolean, updatedState?: Partial<LikeState>, error?: string}>} 결과
+ * @description 좋아요를 전송하고 상태를 업데이트, 매칭 생성
+ */
 export const sendLikeAction = async (
   state: LikeState,
   toUserId: string,
@@ -84,7 +100,14 @@ export const sendLikeAction = async (
   }
 };
 
-// Rewind action
+/**
+ * 좋아요 되돌리기 액션
+ * @async
+ * @function rewindLikeAction
+ * @param {LikeState} state - 현재 좋아요 상태
+ * @returns {Promise<{success: boolean, updatedState?: Partial<LikeState>, error?: string}>} 결과
+ * @description 마지막으로 보낸 좋아요를 취소 (프리미엄 전용)
+ */
 export const rewindLikeAction = async (
   state: LikeState
 ): Promise<{
@@ -132,7 +155,13 @@ export const rewindLikeAction = async (
   }
 };
 
-// Daily reset action
+/**
+ * 일일 제한 초기화 액션
+ * @function resetDailyLimitsAction
+ * @param {LikeState} state - 현재 좋아요 상태
+ * @returns {Partial<LikeState>} 업데이트된 상태
+ * @description 매일 자정에 일일 좋아요 및 슈퍼 좋아요 사용량 초기화
+ */
 export const resetDailyLimitsAction = (
   state: LikeState
 ): Partial<LikeState> => {
@@ -143,7 +172,14 @@ export const resetDailyLimitsAction = (
   };
 };
 
-// Purchase premium likes action
+/**
+ * 프리미엄 좋아요 구매 액션
+ * @function purchasePremiumLikesAction
+ * @param {LikeState} state - 현재 좋아요 상태
+ * @param {number} count - 구매할 좋아요 수
+ * @returns {Partial<LikeState>} 업데이트된 상태
+ * @description 프리미엄 좋아요를 구매하여 남은 좋아요 수 증가
+ */
 export const purchasePremiumLikesAction = (
   state: LikeState,
   count: number

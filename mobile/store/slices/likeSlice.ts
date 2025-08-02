@@ -5,72 +5,122 @@ import { Like, Match } from '@/types';
 import { LIKE_SYSTEM } from '@/utils/constants';
 import { useAuthStore } from './authSlice';
 
+/**
+ * 좋아요 상태 인터페이스
+ * @interface LikeState
+ * @description 좋아요, 매칭, 일일 한도 등의 상태 정의
+ */
 interface LikeState {
   // State
+  /** 보낸 좋아요 목록 */
   sentLikes: Like[];
+  /** 받은 좋아요 목록 */
   receivedLikes: Like[];
+  /** 매칭 목록 */
   matches: Match[];
   
   // Daily limits
+  /** 오늘 사용한 좋아요 수 */
   dailyLikesUsed: number;
-  lastResetDate: string; // ISO date string
+  /** 마지막 리셋 날짜 (ISO date string) */
+  lastResetDate: string;
   
   // Premium features
+  /** 프리미엄 구독 여부 */
   hasPremium: boolean;
+  /** 남은 프리미엄 좋아요 수 */
   premiumLikesRemaining: number;
   
   // Super Likes (Premium only)
+  /** 오늘 사용한 슈퍼 좋아요 수 */
   superLikesUsed: number;
-  dailySuperLikesLimit: number; // 일일 슈퍼 좋아요 제한 (프리미엄 사용자만)
+  /** 일일 슈퍼 좋아요 제한 (프리미엄 사용자만) */
+  dailySuperLikesLimit: number;
   
   // UI state
+  /** 로딩 상태 */
   isLoading: boolean;
+  /** 에러 메시지 */
   error: string | null;
 }
 
+/**
+ * 좋아요 스토어 인터페이스
+ * @interface LikeStore
+ * @extends {LikeState}
+ * @description 좋아요 시스템의 모든 액션과 계산된 값 정의
+ */
 interface LikeStore extends LikeState {
   // Actions
+  /** 일반 좋아요 보내기 */
   sendLike: (toUserId: string, groupId: string) => Promise<boolean>;
-  sendSuperLike: (toUserId: string, groupId: string) => Promise<boolean>; // 슈퍼 좋아요 전용
+  /** 슈퍼 좋아요 보내기 (프리미엄 전용) */
+  sendSuperLike: (toUserId: string, groupId: string) => Promise<boolean>;
+  /** 매치 생성 */
   createMatch: (match: Match) => void;
+  /** 보낸 좋아요 목록 설정 */
   setSentLikes: (likes: Like[]) => void;
+  /** 받은 좋아요 목록 설정 */
   setReceivedLikes: (likes: Like[]) => void;
+  /** 매치 목록 설정 */
   setMatches: (matches: Match[]) => void;
+  /** 로딩 상태 설정 */
   setLoading: (isLoading: boolean) => void;
+  /** 에러 메시지 설정 */
   setError: (error: string | null) => void;
   
   // Cancel and history management
+  /** 좋아요 취소 (24시간 내) */
   cancelLike: (likeId: string) => Promise<boolean>;
+  /** 좋아요 기록 삭제 */
   deleteLikeHistory: (likeIds: string[]) => Promise<boolean>;
+  /** 좋아요 목록 새로고침 */
   refreshLikes: () => Promise<void>;
   
   // Premium actions
+  /** 프리미엄 좋아요 구매 */
   purchasePremiumLikes: (count: number) => void;
+  /** 프리미엄 상태 설정 */
   setPremiumStatus: (hasPremium: boolean) => void;
+  /** 프리미엄 스토어와 동기화 */
   syncWithPremiumStore: () => void;
   
   // Super Like actions
+  /** 슈퍼 좋아요 가능 여부 확인 */
   canSendSuperLike: () => boolean;
+  /** 남은 슈퍼 좋아요 수 */
   getRemainingSuperLikes: () => number;
   
   // Rewind actions (Premium only)
+  /** 좋아요 되돌리기 가능 여부 */
   canRewindLike: () => boolean;
+  /** 마지막 좋아요 되돌리기 */
   rewindLastLike: () => Promise<boolean>;
+  /** 마지막 좋아요 조회 */
   getLastLike: () => Like | null;
   
   // Computed values
+  /** 좋아요 가능 여부 확인 */
   canSendLike: (toUserId: string) => boolean;
+  /** 남은 무료 좋아요 수 */
   getRemainingFreeLikes: () => number;
+  /** 특정 사용자에게 좋아요 보냈는지 확인 */
   hasLikedUser: (userId: string) => boolean;
+  /** 특정 사용자에게 슈퍼 좋아요 보냈는지 확인 */
   isSuperLikedUser: (userId: string) => boolean;
+  /** 특정 사용자와 매칭되었는지 확인 */
   isMatchedWith: (userId: string) => boolean;
+  /** 받은 좋아요 수 */
   getReceivedLikesCount: () => number;
   
   // Anonymity system
+  /** 익명 사용자 정보 조회 */
   getAnonymousUserInfo: (userId: string, currentUserId: string) => import('@/types').AnonymousUserInfo | null;
+  /** 사용자 표시 이름 조회 */
   getUserDisplayName: (userId: string, currentUserId: string) => string;
   
   // Location-based matching
+  /** 위치 기반 매칭 조회 */
   getLocationBasedMatches: (userLocation?: { latitude: number; longitude: number }) => Array<{
     id: string;
     nickname: string;
@@ -80,15 +130,28 @@ interface LikeStore extends LikeState {
     lastActive: Date;
     locationScore: number;
   }>;
+  /** 위치 기반 매칭 점수 계산 */
   calculateLocationMatchingScore: (userId: string, userLocation?: { latitude: number; longitude: number }) => number;
   
   // Daily reset
+  /** 일일 한도 리셋 */
   resetDailyLimits: () => void;
+  /** 일일 리셋 확인 및 실행 */
   checkAndResetDaily: () => void;
 }
 
-// SecureStore를 위한 커스텀 스토리지
+/**
+ * SecureStore를 위한 커스텀 스토리지 어댑터
+ * @constant secureStorage
+ * @description Expo SecureStore를 Zustand persist 미들웨어와 호환되도록 래핑
+ */
 const secureStorage = {
+  /**
+   * 안전한 저장소에서 값 가져오기
+   * @async
+   * @param {string} name - 저장소 키
+   * @returns {Promise<string | null>} 저장된 값 또는 null
+   */
   getItem: async (name: string): Promise<string | null> => {
     try {
       return await SecureStore.getItemAsync(name);
@@ -97,6 +160,13 @@ const secureStorage = {
       return null;
     }
   },
+  /**
+   * 안전한 저장소에 값 저장
+   * @async
+   * @param {string} name - 저장소 키
+   * @param {string} value - 저장할 값
+   * @returns {Promise<void>}
+   */
   setItem: async (name: string, value: string): Promise<void> => {
     try {
       await SecureStore.setItemAsync(name, value);
@@ -104,6 +174,12 @@ const secureStorage = {
       console.error('SecureStore setItem error:', error);
     }
   },
+  /**
+   * 안전한 저장소에서 값 제거
+   * @async
+   * @param {string} name - 저장소 키
+   * @returns {Promise<void>}
+   */
   removeItem: async (name: string): Promise<void> => {
     try {
       await SecureStore.deleteItemAsync(name);
@@ -113,23 +189,51 @@ const secureStorage = {
   },
 };
 
+/**
+ * 좋아요 상태 관리 스토어
+ * @constant useLikeStore
+ * @description 좋아요, 매칭, 슈퍼 좋아요 등 모든 좋아요 관련 기능을 관리하는 Zustand 스토어
+ * @example
+ * ```typescript
+ * const { sendLike, canSendLike, matches } = useLikeStore();
+ * ```
+ */
 export const useLikeStore = create<LikeStore>()(
   persist(
     (set, get) => ({
       // Initial state
+      /** 보낸 좋아요 목록 */
       sentLikes: [],
+      /** 받은 좋아요 목록 */
       receivedLikes: [],
+      /** 매칭 목록 */
       matches: [],
+      /** 오늘 사용한 좋아요 수 */
       dailyLikesUsed: 0,
+      /** 마지막 리셋 날짜 */
       lastResetDate: new Date().toISOString().split('T')[0],
+      /** 프리미엄 구독 여부 */
       hasPremium: false,
+      /** 남은 프리미엄 좋아요 수 */
       premiumLikesRemaining: 0,
+      /** 오늘 사용한 슈퍼 좋아요 수 */
       superLikesUsed: 0,
-      dailySuperLikesLimit: 3, // 프리미엄 사용자 일일 슈퍼 좋아요 3개
+      /** 일일 슈퍼 좋아요 제한 (프리미엄 사용자만) */
+      dailySuperLikesLimit: 3,
+      /** 로딩 상태 */
       isLoading: false,
+      /** 에러 메시지 */
       error: null,
 
       // Actions
+      /**
+       * 일반 좋아요 보내기
+       * @async
+       * @param {string} toUserId - 받는 사용자 ID
+       * @param {string} groupId - 그룹 ID
+       * @returns {Promise<boolean>} 성공 여부
+       * @description 일일 한도와 쿨다운 확인 후 좋아요 전송
+       */
       sendLike: async (toUserId: string, groupId: string): Promise<boolean> => {
         const state = get();
         
@@ -211,7 +315,14 @@ export const useLikeStore = create<LikeStore>()(
         }
       },
 
-      // 슈퍼 좋아요 전송 (프리미엄 전용)
+      /**
+       * 슈퍼 좋아요 보내기 (프리미엄 전용)
+       * @async
+       * @param {string} toUserId - 받는 사용자 ID
+       * @param {string} groupId - 그룹 ID
+       * @returns {Promise<boolean>} 성공 여부
+       * @description 프리미엄 사용자만 사용 가능한 비익명 슈퍼 좋아요
+       */
       sendSuperLike: async (toUserId: string, groupId: string): Promise<boolean> => {
         const state = get();
         
@@ -318,16 +429,30 @@ export const useLikeStore = create<LikeStore>()(
         }
       },
 
+      /**
+       * 매치 생성
+       * @param {Match} match - 생성할 매치 정보
+       * @description 새로운 매치를 상태에 추가
+       */
       createMatch: (match: Match) => {
         set((state) => ({
           matches: [...state.matches, match],
         }));
       },
 
+      /**
+       * 보낸 좋아요 목록 설정
+       * @param {Like[]} likes - 좋아요 목록
+       */
       setSentLikes: (likes: Like[]) => {
         set({ sentLikes: likes });
       },
 
+      /**
+       * 받은 좋아요 목록 설정
+       * @param {Like[]} likes - 좋아요 목록
+       * @description 새로운 좋아요 수신 시 프리미엄 사용자에게 알림 전송
+       */
       setReceivedLikes: (likes: Like[]) => {
         const state = get();
         const previousLikes = state.receivedLikes;
@@ -359,19 +484,37 @@ export const useLikeStore = create<LikeStore>()(
         }
       },
 
+      /**
+       * 매치 목록 설정
+       * @param {Match[]} matches - 매치 목록
+       */
       setMatches: (matches: Match[]) => {
         set({ matches });
       },
 
+      /**
+       * 로딩 상태 설정
+       * @param {boolean} isLoading - 로딩 여부
+       */
       setLoading: (isLoading: boolean) => {
         set({ isLoading });
       },
 
+      /**
+       * 에러 메시지 설정
+       * @param {string | null} error - 에러 메시지
+       */
       setError: (error: string | null) => {
         set({ error });
       },
 
-      // Cancel a sent like
+      /**
+       * 좋아요 취소
+       * @async
+       * @param {string} likeId - 취소할 좋아요 ID
+       * @returns {Promise<boolean>} 성공 여부
+       * @description 24시간 이내에 보낸 좋아요만 취소 가능
+       */
       cancelLike: async (likeId: string): Promise<boolean> => {
         const state = get();
         
@@ -424,7 +567,13 @@ export const useLikeStore = create<LikeStore>()(
         }
       },
 
-      // Delete like history
+      /**
+       * 좋아요 기록 삭제
+       * @async
+       * @param {string[]} likeIds - 삭제할 좋아요 ID 배열
+       * @returns {Promise<boolean>} 성공 여부
+       * @description 여러 개의 좋아요 기록을 일괄 삭제
+       */
       deleteLikeHistory: async (likeIds: string[]): Promise<boolean> => {
         if (likeIds.length === 0) {
           set({ error: '삭제할 항목이 없습니다.' });
@@ -454,7 +603,12 @@ export const useLikeStore = create<LikeStore>()(
         }
       },
 
-      // Refresh likes from server
+      /**
+       * 좋아요 목록 새로고침
+       * @async
+       * @returns {Promise<void>}
+       * @description 서버에서 최신 좋아요 목록을 가져옴
+       */
       refreshLikes: async (): Promise<void> => {
         try {
           set({ isLoading: true, error: null });
@@ -473,18 +627,29 @@ export const useLikeStore = create<LikeStore>()(
         }
       },
 
-      // Premium actions
+      /**
+       * 프리미엄 좋아요 구매
+       * @param {number} count - 구매할 좋아요 수
+       * @description 추가 좋아요를 프리미엄 잔액에 추가
+       */
       purchasePremiumLikes: (count: number) => {
         set((state) => ({
           premiumLikesRemaining: state.premiumLikesRemaining + count,
         }));
       },
 
+      /**
+       * 프리미엄 상태 설정
+       * @param {boolean} hasPremium - 프리미엄 구독 여부
+       */
       setPremiumStatus: (hasPremium: boolean) => {
         set({ hasPremium });
       },
       
-      // Sync with premium store
+      /**
+       * 프리미엄 스토어와 동기화
+       * @description 프리미엄 상태와 남은 좋아요 수를 동기화
+       */
       syncWithPremiumStore: () => {
         // Import premium store dynamically to avoid circular dependency
         import('./premiumSlice').then(({ usePremiumStore, premiumSelectors }) => {
@@ -499,7 +664,12 @@ export const useLikeStore = create<LikeStore>()(
         });
       },
 
-      // Computed values
+      /**
+       * 좋아요 가능 여부 확인
+       * @param {string} toUserId - 대상 사용자 ID
+       * @returns {boolean} 좋아요 가능 여부
+       * @description 일일 한도, 쿨다운, 중복 여부를 확인
+       */
       canSendLike: (toUserId: string) => {
         const state = get();
         
@@ -524,20 +694,38 @@ export const useLikeStore = create<LikeStore>()(
         return remainingLikes > 0 || state.premiumLikesRemaining > 0;
       },
 
+      /**
+       * 남은 무료 좋아요 수 조회
+       * @returns {number} 남은 무료 좋아요 수
+       */
       getRemainingFreeLikes: () => {
         const state = get();
         return Math.max(0, LIKE_SYSTEM.DAILY_FREE_LIKES - state.dailyLikesUsed);
       },
 
+      /**
+       * 특정 사용자에게 좋아요를 보냈는지 확인
+       * @param {string} userId - 사용자 ID
+       * @returns {boolean} 좋아요 여부
+       */
       hasLikedUser: (userId: string) => {
         return get().sentLikes.some((like) => like.toUserId === userId && !like.isSuper);
       },
 
+      /**
+       * 특정 사용자에게 슈퍼 좋아요를 보냈는지 확인
+       * @param {string} userId - 사용자 ID
+       * @returns {boolean} 슈퍼 좋아요 여부
+       */
       isSuperLikedUser: (userId: string) => {
         return get().sentLikes.some((like) => like.toUserId === userId && like.isSuper);
       },
 
-      // 슈퍼 좋아요 관련 computed values
+      /**
+       * 슈퍼 좋아요 가능 여부 확인
+       * @returns {boolean} 슈퍼 좋아요 가능 여부
+       * @description 프리미엄 사용자이고 일일 한도 미달인 경우 true
+       */
       canSendSuperLike: () => {
         const state = get();
         
@@ -548,13 +736,21 @@ export const useLikeStore = create<LikeStore>()(
         return state.superLikesUsed < state.dailySuperLikesLimit;
       },
 
+      /**
+       * 남은 슈퍼 좋아요 수 조회
+       * @returns {number} 남은 슈퍼 좋아요 수
+       */
       getRemainingSuperLikes: () => {
         const state = get();
         if (!state.hasPremium) return 0;
         return Math.max(0, state.dailySuperLikesLimit - state.superLikesUsed);
       },
 
-      // 좋아요 되돌리기 기능 (프리미엄 전용)
+      /**
+       * 좋아요 되돌리기 가능 여부 확인
+       * @returns {boolean} 되돌리기 가능 여부
+       * @description 프리미엄 사용자이고 5분 이내 좋아요인 경우 true
+       */
       canRewindLike: () => {
         const state = get();
         
@@ -575,6 +771,11 @@ export const useLikeStore = create<LikeStore>()(
         return likeCreatedAt > fiveMinutesAgo;
       },
 
+      /**
+       * 마지막 좋아요 조회
+       * @returns {Like | null} 가장 최근 좋아요
+       * @description 가장 최근에 보낸 좋아요 정보 반환
+       */
       getLastLike: () => {
         const state = get();
         if (state.sentLikes.length === 0) return null;
@@ -589,6 +790,12 @@ export const useLikeStore = create<LikeStore>()(
         return sortedLikes[0];
       },
 
+      /**
+       * 마지막 좋아요 되돌리기
+       * @async
+       * @returns {Promise<boolean>} 성공 여부
+       * @description 프리미엄 전용 기능으로 5분 이내 좋아요만 취소 가능
+       */
       rewindLastLike: async () => {
         const state = get();
         
@@ -656,6 +863,11 @@ export const useLikeStore = create<LikeStore>()(
         }
       },
 
+      /**
+       * 특정 사용자와 매칭 여부 확인
+       * @param {string} userId - 사용자 ID
+       * @returns {boolean} 매칭 여부
+       */
       isMatchedWith: (userId: string) => {
         const state = get();
         return state.matches.some(
@@ -663,11 +875,21 @@ export const useLikeStore = create<LikeStore>()(
         );
       },
 
+      /**
+       * 받은 좋아요 수 조회
+       * @returns {number} 받은 좋아요 수
+       */
       getReceivedLikesCount: () => {
         return get().receivedLikes.length;
       },
 
-      // 익명성 시스템 구현
+      /**
+       * 익명 사용자 정보 조회
+       * @param {string} userId - 대상 사용자 ID
+       * @param {string} currentUserId - 현재 사용자 ID
+       * @returns {AnonymousUserInfo | null} 익명 사용자 정보
+       * @description 매칭 여부에 따라 실명 또는 닉네임 반환
+       */
       getAnonymousUserInfo: (userId: string, currentUserId: string) => {
         const state = get();
         
@@ -697,12 +919,25 @@ export const useLikeStore = create<LikeStore>()(
         };
       },
 
+      /**
+       * 사용자 표시 이름 조회
+       * @param {string} userId - 대상 사용자 ID
+       * @param {string} currentUserId - 현재 사용자 ID
+       * @returns {string} 표시할 이름
+       */
       getUserDisplayName: (userId: string, currentUserId: string) => {
         const anonymousInfo = get().getAnonymousUserInfo(userId, currentUserId);
         return anonymousInfo?.displayName || '알 수 없는 사용자';
       },
 
-      // 위치 기반 매칭 알고리즘
+      /**
+       * 위치 기반 매칭 조회
+       * @param {Object} [userLocation] - 사용자 위치
+       * @param {number} userLocation.latitude - 위도
+       * @param {number} userLocation.longitude - 경도
+       * @returns {Array} 근처 사용자 목록
+       * @description 위치 기반으로 근처 사용자를 매칭 점수 순으로 정렬
+       */
       getLocationBasedMatches: (userLocation) => {
         if (!userLocation) return [];
 
@@ -744,6 +979,15 @@ export const useLikeStore = create<LikeStore>()(
           .sort((a, b) => b.locationScore - a.locationScore);
       },
 
+      /**
+       * 위치 기반 매칭 점수 계산
+       * @param {string} userId - 대상 사용자 ID
+       * @param {Object} [userLocation] - 사용자 위치
+       * @param {number} userLocation.latitude - 위도
+       * @param {number} userLocation.longitude - 경도
+       * @returns {number} 매칭 점수 (0-1)
+       * @description 거리, 공통 그룹, 최근 활동 등을 고려한 점수 계산
+       */
       calculateLocationMatchingScore: (userId, userLocation) => {
         if (!userLocation) return 0;
 
@@ -782,7 +1026,10 @@ export const useLikeStore = create<LikeStore>()(
         return Math.min(1.0, score); // 최대 1.0
       },
 
-      // Daily reset
+      /**
+       * 일일 한도 리셋
+       * @description 매일 자정에 좋아요와 슈퍼 좋아요 한도를 초기화
+       */
       resetDailyLimits: () => {
         set({
           dailyLikesUsed: 0,
@@ -791,6 +1038,10 @@ export const useLikeStore = create<LikeStore>()(
         });
       },
 
+      /**
+       * 일일 리셋 확인 및 실행
+       * @description 날짜가 바뀌었는지 확인하고 필요시 리셋 실행
+       */
       checkAndResetDaily: () => {
         const today = new Date().toISOString().split('T')[0];
         const lastReset = get().lastResetDate;
@@ -801,18 +1052,26 @@ export const useLikeStore = create<LikeStore>()(
       },
     }),
     {
+      /** 저장소 키 이름 */
       name: 'like-storage',
+      /** SecureStore를 사용하는 커스텀 저장소 */
       storage: createJSONStorage(() => secureStorage),
-      // 민감하지 않은 데이터만 persist
+      /**
+       * 영속화할 상태 선택
+       * @description 일일 한도, 프리미엄 상태 등 민감하지 않은 데이터만 저장
+       */
       partialize: (state) => ({
         dailyLikesUsed: state.dailyLikesUsed,
-        superLikesUsed: state.superLikesUsed, // 슈퍼 좋아요 사용량 persist
+        superLikesUsed: state.superLikesUsed,
         dailySuperLikesLimit: state.dailySuperLikesLimit,
         lastResetDate: state.lastResetDate,
         hasPremium: state.hasPremium,
         premiumLikesRemaining: state.premiumLikesRemaining,
       }),
-      // Date 문자열을 Date 객체로 복원
+      /**
+       * 저장소에서 데이터 복원 시 처리
+       * @description Date 문자열을 Date 객체로 변환
+       */
       onRehydrateStorage: () => (state) => {
         if (state) {
           // sentLikes의 createdAt을 Date 객체로 변환

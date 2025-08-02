@@ -4,23 +4,51 @@ import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { NOTIFICATION_CONFIG } from '@/utils/constants/index';
 
+/**
+ * 알림 데이터 인터페이스
+ * @interface NotificationData
+ * @description 푸시 알림에 포함될 데이터 구조
+ */
 export interface NotificationData {
+  /** 알림 타입 */
   type: 'new_match' | 'new_message' | 'like_received' | 'super_like' | 'group_invite';
+  /** 사용자 ID */
   userId?: string;
+  /** 그룹 ID */
   groupId?: string;
+  /** 매칭 ID */
   matchId?: string;
+  /** 메시지 ID */
   messageId?: string;
+  /** 알림 제목 */
   title: string;
+  /** 알림 내용 */
   body: string;
 }
 
+/**
+ * 알림 서비스 클래스
+ * @class NotificationService
+ * @description Expo 기반 푸시 알림 관리 및 Android 채널 설정
+ */
 class NotificationService {
+  /** Expo 푸시 토큰 */
   private expoPushToken: string | null = null;
 
+  /**
+   * NotificationService 생성자
+   * @constructor
+   * @description 푸시 알림 초기 설정 수행
+   */
   constructor() {
     this.configurePushNotifications();
   }
 
+  /**
+   * 푸시 알림 설정
+   * @private
+   * @description 알림 핸들러 및 Android 채널 설정
+   */
   private configurePushNotifications() {
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -59,6 +87,12 @@ class NotificationService {
     }
   }
 
+  /**
+   * 알림 권한 요청
+   * @async
+   * @returns {Promise<boolean>} 권한 허용 여부
+   * @description 사용자에게 푸시 알림 권한 요청
+   */
   async requestPermissions(): Promise<boolean> {
     if (!Device.isDevice) {
       console.log('Push notifications only work on physical devices');
@@ -81,6 +115,12 @@ class NotificationService {
     return true;
   }
 
+  /**
+   * Expo 푸시 토큰 가져오기
+   * @async
+   * @returns {Promise<string | null>} 푸시 토큰 또는 null
+   * @description Expo 푸시 알림을 위한 토큰 생성 및 반환
+   */
   async getExpoPushToken(): Promise<string | null> {
     if (this.expoPushToken) {
       return this.expoPushToken;
@@ -109,6 +149,13 @@ class NotificationService {
     }
   }
 
+  /**
+   * 푸시 알림 예약
+   * @async
+   * @param {NotificationData} data - 알림 데이터
+   * @returns {Promise<string>} 알림 ID
+   * @description 즉시 또는 예약된 푸시 알림 생성
+   */
   async schedulePushNotification(data: NotificationData): Promise<string> {
     const channelId = this.getChannelId(data.type);
     
@@ -130,6 +177,13 @@ class NotificationService {
     });
   }
 
+  /**
+   * 채널 ID 가져오기
+   * @private
+   * @param {NotificationData['type']} type - 알림 타입
+   * @returns {string} Android 채널 ID
+   * @description 알림 타입에 따른 Android 채널 ID 반환
+   */
   private getChannelId(type: NotificationData['type']): string {
     switch (type) {
       case 'new_match':
@@ -144,7 +198,14 @@ class NotificationService {
     }
   }
 
-  // 새 매치 알림
+  /**
+   * 새 매치 알림
+   * @async
+   * @param {string} matchId - 매칭 ID
+   * @param {string} userName - 상대방 이름
+   * @returns {Promise<void>}
+   * @description 서로 좋아요를 누른 매칭 성사 알림
+   */
   async notifyNewMatch(matchId: string, userName: string): Promise<void> {
     await this.schedulePushNotification({
       type: 'new_match',
@@ -154,7 +215,15 @@ class NotificationService {
     });
   }
 
-  // 새 메시지 알림
+  /**
+   * 새 메시지 알림
+   * @async
+   * @param {string} messageId - 메시지 ID
+   * @param {string} senderName - 발신자 이름
+   * @param {string} preview - 메시지 미리보기
+   * @returns {Promise<void>}
+   * @description 새로운 채팅 메시지 수신 알림
+   */
   async notifyNewMessage(messageId: string, senderName: string, preview: string): Promise<void> {
     await this.schedulePushNotification({
       type: 'new_message',
@@ -164,7 +233,14 @@ class NotificationService {
     });
   }
 
-  // 좋아요 받음 알림 (프리미엄 기능)
+  /**
+   * 좋아요 받음 알림 (프리미엄 기능)
+   * @async
+   * @param {string} userId - 좋아요 보낸 사용자 ID
+   * @param {boolean} isPremium - 프리미엄 사용자 여부
+   * @returns {Promise<void>}
+   * @description 프리미엄 사용자에게만 좋아요 받음 알림
+   */
   async notifyLikeReceived(userId: string, isPremium: boolean): Promise<void> {
     if (!isPremium) return; // 프리미엄 사용자만 알림
 
@@ -176,7 +252,14 @@ class NotificationService {
     });
   }
 
-  // 슈퍼 좋아요 알림
+  /**
+   * 슈퍼 좋아요 알림
+   * @async
+   * @param {string} userId - 슈퍼 좋아요 보낸 사용자 ID
+   * @param {string} userName - 사용자 이름
+   * @returns {Promise<void>}
+   * @description 슈퍼 좋아요를 보냈을 때 알림
+   */
   async notifySuperLike(userId: string, userName: string): Promise<void> {
     await this.schedulePushNotification({
       type: 'super_like',
@@ -186,7 +269,14 @@ class NotificationService {
     });
   }
 
-  // 슈퍼 좋아요 받음 알림 (likeSlice에서 호출용)
+  /**
+   * 슈퍼 좋아요 받음 알림
+   * @async
+   * @param {string} likeId - 좋아요 ID
+   * @param {string} userName - 슈퍼 좋아요 보낸 사용자 이름
+   * @returns {Promise<void>}
+   * @description 슈퍼 좋아요를 받았을 때 알림 (likeSlice에서 호출)
+   */
   async notifySuperLikeReceived(likeId: string, userName: string): Promise<void> {
     await this.schedulePushNotification({
       type: 'super_like',
@@ -196,7 +286,14 @@ class NotificationService {
     });
   }
 
-  // 슈퍼 매치 알림 (특별한 매치)
+  /**
+   * 슈퍼 매치 알림
+   * @async
+   * @param {string} matchId - 매칭 ID
+   * @param {string} userName - 상대방 이름
+   * @returns {Promise<void>}
+   * @description 슈퍼 좋아요로 인한 특별한 매치 성사 알림
+   */
   async notifySuperMatch(matchId: string, userName: string): Promise<void> {
     await this.schedulePushNotification({
       type: 'new_match',
@@ -206,7 +303,14 @@ class NotificationService {
     });
   }
 
-  // 그룹 초대 알림
+  /**
+   * 그룹 초대 알림
+   * @async
+   * @param {string} groupId - 그룹 ID
+   * @param {string} groupName - 그룹 이름
+   * @returns {Promise<void>}
+   * @description 그룹 초대를 받았을 때 알림
+   */
   async notifyGroupInvite(groupId: string, groupName: string): Promise<void> {
     await this.schedulePushNotification({
       type: 'group_invite',
@@ -216,12 +320,23 @@ class NotificationService {
     });
   }
 
-  // 모든 알림 취소
+  /**
+   * 모든 알림 취소
+   * @async
+   * @returns {Promise<void>}
+   * @description 예약된 모든 알림을 취소
+   */
   async cancelAllNotifications(): Promise<void> {
     await Notifications.cancelAllScheduledNotificationsAsync();
   }
 
-  // 특정 타입 알림 취소
+  /**
+   * 특정 타입 알림 취소
+   * @async
+   * @param {NotificationData['type']} type - 취소할 알림 타입
+   * @returns {Promise<void>}
+   * @description 특정 타입의 예약된 알림만 취소
+   */
   async cancelNotificationsByType(type: NotificationData['type']): Promise<void> {
     const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
     
@@ -232,15 +347,30 @@ class NotificationService {
     }
   }
 
-  // 알림 클릭 처리를 위한 리스너 등록
+  /**
+   * 알림 클릭 리스너 등록
+   * @param {Function} callback - 알림 클릭 시 호출될 콜백
+   * @returns {object} 리스너 구독 객체
+   * @description 사용자가 알림을 클릭했을 때 처리
+   */
   addNotificationResponseListener(callback: (response: Notifications.NotificationResponse) => void) {
     return Notifications.addNotificationResponseReceivedListener(callback);
   }
 
-  // 앱이 foreground에 있을 때 알림 처리
+  /**
+   * 포그라운드 알림 리스너 등록
+   * @param {Function} callback - 알림 수신 시 호출될 콜백
+   * @returns {object} 리스너 구독 객체
+   * @description 앱이 포그라운드에 있을 때 알림 수신 처리
+   */
   addNotificationReceivedListener(callback: (notification: Notifications.Notification) => void) {
     return Notifications.addNotificationReceivedListener(callback);
   }
 }
 
+/**
+ * 알림 서비스 싱글톤 인스턴스
+ * @constant {NotificationService}
+ * @description 앱 전체에서 사용할 알림 서비스 인스턴스
+ */
 export const notificationService = new NotificationService();

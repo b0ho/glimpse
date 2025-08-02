@@ -1,8 +1,20 @@
+/**
+ * 좋아요 기능 유틸리티
+ * @module like/utils
+ * @description 좋아요 기능에서 사용하는 유틸리티 함수
+ */
+
 import { LIKE_SYSTEM } from '@/utils/constants';
 import { Like, Match, AnonymousUserInfo } from '@/types';
 import { LocationMatchScore } from './types';
 
 // Date utilities
+/**
+ * 오늘 날짜인지 확인
+ * @function isToday
+ * @param {string} dateString - 확인할 날짜 문자열
+ * @returns {boolean} 오늘 여부
+ */
 export const isToday = (dateString: string): boolean => {
   const today = new Date();
   const date = new Date(dateString);
@@ -13,11 +25,26 @@ export const isToday = (dateString: string): boolean => {
   );
 };
 
+/**
+ * 오늘 날짜 문자열 반환
+ * @function getTodayDateString
+ * @returns {string} YYYY-MM-DD 형식의 오늘 날짜
+ */
 export const getTodayDateString = (): string => {
   return new Date().toISOString().split('T')[0];
 };
 
 // Like validation utilities
+/**
+ * 좋아요 전송 가능 여부 확인
+ * @function canUserSendLike
+ * @param {string} toUserId - 대상 사용자 ID
+ * @param {Like[]} sentLikes - 보낸 좋아요 목록
+ * @param {number} dailyLikesUsed - 오늘 사용한 좋아요 수
+ * @param {boolean} hasPremium - 프리미엄 여부
+ * @param {number} premiumLikesRemaining - 남은 프리미엄 좋아요 수
+ * @returns {boolean} 전송 가능 여부
+ */
 export const canUserSendLike = (
   toUserId: string,
   sentLikes: Like[],
@@ -41,6 +68,14 @@ export const canUserSendLike = (
   return true;
 };
 
+/**
+ * 남은 좋아요 수 계산
+ * @function getRemainingLikes
+ * @param {number} dailyLikesUsed - 오늘 사용한 좋아요 수
+ * @param {boolean} hasPremium - 프리미엄 여부
+ * @param {number} premiumLikesRemaining - 남은 프리미엄 좋아요 수
+ * @returns {number} 남은 좋아요 수 (-1은 무제한)
+ */
 export const getRemainingLikes = (
   dailyLikesUsed: number,
   hasPremium: boolean,
@@ -53,6 +88,15 @@ export const getRemainingLikes = (
 };
 
 // Anonymity utilities
+/**
+ * 익명 사용자 정보 가져오기
+ * @function getAnonymousInfo
+ * @param {string} userId - 대상 사용자 ID
+ * @param {string} currentUserId - 현재 사용자 ID
+ * @param {Match[]} matches - 매칭 목록
+ * @returns {AnonymousUserInfo | null} 익명 사용자 정보
+ * @description 매칭 여부에 따라 익명성 수준 결정
+ */
 export const getAnonymousInfo = (
   userId: string,
   currentUserId: string,
@@ -84,6 +128,16 @@ export const getAnonymousInfo = (
 };
 
 // Location matching utilities
+/**
+ * 두 지점 간 거리 계산
+ * @function calculateDistance
+ * @param {number} lat1 - 첫 번째 지점의 위도
+ * @param {number} lon1 - 첫 번째 지점의 경도
+ * @param {number} lat2 - 두 번째 지점의 위도
+ * @param {number} lon2 - 두 번째 지점의 경도
+ * @returns {number} 거리 (km)
+ * @description Haversine 공식을 사용한 직선 거리 계산
+ */
 export const calculateDistance = (
   lat1: number,
   lon1: number,
@@ -101,6 +155,15 @@ export const calculateDistance = (
   return R * c; // Distance in km
 };
 
+/**
+ * 위치 기반 매칭 점수 계산
+ * @function calculateLocationScore
+ * @param {number} distance - 거리 (km)
+ * @param {number} commonGroups - 공통 그룹 수
+ * @param {Date} lastActive - 마지막 활동 시간
+ * @returns {number} 매칭 점수 (0-100)
+ * @description 거리, 공통 그룹, 활동도를 기반으로 점수 계산
+ */
 export const calculateLocationScore = (
   distance: number,
   commonGroups: number,
@@ -127,6 +190,14 @@ export const calculateLocationScore = (
 };
 
 // Super Like utilities
+/**
+ * 슈퍼 좋아요 전송 가능 여부
+ * @function canSendSuperLike
+ * @param {boolean} hasPremium - 프리미엄 여부
+ * @param {number} superLikesUsed - 사용한 슈퍼 좋아요 수
+ * @param {number} dailySuperLikesLimit - 일일 슈퍼 좋아요 제한
+ * @returns {boolean} 전송 가능 여부
+ */
 export const canSendSuperLike = (
   hasPremium: boolean,
   superLikesUsed: number,
@@ -136,6 +207,14 @@ export const canSendSuperLike = (
   return superLikesUsed < dailySuperLikesLimit;
 };
 
+/**
+ * 남은 슈퍼 좋아요 수 계산
+ * @function getRemainingSuperLikes
+ * @param {boolean} hasPremium - 프리미엄 여부
+ * @param {number} superLikesUsed - 사용한 슈퍼 좋아요 수
+ * @param {number} dailySuperLikesLimit - 일일 슈퍼 좋아요 제한
+ * @returns {number} 남은 슈퍼 좋아요 수
+ */
 export const getRemainingSuperLikes = (
   hasPremium: boolean,
   superLikesUsed: number,
@@ -146,6 +225,14 @@ export const getRemainingSuperLikes = (
 };
 
 // Rewind utilities
+/**
+ * 좋아요 되돌리기 가능 여부
+ * @function canRewind
+ * @param {boolean} hasPremium - 프리미엄 여부
+ * @param {Like[]} sentLikes - 보낸 좋아요 목록
+ * @returns {boolean} 되돌리기 가능 여부
+ * @description 5분 이내의 좋아요만 되돌릴 수 있음
+ */
 export const canRewind = (
   hasPremium: boolean,
   sentLikes: Like[]

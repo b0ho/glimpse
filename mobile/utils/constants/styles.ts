@@ -1,6 +1,16 @@
+/**
+ * 스타일 상수 정의
+ * @module constants/styles
+ * @description UI 스타일링에 사용되는 상수들
+ */
+
 import { Platform } from 'react-native';
 
-// 폰트 패밀리
+/**
+ * 폰트 패밀리 설정
+ * @constant FONT_FAMILY
+ * @description 플랫폼별 폰트 패밀리 정의
+ */
 export const FONT_FAMILY = {
   REGULAR: Platform.select({
     ios: 'System',
@@ -20,7 +30,11 @@ export const FONT_FAMILY = {
   }),
 } as const;
 
-// 폰트 스타일
+/**
+ * 폰트 스타일 프리셋
+ * @constant FONTS
+ * @description 타이포그래피 스타일 정의 (h1, h2, body 등)
+ */
 export const FONTS = {
   h1: {
     fontFamily: FONT_FAMILY.BOLD,
@@ -78,7 +92,11 @@ export const FONTS = {
   },
 } as const;
 
-// 사이즈 상수
+/**
+ * 사이즈 상수
+ * @constant SIZES
+ * @description UI 요소 크기, 여백, 그림자 등 설정
+ */
 export const SIZES = {
   // 기본 크기
   base: 8,
@@ -124,7 +142,11 @@ export const SIZES = {
   },
 } as const;
 
-// 색상 확장
+/**
+ * 확장 색상 팔레트
+ * @constant COLORS_EXTENDED
+ * @description 추가 색상 정의 및 프리미엄 색상
+ */
 export const COLORS_EXTENDED = {
   // 기본 색상
   primary: '#FF6B6B',
