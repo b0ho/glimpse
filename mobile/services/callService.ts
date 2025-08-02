@@ -3,6 +3,15 @@ import { webRTCService } from './webrtcService';
 import { notificationService } from './notificationService';
 import { Alert } from 'react-native';
 
+/**
+ * 통화 초대 인터페이스
+ * @interface CallInvite
+ * @property {string} callId - 통화 ID
+ * @property {string} fromUserId - 발신자 사용자 ID
+ * @property {string} fromUserName - 발신자 이름
+ * @property {'video' | 'audio'} callType - 통화 유형
+ * @property {number} timestamp - 타임스탬프
+ */
 interface CallInvite {
   callId: string;
   fromUserId: string;
@@ -11,26 +20,51 @@ interface CallInvite {
   timestamp: number;
 }
 
+/**
+ * 통화 상태 인터페이스
+ * @interface CallState
+ * @property {CallInvite | null} activeCall - 현재 활성 통화
+ * @property {boolean} isInCall - 통화 중 여부
+ * @property {CallInvite | null} incomingCall - 수신 통화
+ */
 interface CallState {
   activeCall: CallInvite | null;
   isInCall: boolean;
   incomingCall: CallInvite | null;
 }
 
+/**
+ * 통화 서비스 클래스
+ * @class CallService
+ * @description 음성/영상 통화 관리, Socket.IO를 통한 실시간 시그널링
+ */
 class CallService {
+  /** 통화 상태 */
   private callState: CallState = {
     activeCall: null,
     isInCall: false,
     incomingCall: null,
   };
 
+  /** 수신 통화 콜백 */
   private onIncomingCallCallback?: (call: CallInvite) => void;
+  /** 통화 종료 콜백 */
   private onCallEndCallback?: () => void;
 
+  /**
+   * CallService 생성자
+   * @constructor
+   * @description Socket 리스너 설정
+   */
   constructor() {
     this.setupSocketListeners();
   }
 
+  /**
+   * Socket 리스너 설정
+   * @private
+   * @description 통화 관련 Socket.IO 이벤트 리스너 등록
+   */
   private setupSocketListeners() {
     // Listen for incoming call invites
     io.on('call-invite', (data: {
@@ -60,7 +94,15 @@ class CallService {
     });
   }
 
-  // Initiate a call
+  /**
+   * 통화 시작
+   * @async
+   * @param {string} toUserId - 수신자 사용자 ID
+   * @param {string} toUserName - 수신자 이름
+   * @param {'video' | 'audio'} callType - 통화 유형
+   * @returns {Promise<void>}
+   * @description 새로운 통화를 시작하고 상대방에게 통화 초대 전송
+   */
   async initiateCall(
     toUserId: string,
     toUserName: string,
@@ -104,7 +146,16 @@ class CallService {
     }
   }
 
-  // Handle incoming call invite
+  /**
+   * 수신 통화 초대 처리
+   * @private
+   * @param {Object} data - 통화 초대 데이터
+   * @param {string} data.callId - 통화 ID
+   * @param {string} data.fromUserId - 발신자 ID
+   * @param {string} data.fromUserName - 발신자 이름
+   * @param {'video' | 'audio'} data.callType - 통화 유형
+   * @description 수신된 통화 초대를 처리하고 알림 표시
+   */
   private handleIncomingCallInvite(data: {
     callId: string;
     fromUserId: string;
@@ -146,7 +197,12 @@ class CallService {
     }, 30000);
   }
 
-  // Accept incoming call
+  /**
+   * 수신 통화 수락
+   * @async
+   * @returns {Promise<void>}
+   * @description 수신된 통화를 수락하고 연결 처리
+   */
   async acceptCall(): Promise<void> {
     const incomingCall = this.callState.incomingCall;
     if (!incomingCall) {
@@ -174,7 +230,10 @@ class CallService {
     }
   }
 
-  // Reject incoming call
+  /**
+   * 수신 통화 거절
+   * @description 수신된 통화를 거절하고 발신자에게 알림
+   */
   rejectCall() {
     const incomingCall = this.callState.incomingCall;
     if (!incomingCall) {
@@ -190,7 +249,10 @@ class CallService {
     this.clearIncomingCall();
   }
 
-  // Cancel outgoing call
+  /**
+   * 발신 통화 취소
+   * @description 발신한 통화를 취소하고 상대방에게 알림
+   */
   cancelCall() {
     const activeCall = this.callState.activeCall;
     if (!activeCall || this.callState.incomingCall) {
@@ -206,7 +268,10 @@ class CallService {
     this.endCall();
   }
 
-  // End active call
+  /**
+   * 활성 통화 종료
+   * @description 현재 진행 중인 통화를 종료하고 상태 초기화
+   */
   endCall() {
     this.callState.activeCall = null;
     this.callState.isInCall = false;
@@ -217,42 +282,74 @@ class CallService {
     }
   }
 
-  // Clear incoming call
+  /**
+   * 수신 통화 초기화
+   * @private
+   * @description 수신 통화 정보를 초기화하고 알림 제거
+   */
   private clearIncomingCall() {
     this.callState.incomingCall = null;
     notificationService.clearCallNotification();
   }
 
-  // Get call state
+  /**
+   * 통화 상태 가져오기
+   * @returns {CallState} 현재 통화 상태
+   * @description 현재 통화 상태의 복사본을 반환
+   */
   getCallState(): CallState {
     return { ...this.callState };
   }
 
-  // Check if in call
+  /**
+   * 통화 중 여부 확인
+   * @returns {boolean} 통화 중 여부
+   * @description 현재 통화 중인지 확인
+   */
   isInCall(): boolean {
     return this.callState.isInCall;
   }
 
-  // Get active call
+  /**
+   * 활성 통화 가져오기
+   * @returns {CallInvite | null} 활성 통화 정보
+   * @description 현재 진행 중인 통화 정보를 반환
+   */
   getActiveCall(): CallInvite | null {
     return this.callState.activeCall;
   }
 
-  // Get incoming call
+  /**
+   * 수신 통화 가져오기
+   * @returns {CallInvite | null} 수신 통화 정보
+   * @description 대기 중인 수신 통화 정보를 반환
+   */
   getIncomingCall(): CallInvite | null {
     return this.callState.incomingCall;
   }
 
-  // Event listeners
+  /**
+   * 수신 통화 이벤트 리스너 등록
+   * @param {Function} callback - 수신 통화 콜백
+   * @description 수신 통화가 있을 때 호출될 콜백 등록
+   */
   onIncomingCall(callback: (call: CallInvite) => void) {
     this.onIncomingCallCallback = callback;
   }
 
+  /**
+   * 통화 종료 이벤트 리스너 등록
+   * @param {Function} callback - 통화 종료 콜백
+   * @description 통화가 종료될 때 호출될 콜백 등록
+   */
   onCallEnd(callback: () => void) {
     this.onCallEndCallback = callback;
   }
 
-  // Cleanup
+  /**
+   * 리소스 정리
+   * @description 모든 통화를 종료하고 Socket 리스너 제거
+   */
   cleanup() {
     this.endCall();
     io.off('call-invite');
@@ -262,4 +359,9 @@ class CallService {
   }
 }
 
+/**
+ * 통화 서비스 싱글톤 인스턴스
+ * @constant {CallService}
+ * @description 앱 전체에서 사용할 통화 서비스 인스턴스
+ */
 export const callService = new CallService();
