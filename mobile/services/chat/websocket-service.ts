@@ -7,6 +7,16 @@ import io, { Socket } from 'socket.io-client';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Message, ChatRoom } from '@/types';
 
+/**
+ * 채팅 이벤트 인터페이스
+ * @interface ChatEvent
+ * @property {Function} message - 새 메시지 수신 이벤트
+ * @property {Function} messageRead - 메시지 읽음 상태 업데이트 이벤트
+ * @property {Function} typing - 타이핑 상태 이벤트
+ * @property {Function} userJoined - 사용자 참여 이벤트
+ * @property {Function} userLeft - 사용자 퇴장 이벤트
+ * @property {Function} error - 에러 이벤트
+ */
 export interface ChatEvent {
   message: (data: Message) => void;
   messageRead: (data: { messageId: string; readBy: string }) => void;
@@ -16,10 +26,19 @@ export interface ChatEvent {
   error: (error: string) => void;
 }
 
+/**
+ * WebSocket 서비스 클래스
+ * @class WebSocketService
+ * @description Socket.IO를 사용한 실시간 채팅 서비스 구현
+ */
 class WebSocketService {
+  /** Socket.IO 클라이언트 인스턴스 */
   private socket: Socket | null = null;
+  /** 연결 상태 */
   private isConnected = false;
+  /** 현재 사용자 ID */
   private currentUserId: string | null = null;
+  /** 이벤트 리스너 맵 */
   private eventListeners: Map<string, Set<Function>> = new Map();
 
   /**
@@ -332,5 +351,9 @@ class WebSocketService {
   }
 }
 
-// 싱글톤 인스턴스 생성
+/**
+ * WebSocket 서비스 싱글톤 인스턴스
+ * @constant {WebSocketService}
+ * @description 앱 전체에서 사용할 WebSocket 서비스 인스턴스
+ */
 export const webSocketService = new WebSocketService();

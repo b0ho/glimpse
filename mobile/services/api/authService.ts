@@ -1,7 +1,21 @@
 import { apiClient } from './apiClient';
 import { User } from '@shared/types';
 
+/**
+ * 인증 관련 API 서비스
+ * @namespace authService
+ * @description 사용자 프로필 업데이트 및 계정 관리 API
+ */
 export const authService = {
+  /**
+   * 프로필 업데이트
+   * @async
+   * @param {Object} data - 업데이트할 프로필 데이터
+   * @param {string} [data.nickname] - 닉네임
+   * @param {string} [data.bio] - 자기소개
+   * @param {number} [data.age] - 나이
+   * @returns {Promise<{success: boolean, data?: any, message?: string}>} 결과 객체
+   */
   updateProfile: async (data: { nickname?: string; bio?: string; age?: number }) => {
     try {
       const response = await apiClient.put('/users/profile', data);
@@ -17,6 +31,14 @@ export const authService = {
     }
   },
   
+  /**
+   * 계정 삭제
+   * @async
+   * @param {Object} data - 삭제 요청 데이터
+   * @param {string} [data.reason] - 탈퇴 사유
+   * @returns {Promise<{success: boolean, message: string}>} 결과 객체
+   * @description 사용자 계정을 비활성화하고 데이터를 삭제
+   */
   deleteAccount: async (data: { reason?: string }) => {
     try {
       const response = await apiClient.delete('/users/account', { data });
