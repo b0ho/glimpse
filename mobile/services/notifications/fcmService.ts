@@ -5,14 +5,32 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { notificationService } from './notification-service';
 import { navigationService } from '../navigation/navigationService';
 
+/** FCM 토큰 저장 키 */
 const FCM_TOKEN_KEY = '@glimpse_fcm_token';
 
+/**
+ * FCM 서비스 클래스
+ * @class FCMService
+ * @description Firebase Cloud Messaging을 통한 푸시 알림 관리
+ */
 class FCMService {
+  /** 싱글톤 인스턴스 */
   private static instance: FCMService;
+  /** FCM 토큰 */
   private fcmToken: string | null = null;
 
+  /**
+   * FCMService 생성자
+   * @private
+   * @constructor
+   */
   private constructor() {}
 
+  /**
+   * 싱글톤 인스턴스 가져오기
+   * @static
+   * @returns {FCMService} FCM 서비스 인스턴스
+   */
   static getInstance(): FCMService {
     if (!FCMService.instance) {
       FCMService.instance = new FCMService();
@@ -21,7 +39,10 @@ class FCMService {
   }
 
   /**
-   * Initialize FCM and request permissions
+   * FCM 초기화 및 권한 요청
+   * @async
+   * @returns {Promise<void>}
+   * @description FCM을 초기화하고 알림 권한을 요청하며 메시지 핸들러 설정
    */
   async initialize(): Promise<void> {
     try {
@@ -56,7 +77,10 @@ class FCMService {
   }
 
   /**
-   * Get FCM token and register it with the server
+   * FCM 토큰 가져오기 및 서버 등록
+   * @async
+   * @returns {Promise<void>}
+   * @description FCM 토큰을 가져와서 백엔드 서버에 등록
    */
   async getAndRegisterToken(): Promise<void> {
     try {
@@ -73,7 +97,11 @@ class FCMService {
   }
 
   /**
-   * Register FCM token with the server
+   * FCM 토큰 서버 등록
+   * @async
+   * @param {string} token - FCM 토큰
+   * @returns {Promise<void>}
+   * @description 토큰이 변경된 경우에만 서버에 등록
    */
   async registerToken(token: string): Promise<void> {
     try {
@@ -98,7 +126,10 @@ class FCMService {
   }
 
   /**
-   * Remove FCM token (on logout)
+   * FCM 토큰 제거 (로그아웃 시)
+   * @async
+   * @returns {Promise<void>}
+   * @description 서버에서 토큰을 제거하고 로컬 저장소에서도 삭제
    */
   async removeToken(): Promise<void> {
     try {
@@ -120,7 +151,9 @@ class FCMService {
   }
 
   /**
-   * Set up message handlers
+   * 메시지 핸들러 설정
+   * @private
+   * @description 포그라운드, 백그라운드, 알림 오픈 이벤트 핸들러 설정
    */
   private setupMessageHandlers(): void {
     // Handle foreground messages
@@ -169,7 +202,10 @@ class FCMService {
   }
 
   /**
-   * Handle notification open
+   * 알림 오픈 처리
+   * @private
+   * @param {any} remoteMessage - FCM 메시지 객체
+   * @description 알림 타입에 따라 적절한 화면으로 네비게이션
    */
   private handleNotificationOpen(remoteMessage: any): void {
     const data = remoteMessage.data;
@@ -223,7 +259,11 @@ class FCMService {
   }
 
   /**
-   * Update unread count (for badge)
+   * 읽지 않은 메시지 수 업데이트 (배지용)
+   * @private
+   * @async
+   * @returns {Promise<void>}
+   * @description 앱 배지에 표시될 읽지 않은 메시지 수 업데이트
    */
   private async updateUnreadCount(): Promise<void> {
     try {
@@ -236,7 +276,11 @@ class FCMService {
   }
 
   /**
-   * Subscribe to topic
+   * 토픽 구독
+   * @async
+   * @param {string} topic - 구독할 토픽명
+   * @returns {Promise<void>}
+   * @description FCM 토픽을 구독하여 그룹 메시지 수신
    */
   async subscribeToTopic(topic: string): Promise<void> {
     try {
@@ -248,7 +292,11 @@ class FCMService {
   }
 
   /**
-   * Unsubscribe from topic
+   * 토픽 구독 해제
+   * @async
+   * @param {string} topic - 구독 해제할 토픽명
+   * @returns {Promise<void>}
+   * @description FCM 토픽 구독을 해제
    */
   async unsubscribeFromTopic(topic: string): Promise<void> {
     try {
@@ -260,7 +308,10 @@ class FCMService {
   }
 
   /**
-   * Check if notifications are enabled
+   * 알림 활성화 상태 확인
+   * @async
+   * @returns {Promise<boolean>} 알림 활성화 여부
+   * @description 현재 알림 권한이 허용되어 있는지 확인
    */
   async areNotificationsEnabled(): Promise<boolean> {
     const authStatus = await messaging().hasPermission();
@@ -271,7 +322,10 @@ class FCMService {
   }
 
   /**
-   * Request notification permission
+   * 알림 권한 요청
+   * @async
+   * @returns {Promise<boolean>} 권한 허용 여부
+   * @description 사용자에게 알림 권한을 요청하고 결과 반환
    */
   async requestPermission(): Promise<boolean> {
     try {
@@ -293,4 +347,9 @@ class FCMService {
   }
 }
 
+/**
+ * FCM 서비스 싱글톤 인스턴스
+ * @constant {FCMService}
+ * @description 앱 전체에서 사용할 FCM 서비스 인스턴스
+ */
 export const fcmService = FCMService.getInstance();
