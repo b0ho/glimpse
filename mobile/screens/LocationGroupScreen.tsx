@@ -19,6 +19,17 @@ import { COLORS, FONTS, SIZES } from '../constants/theme';
 import { locationService } from '../services/locationService';
 // ContentItem 대신 직접 렌더링
 
+/**
+ * 위치 기반 그룹 인터페이스
+ * @interface LocationGroup
+ * @property {string} id - 그룹 ID
+ * @property {string} name - 그룹 이름
+ * @property {string} [description] - 그룹 설명
+ * @property {number} distance - 현재 위치로부터의 거리 (m)
+ * @property {string} address - 그룹 주소
+ * @property {Object} _count - 그룹 통계
+ * @property {Object} creator - 그룹 생성자 정보
+ */
 interface LocationGroup {
   id: string;
   name: string;
@@ -33,6 +44,12 @@ interface LocationGroup {
   };
 }
 
+/**
+ * 위치 기반 그룹 화면 컴포넌트
+ * @component
+ * @returns {JSX.Element} 위치 그룹 화면 UI
+ * @description GPS 기반 주변 그룹 탐색, QR 코드 스캔, 그룹 생성 기능을 제공하는 화면
+ */
 const LocationGroupScreen: React.FC = () => {
   const navigation = useNavigation();
   const [nearbyGroups, setNearbyGroups] = useState<LocationGroup[]>([]);
@@ -52,6 +69,11 @@ const LocationGroupScreen: React.FC = () => {
     checkPermissionsAndLoadGroups();
   }, []);
 
+  /**
+   * 권한 확인 및 그룹 로드
+   * @returns {Promise<void>}
+   * @description 위치 및 카메라 권한을 확인하고 주변 그룹을 로드
+   */
   const checkPermissionsAndLoadGroups = async () => {
     try {
       // 위치 권한 확인
@@ -74,6 +96,11 @@ const LocationGroupScreen: React.FC = () => {
     }
   };
 
+  /**
+   * 주변 그룹 로드
+   * @returns {Promise<void>}
+   * @description 5km 반경 내의 위치 기반 그룹을 가져오기
+   */
   const loadNearbyGroups = async () => {
     try {
       const groups = await locationService.getNearbyGroups(5); // 5km 반경
@@ -84,12 +111,23 @@ const LocationGroupScreen: React.FC = () => {
     }
   };
 
+  /**
+   * 새로고침 핸들러
+   * @returns {Promise<void>}
+   * @description Pull-to-refresh로 주변 그룹 목록을 다시 로드
+   */
   const handleRefresh = async () => {
     setRefreshing(true);
     await loadNearbyGroups();
     setRefreshing(false);
   };
 
+  /**
+   * 그룹 참여 핸들러
+   * @param {string} groupId - 참여할 그룹 ID
+   * @returns {Promise<void>}
+   * @description 선택한 위치 기반 그룹에 참여
+   */
   const handleJoinGroup = async (groupId: string) => {
     try {
       setLoading(true);
@@ -108,6 +146,14 @@ const LocationGroupScreen: React.FC = () => {
     }
   };
 
+  /**
+   * QR 코드 스캔 핸들러
+   * @param {Object} params - 스캔 데이터
+   * @param {string} params.type - 바코드 타입
+   * @param {string} params.data - QR 코드 데이터
+   * @returns {Promise<void>}
+   * @description QR 코드를 통해 그룹에 참여
+   */
   const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
     setScanning(false);
     
@@ -128,6 +174,11 @@ const LocationGroupScreen: React.FC = () => {
     }
   };
 
+  /**
+   * 그룹 생성 핸들러
+   * @returns {Promise<void>}
+   * @description 현재 위치에 새로운 위치 기반 그룹 생성
+   */
   const handleCreateGroup = async () => {
     if (!createForm.name.trim()) {
       Alert.alert('오류', '그룹 이름을 입력해주세요.');
@@ -169,6 +220,12 @@ const LocationGroupScreen: React.FC = () => {
     }
   };
 
+  /**
+   * 거리 포맷팅
+   * @param {number} meters - 미터 단위 거리
+   * @returns {string} 포맷팅된 거리 문자열
+   * @description 미터를 km 단위로 변환하여 표시
+   */
   const formatDistance = (meters: number): string => {
     if (meters < 1000) {
       return `${Math.round(meters)}m`;

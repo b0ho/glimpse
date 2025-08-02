@@ -16,7 +16,12 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { generateDummyMatches, dummyUserNicknames } from '@/utils/mockData';
 import { formatTimeAgo } from '@/utils/dateUtils';
 
-
+/**
+ * 매칭 화면 컴포넌트 - 서로 좋아요한 사용자 목록
+ * @component
+ * @returns {JSX.Element} 매칭 화면 UI
+ * @description 서로 좋아요를 보내 매칭된 사용자 목록을 표시하고 채팅을 시작할 수 있는 화면
+ */
 export const MatchesScreen: React.FC = React.memo(() => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,6 +30,11 @@ export const MatchesScreen: React.FC = React.memo(() => {
   const likeStore = useLikeStore();
   const { user } = useAuthStore();
 
+  /**
+   * 매칭 데이터 로드
+   * @effect
+   * @description 서버에서 매칭 목록을 가져와 표시
+   */
   useEffect(() => {
     const loadMatches = async () => {
       setIsLoading(true);
@@ -44,6 +54,12 @@ export const MatchesScreen: React.FC = React.memo(() => {
     loadMatches();
   }, [likeStore]);
 
+  /**
+   * 채팅 시작 핸들러
+   * @param {string} matchId - 매칭 ID
+   * @param {string} nickname - 상대방 닉네임
+   * @description 선택한 매칭과의 채팅 화면으로 이동
+   */
   const handleStartChat = (matchId: string, nickname: string) => {
     // 채팅 화면으로 네비게이션
     const roomId = `room_${matchId}`;
@@ -55,6 +71,13 @@ export const MatchesScreen: React.FC = React.memo(() => {
   };
 
 
+  /**
+   * 매칭 아이템 렌더링
+   * @param {Object} params - 리스트 아이템 파라미터
+   * @param {Match} params.item - 매칭 객체
+   * @returns {JSX.Element} 매칭 카드 UI
+   * @description 각 매칭의 정보와 채팅 시작 버튼을 표시
+   */
   const renderMatchItem = ({ item }: { item: Match }) => {
     const otherUserId = item.user1Id === user?.id ? item.user2Id : item.user1Id;
     
@@ -96,6 +119,11 @@ export const MatchesScreen: React.FC = React.memo(() => {
     );
   };
 
+  /**
+   * 헤더 렌더링
+   * @returns {JSX.Element} 헤더 UI
+   * @description 매칭 통계와 안내 메시지를 표시
+   */
   const renderHeader = () => (
     <View style={styles.header}>
       <Text style={styles.headerTitle}>매칭</Text>
@@ -113,6 +141,11 @@ export const MatchesScreen: React.FC = React.memo(() => {
     </View>
   );
 
+  /**
+   * 빈 상태 렌더링
+   * @returns {JSX.Element} 빈 상태 UI
+   * @description 매칭이 없을 때 표시되는 안내 UI
+   */
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>💕</Text>

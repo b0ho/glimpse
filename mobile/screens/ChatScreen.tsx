@@ -1,6 +1,8 @@
 /**
- * 채팅 화면
- * 실시간 메시징 및 채팅 기능 제공
+ * 채팅 화면 컴포넌트 - 실시간 메시징 및 채팅 기능
+ * @component  
+ * @returns {JSX.Element} 채팅 화면 UI
+ * @description 1:1 실시간 채팅, 메시지 암호화, 영상/음성 통화 기능을 제공하는 화면
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -27,6 +29,13 @@ import { useCall } from '@/providers/CallProvider';
 import { Message } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
+/**
+ * 채팅 화면 라우트 파라미터 타입
+ * @typedef {Object} ChatScreenParams
+ * @property {string} roomId - 채팅방 ID
+ * @property {string} matchId - 매칭 ID
+ * @property {string} otherUserNickname - 상대방 닉네임
+ */
 type ChatScreenRouteProp = RouteProp<{
   Chat: {
     roomId: string;
@@ -35,6 +44,11 @@ type ChatScreenRouteProp = RouteProp<{
   };
 }, 'Chat'>;
 
+/**
+ * 채팅 화면 컴포넌트
+ * @component
+ * @returns {JSX.Element} 채팅 화면 UI
+ */
 export const ChatScreen: React.FC = () => {
   const route = useRoute<ChatScreenRouteProp>();
   const navigation = useNavigation();
@@ -70,7 +84,11 @@ export const ChatScreen: React.FC = () => {
   const typingUsers = useChatStore(chatSelectors.getTypingUsers(roomId));
   const isOtherUserTyping = typingUsers.some(user => user.userId !== authStore.user?.id);
 
-  // 초기화
+  /**
+   * 채팅방 초기화 및 메시지 로드
+   * @effect
+   * @description WebSocket 연결, 채팅방 활성화, 메시지 로드를 처리
+   */
   useEffect(() => {
     const initChat = async () => {
       if (!authStore.user?.id || !authStore.token) {
@@ -107,7 +125,11 @@ export const ChatScreen: React.FC = () => {
     };
   }, [roomId, authStore.user?.id, authStore.token, isInitialized, activeRoomId, initializeChat, loadMessages, navigation, setActiveRoom]);
 
-  // 네비게이션 헤더 설정
+  /**
+   * 네비게이션 헤더 설정
+   * @effect
+   * @description 채팅방 제목, 통화 버튼 등 헤더 UI를 설정
+   */
   useEffect(() => {
     navigation.setOptions({
       title: otherUserNickname,
@@ -138,14 +160,24 @@ export const ChatScreen: React.FC = () => {
     });
   }, [navigation, otherUserNickname, isInCall]);
 
-  // 통화 시작 핸들러
+  /**
+   * 통화 시작 핸들러
+   * @param {'video' | 'audio'} callType - 통화 유형
+   * @description 영상 또는 음성 통화를 시작하는 함수
+   */
   const handleCall = useCallback((callType: 'video' | 'audio') => {
     // matchId에서 상대방 userId 추출 (실제로는 API에서 가져와야 함)
     const otherUserId = matchId; // 임시로 matchId 사용
     initiateCall(otherUserId, otherUserNickname, callType);
   }, [matchId, otherUserNickname, initiateCall]);
 
-  // 메시지 전송 핸들러
+  /**
+   * 메시지 전송 핸들러
+   * @param {string} content - 메시지 내용
+   * @param {'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY'} [type='TEXT'] - 메시지 유형
+   * @returns {Promise<void>}
+   * @description 메시지를 암호화하여 전송하고 UI를 업데이트하는 함수
+   */
   const handleSendMessage = useCallback(async (content: string, type?: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY') => {
     try {
       await sendMessage(roomId, content, type);
@@ -162,12 +194,20 @@ export const ChatScreen: React.FC = () => {
     }
   }, [roomId, sendMessage]);
 
-  // 타이핑 상태 변경 핸들러
+  /**
+   * 타이핑 상태 변경 핸들러
+   * @param {boolean} isTyping - 타이핑 여부
+   * @description 사용자의 타이핑 상태를 실시간으로 전달하는 함수
+   */
   const handleTypingStatusChange = useCallback((isTyping: boolean) => {
     setTypingStatus(roomId, isTyping);
   }, [roomId, setTypingStatus]);
 
-  // 메시지 길게 누르기 핸들러
+  /**
+   * 메시지 길게 누르기 핸들러
+   * @param {Message} message - 메시지 객체
+   * @description 메시지 복사, 삭제 등의 옵션을 제공하는 함수
+   */
   const handleMessageLongPress = useCallback((message: Message) => {
     Alert.alert(
       '메시지 옵션',
@@ -186,7 +226,11 @@ export const ChatScreen: React.FC = () => {
     );
   }, []);
 
-  // 더 많은 메시지 로드
+  /**
+   * 추가 메시지 로드 (페이지네이션)
+   * @returns {Promise<void>}
+   * @description 스크롤 시 이전 메시지를 추가로 로드하는 함수
+   */
   const loadMoreMessages = useCallback(async () => {
     if (isLoadingMore || isLoading) return;
 
@@ -202,7 +246,11 @@ export const ChatScreen: React.FC = () => {
     }
   }, [roomId, currentPage, isLoadingMore, isLoading, loadMessages]);
 
-  // 스크롤 이벤트 핸들러
+  /**
+   * 스크롤 이벤트 핸들러
+   * @param {Object} event - 스크롤 이벤트 객체
+   * @description 사용자의 스크롤 위치를 추적하여 자동 스크롤 여부를 결정
+   */
   const handleScroll = useCallback((event: {nativeEvent: {layoutMeasurement: {height: number}, contentOffset: {y: number}, contentSize: {height: number}}}) => {
     const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
     const paddingToBottom = 20;
@@ -210,7 +258,12 @@ export const ChatScreen: React.FC = () => {
       contentSize.height - paddingToBottom;
   }, []);
 
-  // 메시지 읽음 표시
+  /**
+   * 메시지 읽음 표시 핸들러
+   * @param {Object} params - 보이는 아이템 정보
+   * @param {Array<{item: Message}>} params.viewableItems - 화면에 보이는 메시지 목록
+   * @description 화면에 표시된 메시지를 읽음 처리하는 함수
+   */
   const handleViewableItemsChanged = useCallback(({ viewableItems }: {viewableItems: Array<{item: Message}>}) => {
     viewableItems.forEach((item: {item: Message}) => {
       const message: Message = item.item;
@@ -220,7 +273,13 @@ export const ChatScreen: React.FC = () => {
     });
   }, [authStore.user?.id, roomId, markMessageAsRead]);
 
-  // 메시지 아이템 렌더링
+  /**
+   * 메시지 아이템 렌더링
+   * @param {Object} params - 리스트 아이템 파라미터
+   * @param {Message} params.item - 메시지 객체
+   * @param {number} params.index - 메시지 인덱스
+   * @returns {JSX.Element} 메시지 버블 UI
+   */
   const renderMessageItem = ({ item, index }: { item: Message; index: number }) => {
     const isOwnMessage = item.senderId === authStore.user?.id;
     const previousMessage = index > 0 ? roomMessages[index - 1] : null;
@@ -240,7 +299,11 @@ export const ChatScreen: React.FC = () => {
     );
   };
 
-  // 리스트 헤더 (더 불러오기)
+  /**
+   * 리스트 헤더 렌더링
+   * @returns {JSX.Element | null} 로딩 인디케이터 UI
+   * @description 이전 메시지 로딩 상태를 표시
+   */
   const renderListHeader = () => {
     if (!isLoadingMore) return null;
 
@@ -252,7 +315,11 @@ export const ChatScreen: React.FC = () => {
     );
   };
 
-  // 리스트 푸터 (타이핑 인디케이터)
+  /**
+   * 리스트 푸터 렌더링
+   * @returns {JSX.Element} 타이핑 인디케이터 UI
+   * @description 상대방의 타이핑 상태를 표시
+   */
   const renderListFooter = () => {
     return (
       <TypingIndicator 
@@ -262,7 +329,11 @@ export const ChatScreen: React.FC = () => {
     );
   };
 
-  // 빈 상태 렌더링
+  /**
+   * 빈 상태 렌더링
+   * @returns {JSX.Element} 빈 상태 UI
+   * @description 메시지가 없을 때 표시되는 UI
+   */
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>💬</Text>
@@ -274,7 +345,11 @@ export const ChatScreen: React.FC = () => {
     </View>
   );
 
-  // 에러 처리
+  /**
+   * 에러 처리
+   * @effect
+   * @description 채팅 관련 에러를 사용자에게 알림
+   */
   useEffect(() => {
     if (error) {
       Alert.alert('오류', error, [

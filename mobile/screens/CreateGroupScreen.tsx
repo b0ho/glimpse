@@ -18,6 +18,17 @@ import { GroupType, Group } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { groupApi } from '@/services/api/groupApi';
 
+/**
+ * 그룹 생성 폼 데이터 인터페이스
+ * @interface GroupFormData
+ * @property {string} name - 그룹 이름
+ * @property {string} description - 그룹 설명
+ * @property {GroupType} type - 그룹 유형
+ * @property {number} minimumMembers - 최소 참여 인원
+ * @property {boolean} isPrivate - 비공개 여부
+ * @property {Object} [location] - 위치 정보 (장소 그룹의 경우)
+ * @property {Date} [expiresAt] - 만료 날짜 (이벤트 그룹의 경우)
+ */
 interface GroupFormData {
   name: string;
   description: string;
@@ -32,6 +43,12 @@ interface GroupFormData {
   expiresAt?: Date;
 }
 
+/**
+ * 그룹 생성 화면 컴포넌트
+ * @component
+ * @returns {JSX.Element} 그룹 생성 화면 UI
+ * @description 새로운 그룹을 생성하기 위한 폼 화면
+ */
 export const CreateGroupScreen: React.FC = () => {
   const [formData, setFormData] = useState<GroupFormData>({
     name: '',
@@ -48,6 +65,11 @@ export const CreateGroupScreen: React.FC = () => {
   const authStore = useAuthStore();
   const groupStore = useGroupStore();
 
+  /**
+   * 폼 유효성 검사
+   * @returns {boolean} 유효성 검사 통과 여부
+   * @description 그룹 생성 폼의 필수 필드와 제약 조건을 검사
+   */
   const validateForm = (): boolean => {
     const newErrors: Partial<GroupFormData> = {};
 
@@ -81,6 +103,11 @@ export const CreateGroupScreen: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  /**
+   * 그룹 생성 제출 핸들러
+   * @returns {Promise<void>}
+   * @description 폼 유효성 검사 후 API를 통해 그룹 생성
+   */
   const handleSubmit = async () => {
     if (!validateForm()) {
       Alert.alert('입력 오류', '모든 필드를 올바르게 입력해주세요.');
@@ -132,6 +159,11 @@ export const CreateGroupScreen: React.FC = () => {
     }
   };
 
+  /**
+   * 그룹 타입 선택기 렌더링
+   * @returns {JSX.Element | null} 그룹 타입 선택기 모달 UI
+   * @description 그룹 타입을 선택할 수 있는 모달을 표시
+   */
   const renderGroupTypePicker = () => {
     if (!showTypePicker) return null;
 
@@ -169,6 +201,12 @@ export const CreateGroupScreen: React.FC = () => {
     );
   };
 
+  /**
+   * 그룹 타입 이름 반환
+   * @param {GroupType} type - 그룹 타입
+   * @returns {string} 한글 그룹 타입명
+   * @description 그룹 타입을 한글 이름으로 변환
+   */
   const getGroupTypeName = (type: GroupType): string => {
     switch (type) {
       case GroupType.CREATED:

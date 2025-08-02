@@ -18,7 +18,12 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { generateDummyGroups } from '@/utils/mockData';
 import { ACTION_ICONS } from '@/utils/icons';
 
-
+/**
+ * 그룹 탐색 화면 컴포넌트 - 다양한 타입의 그룹 목록 표시
+ * @component
+ * @returns {JSX.Element} 그룹 목록 화면 UI
+ * @description 공식/생성/인스턴트/위치 기반 그룹을 탐색하고 참여할 수 있는 화면
+ */
 export const GroupsScreen: React.FC = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +32,12 @@ export const GroupsScreen: React.FC = () => {
   const navigation = useNavigation();
   const groupStore = useGroupStore();
 
-  // 그룹 로드 함수
+  /**
+   * 그룹 목록 로드
+   * @param {boolean} refresh - 새로고침 여부
+   * @returns {Promise<void>}
+   * @description 서버에서 그룹 목록을 가져와 표시하는 함수
+   */
   const loadGroups = useCallback(async (refresh = false) => {
     if (refresh) {
       setIsRefreshing(true);
@@ -49,7 +59,12 @@ export const GroupsScreen: React.FC = () => {
     }
   }, [groupStore]);
 
-  // 그룹 참여 함수
+  /**
+   * 그룹 참여 핸들러
+   * @param {Group} group - 참여할 그룹 객체
+   * @returns {Promise<void>}
+   * @description 성별 균형 및 참여 조건을 확인하고 그룹에 참여하는 함수
+   */
   const handleJoinGroup = useCallback(async (group: Group) => {
     // 이미 참여한 그룹인지 확인
     if (groupStore.isUserInGroup(group.id)) {
@@ -108,6 +123,12 @@ export const GroupsScreen: React.FC = () => {
     loadGroups();
   }, [loadGroups]);
 
+  /**
+   * 그룹 타입 아이콘 렌더링
+   * @param {GroupType} type - 그룹 타입
+   * @returns {string} 이모티콘 문자
+   * @description 그룹 타입에 따른 아이콘을 반환
+   */
   const renderGroupTypeIcon = (type: GroupType): string => {
     switch (type) {
       case GroupType.OFFICIAL:
@@ -123,6 +144,12 @@ export const GroupsScreen: React.FC = () => {
     }
   };
 
+  /**
+   * 그룹 타입 이름 렌더링
+   * @param {GroupType} type - 그룹 타입
+   * @returns {string} 한글 그룹 타입명
+   * @description 그룹 타입을 한글 이름으로 변환
+   */
   const renderGroupTypeName = (type: GroupType): string => {
     switch (type) {
       case GroupType.OFFICIAL:
@@ -138,6 +165,13 @@ export const GroupsScreen: React.FC = () => {
     }
   };
 
+  /**
+   * 그룹 아이템 렌더링
+   * @param {Object} params - 리스트 아이템 파라미터
+   * @param {Group} params.item - 그룹 객체
+   * @returns {JSX.Element} 그룹 카드 UI
+   * @description 각 그룹의 정보를 카드 형태로 표시
+   */
   const renderGroupItem = ({ item }: { item: Group }) => (
     <View style={styles.groupItem}>
       <View style={styles.groupHeader}>
@@ -211,6 +245,11 @@ export const GroupsScreen: React.FC = () => {
     </View>
   );
 
+  /**
+   * 헤더 렌더링
+   * @returns {JSX.Element} 헤더 UI
+   * @description 그룹 탐색 화면의 헤더 영역
+   */
   const renderHeader = () => (
     <View style={styles.header}>
       <Text style={styles.headerTitle}>그룹 탐색</Text>
@@ -225,6 +264,11 @@ export const GroupsScreen: React.FC = () => {
     </View>
   );
 
+  /**
+   * 빈 상태 렌더링
+   * @returns {JSX.Element} 빈 상태 UI
+   * @description 그룹이 없을 때 표시되는 UI
+   */
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>🔍</Text>

@@ -19,6 +19,12 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { EditNicknameModal } from '@/components/modals/EditNicknameModal';
 import { AppMode, MODE_TEXTS } from '@shared/types';
 
+/**
+ * 프로필 화면 컴포넌트 - 사용자 정보 및 설정 관리
+ * @component
+ * @returns {JSX.Element} 프로필 화면 UI
+ * @description 사용자 프로필, 통계, 프리미엄 상태, 설정 기능을 제공하는 화면
+ */
 export const ProfileScreen: React.FC = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isNicknameModalVisible, setIsNicknameModalVisible] = useState(false);
@@ -34,6 +40,10 @@ export const ProfileScreen: React.FC = () => {
   const currentMode = authStore.currentMode || AppMode.DATING;
   const modeTexts = MODE_TEXTS[currentMode];
 
+  /**
+   * 로그아웃 핸들러
+   * @description Clerk 로그아웃 및 로컬 상태 초기화를 처리
+   */
   const handleSignOut = () => {
     Alert.alert(
       '로그아웃',
@@ -61,14 +71,27 @@ export const ProfileScreen: React.FC = () => {
     );
   };
 
+  /**
+   * 닉네임 편집 핸들러
+   * @description 닉네임 편집 모달을 표시
+   */
   const handleEditNickname = () => {
     setIsNicknameModalVisible(true);
   };
 
+  /**
+   * 계정 삭제 핸들러
+   * @description 계정 삭제 화면으로 이동
+   */
   const handleDeleteAccount = () => {
     navigation.navigate('DeleteAccount' as never);
   };
 
+  /**
+   * 좋아요 되돌리기 핸들러
+   * @returns {Promise<void>}
+   * @description 프리미엄 기능으로 마지막 좋아요를 취소하는 함수
+   */
   const handleRewindLike = async () => {
     const lastLike = likeStore.getLastLike();
     if (!lastLike) {
@@ -107,6 +130,11 @@ export const ProfileScreen: React.FC = () => {
     );
   };
 
+  /**
+   * 프로필 섹션 렌더링
+   * @returns {JSX.Element} 프로필 정보 UI
+   * @description 사용자 닉네임, ID, 가입일 등을 표시
+   */
   const renderProfileSection = () => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>프로필 정보</Text>
@@ -142,6 +170,11 @@ export const ProfileScreen: React.FC = () => {
     </View>
   );
 
+  /**
+   * 프리미엄 섹션 렌더링
+   * @returns {JSX.Element} 프리미엄 상태 UI
+   * @description 프리미엄 구독 상태와 혜택을 표시
+   */
   const renderPremiumSection = () => (
     <View style={styles.section}>
       <TouchableOpacity
@@ -189,6 +222,11 @@ export const ProfileScreen: React.FC = () => {
     </View>
   );
 
+  /**
+   * 통계 섹션 렌더링
+   * @returns {JSX.Element} 활동 통계 UI
+   * @description 참여 그룹, 좋아요, 매칭 통계를 표시
+   */
   const renderStatsSection = () => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>활동 통계</Text>
@@ -217,6 +255,11 @@ export const ProfileScreen: React.FC = () => {
     </View>
   );
 
+  /**
+   * 좋아요 시스템 섹션 렌더링
+   * @returns {JSX.Element} 좋아요 시스템 UI
+   * @description 일일 좋아요, 프리미엄 좋아요 현황을 표시
+   */
   const renderLikeSystemSection = () => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>좋아요 시스템</Text>
@@ -288,6 +331,11 @@ export const ProfileScreen: React.FC = () => {
     </View>
   );
 
+  /**
+   * 설정 섹션 렌더링
+   * @returns {JSX.Element} 설정 메뉴 UI
+   * @description 각종 설정 및 관리 메뉴를 표시
+   */
   const renderSettingsSection = () => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>설정</Text>
@@ -377,6 +425,11 @@ export const ProfileScreen: React.FC = () => {
     </View>
   );
 
+  /**
+   * 위험 섹션 렌더링
+   * @returns {JSX.Element} 로그아웃/계정 삭제 UI
+   * @description 로그아웃 및 계정 삭제 버튼을 표시
+   */
   const renderDangerSection = () => (
     <View style={styles.section}>
       <TouchableOpacity

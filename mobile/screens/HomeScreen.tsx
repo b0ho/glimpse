@@ -24,7 +24,12 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { generateDummyContent } from '@/utils/mockData';
 import { ACTION_ICONS } from '@/utils/icons';
 
-
+/**
+ * 홈 스크린 컴포넌트 - 메인 피드 및 스토리 표시
+ * @component
+ * @returns {JSX.Element} 홈 스크린 UI
+ * @description 사용자의 메인 피드, 스토리, 좋아요 기능을 제공하는 홈 화면
+ */
 export const HomeScreen: React.FC = () => {
   const [contents, setContents] = useState<Content[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +46,13 @@ export const HomeScreen: React.FC = () => {
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
 
-  // 좋아요 토글 함수
+  /**
+   * 좋아요 토글 핸들러
+   * @param {string} contentId - 콘텐츠 ID
+   * @param {string} authorId - 작성자 ID
+   * @returns {Promise<void>}
+   * @description 콘텐츠에 좋아요를 보내거나 취소하는 함수
+   */
   const handleLikeToggle = useCallback(async (contentId: string, authorId: string) => {
     const content = contents.find(c => c.id === contentId);
     if (!content) return;
@@ -103,7 +114,11 @@ export const HomeScreen: React.FC = () => {
     }
   }, [contents, authStore.user?.id, likeStore]);
 
-  // 스토리 로드
+  /**
+   * 스토리 목록 로드
+   * @returns {Promise<void>}
+   * @description 피드에 표시할 스토리 목록을 가져오는 함수
+   */
   const loadStories = useCallback(async () => {
     try {
       setStoriesLoading(true);
@@ -136,18 +151,30 @@ export const HomeScreen: React.FC = () => {
     }
   }, [authStore.user]);
 
-  // 스토리 보기 핸들러
+  /**
+   * 스토리 선택 핸들러
+   * @param {number} index - 선택된 스토리 인덱스
+   * @description 스토리를 선택하여 뷰어를 여는 함수
+   */
   const handleStoryPress = useCallback((index: number) => {
     setSelectedStoryIndex(index);
     setShowStoryViewer(true);
   }, []);
 
-  // 스토리 추가 핸들러
+  /**
+   * 스토리 추가 핸들러
+   * @description 새 스토리 업로드 화면으로 이동하는 함수
+   */
   const handleAddStoryPress = useCallback(() => {
     navigation.navigate('StoryUpload');
   }, [navigation]);
 
-  // 스토리 조회 핸들러
+  /**
+   * 스토리 조회 처리 핸들러
+   * @param {string} storyId - 스토리 ID
+   * @returns {Promise<void>}
+   * @description 스토리를 조회 처리하는 함수
+   */
   const handleViewStory = useCallback(async (storyId: string) => {
     try {
       await storyService.viewStory(storyId);
@@ -156,7 +183,12 @@ export const HomeScreen: React.FC = () => {
     }
   }, []);
 
-  // 콘텐츠 로드 함수 (실제로는 API 호출)
+  /**
+   * 콘텐츠 목록 로드
+   * @param {boolean} refresh - 새로고침 여부
+   * @returns {Promise<void>}
+   * @description 피드에 표시할 콘텐츠 목록을 가져오는 함수
+   */
   const loadContents = useCallback(async (refresh = false) => {
     if (refresh) {
       setIsRefreshing(true);
@@ -185,7 +217,11 @@ export const HomeScreen: React.FC = () => {
     }
   }, []);
 
-  // 더 많은 콘텐츠 로드 (무한 스크롤)
+  /**
+   * 추가 콘텐츠 로드 (무한 스크롤)
+   * @returns {Promise<void>}
+   * @description 스크롤 끝에 도달했을 때 추가 콘텐츠를 로드하는 함수
+   */
   const loadMoreContents = useCallback(async () => {
     if (!hasMoreData || isLoading) return;
 
@@ -204,6 +240,11 @@ export const HomeScreen: React.FC = () => {
     loadStories();
   }, [loadContents, loadStories]);
 
+  /**
+   * 헤더 렌더링
+   * @returns {JSX.Element} 헤더 UI
+   * @description 앱 타이틀, 사용자 정보, 통계를 표시하는 헤더
+   */
   const renderHeader = () => (
     <View style={styles.header}>
       <Text style={styles.headerTitle}>Glimpse</Text>
@@ -231,6 +272,12 @@ export const HomeScreen: React.FC = () => {
     </View>
   );
 
+  /**
+   * 콘텐츠 아이템 렌더링
+   * @param {Object} params - 리스트 아이템 파라미터
+   * @param {Content} params.item - 콘텐츠 객체
+   * @returns {JSX.Element} 콘텐츠 아이템 UI
+   */
   const renderContentItem = ({ item }: { item: Content }) => (
     <ContentItem
       item={item}
@@ -240,6 +287,11 @@ export const HomeScreen: React.FC = () => {
     />
   );
 
+  /**
+   * 빈 상태 렌더링
+   * @returns {JSX.Element} 빈 상태 UI
+   * @description 콘텐츠가 없을 때 표시되는 UI
+   */
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>📱</Text>
@@ -250,6 +302,11 @@ export const HomeScreen: React.FC = () => {
     </View>
   );
 
+  /**
+   * 풋터 렌더링
+   * @returns {JSX.Element | null} 풋터 UI
+   * @description 무한 스크롤 로딩 표시
+   */
   const renderFooter = () => {
     if (!hasMoreData) return null;
     

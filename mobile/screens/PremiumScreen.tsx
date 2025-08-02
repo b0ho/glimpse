@@ -1,6 +1,8 @@
 /**
- * 프리미엄 구독 화면
- * 요금제 선택 및 결제 처리
+ * 프리미엄 구독 화면 컴포넌트 - 요금제 선택 및 결제
+ * @component
+ * @returns {JSX.Element} 프리미엄 화면 UI
+ * @description 프리미엄 구독 플랫8, 좋아요 패키지 선택 및 Stripe 결제를 처리하는 화면
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -24,6 +26,11 @@ import { PaymentProduct, PremiumPlan, premiumService } from '@/services/payment/
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { STATE_ICONS, UI_ICONS } from '@/utils/icons';
 
+/**
+ * 프리미엄 화면 컴포넌트
+ * @component
+ * @returns {JSX.Element} 프리미엄 화면 UI
+ */
 export const PremiumScreen: React.FC = () => {
   const navigation = useNavigation();
   const { user } = useUser();
@@ -45,7 +52,11 @@ export const PremiumScreen: React.FC = () => {
   const currentPlan = usePremiumStore(premiumSelectors.getCurrentPlan());
   const daysUntilExpiry = usePremiumStore(premiumSelectors.getDaysUntilExpiry());
 
-  // 초기 데이터 로드
+  /**
+   * 초기 데이터 로드
+   * @effect
+   * @description 결제 상품 및 현재 구독 상태를 로드
+   */
   useEffect(() => {
     if (user?.id) {
       loadData();
@@ -53,6 +64,11 @@ export const PremiumScreen: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  /**
+   * 데이터 로드 함수
+   * @returns {Promise<void>}
+   * @description 결제 상품 및 구독 정보를 서버에서 가져오기
+   */
   const loadData = useCallback(async () => {
     try {
       loadPaymentProducts();
@@ -64,14 +80,22 @@ export const PremiumScreen: React.FC = () => {
     }
   }, [user?.id, loadSubscription, loadPaymentProducts]);
 
-  // 새로고침
+  /**
+   * 새로고침 핸들러
+   * @returns {Promise<void>}
+   * @description Pull-to-refresh로 데이터를 다시 로드
+   */
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
   }, [loadData]);
 
-  // 상품 선택
+  /**
+   * 상품 선택 핸들러
+   * @param {string} productId - 선택한 상품 ID
+   * @description 선택한 상품으로 결제 모달을 표시
+   */
   const handleProductSelect = (productId: string) => {
     const product = paymentProducts.find(p => p.id === productId);
     if (product) {
@@ -80,14 +104,21 @@ export const PremiumScreen: React.FC = () => {
     }
   };
 
-  // 결제 성공 처리
+  /**
+   * 결제 성공 핸들러
+   * @returns {Promise<void>}
+   * @description 결제 성공 후 구독 상태를 업데이트
+   */
   const handlePaymentSuccess = useCallback(async () => {
     if (user?.id) {
       await loadSubscription(user.id);
     }
   }, [user?.id, loadSubscription]);
 
-  // 구독 취소
+  /**
+   * 구독 취소 핸들러
+   * @description 프리미엄 구독을 취소하고 기간 만료 후 해지 처리
+   */
   const handleCancelSubscription = () => {
     if (!user?.id) return;
 
@@ -112,7 +143,11 @@ export const PremiumScreen: React.FC = () => {
     );
   };
 
-  // 에러 처리
+  /**
+   * 에러 처리
+   * @effect
+   * @description 결제 및 구독 관련 에러를 사용자에게 표시
+   */
   const error = usePremiumStore(state => state.error);
   useEffect(() => {
     if (error) {
@@ -125,7 +160,11 @@ export const PremiumScreen: React.FC = () => {
     }
   }, [error, clearError]);
 
-  // 현재 구독 상태 렌더링
+  /**
+   * 현재 구독 상태 렌더링
+   * @returns {JSX.Element | null} 구독 상태 UI
+   * @description 활성 프리미엄 구독 정보를 표시
+   */
   const renderCurrentSubscription = () => {
     if (!isPremiumUser) return null;
 
@@ -171,7 +210,11 @@ export const PremiumScreen: React.FC = () => {
     );
   };
 
-  // 구독 플랜 렌더링
+  /**
+   * 구독 플랜 렌더링
+   * @returns {JSX.Element} 구독 플랜 UI
+   * @description 월간/연간 프리미엄 구독 플랜을 표시
+   */
   const renderSubscriptionPlans = () => {
     const subscriptionProducts = paymentProducts.filter(p => p.type === 'subscription');
 
@@ -196,7 +239,11 @@ export const PremiumScreen: React.FC = () => {
     );
   };
 
-  // 좋아요 패키지 렌더링
+  /**
+   * 좋아요 패키지 렌더링
+   * @returns {JSX.Element} 좋아요 패키지 UI
+   * @description 일회성 좋아요 구매 패키지를 표시
+   */
   const renderLikePackages = () => {
     const likeProducts = paymentProducts.filter(p => p.type === 'one_time');
 
@@ -227,7 +274,11 @@ export const PremiumScreen: React.FC = () => {
     );
   };
 
-  // 헤더 렌더링
+  /**
+   * 헤더 렌더링
+   * @returns {JSX.Element} 헤더 UI
+   * @description 네비게이션 헤더를 표시
+   */
   const renderHeader = () => (
     <View style={styles.header}>
       <TouchableOpacity
@@ -245,7 +296,11 @@ export const PremiumScreen: React.FC = () => {
     </View>
   );
 
-  // FAQ 섹션
+  /**
+   * FAQ 섹션 렌더링
+   * @returns {JSX.Element} FAQ UI
+   * @description 자주 묻는 질문과 답변을 표시
+   */
   const renderFAQ = () => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>자주 묻는 질문</Text>
