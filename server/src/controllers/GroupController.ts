@@ -143,7 +143,7 @@ export class GroupController {
         throw createError(401, '사용자 ID를 찾을 수 없습니다.');
       }
 
-      const inviteLink = await groupService.generateInviteLink(groupId, userId);
+      const inviteLink = await groupService.generateInviteLink(groupId, userId!);
 
       res.json({
         success: true,
@@ -173,7 +173,7 @@ export class GroupController {
         throw createError(401, '사용자 ID를 찾을 수 없습니다.');
       }
 
-      const result = await groupService.joinGroupByInvite(inviteCode, userId);
+      const result = await groupService.joinGroupByInvite(inviteCode, userId!);
 
       res.json({
         success: true,
@@ -203,7 +203,7 @@ export class GroupController {
         throw createError(401, '사용자 ID를 찾을 수 없습니다.');
       }
 
-      const invites = await groupService.getGroupInvites(groupId, userId);
+      const invites = await groupService.getGroupInvites(groupId, userId!);
 
       res.json({
         success: true,
@@ -233,7 +233,7 @@ export class GroupController {
         throw createError(401, '사용자 ID를 찾을 수 없습니다.');
       }
 
-      await groupService.revokeInvite(inviteId, userId);
+      await groupService.revokeInvite(inviteId, userId!);
 
       res.json({
         success: true,
@@ -873,7 +873,7 @@ export class GroupController {
         throw createError(401, '사용자 ID를 찾을 수 없습니다.');
       }
 
-      const pendingMembers = await groupService.getPendingMembers(groupId, userId);
+      const pendingMembers = await groupService.getPendingMembers(groupId, userId!);
 
       res.json({
         success: true,
@@ -903,7 +903,7 @@ export class GroupController {
         throw createError(401, '사용자 ID를 찾을 수 없습니다.');
       }
 
-      const result = await groupService.approveMember(groupId, targetUserId, adminUserId);
+      const result = await groupService.approveMember(groupId, targetUserId, adminUserId!);
 
       res.json({
         success: true,
@@ -935,7 +935,7 @@ export class GroupController {
         throw createError(401, '사용자 ID를 찾을 수 없습니다.');
       }
 
-      await groupService.rejectMember(groupId, targetUserId, adminUserId, reason);
+      await groupService.rejectMember(groupId, targetUserId, adminUserId!, reason);
 
       res.json({
         success: true,

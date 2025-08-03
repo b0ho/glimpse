@@ -225,7 +225,7 @@ export class TossPayProvider implements PaymentProvider {
         paymentStatus = 'REFUNDED';
         break;
       case 'PARTIAL_CANCELED':
-        paymentStatus = 'PARTIALLY_REFUNDED';
+        paymentStatus = 'REFUNDED'; // Treat partial refunds as full refunds
         break;
       case 'EXPIRED':
       case 'ABORTED':
@@ -253,7 +253,7 @@ export class TossPayProvider implements PaymentProvider {
     const packageType = (payment.metadata as any)?.packageType;
     
     switch (payment.type) {
-      case 'CREDIT_PURCHASE':
+      case 'LIKE_CREDITS':
         return `Glimpse 크레딧 ${packageType || ''}`;
       case 'PREMIUM_SUBSCRIPTION':
         return `Glimpse 프리미엄 ${packageType || '구독'}`;

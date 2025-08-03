@@ -4,7 +4,7 @@
 
 export const formatDate = (date: Date | string): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toISOString().split('T')[0];
+  return d.toISOString().split('T')[0] || '';
 };
 
 export const formatDateTime = (date: Date | string): string => {
@@ -75,5 +75,5 @@ export const getDaysBetween = (date1: Date | string, date2: Date | string): numb
 export const getKoreanDayOfWeek = (date: Date | string): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
   const days = ['일', '월', '화', '수', '목', '금', '토'];
-  return days[d.getDay()];
+  return days[d.getDay()] || '';
 };

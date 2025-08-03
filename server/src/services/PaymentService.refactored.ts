@@ -295,7 +295,7 @@ export class PaymentService {
         });
 
         // Update payment status
-        const newStatus = refundAmount === payment.amount ? 'REFUNDED' : 'PARTIALLY_REFUNDED';
+        const newStatus = 'REFUNDED'; // Treat all refunds as full refunds
         await prisma.payment.update({
           where: { id: paymentId },
           data: { status: newStatus }
@@ -399,7 +399,7 @@ export class PaymentService {
    */
   private async handlePaymentCompletion(payment: Payment): Promise<void> {
     switch (payment.type) {
-      case 'CREDIT_PURCHASE':
+      case 'LIKE_CREDITS':
         await this.handleCreditPurchase(payment);
         break;
       case 'PREMIUM_SUBSCRIPTION':
@@ -482,7 +482,7 @@ export class PaymentService {
   private async handleRefundCompletion(payment: Payment, refundAmount: number): Promise<void> {
     // Handle based on payment type
     switch (payment.type) {
-      case 'CREDIT_PURCHASE':
+      case 'LIKE_CREDITS':
         // Calculate credits to remove (proportional to refund amount)
         const packageType = (payment.metadata as any)?.packageType;
         const totalCredits = PaymentValidator.getCreditsFromPackage(packageType);

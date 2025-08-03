@@ -204,7 +204,7 @@ export class StripeProvider implements PaymentProvider {
       case 'charge.refunded':
         const refundedCharge = event.data.object as Stripe.Charge;
         paymentId = refundedCharge.metadata!.paymentId;
-        status = refundedCharge.amount_refunded === refundedCharge.amount ? 'REFUNDED' : 'PARTIALLY_REFUNDED';
+        status = 'REFUNDED'; // Treat all refunds as full refunds
         break;
         
       default:
@@ -229,7 +229,7 @@ export class StripeProvider implements PaymentProvider {
     const packageType = (payment.metadata as any)?.packageType;
     
     switch (payment.type) {
-      case 'CREDIT_PURCHASE':
+      case 'LIKE_CREDITS':
         return `Glimpse Credits ${packageType || ''}`;
       case 'PREMIUM_SUBSCRIPTION':
         return `Glimpse Premium ${packageType || 'Subscription'}`;
@@ -247,7 +247,7 @@ export class StripeProvider implements PaymentProvider {
    */
   private getProductDescription(payment: Payment): string {
     switch (payment.type) {
-      case 'CREDIT_PURCHASE':
+      case 'LIKE_CREDITS':
         return '좋아요를 보낼 수 있는 크레딧';
       case 'PREMIUM_SUBSCRIPTION':
         return '무제한 좋아요 및 프리미엄 기능';

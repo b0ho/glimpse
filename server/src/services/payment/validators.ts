@@ -63,7 +63,7 @@ export class PaymentValidator {
    * @description 크레딧 구매와 프리미엄 구독의 패키지 유형을 검증합니다.
    */
   static validatePackageType(type: PaymentType, packageType?: string): void {
-    if (type === 'CREDIT_PURCHASE') {
+    if (type === 'LIKE_CREDITS') {
       const validPackages = ['5_credits', '10_credits', '20_credits', '50_credits', '100_credits'];
       if (!packageType || !validPackages.includes(packageType)) {
         throw createError(400, '유효하지 않은 크레딧 패키지입니다.');

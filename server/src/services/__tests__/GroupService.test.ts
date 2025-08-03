@@ -18,8 +18,10 @@ describe('GroupService', () => {
         name: 'Test Group',
         description: 'A test group',
         type: 'CREATED' as const,
-        maxMembers: 50,
-        minGenderBalance: 0.3,
+        settings: {
+          maxMembers: 50,
+          minGenderBalance: 0.3,
+        }
       };
 
       const mockGroup = createMockGroup({
@@ -29,7 +31,10 @@ describe('GroupService', () => {
 
       prismaMock.group.create.mockResolvedValue(mockGroup as any);
 
-      const result = await groupService.createGroup(userId, groupData);
+      const result = await groupService.createGroup({
+        ...groupData,
+        creatorId: userId
+      });
 
       expect(result).toEqual(mockGroup);
       expect(prismaMock.group.create).toHaveBeenCalledWith({
@@ -57,10 +62,14 @@ describe('GroupService', () => {
       const groupData = {
         name: 'a',
         type: 'CREATED' as const,
+        settings: {}
       };
 
       await expect(
-        groupService.createGroup('user-1', groupData)
+        groupService.createGroup({
+          ...groupData,
+          creatorId: 'user-1'
+        })
       ).rejects.toThrow('그룹 이름은 2자 이상이어야 합니다.');
     });
   });
@@ -77,7 +86,7 @@ describe('GroupService', () => {
 
       prismaMock.group.findUnique.mockResolvedValue(mockGroup as any);
 
-      const result = await groupService.getGroupById('group-1');
+      const result = await groupService.getGroupById('group-1', 'user-1');
 
       expect(result).toEqual(mockGroup);
       expect(prismaMock.group.findUnique).toHaveBeenCalledWith({
@@ -98,7 +107,7 @@ describe('GroupService', () => {
     it('should return null for non-existent group', async () => {
       prismaMock.group.findUnique.mockResolvedValue(null);
 
-      const result = await groupService.getGroupById('non-existent');
+      const result = await groupService.getGroupById('non-existent', 'user-1');
 
       expect(result).toBeNull();
     });

@@ -90,7 +90,7 @@ export const maskPhoneNumber = (phone: string): string => {
 export const maskEmail = (email: string): string => {
   const [localPart, domain] = email.split('@');
   
-  if (!domain) {
+  if (!domain || !localPart) {
     return maskData(email, 3);
   }
   

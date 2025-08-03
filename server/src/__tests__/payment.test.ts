@@ -207,7 +207,7 @@ describe('Payment API', () => {
       const mockPayments = [
         {
           id: 'payment-1',
-          type: 'CREDIT_PURCHASE',
+          type: 'LIKE_CREDITS',
           amount: 2500,
           credits: 5,
           status: 'COMPLETED',
@@ -287,7 +287,7 @@ describe('Payment API', () => {
             object: {
               metadata: {
                 userId: 'test-user-id',
-                type: 'CREDIT_PURCHASE',
+                type: 'LIKE_CREDITS',
                 package: 'SMALL'
               }
             }

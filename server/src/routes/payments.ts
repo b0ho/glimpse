@@ -63,7 +63,8 @@ router.post('/retry/:paymentId', authMiddleware, idempotent(), async (req, res, 
     
     const result = await paymentRetryService.processPaymentWithRetry(
       paymentId,
-      userId
+      userId,
+      {} // Empty payment data for retry
     );
     
     res.json(result);

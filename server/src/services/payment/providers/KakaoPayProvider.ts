@@ -220,7 +220,7 @@ export class KakaoPayProvider implements PaymentProvider {
         paymentStatus = 'COMPLETED';
         break;
       case 'CANCEL':
-        paymentStatus = 'CANCELLED';
+        paymentStatus = 'FAILED'; // Treat cancellation as failure
         break;
       case 'FAIL':
         paymentStatus = 'FAILED';
@@ -247,7 +247,7 @@ export class KakaoPayProvider implements PaymentProvider {
     const packageType = (payment.metadata as any)?.packageType;
     
     switch (payment.type) {
-      case 'CREDIT_PURCHASE':
+      case 'LIKE_CREDITS':
         return `Glimpse 크레딧 ${packageType || ''}`;
       case 'PREMIUM_SUBSCRIPTION':
         return `Glimpse 프리미엄 ${packageType || '구독'}`;
