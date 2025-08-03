@@ -1,11 +1,15 @@
+/**
+ * @module GroupService
+ * @description 그룹 생성, 관리, 멤버십 처리를 담당하는 서비스
+ * 회사/대학 공식 그룹, 사용자 생성 그룹, 위치 기반 그룹 등을 관리합니다.
+ */
+
 import { GroupType } from '@prisma/client';
 import { prisma } from '../config/database';
 import { createError } from '../middleware/errorHandler';
 import { contentFilterService } from './ContentFilterService';
 import { GROUP_CONFIG } from '@shared/constants';
 import { generateId } from '@shared/utils';
-
-
 
 /**
  * 그룹 생성 데이터 인터페이스
@@ -46,14 +50,19 @@ interface GetGroupsOptions {
 }
 
 /**
- * 그룹 관리 서비스
+ * 그룹 관리 서비스 클래스
  * @class GroupService
+ * @description 그룹 생성, 조회, 수정, 삭제 및 멤버 관리 기능을 제공합니다.
+ * 그룹 타입별 특수 로직과 매칭 활성화 조건을 처리합니다.
  */
 export class GroupService {
   /**
    * 그룹 목록 조회
+   * @async
    * @param {GetGroupsOptions} options - 조회 옵션
-   * @returns {Promise<Array>} 그룹 목록
+   * @returns {Promise<Array>} 그룹 목록 및 멤버 정보
+   * @description 사용자가 접근 가능한 그룹 목록을 조회합니다.
+   * 타입별 필터링, 검색, 페이지네이션을 지원합니다.
    */
   async getGroups(options: GetGroupsOptions) {
     const { userId, type, search, page, limit } = options;
@@ -117,9 +126,12 @@ export class GroupService {
 
   /**
    * 그룹 생성
+   * @async
    * @param {CreateGroupData} data - 그룹 생성 데이터
-   * @returns {Promise<Object>} 생성된 그룹
+   * @returns {Promise<Object>} 생성된 그룹 정보
    * @throws {Error} 부적절한 내용이나 위치 정보 누락 시
+   * @description 새로운 그룹을 생성하고 생성자를 관리자로 지정합니다.
+   * 그룹 이름과 설명을 필터링하여 부적절한 내용을 차단합니다.
    */
   async createGroup(data: CreateGroupData) {
     const { name, description, type, settings, location, companyId, creatorId } = data;
@@ -177,9 +189,12 @@ export class GroupService {
 
   /**
    * ID로 그룹 상세 정보 조회
+   * @async
    * @param {string} groupId - 그룹 ID
    * @param {string} userId - 요청 사용자 ID
-   * @returns {Promise<Object|null>} 그룹 상세 정보
+   * @returns {Promise<Object|null>} 그룹 상세 정보 및 멤버 수
+   * @description 그룹의 상세 정보와 현재 사용자의 멤버 상태를 포함하여 반환합니다.
+   * 비활성화된 그룹은 null을 반환합니다.
    */
   async getGroupById(groupId: string, userId: string) {
     const group = await prisma.group.findUnique({
@@ -237,10 +252,13 @@ export class GroupService {
 
   /**
    * 그룹 초대 링크 생성
+   * @async
    * @param {string} groupId - 그룹 ID
    * @param {string} userId - 요청 사용자 ID
    * @returns {Promise<string>} 초대 링크 URL
    * @throws {Error} 권한이 없을 때
+   * @description 그룹 관리자가 7일간 유효한 초대 링크를 생성합니다.
+   * 최대 100명까지 사용 가능한 초대 코드를 발급합니다.
    */
   async generateInviteLink(groupId: string, userId: string): Promise<string> {
     // Check if user has permission to generate invite link
@@ -258,7 +276,7 @@ export class GroupService {
     }
 
     // Generate unique invite code
-    const inviteCode = generateId(8);
+    const inviteCode = generateId('INV');
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
 
@@ -281,10 +299,13 @@ export class GroupService {
 
   /**
    * 초대 코드로 그룹 가입
+   * @async
    * @param {string} inviteCode - 초대 코드
    * @param {string} userId - 가입할 사용자 ID
-   * @returns {Promise<Object>} 가입 결과
+   * @returns {Promise<Object>} 가입 결과 및 그룹 정보
    * @throws {Error} 유효하지 않은 코드, 만료, 정원 초과 등
+   * @description 초대 코드를 검증하고 사용자를 그룹에 추가합니다.
+   * 그룹 설정에 따라 승인 대기 상태로 추가될 수 있습니다.
    */
   async joinGroupByInvite(inviteCode: string, userId: string) {
     // Find the invite
@@ -330,7 +351,7 @@ export class GroupService {
     }
 
     // Check if group is full
-    if (invite.group._count.members >= invite.group.maxMembers) {
+    if (invite.group._count.members >= (invite.group.maxMembers || 50)) {
       throw createError(400, '그룹이 가득 찼습니다.');
     }
 
@@ -342,7 +363,7 @@ export class GroupService {
           userId,
           groupId: invite.groupId,
           role: 'MEMBER',
-          status: invite.group.settings?.requireApproval ? 'PENDING' : 'ACTIVE'
+          status: (invite.group.settings as any)?.requireApproval ? 'PENDING' : 'ACTIVE'
         }
       });
 
@@ -355,7 +376,7 @@ export class GroupService {
 
     return {
       success: true,
-      requiresApproval: invite.group.settings?.requireApproval || false,
+      requiresApproval: (invite.group.settings as any)?.requireApproval || false,
       group: {
         id: invite.group.id,
         name: invite.group.name,
@@ -413,10 +434,12 @@ export class GroupService {
 
   /**
    * 초대 취소
+   * @async
    * @param {string} inviteId - 초대 ID
    * @param {string} userId - 요청 사용자 ID
    * @returns {Promise<Object>} 취소 결과
    * @throws {Error} 초대를 찾을 수 없거나 권한이 없을 때
+   * @description 그룹 관리자가 발급한 초대 링크를 취소합니다.
    */
   async revokeInvite(inviteId: string, userId: string) {
     const invite = await prisma.groupInvite.findUnique({
@@ -450,10 +473,13 @@ export class GroupService {
 
   /**
    * 그룹 정보 수정
+   * @async
    * @param {string} groupId - 그룹 ID
    * @param {Object} updateData - 수정할 데이터
    * @returns {Promise<Object>} 수정된 그룹
    * @throws {Error} 부적절한 내용 포함 시
+   * @description 그룹 이름, 설명, 설정 등을 수정합니다.
+   * 수정 내용은 컨텐츠 필터를 거쳐 검증됩니다.
    */
   async updateGroup(groupId: string, updateData: any) {
     const { name, description, settings, location, maxMembers } = updateData;
@@ -496,8 +522,11 @@ export class GroupService {
 
   /**
    * 그룹 삭제
+   * @async
    * @param {string} groupId - 그룹 ID
    * @returns {Promise<void>}
+   * @description 그룹을 삭제하거나 비활성화합니다.
+   * 활성 매칭이 있는 경우 소프트 삭제, 없는 경우 하드 삭제합니다.
    */
   async deleteGroup(groupId: string) {
     // Check if group has active matches or conversations
@@ -521,10 +550,13 @@ export class GroupService {
 
   /**
    * 그룹 가입
+   * @async
    * @param {string} userId - 사용자 ID
    * @param {string} groupId - 그룹 ID
    * @returns {Promise<Object>} 가입 결과
    * @throws {Error} 이미 가입됨, 차단됨, 정원 초과 등
+   * @description 사용자를 그룹에 가입시킵니다.
+   * 그룹 설정에 따라 승인 대기 상태로 가입될 수 있습니다.
    */
   async joinGroup(userId: string, groupId: string) {
     const group = await prisma.group.findUnique({
@@ -592,10 +624,13 @@ export class GroupService {
 
   /**
    * 그룹 탈퇴
+   * @async
    * @param {string} userId - 사용자 ID
    * @param {string} groupId - 그룹 ID
    * @returns {Promise<void>}
    * @throws {Error} 멤버십을 찾을 수 없거나 생성자인 경우
+   * @description 사용자를 그룹에서 탈퇴시킵니다.
+   * 그룹 생성자는 탈퇴할 수 없습니다.
    */
   async leaveGroup(userId: string, groupId: string) {
     const membership = await prisma.groupMember.findUnique({
@@ -619,10 +654,12 @@ export class GroupService {
 
   /**
    * 그룹 멤버 목록 조회
+   * @async
    * @param {string} groupId - 그룹 ID
    * @param {number} page - 페이지 번호
    * @param {number} limit - 페이지당 항목 수
    * @returns {Promise<Array>} 멤버 목록
+   * @description 활성 멤버 목록을 역할별, 가입일순으로 정렬하여 반환합니다.
    */
   async getGroupMembers(groupId: string, page: number, limit: number) {
     const members = await prisma.groupMember.findMany({
@@ -655,10 +692,13 @@ export class GroupService {
 
   /**
    * 전화번호로 사용자 초대
+   * @async
    * @param {string} groupId - 그룹 ID
    * @param {string[]} phoneNumbers - 전화번호 목록
    * @param {string} inviterId - 초대자 ID
    * @returns {Promise<Array>} 초대 결과 목록
+   * @description 전화번호로 사용자를 검색하여 그룹에 초대합니다.
+   * 각 전화번호에 대한 초대 결과를 반환합니다.
    */
   async inviteUsersToGroup(groupId: string, phoneNumbers: string[], inviterId: string) {
     const results = [];
@@ -687,11 +727,13 @@ export class GroupService {
 
   /**
    * 초대 코드 생성
+   * @async
    * @param {string} groupId - 그룹 ID
    * @param {string} createdBy - 생성자 ID
    * @param {number} maxUses - 최대 사용 횟수
    * @param {number} expiresInHours - 만료 시간 (시간)
    * @returns {Promise<Object>} 생성된 초대 코드 정보
+   * @description 8자리 대문자 초대 코드를 생성합니다.
    */
   async createInviteCode(groupId: string, createdBy: string, maxUses: number, expiresInHours: number) {
     const code = generateId().substring(0, 8).toUpperCase();
@@ -716,10 +758,12 @@ export class GroupService {
 
   /**
    * 초대 코드로 그룹 가입
+   * @async
    * @param {string} userId - 사용자 ID
    * @param {string} code - 초대 코드
    * @returns {Promise<Object>} 가입 결과와 그룹명
    * @throws {Error} 유효하지 않거나 만료된 코드
+   * @description 초대 코드를 검증하고 사용자를 그룹에 가입시킵니다.
    */
   async joinByInviteCode(userId: string, code: string) {
     const inviteCode = await prisma.inviteCode.findUnique({

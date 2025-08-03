@@ -30,7 +30,7 @@ describe('MatchController', () => {
 
     // Setup routes
     app.get('/matches', authMiddleware, (req, res, next) =>
-      matchController.getUserMatches(req, res, next)
+      matchController.getMatches(req, res, next)
     );
     app.get('/matches/:matchId', authMiddleware, (req, res, next) =>
       matchController.getMatchById(req, res, next)

@@ -4,7 +4,7 @@
  * @description 좋아요 전송, 되돌리기, 일일 리셋 등의 액션 함수
  */
 
-import { likeApi } from '@/services/api/likeApi';
+import { likeApi } from '../../../services/api/likeApi';
 import { Like, Match } from '@/types';
 import { LikeState } from './types';
 import { canUserSendLike, getTodayDateString } from './utils';
@@ -53,7 +53,8 @@ export const sendLikeAction = async (
       fromUserId: '', // Will be filled by API
       toUserId,
       groupId,
-      isSuperLike,
+      isAnonymous: true,
+      isSuper: isSuperLike,
       createdAt: new Date(),
     };
 
@@ -63,7 +64,7 @@ export const sendLikeAction = async (
 
     // Update daily usage
     if (!state.hasPremium) {
-      if (state.dailyLikesUsed < LIKE_SYSTEM.FREE_DAILY_LIKES) {
+      if (state.dailyLikesUsed < LIKE_SYSTEM.DAILY_FREE_LIKES) {
         updatedState.dailyLikesUsed = state.dailyLikesUsed + 1;
       } else {
         updatedState.premiumLikesRemaining = Math.max(0, state.premiumLikesRemaining - 1);
@@ -83,7 +84,10 @@ export const sendLikeAction = async (
         user2Id: toUserId,
         groupId,
         status: 'ACTIVE',
+        isActive: true,
+        lastMessageAt: null,
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
       updatedState.matches = [...(state.matches || []), newMatch];
     }

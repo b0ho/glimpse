@@ -25,7 +25,7 @@ export const UserCard: React.FC<UserCardProps> = ({
   onLike,
   onMessage,
 }) => {
-  const isMatch = user.matchedAt != null;
+  const isMatch = false; // TODO: Check if user is matched with current user
   const formatDistance = (meters: number) => {
     if (meters < 1000) {
       return `${Math.round(meters)}m`;
@@ -43,22 +43,22 @@ export const UserCard: React.FC<UserCardProps> = ({
       <View style={styles.userInfo}>
         <View style={styles.nameRow}>
           <Text style={styles.nickname}>{user.nickname}</Text>
-          {user.verificationLevel === 'VERIFIED' && (
-            <Icon name="checkmark-circle" size={16} color={COLORS.primary} />
+          {user.isVerified && (
+            <Icon name="checkmark-circle" size={16} color={COLORS.PRIMARY} />
           )}
           {user.isPremium && (
-            <Icon name="star" size={16} color={COLORS.gold} style={styles.premiumIcon} />
+            <Icon name="star" size={16} color={COLORS.premium} style={styles.premiumIcon} />
           )}
         </View>
         
         <View style={styles.details}>
-          <Text style={styles.detailText}>{user.age}세</Text>
+          <Text style={styles.detailText}>{user.age || '??'}세</Text>
           <Text style={styles.separator}>•</Text>
           <Text style={styles.detailText}>{formatDistance(user.distance)}</Text>
-          {user.groupCount > 0 && (
+          {user.commonGroups && user.commonGroups.length > 0 && (
             <>
               <Text style={styles.separator}>•</Text>
-              <Text style={styles.detailText}>공통 그룹 {user.groupCount}개</Text>
+              <Text style={styles.detailText}>공통 그룹 {user.commonGroups.length}개</Text>
             </>
           )}
         </View>
@@ -73,7 +73,7 @@ export const UserCard: React.FC<UserCardProps> = ({
       <View style={styles.actions}>
         {isMatch ? (
           <TouchableOpacity style={styles.messageButton} onPress={onMessage}>
-            <Icon name="chatbubble-ellipses" size={20} color={COLORS.white} />
+            <Icon name="chatbubble-ellipses" size={20} color={COLORS.WHITE} />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -87,7 +87,7 @@ export const UserCard: React.FC<UserCardProps> = ({
             <Icon
               name={hasLiked ? "heart" : "heart-outline"}
               size={24}
-              color={hasLiked ? COLORS.white : COLORS.primary}
+              color={hasLiked ? COLORS.WHITE : COLORS.PRIMARY}
             />
           </TouchableOpacity>
         )}
@@ -99,7 +99,7 @@ export const UserCard: React.FC<UserCardProps> = ({
 const styles = StyleSheet.create({
   userCard: {
     flexDirection: 'row',
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.WHITE,
     padding: SPACING.md,
     marginHorizontal: SPACING.lg,
     marginVertical: SPACING.sm,
@@ -127,9 +127,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   nickname: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: FONT_SIZES.LG,
     fontWeight: '600',
-    color: COLORS.text,
+    color: COLORS.TEXT.PRIMARY,
     marginRight: SPACING.xs,
   },
   premiumIcon: {
@@ -141,16 +141,16 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   detailText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
+    fontSize: FONT_SIZES.SM,
+    color: COLORS.TEXT.SECONDARY,
   },
   separator: {
     marginHorizontal: SPACING.xs,
-    color: COLORS.textLight,
+    color: COLORS.TEXT.LIGHT,
   },
   bio: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
+    fontSize: FONT_SIZES.SM,
+    color: COLORS.TEXT.SECONDARY,
     lineHeight: 20,
   },
   actions: {
@@ -161,18 +161,18 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: COLORS.PRIMARY + '20',
     justifyContent: 'center',
     alignItems: 'center',
   },
   likeButtonActive: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.PRIMARY,
   },
   messageButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.PRIMARY,
     justifyContent: 'center',
     alignItems: 'center',
   },

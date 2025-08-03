@@ -1,8 +1,24 @@
+/**
+ * @module LocationController
+ * @description 위치 기반 그룹 관리 컨트롤러 - GPS 위치 기반 그룹 생성, 가입, QR 코드 기능 처리
+ */
 import { Request, Response, NextFunction } from 'express';
 import { locationService } from '../services/LocationService';
 import { createError } from '../middleware/errorHandler';
 
+/**
+ * 위치 기반 그룹 관리 컨트롤러
+ * GPS 위치 기반 그룹 생성, 위치 검증, QR 코드 생성/스캔, 주변 그룹 검색 기능을 제공
+ * @class LocationController
+ */
 export class LocationController {
+  /**
+   * 위치 기반 그룹 생성
+   * @param {Request} req - Express request 객체 (body: name, description, latitude, longitude, radius, maxMembers)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async createLocationGroup(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;
@@ -38,6 +54,13 @@ export class LocationController {
     }
   }
 
+  /**
+   * 위치 기반 그룹 가입 (위치 검증)
+   * @param {Request} req - Express request 객체 (params: groupId, body: latitude, longitude)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async joinLocationGroup(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;
@@ -66,6 +89,13 @@ export class LocationController {
     }
   }
 
+  /**
+   * QR 코드를 통한 그룹 가입
+   * @param {Request} req - Express request 객체 (body: qrData)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async joinGroupByQR(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;
@@ -90,6 +120,13 @@ export class LocationController {
     }
   }
 
+  /**
+   * 주변 그룹 검색
+   * @param {Request} req - Express request 객체 (query: latitude, longitude, radius)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getNearbyGroups(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { latitude, longitude, radius = '5' } = req.query;
@@ -115,6 +152,13 @@ export class LocationController {
     }
   }
 
+  /**
+   * 사용자 위치 이력 조회
+   * @param {Request} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getLocationHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;
@@ -134,6 +178,13 @@ export class LocationController {
     }
   }
 
+  /**
+   * 그룹 QR 코드 생성 (관리자만 가능)
+   * @param {Request} req - Express request 객체 (params: groupId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getGroupQRCode(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;
@@ -171,6 +222,13 @@ export class LocationController {
     }
   }
 
+  /**
+   * 좌표로부터 주소 변환
+   * @param {Request} req - Express request 객체 (query: latitude, longitude)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getAddressFromCoordinates(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { latitude, longitude } = req.query;

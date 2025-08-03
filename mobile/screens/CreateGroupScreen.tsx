@@ -61,7 +61,7 @@ export const CreateGroupScreen: React.FC = () => {
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [errors, setErrors] = useState<Partial<GroupFormData>>({});
   
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const authStore = useAuthStore();
   const groupStore = useGroupStore();
 
@@ -142,7 +142,7 @@ export const CreateGroupScreen: React.FC = () => {
         [
           {
             text: '초대하기',
-            onPress: () => navigation.navigate('GroupInvite', { groupId: newGroup.id }),
+            onPress: () => navigation.navigate('GroupInvite' as never, { groupId: newGroup.id } as never),
           },
           {
             text: '확인',

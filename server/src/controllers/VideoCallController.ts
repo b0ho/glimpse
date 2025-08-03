@@ -1,11 +1,26 @@
+/**
+ * @module VideoCallController
+ * @description 영상통화 관리 컨트롤러 - WebRTC 기반 화상/음성 통화, 통화 기록 관리
+ */
 import { Response, NextFunction } from 'express';
 import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
 import { videoCallService } from '../services/VideoCallService';
 import { io } from '../index';
 
+/**
+ * 영상통화 관리 컨트롤러
+ * WebRTC 기반 화상/음성 통화 시작, 수락, 거절, 종료 및 시그널링 처리 기능을 제공
+ * @class VideoCallController
+ */
 export class VideoCallController {
-  // Initiate a call
+  /**
+   * 통화 시작
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (body: receiverId, callType)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async initiateCall(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { receiverId, callType = 'video' } = req.body;
@@ -35,7 +50,13 @@ export class VideoCallController {
     }
   }
 
-  // Accept a call
+  /**
+   * 통화 수락
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (params: callId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async acceptCall(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { callId } = req.params;
@@ -61,7 +82,13 @@ export class VideoCallController {
     }
   }
 
-  // Reject a call
+  /**
+   * 통화 거절
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (params: callId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async rejectCall(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { callId } = req.params;
@@ -87,7 +114,13 @@ export class VideoCallController {
     }
   }
 
-  // End a call
+  /**
+   * 통화 종료
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (params: callId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async endCall(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { callId } = req.params;
@@ -113,7 +146,13 @@ export class VideoCallController {
     }
   }
 
-  // Get call history
+  /**
+   * 통화 기록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (query: page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getCallHistory(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { page = 1, limit = 20 } = req.query;
@@ -139,7 +178,13 @@ export class VideoCallController {
     }
   }
 
-  // Get active call
+  /**
+   * 현재 활성 통화 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getActiveCall(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -159,7 +204,13 @@ export class VideoCallController {
     }
   }
 
-  // Handle WebRTC signaling
+  /**
+   * WebRTC 시그널링 처리
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (body: type, targetUserId, data)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async handleSignaling(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const { type, targetUserId, data } = req.body;

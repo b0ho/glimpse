@@ -60,7 +60,7 @@ export const canUserSendLike = (
   if (hasPremium) return true;
 
   // Check daily limit for free users
-  if (dailyLikesUsed >= LIKE_SYSTEM.FREE_DAILY_LIKES) {
+  if (dailyLikesUsed >= LIKE_SYSTEM.DAILY_FREE_LIKES) {
     // Check if they have purchased premium likes
     return premiumLikesRemaining > 0;
   }
@@ -83,7 +83,7 @@ export const getRemainingLikes = (
 ): number => {
   if (hasPremium) return -1; // Unlimited
   
-  const remainingDaily = Math.max(0, LIKE_SYSTEM.FREE_DAILY_LIKES - dailyLikesUsed);
+  const remainingDaily = Math.max(0, LIKE_SYSTEM.DAILY_FREE_LIKES - dailyLikesUsed);
   return remainingDaily + premiumLikesRemaining;
 };
 
@@ -110,20 +110,21 @@ export const getAnonymousInfo = (
 
   if (!match) {
     return {
-      isAnonymous: true,
+      id: userId,
+      anonymousId: 'ANON_' + userId,
       displayName: '익명의 사용자',
-      canViewProfile: false,
-      canChat: false,
+      nickname: '익명의 사용자',
+      isMatched: false
     };
   }
 
   // If matched, return actual user info
   return {
-    isAnonymous: false,
+    id: userId,
+    anonymousId: 'ANON_' + userId,
     displayName: userId, // Will be replaced with actual nickname
-    canViewProfile: true,
-    canChat: true,
-    matchedAt: match.createdAt,
+    nickname: userId, // Will be replaced with actual nickname
+    isMatched: true
   };
 };
 

@@ -187,8 +187,8 @@ class ChatService implements ChatServiceInterface {
    */
   async getMatches(): Promise<ChatRoom[]> {
     try {
-      const response = await apiClient.get('/matches');
-      return response.data.data;
+      const response = await apiClient.get<{ data: ChatRoom[] }>('/matches');
+      return response.data;
     } catch (error) {
       console.error('Failed to get matches:', error);
       throw error;
@@ -207,12 +207,10 @@ class ChatService implements ChatServiceInterface {
    */
   async getMessages(matchId: string, page = 1, limit = 20): Promise<Message[]> {
     try {
-      const response = await apiClient.get(`/matches/${matchId}/messages`, {
-        params: { page, limit }
-      });
+      const response = await apiClient.get<{ data: Message[] }>(`/matches/${matchId}/messages`, { page, limit });
       
       // Decrypt messages
-      const messages = response.data.data;
+      const messages = response.data;
       for (const message of messages) {
         if (message.isEncrypted && message.type === 'TEXT') {
           try {
@@ -250,13 +248,9 @@ class ChatService implements ChatServiceInterface {
       } as any);
       formData.append('matchId', matchId);
 
-      const response = await apiClient.post('/upload/chat-image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await apiClient.post<{ data: { url: string } }>('/upload/chat-image', formData);
 
-      return response.data.data.url;
+      return response.data.url;
     } catch (error) {
       console.error('Failed to upload image:', error);
       throw error;

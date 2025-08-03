@@ -95,12 +95,12 @@ export const NearbyUsersScreen: React.FC = React.memo(() => {
 
   // Handle message action
   const handleMessage = useCallback((targetUser: NearbyUser) => {
-    if (targetUser.matchedAt) {
-      navigation.navigate('Chat', {
-        matchId: targetUser.id,
-        otherUserNickname: targetUser.nickname,
-      });
-    }
+    // TODO: Check if user is matched
+    navigation.navigate('Chat', {
+      roomId: '', // TODO: Get actual room ID from match
+      matchId: targetUser.id,
+      otherUserNickname: targetUser.nickname,
+    });
   }, [navigation]);
 
   // Render user item
@@ -158,11 +158,11 @@ export const NearbyUsersScreen: React.FC = React.memo(() => {
         }
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              {isUsersLoading 
+            {React.createElement(Text as any, { style: styles.emptyText },
+              isUsersLoading 
                 ? '주변 사용자를 찾는 중...' 
-                : '주변에 사용자가 없습니다'}
-            </Text>
+                : '주변에 사용자가 없습니다'
+            )}
           </View>
         )}
       />
@@ -173,7 +173,7 @@ export const NearbyUsersScreen: React.FC = React.memo(() => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.BACKGROUND,
   },
   listContainer: {
     paddingVertical: 8,
@@ -186,6 +186,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: COLORS.textSecondary,
+    color: COLORS.TEXT.SECONDARY,
   },
 });

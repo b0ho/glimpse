@@ -1,8 +1,24 @@
+/**
+ * @module NotificationController
+ * @description 알림 관리 컨트롤러 - FCM 푸시 알림, 알림 기록 관리
+ */
 import { Request, Response, NextFunction } from 'express';
 import { notificationService } from '../services/NotificationService';
 import { createError } from '../middleware/errorHandler';
 
+/**
+ * 알림 관리 컨트롤러
+ * FCM 토큰 관리, 푸시 알림 전송, 알림 기록 조회 및 관리 기능을 제공
+ * @class NotificationController
+ */
 export class NotificationController {
+  /**
+   * FCM 토큰 등록
+   * @param {Request} req - Express request 객체 (body: token, deviceType)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async registerFCMToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;
@@ -31,6 +47,13 @@ export class NotificationController {
     }
   }
 
+  /**
+   * FCM 토큰 제거
+   * @param {Request} req - Express request 객체 (body: token)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async removeFCMToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { token } = req.body;
@@ -50,6 +73,13 @@ export class NotificationController {
     }
   }
 
+  /**
+   * 사용자 알림 목록 조회
+   * @param {Request} req - Express request 객체 (query: page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getNotifications(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;
@@ -74,6 +104,13 @@ export class NotificationController {
     }
   }
 
+  /**
+   * 알림 읽음 처리
+   * @param {Request} req - Express request 객체 (params: notificationId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async markAsRead(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;
@@ -98,6 +135,13 @@ export class NotificationController {
     }
   }
 
+  /**
+   * 모든 알림 읽음 처리
+   * @param {Request} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async markAllAsRead(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;
@@ -117,6 +161,13 @@ export class NotificationController {
     }
   }
 
+  /**
+   * 읽지 않은 알림 갯수 조회
+   * @param {Request} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getUnreadCount(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;
@@ -136,6 +187,13 @@ export class NotificationController {
     }
   }
 
+  /**
+   * 알림 삭제
+   * @param {Request} req - Express request 객체 (params: notificationId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async deleteNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;
@@ -160,7 +218,13 @@ export class NotificationController {
     }
   }
 
-  // 테스트용 엔드포인트
+  /**
+   * 테스트 알림 전송 (테스트용)
+   * @param {Request} req - Express request 객체 (body: title, body, data)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async testNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).auth?.userId;

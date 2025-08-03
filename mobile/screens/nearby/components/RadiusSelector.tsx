@@ -51,15 +51,15 @@ export const RadiusSelector: React.FC<RadiusSelectorProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.WHITE,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.lg,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.BORDER,
   },
   label: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
+    fontSize: FONT_SIZES.SM,
+    color: COLORS.TEXT.SECONDARY,
     marginBottom: SPACING.sm,
   },
   radiusSelector: {
@@ -70,20 +70,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
     borderRadius: 20,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.BACKGROUND,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.BORDER,
   },
   radiusOptionActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+    backgroundColor: COLORS.PRIMARY,
+    borderColor: COLORS.PRIMARY,
   },
   radiusText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text,
+    fontSize: FONT_SIZES.SM,
+    color: COLORS.TEXT.PRIMARY,
     fontWeight: '500',
   },
   radiusTextActive: {
-    color: COLORS.white,
+    color: COLORS.WHITE,
   },
 });

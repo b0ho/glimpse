@@ -1,3 +1,7 @@
+/**
+ * @module StoryController
+ * @description 스토리 관리 컨트롤러 - 24시간 임시 콘텐츠 업로드, 조회, 관리
+ */
 import { Response, NextFunction } from 'express';
 import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
@@ -5,8 +9,19 @@ import { storyService } from '../services/StoryService';
 import { upload } from '../config/multer';
 import { prisma } from '../config/database';
 
+/**
+ * 스토리 관리 컨트롤러
+ * 24시간 임시 콘텐츠(이미지/동영상) 업로드, 조회, 열람 기록 및 삭제 기능을 제공
+ * @class StoryController
+ */
 export class StoryController {
-  // Create a new story
+  /**
+   * 새 스토리 생성
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (body: caption, file: multipart/form-data)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async createStory(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -44,7 +59,13 @@ export class StoryController {
     }
   }
 
-  // Get user's own stories
+  /**
+   * 내 스토리 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getMyStories(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -63,7 +84,13 @@ export class StoryController {
     }
   }
 
-  // Get stories from matched users
+  /**
+   * 매칭된 사용자들의 스토리 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (query: page, limit)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getMatchedUsersStories(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -88,7 +115,13 @@ export class StoryController {
     }
   }
 
-  // Get a specific story
+  /**
+   * 특정 스토리 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (params: storyId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getStoryById(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -109,7 +142,13 @@ export class StoryController {
     }
   }
 
-  // View a story
+  /**
+   * 스토리 열람 업데이트
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (params: storyId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async viewStory(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -130,7 +169,13 @@ export class StoryController {
     }
   }
 
-  // Get story viewers
+  /**
+   * 스토리 열람자 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (params: storyId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getStoryViewers(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -151,7 +196,13 @@ export class StoryController {
     }
   }
 
-  // Delete a story
+  /**
+   * 스토리 삭제
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (params: storyId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async deleteStory(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {
@@ -172,7 +223,13 @@ export class StoryController {
     }
   }
 
-  // Get stories from a specific user
+  /**
+   * 특정 사용자의 스토리 조회 (매칭된 사용자만 가능)
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (params: userId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getUserStories(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.auth) {

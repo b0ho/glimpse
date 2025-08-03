@@ -305,6 +305,7 @@ export interface Message {
   type: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY';
   metadata?: Record<string, any>;
   isRead: boolean;
+  isEncrypted?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

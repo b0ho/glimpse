@@ -115,6 +115,37 @@ export const sanitizeInput = (input: string): string => {
 /**
  * Validate payment amount
  */
+/**
+ * Mask phone number for privacy
+ */
+export const maskPhoneNumber = (phone: string): string => {
+  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  
+  if (cleanPhone.length >= 10) {
+    const masked = cleanPhone.slice(0, 3) + '****' + cleanPhone.slice(-4);
+    return formatPhoneNumber(masked);
+  }
+  
+  return phone;
+};
+
+/**
+ * Mask email for privacy
+ */
+export const maskEmail = (email: string): string => {
+  const [local, domain] = email.split('@');
+  
+  if (!local || !domain) {
+    return email;
+  }
+  
+  const maskedLocal = local.length <= 3 
+    ? local[0] + '***' 
+    : local.slice(0, 2) + '***' + local.slice(-1);
+  
+  return `${maskedLocal}@${domain}`;
+};
+
 export const validatePaymentAmount = (
   amount: number,
   currency: string

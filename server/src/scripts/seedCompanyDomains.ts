@@ -1,5 +1,16 @@
+/**
+ * @module seedCompanyDomains
+ * @description 한국 주요 기업 및 대학 도메인 시드 데이터 스크립트
+ * 회사 인증을 위한 초기 도메인 데이터를 데이터베이스에 추가합니다.
+ */
+
 import { prisma } from '../config/database';
 
+/**
+ * 회사 도메인 시드 데이터
+ * @constant companyDomains
+ * @description 한국의 주요 대기업, IT기업, 금융사, 스타트업, 대학교 도메인 정보
+ */
 const companyDomains = [
   // 대기업
   { domain: 'samsung.com', companyName: 'Samsung Electronics', companyNameKr: '삼성전자', employeeCount: 287439, industry: 'Electronics' },
@@ -63,6 +74,13 @@ const companyDomains = [
   { domain: 'bain.com', companyName: 'Bain & Company', companyNameKr: '베인앤컴퍼니', employeeCount: 150, industry: 'Consulting' }
 ];
 
+/**
+ * 회사 도메인 시드 데이터 추가
+ * @async
+ * @function seedCompanyDomains
+ * @description 사전 정의된 회사 및 대학 도메인을 데이터베이스에 추가합니다.
+ * 이미 존재하는 도메인은 건너뜁니다.
+ */
 async function seedCompanyDomains() {
   try {
     console.log('🌱 회사 도메인 시드 데이터 추가 시작...');

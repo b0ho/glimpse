@@ -93,13 +93,7 @@ const ProfileSettingsScreen: React.FC = () => {
           type: 'navigate',
           route: 'ChangePassword',
         },
-        {
-          icon: 'email-outline',
-          label: '이메일 변경',
-          value: userProfile?.email || '미등록',
-          type: 'navigate',
-          route: 'ChangeEmail',
-        },
+        // Email change removed - not in User type
         {
           icon: 'phone-outline',
           label: '전화번호 변경',

@@ -1,3 +1,9 @@
+/**
+ * Glimpse 서버 진입점
+ * @module server/index
+ * @description Express 서버 초기화, 미들웨어 설정, 라우트 등록
+ */
+
 // Import telemetry first
 import './config/telemetry';
 
@@ -40,12 +46,29 @@ import videoCallRoutes from './routes/videoCallRoutes';
 import storyRoutes from './routes/storyRoutes';
 import friendRoutes from './routes/friends';
 
+/**
+ * Express 애플리케이션 인스턴스
+ * @constant app
+ * @type {express.Application}
+ */
 const app = express();
 
 // Initialize Sentry before other middleware
 initializeSentry(app);
 
+/**
+ * HTTP 서버 인스턴스
+ * @constant server
+ * @type {http.Server}
+ */
 const server = createServer(app);
+
+/**
+ * Socket.IO 서버 인스턴스
+ * @constant io
+ * @type {Server}
+ * @description 실시간 채팅 및 WebSocket 통신
+ */
 const io = new Server(server, {
   cors: {
     origin: env.FRONTEND_URL,
@@ -60,7 +83,7 @@ import compression from 'compression';
 app.use(compression({
   level: 6, // Compression level (0-9)
   threshold: 1024, // Only compress responses larger than 1KB
-  filter: (req, res) => {
+  filter: (req: any, res: any) => {
     // Don't compress responses with no-compress header
     if (req.headers['x-no-compression']) {
       return false;

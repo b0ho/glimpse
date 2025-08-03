@@ -1,12 +1,33 @@
+/**
+ * @module StripeProvider
+ * @description Stripe API를 이용한 국제 결제 제공자 모듈
+ * 전 세계에서 사용되는 온라인 결제 서비스로, 카드 결제와 구독 결제를 지원합니다.
+ * PCI DSS 준수를 통한 높은 보안성과 다양한 통화 지원이 특징입니다.
+ */
+
 import Stripe from 'stripe';
 import { Payment, PaymentStatus } from '@prisma/client';
 import { PaymentProvider, ProcessPaymentRequest } from '../types';
 import { createError } from '../../../middleware/errorHandler';
 import { logger } from '../../../utils/logger';
 
+/**
+ * Stripe 결제 제공자 클래스
+ * @class StripeProvider
+ * @implements {PaymentProvider}
+ * @description Stripe API를 이용한 국제 결제 처리를 담당합니다.
+ * 카드 결제, 각종 디지털 월렛, 구독 결제 등을 지원하며, 다양한 통화로 결제가 가능합니다.
+ */
 export class StripeProvider implements PaymentProvider {
+  /** Stripe 클라이언트 인스턴스 */
   private stripe: Stripe;
 
+  /**
+   * StripeProvider 생성자
+   * @constructor
+   * @throws {Error} Stripe 비밀 키가 설정되지 않았을 경우
+   * @description Stripe 클라이언트를 초기화하고 API 버전을 설정합니다.
+   */
   constructor() {
     const secretKey = process.env.STRIPE_SECRET_KEY;
     if (!secretKey) {
@@ -18,6 +39,14 @@ export class StripeProvider implements PaymentProvider {
     });
   }
 
+  /**
+   * Stripe 결제 생성
+   * @async
+   * @param {Payment} payment - 결제 정보
+   * @returns {Promise<{paymentUrl: string, paymentData: any}>} 결제 URL과 메타데이터
+   * @throws {Error} 결제 생성 실패시
+   * @description Stripe Checkout 세션을 생성하여 결제 또는 구독 결제를 처리합니다.
+   */
   async createPayment(payment: Payment): Promise<{
     paymentUrl: string;
     paymentData: any;
@@ -60,6 +89,14 @@ export class StripeProvider implements PaymentProvider {
     }
   }
 
+  /**
+   * Stripe 결제 검증
+   * @async
+   * @param {Payment} payment - 결제 정보
+   * @param {ProcessPaymentRequest} data - 결제 처리 데이터
+   * @returns {Promise<{success: boolean, transactionId?: string, errorMessage?: string}>} 검증 결과
+   * @description Stripe Checkout 세션의 결제 상태를 확인하고 검증합니다.
+   */
   async verifyPayment(payment: Payment, data: ProcessPaymentRequest): Promise<{
     success: boolean;
     transactionId?: string;
@@ -94,6 +131,14 @@ export class StripeProvider implements PaymentProvider {
     }
   }
 
+  /**
+   * Stripe 결제 환불
+   * @async
+   * @param {Payment} payment - 결제 정보
+   * @param {number} [amount] - 환불 금액 (미지정시 전액 환부)
+   * @returns {Promise<{success: boolean, refundId?: string, errorMessage?: string}>} 환불 결과
+   * @description Stripe 결제를 전체 또는 부분 환불합니다.
+   */
   async refundPayment(payment: Payment, amount?: number): Promise<{
     success: boolean;
     refundId?: string;
@@ -124,6 +169,13 @@ export class StripeProvider implements PaymentProvider {
     }
   }
 
+  /**
+   * Stripe 웹훅 처리
+   * @async
+   * @param {any} data - Stripe 웹훅 이벤트 데이터
+   * @returns {Promise<{paymentId: string, status: PaymentStatus, transactionId?: string}>} 결제 상태 업데이트 정보
+   * @description Stripe에서 전송되는 웹훅 이벤트를 처리하여 결제 상태를 업데이트합니다.
+   */
   async handleWebhook(data: any): Promise<{
     paymentId: string;
     status: PaymentStatus;
@@ -166,6 +218,13 @@ export class StripeProvider implements PaymentProvider {
     };
   }
 
+  /**
+   * 결제 상품명 생성 (영문)
+   * @private
+   * @param {Payment} payment - 결제 정보
+   * @returns {string} 영문 상품명
+   * @description 결제 유형에 따라 적절한 영문 상품명을 생성합니다.
+   */
   private getProductName(payment: Payment): string {
     const packageType = (payment.metadata as any)?.packageType;
     
@@ -179,6 +238,13 @@ export class StripeProvider implements PaymentProvider {
     }
   }
 
+  /**
+   * 결제 상품 설명 생성
+   * @private
+   * @param {Payment} payment - 결제 정보
+   * @returns {string} 한국어 상품 설명
+   * @description 결제 유형에 따라 사용자에게 보여줄 한국어 상품 설명을 생성합니다.
+   */
   private getProductDescription(payment: Payment): string {
     switch (payment.type) {
       case 'CREDIT_PURCHASE':

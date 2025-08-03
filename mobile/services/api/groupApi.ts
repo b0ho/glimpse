@@ -84,8 +84,8 @@ export const groupApi = {
     page?: number;
     limit?: number;
   }): Promise<Group[]> {
-    const response = await apiClient.get('/groups', { params });
-    return response.data.data;
+    const response = await apiClient.get<{ data: Group[] }>('/groups', params);
+    return response.data;
   },
 
   /**
@@ -95,8 +95,8 @@ export const groupApi = {
    * @returns {Promise<Group>} 생성된 그룹 정보
    */
   async createGroup(data: CreateGroupData): Promise<Group> {
-    const response = await apiClient.post('/groups', data);
-    return response.data.data;
+    const response = await apiClient.post<{ data: Group }>('/groups', data);
+    return response.data;
   },
 
   /**
@@ -106,8 +106,8 @@ export const groupApi = {
    * @returns {Promise<Group>} 그룹 상세 정보
    */
   async getGroupById(groupId: string): Promise<Group> {
-    const response = await apiClient.get(`/groups/${groupId}`);
-    return response.data.data;
+    const response = await apiClient.get<{ data: Group }>(`/groups/${groupId}`);
+    return response.data;
   },
 
   /**
@@ -118,8 +118,8 @@ export const groupApi = {
    * @returns {Promise<Group>} 업데이트된 그룹 정보
    */
   async updateGroup(groupId: string, data: Partial<CreateGroupData>): Promise<Group> {
-    const response = await apiClient.put(`/groups/${groupId}`, data);
-    return response.data.data;
+    const response = await apiClient.put<{ data: Group }>(`/groups/${groupId}`, data);
+    return response.data;
   },
 
   /**
@@ -161,7 +161,7 @@ export const groupApi = {
    * @returns {Promise<any[]>} 멤버 리스트
    */
   async getGroupMembers(groupId: string, page = 1, limit = 50): Promise<any[]> {
-    const response = await apiClient.get(`/groups/${groupId}/members`, {
+    const response = await apiClient.get<{ data: { data: any[] } }>(`/groups/${groupId}/members`, {
       params: { page, limit }
     });
     return response.data.data;
@@ -174,7 +174,7 @@ export const groupApi = {
    * @returns {Promise<string>} 초대 링크 URL
    */
   async generateInviteLink(groupId: string): Promise<string> {
-    const response = await apiClient.post(`/groups/${groupId}/invites`);
+    const response = await apiClient.post<{ data: { data: { inviteLink: string } } }>(`/groups/${groupId}/invites`);
     return response.data.data.inviteLink;
   },
 
@@ -185,7 +185,7 @@ export const groupApi = {
    * @returns {Promise<JoinGroupResponse>} 참여 결과
    */
   async joinGroupByInvite(inviteCode: string): Promise<JoinGroupResponse> {
-    const response = await apiClient.post(`/groups/join/${inviteCode}`);
+    const response = await apiClient.post<{ data: { data: JoinGroupResponse } }>(`/groups/join/${inviteCode}`);
     return response.data.data;
   },
 
@@ -196,7 +196,7 @@ export const groupApi = {
    * @returns {Promise<GroupInvite[]>} 초대 리스트
    */
   async getGroupInvites(groupId: string): Promise<GroupInvite[]> {
-    const response = await apiClient.get(`/groups/${groupId}/invites`);
+    const response = await apiClient.get<{ data: { data: GroupInvite[] } }>(`/groups/${groupId}/invites`);
     return response.data.data;
   },
 
@@ -218,7 +218,7 @@ export const groupApi = {
    * @returns {Promise<any>} 초대 결과
    */
   async inviteToGroup(groupId: string, phoneNumbers: string[]): Promise<any> {
-    const response = await apiClient.post(`/groups/${groupId}/invite`, { phoneNumbers });
+    const response = await apiClient.post<{ data: { data: any } }>(`/groups/${groupId}/invite`, { phoneNumbers });
     return response.data.data;
   },
 
@@ -262,8 +262,8 @@ export const groupApi = {
     accuracy?: number;
     method?: 'GPS' | 'QR_CODE';
   }): Promise<any> {
-    const response = await apiClient.post(`/groups/${groupId}/checkin`, data);
-    return response.data.data;
+    const response = await apiClient.post<{ data: any }>(`/groups/${groupId}/checkin`, data);
+    return response.data;
   },
 
   /**
@@ -275,10 +275,8 @@ export const groupApi = {
    * @returns {Promise<any[]>} 체크인 리스트
    */
   async getCheckIns(groupId: string, page = 1, limit = 20): Promise<any[]> {
-    const response = await apiClient.get(`/groups/${groupId}/checkins`, {
-      params: { page, limit }
-    });
-    return response.data.data;
+    const response = await apiClient.get<{ data: any[] }>(`/groups/${groupId}/checkins`, { page, limit });
+    return response.data;
   },
 
   /**
@@ -288,8 +286,8 @@ export const groupApi = {
    * @returns {Promise<any[]>} 대기 중인 멤버 리스트
    */
   async getPendingMembers(groupId: string): Promise<any[]> {
-    const response = await apiClient.get(`/groups/${groupId}/pending-members`);
-    return response.data.data;
+    const response = await apiClient.get<{ data: any[] }>(`/groups/${groupId}/pending-members`);
+    return response.data;
   },
 
   /**
@@ -312,8 +310,6 @@ export const groupApi = {
    * @returns {Promise<void>}
    */
   async rejectMember(groupId: string, userId: string, reason?: string): Promise<void> {
-    await apiClient.delete(`/groups/${groupId}/members/${userId}/reject`, {
-      data: { reason }
-    });
+    await apiClient.delete(`/groups/${groupId}/members/${userId}/reject`);
   }
 };

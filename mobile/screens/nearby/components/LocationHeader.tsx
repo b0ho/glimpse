@@ -22,13 +22,13 @@ export const LocationHeader: React.FC<LocationHeaderProps> = ({
   return (
     <View style={styles.locationHeader}>
       <View style={styles.locationInfo}>
-        <Icon name="location" size={20} color={COLORS.primary} />
+        <Icon name="location" size={20} color={COLORS.PRIMARY} />
         <Text style={styles.locationText} numberOfLines={1}>
           {address || '위치 확인 중...'}
         </Text>
       </View>
       <TouchableOpacity onPress={onRefresh} style={styles.refreshButton}>
-        <Icon name="refresh" size={20} color={COLORS.primary} />
+        <Icon name="refresh" size={20} color={COLORS.PRIMARY} />
       </TouchableOpacity>
     </View>
   );
@@ -41,9 +41,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.WHITE,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.BORDER,
   },
   locationInfo: {
     flex: 1,
@@ -52,8 +52,8 @@ const styles = StyleSheet.create({
   },
   locationText: {
     marginLeft: SPACING.sm,
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text,
+    fontSize: FONT_SIZES.MD,
+    color: COLORS.TEXT.PRIMARY,
     flex: 1,
   },
   refreshButton: {

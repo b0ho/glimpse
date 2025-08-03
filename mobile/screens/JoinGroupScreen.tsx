@@ -22,7 +22,7 @@ interface GroupInfo {
 }
 
 export const JoinGroupScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const route = useRoute();
   const { inviteCode } = route.params as { inviteCode: string };
   
@@ -52,7 +52,7 @@ export const JoinGroupScreen: React.FC = () => {
           [
             {
               text: '확인',
-              onPress: () => navigation.navigate('Groups'),
+              onPress: () => navigation.navigate('Groups' as never),
             },
           ]
         );
@@ -63,7 +63,7 @@ export const JoinGroupScreen: React.FC = () => {
           [
             {
               text: '그룹으로 이동',
-              onPress: () => navigation.navigate('GroupDetail', { groupId: result.group.id }),
+              onPress: () => navigation.navigate('GroupDetail' as never, { groupId: result.group.id } as never),
             },
           ]
         );

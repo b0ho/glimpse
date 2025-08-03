@@ -1,7 +1,18 @@
+/**
+ * @module generate-postman
+ * @description Swagger API 문서를 Postman 컬렉션으로 변환하는 스크립트
+ * Swagger 정의를 기반으로 API 테스트를 위한 Postman 컬렉션을 자동 생성합니다.
+ */
+
 import { swaggerSpec } from '../config/swagger';
 import * as fs from 'fs';
 import * as path from 'path';
 
+/**
+ * Postman 컬렉션 구조 인터페이스
+ * @interface PostmanCollection
+ * @description Postman 컬렉션 v2.1.0 스키마를 따르는 구조
+ */
 interface PostmanCollection {
   info: {
     name: string;
@@ -13,6 +24,13 @@ interface PostmanCollection {
   variable: any[];
 }
 
+/**
+ * Swagger를 Postman 컬렉션으로 변환
+ * @function convertSwaggerToPostman
+ * @param {any} swagger - Swagger 스펙 객체
+ * @returns {PostmanCollection} 변환된 Postman 컬렉션
+ * @description Swagger API 정의를 Postman이 이해할 수 있는 형식으로 변환합니다.
+ */
 function convertSwaggerToPostman(swagger: any): PostmanCollection {
   const collection: PostmanCollection = {
     info: {
@@ -139,6 +157,13 @@ function convertSwaggerToPostman(swagger: any): PostmanCollection {
   return collection;
 }
 
+/**
+ * 스키마에서 예제 데이터 생성
+ * @function generateExample
+ * @param {any} schema - JSON 스키마 객체
+ * @returns {any} 생성된 예제 데이터
+ * @description JSON 스키마를 분석하여 해당하는 예제 데이터를 자동으로 생성합니다.
+ */
 function generateExample(schema: any): any {
   if (schema.$ref) {
     // Handle references (simplified)
@@ -185,6 +210,10 @@ function generateExample(schema: any): any {
   }
 }
 
+/**
+ * 메인 실행 블록
+ * @description Swagger 스펙을 읽어 Postman 컬렉션을 생성하고 파일로 저장합니다.
+ */
 // Generate the collection
 const postmanCollection = convertSwaggerToPostman(swaggerSpec);
 

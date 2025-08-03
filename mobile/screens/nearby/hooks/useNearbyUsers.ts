@@ -17,11 +17,12 @@ export const useNearbyUsers = () => {
     try {
       setIsLoading(true);
       
-      const users = await locationApi.getNearbyUsers({
+      const response = await locationApi.getNearbyUsers({
         latitude: location.latitude,
         longitude: location.longitude,
-        radiusKm: radius,
+        radius: radius * 1000, // Convert km to meters
       });
+      const users = response.users;
 
       setNearbyUsers(users);
     } catch (error: any) {

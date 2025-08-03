@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import apiClient from './config';
 import { User } from '@shared/types';
 
 /**
@@ -18,7 +18,7 @@ export const authService = {
    */
   updateProfile: async (data: { nickname?: string; bio?: string; age?: number }) => {
     try {
-      const response = await apiClient.put('/users/profile', data);
+      const response = await apiClient.put<{ data: any }>('/users/profile', data);
       return {
         success: true,
         data: response.data,
@@ -41,7 +41,7 @@ export const authService = {
    */
   deleteAccount: async (data: { reason?: string }) => {
     try {
-      const response = await apiClient.delete('/users/account', { data });
+      const response = await apiClient.delete('/users/account', data);
       return {
         success: true,
         message: '계정이 비활성화되었습니다.',

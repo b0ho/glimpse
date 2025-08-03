@@ -12,7 +12,10 @@
  * - 반응형 이미지 URL 생성
  */
 
-import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
+// import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
+// TODO: Install @aws-sdk/client-cloudfront package
+const CloudFrontClient = {} as any;
+const CreateInvalidationCommand = {} as any;
 
 /**
  * CloudFront 서비스 설정 인터페이스
@@ -37,7 +40,7 @@ interface CloudFrontConfig {
  */
 export class CloudFrontService {
   /** CloudFront 클라이언트 인스턴스 */
-  private client: CloudFrontClient;
+  private client: any;
   /** CloudFront 설정 정보 */
   private config: CloudFrontConfig;
 

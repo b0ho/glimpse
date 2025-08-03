@@ -1,14 +1,37 @@
+/**
+ * @module TossPayProvider
+ * @description 토스페이먼츠 API를 이용한 결제 제공자 모듈
+ * 한국의 대표적인 결제 서비스인 토스페이먼츠와의 연동을 담당합니다.
+ * 카드 결제, 계좌이체, 문화상품권 등 다양한 결제 수단을 지원합니다.
+ */
+
 import axios from 'axios';
 import { Payment, PaymentStatus } from '@prisma/client';
 import { PaymentProvider, ProcessPaymentRequest } from '../types';
 import { createError } from '../../../middleware/errorHandler';
 import { logger } from '../../../utils/logger';
 
+/**
+ * 토스페이먼츠 결제 제공자 클래스
+ * @class TossPayProvider
+ * @implements {PaymentProvider}
+ * @description 토스페이먼츠 API를 이용한 결제 처리를 담당합니다.
+ * 한국 시장에 특화된 결제 서비스로, 간편한 결제 경험과 높은 보안성을 제공합니다.
+ */
 export class TossPayProvider implements PaymentProvider {
+  /** 토스페이먼츠 API 기본 URL */
   private readonly apiUrl = 'https://api.tosspayments.com/v1';
+  /** 토스페이먼츠 비밀 키 */
   private readonly secretKey: string;
+  /** 토스페이먼츠 클라이언트 키 */
   private readonly clientKey: string;
 
+  /**
+   * TossPayProvider 생성자
+   * @constructor
+   * @throws {Error} 토스페이먼츠 인증 정보가 설정되지 않았을 경우
+   * @description 토스페이먼츠 API 인증 정보를 초기화합니다.
+   */
   constructor() {
     this.secretKey = process.env.TOSS_SECRET_KEY || '';
     this.clientKey = process.env.TOSS_CLIENT_KEY || '';
@@ -18,11 +41,25 @@ export class TossPayProvider implements PaymentProvider {
     }
   }
 
+  /**
+   * 토스페이먼츠 API 인증 헤더 생성
+   * @private
+   * @returns {string} Basic 인증 헤더 문자열
+   * @description 시크릿 키를 Base64로 인코딩하여 Basic 인증 헤더를 생성합니다.
+   */
   private getAuthHeader(): string {
     const credentials = Buffer.from(`${this.secretKey}:`).toString('base64');
     return `Basic ${credentials}`;
   }
 
+  /**
+   * 토스페이먼츠 결제 생성
+   * @async
+   * @param {Payment} payment - 결제 정보
+   * @returns {Promise<{paymentUrl: string, paymentData: any}>} 결제 URL과 메타데이터
+   * @throws {Error} 결제 생성 실패시
+   * @description 토스페이먼츠 결제를 생성하고 사용자가 결제할 수 있는 URL을 반환합니다.
+   */
   async createPayment(payment: Payment): Promise<{
     paymentUrl: string;
     paymentData: any;
@@ -65,6 +102,14 @@ export class TossPayProvider implements PaymentProvider {
     }
   }
 
+  /**
+   * 토스페이먼츠 결제 검증
+   * @async
+   * @param {Payment} payment - 결제 정보
+   * @param {ProcessPaymentRequest} data - 결제 처리 데이터
+   * @returns {Promise<{success: boolean, transactionId?: string, errorMessage?: string}>} 검증 결과
+   * @description 토스페이먼츠 결제를 확정하고 검증합니다.
+   */
   async verifyPayment(payment: Payment, data: ProcessPaymentRequest): Promise<{
     success: boolean;
     transactionId?: string;
@@ -106,6 +151,14 @@ export class TossPayProvider implements PaymentProvider {
     }
   }
 
+  /**
+   * 토스페이먼츠 결제 환불
+   * @async
+   * @param {Payment} payment - 결제 정보
+   * @param {number} [amount] - 환불 금액 (미지정시 전액 환불)
+   * @returns {Promise<{success: boolean, refundId?: string, errorMessage?: string}>} 환불 결과
+   * @description 토스페이먼츠 결제를 전체 또는 부분 환불합니다.
+   */
   async refundPayment(payment: Payment, amount?: number): Promise<{
     success: boolean;
     refundId?: string;
@@ -145,6 +198,13 @@ export class TossPayProvider implements PaymentProvider {
     }
   }
 
+  /**
+   * 토스페이먼츠 웹훅 처리
+   * @async
+   * @param {any} data - 웹훅 데이터
+   * @returns {Promise<{paymentId: string, status: PaymentStatus, transactionId?: string}>} 결제 상태 업데이트 정보
+   * @description 토스페이먼츠에서 전송되는 웹훅을 처리하여 결제 상태를 업데이트합니다.
+   */
   async handleWebhook(data: any): Promise<{
     paymentId: string;
     status: PaymentStatus;
@@ -182,6 +242,13 @@ export class TossPayProvider implements PaymentProvider {
     };
   }
 
+  /**
+   * 결제 주문명 생성
+   * @private
+   * @param {Payment} payment - 결제 정보
+   * @returns {string} 주문명
+   * @description 결제 유형에 따라 적절한 한국어 주문명을 생성합니다.
+   */
   private getOrderName(payment: Payment): string {
     const packageType = (payment.metadata as any)?.packageType;
     

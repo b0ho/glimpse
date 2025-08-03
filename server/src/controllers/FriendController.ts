@@ -1,9 +1,25 @@
+/**
+ * @module FriendController
+ * @description 친구 관리 컨트롤러 - 친구 요청, 수락, 거절, 친구 목록 관리
+ */
 import { Response, NextFunction } from 'express';
 import { prisma } from '../config/database';
 import { ClerkAuthRequest } from '../middleware/clerkAuth';
 import { createError } from '../middleware/errorHandler';
 
+/**
+ * 친구 관리 컨트롤러
+ * 친구 요청 발송/수락/거절, 친구 목록 조회, 친구 관계 삭제 기능을 제공
+ * @class FriendController
+ */
 export class FriendController {
+  /**
+   * 친구 요청 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (query: status)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getFriendRequests(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -38,6 +54,13 @@ export class FriendController {
     }
   }
 
+  /**
+   * 친구 요청 전송
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (body: toUserId, message)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async sendFriendRequest(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -115,6 +138,13 @@ export class FriendController {
     }
   }
 
+  /**
+   * 친구 요청 수락
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (params: requestId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async acceptFriendRequest(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -155,6 +185,13 @@ export class FriendController {
     }
   }
 
+  /**
+   * 친구 요청 거절
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (params: requestId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async rejectFriendRequest(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -186,6 +223,13 @@ export class FriendController {
     }
   }
 
+  /**
+   * 친구 목록 조회
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getFriends(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;
@@ -232,6 +276,13 @@ export class FriendController {
     }
   }
 
+  /**
+   * 친구 삭제
+   * @param {ClerkAuthRequest} req - Clerk 인증 request 객체 (params: friendId)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async removeFriend(req: ClerkAuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.auth!.userId;

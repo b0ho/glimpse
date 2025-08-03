@@ -1,8 +1,24 @@
+/**
+ * @module CompanyDomainController
+ * @description 회사 도메인 인증 컨트롤러 - 이메일 도메인 기반 회사 인증, 도메인 관리
+ */
 import { Request, Response, NextFunction } from 'express';
 import { companyDomainService } from '../services/CompanyDomainService';
 import { createError } from '../middleware/errorHandler';
 
+/**
+ * 회사 도메인 인증 컨트롤러
+ * 이메일 도메인을 통한 회사 인증, 회사 도메인 검색 및 관리 기능을 제공
+ * @class CompanyDomainController
+ */
 export class CompanyDomainController {
+  /**
+   * 이메일 도메인 인증 메일 전송
+   * @param {Request} req - Express request 객체 (body: email)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async sendVerificationEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email } = req.body;
@@ -31,6 +47,13 @@ export class CompanyDomainController {
     }
   }
 
+  /**
+   * 이메일 인증 코드 확인
+   * @param {Request} req - Express request 객체 (body: email, code)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async verifyEmailCode(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, code } = req.body;
@@ -55,6 +78,13 @@ export class CompanyDomainController {
     }
   }
 
+  /**
+   * 인증된 도메인 목록 조회
+   * @param {Request} req - Express request 객체
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async getVerifiedDomains(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const domains = await companyDomainService.getVerifiedDomains();
@@ -68,6 +98,13 @@ export class CompanyDomainController {
     }
   }
 
+  /**
+   * 도메인 검색
+   * @param {Request} req - Express request 객체 (query: query)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async searchDomains(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { query } = req.query;
@@ -87,6 +124,13 @@ export class CompanyDomainController {
     }
   }
 
+  /**
+   * 새로운 회사 도메인 추가
+   * @param {Request} req - Express request 객체 (body: domain, companyName, companyNameKr, employeeCount, industry, logoUrl)
+   * @param {Response} res - Express response 객체
+   * @param {NextFunction} next - Express next 함수
+   * @returns {Promise<void>}
+   */
   async addCompanyDomain(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { domain, companyName, companyNameKr, employeeCount, industry, logoUrl } = req.body;

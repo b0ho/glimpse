@@ -24,7 +24,7 @@ type ProfileScreenNavigationProp = any;
 
 const ProfileScreenV2: React.FC = () => {
   const navigation = useNavigation<ProfileScreenNavigationProp>();
-  const { user, signOut } = useAuthStore();
+  const { user, clearAuth } = useAuthStore();
   const { 
     userProfile, 
     likesReceived, 
@@ -119,7 +119,7 @@ const ProfileScreenV2: React.FC = () => {
         {
           text: '로그아웃',
           style: 'destructive',
-          onPress: () => signOut(),
+          onPress: () => clearAuth(),
         },
       ]
     );

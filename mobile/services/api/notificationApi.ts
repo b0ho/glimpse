@@ -48,9 +48,7 @@ export const notificationApi = {
    * @description 서버에서 FCM 토큰을 제거하여 푸시 알림 중지
    */
   async removeFCMToken(token: string): Promise<void> {
-    await apiClient.delete('/users/fcm/token', {
-      data: { token }
-    });
+    await apiClient.delete('/users/fcm/token');
   },
 
   /**
@@ -61,8 +59,8 @@ export const notificationApi = {
    * @description 사용자의 알림 설정을 부분적으로 업데이트
    */
   async updateNotificationSettings(settings: Partial<NotificationSettings>): Promise<NotificationSettings> {
-    const response = await apiClient.put('/users/notifications/settings', settings);
-    return response.data.data;
+    const response = await apiClient.put<{ data: NotificationSettings }>('/users/notifications/settings', settings);
+    return response.data;
   },
 
   /**
@@ -72,8 +70,8 @@ export const notificationApi = {
    * @description 사용자의 현재 알림 설정을 가져오기
    */
   async getNotificationSettings(): Promise<NotificationSettings> {
-    const response = await apiClient.get('/users/notifications/settings');
-    return response.data.data;
+    const response = await apiClient.get<{ data: NotificationSettings }>('/users/notifications/settings');
+    return response.data;
   },
 
   /**
@@ -85,10 +83,8 @@ export const notificationApi = {
    * @description 사용자의 알림 목록을 페이지네이션하여 조회
    */
   async getNotifications(page = 1, limit = 20): Promise<any[]> {
-    const response = await apiClient.get('/notifications', {
-      params: { page, limit }
-    });
-    return response.data.data;
+    const response = await apiClient.get<{ data: any[] }>('/notifications', { page, limit });
+    return response.data;
   },
 
   /**
@@ -130,7 +126,7 @@ export const notificationApi = {
    * @description 사용자의 미읽은 알림 개수를 가져오기
    */
   async getUnreadCount(): Promise<number> {
-    const response = await apiClient.get('/notifications/unread-count');
-    return response.data.data.count;
+    const response = await apiClient.get<{ data: { count: number } }>('/notifications/unread-count');
+    return response.data.count;
   }
 };

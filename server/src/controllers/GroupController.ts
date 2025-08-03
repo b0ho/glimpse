@@ -133,6 +133,9 @@ export class GroupController {
 
       const { groupId } = req.params;
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       const inviteLink = await groupService.generateInviteLink(groupId, userId);
 
@@ -160,6 +163,9 @@ export class GroupController {
 
       const { inviteCode } = req.params;
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       const result = await groupService.joinGroupByInvite(inviteCode, userId);
 
@@ -187,6 +193,9 @@ export class GroupController {
 
       const { groupId } = req.params;
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       const invites = await groupService.getGroupInvites(groupId, userId);
 
@@ -214,6 +223,9 @@ export class GroupController {
 
       const { inviteId } = req.params;
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       await groupService.revokeInvite(inviteId, userId);
 
@@ -812,6 +824,9 @@ export class GroupController {
 
       const { groupId } = req.params;
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       const pendingMembers = await groupService.getPendingMembers(groupId, userId);
 
@@ -839,6 +854,9 @@ export class GroupController {
 
       const { groupId, userId: targetUserId } = req.params;
       const adminUserId = req.auth.userId;
+      if (!adminUserId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       const result = await groupService.approveMember(groupId, targetUserId, adminUserId);
 
@@ -868,6 +886,9 @@ export class GroupController {
       const { groupId, userId: targetUserId } = req.params;
       const { reason } = req.body;
       const adminUserId = req.auth.userId;
+      if (!adminUserId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       await groupService.rejectMember(groupId, targetUserId, adminUserId, reason);
 
