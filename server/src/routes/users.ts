@@ -1,9 +1,21 @@
+/**
+ * 사용자 라우트
+ * @module routes/users
+ * @description 프로필, 좋아요, 크레딧, 알림 설정 등 사용자 관련 API 엔드포인트
+ */
+
 import { Router } from 'express';
 import { clerkAuthMiddleware } from '../middleware/clerkAuth';
 import { userController } from '../controllers/UserController';
 import { validate, validators } from '../utils/validation';
 import { likeSendingLimiter, paymentCreationLimiter } from '../middleware/specificRateLimiters';
 
+/**
+ * 사용자 라우터 인스턴스
+ * @constant router
+ * @type {Router}
+ * @description 인증된 사용자 전용 API 엔드포인트
+ */
 const router = Router();
 
 /**

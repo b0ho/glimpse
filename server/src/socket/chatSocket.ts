@@ -1,3 +1,9 @@
+/**
+ * 실시간 채팅 WebSocket 핸들러
+ * @module socket/chatSocket
+ * @description Socket.IO를 사용한 실시간 채팅, 타이핑 상태, 온라인 상태 관리
+ */
+
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
@@ -12,11 +18,27 @@ import { websocketMetrics, chatMetrics } from '../utils/monitoring';
 const prisma = new PrismaClient();
 const chatService = new ChatService();
 
-// Store user socket mappings
+/**
+ * 사용자-소켓 매핑 저장소
+ * @constant userSocketMap
+ * @type {Map<string, string>}
+ * @description userId -> socketId 매핑
+ */
 const userSocketMap = new Map<string, string>();
+
+/**
+ * 소켓-사용자 역매핑 저장소
+ * @constant socketUserMap
+ * @type {Map<string, string>}
+ * @description socketId -> userId 매핑
+ */
 const socketUserMap = new Map<string, string>();
 
-// Clerk JWKS client for token verification
+/**
+ * Clerk JWKS 클라이언트
+ * @constant client
+ * @description JWT 토큰 검증을 위한 Clerk JWKS 클라이언트
+ */
 const jwksUri = `https://api.clerk.com/v1/jwks`;
 const client = jwksClient({
   jwksUri,
@@ -25,6 +47,13 @@ const client = jwksClient({
   cacheMaxAge: 600000, // 10 minutes
 });
 
+/**
+ * JWT 서명 키 가져오기
+ * @function getKey
+ * @param {any} header - JWT 헤더
+ * @param {any} callback - 콜백 함수
+ * @description JWKS에서 JWT 서명 검증용 공개 키 가져오기
+ */
 function getKey(header: any, callback: any) {
   client.getSigningKey(header.kid, function (err, key) {
     if (err) {
@@ -36,11 +65,24 @@ function getKey(header: any, callback: any) {
   });
 }
 
+/**
+ * 소켓 데이터 인터페이스
+ * @interface SocketData
+ * @description 소켓 연결에 저장되는 사용자 정보
+ */
 interface SocketData {
+  /** 사용자 ID */
   userId?: string;
+  /** 매치 ID */
   matchId?: string;
 }
 
+/**
+ * 채팅 소켓 초기화
+ * @function initializeChatSocket
+ * @param {Server} io - Socket.IO 서버 인스턴스
+ * @description WebSocket 연결 및 이벤트 핸들러 설정
+ */
 export function initializeChatSocket(io: Server) {
   // Authentication middleware
   io.use(async (socket, next) => {

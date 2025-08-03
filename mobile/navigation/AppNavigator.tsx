@@ -1,3 +1,9 @@
+/**
+ * 앱 네비게이터
+ * @module navigation/AppNavigator
+ * @description 데이팅/친구 모드 및 모든 화면 네비게이션 관리
+ */
+
 import React, { useRef, useEffect } from 'react';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -38,7 +44,12 @@ import { LikeHistoryScreen } from '@/screens/LikeHistoryScreen';
 import { DeleteAccountScreen } from '@/screens/DeleteAccountScreen';
 // import { RootStackParamList } from '@/types';
 
-// Navigation Types
+/**
+ * 네비게이션 타입 정의
+ * @description 각 스택과 탭에서 사용되는 파라미터 타입
+ */
+
+/** 인증 스택 파라미터 */
 type AuthStackParamList = {
   Auth: undefined;
 };
@@ -89,7 +100,11 @@ type MainTabParamList = {
   Friends: undefined;
 };
 
-// Combined navigation type for global use
+/**
+ * 루트 네비게이션 파라미터 타입
+ * @type RootNavigationParamList
+ * @description 전역에서 사용할 통합 네비게이션 타입
+ */
 export type RootNavigationParamList = MainTabParamList & {
   Chat: {
     roomId: string;
@@ -125,7 +140,11 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // 모든 메인 화면들이 실제 컴포넌트로 구현됨
 
-// AuthScreen 래퍼 컴포넌트
+/**
+ * 인증 화면 래퍼
+ * @component AuthScreenWrapper
+ * @description 인증 완료 처리를 위한 래퍼 컴포넌트
+ */
 const AuthScreenWrapper = () => {
   const handleAuthCompleted = () => {
     console.log('Authentication completed');
@@ -135,7 +154,12 @@ const AuthScreenWrapper = () => {
   return <AuthScreen onAuthCompleted={handleAuthCompleted} />;
 };
 
-// 인증되지 않은 사용자용 네비게이터
+/**
+ * 인증 네비게이터
+ * @function AuthNavigator
+ * @returns {JSX.Element} 인증 스택 네비게이터
+ * @description 로그인하지 않은 사용자를 위한 인증 화면
+ */
 function AuthNavigator() {
   return (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
@@ -148,7 +172,12 @@ function AuthNavigator() {
   );
 }
 
-// Home Stack Navigator
+/**
+ * 홈 스택 네비게이터
+ * @function HomeStackNavigator
+ * @returns {JSX.Element} 홈 스택 네비게이터
+ * @description 메인 피드, 컨텐츠 작성, 스토리 업로드
+ */
 function HomeStackNavigator() {
   return (
     <HomeStack.Navigator>
@@ -179,7 +208,12 @@ function HomeStackNavigator() {
   );
 }
 
-// Groups Stack Navigator
+/**
+ * 그룹 스택 네비게이터
+ * @function GroupsStackNavigator
+ * @returns {JSX.Element} 그룹 스택 네비게이터
+ * @description 그룹 목록, 생성, 위치 기반 그룹, 초대 관리
+ */
 function GroupsStackNavigator() {
   return (
     <GroupsStack.Navigator>
@@ -252,7 +286,12 @@ function GroupsStackNavigator() {
   );
 }
 
-// Matches Stack Navigator
+/**
+ * 매치 스택 네비게이터
+ * @function MatchesStackNavigator
+ * @returns {JSX.Element} 매치 스택 네비게이터
+ * @description 매칭 목록과 채팅 화면
+ */
 function MatchesStackNavigator() {
   return (
     <MatchesStack.Navigator>
@@ -272,7 +311,12 @@ function MatchesStackNavigator() {
   );
 }
 
-// Profile Stack Navigator
+/**
+ * 프로필 스택 네비게이터
+ * @function ProfileStackNavigator
+ * @returns {JSX.Element} 프로필 스택 네비게이터
+ * @description 프로필, 프리미엄, 알림 설정, 계정 관리
+ */
 function ProfileStackNavigator() {
   return (
     <ProfileStack.Navigator>
@@ -328,7 +372,12 @@ function ProfileStackNavigator() {
   );
 }
 
-// Dating Mode Tab Navigator
+/**
+ * 데이팅 모드 탭 네비게이터
+ * @function DatingTabNavigator
+ * @returns {JSX.Element} 데이팅 모드 탭 네비게이터
+ * @description 연애 목적 사용자를 위한 4개 탭 (홈, 그룹, 매칭, 프로필)
+ */
 function DatingTabNavigator() {
   const { currentMode } = useAuthStore();
   const modeTexts = MODE_TEXTS[currentMode];
@@ -391,7 +440,12 @@ function DatingTabNavigator() {
   );
 }
 
-// Friendship Mode Tab Navigator
+/**
+ * 친구 모드 탭 네비게이터
+ * @function FriendshipTabNavigator
+ * @returns {JSX.Element} 친구 모드 탭 네비게이터
+ * @description 친구 찾기 목적 사용자를 위한 5개 탭 (홈, 커뮤니티, 단체채팅, 친구목록, 프로필)
+ */
 function FriendshipTabNavigator() {
   return (
     <Tab.Navigator
@@ -460,14 +514,24 @@ function FriendshipTabNavigator() {
   );
 }
 
-// Main Tab Navigator (mode selector)
+/**
+ * 메인 탭 네비게이터
+ * @function MainTabNavigator
+ * @returns {JSX.Element} 현재 모드에 따른 탭 네비게이터
+ * @description 앱 모드에 따라 데이팅 또는 친구 모드 탭 표시
+ */
 function MainTabNavigator() {
   const { currentMode } = useAuthStore();
   
   return currentMode === AppMode.DATING ? <DatingTabNavigator /> : <FriendshipTabNavigator />;
 }
 
-// 메인 앱 네비게이터
+/**
+ * 앱 네비게이터
+ * @function AppNavigator
+ * @returns {JSX.Element} 앱 네비게이터
+ * @description 인증 상태와 모드 선택에 따른 화면 라우팅
+ */
 function AppNavigator() {
   const { isSignedIn, isLoaded } = useAuth();
   const { currentMode } = useAuthStore();
@@ -510,7 +574,12 @@ function AppNavigator() {
   );
 }
 
-// 네비게이션 컨테이너를 포함한 루트 네비게이터
+/**
+ * 루트 네비게이터
+ * @function RootNavigator
+ * @returns {JSX.Element} 루트 네비게이터
+ * @description 네비게이션 컨테이너, 호출 제공자, FCM 초기화 포함
+ */
 export default function RootNavigator() {
   const navigationRef = useRef<NavigationContainerRef<RootNavigationParamList>>(null);
   const { isSignedIn } = useAuth();

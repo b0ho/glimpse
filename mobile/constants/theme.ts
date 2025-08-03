@@ -1,3 +1,14 @@
+/**
+ * 테마 상수
+ * @module constants/theme
+ * @description 애플리케이션 전체에서 사용되는 디자인 테마 상수
+ */
+
+/**
+ * 색상 테마
+ * @constant COLORS
+ * @description 브랜드 아이덴티티와 UI 일관성을 위한 색상 팔레트
+ */
 export const COLORS = {
   primary: '#FF6B6B',
   secondary: '#4ECDC4',
@@ -33,6 +44,11 @@ export const COLORS = {
   infoBackground: '#E7F5FF',
 };
 
+/**
+ * 크기 및 간격 상수
+ * @constant SIZES
+ * @description 레이아웃, 폰트 크기, 여백 등 UI 크기 값
+ */
 export const SIZES = {
   base: 8,
   font: 14,
@@ -59,6 +75,11 @@ export const SIZES = {
   height: 812,
 };
 
+/**
+ * 폰트 스타일
+ * @constant FONTS
+ * @description 타이포그래피 스타일 정의
+ */
 export const FONTS = {
   largeTitle: { fontSize: SIZES.largeTitle, lineHeight: 55 },
   h1: { fontSize: SIZES.h1, lineHeight: 36, fontWeight: '700' as const },
@@ -72,5 +93,10 @@ export const FONTS = {
   body5: { fontSize: SIZES.body5, lineHeight: 22 },
 };
 
+/**
+ * 앱 테마 객체
+ * @constant appTheme
+ * @description 모든 테마 상수를 포함하는 통합 테마 객체
+ */
 const appTheme = { COLORS, SIZES, FONTS };
 export default appTheme;

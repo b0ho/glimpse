@@ -1,6 +1,38 @@
+/**
+ * @module Swagger
+ * @description Swagger API 문서 설정 및 스키마 정의
+ * 
+ * Glimpse 앱의 모든 API 엔드포인트에 대한 문서화를 자동으로 생성합니다.
+ * OpenAPI 3.0 표준을 따르며, 개발자들이 API를 쉽게 이해하고 테스트할 수 있도록
+ * 상세한 스키마와 예제를 제공합니다.
+ * 
+ * 주요 기능:
+ * - 모든 API 엔드포인트 자동 문서화
+ * - 요청/응답 스키마 정의
+ * - 인증 방법 설명
+ * - 에러 코드 및 응답 형식 정의
+ * - 대화형 API 테스트 인터페이스
+ * 
+ * 지원하는 API 카테고리:
+ * - 인증 (Auth)
+ * - 사용자 관리 (Users)
+ * - 그룹 관리 (Groups)
+ * - 매칭 시스템 (Matches)
+ * - 실시간 채팅 (Chat)
+ * - 결제 시스템 (Payments)
+ */
+
 import swaggerJsdoc from 'swagger-jsdoc';
 import env from './env';
 
+/**
+ * Swagger API 문서 정의
+ * 
+ * OpenAPI 3.0 규격에 따른 API 문서 메타데이터와 기본 설정을 정의합니다.
+ * 서버 정보, 인증 방법, 공통 스키마, 응답 템플릿 등을 포함합니다.
+ * 
+ * @constant {Object}
+ */
 const swaggerDefinition = {
   openapi: '3.0.0',
   info: {
@@ -239,6 +271,15 @@ const swaggerDefinition = {
   ]
 };
 
+/**
+ * Swagger JSDoc 옵션 설정
+ * 
+ * API 문서 생성을 위한 설정 옵션을 정의합니다.
+ * 컨트롤러와 라우트 파일에서 JSDoc 주석을 파싱하여
+ * 자동으로 API 문서를 생성합니다.
+ * 
+ * @constant {Object}
+ */
 const options = {
   definition: swaggerDefinition,
   apis: [
@@ -247,4 +288,18 @@ const options = {
   ],
 };
 
+/**
+ * 생성된 Swagger API 스펙
+ * 
+ * swagger-jsdoc을 통해 생성된 완전한 OpenAPI 스펙입니다.
+ * Express 앱에서 swagger-ui-express와 함께 사용되어
+ * 대화형 API 문서 인터페이스를 제공합니다.
+ * 
+ * 사용 방법:
+ * ```typescript
+ * app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+ * ```
+ * 
+ * @constant {Object}
+ */
 export const swaggerSpec = swaggerJsdoc(options);

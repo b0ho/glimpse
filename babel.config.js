@@ -1,3 +1,9 @@
+/**
+ * Babel 트랜스파일러 설정
+ * @module babel.config
+ * @description React Native 및 Expo를 위한 Babel 설정
+ */
+
 module.exports = function (api) {
   api.cache(true);
   return {

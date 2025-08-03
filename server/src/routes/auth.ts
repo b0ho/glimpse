@@ -1,8 +1,20 @@
+/**
+ * 인증 라우트
+ * @module routes/auth
+ * @description SMS 인증, 회원가입, 토큰 갱신 등 인증 관련 API 엔드포인트
+ */
+
 import { Router } from 'express';
 import { authController } from '../controllers/AuthController';
 import { validate, validators } from '../utils/validation';
 import { authRateLimiter } from '../config/security';
 
+/**
+ * 인증 라우터 인스턴스
+ * @constant router
+ * @type {Router}
+ * @description 모든 인증 관련 라우트에 rate limiting 적용
+ */
 const router = Router();
 
 // Apply rate limiting to all auth routes

@@ -1,3 +1,9 @@
+/**
+ * Jest 테스트 프레임워크 설정
+ * @module jest.config
+ * @description React Native 및 Expo 환경을 위한 Jest 테스트 설정
+ */
+
 module.exports = {
   preset: 'jest-expo',
   transformIgnorePatterns: [
