@@ -331,8 +331,9 @@ export class PaymentService {
    * @throws {Error} 토스페이 결제 생성 실패 시
    */
   private async createTossPayment(payment: Payment) {
-    const orderId = payment.externalId;
-    const orderName = this.getOrderName(payment.type, payment.packageType);
+    const metadata = payment.metadata as any || {};
+    const orderId = metadata.externalId || payment.id;
+    const orderName = this.getOrderName(payment.type, metadata.packageType);
     
     const paymentData = {
       orderId,
@@ -371,8 +372,9 @@ export class PaymentService {
    * @throws {Error} 카카오페이 결제 생성 실패 시
    */
   private async createKakaoPayment(payment: Payment) {
-    const orderId = payment.externalId;
-    const itemName = this.getOrderName(payment.type, payment.packageType);
+    const metadata = payment.metadata as any || {};
+    const orderId = metadata.externalId || payment.id;
+    const itemName = this.getOrderName(payment.type, metadata.packageType);
     
     const paymentData = {
       cid: process.env.KAKAO_CID || 'TC0ONETIME',
@@ -407,13 +409,14 @@ export class PaymentService {
 
   private async createGenericPayment(payment: Payment) {
     // For card/bank payments, create a generic payment URL
-    const paymentUrl = `${process.env.BASE_URL}/payment/generic/${payment.externalId}`;
+    const metadata = payment.metadata as any || {};
+    const paymentUrl = `${process.env.BASE_URL}/payment/generic/${metadata.externalId || payment.id}`;
     
     return {
       paymentUrl,
       paymentData: {
         paymentId: payment.id,
-        externalId: payment.externalId,
+        externalId: metadata.externalId || payment.id,
         amount: payment.amount,
         currency: payment.currency
       }
@@ -422,8 +425,9 @@ export class PaymentService {
 
   private async processTossPayment(payment: Payment, paymentKey: string) {
     try {
+      const metadata = payment.metadata as any || {};
       const response = await axios.post(`https://api.tosspayments.com/v1/payments/${paymentKey}`, {
-        orderId: payment.externalId,
+        orderId: metadata.externalId || payment.id,
         amount: payment.amount
       }, {
         headers: {
@@ -449,10 +453,11 @@ export class PaymentService {
 
   private async processKakaoPayment(payment: Payment, pgToken: string) {
     try {
+      const metadata = payment.metadata as any || {};
       const response = await axios.post('https://kapi.kakao.com/v1/payment/approve', {
         cid: process.env.KAKAO_CID || 'TC0ONETIME',
-        tid: (payment.externalData as any)?.tid,
-        partner_order_id: payment.externalId,
+        tid: metadata?.tid,
+        partner_order_id: metadata.externalId || payment.id,
         partner_user_id: payment.userId,
         pg_token: pgToken
       }, {

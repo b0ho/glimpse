@@ -145,7 +145,7 @@ export class StripeProvider implements PaymentProvider {
     errorMessage?: string;
   }> {
     try {
-      const transactionId = payment.transactionId;
+      const transactionId = payment.stripePaymentId;
       
       if (!transactionId) {
         throw new Error('Missing transaction ID for refund');
@@ -190,20 +190,20 @@ export class StripeProvider implements PaymentProvider {
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object as Stripe.Checkout.Session;
-        paymentId = session.metadata!.paymentId;
+        paymentId = session.metadata?.paymentId || '';
         status = 'COMPLETED';
         transactionId = session.payment_intent as string;
         break;
         
       case 'payment_intent.payment_failed':
         const failedIntent = event.data.object as Stripe.PaymentIntent;
-        paymentId = failedIntent.metadata!.paymentId;
+        paymentId = failedIntent.metadata?.paymentId || '';
         status = 'FAILED';
         break;
         
       case 'charge.refunded':
         const refundedCharge = event.data.object as Stripe.Charge;
-        paymentId = refundedCharge.metadata!.paymentId;
+        paymentId = refundedCharge.metadata?.paymentId || '';
         status = 'REFUNDED'; // Treat all refunds as full refunds
         break;
         

@@ -1,24 +1,22 @@
 import { PaymentService } from '../PaymentService';
 import { prismaMock } from '../../__tests__/setup';
 import { createMockUser } from '../../__tests__/setup';
-import { stripe } from '../../config/stripe';
+// import { stripe } from '../../config/stripe';
 import { createError } from '../../middleware/errorHandler';
 
 // Mock stripe
-jest.mock('../../config/stripe', () => ({
-  stripe: {
-    paymentIntents: {
+const stripeMock = {
+  paymentIntents: {
+    create: jest.fn(),
+    retrieve: jest.fn(),
+  },
+  checkout: {
+    sessions: {
       create: jest.fn(),
       retrieve: jest.fn(),
     },
-    checkout: {
-      sessions: {
-        create: jest.fn(),
-        retrieve: jest.fn(),
-      },
-    },
   },
-}));
+};
 
 // Mock external payment services
 jest.mock('axios');
@@ -51,7 +49,7 @@ describe('PaymentService', () => {
 
       prismaMock.payment.create.mockResolvedValue(mockPayment as any);
 
-      const result = await paymentService.createPayment(userId, paymentData);
+      const result = await paymentService.createPayment({ userId, ...paymentData });
 
       expect(result).toEqual(mockPayment);
       expect(prismaMock.payment.create).toHaveBeenCalledWith({

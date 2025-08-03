@@ -56,10 +56,14 @@ router.get('/methods', authMiddleware, paymentController.getPaymentMethods);
 router.get('/packages', authMiddleware, paymentController.getPricingPackages);
 
 // Retry endpoints (with idempotency)
-router.post('/retry/:paymentId', authMiddleware, idempotent(), async (req, res, next) => {
+router.post('/retry/:paymentId', authMiddleware, idempotent(), async (req: any, res, next) => {
   try {
     const { paymentId } = req.params;
-    const userId = (req as any).user!.id;
+    const userId = req.auth?.userId;
+    
+    if (!userId) {
+      throw new Error('User ID not found');
+    }
     
     const result = await paymentRetryService.processPaymentWithRetry(
       paymentId,

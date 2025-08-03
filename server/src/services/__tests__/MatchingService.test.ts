@@ -39,7 +39,7 @@ describe('MatchingService', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty('user');
-      expect(result[0].user.id).toBe('test-user-2');
+      expect(result[0].user?.id).toBe('test-user-2');
       expect(result[0]).toHaveProperty('lastMessage');
       expect(prismaMock.match.findMany).toHaveBeenCalledWith({
         where: {
@@ -165,8 +165,8 @@ describe('MatchingService', () => {
 
       expect(result).toHaveLength(2);
       expect(result[0]).toHaveProperty('compatibilityScore');
-      expect(result[0].bio).toBeNull(); // Bio hidden until matched
-      expect(result[0].nickname).toMatch(/^\*+$/); // Anonymized nickname
+      expect(result[0]!.bio).toBeNull(); // Bio hidden until matched
+      expect(result[0]!.nickname).toMatch(/^\*+$/); // Anonymized nickname
     });
 
     it('should exclude already liked users', async () => {

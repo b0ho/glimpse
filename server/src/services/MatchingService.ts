@@ -252,7 +252,7 @@ export class MatchingService {
     });
 
     // Calculate compatibility scores and apply matching algorithm
-    const scoredMatches = await trackAsyncOperation(
+    return await trackAsyncOperation(
       async () => {
         return potentialMatches
           .map(user => ({
@@ -262,14 +262,12 @@ export class MatchingService {
             nickname: user.nickname ? user.nickname.charAt(0) + '*'.repeat(user.nickname.length - 1) : '',
             bio: null // Hide bio until matched
           }))
-          .sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+          .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
+          .slice(0, count);
       },
       metrics.matchingDuration,
       { type: 'discovery' }
-    )
-      .slice(0, count);
-
-    return scoredMatches;
+    );
   }
 
   /**

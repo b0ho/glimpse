@@ -137,6 +137,10 @@ export class FileUploadService {
     const uploadResults = await Promise.all(uploadPromises);
     const mainResult = uploadResults[1]; // Use 'large' as the main image
 
+    if (!mainResult) {
+      throw new Error('Failed to upload profile image');
+    }
+
     // Convert to CDN URL
     const cdnUrl = cloudFrontService.getCDNUrl(mainResult.url);
     
@@ -152,9 +156,9 @@ export class FileUploadService {
         category: 'PROFILE_IMAGE',
         metadata: {
           variants: uploadResults.map((result, index) => ({
-            size: sizes[index].suffix,
-            url: cloudFrontService.getCDNUrl(result.url),
-            width: sizes[index].width
+            size: sizes[index]?.suffix || 'unknown',
+            url: result ? cloudFrontService.getCDNUrl(result.url) : '',
+            width: sizes[index]?.width || 0
           }))
         }
       }

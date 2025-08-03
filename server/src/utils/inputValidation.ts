@@ -269,7 +269,9 @@ export function createValidator(validationRules: Record<string, (value: any) => 
     }
 
     if (Object.keys(errors).length > 0) {
-      return next(createError(400, 'Validation failed', { errors }));
+      const error = createError(400, 'Validation failed');
+      (error as any).errors = errors;
+      return next(error);
     }
 
     next();

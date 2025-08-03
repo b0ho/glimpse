@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import { createClient, RedisClientType } from 'redis';
 import { logger } from '../middleware/logging';
 import { EventEmitter } from 'events';
 
@@ -43,9 +43,9 @@ interface QueueOptions {
  */
 export class MessageQueueService extends EventEmitter {
   /** Redis publisher 클라이언트 */
-  private publisher: Redis;
+  private publisher: RedisClientType;
   /** Redis subscriber 클라이언트 */
-  private subscriber: Redis;
+  private subscriber: RedisClientType;
   /** 연결 상태 */
   private isConnected: boolean = false;
 
@@ -55,20 +55,19 @@ export class MessageQueueService extends EventEmitter {
   constructor() {
     super();
     
-    const redisConfig = {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
+    const redisUrl = process.env.REDIS_URL || `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || '6379'}`;
+    
+    this.publisher = createClient({
+      url: redisUrl,
       password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '0'),
-      retryStrategy: (times: number) => {
-        const delay = Math.min(times * 50, 2000);
-        return delay;
-      },
-      maxRetriesPerRequest: 3
-    };
-
-    this.publisher = new Redis(redisConfig);
-    this.subscriber = new Redis(redisConfig);
+      database: parseInt(process.env.REDIS_DB || '0')
+    });
+    
+    this.subscriber = createClient({
+      url: redisUrl,
+      password: process.env.REDIS_PASSWORD,
+      database: parseInt(process.env.REDIS_DB || '0')
+    });
 
     this.setupEventHandlers();
     this.startQueueProcessor();
@@ -79,7 +78,11 @@ export class MessageQueueService extends EventEmitter {
    * @private
    * @returns {void}
    */
-  private setupEventHandlers() {
+  private async setupEventHandlers() {
+    // Connect to Redis
+    await this.publisher.connect();
+    await this.subscriber.connect();
+    
     this.publisher.on('connect', () => {
       logger.info('Message queue publisher connected');
       this.isConnected = true;
@@ -126,7 +129,7 @@ export class MessageQueueService extends EventEmitter {
     const ttl = options.ttl || 7 * 24 * 60 * 60; // 7 days default
 
     try {
-      await this.publisher.zadd(queueKey, Date.now(), JSON.stringify(queueMessage));
+      await this.publisher.zAdd(queueKey, { score: Date.now(), value: JSON.stringify(queueMessage) });
       await this.publisher.expire(queueKey, ttl);
       
       logger.info(`Enqueued offline message for user ${userId}`);
@@ -148,7 +151,7 @@ export class MessageQueueService extends EventEmitter {
 
     try {
       // Get all messages sorted by timestamp
-      const messages = await this.publisher.zrange(queueKey, 0, -1);
+      const messages = await this.publisher.zRange(queueKey, 0, -1);
       
       // Parse and return messages
       return messages.map(msg => {
@@ -216,7 +219,7 @@ export class MessageQueueService extends EventEmitter {
     const score = Date.now() + retryDelay * queueMessage.attempts;
 
     try {
-      await this.publisher.zadd(queueKey, score, JSON.stringify(queueMessage));
+      await this.publisher.zAdd(queueKey, { score, value: JSON.stringify(queueMessage) });
       logger.info(`Enqueued push notification retry for user ${notification.userId}, attempt ${queueMessage.attempts}`);
     } catch (error) {
       logger.error('Failed to enqueue push notification retry:', error);
@@ -251,7 +254,7 @@ export class MessageQueueService extends EventEmitter {
 
     try {
       // Get messages ready for retry
-      const messages = await this.publisher.zrangebyscore(queueKey, 0, now, 'LIMIT', 0, 10);
+      const messages = await this.publisher.zRangeByScore(queueKey, 0, now, { LIMIT: { offset: 0, count: 10 } });
 
       for (const messageStr of messages) {
         try {
@@ -261,7 +264,7 @@ export class MessageQueueService extends EventEmitter {
           this.emit('push_notification_retry', message.payload);
 
           // Remove from queue
-          await this.publisher.zrem(queueKey, messageStr);
+          await this.publisher.zRem(queueKey, messageStr);
         } catch (error) {
           logger.error('Failed to process retry message:', error);
         }
@@ -281,7 +284,7 @@ export class MessageQueueService extends EventEmitter {
     const failedKey = `failed_notifications:${new Date().toISOString().split('T')[0]}`;
     
     try {
-      await this.publisher.lpush(failedKey, JSON.stringify({
+      await this.publisher.lPush(failedKey, JSON.stringify({
         notification,
         failedAt: new Date().toISOString()
       }));
@@ -320,16 +323,12 @@ export class MessageQueueService extends EventEmitter {
    */
   async subscribeToChannel(channel: string, callback: (message: any) => void) {
     try {
-      await this.subscriber.subscribe(channel);
-      
-      this.subscriber.on('message', (receivedChannel, message) => {
-        if (receivedChannel === channel) {
-          try {
-            const parsedMessage = JSON.parse(message);
-            callback(parsedMessage);
-          } catch (error) {
-            logger.error('Failed to parse message:', error);
-          }
+      await this.subscriber.subscribe(channel, (message) => {
+        try {
+          const parsedMessage = JSON.parse(message);
+          callback(parsedMessage);
+        } catch (error) {
+          logger.error('Failed to parse message:', error);
         }
       });
     } catch (error) {
