@@ -61,7 +61,7 @@ const contentSecurityPolicy = {
  * @description XSS, 클릭재킹, 스니핑 등 다양한 공격 방어
  */
 export const securityHeaders = helmet({
-  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? contentSecurityPolicy : false,
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? contentSecurityPolicy as any : false,
   crossOriginEmbedderPolicy: { policy: "require-corp" },
   crossOriginOpenerPolicy: { policy: "same-origin" },
   crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -149,7 +149,7 @@ export const securityMonitoring = (req: Request, res: Response, next: NextFuncti
  * @param {NextFunction} next - 다음 미들웨어 함수
  * @returns {void | Response}
  */
-export const apiKeyAuth = (req: Request, res: Response, next: NextFunction) => {
+export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): void | Response => {
   const apiKey = req.headers['x-api-key'];
   
   if (req.path.startsWith('/internal/')) {

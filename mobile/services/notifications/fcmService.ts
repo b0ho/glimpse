@@ -83,7 +83,7 @@ class FCMService {
       this.setupMessageHandlers();
 
       // Handle token refresh
-      messaging.onTokenRefresh(async (token) => {
+      messaging.onTokenRefresh(async (token: string) => {
         console.log('FCM token refreshed:', token);
         await this.registerToken(token);
       });
@@ -153,9 +153,7 @@ class FCMService {
       const storedToken = await AsyncStorage.getItem(FCM_TOKEN_KEY);
       
       if (storedToken) {
-        await apiClient.delete('/users/fcm/token', {
-          data: { token: storedToken }
-        });
+        await apiClient.delete('/users/fcm/token');
 
         await AsyncStorage.removeItem(FCM_TOKEN_KEY);
         this.fcmToken = null;
@@ -174,7 +172,7 @@ class FCMService {
    */
   private setupMessageHandlers(): void {
     // Handle foreground messages
-    messaging.onMessage(async (remoteMessage) => {
+    messaging.onMessage(async (remoteMessage: any) => {
       console.log('Foreground message received:', remoteMessage);
       
       // Show local notification when app is in foreground
@@ -189,7 +187,7 @@ class FCMService {
     });
 
     // Handle background message
-    messaging.setBackgroundMessageHandler(async (remoteMessage) => {
+    messaging.setBackgroundMessageHandler(async (remoteMessage: any) => {
       console.log('Background message received:', remoteMessage);
       
       // Handle background message (e.g., update badge count)
@@ -200,7 +198,7 @@ class FCMService {
     });
 
     // Handle notification opened app
-    messaging.onNotificationOpenedApp((remoteMessage) => {
+    messaging.onNotificationOpenedApp((remoteMessage: any) => {
       console.log('Notification opened app:', remoteMessage);
       this.handleNotificationOpen(remoteMessage);
     });
@@ -208,7 +206,7 @@ class FCMService {
     // Check if app was opened from a notification
     messaging()
       .getInitialNotification()
-      .then((remoteMessage) => {
+      .then((remoteMessage: any) => {
         if (remoteMessage) {
           console.log('App opened from notification:', remoteMessage);
           // Delay to ensure navigation is ready

@@ -22,9 +22,18 @@ export const useNearbyUsers = () => {
         longitude: location.longitude,
         radius: radius * 1000, // Convert km to meters
       });
-      const users = response.users;
+      
+      // Convert User[] to NearbyUser[]
+      const nearbyUsersData: NearbyUser[] = response.users.map(user => ({
+        ...user,
+        anonymousId: user.id, // Using ID as anonymous ID
+        distance: 0, // Distance will be calculated by server
+        lastSeen: new Date().toISOString(),
+        isOnline: true,
+        commonGroups: []
+      }));
 
-      setNearbyUsers(users);
+      setNearbyUsers(nearbyUsersData);
     } catch (error: any) {
       console.error('Load nearby users error:', error);
       Alert.alert(

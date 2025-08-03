@@ -143,7 +143,7 @@ export const rewindLikeAction = async (
     }
 
     // Restore super like usage
-    if (lastLike.isSuperLike) {
+    if (lastLike.isSuper) {
       updatedState.superLikesUsed = Math.max(0, state.superLikesUsed - 1);
     }
 

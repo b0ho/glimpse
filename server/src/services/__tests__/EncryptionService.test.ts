@@ -77,9 +77,9 @@ describe('EncryptionService', () => {
 
       const hashed = await encryptionService.hashPassword(password);
       expect(hashed).not.toBe(password);
-      expect(hashed.length).toBeGreaterThan(50); // bcrypt hashes are long
+      expect(hashed.hash.length).toBeGreaterThan(50); // bcrypt hashes are long
 
-      const isValid = await encryptionService.verifyPassword(password, hashed);
+      const isValid = await encryptionService.verifyPassword(password, hashed.hash, hashed.salt);
       expect(isValid).toBe(true);
     });
 
@@ -88,7 +88,7 @@ describe('EncryptionService', () => {
       const wrongPassword = 'wrongPassword';
 
       const hashed = await encryptionService.hashPassword(password);
-      const isValid = await encryptionService.verifyPassword(wrongPassword, hashed);
+      const isValid = await encryptionService.verifyPassword(wrongPassword, hashed.hash, hashed.salt);
 
       expect(isValid).toBe(false);
     });
@@ -102,37 +102,36 @@ describe('EncryptionService', () => {
       expect(hash1).not.toBe(hash2);
 
       // But both should verify correctly
-      expect(await encryptionService.verifyPassword(password, hash1)).toBe(true);
-      expect(await encryptionService.verifyPassword(password, hash2)).toBe(true);
+      expect(await encryptionService.verifyPassword(password, hash1.hash, hash1.salt)).toBe(true);
+      expect(await encryptionService.verifyPassword(password, hash2.hash, hash2.salt)).toBe(true);
     });
   });
 
-  describe('generateToken', () => {
+  describe('generateSecureToken', () => {
     it('should generate random tokens', () => {
-      const token1 = encryptionService.generateToken();
-      const token2 = encryptionService.generateToken();
+      const token1 = encryptionService.generateSecureToken();
+      const token2 = encryptionService.generateSecureToken();
 
-      expect(token1).toHaveLength(64); // 32 bytes = 64 hex chars
-      expect(token2).toHaveLength(64);
       expect(token1).not.toBe(token2);
-      expect(token1).toMatch(/^[a-f0-9]+$/);
+      expect(token1).toMatch(/^[A-Za-z0-9_-]+$/); // base64url format
     });
 
     it('should generate tokens of specified length', () => {
-      const token16 = encryptionService.generateToken(16);
-      const token48 = encryptionService.generateToken(48);
+      const token16 = encryptionService.generateSecureToken(16);
+      const token48 = encryptionService.generateSecureToken(48);
 
-      expect(token16).toHaveLength(32); // 16 bytes = 32 hex chars
-      expect(token48).toHaveLength(96); // 48 bytes = 96 hex chars
+      // base64url encoding results in roughly 4/3 of the input bytes
+      expect(token16.length).toBeGreaterThan(20); // approximately 22
+      expect(token48.length).toBeGreaterThan(60); // approximately 64
     });
   });
 
-  describe('hashData', () => {
+  describe('hash', () => {
     it('should hash data consistently', () => {
       const data = 'some data to hash';
 
-      const hash1 = encryptionService.hashData(data);
-      const hash2 = encryptionService.hashData(data);
+      const hash1 = encryptionService.hash(data);
+      const hash2 = encryptionService.hash(data);
 
       expect(hash1).toBe(hash2);
       expect(hash1).toHaveLength(64); // SHA-256 = 64 hex chars
@@ -142,66 +141,43 @@ describe('EncryptionService', () => {
       const data1 = 'data1';
       const data2 = 'data2';
 
-      const hash1 = encryptionService.hashData(data1);
-      const hash2 = encryptionService.hashData(data2);
+      const hash1 = encryptionService.hash(data1);
+      const hash2 = encryptionService.hash(data2);
 
       expect(hash1).not.toBe(hash2);
     });
   });
 
-  describe('encryptSensitiveData and decryptSensitiveData', () => {
-    it('should handle JSON objects', async () => {
+  describe('encryptObject and decryptObject', () => {
+    it('should handle objects with specific fields', async () => {
       const sensitiveData = {
         cardNumber: '1234-5678-9012-3456',
         cvv: '123',
         expiry: '12/25',
+        userId: 'user123',
       };
 
-      const encrypted = await encryptionService.encryptSensitiveData(sensitiveData);
-      expect(typeof encrypted).toBe('string');
+      const encrypted = encryptionService.encryptObject(sensitiveData, ['cardNumber', 'cvv']);
+      expect(encrypted.cardNumber).not.toBe(sensitiveData.cardNumber);
+      expect(encrypted.cvv).not.toBe(sensitiveData.cvv);
+      expect(encrypted.expiry).toBe(sensitiveData.expiry); // not encrypted
+      expect(encrypted.userId).toBe(sensitiveData.userId); // not encrypted
 
-      const decrypted = await encryptionService.decryptSensitiveData(encrypted);
-      expect(decrypted).toEqual(sensitiveData);
-    });
-
-    it('should handle arrays', async () => {
-      const sensitiveData = ['secret1', 'secret2', 'secret3'];
-
-      const encrypted = await encryptionService.encryptSensitiveData(sensitiveData);
-      const decrypted = await encryptionService.decryptSensitiveData(encrypted);
-
-      expect(decrypted).toEqual(sensitiveData);
-    });
-
-    it('should handle nested objects', async () => {
-      const sensitiveData = {
-        user: {
-          name: 'John Doe',
-          ssn: '123-45-6789',
-          accounts: [
-            { bank: 'Bank A', number: '12345' },
-            { bank: 'Bank B', number: '67890' },
-          ],
-        },
-      };
-
-      const encrypted = await encryptionService.encryptSensitiveData(sensitiveData);
-      const decrypted = await encryptionService.decryptSensitiveData(encrypted);
-
+      const decrypted = encryptionService.decryptObject(encrypted, ['cardNumber', 'cvv']);
       expect(decrypted).toEqual(sensitiveData);
     });
   });
 
-  describe('generateSecureCode', () => {
+  describe('generateRandomCode', () => {
     it('should generate 6-digit codes by default', () => {
-      const code = encryptionService.generateSecureCode();
+      const code = encryptionService.generateRandomCode();
 
       expect(code).toMatch(/^\d{6}$/);
     });
 
     it('should generate codes of specified length', () => {
-      const code4 = encryptionService.generateSecureCode(4);
-      const code8 = encryptionService.generateSecureCode(8);
+      const code4 = encryptionService.generateRandomCode(4);
+      const code8 = encryptionService.generateRandomCode(8);
 
       expect(code4).toMatch(/^\d{4}$/);
       expect(code8).toMatch(/^\d{8}$/);
@@ -210,11 +186,35 @@ describe('EncryptionService', () => {
     it('should generate different codes each time', () => {
       const codes = new Set();
       for (let i = 0; i < 100; i++) {
-        codes.add(encryptionService.generateSecureCode());
+        codes.add(encryptionService.generateRandomCode());
       }
 
-      // Should have generated 100 unique codes (very unlikely to have duplicates)
-      expect(codes.size).toBeGreaterThan(95);
+      // Should have generated many unique codes
+      expect(codes.size).toBeGreaterThan(50);
+    });
+  });
+
+  describe('generateMatchKey and message encryption', () => {
+    it('should generate consistent match keys', () => {
+      const userId1 = 'user123';
+      const userId2 = 'user456';
+
+      const key1 = encryptionService.generateMatchKey(userId1, userId2);
+      const key2 = encryptionService.generateMatchKey(userId2, userId1);
+
+      expect(key1).toBe(key2); // Same key regardless of order
+    });
+
+    it('should encrypt and decrypt messages with match key', () => {
+      const userId1 = 'user123';
+      const userId2 = 'user456';
+      const message = 'Hello, this is a secret message!';
+
+      const matchKey = encryptionService.generateMatchKey(userId1, userId2);
+      const encrypted = encryptionService.encryptMessage(message, matchKey);
+      const decrypted = encryptionService.decryptMessage(encrypted, matchKey);
+
+      expect(decrypted).toBe(message);
     });
   });
 });

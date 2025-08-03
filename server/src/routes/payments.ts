@@ -59,12 +59,11 @@ router.get('/packages', authMiddleware, paymentController.getPricingPackages);
 router.post('/retry/:paymentId', authMiddleware, idempotent(), async (req, res, next) => {
   try {
     const { paymentId } = req.params;
-    const userId = req.user!.id;
+    const userId = (req as any).user!.id;
     
     const result = await paymentRetryService.processPaymentWithRetry(
       paymentId,
-      userId,
-      req.body
+      userId
     );
     
     res.json(result);

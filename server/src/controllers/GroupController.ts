@@ -25,6 +25,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
       const { type, search, page = 1, limit = 20 } = req.query;
 
       const groups = await groupService.getGroups({
@@ -58,6 +61,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
       const { name, description, type, settings, location, companyId } = req.body;
 
       if (!name || !type) {
@@ -258,6 +264,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       const group = await groupService.getGroupById(groupId, userId);
 
@@ -294,6 +303,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
       const updateData = req.body;
 
       // Check if user has permission to update
@@ -341,6 +353,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       // Check if user is the creator
       const group = await prisma.group.findUnique({
@@ -383,6 +398,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       const result = await groupService.joinGroup(userId, groupId);
 
@@ -415,6 +433,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       await groupService.leaveGroup(userId, groupId);
 
@@ -447,6 +468,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
       const { page = 1, limit = 50 } = req.query;
 
       // Check if user is member of the group
@@ -494,6 +518,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       if (!phoneNumbers || !Array.isArray(phoneNumbers)) {
         throw createError(400, '초대할 전화번호 목록이 필요합니다.');
@@ -549,6 +576,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       if (!['MEMBER', 'ADMIN'].includes(role)) {
         throw createError(400, '유효하지 않은 역할입니다.');
@@ -611,6 +641,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       // Check if user has permission
       const membership = await prisma.groupMember.findFirst({
@@ -666,6 +699,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       if (!latitude || !longitude) {
         throw createError(400, '위치 정보가 필요합니다.');
@@ -710,6 +746,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
       const { page = 1, limit = 20 } = req.query;
 
       // LocationService에 getCheckIns 메소드가 없으므로 임시로 주석처리
@@ -751,6 +790,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       // Check if user has permission
       const membership = await prisma.groupMember.findFirst({
@@ -793,6 +835,9 @@ export class GroupController {
       }
       
       const userId = req.auth.userId;
+      if (!userId) {
+        throw createError(401, '사용자 ID를 찾을 수 없습니다.');
+      }
 
       if (!code) {
         throw createError(400, '초대 코드가 필요합니다.');

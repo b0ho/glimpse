@@ -206,7 +206,7 @@ export const useProfileStore = create<ProfileState>()(
        * @param {string} requestId - 친구 요청 ID
        * @returns {Promise<boolean>} 성공 여부
        */
-      acceptFriendRequest: async (requestId: string) => {
+      acceptFriendRequest: async (requestId: string): Promise<boolean> => {
         try {
           const success = await profileService.acceptFriendRequest(requestId);
           if (success) {
@@ -226,7 +226,7 @@ export const useProfileStore = create<ProfileState>()(
        * @param {string} requestId - 친구 요청 ID
        * @returns {Promise<boolean>} 성공 여부
        */
-      rejectFriendRequest: async (requestId: string) => {
+      rejectFriendRequest: async (requestId: string): Promise<boolean> => {
         try {
           const success = await profileService.rejectFriendRequest(requestId);
           if (success) {

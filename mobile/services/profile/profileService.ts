@@ -22,7 +22,7 @@ class ProfileService {
    * @description 특정 사용자의 프로필 정보 조회
    */
   async getUserProfile(userId: string): Promise<User> {
-    const response = await apiClient.get(`/users/${userId}`);
+    const response = await apiClient.get<{ data: User }>(`/users/${userId}`);
     return response.data;
   }
 
@@ -35,7 +35,7 @@ class ProfileService {
    * @description 사용자 프로필 정보 업데이트
    */
   async updateProfile(userId: string, data: UpdateProfileData): Promise<ProfileUpdateResponse> {
-    const response = await apiClient.put(`/users/${userId}`, data);
+    const response = await apiClient.put<{ data: ProfileUpdateResponse }>(`/users/${userId}`, data);
     return response.data;
   }
 
@@ -55,14 +55,10 @@ class ProfileService {
       name: 'profile.jpg',
     } as any);
 
-    const response = await apiClient.post(`/users/${userId}/profile-image`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-
+    const response = await apiClient.post<{ data: { imageUrl: string } }>(`/users/${userId}/profile-image`, formData);
     return response.data.imageUrl;
   }
+
 
   /**
    * 받은 좋아요 목록 조회
@@ -71,7 +67,7 @@ class ProfileService {
    * @description 내가 받은 좋아요 목록 조회 (프리미엄 기능)
    */
   async getLikesReceived(): Promise<Like[]> {
-    const response = await apiClient.get('/likes/received');
+    const response = await apiClient.get<{ data: Like[] }>('/likes/received');
     return response.data;
   }
 
@@ -82,7 +78,7 @@ class ProfileService {
    * @description 받은 친구 요청 목록 조회
    */
   async getFriendRequests(): Promise<FriendRequest[]> {
-    const response = await apiClient.get('/friends/requests');
+    const response = await apiClient.get<{ data: FriendRequest[] }>('/friends/requests');
     return response.data;
   }
 
@@ -127,7 +123,7 @@ class ProfileService {
    * @description 서로 좋아요를 누른 매칭 목록 조회
    */
   async getMatches(): Promise<Match[]> {
-    const response = await apiClient.get('/matches');
+    const response = await apiClient.get<{ data: Match[] }>('/matches');
     return response.data;
   }
 

@@ -117,7 +117,7 @@ export const idempotent = (options: IdempotencyOptions = {}) => {
  * @description 사용자 ID, HTTP 메소드, 경로, 본문을 기반으로 고유 키 생성
  */
 export const generateIdempotencyKey = (req: Request): string => {
-  const userId = req.user?.id || 'anonymous';
+  const userId = (req as any).user?.id || 'anonymous';
   const method = req.method;
   const path = req.path;
   const body = JSON.stringify(req.body || {});

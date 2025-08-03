@@ -41,7 +41,7 @@ export const authService = {
    */
   deleteAccount: async (data: { reason?: string }) => {
     try {
-      const response = await apiClient.delete('/users/account', data);
+      const response = await apiClient.delete('/users/account');
       return {
         success: true,
         message: '계정이 비활성화되었습니다.',

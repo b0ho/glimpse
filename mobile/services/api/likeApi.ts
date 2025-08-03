@@ -47,9 +47,7 @@ export const likeApi = {
    * @returns {Promise<void>}
    */
   async unlikeUser(toUserId: string, groupId: string): Promise<void> {
-    await apiClient.delete(`/likes/${toUserId}`, {
-      groupId
-    });
+    await apiClient.delete(`/likes/${toUserId}`);
   },
 
   /**

@@ -41,7 +41,7 @@ export const isSuperLikedUserSelector = (
   userId: string
 ): boolean => {
   return state.sentLikes.some(
-    like => like.toUserId === userId && like.isSuperLike
+    like => like.toUserId === userId && like.isSuper
   );
 };
 
@@ -73,7 +73,8 @@ export const isMatchedWithSelector = (
 export const getReceivedLikesCountSelector = (
   state: LikeState
 ): number => {
-  return state.receivedLikes.filter(like => !like.isViewed).length;
+  // TODO: Add isViewed property to Like interface or use a different approach
+  return state.receivedLikes.length;
 };
 
 /**

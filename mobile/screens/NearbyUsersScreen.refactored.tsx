@@ -24,7 +24,7 @@ import { useLocation } from './nearby/hooks/useLocation';
 import { useNearbyUsers } from './nearby/hooks/useNearbyUsers';
 
 export const NearbyUsersScreen: React.FC = React.memo(() => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { user } = useAuthStore();
   const { sendLike, sentLikes } = useLikeStore();
   
