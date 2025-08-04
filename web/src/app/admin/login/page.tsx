@@ -34,23 +34,29 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      // 실제 구현에서는 백엔드 API 호출
-      // 여기서는 더미 인증 로직
-      
-      if (formData.email === 'admin@glimpse.app' && formData.password === 'admin123!') {
-        // 관리자 토큰 저장 (실제로는 secure cookie 또는 secure storage 사용)
-        localStorage.setItem('admin_token', 'dummy_admin_token');
-        localStorage.setItem('admin_user', JSON.stringify({
-          email: formData.email,
-          name: '관리자',
-          role: 'admin',
-          permissions: ['read', 'write', 'delete'],
-        }));
+      // 백엔드 API 호출
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // JWT 토큰과 사용자 정보 저장
+        localStorage.setItem('admin_token', data.access_token);
+        localStorage.setItem('admin_user', JSON.stringify(data.user));
+        
+        // 쿠키에도 저장 (미들웨어에서 확인)
+        document.cookie = `admin_token=${data.access_token}; path=/; max-age=${7 * 24 * 60 * 60}`;
         
         // 관리자 대시보드로 리다이렉트
         router.push('/admin');
       } else {
-        setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        setError(data.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
       }
     } catch (error) {
       console.error('Admin login error:', error);

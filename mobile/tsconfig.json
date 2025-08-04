@@ -3,8 +3,12 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@shared/*": ["../shared/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@shared/*": [
+        "../shared/*"
+      ]
     },
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -13,7 +17,11 @@
     "moduleResolution": "bundler",
     "module": "esnext",
     "target": "es2020",
-    "lib": ["es2020", "dom", "dom.iterable"],
+    "lib": [
+      "es2020",
+      "dom",
+      "dom.iterable"
+    ],
     "noEmit": true,
     "isolatedModules": true,
     "allowJs": true,
@@ -31,5 +39,6 @@
     "../tests/**/*",
     "**/*.spec.ts",
     "**/*.test.ts"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }

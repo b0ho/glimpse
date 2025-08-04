@@ -7,8 +7,8 @@ import {
   SafeAreaView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { captureError } from '@/services/sentry/sentry-config';
+import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
+import { captureError } from '../services/sentry/sentry-config';
 
 /**
  * ErrorBoundary 컴포넌트 Props
