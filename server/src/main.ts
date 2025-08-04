@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 /**
@@ -41,6 +42,39 @@ async function bootstrap() {
   // API 프리픽스 설정
   app.setGlobalPrefix('api/v1', {
     exclude: ['health', 'docs'],
+  });
+
+  // Swagger 설정
+  const config = new DocumentBuilder()
+    .setTitle('Glimpse API')
+    .setDescription('글림프스 데이팅 앱 API 문서')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .addTag('auth', '인증 관련 API')
+    .addTag('users', '사용자 관리 API')
+    .addTag('groups', '그룹 관리 API')
+    .addTag('likes', '좋아요 및 매칭 API')
+    .addTag('chat', '채팅 API')
+    .addTag('payment', '결제 API')
+    .addTag('notification', '알림 API')
+    .addTag('admin', '관리자 API')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
   });
 
   await app.listen(port);

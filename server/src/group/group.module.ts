@@ -1,17 +1,13 @@
 import { Module } from '@nestjs/common';
-import { GroupController } from './group.controller';
 import { GroupService } from './group.service';
+import { GroupController } from './group.controller';
 import { PrismaModule } from '../core/prisma/prisma.module';
+import { CacheModule } from '../core/cache/cache.module';
 
-/**
- * 그룹 모듈
- * 
- * 그룹 생성, 관리, 멤버십 기능을 제공합니다.
- */
 @Module({
-  imports: [PrismaModule],
-  controllers: [GroupController],
+  imports: [PrismaModule, CacheModule],
   providers: [GroupService],
+  controllers: [GroupController],
   exports: [GroupService],
 })
 export class GroupModule {}

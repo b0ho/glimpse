@@ -1,10 +1,12 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { AuthGuard } from './guards/auth.guard';
+import { WsAuthGuard } from './guards/ws-auth.guard';
 import { PrismaModule } from '../core/prisma/prisma.module';
 
 /**
@@ -12,6 +14,7 @@ import { PrismaModule } from '../core/prisma/prisma.module';
  * 
  * Clerk JWT 기반 인증 시스템을 제공합니다.
  */
+@Global()
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -28,7 +31,7 @@ import { PrismaModule } from '../core/prisma/prisma.module';
     PrismaModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService, PassportModule],
+  providers: [AuthService, JwtStrategy, AuthGuard, WsAuthGuard],
+  exports: [AuthService, PassportModule, AuthGuard, WsAuthGuard],
 })
 export class AuthModule {}

@@ -1,4 +1,5 @@
 import { Controller, Post, Body, UseGuards, Get, HttpException, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -8,6 +9,7 @@ import { CurrentUser } from './decorators/current-user.decorator';
  * 
  * 사용자 인증 및 회원가입 관련 API를 제공합니다.
  */
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -21,6 +23,10 @@ export class AuthController {
    * @returns 생성된 사용자 정보
    */
   @Post('register')
+  @ApiOperation({ summary: 'Clerk 연동 회원가입/로그인' })
+  @ApiBody({ schema: { properties: { clerkUserId: { type: 'string' } } } })
+  @ApiResponse({ status: 200, description: '회원가입 성공' })
+  @ApiResponse({ status: 400, description: '회원가입 실패' })
   async register(@Body() body: { clerkUserId: string }) {
     try {
       const user = await this.authService.createOrUpdateUser(body.clerkUserId);
