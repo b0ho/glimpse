@@ -421,4 +421,33 @@ export class ContentFilterService {
     // 캐시 갱신
     await this.initializeFilters();
   }
+
+  /**
+   * 텍스트 필터링
+   * 
+   * @param text 필터링할 텍스트
+   * @returns 필터링 결과
+   */
+  async filterText(text: string): Promise<{
+    severity: 'safe' | 'warning' | 'blocked';
+    filteredText?: string;
+  }> {
+    const validation = await this.validateText(text, 'CHAT');
+    
+    if (!validation.isValid) {
+      if (validation.severity === 'HIGH') {
+        return { severity: 'blocked' };
+      } else if (validation.severity === 'MEDIUM') {
+        // 중간 심각도의 경우 금지어를 마스킹 처리
+        let filteredText = text;
+        this.bannedWords.forEach(word => {
+          const regex = new RegExp(word, 'gi');
+          filteredText = filteredText.replace(regex, '*'.repeat(word.length));
+        });
+        return { severity: 'warning', filteredText };
+      }
+    }
+    
+    return { severity: 'safe', filteredText: text };
+  }
 }

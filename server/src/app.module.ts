@@ -25,6 +25,9 @@ import { AdminModule } from './admin/admin.module';
 import { ContentFilterModule } from './content-filter/content-filter.module';
 import { LocationModule } from './location/location.module';
 import { VideoCallModule } from './video-call/video-call.module';
+import { CompanyDomainModule } from './company-domain/company-domain.module';
+import { FriendModule } from './friend/friend.module';
+import { StoryModule } from './story/story.module';
 
 /**
  * 애플리케이션 루트 모듈
@@ -98,6 +101,12 @@ import { VideoCallModule } from './video-call/video-call.module';
     LocationModule,
     
     VideoCallModule,
+    
+    CompanyDomainModule,
+    
+    FriendModule,
+    
+    StoryModule,
   ],
 })
 export class AppModule {}

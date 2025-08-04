@@ -458,6 +458,85 @@ export class FileService {
   }
 
   /**
+   * 단일 파일 업로드 (스토리 등)
+   * 
+   * @param file 업로드할 파일
+   * @param userId 사용자 ID
+   * @param purpose 파일 용도
+   */
+  async uploadSingleFile(
+    file: Express.Multer.File,
+    userId: string,
+    purpose: 'STORY' | 'POST' | 'OTHER' = 'OTHER',
+  ): Promise<{ url: string; fileId: string }> {
+    // 파일 크기 제한 (용도별로 다름)
+    const maxSizes = {
+      STORY: 50 * 1024 * 1024, // 50MB (동영상 포함)
+      POST: 20 * 1024 * 1024,  // 20MB
+      OTHER: 10 * 1024 * 1024, // 10MB
+    };
+
+    if (file.size > maxSizes[purpose]) {
+      throw new HttpException(
+        `파일 크기는 ${maxSizes[purpose] / (1024 * 1024)}MB를 초과할 수 없습니다.`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const fileId = generateId();
+    const timestamp = Date.now();
+    const isImage = file.mimetype.startsWith('image/');
+    const isVideo = file.mimetype.startsWith('video/');
+
+    let processedBuffer = file.buffer;
+    let finalMimeType = file.mimetype;
+    
+    // 이미지인 경우 처리
+    if (isImage) {
+      processedBuffer = await this.processImage(file.buffer, {
+        width: 1200,
+        height: 1200,
+        quality: 85,
+        progressive: true,
+      });
+      finalMimeType = 'image/jpeg';
+    }
+
+    // S3 키 생성
+    const extension = isImage ? 'jpg' : file.originalname.split('.').pop() || 'bin';
+    const key = `${purpose.toLowerCase()}/${userId}/${fileId}_${timestamp}.${extension}`;
+
+    // S3 업로드
+    await this.uploadToS3(key, processedBuffer, finalMimeType, true);
+
+    // CloudFront URL 생성
+    const url = this.getCloudFrontUrl(key);
+
+    // 데이터베이스에 저장
+    const fileRecord = await this.prisma.file.create({
+      data: {
+        userId,
+        filename: file.originalname,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size,
+        path: key,
+        url,
+        metadata: {
+          isVideo,
+          isImage,
+          uploadType: purpose,
+        },
+      },
+    });
+
+    return {
+      url,
+      fileId: fileRecord.id,
+    };
+  }
+
+  /**
    * 파일 삭제
    * 
    * @param fileId 파일 ID
