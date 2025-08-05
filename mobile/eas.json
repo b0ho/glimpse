@@ -1,0 +1,51 @@
+{
+  "cli": {
+    "version": ">= 5.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://localhost:8000",
+        "EXPO_PUBLIC_SOCKET_URL": "ws://localhost:8000"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api-staging.glimpse.app",
+        "EXPO_PUBLIC_SOCKET_URL": "wss://api-staging.glimpse.app"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.glimpse.app",
+        "EXPO_PUBLIC_SOCKET_URL": "wss://api.glimpse.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_...",
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_...",
+        "EXPO_PUBLIC_SENTRY_DSN": "https://...@sentry.io/..."
+      },
+      "android": {
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease"
+      },
+      "ios": {
+        "cocoapods": "1.14.0"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./android-service-account.json",
+        "track": "production"
+      },
+      "ios": {
+        "appleId": "your-apple-id@example.com",
+        "ascAppId": "1234567890",
+        "appleTeamId": "YOUR_TEAM_ID"
+      }
+    }
+  }
+}

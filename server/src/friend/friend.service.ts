@@ -15,7 +15,7 @@ export class FriendService {
     return this.prisma.friendRequest.findMany({
       where: {
         toUserId: userId,
-        status: status as any
+        status: status as any,
       },
       include: {
         fromUser: {
@@ -25,18 +25,22 @@ export class FriendService {
             profileImage: true,
             bio: true,
             age: true,
-            gender: true
-          }
-        }
+            gender: true,
+          },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   /**
    * 친구 요청 전송
    */
-  async sendFriendRequest(fromUserId: string, toUserId: string, message?: string) {
+  async sendFriendRequest(
+    fromUserId: string,
+    toUserId: string,
+    message?: string,
+  ) {
     if (fromUserId === toUserId) {
       throw new Error('자신에게는 친구 요청을 보낼 수 없습니다.');
     }
@@ -46,9 +50,9 @@ export class FriendService {
       where: {
         OR: [
           { user1Id: fromUserId, user2Id: toUserId },
-          { user1Id: toUserId, user2Id: fromUserId }
-        ]
-      }
+          { user1Id: toUserId, user2Id: fromUserId },
+        ],
+      },
     });
 
     if (existingFriendship) {
@@ -60,8 +64,8 @@ export class FriendService {
       where: {
         fromUserId,
         toUserId,
-        status: 'PENDING'
-      }
+        status: 'PENDING',
+      },
     });
 
     if (existingRequest) {
@@ -71,10 +75,13 @@ export class FriendService {
     // Check if the other user has privacy settings that block friend requests
     const targetUser = await this.prisma.user.findUnique({
       where: { id: toUserId },
-      select: { privacySettings: true }
+      select: { privacySettings: true },
     });
 
-    if (targetUser?.privacySettings && !(targetUser.privacySettings as any).allowFriendRequests) {
+    if (
+      targetUser?.privacySettings &&
+      !(targetUser.privacySettings as any).allowFriendRequests
+    ) {
       throw new Error('해당 사용자는 친구 요청을 받지 않습니다.');
     }
 
@@ -83,17 +90,17 @@ export class FriendService {
         fromUserId,
         toUserId,
         message,
-        status: 'PENDING'
+        status: 'PENDING',
       },
       include: {
         fromUser: {
           select: {
             id: true,
             nickname: true,
-            profileImage: true
-          }
-        }
-      }
+            profileImage: true,
+          },
+        },
+      },
     });
   }
 
@@ -105,8 +112,8 @@ export class FriendService {
       where: {
         id: requestId,
         toUserId: userId,
-        status: 'PENDING'
-      }
+        status: 'PENDING',
+      },
     });
 
     if (!request) {
@@ -116,15 +123,15 @@ export class FriendService {
     // Update request status
     await this.prisma.friendRequest.update({
       where: { id: requestId },
-      data: { status: 'ACCEPTED' }
+      data: { status: 'ACCEPTED' },
     });
 
     // Create friendship
     return this.prisma.friendship.create({
       data: {
         user1Id: request.fromUserId,
-        user2Id: userId
-      }
+        user2Id: userId,
+      },
     });
   }
 
@@ -136,8 +143,8 @@ export class FriendService {
       where: {
         id: requestId,
         toUserId: userId,
-        status: 'PENDING'
-      }
+        status: 'PENDING',
+      },
     });
 
     if (!request) {
@@ -146,7 +153,7 @@ export class FriendService {
 
     await this.prisma.friendRequest.update({
       where: { id: requestId },
-      data: { status: 'REJECTED' }
+      data: { status: 'REJECTED' },
     });
 
     return { success: true, message: '친구 요청을 거절했습니다.' };
@@ -158,10 +165,7 @@ export class FriendService {
   async getFriends(userId: string) {
     const friendships = await this.prisma.friendship.findMany({
       where: {
-        OR: [
-          { user1Id: userId },
-          { user2Id: userId }
-        ]
+        OR: [{ user1Id: userId }, { user2Id: userId }],
       },
       include: {
         user1: {
@@ -170,8 +174,8 @@ export class FriendService {
             nickname: true,
             profileImage: true,
             bio: true,
-            lastActive: true
-          }
+            lastActive: true,
+          },
         },
         user2: {
           select: {
@@ -179,14 +183,16 @@ export class FriendService {
             nickname: true,
             profileImage: true,
             bio: true,
-            lastActive: true
-          }
-        }
-      }
+            lastActive: true,
+          },
+        },
+      },
     });
 
-    return friendships.map(friendship => {
-      return friendship.user1Id === userId ? friendship.user2 : friendship.user1;
+    return friendships.map((friendship) => {
+      return friendship.user1Id === userId
+        ? friendship.user2
+        : friendship.user1;
     });
   }
 
@@ -198,9 +204,9 @@ export class FriendService {
       where: {
         OR: [
           { user1Id: userId, user2Id: friendId },
-          { user1Id: friendId, user2Id: userId }
-        ]
-      }
+          { user1Id: friendId, user2Id: userId },
+        ],
+      },
     });
 
     if (!friendship) {
@@ -208,7 +214,7 @@ export class FriendService {
     }
 
     await this.prisma.friendship.delete({
-      where: { id: friendship.id }
+      where: { id: friendship.id },
     });
 
     return { success: true, message: '친구가 삭제되었습니다.' };

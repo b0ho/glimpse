@@ -1,7 +1,12 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../core/prisma/prisma.service';
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 // import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import * as sharp from 'sharp';
@@ -13,9 +18,12 @@ const generateId = (): string => {
   return crypto.randomBytes(16).toString('hex');
 };
 
-const validateFileType = (mimeType: string, allowedTypes?: string[]): boolean => {
+const validateFileType = (
+  mimeType: string,
+  allowedTypes?: string[],
+): boolean => {
   if (!allowedTypes || allowedTypes.length === 0) return true;
-  return allowedTypes.some(type => {
+  return allowedTypes.some((type) => {
     if (type.endsWith('/*')) {
       const baseType = type.slice(0, -2);
       return mimeType.startsWith(baseType + '/');
@@ -39,7 +47,7 @@ import {
 
 /**
  * 파일 업로드 및 처리 서비스
- * 
+ *
  * S3 업로드, 이미지 처리, CloudFront CDN 통합을 담당합니다.
  */
 @Injectable()
@@ -55,14 +63,17 @@ export class FileService {
     private readonly prisma: PrismaService,
   ) {
     this.bucketName = this.configService.get<string>('AWS_S3_BUCKET') || '';
-    this.cloudFrontDomain = this.configService.get<string>('AWS_CLOUDFRONT_DOMAIN') || '';
-    this.cloudFrontDistributionId = this.configService.get<string>('AWS_CLOUDFRONT_DISTRIBUTION_ID') || '';
+    this.cloudFrontDomain =
+      this.configService.get<string>('AWS_CLOUDFRONT_DOMAIN') || '';
+    this.cloudFrontDistributionId =
+      this.configService.get<string>('AWS_CLOUDFRONT_DISTRIBUTION_ID') || '';
 
     this.s3Client = new S3Client({
       region: this.configService.get<string>('AWS_REGION') || 'us-east-1',
       credentials: {
         accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID') || '',
-        secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
+        secretAccessKey:
+          this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
       },
     });
 
@@ -77,7 +88,7 @@ export class FileService {
 
   /**
    * 프로필 이미지 업로드
-   * 
+   *
    * @param file 업로드 파일
    * @param userId 사용자 ID
    * @returns 이미지 URL들
@@ -88,12 +99,18 @@ export class FileService {
   ): Promise<ProfileImageUploadResponseDto> {
     // 파일 타입 검증
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
-      throw new HttpException('허용되지 않은 파일 형식입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '허용되지 않은 파일 형식입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // 파일 크기 검증 (10MB)
     if (file.size > 10 * 1024 * 1024) {
-      throw new HttpException('파일 크기는 10MB를 초과할 수 없습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '파일 크기는 10MB를 초과할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const imageBuffer = file.buffer;
@@ -164,16 +181,14 @@ export class FileService {
     });
 
     // 기존 이미지가 있다면 CloudFront 캐시 무효화
-    await this.invalidateCloudFrontCache([
-      `profiles/${userId}/*`,
-    ]);
+    await this.invalidateCloudFrontCache([`profiles/${userId}/*`]);
 
     return uploadedUrls as unknown as ProfileImageUploadResponseDto;
   }
 
   /**
    * 채팅 이미지 업로드
-   * 
+   *
    * @param file 업로드 파일
    * @param userId 사용자 ID
    * @param matchId 매치 ID
@@ -190,16 +205,25 @@ export class FileService {
     });
 
     if (!match || (match.user1Id !== userId && match.user2Id !== userId)) {
-      throw new HttpException('매치에 대한 권한이 없습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '매치에 대한 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     // 파일 검증
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
-      throw new HttpException('허용되지 않은 파일 형식입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '허용되지 않은 파일 형식입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      throw new HttpException('파일 크기는 10MB를 초과할 수 없습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '파일 크기는 10MB를 초과할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const imageBuffer = file.buffer;
@@ -269,7 +293,7 @@ export class FileService {
 
   /**
    * 음성 파일 업로드 (채팅용)
-   * 
+   *
    * @param file 오디오 파일
    * @param userId 사용자 ID
    * @param matchId 매치 ID
@@ -286,17 +310,26 @@ export class FileService {
     });
 
     if (!match || (match.user1Id !== userId && match.user2Id !== userId)) {
-      throw new HttpException('매치에 대한 권한이 없습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '매치에 대한 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     // 파일 검증
     const allowedTypes = ['audio/mp4', 'audio/m4a', 'audio/mpeg', 'audio/webm'];
     if (!allowedTypes.includes(file.mimetype)) {
-      throw new HttpException('허용되지 않은 오디오 형식입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '허용되지 않은 오디오 형식입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      throw new HttpException('오디오 파일은 5MB를 초과할 수 없습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '오디오 파일은 5MB를 초과할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const fileId = generateId();
@@ -327,7 +360,7 @@ export class FileService {
 
   /**
    * 그룹 이미지 업로드
-   * 
+   *
    * @param file 업로드 파일
    * @param userId 사용자 ID
    * @param groupId 그룹 ID
@@ -345,17 +378,29 @@ export class FileService {
       },
     });
 
-    if (!membership || (membership.role !== 'CREATOR' && membership.role !== 'ADMIN')) {
-      throw new HttpException('그룹 이미지 변경 권한이 없습니다.', HttpStatus.FORBIDDEN);
+    if (
+      !membership ||
+      (membership.role !== 'CREATOR' && membership.role !== 'ADMIN')
+    ) {
+      throw new HttpException(
+        '그룹 이미지 변경 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     // 파일 검증
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
-      throw new HttpException('허용되지 않은 파일 형식입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '허용되지 않은 파일 형식입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      throw new HttpException('파일 크기는 5MB를 초과할 수 없습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '파일 크기는 5MB를 초과할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const imageBuffer = file.buffer;
@@ -404,7 +449,7 @@ export class FileService {
 
   /**
    * 인증 문서 업로드
-   * 
+   *
    * @param file 업로드 파일
    * @param userId 사용자 ID
    * @param type 문서 타입
@@ -418,11 +463,17 @@ export class FileService {
     // 파일 검증
     const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
     if (!allowedTypes.includes(file.mimetype)) {
-      throw new HttpException('JPG, PNG, PDF 파일만 업로드 가능합니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'JPG, PNG, PDF 파일만 업로드 가능합니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      throw new HttpException('파일 크기는 10MB를 초과할 수 없습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '파일 크기는 10MB를 초과할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const fileId = generateId();
@@ -459,7 +510,7 @@ export class FileService {
 
   /**
    * 단일 파일 업로드 (스토리 등)
-   * 
+   *
    * @param file 업로드할 파일
    * @param userId 사용자 ID
    * @param purpose 파일 용도
@@ -472,7 +523,7 @@ export class FileService {
     // 파일 크기 제한 (용도별로 다름)
     const maxSizes = {
       STORY: 50 * 1024 * 1024, // 50MB (동영상 포함)
-      POST: 20 * 1024 * 1024,  // 20MB
+      POST: 20 * 1024 * 1024, // 20MB
       OTHER: 10 * 1024 * 1024, // 10MB
     };
 
@@ -490,7 +541,7 @@ export class FileService {
 
     let processedBuffer = file.buffer;
     let finalMimeType = file.mimetype;
-    
+
     // 이미지인 경우 처리
     if (isImage) {
       processedBuffer = await this.processImage(file.buffer, {
@@ -503,7 +554,9 @@ export class FileService {
     }
 
     // S3 키 생성
-    const extension = isImage ? 'jpg' : file.originalname.split('.').pop() || 'bin';
+    const extension = isImage
+      ? 'jpg'
+      : file.originalname.split('.').pop() || 'bin';
     const key = `${purpose.toLowerCase()}/${userId}/${fileId}_${timestamp}.${extension}`;
 
     // S3 업로드
@@ -538,7 +591,7 @@ export class FileService {
 
   /**
    * 파일 삭제
-   * 
+   *
    * @param fileId 파일 ID
    * @param userId 사용자 ID
    */
@@ -552,7 +605,10 @@ export class FileService {
     }
 
     if (file.userId !== userId) {
-      throw new HttpException('파일 삭제 권한이 없습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '파일 삭제 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     // S3에서 삭제
@@ -579,7 +635,7 @@ export class FileService {
 
   /**
    * 사용자 파일 사용량 통계
-   * 
+   *
    * @param userId 사용자 ID
    * @returns 파일 통계
    */
@@ -600,12 +656,12 @@ export class FileService {
 
     for (const file of files) {
       stats.totalSize += file.size;
-      
+
       const category = file.category || 'OTHER';
       if (!stats.categories[category]) {
         stats.categories[category] = { count: 0, size: 0 };
       }
-      
+
       stats.categories[category].count++;
       stats.categories[category].size += file.size;
     }
@@ -644,7 +700,7 @@ export class FileService {
 
   /**
    * 이미지 처리
-   * 
+   *
    * @param buffer 이미지 버퍼
    * @param options 처리 옵션
    * @returns 처리된 이미지 버퍼
@@ -697,7 +753,7 @@ export class FileService {
 
   /**
    * S3 업로드
-   * 
+   *
    * @param key S3 키
    * @param buffer 파일 버퍼
    * @param mimeType MIME 타입
@@ -722,7 +778,7 @@ export class FileService {
 
   /**
    * S3에서 파일 삭제
-   * 
+   *
    * @param key S3 키
    */
   private async deleteFromS3(key: string): Promise<void> {
@@ -736,7 +792,7 @@ export class FileService {
 
   /**
    * CloudFront URL 생성
-   * 
+   *
    * @param key S3 키
    * @returns CloudFront URL
    */
@@ -746,7 +802,7 @@ export class FileService {
 
   /**
    * URL에서 S3 키 추출
-   * 
+   *
    * @param url CloudFront URL
    * @returns S3 키
    */
@@ -756,7 +812,7 @@ export class FileService {
 
   /**
    * 서명된 URL 생성
-   * 
+   *
    * @param key S3 키
    * @param expiresIn 유효 시간 (초)
    * @returns 서명된 URL
@@ -772,7 +828,7 @@ export class FileService {
 
   /**
    * CloudFront 캐시 무효화
-   * 
+   *
    * @param paths 무효화할 경로들
    */
   private async invalidateCloudFrontCache(paths: string[]): Promise<void> {

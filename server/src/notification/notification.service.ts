@@ -17,7 +17,7 @@ interface PushNotificationData {
 
 /**
  * 알림 서비스
- * 
+ *
  * 인앱 알림 및 푸시 알림을 처리합니다.
  */
 @Injectable()
@@ -29,7 +29,7 @@ export class NotificationService {
 
   /**
    * 인앱 알림 전송
-   * 
+   *
    * @param data 알림 데이터
    */
   async sendNotification(data: NotificationData) {
@@ -55,7 +55,7 @@ export class NotificationService {
 
   /**
    * 푸시 알림 전송
-   * 
+   *
    * @param userId 사용자 ID
    * @param data 푸시 알림 데이터
    */
@@ -79,7 +79,7 @@ export class NotificationService {
     }
 
     // Firebase를 통한 푸시 알림 전송
-    const tokens = fcmTokens.map(t => t.token);
+    const tokens = fcmTokens.map((t) => t.token);
     try {
       // TODO: implement sendMulticast in FirebaseService
       // await this.firebaseService.sendMulticast({
@@ -97,7 +97,7 @@ export class NotificationService {
 
   /**
    * 시스템 알림 전송
-   * 
+   *
    * @param userId 사용자 ID
    * @param title 제목
    * @param message 메시지
@@ -118,7 +118,7 @@ export class NotificationService {
 
   /**
    * 알림 읽음 처리
-   * 
+   *
    * @param userId 사용자 ID
    * @param notificationId 알림 ID
    */
@@ -142,7 +142,7 @@ export class NotificationService {
 
   /**
    * 모든 알림 읽음 처리
-   * 
+   *
    * @param userId 사용자 ID
    */
   async markAllAsRead(userId: string) {
@@ -159,12 +159,16 @@ export class NotificationService {
 
   /**
    * 알림 목록 조회
-   * 
+   *
    * @param userId 사용자 ID
    * @param limit 조회 개수
    * @param offset 오프셋
    */
-  async getNotifications(userId: string, limit: number = 20, offset: number = 0) {
+  async getNotifications(
+    userId: string,
+    limit: number = 20,
+    offset: number = 0,
+  ) {
     const notifications = await this.prisma.notification.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -192,7 +196,7 @@ export class NotificationService {
 
   /**
    * FCM 토큰 등록
-   * 
+   *
    * @param userId 사용자 ID
    * @param token FCM 토큰
    * @param platform 플랫폼
@@ -226,7 +230,7 @@ export class NotificationService {
 
   /**
    * FCM 토큰 비활성화
-   * 
+   *
    * @param token FCM 토큰
    */
   async deactivateFcmToken(token: string) {

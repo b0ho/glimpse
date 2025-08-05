@@ -1,5 +1,20 @@
-import { Controller, Get, Post, Delete, Param, Query, Body, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Query,
+  Body,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { FriendService } from './friend.service';
 import { AuthGuard } from '../auth/auth.guard';
 
@@ -19,10 +34,7 @@ export class FriendController {
   @Get('requests')
   @ApiOperation({ summary: '친구 요청 목록 조회' })
   @ApiResponse({ status: 200, description: '친구 요청 목록' })
-  async getFriendRequests(
-    @Req() req: any,
-    @Query('status') status?: string
-  ) {
+  async getFriendRequests(@Req() req: any, @Query('status') status?: string) {
     const userId = req.user.id;
     const data = await this.friendService.getFriendRequests(userId, status);
     return { success: true, data };
@@ -36,13 +48,13 @@ export class FriendController {
   @ApiResponse({ status: 201, description: '친구 요청 전송됨' })
   async sendFriendRequest(
     @Req() req: any,
-    @Body() body: { toUserId: string; message?: string }
+    @Body() body: { toUserId: string; message?: string },
   ) {
     const userId = req.user.id;
     const data = await this.friendService.sendFriendRequest(
       userId,
       body.toUserId,
-      body.message
+      body.message,
     );
     return { success: true, data };
   }
@@ -55,10 +67,13 @@ export class FriendController {
   @ApiResponse({ status: 200, description: '친구 요청 수락됨' })
   async acceptFriendRequest(
     @Req() req: any,
-    @Param('requestId') requestId: string
+    @Param('requestId') requestId: string,
   ) {
     const userId = req.user.id;
-    const data = await this.friendService.acceptFriendRequest(requestId, userId);
+    const data = await this.friendService.acceptFriendRequest(
+      requestId,
+      userId,
+    );
     return { success: true, data };
   }
 
@@ -70,10 +85,13 @@ export class FriendController {
   @ApiResponse({ status: 200, description: '친구 요청 거절됨' })
   async rejectFriendRequest(
     @Req() req: any,
-    @Param('requestId') requestId: string
+    @Param('requestId') requestId: string,
   ) {
     const userId = req.user.id;
-    const result = await this.friendService.rejectFriendRequest(requestId, userId);
+    const result = await this.friendService.rejectFriendRequest(
+      requestId,
+      userId,
+    );
     return result;
   }
 
@@ -95,10 +113,7 @@ export class FriendController {
   @Delete(':friendId')
   @ApiOperation({ summary: '친구 삭제' })
   @ApiResponse({ status: 200, description: '친구 삭제됨' })
-  async removeFriend(
-    @Req() req: any,
-    @Param('friendId') friendId: string
-  ) {
+  async removeFriend(@Req() req: any, @Param('friendId') friendId: string) {
     const userId = req.user.id;
     const result = await this.friendService.removeFriend(userId, friendId);
     return result;

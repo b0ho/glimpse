@@ -25,7 +25,7 @@ import { Request } from 'express';
 
 /**
  * 결제 컨트롤러
- * 
+ *
  * 결제 생성, 처리, 환불, 구독 관리 등의 엔드포인트를 제공합니다.
  */
 @Controller('payment')
@@ -56,7 +56,11 @@ export class PaymentController {
     @CurrentUserId() userId: string,
     @Body() processPaymentDto: ProcessPaymentDto,
   ) {
-    return this.paymentService.processPayment(paymentId, userId, processPaymentDto);
+    return this.paymentService.processPayment(
+      paymentId,
+      userId,
+      processPaymentDto,
+    );
   }
 
   /**
@@ -78,7 +82,10 @@ export class PaymentController {
     @Param('id') paymentId: string,
     @Body() refundPaymentDto: RefundPaymentDto,
   ) {
-    return this.paymentService.refundPayment(paymentId, refundPaymentDto.reason);
+    return this.paymentService.refundPayment(
+      paymentId,
+      refundPaymentDto.reason,
+    );
   }
 
   /**
@@ -91,7 +98,10 @@ export class PaymentController {
     @CurrentUserId() userId: string,
     @Body() createCreditPurchaseDto: CreateCreditPurchaseDto,
   ) {
-    return this.paymentService.createCreditPurchase(userId, createCreditPurchaseDto);
+    return this.paymentService.createCreditPurchase(
+      userId,
+      createCreditPurchaseDto,
+    );
   }
 
   /**
@@ -104,7 +114,10 @@ export class PaymentController {
     @CurrentUserId() userId: string,
     @Body() createSubscriptionDto: CreateSubscriptionDto,
   ) {
-    return this.paymentService.createSubscription(userId, createSubscriptionDto);
+    return this.paymentService.createSubscription(
+      userId,
+      createSubscriptionDto,
+    );
   }
 
   /**

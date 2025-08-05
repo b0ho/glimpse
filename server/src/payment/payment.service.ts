@@ -1,6 +1,12 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PaymentStatus, PaymentMethod, PaymentType, Payment, User } from '@prisma/client';
+import {
+  PaymentStatus,
+  PaymentMethod,
+  PaymentType,
+  Payment,
+  User,
+} from '@prisma/client';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { CacheService } from '../core/cache/cache.service';
 import * as crypto from 'crypto';
@@ -15,7 +21,7 @@ import {
 
 /**
  * 결제 서비스
- * 
+ *
  * TossPay, KakaoPay 등 다양한 결제 수단을 통합 관리하고,
  * 구독, 크레딧 구매, 환불 등의 결제 관련 기능을 제공합니다.
  */
@@ -33,8 +39,14 @@ export class PaymentService {
     private readonly cacheService: CacheService,
   ) {
     this.tossSecretKey = this.configService.get<string>('TOSS_SECRET_KEY', '');
-    this.kakaoSecretKey = this.configService.get<string>('KAKAO_SECRET_KEY', '');
-    this.webhookSecret = this.configService.get<string>('PAYMENT_WEBHOOK_SECRET', '');
+    this.kakaoSecretKey = this.configService.get<string>(
+      'KAKAO_SECRET_KEY',
+      '',
+    );
+    this.webhookSecret = this.configService.get<string>(
+      'PAYMENT_WEBHOOK_SECRET',
+      '',
+    );
     this.baseUrl = this.configService.get<string>('BASE_URL', '');
     this.kakaoCid = this.configService.get<string>('KAKAO_CID', 'TC0ONETIME');
   }
@@ -85,7 +97,8 @@ export class PaymentService {
         break;
       case 'CARD':
       case 'NAVER_PAY':
-        ({ paymentUrl, paymentData } = await this.createGenericPayment(payment));
+        ({ paymentUrl, paymentData } =
+          await this.createGenericPayment(payment));
         break;
       default:
         throw new HttpException(
@@ -121,7 +134,11 @@ export class PaymentService {
   /**
    * 결제 처리
    */
-  async processPayment(paymentId: string, userId: string, data: ProcessPaymentDto) {
+  async processPayment(
+    paymentId: string,
+    userId: string,
+    data: ProcessPaymentDto,
+  ) {
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
     });
@@ -138,11 +155,14 @@ export class PaymentService {
     }
 
     if (payment.status !== 'PENDING') {
-      throw new HttpException('이미 처리된 결제입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '이미 처리된 결제입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     let result;
-    
+
     try {
       switch (payment.method) {
         case 'TOSS_PAY':
@@ -493,7 +513,10 @@ export class PaymentService {
     }
   }
 
-  private async processGenericPayment(payment: Payment, data: ProcessPaymentDto) {
+  private async processGenericPayment(
+    payment: Payment,
+    data: ProcessPaymentDto,
+  ) {
     // 일반 결제 시뮬레이션
     return {
       success: true,

@@ -44,7 +44,7 @@ interface VerificationEmailData {
 
 /**
  * 이메일 서비스
- * 
+ *
  * 다양한 이메일 제공자(SMTP, SendGrid, AWS SES)를 통해 이메일을 발송합니다.
  */
 @Injectable()
@@ -71,7 +71,10 @@ export class EmailService {
         region: awsRegion,
         credentials: {
           accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID', ''),
-          secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY', ''),
+          secretAccessKey: this.configService.get<string>(
+            'AWS_SECRET_ACCESS_KEY',
+            '',
+          ),
         },
       });
     }
@@ -84,8 +87,9 @@ export class EmailService {
     try {
       // Check rate limit
       const rateLimitKey = `email:ratelimit:${options.to}`;
-      const sentCount = await this.cacheService.get<number>(rateLimitKey) || 0;
-      
+      const sentCount =
+        (await this.cacheService.get<number>(rateLimitKey)) || 0;
+
       if (sentCount >= this.rateLimit) {
         throw new Error('Email rate limit exceeded');
       }
@@ -97,11 +101,11 @@ export class EmailService {
         case 'sendgrid':
           result = await this.sendViaSendGrid(options);
           break;
-        
+
         case 'ses':
           result = await this.sendViaSES(options);
           break;
-        
+
         case 'smtp':
         default:
           result = await this.sendViaSMTP(options);
@@ -111,7 +115,7 @@ export class EmailService {
       if (result) {
         // Update rate limit counter
         await this.cacheService.set(rateLimitKey, sentCount + 1, { ttl: 3600 });
-        
+
         // Log email activity
         await this.logEmailActivity(options);
       }
@@ -119,12 +123,12 @@ export class EmailService {
       return result;
     } catch (error) {
       console.error('Failed to send email:', error);
-      
+
       // Don't throw for non-critical emails
       if (!this.isCriticalEmail(options.subject)) {
         return false;
       }
-      
+
       throw error;
     }
   }
@@ -156,12 +160,14 @@ export class EmailService {
     try {
       const msg = {
         to: options.to,
-        from: options.from || this.configService.get('SENDGRID_FROM', 'noreply@glimpse.app'),
+        from:
+          options.from ||
+          this.configService.get('SENDGRID_FROM', 'noreply@glimpse.app'),
         subject: options.subject,
         html: options.html,
         text: options.text,
       };
-      
+
       await sgMail.send(msg as any);
       return true;
     } catch (error) {
@@ -180,7 +186,9 @@ export class EmailService {
 
     try {
       const command = new SendEmailCommand({
-        Source: options.from || this.configService.get('SES_FROM', 'noreply@glimpse.app'),
+        Source:
+          options.from ||
+          this.configService.get('SES_FROM', 'noreply@glimpse.app'),
         Destination: {
           ToAddresses: [options.to],
         },
@@ -194,10 +202,12 @@ export class EmailService {
               Data: options.html,
               Charset: 'UTF-8',
             },
-            Text: options.text ? {
-              Data: options.text,
-              Charset: 'UTF-8',
-            } : undefined,
+            Text: options.text
+              ? {
+                  Data: options.text,
+                  Charset: 'UTF-8',
+                }
+              : undefined,
           },
         },
       });
@@ -234,13 +244,15 @@ export class EmailService {
    */
   private isCriticalEmail(subject: string): boolean {
     const criticalKeywords = ['인증', '비밀번호', '결제', '보안'];
-    return criticalKeywords.some(keyword => subject.includes(keyword));
+    return criticalKeywords.some((keyword) => subject.includes(keyword));
   }
 
   /**
    * 회사 인증 이메일 발송
    */
-  async sendCompanyVerificationEmail(data: VerificationEmailData): Promise<boolean> {
+  async sendCompanyVerificationEmail(
+    data: VerificationEmailData,
+  ): Promise<boolean> {
     const { userEmail, companyName, verificationCode, expiresInMinutes } = data;
 
     const html = `
@@ -325,7 +337,7 @@ ${companyName}에서 Glimpse 회사 그룹에 가입하기 위한 인증 코드�
   async sendMatchNotificationEmail(
     userEmail: string,
     matchedUserNickname: string,
-    groupName: string
+    groupName: string,
   ): Promise<boolean> {
     const html = `
       <!DOCTYPE html>
@@ -379,7 +391,10 @@ ${companyName}에서 Glimpse 회사 그룹에 가입하기 위한 인증 코드�
   /**
    * 환영 이메일 발송
    */
-  async sendWelcomeEmail(userEmail: string, nickname: string): Promise<boolean> {
+  async sendWelcomeEmail(
+    userEmail: string,
+    nickname: string,
+  ): Promise<boolean> {
     const html = `
       <!DOCTYPE html>
       <html>
@@ -442,7 +457,7 @@ ${companyName}에서 Glimpse 회사 그룹에 가입하기 위한 인증 코드�
     userEmail: string,
     itemName: string,
     amount: number,
-    currency: string = 'KRW'
+    currency: string = 'KRW',
   ): Promise<boolean> {
     const formattedAmount = new Intl.NumberFormat('ko-KR', {
       style: 'currency',

@@ -14,16 +14,14 @@ interface CacheOptions {
 
 /**
  * Redis 기반 캐시 서비스
- * 
+ *
  * 애플리케이션 성능 향상을 위한 캐싱 기능을 제공합니다.
  */
 @Injectable()
 export class CacheService {
   private defaultTTL: number = 300; // 5 minutes
 
-  constructor(
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-  ) {}
+  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
   /**
    * 접두사를 포함한 전체 키 생성
@@ -90,7 +88,9 @@ export class CacheService {
       if (store.keys) {
         const keys = await store.keys(pattern);
         if (keys.length > 0) {
-          await Promise.all(keys.map((key: string) => this.cacheManager.del(key)));
+          await Promise.all(
+            keys.map((key: string) => this.cacheManager.del(key)),
+          );
         }
       }
     } catch (error) {
@@ -128,7 +128,7 @@ export class CacheService {
   async getOrSet<T>(
     key: string,
     fetchFn: () => Promise<T>,
-    options?: CacheOptions
+    options?: CacheOptions,
   ): Promise<T> {
     const cached = await this.get<T>(key, options);
     if (cached !== null) {
@@ -150,7 +150,12 @@ export class CacheService {
   /**
    * 사용자별 캐시 저장
    */
-  async setUserCache<T>(userId: string, key: string, value: T, ttl?: number): Promise<void> {
+  async setUserCache<T>(
+    userId: string,
+    key: string,
+    value: T,
+    ttl?: number,
+  ): Promise<void> {
     return this.set(`user:${userId}:${key}`, value, { ttl });
   }
 
@@ -171,7 +176,12 @@ export class CacheService {
   /**
    * 그룹별 캐시 저장
    */
-  async setGroupCache<T>(groupId: string, key: string, value: T, ttl?: number): Promise<void> {
+  async setGroupCache<T>(
+    groupId: string,
+    key: string,
+    value: T,
+    ttl?: number,
+  ): Promise<void> {
     return this.set(`group:${groupId}:${key}`, value, { ttl });
   }
 
@@ -192,7 +202,12 @@ export class CacheService {
   /**
    * 매칭별 캐시 저장
    */
-  async setMatchCache<T>(matchId: string, key: string, value: T, ttl?: number): Promise<void> {
+  async setMatchCache<T>(
+    matchId: string,
+    key: string,
+    value: T,
+    ttl?: number,
+  ): Promise<void> {
     return this.set(`match:${matchId}:${key}`, value, { ttl });
   }
 
@@ -226,19 +241,25 @@ export class CacheService {
  * async getUserProfile(userId: string) { ... }
  */
 export function Cacheable(keyPrefix: string, ttl: number = 300) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
       // Get cache service from NestJS DI container
-      const cacheService = (this as any).cacheService;
+      const cacheService = this.cacheService;
       if (!cacheService) {
-        console.warn('CacheService not injected, executing method without cache');
+        console.warn(
+          'CacheService not injected, executing method without cache',
+        );
         return method.apply(this, args);
       }
 
       const key = `${keyPrefix}:${propertyName}:${JSON.stringify(args)}`;
-      
+
       const cached = await cacheService.get(key);
       if (cached !== null) {
         return cached;
@@ -246,7 +267,7 @@ export function Cacheable(keyPrefix: string, ttl: number = 300) {
 
       const result = await method.apply(this, args);
       await cacheService.set(key, result, { ttl });
-      
+
       return result;
     };
 
@@ -261,14 +282,18 @@ export function Cacheable(keyPrefix: string, ttl: number = 300) {
  * async updateUser(userId: string, data: any) { ... }
  */
 export function InvalidateCache(patterns: string[]) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
       const result = await method.apply(this, args);
-      
+
       // Get cache service from NestJS DI container
-      const cacheService = (this as any).cacheService;
+      const cacheService = this.cacheService;
       if (!cacheService) {
         console.warn('CacheService not injected, skipping cache invalidation');
         return result;
@@ -278,7 +303,7 @@ export function InvalidateCache(patterns: string[]) {
       for (const pattern of patterns) {
         await cacheService.invalidate(pattern);
       }
-      
+
       return result;
     };
 

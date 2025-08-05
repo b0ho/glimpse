@@ -22,14 +22,17 @@ export class CompanyDomainService {
     if (!domain) return null;
 
     return this.prisma.companyDomain.findUnique({
-      where: { domain }
+      where: { domain },
     });
   }
 
   /**
    * 이메일 인증 생성 및 인증 코드 전송
    */
-  async createEmailVerification(userId: string, email: string): Promise<EmailVerification> {
+  async createEmailVerification(
+    userId: string,
+    email: string,
+  ): Promise<EmailVerification> {
     const domain = email.split('@')[1];
     if (!domain) {
       throw new Error('유효하지 않은 이메일 형식입니다.');
@@ -42,14 +45,16 @@ export class CompanyDomainService {
     }
 
     // 기존 인증 확인
-    const existingVerification = await this.prisma.emailVerification.findUnique({
-      where: {
-        userId_email: {
-          userId,
-          email
-        }
-      }
-    });
+    const existingVerification = await this.prisma.emailVerification.findUnique(
+      {
+        where: {
+          userId_email: {
+            userId,
+            email,
+          },
+        },
+      },
+    );
 
     if (existingVerification?.isVerified) {
       throw new Error('이미 인증된 이메일입니다.');
@@ -63,22 +68,22 @@ export class CompanyDomainService {
       where: {
         userId_email: {
           userId,
-          email
-        }
+          email,
+        },
       },
       update: {
         code,
         expiresAt,
         attempts: 0,
-        isVerified: false
+        isVerified: false,
       },
       create: {
         userId,
         email,
         domain,
         code,
-        expiresAt
-      }
+        expiresAt,
+      },
     });
 
     // 이메일 전송
@@ -90,12 +95,12 @@ export class CompanyDomainService {
       <br>
       <p>감사합니다.<br>Glimpse 팀</p>
     `;
-    
+
     await this.emailService.sendEmail({
       to: email,
       subject: `[Glimpse] ${companyDomain.companyNameKr || companyDomain.companyName} 이메일 인증`,
       html: htmlContent,
-      text: `안녕하세요!\n\n${companyDomain.companyNameKr || companyDomain.companyName} 이메일 인증을 위한 코드입니다.\n\n인증 코드: ${code}\n\n이 코드는 30분 후 만료됩니다.\n\n감사합니다.\nGlimpse 팀`
+      text: `안녕하세요!\n\n${companyDomain.companyNameKr || companyDomain.companyName} 이메일 인증을 위한 코드입니다.\n\n인증 코드: ${code}\n\n이 코드는 30분 후 만료됩니다.\n\n감사합니다.\nGlimpse 팀`,
     });
 
     return verification;
@@ -104,14 +109,18 @@ export class CompanyDomainService {
   /**
    * 이메일 인증 코드 검증
    */
-  async verifyEmailCode(userId: string, email: string, code: string): Promise<boolean> {
+  async verifyEmailCode(
+    userId: string,
+    email: string,
+    code: string,
+  ): Promise<boolean> {
     const verification = await this.prisma.emailVerification.findUnique({
       where: {
         userId_email: {
           userId,
-          email
-        }
-      }
+          email,
+        },
+      },
     });
 
     if (!verification) {
@@ -133,7 +142,7 @@ export class CompanyDomainService {
     // 시도 횟수 증가
     await this.prisma.emailVerification.update({
       where: { id: verification.id },
-      data: { attempts: verification.attempts + 1 }
+      data: { attempts: verification.attempts + 1 },
     });
 
     if (verification.code !== code) {
@@ -145,13 +154,13 @@ export class CompanyDomainService {
       where: { id: verification.id },
       data: {
         isVerified: true,
-        verifiedAt: new Date()
-      }
+        verifiedAt: new Date(),
+      },
     });
 
     // 회사 도메인 정보 가져오기
     const companyDomain = await this.getDomainByEmail(email);
-    
+
     if (companyDomain) {
       // 회사 그룹 자동 가입 처리
       await this.joinCompanyGroup(userId, companyDomain);
@@ -167,30 +176,30 @@ export class CompanyDomainService {
     // 회사와 연결된 공식 그룹 찾기
     const company = await this.prisma.company.findUnique({
       where: { domain: companyDomain.domain },
-      include: { groups: { where: { type: 'OFFICIAL' } } }
+      include: { groups: { where: { type: 'OFFICIAL' } } },
     });
 
     if (company && company.groups.length > 0) {
       const officialGroup = company.groups[0];
-      
+
       if (officialGroup) {
         // 그룹 멤버로 추가
         await this.prisma.groupMember.upsert({
           where: {
             userId_groupId: {
               userId,
-              groupId: officialGroup.id
-            }
+              groupId: officialGroup.id,
+            },
           },
           update: {
-            status: 'ACTIVE'
+            status: 'ACTIVE',
           },
           create: {
             userId,
             groupId: officialGroup.id,
             role: 'MEMBER',
-            status: 'ACTIVE'
-          }
+            status: 'ACTIVE',
+          },
         });
       }
     }
@@ -216,7 +225,7 @@ export class CompanyDomainService {
   }): Promise<CompanyDomain> {
     // 도메인 중복 확인
     const existing = await this.prisma.companyDomain.findUnique({
-      where: { domain: data.domain }
+      where: { domain: data.domain },
     });
 
     if (existing) {
@@ -224,7 +233,7 @@ export class CompanyDomainService {
     }
 
     return this.prisma.companyDomain.create({
-      data
+      data,
     });
   }
 
@@ -234,7 +243,7 @@ export class CompanyDomainService {
   async getVerifiedDomains(): Promise<CompanyDomain[]> {
     return this.prisma.companyDomain.findMany({
       where: { isVerified: true },
-      orderBy: { companyName: 'asc' }
+      orderBy: { companyName: 'asc' },
     });
   }
 
@@ -247,12 +256,12 @@ export class CompanyDomainService {
         OR: [
           { domain: { contains: query, mode: 'insensitive' } },
           { companyName: { contains: query, mode: 'insensitive' } },
-          { companyNameKr: { contains: query, mode: 'insensitive' } }
+          { companyNameKr: { contains: query, mode: 'insensitive' } },
         ],
-        isVerified: true
+        isVerified: true,
       },
       take: 20,
-      orderBy: { companyName: 'asc' }
+      orderBy: { companyName: 'asc' },
     });
   }
 }

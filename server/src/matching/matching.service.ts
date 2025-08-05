@@ -30,7 +30,7 @@ import {
 
 /**
  * 매칭 서비스
- * 
+ *
  * 좋아요, 매칭, 추천 기능을 담당합니다.
  */
 @Injectable()
@@ -43,7 +43,7 @@ export class MatchingService {
 
   /**
    * 좋아요 보내기
-   * 
+   *
    * @param userId 사용자 ID
    * @param data 좋아요 데이터
    * @returns 좋아요 결과
@@ -53,7 +53,10 @@ export class MatchingService {
 
     // 자기 자신에게 좋아요 불가
     if (userId === targetUserId) {
-      throw new HttpException('자기 자신에게 좋아요를 보낼 수 없습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '자기 자신에게 좋아요를 보낼 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // 그룹 멤버십 확인
@@ -75,7 +78,10 @@ export class MatchingService {
     }
 
     if (!targetMembership || targetMembership.status !== 'ACTIVE') {
-      throw new HttpException('대상이 그룹 멤버가 아닙니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '대상이 그룹 멤버가 아닙니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // 중복 좋아요 및 쿨다운 확인
@@ -91,11 +97,11 @@ export class MatchingService {
     if (existingLike) {
       const cooldownEnd = new Date(existingLike.createdAt);
       cooldownEnd.setDate(cooldownEnd.getDate() + 14); // 14 days cooldown
-      
+
       if (new Date() < cooldownEnd) {
         throw new HttpException(
           `14일 후에 다시 좋아요를 보낼 수 있습니다.`,
-          HttpStatus.TOO_MANY_REQUESTS
+          HttpStatus.TOO_MANY_REQUESTS,
         );
       }
     }
@@ -111,7 +117,10 @@ export class MatchingService {
     });
 
     if (!user) {
-      throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '사용자를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     // 프리미엄이 아닌 경우 크레딧 확인
@@ -119,7 +128,7 @@ export class MatchingService {
       // 일일 무료 좋아요 확인
       const cacheKey = `daily_like_used:${userId}:${new Date().toDateString()}`;
       const dailyLikeUsed = await this.cacheService.get<boolean>(cacheKey);
-      
+
       if (!dailyLikeUsed && user.credits === 0) {
         // 오늘의 무료 좋아요 사용
         await this.cacheService.set(cacheKey, true, { ttl: 86400 }); // 24 hours
@@ -132,7 +141,7 @@ export class MatchingService {
       } else {
         throw new HttpException(
           '좋아요를 보낼 크레딧이 부족합니다.',
-          HttpStatus.PAYMENT_REQUIRED
+          HttpStatus.PAYMENT_REQUIRED,
         );
       }
     }
@@ -176,10 +185,7 @@ export class MatchingService {
         // 좋아요 상태 업데이트
         await tx.userLike.updateMany({
           where: {
-            OR: [
-              { id: like.id },
-              { id: mutualLike.id },
-            ],
+            OR: [{ id: like.id }, { id: mutualLike.id }],
           },
           data: { isMatch: true },
         });
@@ -225,7 +231,7 @@ export class MatchingService {
 
   /**
    * 슈퍼 좋아요 보내기 (프리미엄)
-   * 
+   *
    * @param userId 사용자 ID
    * @param data 슈퍼 좋아요 데이터
    * @returns 좋아요 결과
@@ -238,19 +244,27 @@ export class MatchingService {
     });
 
     if (!user?.isPremium) {
-      throw new HttpException('슈퍼 좋아요는 프리미엄 멤버만 사용할 수 있습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '슈퍼 좋아요는 프리미엄 멤버만 사용할 수 있습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     // 일반 좋아요와 동일한 검증 로직 후 isSuper: true로 생성
     const result = await this.createLike(userId, data);
-    
+
     // 슈퍼 좋아요 메시지 전송
     if (data.message) {
       await this.notificationService.sendNotification({
         userId: data.targetUserId,
         type: 'LIKE_RECEIVED',
         content: `누군가 당신에게 슈퍼 좋아요를 보냈습니다! 💫\n메시지: ${data.message}`,
-        data: { fromUserId: userId, groupId: data.groupId, isSuperLike: true, message: data.message },
+        data: {
+          fromUserId: userId,
+          groupId: data.groupId,
+          isSuperLike: true,
+          message: data.message,
+        },
       });
     }
 
@@ -259,7 +273,7 @@ export class MatchingService {
 
   /**
    * 좋아요 취소
-   * 
+   *
    * @param likeId 좋아요 ID
    * @param userId 사용자 ID
    */
@@ -269,11 +283,17 @@ export class MatchingService {
     });
 
     if (!like || like.fromUserId !== userId) {
-      throw new HttpException('좋아요를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '좋아요를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     if (like.isMatch) {
-      throw new HttpException('매치된 좋아요는 취소할 수 없습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '매치된 좋아요는 취소할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.prisma.userLike.delete({
@@ -286,7 +306,7 @@ export class MatchingService {
 
   /**
    * 보낸 좋아요 목록 조회
-   * 
+   *
    * @param userId 사용자 ID
    * @param groupId 그룹 ID (옵션)
    * @param page 페이지 번호
@@ -335,7 +355,7 @@ export class MatchingService {
 
   /**
    * 받은 좋아요 목록 조회 (프리미엄)
-   * 
+   *
    * @param userId 사용자 ID
    * @param groupId 그룹 ID (옵션)
    * @param page 페이지 번호
@@ -355,7 +375,10 @@ export class MatchingService {
     });
 
     if (!user?.isPremium) {
-      throw new HttpException('받은 좋아요는 프리미엄 멤버만 볼 수 있습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '받은 좋아요는 프리미엄 멤버만 볼 수 있습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     const where: any = {
@@ -395,7 +418,7 @@ export class MatchingService {
 
   /**
    * 매치 목록 조회
-   * 
+   *
    * @param userId 사용자 ID
    * @param groupId 그룹 ID (옵션)
    * @param page 페이지 번호
@@ -409,10 +432,7 @@ export class MatchingService {
     limit: number = 20,
   ) {
     const where: Prisma.MatchWhereInput = {
-      OR: [
-        { user1Id: userId },
-        { user2Id: userId },
-      ],
+      OR: [{ user1Id: userId }, { user2Id: userId }],
       status: 'ACTIVE',
     };
 
@@ -454,7 +474,7 @@ export class MatchingService {
       take: limit,
     });
 
-    return matches.map(match => ({
+    return matches.map((match) => ({
       ...match,
       partner: match.user1Id === userId ? match.user2 : match.user1,
       messageCount: match._count.messages,
@@ -463,7 +483,7 @@ export class MatchingService {
 
   /**
    * 매치 상세 정보 조회
-   * 
+   *
    * @param matchId 매치 ID
    * @param userId 사용자 ID
    * @returns 매치 정보
@@ -502,7 +522,10 @@ export class MatchingService {
     }
 
     if (match.user1Id !== userId && match.user2Id !== userId) {
-      throw new HttpException('매치에 접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '매치에 접근 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     return {
@@ -514,7 +537,7 @@ export class MatchingService {
 
   /**
    * 매치 해제
-   * 
+   *
    * @param matchId 매치 ID
    * @param userId 사용자 ID
    * @param reason 해제 사유
@@ -529,7 +552,10 @@ export class MatchingService {
     }
 
     if (match.user1Id !== userId && match.user2Id !== userId) {
-      throw new HttpException('매치 해제 권한이 없습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '매치 해제 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     await this.prisma.match.update({
@@ -549,7 +575,7 @@ export class MatchingService {
 
   /**
    * 매칭 추천 목록 조회
-   * 
+   *
    * @param userId 사용자 ID
    * @param groupId 그룹 ID
    * @param count 추천 수
@@ -573,7 +599,10 @@ export class MatchingService {
     });
 
     if (!user) {
-      throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '사용자를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     // 그룹 멤버십 확인
@@ -596,7 +625,7 @@ export class MatchingService {
       select: { toUserId: true },
     });
 
-    const excludeUserIds = [userId, ...sentLikes.map(like => like.toUserId)];
+    const excludeUserIds = [userId, ...sentLikes.map((like) => like.toUserId)];
 
     // 추천 대상 조회
     const recommendations = await this.prisma.user.findMany({
@@ -622,12 +651,12 @@ export class MatchingService {
     });
 
     // 호환성 스코어 계산 및 정렬
-    const scoredRecommendations = recommendations.map(candidate => {
+    const scoredRecommendations = recommendations.map((candidate) => {
       let score = 0;
 
       // 관심사 매칭
-      const commonInterests = candidate.interests.filter(
-        interest => user.interests.includes(interest)
+      const commonInterests = candidate.interests.filter((interest) =>
+        user.interests.includes(interest),
       );
       score += commonInterests.length * 10;
 
@@ -649,7 +678,7 @@ export class MatchingService {
 
   /**
    * 매칭 통계 조회
-   * 
+   *
    * @param userId 사용자 ID
    * @returns 매칭 통계
    */
@@ -669,18 +698,12 @@ export class MatchingService {
       }),
       this.prisma.match.count({
         where: {
-          OR: [
-            { user1Id: userId },
-            { user2Id: userId },
-          ],
+          OR: [{ user1Id: userId }, { user2Id: userId }],
         },
       }),
       this.prisma.match.count({
         where: {
-          OR: [
-            { user1Id: userId },
-            { user2Id: userId },
-          ],
+          OR: [{ user1Id: userId }, { user2Id: userId }],
           status: 'ACTIVE',
         },
       }),
@@ -709,15 +732,15 @@ export class MatchingService {
       activeMatches,
       todayLikes,
       credits: user?.credits || 0,
-      dailyLikesRemaining: user?.isPremium 
-        ? -1 
+      dailyLikesRemaining: user?.isPremium
+        ? -1
         : Math.max(0, LIKE_CONFIG.DAILY_LIKE_LIMIT - (user?.credits || 0)),
     };
   }
 
   /**
    * 매칭 기간 연장 (프리미엄)
-   * 
+   *
    * @param matchId 매치 ID
    * @param userId 사용자 ID
    * @returns 연장된 매치
@@ -730,7 +753,10 @@ export class MatchingService {
     });
 
     if (!user?.isPremium) {
-      throw new HttpException('매치 연장은 프리미엄 멤버만 사용할 수 있습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '매치 연장은 프리미엄 멤버만 사용할 수 있습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     const match = await this.prisma.match.findUnique({
@@ -742,11 +768,17 @@ export class MatchingService {
     }
 
     if (match.user1Id !== userId && match.user2Id !== userId) {
-      throw new HttpException('매치 연장 권한이 없습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '매치 연장 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     if (match.status !== 'ACTIVE') {
-      throw new HttpException('활성 매치만 연장할 수 있습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '활성 매치만 연장할 수 있습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // 30일 연장
@@ -763,7 +795,7 @@ export class MatchingService {
 
   /**
    * 매칭 이력 조회
-   * 
+   *
    * @param userId 사용자 ID
    * @param groupId 그룹 ID (옵션)
    * @param page 페이지 번호
@@ -777,10 +809,7 @@ export class MatchingService {
     limit: number = 20,
   ) {
     const where: Prisma.MatchWhereInput = {
-      OR: [
-        { user1Id: userId },
-        { user2Id: userId },
-      ],
+      OR: [{ user1Id: userId }, { user2Id: userId }],
     };
 
     if (groupId) {
@@ -816,7 +845,7 @@ export class MatchingService {
       take: limit,
     });
 
-    return matches.map(match => ({
+    return matches.map((match) => ({
       ...match,
       partner: match.user1Id === userId ? match.user2 : match.user1,
     }));
@@ -824,7 +853,7 @@ export class MatchingService {
 
   /**
    * 일일 좋아요 갱신
-   * 
+   *
    * @param userId 사용자 ID
    * @returns 갱신 결과
    */
@@ -845,16 +874,14 @@ export class MatchingService {
     });
 
     return {
-      dailyLikesRemaining: user.isPremium 
-        ? -1 
-        : LIKE_CONFIG.DAILY_LIKE_LIMIT,
+      dailyLikesRemaining: user.isPremium ? -1 : LIKE_CONFIG.DAILY_LIKE_LIMIT,
       credits: user.credits,
     };
   }
 
   /**
    * 좋아요 되돌리기 (프리미엄)
-   * 
+   *
    * @param userId 사용자 ID
    * @returns 되돌린 좋아요
    */
@@ -866,7 +893,10 @@ export class MatchingService {
     });
 
     if (!user?.isPremium) {
-      throw new HttpException('좋아요 되돌리기는 프리미엄 멤버만 사용할 수 있습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '좋아요 되돌리기는 프리미엄 멤버만 사용할 수 있습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     // 가장 최근 좋아요 찾기
@@ -879,13 +909,19 @@ export class MatchingService {
     });
 
     if (!lastLike) {
-      throw new HttpException('되돌릴 좋아요가 없습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '되돌릴 좋아요가 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     // 5분 이내만 가능
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     if (lastLike.createdAt < fiveMinutesAgo) {
-      throw new HttpException('5분이 지난 좋아요는 되돌릴 수 없습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '5분이 지난 좋아요는 되돌릴 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // 좋아요 삭제
@@ -904,7 +940,7 @@ export class MatchingService {
    */
   async cleanupExpiredMatches() {
     const now = new Date();
-    
+
     const expiredMatches = await this.prisma.match.updateMany({
       where: {
         status: 'ACTIVE',

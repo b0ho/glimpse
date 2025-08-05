@@ -22,15 +22,15 @@ export class StoryService {
   async createStory(
     userId: string,
     mediaFile: Express.Multer.File,
-    caption?: string
+    caption?: string,
   ) {
     // Check if user has reached story limit (e.g., 10 active stories)
     const activeStoriesCount = await this.prisma.story.count({
       where: {
         userId,
         isActive: true,
-        expiresAt: { gt: new Date() }
-      }
+        expiresAt: { gt: new Date() },
+      },
     });
 
     if (activeStoriesCount >= 10) {
@@ -47,15 +47,15 @@ export class StoryService {
     }
 
     // Determine media type
-    const mediaType: StoryMediaType = mediaFile.mimetype.startsWith('video/') 
-      ? 'VIDEO' 
+    const mediaType: StoryMediaType = mediaFile.mimetype.startsWith('video/')
+      ? 'VIDEO'
       : 'IMAGE';
 
     // Upload media to S3
     const uploadResult = await this.fileService.uploadSingleFile(
       mediaFile,
       userId,
-      'STORY'
+      'STORY',
     );
 
     // Create story with 24-hour expiration
@@ -68,17 +68,17 @@ export class StoryService {
         mediaUrl: uploadResult.url,
         mediaType,
         caption,
-        expiresAt
+        expiresAt,
       },
       include: {
         user: {
           select: {
             id: true,
             nickname: true,
-            profileImage: true
-          }
-        }
-      }
+            profileImage: true,
+          },
+        },
+      },
     });
 
     return story;
@@ -92,50 +92,51 @@ export class StoryService {
       where: {
         userId,
         isActive: true,
-        expiresAt: { gt: new Date() }
+        expiresAt: { gt: new Date() },
       },
       include: {
         user: {
           select: {
             id: true,
             nickname: true,
-            profileImage: true
-          }
+            profileImage: true,
+          },
         },
         _count: {
-          select: { views: true }
-        }
+          select: { views: true },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
-    return stories.map(story => ({
+    return stories.map((story) => ({
       ...story,
-      viewCount: story._count.views
+      viewCount: story._count.views,
     }));
   }
 
   /**
    * 매칭된 사용자들의 스토리 조회
    */
-  async getMatchedUsersStories(userId: string, page: number = 1, limit: number = 20) {
+  async getMatchedUsersStories(
+    userId: string,
+    page: number = 1,
+    limit: number = 20,
+  ) {
     // First, get all matched user IDs
     const matches = await this.prisma.match.findMany({
       where: {
-        OR: [
-          { user1Id: userId },
-          { user2Id: userId }
-        ],
-        status: 'ACTIVE'
+        OR: [{ user1Id: userId }, { user2Id: userId }],
+        status: 'ACTIVE',
       },
       select: {
         user1Id: true,
-        user2Id: true
-      }
+        user2Id: true,
+      },
     });
 
-    const matchedUserIds = matches.map(match => 
-      match.user1Id === userId ? match.user2Id : match.user1Id
+    const matchedUserIds = matches.map((match) =>
+      match.user1Id === userId ? match.user2Id : match.user1Id,
     );
 
     if (matchedUserIds.length === 0) {
@@ -147,49 +148,52 @@ export class StoryService {
       where: {
         userId: { in: matchedUserIds },
         isActive: true,
-        expiresAt: { gt: new Date() }
+        expiresAt: { gt: new Date() },
       },
       include: {
         user: {
           select: {
             id: true,
             nickname: true,
-            profileImage: true
-          }
+            profileImage: true,
+          },
         },
         views: {
           where: { viewerId: userId },
-          select: { id: true }
-        }
+          select: { id: true },
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
-      take: limit
+      take: limit,
     });
 
     // Group stories by user
-    const storiesByUser = stories.reduce((acc, story) => {
-      const userId = story.userId;
-      if (!acc[userId]) {
-        acc[userId] = {
-          user: story.user,
-          stories: [],
-          hasUnviewed: false
-        };
-      }
-      
-      const isViewed = story.views.length > 0;
-      if (!isViewed) {
-        acc[userId].hasUnviewed = true;
-      }
+    const storiesByUser = stories.reduce(
+      (acc, story) => {
+        const userId = story.userId;
+        if (!acc[userId]) {
+          acc[userId] = {
+            user: story.user,
+            stories: [],
+            hasUnviewed: false,
+          };
+        }
 
-      acc[userId].stories.push({
-        ...story,
-        isViewed
-      });
+        const isViewed = story.views.length > 0;
+        if (!isViewed) {
+          acc[userId].hasUnviewed = true;
+        }
 
-      return acc;
-    }, {} as Record<string, any>);
+        acc[userId].stories.push({
+          ...story,
+          isViewed,
+        });
+
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
 
     return Object.values(storiesByUser);
   }
@@ -200,7 +204,7 @@ export class StoryService {
   async viewStory(storyId: string, viewerId: string) {
     const story = await this.prisma.story.findUnique({
       where: { id: storyId },
-      include: { user: true }
+      include: { user: true },
     });
 
     if (!story) {
@@ -222,16 +226,16 @@ export class StoryService {
       where: {
         storyId_viewerId: {
           storyId,
-          viewerId
-        }
+          viewerId,
+        },
       },
       update: {
-        viewedAt: new Date()
+        viewedAt: new Date(),
       },
       create: {
         storyId,
-        viewerId
-      }
+        viewerId,
+      },
     });
 
     return view;
@@ -242,7 +246,7 @@ export class StoryService {
    */
   async getStoryViewers(storyId: string, userId: string) {
     const story = await this.prisma.story.findUnique({
-      where: { id: storyId }
+      where: { id: storyId },
     });
 
     if (!story) {
@@ -260,11 +264,11 @@ export class StoryService {
           select: {
             id: true,
             nickname: true,
-            profileImage: true
-          }
-        }
+            profileImage: true,
+          },
+        },
       },
-      orderBy: { viewedAt: 'desc' }
+      orderBy: { viewedAt: 'desc' },
     });
 
     return views;
@@ -275,7 +279,7 @@ export class StoryService {
    */
   async deleteStory(storyId: string, userId: string) {
     const story = await this.prisma.story.findUnique({
-      where: { id: storyId }
+      where: { id: storyId },
     });
 
     if (!story) {
@@ -289,14 +293,14 @@ export class StoryService {
     // Soft delete by marking as inactive
     await this.prisma.story.update({
       where: { id: storyId },
-      data: { isActive: false }
+      data: { isActive: false },
     });
 
     // Delete the media file from S3
     // Note: FileService expects fileId, not URL. Need to extract fileId or modify FileService
     // For now, we'll just return success
     // TODO: Implement proper file deletion
-    
+
     return { success: true };
   }
 
@@ -306,20 +310,17 @@ export class StoryService {
   async cleanupExpiredStories() {
     const expiredStories = await this.prisma.story.findMany({
       where: {
-        OR: [
-          { expiresAt: { lt: new Date() } },
-          { isActive: false }
-        ]
-      }
+        OR: [{ expiresAt: { lt: new Date() } }, { isActive: false }],
+      },
     });
 
     for (const story of expiredStories) {
       try {
         // Delete story and its views from database
         await this.prisma.story.delete({
-          where: { id: story.id }
+          where: { id: story.id },
         });
-        
+
         // TODO: Delete media from S3
         // await this.fileService.deleteFile(story.mediaUrl);
       } catch (error) {
@@ -333,15 +334,18 @@ export class StoryService {
   /**
    * 두 사용자의 매칭 여부 확인
    */
-  private async checkIfMatched(userId1: string, userId2: string): Promise<boolean> {
+  private async checkIfMatched(
+    userId1: string,
+    userId2: string,
+  ): Promise<boolean> {
     const match = await this.prisma.match.findFirst({
       where: {
         OR: [
           { user1Id: userId1, user2Id: userId2 },
-          { user1Id: userId2, user2Id: userId1 }
+          { user1Id: userId2, user2Id: userId1 },
         ],
-        status: 'ACTIVE'
-      }
+        status: 'ACTIVE',
+      },
     });
 
     return !!match;
@@ -358,17 +362,17 @@ export class StoryService {
           select: {
             id: true,
             nickname: true,
-            profileImage: true
-          }
+            profileImage: true,
+          },
         },
         views: {
           where: { viewerId },
-          select: { id: true }
+          select: { id: true },
         },
         _count: {
-          select: { views: true }
-        }
-      }
+          select: { views: true },
+        },
+      },
     });
 
     if (!story) {
@@ -382,7 +386,7 @@ export class StoryService {
     // Check if viewer can see this story
     const isOwner = story.userId === viewerId;
     const isMatched = await this.checkIfMatched(story.userId, viewerId);
-    
+
     if (!isOwner && !isMatched) {
       throw new Error('이 스토리를 볼 권한이 없습니다.');
     }
@@ -391,7 +395,7 @@ export class StoryService {
       ...story,
       isViewed: story.views.length > 0,
       isOwner,
-      viewCount: story._count.views
+      viewCount: story._count.views,
     };
   }
 }

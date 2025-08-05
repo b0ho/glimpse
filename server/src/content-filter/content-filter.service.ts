@@ -4,7 +4,7 @@ import { AdminService } from '../admin/admin.service';
 
 /**
  * 콘텐츠 필터링 서비스
- * 
+ *
  * 부적절한 콘텐츠를 감지하고 차단합니다.
  */
 @Injectable()
@@ -47,7 +47,7 @@ export class ContentFilterService {
 
   /**
    * 텍스트 검증
-   * 
+   *
    * @param text 검증할 텍스트
    * @param context 컨텍스트 (프로필, 채팅, 그룹 등)
    * @returns 검증 결과
@@ -129,7 +129,7 @@ export class ContentFilterService {
 
   /**
    * 이미지 검증 (메타데이터)
-   * 
+   *
    * @param imageUrl 이미지 URL
    * @param context 컨텍스트
    * @returns 검증 결과
@@ -143,7 +143,7 @@ export class ContentFilterService {
   }> {
     // 이미지 메타데이터 검증
     // 실제 구현에서는 AI 기반 이미지 분석 서비스 연동 필요
-    
+
     // 임시 구현: URL 패턴 검사
     if (imageUrl.includes('nsfw') || imageUrl.includes('adult')) {
       return {
@@ -157,7 +157,7 @@ export class ContentFilterService {
 
   /**
    * 신고 내용 분석
-   * 
+   *
    * @param reportedContent 신고된 내용
    * @param reportReason 신고 사유
    * @returns 분석 결과
@@ -171,7 +171,7 @@ export class ContentFilterService {
     analysis: string;
   }> {
     const validation = await this.validateText(reportedContent, 'CHAT');
-    
+
     let recommendedAction: 'DISMISS' | 'WARN' | 'BLOCK' = 'DISMISS';
     let analysis = '';
 
@@ -199,7 +199,7 @@ export class ContentFilterService {
 
   /**
    * 텍스트 정규화
-   * 
+   *
    * @param text 원본 텍스트
    * @returns 정규화된 텍스트
    */
@@ -213,14 +213,14 @@ export class ContentFilterService {
 
   /**
    * 금지어 검사
-   * 
+   *
    * @param text 검사할 텍스트
    * @returns 발견된 금지어 목록
    */
   private checkBannedWords(text: string): string[] {
     const found: string[] = [];
-    
-    this.bannedWords.forEach(word => {
+
+    this.bannedWords.forEach((word) => {
       if (text.includes(word)) {
         found.push(word);
       }
@@ -231,14 +231,14 @@ export class ContentFilterService {
 
   /**
    * 개인정보 검사
-   * 
+   *
    * @param text 검사할 텍스트
    * @returns 발견된 패턴
    */
   private checkPersonalInfo(text: string): string[] {
     const found: string[] = [];
 
-    this.suspiciousPatterns.forEach(pattern => {
+    this.suspiciousPatterns.forEach((pattern) => {
       const matches = text.match(pattern);
       if (matches) {
         found.push(pattern.source);
@@ -250,7 +250,7 @@ export class ContentFilterService {
 
   /**
    * 스팸 점수 계산
-   * 
+   *
    * @param text 텍스트
    * @returns 스팸 점수 (0-1)
    */
@@ -281,7 +281,7 @@ export class ContentFilterService {
 
   /**
    * 반복 문자 검사
-   * 
+   *
    * @param text 텍스트
    * @returns 과도한 반복 여부
    */
@@ -292,19 +292,20 @@ export class ContentFilterService {
 
   /**
    * 이모지 비율 계산
-   * 
+   *
    * @param text 텍스트
    * @returns 이모지 비율
    */
   private calculateEmojiRatio(text: string): number {
-    const emojiPattern = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F700}-\u{1F77F}]|[\u{1F780}-\u{1F7FF}]|[\u{1F800}-\u{1F8FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+    const emojiPattern =
+      /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F700}-\u{1F77F}]|[\u{1F780}-\u{1F7FF}]|[\u{1F800}-\u{1F8FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
     const emojiCount = (text.match(emojiPattern) || []).length;
     return emojiCount / text.length;
   }
 
   /**
    * 프로필 콘텐츠 검증
-   * 
+   *
    * @param text 프로필 텍스트
    * @returns 문제점 목록
    */
@@ -326,7 +327,7 @@ export class ContentFilterService {
 
   /**
    * 채팅 콘텐츠 검증
-   * 
+   *
    * @param text 채팅 텍스트
    * @returns 문제점 목록
    */
@@ -348,7 +349,7 @@ export class ContentFilterService {
 
   /**
    * 금지어 목록 로드
-   * 
+   *
    * @returns 금지어 목록
    */
   private async loadBannedWords(): Promise<string[]> {
@@ -361,8 +362,14 @@ export class ContentFilterService {
 
     // 기본 금지어
     const defaultBannedWords = [
-      '자살', '살인', '마약', '도박',
-      '사기', '피싱', '몸캠', '조건만남',
+      '자살',
+      '살인',
+      '마약',
+      '도박',
+      '사기',
+      '피싱',
+      '몸캠',
+      '조건만남',
       // 욕설 및 비속어 (실제로는 더 포괄적인 목록 필요)
     ];
 
@@ -371,7 +378,7 @@ export class ContentFilterService {
 
   /**
    * 위반 로깅
-   * 
+   *
    * @param content 콘텐츠
    * @param context 컨텍스트
    * @param violations 위반 사항
@@ -394,7 +401,7 @@ export class ContentFilterService {
 
   /**
    * 금지어 추가
-   * 
+   *
    * @param word 금지어
    * @param category 카테고리
    */
@@ -411,7 +418,7 @@ export class ContentFilterService {
 
   /**
    * 금지어 제거
-   * 
+   *
    * @param word 금지어
    */
   async removeBannedWord(word: string) {
@@ -424,7 +431,7 @@ export class ContentFilterService {
 
   /**
    * 텍스트 필터링
-   * 
+   *
    * @param text 필터링할 텍스트
    * @returns 필터링 결과
    */
@@ -433,21 +440,21 @@ export class ContentFilterService {
     filteredText?: string;
   }> {
     const validation = await this.validateText(text, 'CHAT');
-    
+
     if (!validation.isValid) {
       if (validation.severity === 'HIGH') {
         return { severity: 'blocked' };
       } else if (validation.severity === 'MEDIUM') {
         // 중간 심각도의 경우 금지어를 마스킹 처리
         let filteredText = text;
-        this.bannedWords.forEach(word => {
+        this.bannedWords.forEach((word) => {
           const regex = new RegExp(word, 'gi');
           filteredText = filteredText.replace(regex, '*'.repeat(word.length));
         });
         return { severity: 'warning', filteredText };
       }
     }
-    
+
     return { severity: 'safe', filteredText: text };
   }
 }

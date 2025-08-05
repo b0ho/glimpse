@@ -38,7 +38,7 @@ interface QueueOptions {
 
 /**
  * 메시지 큐 서비스
- * 
+ *
  * Redis 기반 메시지 큐를 관리하며 오프라인 메시지와 실패한 작업의 재시도를 처리합니다.
  */
 @Injectable()
@@ -54,9 +54,10 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
   ) {
-    const redisUrl = this.configService.get('REDIS_URL') || 
+    const redisUrl =
+      this.configService.get('REDIS_URL') ||
       `redis://${this.configService.get('REDIS_HOST', 'localhost')}:${this.configService.get('REDIS_PORT', 6379)}`;
-    
+
     const redisConfig = {
       url: redisUrl,
       password: this.configService.get('REDIS_PASSWORD'),
@@ -88,7 +89,7 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
     // Connect to Redis
     await this.publisher.connect();
     await this.subscriber.connect();
-    
+
     this.publisher.on('connect', () => {
       console.log('Message queue publisher connected');
       this.isConnected = true;
@@ -111,7 +112,11 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
   /**
    * 오프라인 사용자를 위한 메시지 큐 추가
    */
-  async enqueueOfflineMessage(userId: string, message: any, options: QueueOptions = {}): Promise<void> {
+  async enqueueOfflineMessage(
+    userId: string,
+    message: any,
+    options: QueueOptions = {},
+  ): Promise<void> {
     if (!this.isConnected) {
       console.warn('Message queue not connected, message may be lost');
       return;
@@ -130,12 +135,12 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
     const ttl = options.ttl || 7 * 24 * 60 * 60; // 7 days default
 
     try {
-      await this.publisher.zAdd(queueKey, { 
-        score: Date.now(), 
-        value: JSON.stringify(queueMessage) 
+      await this.publisher.zAdd(queueKey, {
+        score: Date.now(),
+        value: JSON.stringify(queueMessage),
       });
       await this.publisher.expire(queueKey, ttl);
-      
+
       console.log(`Enqueued offline message for user ${userId}`);
     } catch (error) {
       console.error('Failed to enqueue offline message:', error);
@@ -154,15 +159,17 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
     try {
       // Get all messages sorted by timestamp
       const messages = await this.publisher.zRange(queueKey, 0, -1);
-      
+
       // Parse and return messages
-      return messages.map(msg => {
-        try {
-          return JSON.parse(msg);
-        } catch {
-          return null;
-        }
-      }).filter(Boolean);
+      return messages
+        .map((msg) => {
+          try {
+            return JSON.parse(msg);
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean);
     } catch (error) {
       console.error('Failed to get offline messages:', error);
       return [];
@@ -188,9 +195,14 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
   /**
    * 실패한 푸시 알림 재시도 큐 추가
    */
-  async enqueuePushNotificationRetry(notification: any, options: QueueOptions = {}): Promise<void> {
+  async enqueuePushNotificationRetry(
+    notification: any,
+    options: QueueOptions = {},
+  ): Promise<void> {
     if (!this.isConnected) {
-      console.warn('Message queue not connected, push notification retry may be lost');
+      console.warn(
+        'Message queue not connected, push notification retry may be lost',
+      );
       return;
     }
 
@@ -207,7 +219,9 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
     };
 
     if (queueMessage.attempts > maxRetries) {
-      console.warn(`Push notification retry limit exceeded for user ${notification.userId}`);
+      console.warn(
+        `Push notification retry limit exceeded for user ${notification.userId}`,
+      );
       await this.logFailedNotification(notification);
       return;
     }
@@ -216,8 +230,13 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
     const score = Date.now() + retryDelay * queueMessage.attempts;
 
     try {
-      await this.publisher.zAdd(queueKey, { score, value: JSON.stringify(queueMessage) });
-      console.log(`Enqueued push notification retry for user ${notification.userId}, attempt ${queueMessage.attempts}`);
+      await this.publisher.zAdd(queueKey, {
+        score,
+        value: JSON.stringify(queueMessage),
+      });
+      console.log(
+        `Enqueued push notification retry for user ${notification.userId}, attempt ${queueMessage.attempts}`,
+      );
     } catch (error) {
       console.error('Failed to enqueue push notification retry:', error);
     }
@@ -235,17 +254,14 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
 
     try {
       // Get messages ready for retry
-      const messages = await this.publisher.zRangeByScore(
-        queueKey, 
-        0, 
-        now, 
-        { LIMIT: { offset: 0, count: 10 } }
-      );
+      const messages = await this.publisher.zRangeByScore(queueKey, 0, now, {
+        LIMIT: { offset: 0, count: 10 },
+      });
 
       for (const messageStr of messages) {
         try {
           const message = JSON.parse(messageStr) as QueueMessage;
-          
+
           // Emit event for retry
           this.eventEmitter.emit('push_notification_retry', message.payload);
 
@@ -265,13 +281,16 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
    */
   private async logFailedNotification(notification: any): Promise<void> {
     const failedKey = `failed_notifications:${new Date().toISOString().split('T')[0]}`;
-    
+
     try {
-      await this.publisher.lPush(failedKey, JSON.stringify({
-        notification,
-        failedAt: new Date().toISOString(),
-      }));
-      
+      await this.publisher.lPush(
+        failedKey,
+        JSON.stringify({
+          notification,
+          failedAt: new Date().toISOString(),
+        }),
+      );
+
       // Keep failed notifications for 30 days
       await this.publisher.expire(failedKey, 30 * 24 * 60 * 60);
     } catch (error) {
@@ -298,7 +317,10 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
   /**
    * 실시간 이벤트 구독
    */
-  async subscribeToChannel(channel: string, callback: (message: any) => void): Promise<void> {
+  async subscribeToChannel(
+    channel: string,
+    callback: (message: any) => void,
+  ): Promise<void> {
     try {
       await this.subscriber.subscribe(channel, (message) => {
         try {
@@ -317,17 +339,18 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
    * 서비스 종료
    */
   async disconnect(): Promise<void> {
-    await Promise.all([
-      this.publisher.quit(),
-      this.subscriber.quit()
-    ]);
+    await Promise.all([this.publisher.quit(), this.subscriber.quit()]);
     this.isConnected = false;
   }
 
   /**
    * 배치 작업 큐에 추가
    */
-  async enqueueBatchJob(jobType: string, data: any, options: QueueOptions = {}): Promise<void> {
+  async enqueueBatchJob(
+    jobType: string,
+    data: any,
+    options: QueueOptions = {},
+  ): Promise<void> {
     if (!this.isConnected) {
       console.warn('Message queue not connected, batch job may be lost');
       return;
@@ -347,7 +370,7 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.publisher.lPush(queueKey, JSON.stringify(queueMessage));
       await this.publisher.expire(queueKey, ttl);
-      
+
       console.log(`Enqueued batch job: ${jobType}`);
     } catch (error) {
       console.error('Failed to enqueue batch job:', error);
@@ -358,7 +381,10 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
   /**
    * 배치 작업 처리
    */
-  async processBatchJobs(jobType: string, batchSize: number = 10): Promise<any[]> {
+  async processBatchJobs(
+    jobType: string,
+    batchSize: number = 10,
+  ): Promise<any[]> {
     if (!this.isConnected) return [];
 
     const queueKey = `batch_jobs:${jobType}`;
@@ -386,7 +412,11 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
   /**
    * 지연된 작업 예약
    */
-  async scheduleDelayedJob(jobType: string, data: any, delayMs: number): Promise<void> {
+  async scheduleDelayedJob(
+    jobType: string,
+    data: any,
+    delayMs: number,
+  ): Promise<void> {
     if (!this.isConnected) {
       console.warn('Message queue not connected, delayed job may be lost');
       return;
@@ -404,7 +434,10 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
     const score = Date.now() + delayMs;
 
     try {
-      await this.publisher.zAdd(queueKey, { score, value: JSON.stringify(queueMessage) });
+      await this.publisher.zAdd(queueKey, {
+        score,
+        value: JSON.stringify(queueMessage),
+      });
       console.log(`Scheduled delayed job: ${jobType} to run in ${delayMs}ms`);
     } catch (error) {
       console.error('Failed to schedule delayed job:', error);
@@ -423,17 +456,14 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
     const now = Date.now();
 
     try {
-      const jobs = await this.publisher.zRangeByScore(
-        queueKey, 
-        0, 
-        now, 
-        { LIMIT: { offset: 0, count: 20 } }
-      );
+      const jobs = await this.publisher.zRangeByScore(queueKey, 0, now, {
+        LIMIT: { offset: 0, count: 20 },
+      });
 
       for (const jobStr of jobs) {
         try {
           const job = JSON.parse(jobStr) as QueueMessage;
-          
+
           // Emit event for job processing
           this.eventEmitter.emit(`delayed_job:${job.type}`, job.payload);
 
@@ -462,7 +492,9 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
       stats.offlineMessages = offlineKeys.length;
 
       // Get retry queue size
-      const retryQueueSize = await this.publisher.zCard('push_notification_retry_queue');
+      const retryQueueSize = await this.publisher.zCard(
+        'push_notification_retry_queue',
+      );
       stats.retryQueueSize = retryQueueSize;
 
       // Get delayed jobs size
@@ -472,7 +504,7 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
       // Get batch job stats
       const batchJobKeys = await this.publisher.keys('batch_jobs:*');
       stats.batchJobQueues = {};
-      
+
       for (const key of batchJobKeys) {
         const jobType = key.split(':')[1];
         const size = await this.publisher.lLen(key);

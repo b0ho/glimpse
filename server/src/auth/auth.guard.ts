@@ -1,9 +1,14 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 /**
  * 인증 가드
- * 
+ *
  * JWT 토큰을 검증하고 사용자 정보를 request 객체에 추가합니다.
  */
 @Injectable()

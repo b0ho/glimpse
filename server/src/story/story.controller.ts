@@ -1,6 +1,25 @@
-import { Controller, Post, Get, Delete, Param, Query, Body, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Param,
+  Query,
+  Body,
+  UseGuards,
+  Req,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger';
 import { StoryService } from './story.service';
 import { AuthGuard } from '../auth/auth.guard';
 import type { Express } from 'express';
@@ -40,7 +59,7 @@ export class StoryController {
   async createStory(
     @Req() req: any,
     @UploadedFile() media: Express.Multer.File,
-    @Body('caption') caption?: string
+    @Body('caption') caption?: string,
   ) {
     const userId = req.user.id;
     return this.storyService.createStory(userId, media, caption);
@@ -66,13 +85,13 @@ export class StoryController {
   async getMatchedUsersStories(
     @Req() req: any,
     @Query('page') page?: number,
-    @Query('limit') limit?: number
+    @Query('limit') limit?: number,
   ) {
     const userId = req.user.id;
     return this.storyService.getMatchedUsersStories(
       userId,
       page || 1,
-      limit || 20
+      limit || 20,
     );
   }
 
@@ -82,10 +101,7 @@ export class StoryController {
   @Get(':storyId')
   @ApiOperation({ summary: '특정 스토리 조회' })
   @ApiResponse({ status: 200, description: '스토리 상세 정보' })
-  async getStoryById(
-    @Req() req: any,
-    @Param('storyId') storyId: string
-  ) {
+  async getStoryById(@Req() req: any, @Param('storyId') storyId: string) {
     const viewerId = req.user.id;
     return this.storyService.getStoryById(storyId, viewerId);
   }
@@ -96,10 +112,7 @@ export class StoryController {
   @Post(':storyId/view')
   @ApiOperation({ summary: '스토리 조회 표시' })
   @ApiResponse({ status: 200, description: '조회 기록됨' })
-  async viewStory(
-    @Req() req: any,
-    @Param('storyId') storyId: string
-  ) {
+  async viewStory(@Req() req: any, @Param('storyId') storyId: string) {
     const viewerId = req.user.id;
     return this.storyService.viewStory(storyId, viewerId);
   }
@@ -110,10 +123,7 @@ export class StoryController {
   @Get(':storyId/viewers')
   @ApiOperation({ summary: '스토리 조회자 목록' })
   @ApiResponse({ status: 200, description: '조회자 목록' })
-  async getStoryViewers(
-    @Req() req: any,
-    @Param('storyId') storyId: string
-  ) {
+  async getStoryViewers(@Req() req: any, @Param('storyId') storyId: string) {
     const userId = req.user.id;
     return this.storyService.getStoryViewers(storyId, userId);
   }
@@ -124,10 +134,7 @@ export class StoryController {
   @Delete(':storyId')
   @ApiOperation({ summary: '스토리 삭제' })
   @ApiResponse({ status: 200, description: '스토리 삭제됨' })
-  async deleteStory(
-    @Req() req: any,
-    @Param('storyId') storyId: string
-  ) {
+  async deleteStory(@Req() req: any, @Param('storyId') storyId: string) {
     const userId = req.user.id;
     return this.storyService.deleteStory(storyId, userId);
   }

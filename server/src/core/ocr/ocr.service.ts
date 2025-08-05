@@ -62,14 +62,15 @@ interface IDCardInfo {
 
 /**
  * OCR 서비스
- * 
+ *
  * 문서 인식 및 정보 추출을 담당합니다.
  * Naver OCR과 Google Vision API를 지원합니다.
  */
 @Injectable()
 export class OcrService {
   /** 네이버 OCR API URL */
-  private readonly naverApiUrl = 'https://naveropenapi.apigw.ntruss.com/vision/v1/ocr';
+  private readonly naverApiUrl =
+    'https://naveropenapi.apigw.ntruss.com/vision/v1/ocr';
   /** 네이버 클라이언트 ID */
   private readonly naverClientId: string;
   /** 네이버 클라이언트 시크릿 */
@@ -79,14 +80,20 @@ export class OcrService {
 
   constructor(private readonly configService: ConfigService) {
     this.naverClientId = this.configService.get('NAVER_OCR_CLIENT_ID', '');
-    this.naverClientSecret = this.configService.get('NAVER_OCR_CLIENT_SECRET', '');
+    this.naverClientSecret = this.configService.get(
+      'NAVER_OCR_CLIENT_SECRET',
+      '',
+    );
     this.googleApiKey = this.configService.get('GOOGLE_VISION_API_KEY', '');
   }
 
   /**
    * 이미지에서 텍스트 추출
    */
-  async extractTextFromImage(imageBuffer: Buffer, ocrProvider: 'naver' | 'google' = 'naver'): Promise<OCRResult> {
+  async extractTextFromImage(
+    imageBuffer: Buffer,
+    ocrProvider: 'naver' | 'google' = 'naver',
+  ): Promise<OCRResult> {
     try {
       // Preprocess image for better OCR results
       const processedImage = await this.preprocessImage(imageBuffer);
@@ -101,7 +108,10 @@ export class OcrService {
       }
     } catch (error) {
       console.error('OCR extraction failed:', error);
-      throw new HttpException('OCR 텍스트 추출에 실패했습니다.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'OCR 텍스트 추출에 실패했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -111,17 +121,20 @@ export class OcrService {
   async verifyCompanyCard(imageBuffer: Buffer): Promise<CompanyInfo> {
     try {
       const ocrResult = await this.extractTextFromImage(imageBuffer);
-      
+
       // Extract company information using patterns
       const companyInfo = this.extractCompanyInfo(ocrResult.text);
-      
+
       return {
         ...companyInfo,
         confidence: Math.min(ocrResult.confidence, companyInfo.confidence),
       };
     } catch (error) {
       console.error('Company card verification failed:', error);
-      throw new HttpException('회사 카드 인증에 실패했습니다.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        '회사 카드 인증에 실패했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -131,37 +144,48 @@ export class OcrService {
   async verifyIDCard(imageBuffer: Buffer): Promise<IDCardInfo> {
     try {
       const ocrResult = await this.extractTextFromImage(imageBuffer);
-      
+
       // Extract ID card information using patterns
       const idInfo = this.extractIDCardInfo(ocrResult.text);
-      
+
       return {
         ...idInfo,
         confidence: Math.min(ocrResult.confidence, idInfo.confidence),
       };
     } catch (error) {
       console.error('ID card verification failed:', error);
-      throw new HttpException('신분증 인증에 실패했습니다.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        '신분증 인증에 실패했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   /**
    * 학생증 인증
    */
-  async verifyStudentCard(imageBuffer: Buffer): Promise<{ university?: string; studentId?: string; name?: string; confidence: number }> {
+  async verifyStudentCard(imageBuffer: Buffer): Promise<{
+    university?: string;
+    studentId?: string;
+    name?: string;
+    confidence: number;
+  }> {
     try {
       const ocrResult = await this.extractTextFromImage(imageBuffer);
-      
+
       // Extract student card information
       const studentInfo = this.extractStudentCardInfo(ocrResult.text);
-      
+
       return {
         ...studentInfo,
         confidence: Math.min(ocrResult.confidence, studentInfo.confidence),
       };
     } catch (error) {
       console.error('Student card verification failed:', error);
-      throw new HttpException('학생증 인증에 실패했습니다.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        '학생증 인증에 실패했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -211,16 +235,22 @@ export class OcrService {
       });
 
       const result = response.data;
-      
+
       if (!result.images || result.images.length === 0) {
         throw new Error('No text detected in image');
       }
 
       const fields = result.images[0].fields || [];
-      const extractedText = fields.map((field: any) => field.inferText || '').join(' ');
-      const avgConfidence = fields.length > 0 
-        ? fields.reduce((sum: number, field: any) => sum + (field.inferConfidence || 0), 0) / fields.length 
-        : 0;
+      const extractedText = fields
+        .map((field: any) => field.inferText || '')
+        .join(' ');
+      const avgConfidence =
+        fields.length > 0
+          ? fields.reduce(
+              (sum: number, field: any) => sum + (field.inferConfidence || 0),
+              0,
+            ) / fields.length
+          : 0;
 
       const boundingBoxes: BoundingBox[] = fields.map((field: any) => {
         const vertices = field.boundingPoly?.vertices || [];
@@ -228,7 +258,7 @@ export class OcrService {
         const y = vertices[0]?.y || 0;
         const width = (vertices[2]?.x || 0) - x;
         const height = (vertices[2]?.y || 0) - y;
-        
+
         return {
           text: field.inferText || '',
           x,
@@ -253,28 +283,32 @@ export class OcrService {
   /**
    * Google Vision API로 텍스트 추출
    */
-  private async extractWithGoogleVision(imageBuffer: Buffer): Promise<OCRResult> {
+  private async extractWithGoogleVision(
+    imageBuffer: Buffer,
+  ): Promise<OCRResult> {
     if (!this.googleApiKey) {
       throw new Error('Google Vision API key not configured');
     }
 
     try {
       const base64Image = imageBuffer.toString('base64');
-      
+
       const requestBody = {
-        requests: [{
-          image: { content: base64Image },
-          features: [{ type: 'TEXT_DETECTION', maxResults: 50 }],
-        }],
+        requests: [
+          {
+            image: { content: base64Image },
+            features: [{ type: 'TEXT_DETECTION', maxResults: 50 }],
+          },
+        ],
       };
 
       const response = await axios.post(
         `https://vision.googleapis.com/v1/images:annotate?key=${this.googleApiKey}`,
-        requestBody
+        requestBody,
       );
 
       const result = response.data.responses[0];
-      
+
       if (!result.textAnnotations || result.textAnnotations.length === 0) {
         throw new Error('No text detected in image');
       }
@@ -282,22 +316,24 @@ export class OcrService {
       const fullText = result.textAnnotations[0].description;
       const confidence = result.textAnnotations[0].confidence || 0.8; // Default confidence
 
-      const boundingBoxes: BoundingBox[] = result.textAnnotations.slice(1).map((annotation: any) => {
-        const vertices = annotation.boundingPoly?.vertices || [];
-        const x = vertices[0]?.x || 0;
-        const y = vertices[0]?.y || 0;
-        const width = (vertices[2]?.x || 0) - x;
-        const height = (vertices[2]?.y || 0) - y;
-        
-        return {
-          text: annotation.description || '',
-          x,
-          y,
-          width,
-          height,
-          confidence: annotation.confidence || 0.8,
-        };
-      });
+      const boundingBoxes: BoundingBox[] = result.textAnnotations
+        .slice(1)
+        .map((annotation: any) => {
+          const vertices = annotation.boundingPoly?.vertices || [];
+          const x = vertices[0]?.x || 0;
+          const y = vertices[0]?.y || 0;
+          const width = (vertices[2]?.x || 0) - x;
+          const height = (vertices[2]?.y || 0) - y;
+
+          return {
+            text: annotation.description || '',
+            x,
+            y,
+            width,
+            height,
+            confidence: annotation.confidence || 0.8,
+          };
+        });
 
       return {
         text: fullText,
@@ -314,7 +350,10 @@ export class OcrService {
    * 텍스트에서 회사 정보 추출
    */
   private extractCompanyInfo(text: string): CompanyInfo {
-    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const lines = text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
     let companyName: string | undefined;
     let domain: string | undefined;
     let confidence = 0.5;
@@ -372,18 +411,22 @@ export class OcrService {
    * 텍스트에서 신분증 정보 추출
    */
   private extractIDCardInfo(text: string): IDCardInfo {
-    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const lines = text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
     let name: string | undefined;
     let idNumber: string | undefined;
     let issueDate: string | undefined;
     let confidence = 0.5;
 
     // Korean name pattern (2-4 characters)
-    const namePattern = /이름\s*[:：]\s*([가-힣]{2,4})|([가-힣]{2,4})\s*(?=\d{6}-\d{7})/;
-    
+    const namePattern =
+      /이름\s*[:：]\s*([가-힣]{2,4})|([가-힣]{2,4})\s*(?=\d{6}-\d{7})/;
+
     // Korean ID number pattern
     const idNumberPattern = /(\d{6}[-\s]*\d{7})/;
-    
+
     // Date patterns - make sure it's specific enough
     const datePatterns = [
       /발급일\s*[:：]?\s*(\d{4})[-.\s]*(\d{1,2})[-.\s]*(\d{1,2})/,
@@ -439,8 +482,16 @@ export class OcrService {
   /**
    * 텍스트에서 학생증 정보 추출
    */
-  private extractStudentCardInfo(text: string): { university?: string; studentId?: string; name?: string; confidence: number } {
-    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  private extractStudentCardInfo(text: string): {
+    university?: string;
+    studentId?: string;
+    name?: string;
+    confidence: number;
+  } {
+    const lines = text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
     let university: string | undefined;
     let studentId: string | undefined;
     let name: string | undefined;
@@ -469,7 +520,8 @@ export class OcrService {
             university = match[1];
             confidence = Math.max(confidence, 0.8);
             break;
-          } else if (line.length < 20) { // Avoid long lines that might not be university names
+          } else if (line.length < 20) {
+            // Avoid long lines that might not be university names
             university = line;
             confidence = Math.max(confidence, 0.6);
             break;
@@ -507,7 +559,7 @@ export class OcrService {
   private validateKoreanIDNumber(idNumber: string): boolean {
     // Remove any dashes or spaces
     const cleanId = idNumber.replace(/[-\s]/g, '');
-    
+
     // Must be exactly 13 digits
     if (cleanId.length !== 13 || !/^\d{13}$/.test(cleanId)) {
       return false;
@@ -531,23 +583,39 @@ export class OcrService {
   /**
    * 문서 타입 감지
    */
-  async detectDocumentType(imageBuffer: Buffer): Promise<'id_card' | 'company_card' | 'student_card' | 'unknown'> {
+  async detectDocumentType(
+    imageBuffer: Buffer,
+  ): Promise<'id_card' | 'company_card' | 'student_card' | 'unknown'> {
     try {
       const ocrResult = await this.extractTextFromImage(imageBuffer);
       const text = ocrResult.text.toLowerCase();
 
       // Document type detection patterns
-      if (text.includes('주민등록증') || text.includes('신분증') || /\d{6}-\d{7}/.test(text)) {
+      if (
+        text.includes('주민등록증') ||
+        text.includes('신분증') ||
+        /\d{6}-\d{7}/.test(text)
+      ) {
         return 'id_card';
       }
 
-      if (text.includes('사원증') || text.includes('직원증') || text.includes('company') || 
-          text.includes('employee') || /@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(text)) {
+      if (
+        text.includes('사원증') ||
+        text.includes('직원증') ||
+        text.includes('company') ||
+        text.includes('employee') ||
+        /@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(text)
+      ) {
         return 'company_card';
       }
 
-      if (text.includes('학생증') || text.includes('대학교') || text.includes('university') || 
-          text.includes('college') || text.includes('학번')) {
+      if (
+        text.includes('학생증') ||
+        text.includes('대학교') ||
+        text.includes('university') ||
+        text.includes('college') ||
+        text.includes('학번')
+      ) {
         return 'student_card';
       }
 
@@ -561,39 +629,54 @@ export class OcrService {
   /**
    * 문서 품질 검증
    */
-  async validateDocumentQuality(imageBuffer: Buffer): Promise<{ isValid: boolean; issues: string[] }> {
+  async validateDocumentQuality(
+    imageBuffer: Buffer,
+  ): Promise<{ isValid: boolean; issues: string[] }> {
     const issues: string[] = [];
 
     try {
       const metadata = await (sharp as any)(imageBuffer).metadata();
-      
+
       // Check image dimensions
       if (metadata.width && metadata.width < 800) {
-        issues.push('이미지 해상도가 너무 낮습니다. 더 선명한 사진을 업로드해주세요.');
+        issues.push(
+          '이미지 해상도가 너무 낮습니다. 더 선명한 사진을 업로드해주세요.',
+        );
       }
 
       if (metadata.height && metadata.height < 600) {
-        issues.push('이미지 높이가 부족합니다. 문서 전체가 보이도록 촬영해주세요.');
+        issues.push(
+          '이미지 높이가 부족합니다. 문서 전체가 보이도록 촬영해주세요.',
+        );
       }
 
       // Check file size (too small might indicate poor quality)
-      if (imageBuffer.length < 50000) { // 50KB
-        issues.push('이미지 파일 크기가 너무 작습니다. 더 선명한 사진을 업로드해주세요.');
+      if (imageBuffer.length < 50000) {
+        // 50KB
+        issues.push(
+          '이미지 파일 크기가 너무 작습니다. 더 선명한 사진을 업로드해주세요.',
+        );
       }
 
       // Try OCR extraction to validate readability
       try {
         const ocrResult = await this.extractTextFromImage(imageBuffer);
-        
+
         if (ocrResult.confidence < 0.3) {
-          issues.push('텍스트 인식률이 낮습니다. 조명이 좋은 곳에서 다시 촬영해주세요.');
+          issues.push(
+            '텍스트 인식률이 낮습니다. 조명이 좋은 곳에서 다시 촬영해주세요.',
+          );
         }
 
         if (ocrResult.text.length < 10) {
-          issues.push('인식된 텍스트가 부족합니다. 문서가 선명하게 보이도록 촬영해주세요.');
+          issues.push(
+            '인식된 텍스트가 부족합니다. 문서가 선명하게 보이도록 촬영해주세요.',
+          );
         }
       } catch (error) {
-        issues.push('문서에서 텍스트를 인식할 수 없습니다. 다른 이미지를 시도해주세요.');
+        issues.push(
+          '문서에서 텍스트를 인식할 수 없습니다. 다른 이미지를 시도해주세요.',
+        );
       }
 
       return {
@@ -612,9 +695,13 @@ export class OcrService {
   /**
    * 사원증 처리 (호환성을 위한 별칭)
    */
-  async processEmployeeCard(imageInput: string | Buffer): Promise<{ companyName?: string; employeeName?: string; confidence: number }> {
+  async processEmployeeCard(imageInput: string | Buffer): Promise<{
+    companyName?: string;
+    employeeName?: string;
+    confidence: number;
+  }> {
     let imageBuffer: Buffer;
-    
+
     if (typeof imageInput === 'string') {
       // Handle base64 or URL input
       if (imageInput.startsWith('data:image/')) {
@@ -636,7 +723,7 @@ export class OcrService {
 
     const companyInfo = await this.verifyCompanyCard(imageBuffer);
     const idInfo = await this.verifyIDCard(imageBuffer);
-    
+
     return {
       companyName: companyInfo.companyName,
       employeeName: idInfo.name,

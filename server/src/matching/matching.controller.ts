@@ -22,7 +22,7 @@ import {
 
 /**
  * 매칭 컨트롤러
- * 
+ *
  * 좋아요, 매칭, 추천 관련 API를 제공합니다.
  */
 @Controller('matching')
@@ -135,7 +135,11 @@ export class MatchingController {
     @Query('groupId') groupId: string,
     @Query('count') count: number = 10,
   ) {
-    return this.matchingService.getMatchingRecommendations(userId, groupId, count);
+    return this.matchingService.getMatchingRecommendations(
+      userId,
+      groupId,
+      count,
+    );
   }
 
   /**
@@ -166,7 +170,12 @@ export class MatchingController {
     @Query() query: GetMatchesQueryDto,
   ) {
     const { groupId, page = 1, limit = 20 } = query;
-    return this.matchingService.getMatchingHistory(userId, groupId, page, limit);
+    return this.matchingService.getMatchingHistory(
+      userId,
+      groupId,
+      page,
+      limit,
+    );
   }
 
   /**

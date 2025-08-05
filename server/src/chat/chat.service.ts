@@ -15,7 +15,7 @@ import {
 
 /**
  * 채팅 서비스
- * 
+ *
  * 실시간 메시징 및 채팅 관리 기능을 제공합니다.
  * 메시지 암호화, 읽음 표시, 타이핑 상태 등을 처리합니다.
  */
@@ -80,21 +80,24 @@ export class ChatService {
         }
 
         // 반응들을 이모지별로 그룹화
-        const reactionsByEmoji = message.reactions.reduce((acc, reaction) => {
-          if (!acc[reaction.emoji]) {
-            acc[reaction.emoji] = {
-              emoji: reaction.emoji,
-              count: 0,
-              users: [],
-            };
-          }
-          acc[reaction.emoji].count++;
-          acc[reaction.emoji].users.push({
-            id: reaction.user.id,
-            nickname: reaction.user.nickname,
-          });
-          return acc;
-        }, {} as Record<string, any>);
+        const reactionsByEmoji = message.reactions.reduce(
+          (acc, reaction) => {
+            if (!acc[reaction.emoji]) {
+              acc[reaction.emoji] = {
+                emoji: reaction.emoji,
+                count: 0,
+                users: [],
+              };
+            }
+            acc[reaction.emoji].count++;
+            acc[reaction.emoji].users.push({
+              id: reaction.user.id,
+              nickname: reaction.user.nickname,
+            });
+            return acc;
+          },
+          {} as Record<string, any>,
+        );
 
         return {
           id: message.id,
@@ -120,11 +123,7 @@ export class ChatService {
   /**
    * 메시지 전송
    */
-  async sendMessage(
-    matchId: string,
-    senderId: string,
-    data: SendMessageDto,
-  ) {
+  async sendMessage(matchId: string, senderId: string, data: SendMessageDto) {
     const { content, type = 'TEXT' } = data;
 
     // 내용 길이 검증
@@ -254,7 +253,8 @@ export class ChatService {
           }
 
           lastMessageContent = {
-            content: content.length > 50 ? content.substring(0, 50) + '...' : content,
+            content:
+              content.length > 50 ? content.substring(0, 50) + '...' : content,
             isFromMe: lastMessage.senderId === userId,
             createdAt: lastMessage.createdAt,
           };
@@ -307,7 +307,8 @@ export class ChatService {
     }
 
     // 상대방이 보낸 읽지 않은 메시지들을 읽음 처리
-    const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
+    const otherUserId =
+      match.user1Id === userId ? match.user2Id : match.user1Id;
 
     const updatedMessages = await this.prisma.chatMessage.updateMany({
       where: {

@@ -15,7 +15,10 @@ const GROUP_CONFIG = {
 };
 
 const generateId = (): string => {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 };
 import {
   CreateGroupDto,
@@ -27,7 +30,7 @@ import {
 
 /**
  * 그룹 서비스
- * 
+ *
  * 그룹 생성, 관리, 멤버십 처리를 담당합니다.
  */
 @Injectable()
@@ -39,7 +42,7 @@ export class GroupService {
 
   /**
    * 그룹 목록 조회
-   * 
+   *
    * @param userId 사용자 ID
    * @param type 그룹 타입 필터
    * @param search 검색어
@@ -94,7 +97,7 @@ export class GroupService {
       take: limit,
     });
 
-    return groups.map(group => ({
+    return groups.map((group) => ({
       id: group.id,
       name: group.name,
       description: group.description,
@@ -105,15 +108,15 @@ export class GroupService {
       location: group.location,
       creator: group.creator,
       company: group.company,
-      isUserMember: group.members.some(member => member.userId === userId),
-      userRole: group.members.find(member => member.userId === userId)?.role,
+      isUserMember: group.members.some((member) => member.userId === userId),
+      userRole: group.members.find((member) => member.userId === userId)?.role,
       createdAt: group.createdAt,
     }));
   }
 
   /**
    * 그룹 상세 정보 조회
-   * 
+   *
    * @param groupId 그룹 ID
    * @param userId 요청 사용자 ID
    * @returns 그룹 상세 정보
@@ -150,7 +153,9 @@ export class GroupService {
       throw new HttpException('그룹을 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
     }
 
-    const userMembership = group.members.find(member => member.userId === userId);
+    const userMembership = group.members.find(
+      (member) => member.userId === userId,
+    );
 
     return {
       ...group,
@@ -163,7 +168,7 @@ export class GroupService {
 
   /**
    * 그룹 생성
-   * 
+   *
    * @param creatorId 생성자 ID
    * @param data 그룹 생성 데이터
    * @returns 생성된 그룹
@@ -186,7 +191,10 @@ export class GroupService {
 
     // 위치 기반 그룹 검증
     if (type === 'LOCATION' && !location) {
-      throw new HttpException('위치 기반 그룹은 위치 정보가 필요합니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '위치 기반 그룹은 위치 정보가 필요합니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // TODO: 콘텐츠 필터링 추가
@@ -219,7 +227,7 @@ export class GroupService {
 
   /**
    * 그룹 업데이트
-   * 
+   *
    * @param groupId 그룹 ID
    * @param userId 요청 사용자 ID
    * @param data 업데이트 데이터
@@ -245,7 +253,7 @@ export class GroupService {
 
   /**
    * 그룹 가입
-   * 
+   *
    * @param groupId 그룹 ID
    * @param userId 사용자 ID
    * @returns 멤버십 정보
@@ -266,7 +274,10 @@ export class GroupService {
 
     // 최대 멤버 수 확인
     if (group.maxMembers && group._count.members >= group.maxMembers) {
-      throw new HttpException('그룹의 최대 인원을 초과했습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '그룹의 최대 인원을 초과했습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // 기존 멤버십 확인
@@ -281,7 +292,10 @@ export class GroupService {
 
     if (existingMember) {
       if (existingMember.status === 'ACTIVE') {
-        throw new HttpException('이미 그룹에 가입되어 있습니다.', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          '이미 그룹에 가입되어 있습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
       }
       // 비활성 멤버 재활성화
       return await this.prisma.groupMember.update({
@@ -311,7 +325,7 @@ export class GroupService {
 
   /**
    * 그룹 탈퇴
-   * 
+   *
    * @param groupId 그룹 ID
    * @param userId 사용자 ID
    */
@@ -326,11 +340,17 @@ export class GroupService {
     });
 
     if (!membership || membership.status !== 'ACTIVE') {
-      throw new HttpException('그룹 멤버십을 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '그룹 멤버십을 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     if (membership.role === 'CREATOR') {
-      throw new HttpException('그룹 생성자는 그룹을 탈퇴할 수 없습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '그룹 생성자는 그룹을 탈퇴할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.prisma.groupMember.update({
@@ -349,7 +369,7 @@ export class GroupService {
 
   /**
    * 그룹 초대 링크 생성
-   * 
+   *
    * @param groupId 그룹 ID
    * @param userId 요청 사용자 ID
    * @returns 초대 링크
@@ -381,7 +401,7 @@ export class GroupService {
 
   /**
    * 초대 코드로 그룹 가입
-   * 
+   *
    * @param inviteCode 초대 코드
    * @param userId 사용자 ID
    * @returns 그룹 정보
@@ -401,13 +421,19 @@ export class GroupService {
     });
 
     if (!invite || !invite.group.isActive) {
-      throw new HttpException('유효하지 않은 초대 코드입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '유효하지 않은 초대 코드입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const group = invite.group;
 
     if (!group) {
-      throw new HttpException('유효하지 않은 초대 코드입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '유효하지 않은 초대 코드입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.joinGroup(group.id, userId);
@@ -416,7 +442,7 @@ export class GroupService {
 
   /**
    * 관리자 권한 확인
-   * 
+   *
    * @param groupId 그룹 ID
    * @param userId 사용자 ID
    */
@@ -435,13 +461,16 @@ export class GroupService {
     }
 
     if (membership.role !== 'CREATOR' && membership.role !== 'ADMIN') {
-      throw new HttpException('관리자 권한이 필요합니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '관리자 권한이 필요합니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
   }
 
   /**
    * 매칭 활성화 여부 확인
-   * 
+   *
    * @param group 그룹 정보
    * @returns 매칭 활성화 여부
    */
@@ -471,7 +500,11 @@ export class GroupService {
   /**
    * 그룹 멤버 제거
    */
-  async removeMember(groupId: string, targetUserId: string, adminUserId: string) {
+  async removeMember(
+    groupId: string,
+    targetUserId: string,
+    adminUserId: string,
+  ) {
     // 권한 확인
     await this.checkAdminPermission(groupId, adminUserId);
 
@@ -489,7 +522,10 @@ export class GroupService {
     }
 
     if (membership.role === 'CREATOR') {
-      throw new HttpException('그룹 생성자는 제거할 수 없습니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '그룹 생성자는 제거할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.prisma.groupMember.update({
@@ -528,7 +564,10 @@ export class GroupService {
     });
 
     if (!adminMembership || adminMembership.role !== 'CREATOR') {
-      throw new HttpException('그룹 생성자만 역할을 변경할 수 있습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '그룹 생성자만 역할을 변경할 수 있습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     const targetMembership = await this.prisma.groupMember.findUnique({
@@ -654,7 +693,10 @@ export class GroupService {
     });
 
     if (!membership || membership.status !== 'PENDING') {
-      throw new HttpException('가입 요청을 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '가입 요청을 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     if (data.action === 'APPROVE') {
@@ -692,39 +734,34 @@ export class GroupService {
    * 그룹 통계 조회
    */
   async getGroupStats(groupId: string) {
-    const [
-      memberCount,
-      maleCount,
-      femaleCount,
-      matchCount,
-      messageCount,
-    ] = await Promise.all([
-      this.prisma.groupMember.count({
-        where: { groupId, status: 'ACTIVE' },
-      }),
-      this.prisma.groupMember.count({
-        where: {
-          groupId,
-          status: 'ACTIVE',
-          user: { gender: 'MALE' },
-        },
-      }),
-      this.prisma.groupMember.count({
-        where: {
-          groupId,
-          status: 'ACTIVE',
-          user: { gender: 'FEMALE' },
-        },
-      }),
-      this.prisma.match.count({
-        where: { groupId, status: 'ACTIVE' },
-      }),
-      this.prisma.chatMessage.count({
-        where: {
-          match: { groupId },
-        },
-      }),
-    ]);
+    const [memberCount, maleCount, femaleCount, matchCount, messageCount] =
+      await Promise.all([
+        this.prisma.groupMember.count({
+          where: { groupId, status: 'ACTIVE' },
+        }),
+        this.prisma.groupMember.count({
+          where: {
+            groupId,
+            status: 'ACTIVE',
+            user: { gender: 'MALE' },
+          },
+        }),
+        this.prisma.groupMember.count({
+          where: {
+            groupId,
+            status: 'ACTIVE',
+            user: { gender: 'FEMALE' },
+          },
+        }),
+        this.prisma.match.count({
+          where: { groupId, status: 'ACTIVE' },
+        }),
+        this.prisma.chatMessage.count({
+          where: {
+            match: { groupId },
+          },
+        }),
+      ]);
 
     return {
       memberCount,

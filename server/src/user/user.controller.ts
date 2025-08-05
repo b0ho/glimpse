@@ -16,7 +16,7 @@ import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 
 /**
  * 사용자 컨트롤러
- * 
+ *
  * 사용자 프로필, 추천, 크레딧 관련 API를 제공합니다.
  */
 @Controller('users')
@@ -26,7 +26,7 @@ export class UserController {
 
   /**
    * 현재 사용자 프로필 조회
-   * 
+   *
    * @param userId 현재 사용자 ID
    * @returns 사용자 프로필
    */
@@ -65,7 +65,7 @@ export class UserController {
 
   /**
    * 현재 사용자 프로필 업데이트
-   * 
+   *
    * @param userId 현재 사용자 ID
    * @param updateData 업데이트할 데이터
    * @returns 업데이트된 프로필
@@ -99,7 +99,7 @@ export class UserController {
 
   /**
    * 사용자 추천 목록 조회
-   * 
+   *
    * @param userId 현재 사용자 ID
    * @param groupId 그룹 ID
    * @param page 페이지 번호
@@ -145,7 +145,7 @@ export class UserController {
 
   /**
    * 다른 사용자 프로필 조회
-   * 
+   *
    * @param userId 현재 사용자 ID
    * @param targetUserId 대상 사용자 ID
    * @returns 사용자 프로필 (매칭된 경우만 상세 정보)
@@ -169,7 +169,9 @@ export class UserController {
           success: true,
           data: {
             id: user.id,
-            nickname: user.nickname ? user.nickname.charAt(0) + '*'.repeat(user.nickname.length - 1) : 'Anonymous',
+            nickname: user.nickname
+              ? user.nickname.charAt(0) + '*'.repeat(user.nickname.length - 1)
+              : 'Anonymous',
             profileImage: user.profileImage,
             bio: user.bio?.substring(0, 50) + '...',
             gender: user.gender,
@@ -207,7 +209,7 @@ export class UserController {
 
   /**
    * 사용자 통계 조회
-   * 
+   *
    * @param userId 현재 사용자 ID
    * @returns 사용자 통계
    */
@@ -232,7 +234,7 @@ export class UserController {
 
   /**
    * 남은 좋아요 수 조회
-   * 
+   *
    * @param userId 현재 사용자 ID
    * @returns 남은 좋아요 수
    */
@@ -260,7 +262,7 @@ export class UserController {
 
   /**
    * 크레딧 구매
-   * 
+   *
    * @param userId 현재 사용자 ID
    * @param body 구매 정보
    * @returns 구매 결과

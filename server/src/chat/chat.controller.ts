@@ -22,7 +22,7 @@ import {
 
 /**
  * 채팅 컨트롤러
- * 
+ *
  * 채팅 관련 API 엔드포인트를 제공합니다.
  * 메시지 송수신, 읽음 처리, 타이핑 상태 등을 관리합니다.
  */
@@ -109,7 +109,11 @@ export class ChatController {
     @CurrentUserId() userId: string,
     @Body() reactionDto: MessageReactionDto,
   ) {
-    return this.chatService.toggleMessageReaction(messageId, userId, reactionDto);
+    return this.chatService.toggleMessageReaction(
+      messageId,
+      userId,
+      reactionDto,
+    );
   }
 
   /**

@@ -11,7 +11,7 @@ import { PrismaModule } from '../core/prisma/prisma.module';
 
 /**
  * 인증 모듈
- * 
+ *
  * Clerk JWT 기반 인증 시스템을 제공합니다.
  */
 @Global()

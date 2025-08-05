@@ -32,7 +32,7 @@ import {
 
 /**
  * 관리자 컨트롤러
- * 
+ *
  * 관리자 전용 API를 제공합니다.
  */
 @Controller('admin')
@@ -49,24 +49,24 @@ export class AdminController {
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: AdminLoginDto): Promise<AdminTokenResponseDto> {
     const { email, password } = loginDto;
-    
+
     // 환경 변수에서 관리자 계정 확인
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@glimpse.app';
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123!';
-    
+
     if (email !== adminEmail || password !== adminPassword) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    
+
     // JWT 토큰 생성
     const payload = {
       email,
       role: 'admin',
       sub: 'admin-1',
     };
-    
+
     const token = this.jwtService.sign(payload);
-    
+
     return {
       access_token: token,
       user: {
@@ -207,7 +207,10 @@ export class AdminController {
   ) {
     // ModerateGroupDto를 ManageGroupDto 형식으로 변환
     const manageData = {
-      action: data.action === 'APPROVE' ? 'approve' as const : 'deactivate' as const,
+      action:
+        data.action === 'APPROVE'
+          ? ('approve' as const)
+          : ('deactivate' as const),
       reason: data.reason,
     };
     await this.adminService.manageGroup(groupId, adminId, manageData);

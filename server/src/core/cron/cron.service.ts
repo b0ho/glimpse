@@ -7,7 +7,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 
 /**
  * 크론 작업 서비스
- * 
+ *
  * 주기적으로 실행되는 시스템 작업을 관리합니다.
  */
 @Injectable()
@@ -42,7 +42,7 @@ export class CronService implements OnModuleInit {
 
     try {
       const now = new Date();
-      
+
       // Find all active stories that have expired
       const expiredStories = await this.prismaService.story.updateMany({
         where: {
@@ -57,7 +57,9 @@ export class CronService implements OnModuleInit {
       });
 
       if (expiredStories.count > 0) {
-        console.log(`Marked ${expiredStories.count} expired stories as inactive`);
+        console.log(
+          `Marked ${expiredStories.count} expired stories as inactive`,
+        );
       }
     } catch (error) {
       console.error('Error marking expired stories as inactive:', error);
@@ -87,9 +89,11 @@ export class CronService implements OnModuleInit {
 
       if (deletedStories.count > 0) {
         console.log(`Deleted ${deletedStories.count} old inactive stories`);
-        
+
         // Emit event for file cleanup
-        this.eventEmitter.emit('stories.deleted', { count: deletedStories.count });
+        this.eventEmitter.emit('stories.deleted', {
+          count: deletedStories.count,
+        });
       }
     } catch (error) {
       console.error('Error cleaning up old stories:', error);
@@ -146,7 +150,7 @@ export class CronService implements OnModuleInit {
           },
         },
       });
-      
+
       // Update premium subscriptions count
       const premiumUsers = await this.prismaService.user.count({
         where: {
@@ -166,8 +170,10 @@ export class CronService implements OnModuleInit {
       //     totalMessages: await this.getTotalMessagesCount(),
       //   },
       // });
-      
-      console.log(`Daily stats updated: ${activeUsers} active users, ${premiumUsers} premium users`);
+
+      console.log(
+        `Daily stats updated: ${activeUsers} active users, ${premiumUsers} premium users`,
+      );
     } catch (error) {
       console.error('Error updating daily stats:', error);
     }
@@ -193,9 +199,9 @@ export class CronService implements OnModuleInit {
           credits: 1,
         },
       });
-      
+
       console.log(`Reset daily credits for ${result.count} users`);
-      
+
       // Send notifications to users about credit reset
       if (result.count > 0) {
         this.eventEmitter.emit('credits.reset', { userCount: result.count });
@@ -230,7 +236,8 @@ export class CronService implements OnModuleInit {
     if (!this.isEnabled) return;
 
     try {
-      const cleanedCount = await this.firebaseService.cleanupInactiveFCMTokens();
+      const cleanedCount =
+        await this.firebaseService.cleanupInactiveFCMTokens();
       if (cleanedCount > 0) {
         console.log(`Cleaned up ${cleanedCount} inactive FCM tokens`);
       }
@@ -261,10 +268,14 @@ export class CronService implements OnModuleInit {
       });
 
       if (expiredUsers.count > 0) {
-        console.log(`Processed ${expiredUsers.count} expired premium subscriptions`);
-        
+        console.log(
+          `Processed ${expiredUsers.count} expired premium subscriptions`,
+        );
+
         // Emit event for notification
-        this.eventEmitter.emit('subscription.expired', { count: expiredUsers.count });
+        this.eventEmitter.emit('subscription.expired', {
+          count: expiredUsers.count,
+        });
       }
     } catch (error) {
       console.error('Error processing expired subscriptions:', error);
@@ -300,7 +311,9 @@ export class CronService implements OnModuleInit {
         },
       });
 
-      console.log(`Cleaned up ${deletedEmailLogs.count} email logs and ${deletedSmsLogs.count} SMS logs`);
+      console.log(
+        `Cleaned up ${deletedEmailLogs.count} email logs and ${deletedSmsLogs.count} SMS logs`,
+      );
     } catch (error) {
       console.error('Error cleaning up old logs:', error);
     }
@@ -341,12 +354,14 @@ export class CronService implements OnModuleInit {
               type: 're_engagement',
             },
           },
-          new Date()
+          new Date(),
         );
       }
 
       if (inactiveUsers.length > 0) {
-        console.log(`Sent re-engagement notifications to ${inactiveUsers.length} inactive users`);
+        console.log(
+          `Sent re-engagement notifications to ${inactiveUsers.length} inactive users`,
+        );
       }
     } catch (error) {
       console.error('Error notifying inactive users:', error);

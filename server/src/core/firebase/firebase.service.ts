@@ -40,7 +40,7 @@ interface SendNotificationOptions {
 
 /**
  * Firebase 푸시 알림 서비스
- * 
+ *
  * Firebase Cloud Messaging을 통해 모바일 푸시 알림을 발송합니다.
  */
 @Injectable()
@@ -66,11 +66,13 @@ export class FirebaseService implements OnModuleInit {
   private async initializeFirebase() {
     try {
       if (!admin.apps.length) {
-        const serviceAccountPath = this.configService.get<string>('FCM_CREDENTIALS_PATH');
-        
+        const serviceAccountPath = this.configService.get<string>(
+          'FCM_CREDENTIALS_PATH',
+        );
+
         if (serviceAccountPath && serviceAccountPath.trim() !== '') {
           const serviceAccount = require(path.resolve(serviceAccountPath));
-          
+
           admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
             projectId: this.configService.get('FIREBASE_PROJECT_ID'),
@@ -89,7 +91,7 @@ export class FirebaseService implements OnModuleInit {
           }
         }
       }
-      
+
       this.initialized = true;
       console.log('Firebase Admin SDK initialized successfully');
     } catch (error) {
@@ -101,7 +103,9 @@ export class FirebaseService implements OnModuleInit {
   /**
    * 특정 사용자에게 푸시 알림 전송
    */
-  async sendNotificationToUser(options: SendNotificationOptions): Promise<boolean> {
+  async sendNotificationToUser(
+    options: SendNotificationOptions,
+  ): Promise<boolean> {
     if (!this.initialized) {
       console.warn('Firebase not initialized, skipping notification');
       return false;
@@ -110,7 +114,7 @@ export class FirebaseService implements OnModuleInit {
     try {
       // Get user's FCM tokens
       const tokens = await this.getUserFCMTokens(options.userId);
-      
+
       if (tokens.length === 0) {
         console.log(`No FCM tokens found for user ${options.userId}`);
         return false;
@@ -147,14 +151,19 @@ export class FirebaseService implements OnModuleInit {
       };
 
       const response = await (admin.messaging() as any).sendMulticast(message);
-      
+
       // Handle failed tokens
       if (response.failureCount > 0) {
         const failedTokens: string[] = [];
         response.responses.forEach((resp: any, idx: number) => {
           if (!resp.success) {
-            console.error(`Failed to send to token ${tokens[idx]}:`, resp.error);
-            if (resp.error?.code === 'messaging/registration-token-not-registered') {
+            console.error(
+              `Failed to send to token ${tokens[idx]}:`,
+              resp.error,
+            );
+            if (
+              resp.error?.code === 'messaging/registration-token-not-registered'
+            ) {
               const token = tokens[idx];
               if (token) {
                 failedTokens.push(token);
@@ -169,8 +178,10 @@ export class FirebaseService implements OnModuleInit {
         }
       }
 
-      console.log(`Successfully sent notification to ${response.successCount} devices`);
-      
+      console.log(
+        `Successfully sent notification to ${response.successCount} devices`,
+      );
+
       return response.successCount > 0;
     } catch (error) {
       console.error('Error sending notification:', error);
@@ -181,36 +192,41 @@ export class FirebaseService implements OnModuleInit {
   /**
    * 대량 알림 전송
    */
-  async sendBulkNotifications(notifications: SendNotificationOptions[]): Promise<number> {
+  async sendBulkNotifications(
+    notifications: SendNotificationOptions[],
+  ): Promise<number> {
     let successCount = 0;
-    
+
     // Process in batches to avoid rate limits
     const batchSize = 500;
     for (let i = 0; i < notifications.length; i += batchSize) {
       const batch = notifications.slice(i, i + batchSize);
-      
-      const promises = batch.map(notification => 
-        this.sendNotificationToUser(notification)
+
+      const promises = batch.map((notification) =>
+        this.sendNotificationToUser(notification),
       );
-      
+
       const results = await Promise.allSettled(promises);
-      successCount += results.filter(result => 
-        result.status === 'fulfilled' && result.value
+      successCount += results.filter(
+        (result) => result.status === 'fulfilled' && result.value,
       ).length;
-      
+
       // Wait between batches
       if (i + batchSize < notifications.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
-    
+
     return successCount;
   }
 
   /**
    * 특정 주제 구독자들에게 알림 전송
    */
-  async sendNotificationToTopic(topic: string, payload: NotificationPayload): Promise<boolean> {
+  async sendNotificationToTopic(
+    topic: string,
+    payload: NotificationPayload,
+  ): Promise<boolean> {
     if (!this.initialized) {
       console.warn('Firebase not initialized, skipping topic notification');
       return false;
@@ -246,7 +262,9 @@ export class FirebaseService implements OnModuleInit {
 
     try {
       const response = await admin.messaging().subscribeToTopic(tokens, topic);
-      console.log(`Successfully subscribed ${response.successCount} tokens to topic ${topic}`);
+      console.log(
+        `Successfully subscribed ${response.successCount} tokens to topic ${topic}`,
+      );
       return response.successCount > 0;
     } catch (error) {
       console.error('Error subscribing to topic:', error);
@@ -257,14 +275,21 @@ export class FirebaseService implements OnModuleInit {
   /**
    * FCM 토큰을 특정 주제에서 구독 해제
    */
-  async unsubscribeFromTopic(tokens: string[], topic: string): Promise<boolean> {
+  async unsubscribeFromTopic(
+    tokens: string[],
+    topic: string,
+  ): Promise<boolean> {
     if (!this.initialized) {
       return false;
     }
 
     try {
-      const response = await admin.messaging().unsubscribeFromTopic(tokens, topic);
-      console.log(`Successfully unsubscribed ${response.successCount} tokens from topic ${topic}`);
+      const response = await admin
+        .messaging()
+        .unsubscribeFromTopic(tokens, topic);
+      console.log(
+        `Successfully unsubscribed ${response.successCount} tokens from topic ${topic}`,
+      );
       return response.successCount > 0;
     } catch (error) {
       console.error('Error unsubscribing from topic:', error);
@@ -275,7 +300,11 @@ export class FirebaseService implements OnModuleInit {
   /**
    * 사용자 FCM 토큰 추가
    */
-  async addUserFCMToken(userId: string, token: string, deviceType: 'ios' | 'android'): Promise<void> {
+  async addUserFCMToken(
+    userId: string,
+    token: string,
+    deviceType: 'ios' | 'android',
+  ): Promise<void> {
     try {
       // Check if token already exists
       const existingToken = await this.prismaService.fcmToken.findFirst({
@@ -291,7 +320,7 @@ export class FirebaseService implements OnModuleInit {
             isActive: true,
           },
         });
-        
+
         console.log(`Added FCM token for user ${userId}`);
       } else {
         // Update existing token
@@ -316,7 +345,7 @@ export class FirebaseService implements OnModuleInit {
       await this.prismaService.fcmToken.deleteMany({
         where: { userId, token },
       });
-      
+
       console.log(`Removed FCM token for user ${userId}`);
     } catch (error) {
       console.error('Error removing FCM token:', error);
@@ -334,7 +363,7 @@ export class FirebaseService implements OnModuleInit {
           token: { in: tokens },
         },
       });
-      
+
       console.log(`Removed ${tokens.length} FCM tokens for user ${userId}`);
     } catch (error) {
       console.error('Error removing FCM tokens:', error);
@@ -353,8 +382,8 @@ export class FirebaseService implements OnModuleInit {
         },
         select: { token: true },
       });
-      
-      return tokens.map(t => t.token);
+
+      return tokens.map((t) => t.token);
     } catch (error) {
       console.error('Error getting FCM tokens:', error);
       return [];
@@ -381,18 +410,23 @@ export class FirebaseService implements OnModuleInit {
       // Check tokens in batches
       for (let i = 0; i < tokens.length; i += batchSize) {
         const batch = tokens.slice(i, i + batchSize);
-        
+
         try {
           // Try to send a test message to check token validity
           const testMessage: admin.messaging.MulticastMessage = {
-            tokens: batch.map(t => t.token),
+            tokens: batch.map((t) => t.token),
             data: { test: 'true' },
           };
 
-          const response = await (admin.messaging() as any).sendMulticast(testMessage);
-          
+          const response = await (admin.messaging() as any).sendMulticast(
+            testMessage,
+          );
+
           response.responses.forEach((resp: any, idx: number) => {
-            if (!resp.success && resp.error?.code === 'messaging/registration-token-not-registered') {
+            if (
+              !resp.success &&
+              resp.error?.code === 'messaging/registration-token-not-registered'
+            ) {
               const tokenData = batch[idx];
               if (tokenData) {
                 inactiveTokens.push(tokenData.token);
@@ -426,17 +460,18 @@ export class FirebaseService implements OnModuleInit {
    */
   async sendScheduledNotifications(): Promise<number> {
     try {
-      const scheduledNotifications = await this.prismaService.scheduledNotification.findMany({
-        where: {
-          scheduledAt: { lte: new Date() },
-          sent: false,
-        },
-        include: {
-          user: {
-            select: { id: true },
+      const scheduledNotifications =
+        await this.prismaService.scheduledNotification.findMany({
+          where: {
+            scheduledAt: { lte: new Date() },
+            sent: false,
           },
-        },
-      });
+          include: {
+            user: {
+              select: { id: true },
+            },
+          },
+        });
 
       let sentCount = 0;
 
@@ -473,7 +508,7 @@ export class FirebaseService implements OnModuleInit {
   async scheduleNotification(
     userId: string,
     payload: NotificationPayload,
-    scheduledAt: Date
+    scheduledAt: Date,
   ): Promise<string> {
     const notification = await this.prismaService.scheduledNotification.create({
       data: {
@@ -492,7 +527,10 @@ export class FirebaseService implements OnModuleInit {
   /**
    * 예약된 알림 취소
    */
-  async cancelScheduledNotification(notificationId: string, userId: string): Promise<boolean> {
+  async cancelScheduledNotification(
+    notificationId: string,
+    userId: string,
+  ): Promise<boolean> {
     try {
       const result = await this.prismaService.scheduledNotification.deleteMany({
         where: {
@@ -528,7 +566,10 @@ export class FirebaseService implements OnModuleInit {
   /**
    * 메시지 알림 템플릿 생성
    */
-  createMessageNotification(senderNickname: string, message: string): NotificationPayload {
+  createMessageNotification(
+    senderNickname: string,
+    message: string,
+  ): NotificationPayload {
     return {
       title: senderNickname,
       body: message.length > 50 ? message.substring(0, 50) + '...' : message,

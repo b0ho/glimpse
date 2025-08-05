@@ -16,7 +16,7 @@ import { SendMessageDto } from './dto/chat.dto';
 
 /**
  * 채팅 웹소켓 게이트웨이
- * 
+ *
  * 실시간 메시지 전송, 타이핑 상태, 읽음 표시 등을 처리합니다.
  */
 @WebSocketGateway({
@@ -48,19 +48,19 @@ export class ChatGateway
 
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
-    
+
     // 사용자 소켓 매핑 정리
     const userId = this.socketUsers.get(client.id);
     if (userId) {
       const userSockets = this.userSockets.get(userId) || [];
-      const updatedSockets = userSockets.filter(id => id !== client.id);
-      
+      const updatedSockets = userSockets.filter((id) => id !== client.id);
+
       if (updatedSockets.length > 0) {
         this.userSockets.set(userId, updatedSockets);
       } else {
         this.userSockets.delete(userId);
       }
-      
+
       this.socketUsers.delete(client.id);
     }
   }
@@ -74,20 +74,20 @@ export class ChatGateway
     @ConnectedSocket() client: Socket,
   ) {
     const { userId } = data;
-    
+
     // 소켓-사용자 매핑
     this.socketUsers.set(client.id, userId);
-    
+
     const userSockets = this.userSockets.get(userId) || [];
     userSockets.push(client.id);
     this.userSockets.set(userId, userSockets);
-    
+
     // 사용자의 모든 활성 매치 룸에 조인
     const chatSummary = await this.chatService.getChatSummary(userId);
     for (const chat of (chatSummary as any).chats || []) {
       client.join(`match:${chat.matchId}`);
     }
-    
+
     return { success: true, message: 'Authenticated successfully' };
   }
 
@@ -101,13 +101,15 @@ export class ChatGateway
   ) {
     const { matchId } = data;
     client.join(`match:${matchId}`);
-    
+
     // 읽지 않은 메시지 수 전송
     const userId = this.socketUsers.get(client.id);
     if (userId) {
       const chatSummary = await this.chatService.getChatSummary(userId);
-      const matchChat = ((chatSummary as any).chats || []).find((chat: any) => chat.matchId === matchId);
-      
+      const matchChat = ((chatSummary as any).chats || []).find(
+        (chat: any) => chat.matchId === matchId,
+      );
+
       if (matchChat) {
         client.emit('unread-count', {
           matchId,
@@ -115,7 +117,7 @@ export class ChatGateway
         });
       }
     }
-    
+
     return { success: true, message: `Joined match ${matchId}` };
   }
 
@@ -142,11 +144,11 @@ export class ChatGateway
   ) {
     const { matchId, message } = data;
     const userId = this.socketUsers.get(client.id);
-    
+
     if (!userId) {
       return { success: false, error: 'User not authenticated' };
     }
-    
+
     try {
       // 메시지 저장
       const sentMessage = await this.chatService.sendMessage(
@@ -154,15 +156,15 @@ export class ChatGateway
         userId,
         message,
       );
-      
+
       // 매치 룸의 모든 사용자에게 메시지 브로드캐스트
       this.server.to(`match:${matchId}`).emit('new-message', {
         matchId,
         message: sentMessage,
       });
-      
+
       // 푸시 알림 트리거 (TODO: NotificationService 통합)
-      
+
       return { success: true, message: sentMessage };
     } catch (error) {
       return { success: false, error: error.message };
@@ -179,21 +181,21 @@ export class ChatGateway
   ) {
     const { matchId, isTyping } = data;
     const userId = this.socketUsers.get(client.id);
-    
+
     if (!userId) {
       return { success: false, error: 'User not authenticated' };
     }
-    
+
     // 타이핑 상태 업데이트
     await this.chatService.setTypingStatus(matchId, userId, { isTyping });
-    
+
     // 다른 사용자에게 타이핑 상태 브로드캐스트
     client.to(`match:${matchId}`).emit('user-typing', {
       matchId,
       userId,
       isTyping,
     });
-    
+
     return { success: true };
   }
 
@@ -207,21 +209,24 @@ export class ChatGateway
   ) {
     const { matchId } = data;
     const userId = this.socketUsers.get(client.id);
-    
+
     if (!userId) {
       return { success: false, error: 'User not authenticated' };
     }
-    
+
     // 메시지 읽음 처리
-    const result = await this.chatService.markAllMessagesAsRead(matchId, userId);
-    
+    const result = await this.chatService.markAllMessagesAsRead(
+      matchId,
+      userId,
+    );
+
     // 상대방에게 읽음 상태 알림
     client.to(`match:${matchId}`).emit('messages-read', {
       matchId,
       userId,
       readAt: new Date(),
     });
-    
+
     return { success: true, ...result };
   }
 
@@ -235,20 +240,20 @@ export class ChatGateway
   ) {
     const { messageId, emoji } = data;
     const userId = this.socketUsers.get(client.id);
-    
+
     if (!userId) {
       return { success: false, error: 'User not authenticated' };
     }
-    
+
     try {
       const result = await this.chatService.toggleMessageReaction(
         messageId,
         userId,
         { emoji },
       );
-      
+
       // TODO: 해당 매치의 모든 사용자에게 반응 업데이트 브로드캐스트
-      
+
       return { success: true, ...result };
     } catch (error) {
       return { success: false, error: error.message };

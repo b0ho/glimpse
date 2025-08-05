@@ -1,18 +1,17 @@
-import { Injectable, HttpException, HttpStatus, ForbiddenException } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { CacheService } from '../core/cache/cache.service';
 import { NotificationService } from '../notification/notification.service';
-import { 
-  AdminStatsQueryDto, 
-  BanUserDto, 
-  ManageGroupDto, 
+import {
+  BanUserDto,
+  ManageGroupDto,
   BroadcastNotificationDto,
-  UserListQueryDto
+  UserListQueryDto,
 } from './dto/admin.dto';
 
 /**
  * 관리자 서비스
- * 
+ *
  * 관리자 기능을 제공합니다.
  */
 @Injectable()
@@ -25,7 +24,7 @@ export class AdminService {
 
   /**
    * 대시보드 통계 조회
-   * 
+   *
    * @returns 대시보드 통계
    */
   async getDashboardStats() {
@@ -62,7 +61,9 @@ export class AdminService {
         where: { status: 'ACTIVE' },
       }),
       // 전체 신고 (알림으로 대체)
-      this.prisma.notification.count({ where: { title: { contains: 'Report' } } }),
+      this.prisma.notification.count({
+        where: { title: { contains: 'Report' } },
+      }),
       // 처리 대기 신고
       this.prisma.notification.count({
         where: { title: { contains: 'Report' }, isRead: false },
@@ -71,7 +72,22 @@ export class AdminService {
       this.getMonthlyRevenue(),
     ]);
 
+    // 온라인 사용자 수 (실제 구현 필요)
+    const onlineUsers = await this.getOnlineUsersCount();
+
+    // 쳑 메시지 수 (chat 모듈에서 가져와야 함)
+    const totalMessages = 0; // TODO: ChatService에서 메시지 수 가져오기
+
     return {
+      totalUsers,
+      activeUsers,
+      totalMatches,
+      totalMessages,
+      revenue,
+      premiumUsers,
+      reportedUsers: pendingReports,
+      onlineUsers,
+      // 추가 데이터
       users: {
         total: totalUsers,
         active: activeUsers,
@@ -87,15 +103,27 @@ export class AdminService {
         total: totalReports,
         pending: pendingReports,
       },
-      revenue: {
-        monthly: revenue,
-      },
     };
   }
 
   /**
+   * 온라인 사용자 수 조회
+   */
+  private async getOnlineUsersCount(): Promise<number> {
+    // 실제 구현에서는 Redis나 WebSocket 연결 수 확인
+    // 현재는 최근 5분 이내 활동한 사용자로 대체
+    return this.prisma.user.count({
+      where: {
+        lastActive: {
+          gte: new Date(Date.now() - 5 * 60 * 1000), // 5분
+        },
+      },
+    });
+  }
+
+  /**
    * 사용자 목록 조회
-   * 
+   *
    * @param query 검색 조건
    * @returns 사용자 목록
    */
@@ -103,7 +131,7 @@ export class AdminService {
     const { page = 1, limit = 20, search, filter } = query;
 
     const where: any = {};
-    
+
     if (search) {
       where.OR = [
         { nickname: { contains: search, mode: 'insensitive' } },
@@ -148,7 +176,7 @@ export class AdminService {
     ]);
 
     return {
-      items: users.map(user => ({
+      items: users.map((user) => ({
         ...user,
         matchCount: user._count.matches1 + user._count.matches2,
         reportCount: user._count.notifications,
@@ -161,7 +189,7 @@ export class AdminService {
 
   /**
    * 사용자 상세 정보 조회
-   * 
+   *
    * @param userId 사용자 ID
    * @returns 사용자 상세 정보
    */
@@ -244,21 +272,24 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '사용자를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return {
       ...user,
       matches: [
-        ...user.matches1.map(m => ({ ...m, partner: m.user2 })),
-        ...user.matches2.map(m => ({ ...m, partner: m.user1 })),
+        ...user.matches1.map((m) => ({ ...m, partner: m.user2 })),
+        ...user.matches2.map((m) => ({ ...m, partner: m.user1 })),
       ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
     };
   }
 
   /**
    * 사용자 차단
-   * 
+   *
    * @param userId 사용자 ID
    * @param adminId 관리자 ID
    * @param data 차단 데이터
@@ -271,14 +302,20 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '사용자를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     // 관리자 권한 확인 (별도 관리자 시스템이 필요)
     // 임시로 특정 ID를 관리자로 가정
     const ADMIN_IDS = ['admin-user-id'];
     if (ADMIN_IDS.includes(userId)) {
-      throw new HttpException('관리자는 차단할 수 없습니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        '관리자는 차단할 수 없습니다.',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     // 영구 차단인 경우 삭제 처리
@@ -299,7 +336,9 @@ export class AdminService {
           title: '계정 제한 안내',
           message: `계정이 ${durationDays}일간 제한되었습니다. 사유: ${reason}`,
           data: {
-            bannedUntil: new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000),
+            bannedUntil: new Date(
+              Date.now() + durationDays * 24 * 60 * 60 * 1000,
+            ),
             reason,
             adminId,
           },
@@ -327,7 +366,7 @@ export class AdminService {
 
   /**
    * 사용자 차단 해제
-   * 
+   *
    * @param userId 사용자 ID
    * @param adminId 관리자 ID
    */
@@ -337,11 +376,17 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '사용자를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     if (!user.deletedAt) {
-      throw new HttpException('차단된 사용자가 아닙니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '차단된 사용자가 아닙니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.prisma.user.update({
@@ -367,12 +412,16 @@ export class AdminService {
 
   /**
    * 신고 처리
-   * 
+   *
    * @param reportId 신고 ID
    * @param adminId 관리자 ID
    * @param action 처리 액션
    */
-  async handleReport(reportId: string, adminId: string, action: 'approve' | 'reject') {
+  async handleReport(
+    reportId: string,
+    adminId: string,
+    action: 'approve' | 'reject',
+  ) {
     const report = await this.prisma.notification.findUnique({
       where: { id: reportId },
     });
@@ -402,9 +451,10 @@ export class AdminService {
       await this.notificationService.sendNotification({
         userId: reportData.reporterId,
         type: 'MESSAGE_RECEIVED',
-        content: action === 'approve' 
-          ? '신고가 접수되어 처리되었습니다.' 
-          : '신고 내용을 검토한 결과 추가 조치가 필요하지 않습니다.',
+        content:
+          action === 'approve'
+            ? '신고가 접수되어 처리되었습니다.'
+            : '신고 내용을 검토한 결과 추가 조치가 필요하지 않습니다.',
       });
     }
 
@@ -417,7 +467,7 @@ export class AdminService {
 
   /**
    * 그룹 관리
-   * 
+   *
    * @param groupId 그룹 ID
    * @param adminId 관리자 ID
    * @param data 관리 데이터
@@ -478,15 +528,18 @@ export class AdminService {
 
   /**
    * 공지사항 발송
-   * 
+   *
    * @param adminId 관리자 ID
    * @param data 공지사항 데이터
    */
-  async sendBroadcastNotification(adminId: string, data: BroadcastNotificationDto) {
+  async sendBroadcastNotification(
+    adminId: string,
+    data: BroadcastNotificationDto,
+  ) {
     const { title, message, targetAudience } = data;
 
-    let where: any = {};
-    
+    const where: any = {};
+
     if (targetAudience === 'premium') {
       where.isPremium = true;
     } else if (targetAudience === 'active') {
@@ -502,7 +555,7 @@ export class AdminService {
 
     // 일괄 알림 생성
     await this.prisma.notification.createMany({
-      data: users.map(user => ({
+      data: users.map((user) => ({
         userId: user.id,
         type: 'MESSAGE_RECEIVED',
         title,
@@ -532,7 +585,7 @@ export class AdminService {
 
   /**
    * 관리자 권한 확인
-   * 
+   *
    * @param userId 사용자 ID
    * @returns 관리자 여부
    */
@@ -545,7 +598,7 @@ export class AdminService {
 
   /**
    * 이번 달 수익 조회
-   * 
+   *
    * @returns 이번 달 수익
    */
   private async getMonthlyRevenue(): Promise<number> {
@@ -570,7 +623,7 @@ export class AdminService {
 
   /**
    * 관리자 액션 로그 기록
-   * 
+   *
    * @param adminId 관리자 ID
    * @param action 액션 타입
    * @param data 액션 데이터

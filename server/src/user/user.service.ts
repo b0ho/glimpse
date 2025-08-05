@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { CacheService } from '../core/cache/cache.service';
 import { User } from '@prisma/client';
@@ -25,7 +31,7 @@ const APP_CONFIG = {
 
 /**
  * 사용자 서비스
- * 
+ *
  * 사용자 프로필, 추천, 크레딧 관리 등을 처리합니다.
  */
 @Injectable()
@@ -59,27 +65,32 @@ export class UserService {
   /**
    * 사용자 프로필 업데이트
    */
-  async updateProfile(userId: string, data: {
-    nickname?: string;
-    bio?: string;
-    age?: number;
-    profileImage?: string;
-    height?: number;
-    mbti?: string;
-    education?: string;
-    location?: string;
-    companyName?: string;
-  }): Promise<User> {
+  async updateProfile(
+    userId: string,
+    data: {
+      nickname?: string;
+      bio?: string;
+      age?: number;
+      profileImage?: string;
+      height?: number;
+      mbti?: string;
+      education?: string;
+      location?: string;
+      companyName?: string;
+    },
+  ): Promise<User> {
     const updateData: any = {};
 
     // Nickname validation (1-40 chars, duplicates allowed)
     if (data.nickname) {
       const trimmedNickname = data.nickname.trim();
-      
+
       if (trimmedNickname.length < 1 || trimmedNickname.length > 40) {
-        throw new BadRequestException('닉네임은 1자 이상 40자 이하여야 합니다.');
+        throw new BadRequestException(
+          '닉네임은 1자 이상 40자 이하여야 합니다.',
+        );
       }
-      
+
       // TODO: Content filtering when ContentFilterService is migrated
       updateData.nickname = trimmedNickname;
     }
@@ -96,7 +107,9 @@ export class UserService {
     // Age validation
     if (data.age !== undefined) {
       if (data.age < 18 || data.age > 100) {
-        throw new BadRequestException('나이는 18세 이상 100세 이하여야 합니다.');
+        throw new BadRequestException(
+          '나이는 18세 이상 100세 이하여야 합니다.',
+        );
       }
       updateData.age = data.age;
     }
@@ -119,10 +132,12 @@ export class UserService {
     }
 
     // Other fields
-    if (data.profileImage !== undefined) updateData.profileImage = data.profileImage;
+    if (data.profileImage !== undefined)
+      updateData.profileImage = data.profileImage;
     if (data.education !== undefined) updateData.education = data.education;
     if (data.location !== undefined) updateData.location = data.location;
-    if (data.companyName !== undefined) updateData.companyName = data.companyName;
+    if (data.companyName !== undefined)
+      updateData.companyName = data.companyName;
 
     const updatedUser = await this.prismaService.user.update({
       where: { id: userId },
@@ -167,7 +182,10 @@ export class UserService {
       select: { toUserId: true },
     });
 
-    const excludeUserIds = [userId, ...alreadyLiked.map(like => like.toUserId)];
+    const excludeUserIds = [
+      userId,
+      ...alreadyLiked.map((like) => like.toUserId),
+    ];
 
     // 같은 그룹의 사용자 조회
     const users = await this.prismaService.user.findMany({
@@ -204,7 +222,7 @@ export class UserService {
 
     // 호환성 점수 계산 및 정렬
     const recommendations = users
-      .map(user => ({
+      .map((user) => ({
         ...user,
         compatibilityScore: this.calculateCompatibilityScore(currentUser, user),
         // 매칭 전까지 닉네임 일부 숨김
@@ -223,7 +241,10 @@ export class UserService {
   /**
    * 사용자 상세 정보 열람 가능 여부 확인
    */
-  async canViewUserDetails(requesterId: string, targetUserId: string): Promise<boolean> {
+  async canViewUserDetails(
+    requesterId: string,
+    targetUserId: string,
+  ): Promise<boolean> {
     // 매칭 여부 확인
     const match = await this.prismaService.match.findFirst({
       where: {
@@ -243,7 +264,7 @@ export class UserService {
    */
   async getDailyLikesRemaining(userId: string): Promise<number> {
     const user = await this.findById(userId);
-    
+
     // Premium users have unlimited likes
     if (user.isPremium) {
       return 999;
@@ -265,7 +286,11 @@ export class UserService {
   /**
    * 크레딧 구매
    */
-  async purchaseCredits(userId: string, packageId: string, paymentMethodId: string) {
+  async purchaseCredits(
+    userId: string,
+    packageId: string,
+    paymentMethodId: string,
+  ) {
     const creditPackage = PRICING.CREDIT_PACKAGES.find(
       (pkg) => pkg.credits.toString() === packageId,
     );
@@ -327,23 +352,20 @@ export class UserService {
       receivedLikesCount,
       matchesCount,
       groupsCount,
-      user
+      user,
     ] = await Promise.all([
       this.prismaService.userLike.count({ where: { fromUserId: userId } }),
       this.prismaService.userLike.count({ where: { toUserId: userId } }),
       this.prismaService.match.count({
         where: {
-          OR: [
-            { user1Id: userId },
-            { user2Id: userId }
-          ],
-          status: 'ACTIVE'
-        }
+          OR: [{ user1Id: userId }, { user2Id: userId }],
+          status: 'ACTIVE',
+        },
       }),
       this.prismaService.groupMember.count({
-        where: { userId, status: 'ACTIVE' }
+        where: { userId, status: 'ACTIVE' },
       }),
-      this.findById(userId)
+      this.findById(userId),
     ]);
 
     return {
@@ -366,7 +388,7 @@ export class UserService {
   async updateLastActive(userId: string): Promise<void> {
     const updatedUser = await this.prismaService.user.update({
       where: { id: userId },
-      data: { lastActive: new Date() }
+      data: { lastActive: new Date() },
     });
 
     // Update cache
@@ -378,7 +400,7 @@ export class UserService {
    */
   async deleteAccount(userId: string, reason?: string): Promise<boolean> {
     const user = await this.prismaService.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!user) {
@@ -394,7 +416,7 @@ export class UserService {
         nickname: 'deleted_user',
         bio: null,
         profileImage: null,
-      }
+      },
     });
 
     // Cancel all active subscriptions
@@ -420,7 +442,7 @@ export class UserService {
       data: {
         isPremium: true,
         premiumUntil: expiresAt,
-      }
+      },
     });
 
     // Update cache
@@ -438,7 +460,7 @@ export class UserService {
       data: {
         isPremium: false,
         premiumUntil: null,
-      }
+      },
     });
 
     // Update cache
@@ -450,7 +472,10 @@ export class UserService {
   /**
    * 호환성 점수 계산
    */
-  private calculateCompatibilityScore(currentUser: any, targetUser: any): number {
+  private calculateCompatibilityScore(
+    currentUser: any,
+    targetUser: any,
+  ): number {
     let score = 50; // 기본 점수
 
     // 나이 호환성 (0-30점)
@@ -461,10 +486,11 @@ export class UserService {
     }
 
     // 최근 활동 (0-20점)
-    const lastActiveHours = targetUser.lastActive 
-      ? (Date.now() - new Date(targetUser.lastActive).getTime()) / (1000 * 60 * 60)
+    const lastActiveHours = targetUser.lastActive
+      ? (Date.now() - new Date(targetUser.lastActive).getTime()) /
+        (1000 * 60 * 60)
       : 999;
-    
+
     if (lastActiveHours < 24) score += 20;
     else if (lastActiveHours < 72) score += 10;
     else if (lastActiveHours < 168) score += 5;
@@ -477,7 +503,7 @@ export class UserService {
    */
   async deductCredits(userId: string, amount: number): Promise<User> {
     const user = await this.findById(userId);
-    
+
     if (user.credits < amount) {
       throw new BadRequestException('크레딧이 부족합니다.');
     }
@@ -486,9 +512,9 @@ export class UserService {
       where: { id: userId },
       data: {
         credits: {
-          decrement: amount
-        }
-      }
+          decrement: amount,
+        },
+      },
     });
 
     // Update cache
@@ -505,9 +531,9 @@ export class UserService {
       where: { id: userId },
       data: {
         credits: {
-          increment: amount
-        }
-      }
+          increment: amount,
+        },
+      },
     });
 
     // Update cache
@@ -524,8 +550,8 @@ export class UserService {
       where: {
         userId,
         groupId,
-        status: 'ACTIVE'
-      }
+        status: 'ACTIVE',
+      },
     });
 
     return !!membership;

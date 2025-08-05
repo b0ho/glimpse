@@ -14,7 +14,7 @@ import * as crypto from 'crypto';
 
 /**
  * 영상/음성 통화 서비스
- * 
+ *
  * WebRTC 기반 P2P 통화를 지원합니다.
  */
 @Injectable()
@@ -30,12 +30,15 @@ export class VideoCallService {
     private readonly notificationService: NotificationService,
   ) {
     this.turnSecret = this.configService.get('TURN_SECRET', '');
-    this.turnServer = this.configService.get('TURN_SERVER', 'turn:turn.example.com:3478');
+    this.turnServer = this.configService.get(
+      'TURN_SERVER',
+      'turn:turn.example.com:3478',
+    );
   }
 
   /**
    * 통화 시작
-   * 
+   *
    * @param callerId 발신자 ID
    * @param data 통화 데이터
    * @returns 생성된 통화 정보
@@ -68,8 +71,16 @@ export class VideoCallService {
     const existingCall = await this.prisma.videoCall.findFirst({
       where: {
         OR: [
-          { callerId, receiverId: receiverId, status: { in: ['INITIATED', 'RINGING', 'CONNECTED'] } },
-          { callerId: receiverId, receiverId: callerId, status: { in: ['INITIATED', 'RINGING', 'CONNECTED'] } },
+          {
+            callerId,
+            receiverId: receiverId,
+            status: { in: ['INITIATED', 'RINGING', 'CONNECTED'] },
+          },
+          {
+            callerId: receiverId,
+            receiverId: callerId,
+            status: { in: ['INITIATED', 'RINGING', 'CONNECTED'] },
+          },
         ],
       },
     });
@@ -131,7 +142,7 @@ export class VideoCallService {
 
   /**
    * 통화 이벤트 처리
-   * 
+   *
    * @param userId 사용자 ID
    * @param data 이벤트 데이터
    */
@@ -158,24 +169,24 @@ export class VideoCallService {
     switch (type) {
       case CallEventType.ACCEPT:
         return this.acceptCall(call.id, userId);
-      
+
       case CallEventType.REJECT:
         return this.rejectCall(call.id, userId);
-      
+
       case CallEventType.END:
         return this.endCall(call.id, userId);
-      
+
       case CallEventType.ICE_CANDIDATE:
       case CallEventType.OFFER:
       case CallEventType.ANSWER:
         return this.relaySignal(call, userId, type, eventData);
-      
+
       case CallEventType.MUTE_AUDIO:
       case CallEventType.UNMUTE_AUDIO:
       case CallEventType.MUTE_VIDEO:
       case CallEventType.UNMUTE_VIDEO:
         return this.updateMediaState(call, userId, type);
-      
+
       default:
         throw new BadRequestException('알 수 없는 이벤트 타입입니다.');
     }
@@ -183,14 +194,14 @@ export class VideoCallService {
 
   /**
    * TURN 서버 자격 증명 생성
-   * 
+   *
    * @param userId 사용자 ID
    * @returns TURN 자격 증명
    */
   async getTurnCredentials(userId: string): Promise<TurnCredentialsDto> {
     const timestamp = Math.floor(Date.now() / 1000) + 86400; // 24시간 유효
     const username = `${timestamp}:${userId}`;
-    
+
     // HMAC-SHA1로 자격 증명 생성
     const hmac = crypto.createHmac('sha1', this.turnSecret);
     hmac.update(username);
@@ -209,17 +220,14 @@ export class VideoCallService {
 
   /**
    * 활성 통화 목록 조회
-   * 
+   *
    * @param userId 사용자 ID
    * @returns 활성 통화 목록
    */
   async getActiveCalls(userId: string) {
     const calls = await this.prisma.videoCall.findMany({
       where: {
-        OR: [
-          { callerId: userId },
-          { receiverId: userId },
-        ],
+        OR: [{ callerId: userId }, { receiverId: userId }],
         status: {
           in: ['INITIATED', 'RINGING', 'CONNECTED'],
         },
@@ -245,7 +253,7 @@ export class VideoCallService {
       },
     });
 
-    return calls.map(call => ({
+    return calls.map((call) => ({
       ...call,
       isIncoming: call.receiverId === userId,
       otherUser: call.callerId === userId ? call.receiver : call.caller,
@@ -254,7 +262,7 @@ export class VideoCallService {
 
   /**
    * 통화 기록 조회
-   * 
+   *
    * @param userId 사용자 ID
    * @param limit 조회 개수
    * @param offset 오프셋
@@ -262,10 +270,7 @@ export class VideoCallService {
   async getCallHistory(userId: string, limit: number = 20, offset: number = 0) {
     const calls = await this.prisma.videoCall.findMany({
       where: {
-        OR: [
-          { callerId: userId },
-          { receiverId: userId },
-        ],
+        OR: [{ callerId: userId }, { receiverId: userId }],
         status: {
           in: ['ENDED', 'MISSED', 'REJECTED'],
         },
@@ -294,7 +299,7 @@ export class VideoCallService {
     });
 
     return {
-      calls: calls.map(call => ({
+      calls: calls.map((call) => ({
         ...call,
         isIncoming: call.receiverId === userId,
         otherUser: call.callerId === userId ? call.receiver : call.caller,
@@ -310,7 +315,7 @@ export class VideoCallService {
 
   /**
    * 통화 수락
-   * 
+   *
    * @param callId 통화 ID
    * @param userId 사용자 ID
    */
@@ -356,7 +361,7 @@ export class VideoCallService {
 
   /**
    * 통화 거절
-   * 
+   *
    * @param callId 통화 ID
    * @param userId 사용자 ID
    */
@@ -402,7 +407,7 @@ export class VideoCallService {
 
   /**
    * 통화 종료
-   * 
+   *
    * @param callId 통화 ID
    * @param userId 사용자 ID
    */
@@ -429,7 +434,8 @@ export class VideoCallService {
     });
 
     // 상대방에게 알림
-    const otherUserId = call.callerId === userId ? call.receiverId : call.callerId;
+    const otherUserId =
+      call.callerId === userId ? call.receiverId : call.callerId;
     await this.notificationService.sendNotification({
       userId: otherUserId,
       type: 'CALL_ENDED',
@@ -442,7 +448,7 @@ export class VideoCallService {
 
   /**
    * 시그널링 중계
-   * 
+   *
    * @param call 통화 정보
    * @param userId 발신자 ID
    * @param type 시그널 타입
@@ -454,7 +460,8 @@ export class VideoCallService {
     type: CallEventType,
     data: any,
   ) {
-    const targetUserId = call.callerId === userId ? call.receiverId : call.callerId;
+    const targetUserId =
+      call.callerId === userId ? call.receiverId : call.callerId;
 
     // WebSocket을 통해 상대방에게 시그널 전달
     // 실제 구현에서는 WebSocket 서비스를 통해 전달
@@ -474,7 +481,7 @@ export class VideoCallService {
 
   /**
    * 미디어 상태 업데이트
-   * 
+   *
    * @param call 통화 정보
    * @param userId 사용자 ID
    * @param type 이벤트 타입
@@ -484,7 +491,8 @@ export class VideoCallService {
     userId: string,
     type: CallEventType,
   ) {
-    const targetUserId = call.callerId === userId ? call.receiverId : call.callerId;
+    const targetUserId =
+      call.callerId === userId ? call.receiverId : call.callerId;
 
     // 상대방에게 미디어 상태 변경 알림
     await this.notificationService.sendNotification({
@@ -502,7 +510,7 @@ export class VideoCallService {
 
   /**
    * 통화 타임아웃 처리
-   * 
+   *
    * @param callId 통화 ID
    */
   private async handleCallTimeout(callId: string) {

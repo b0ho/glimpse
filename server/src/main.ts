@@ -6,7 +6,7 @@ import { AppModule } from './app.module';
 
 /**
  * NestJS 애플리케이션 부트스트랩
- * 
+ *
  * 서버를 초기화하고 필요한 미들웨어를 설정합니다.
  */
 async function bootstrap() {

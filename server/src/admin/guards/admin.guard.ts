@@ -1,9 +1,14 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AdminService } from '../admin.service';
 
 /**
  * 관리자 권한 Guard
- * 
+ *
  * 관리자 역할을 가진 사용자만 접근할 수 있도록 제한합니다.
  */
 @Injectable()

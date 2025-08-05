@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AppController } from './app.controller';
 import { PrismaModule } from './core/prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
@@ -31,7 +32,7 @@ import { StoryModule } from './story/story.module';
 
 /**
  * 애플리케이션 루트 모듈
- * 
+ *
  * 모든 기능 모듈을 통합하고 전역 설정을 관리합니다.
  */
 @Module({
@@ -41,7 +42,7 @@ import { StoryModule } from './story/story.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    
+
     // 요청 속도 제한
     ThrottlerModule.forRoot([
       {
@@ -49,64 +50,65 @@ import { StoryModule } from './story/story.module';
         limit: 60, // 60회
       },
     ]),
-    
+
     // 스케줄링
     ScheduleModule.forRoot(),
-    
+
     // 이벤트 이미터
     EventEmitterModule.forRoot(),
-    
+
     // 코어 모듈
     PrismaModule,
-    
+
     // 기능 모듈
     AuthModule,
-    
+
     UserModule,
-    
+
     GroupModule,
-    
+
     MatchingModule,
-    
+
     ChatModule,
-    
+
     PaymentModule,
-    
+
     NotificationModule,
-    
+
     FileModule,
-    
+
     EncryptionModule,
-    
+
     CacheModule,
-    
+
     EmailModule,
-    
+
     SmsModule,
-    
+
     FirebaseModule,
-    
+
     MessageQueueModule,
-    
+
     CronModule,
-    
+
     OcrModule,
-    
+
     CompanyVerificationModule,
-    
+
     AdminModule,
-    
+
     ContentFilterModule,
-    
+
     LocationModule,
-    
+
     VideoCallModule,
-    
+
     CompanyDomainModule,
-    
+
     FriendModule,
-    
+
     StoryModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

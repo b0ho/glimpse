@@ -1,15 +1,22 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { CacheService } from '../core/cache/cache.service';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { NearbyUsersQueryDto } from './dto/nearby-users.dto';
-import { CreateLocationGroupDto, JoinLocationGroupDto } from './dto/location-group.dto';
+import {
+  CreateLocationGroupDto,
+  JoinLocationGroupDto,
+} from './dto/location-group.dto';
 import { Prisma } from '@prisma/client';
 import * as crypto from 'crypto';
 
 /**
  * 위치 기반 서비스
- * 
+ *
  * 사용자 위치 관리, 주변 사용자 검색, 위치 기반 그룹 등을 처리합니다.
  */
 @Injectable()
@@ -21,7 +28,7 @@ export class LocationService {
 
   /**
    * 사용자 위치 업데이트
-   * 
+   *
    * @param userId 사용자 ID
    * @param data 위치 데이터
    */
@@ -39,7 +46,11 @@ export class LocationService {
 
     // 캐시에 저장 (5분간 유지)
     const cacheKey = `location:${userId}`;
-    await this.cacheService.set(cacheKey, { latitude, longitude }, { ttl: 300 });
+    await this.cacheService.set(
+      cacheKey,
+      { latitude, longitude },
+      { ttl: 300 },
+    );
 
     // 위치 기반 그룹 자동 가입 체크
     await this.checkAndJoinNearbyGroups(userId, latitude, longitude);
@@ -47,7 +58,7 @@ export class LocationService {
 
   /**
    * 주변 사용자 검색
-   * 
+   *
    * @param userId 요청 사용자 ID
    * @param query 검색 조건
    * @returns 주변 사용자 목록
@@ -58,18 +69,22 @@ export class LocationService {
     // 현재 사용자 위치 가져오기
     const userLocation = await this.getUserLocation(userId);
     if (!userLocation) {
-      throw new BadRequestException('위치 정보가 없습니다. 먼저 위치를 업데이트해주세요.');
+      throw new BadRequestException(
+        '위치 정보가 없습니다. 먼저 위치를 업데이트해주세요.',
+      );
     }
 
     // Haversine 공식을 사용한 거리 계산
     // PostgreSQL의 earth_distance 확장을 사용할 수도 있음
-    const nearbyUsers = await this.prisma.$queryRaw<Array<{
-      userId: string;
-      nickname: string;
-      profileImageUrl: string | null;
-      distance: number;
-      lastSeen: Date;
-    }>>`
+    const nearbyUsers = await this.prisma.$queryRaw<
+      Array<{
+        userId: string;
+        nickname: string;
+        profileImageUrl: string | null;
+        distance: number;
+        lastSeen: Date;
+      }>
+    >`
       SELECT 
         u.id as "userId",
         u.nickname,
@@ -105,7 +120,7 @@ export class LocationService {
     `;
 
     // 프라이버시 보호: 정확한 위치 대신 대략적인 거리만 표시
-    const sanitizedUsers = nearbyUsers.map(user => ({
+    const sanitizedUsers = nearbyUsers.map((user) => ({
       ...user,
       distance: Math.round(user.distance * 10) / 10, // 100m 단위로 반올림
     }));
@@ -122,13 +137,20 @@ export class LocationService {
 
   /**
    * 위치 기반 그룹 생성
-   * 
+   *
    * @param userId 생성자 ID
    * @param data 그룹 데이터
    * @returns 생성된 그룹
    */
   async createLocationGroup(userId: string, data: CreateLocationGroupDto) {
-    const { name, description, latitude, longitude, radius = 1, durationHours = 4 } = data;
+    const {
+      name,
+      description,
+      latitude,
+      longitude,
+      radius = 1,
+      durationHours = 4,
+    } = data;
 
     // QR 코드 생성
     const qrCode = this.generateQrCode();
@@ -190,7 +212,7 @@ export class LocationService {
 
   /**
    * QR 코드로 위치 그룹 가입
-   * 
+   *
    * @param userId 사용자 ID
    * @param data QR 코드 데이터
    */
@@ -254,7 +276,7 @@ export class LocationService {
 
   /**
    * 위치 기반 그룹 검색
-   * 
+   *
    * @param userId 사용자 ID
    * @param radius 검색 반경 (km)
    */
@@ -287,7 +309,7 @@ export class LocationService {
 
     // 거리 계산 및 필터링
     const nearbyGroups = groups
-      .map(group => {
+      .map((group) => {
         const metadata = group.location as any;
         if (!metadata.location) return null;
 
@@ -314,16 +336,17 @@ export class LocationService {
 
   /**
    * 사용자 위치 정보 가져오기
-   * 
+   *
    * @param userId 사용자 ID
    * @returns 위치 정보
    */
   private async getUserLocation(userId: string) {
     // 캐시 확인
     const cacheKey = `location:${userId}`;
-    const cached = await this.cacheService.get<{ latitude: number; longitude: number }>(
-      cacheKey,
-    );
+    const cached = await this.cacheService.get<{
+      latitude: number;
+      longitude: number;
+    }>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -333,10 +356,10 @@ export class LocationService {
       where: { id: userId },
       select: { location: true },
     });
-    
+
     if (!user || !user.location) return null;
-    
-    const location = JSON.parse(user.location as string);
+
+    const location = JSON.parse(user.location);
 
     if (location) {
       // 캐시에 저장
@@ -352,7 +375,7 @@ export class LocationService {
 
   /**
    * 주변 그룹 자동 가입 체크
-   * 
+   *
    * @param userId 사용자 ID
    * @param latitude 위도
    * @param longitude 경도
@@ -410,7 +433,7 @@ export class LocationService {
 
   /**
    * 두 지점 간 거리 계산 (Haversine 공식)
-   * 
+   *
    * @param lat1 지점 1 위도
    * @param lon1 지점 1 경도
    * @param lat2 지점 2 위도
@@ -438,7 +461,7 @@ export class LocationService {
 
   /**
    * 도를 라디안으로 변환
-   * 
+   *
    * @param deg 도
    * @returns 라디안
    */
@@ -448,7 +471,7 @@ export class LocationService {
 
   /**
    * QR 코드 생성
-   * 
+   *
    * @returns QR 코드 문자열
    */
   private generateQrCode(): string {
@@ -457,7 +480,7 @@ export class LocationService {
 
   /**
    * 위치 공유 토글
-   * 
+   *
    * @param userId 사용자 ID
    * @param enabled 활성화 여부
    */
@@ -488,7 +511,7 @@ export class LocationService {
 
   /**
    * 위치 히스토리 조회
-   * 
+   *
    * @param userId 사용자 ID
    * @param days 조회 기간 (일)
    */
@@ -509,7 +532,7 @@ export class LocationService {
       take: 100,
     });
 
-    return history.map(entry => ({
+    return history.map((entry) => ({
       latitude: entry.latitude,
       longitude: entry.longitude,
       timestamp: entry.createdAt,

@@ -10,7 +10,7 @@ import axios from 'axios';
 
 /**
  * 인증 서비스
- * 
+ *
  * Clerk와 연동하여 사용자 인증을 처리합니다.
  */
 @Injectable()
@@ -27,13 +27,22 @@ export class AuthService {
   /**
    * 전화번호 인증 및 사용자 생성/업데이트
    */
-  async verifyPhoneNumber(phoneNumber: string, verificationCode: string): Promise<User> {
+  async verifyPhoneNumber(
+    phoneNumber: string,
+    verificationCode: string,
+  ): Promise<User> {
     try {
       // Verify with our SMS service first
-      const isValid = await this.smsService.verifyCode(phoneNumber, verificationCode);
-      
+      const isValid = await this.smsService.verifyCode(
+        phoneNumber,
+        verificationCode,
+      );
+
       if (!isValid) {
-        throw new HttpException('잘못된 인증 코드입니다.', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          '잘못된 인증 코드입니다.',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // Find or create user in our database
@@ -59,7 +68,7 @@ export class AuthService {
         // Update verification status
         user = await this.prismaService.user.update({
           where: { id: user.id },
-          data: { 
+          data: {
             isVerified: true,
             lastActive: new Date(),
           },
@@ -74,7 +83,10 @@ export class AuthService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new HttpException('인증 처리 중 오류가 발생했습니다.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        '인증 처리 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -85,7 +97,10 @@ export class AuthService {
     try {
       await this.smsService.sendVerificationCode(phoneNumber);
     } catch (error) {
-      throw new HttpException('SMS 전송에 실패했습니다.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'SMS 전송에 실패했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -95,10 +110,13 @@ export class AuthService {
   async resendVerificationCode(phoneNumber: string): Promise<void> {
     // Check rate limit
     const rateLimitKey = `resend_code:${phoneNumber}`;
-    const attempts = await this.cacheService.get<number>(rateLimitKey) || 0;
-    
+    const attempts = (await this.cacheService.get<number>(rateLimitKey)) || 0;
+
     if (attempts >= 3) {
-      throw new HttpException('인증 코드 재전송 횟수를 초과했습니다. 잠시 후 다시 시도해주세요.', HttpStatus.TOO_MANY_REQUESTS);
+      throw new HttpException(
+        '인증 코드 재전송 횟수를 초과했습니다. 잠시 후 다시 시도해주세요.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
 
     await this.sendVerificationCode(phoneNumber);
@@ -118,7 +136,7 @@ export class AuthService {
       // Get user details from Clerk
       const clerkUser = await clerkClient.users.getUser(clerkUserId);
       const phoneNumber = clerkUser.phoneNumbers?.[0]?.phoneNumber;
-      
+
       if (!phoneNumber) {
         return null;
       }
@@ -126,10 +144,7 @@ export class AuthService {
       // Find user in our database
       const user = await this.prismaService.user.findFirst({
         where: {
-          OR: [
-            { clerkId: clerkUserId },
-            { phoneNumber },
-          ],
+          OR: [{ clerkId: clerkUserId }, { phoneNumber }],
         },
       });
 
@@ -143,7 +158,7 @@ export class AuthService {
           await this.cacheService.set(cacheKey, updatedUser, { ttl: 3600 });
           return updatedUser;
         }
-        
+
         await this.cacheService.set(cacheKey, user, { ttl: 3600 });
       }
 
@@ -163,7 +178,10 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '사용자를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     try {
@@ -191,7 +209,7 @@ export class AuthService {
     try {
       const clerkUser = await clerkClient.users.getUser(clerkUserId);
       const phoneNumber = clerkUser.phoneNumbers?.[0]?.phoneNumber || '';
-      
+
       // Check if user already exists by phone number
       const existingUser = await this.prismaService.user.findUnique({
         where: { phoneNumber },
@@ -208,7 +226,11 @@ export class AuthService {
           },
         });
 
-        await this.cacheService.setUserCache(updatedUser.id, 'profile', updatedUser);
+        await this.cacheService.setUserCache(
+          updatedUser.id,
+          'profile',
+          updatedUser,
+        );
         return updatedUser;
       }
 
@@ -228,7 +250,10 @@ export class AuthService {
       return newUser;
     } catch (error) {
       console.error('Error creating/updating user:', error);
-      throw new HttpException('사용자 생성/업데이트에 실패했습니다.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        '사용자 생성/업데이트에 실패했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -241,7 +266,10 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '사용자를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     // Soft delete in our database
@@ -273,7 +301,10 @@ export class AuthService {
       isVerified: user.isVerified,
     };
 
-    const secret = this.configService.get<string>('JWT_SECRET', 'default-secret');
+    const secret = this.configService.get<string>(
+      'JWT_SECRET',
+      'default-secret',
+    );
     return jwt.sign(payload, secret, {
       expiresIn: '30d',
     });
@@ -292,7 +323,10 @@ export class AuthService {
     } catch (error) {
       // Fall back to legacy JWT
       try {
-        const secret = this.configService.get<string>('JWT_SECRET', 'default-secret');
+        const secret = this.configService.get<string>(
+          'JWT_SECRET',
+          'default-secret',
+        );
         return jwt.verify(token, secret);
       } catch (jwtError) {
         console.error('Token verification failed:', jwtError);
@@ -306,7 +340,9 @@ export class AuthService {
    */
   async findUserByClerkId(clerkUserId: string): Promise<User | null> {
     // Check cache first
-    const cached = await this.cacheService.get<User>(`clerk_user_db:${clerkUserId}`);
+    const cached = await this.cacheService.get<User>(
+      `clerk_user_db:${clerkUserId}`,
+    );
     if (cached) return cached;
 
     const user = await this.prismaService.user.findUnique({
@@ -314,7 +350,9 @@ export class AuthService {
     });
 
     if (user) {
-      await this.cacheService.set(`clerk_user_db:${clerkUserId}`, user, { ttl: 3600 });
+      await this.cacheService.set(`clerk_user_db:${clerkUserId}`, user, {
+        ttl: 3600,
+      });
     }
 
     return user;
@@ -333,29 +371,52 @@ export class AuthService {
    * 고유 닉네임 생성
    */
   private async generateUniqueNickname(): Promise<string> {
-    const adjectives = ['행복한', '즐거운', '신나는', '활발한', '따뜻한', '밝은', '귀여운', '멋진', '상쾌한', '유쾌한'];
-    const nouns = ['고양이', '강아지', '토끼', '펭귄', '코알라', '판다', '여우', '다람쥐', '햄스터', '수달'];
-    
+    const adjectives = [
+      '행복한',
+      '즐거운',
+      '신나는',
+      '활발한',
+      '따뜻한',
+      '밝은',
+      '귀여운',
+      '멋진',
+      '상쾌한',
+      '유쾌한',
+    ];
+    const nouns = [
+      '고양이',
+      '강아지',
+      '토끼',
+      '펭귄',
+      '코알라',
+      '판다',
+      '여우',
+      '다람쥐',
+      '햄스터',
+      '수달',
+    ];
+
     let nickname: string;
     let isUnique = false;
     let attempts = 0;
 
     while (!isUnique && attempts < 10) {
-      const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+      const adjective =
+        adjectives[Math.floor(Math.random() * adjectives.length)];
       const noun = nouns[Math.floor(Math.random() * nouns.length)];
       const number = Math.floor(Math.random() * 1000);
-      
+
       nickname = `${adjective}${noun}${number}`;
-      
+
       // Check if nickname is unique
       const existing = await this.prismaService.user.findFirst({
-        where: { nickname: nickname as string },
+        where: { nickname: nickname },
       });
-      
+
       if (!existing) {
         isUnique = true;
       }
-      
+
       attempts++;
     }
 
@@ -380,7 +441,7 @@ export class AuthService {
     const user = await this.prismaService.user.findUnique({
       where: { id: userId },
     });
-    
+
     if (user) {
       await this.cacheService.setUserCache(userId, 'profile', user);
     }
@@ -391,7 +452,7 @@ export class AuthService {
    */
   async isUserOnline(userId: string): Promise<boolean> {
     const user = await this.cacheService.get<User>(`user:${userId}`);
-    
+
     if (!user?.lastActive) {
       return false;
     }
@@ -409,7 +470,7 @@ export class AuthService {
     await this.cacheService.del(`user:${userId}`);
     await this.cacheService.delete(`user_groups:${userId}`);
     await this.cacheService.delete(`user_matches:${userId}`);
-    
+
     // Update user status
     await this.prismaService.user.update({
       where: { id: userId },

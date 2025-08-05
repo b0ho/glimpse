@@ -5,7 +5,7 @@ import { PrismaModule } from '../core/prisma/prisma.module';
 
 /**
  * 사용자 모듈
- * 
+ *
  * 사용자 프로필 및 관련 기능을 제공합니다.
  */
 @Module({

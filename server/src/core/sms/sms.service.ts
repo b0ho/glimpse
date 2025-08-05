@@ -32,7 +32,7 @@ interface SMSProvider {
 
 /**
  * SMS 서비스
- * 
+ *
  * 다양한 SMS 제공자(Twilio, Aligo, Toast)를 통해 SMS를 발송합니다.
  */
 @Injectable()
@@ -50,7 +50,7 @@ export class SmsService {
   ) {
     // Initialize SMS provider based on configuration
     const providerType = this.configService.get('SMS_PROVIDER', 'console');
-    
+
     switch (providerType) {
       case 'twilio':
         this.provider = new TwilioProvider(configService);
@@ -72,18 +72,18 @@ export class SmsService {
   async sendVerificationCode(phoneNumber: string): Promise<void> {
     // Clean phone number
     const cleanedNumber = this.cleanPhoneNumber(phoneNumber);
-    
+
     // Check rate limit
     const rateLimitKey = `sms:ratelimit:${cleanedNumber}`;
-    const sentCount = await this.cacheService.get<number>(rateLimitKey) || 0;
-    
+    const sentCount = (await this.cacheService.get<number>(rateLimitKey)) || 0;
+
     if (sentCount >= this.rateLimit) {
       throw new Error('SMS rate limit exceeded. Please try again later.');
     }
 
     // Generate verification code
     const code = this.encryptionService.generateRandomCode(6);
-    
+
     // Store verification code in cache
     const verificationData: VerificationCode = {
       code,
@@ -91,11 +91,11 @@ export class SmsService {
       expiresAt: new Date(Date.now() + this.verificationTTL * 1000),
       attempts: 0,
     };
-    
+
     await this.cacheService.set(
       `sms:verification:${cleanedNumber}`,
       verificationData,
-      { ttl: this.verificationTTL }
+      { ttl: this.verificationTTL },
     );
 
     // Send SMS
@@ -115,9 +115,10 @@ export class SmsService {
   async verifyCode(phoneNumber: string, code: string): Promise<boolean> {
     const cleanedNumber = this.cleanPhoneNumber(phoneNumber);
     const cacheKey = `sms:verification:${cleanedNumber}`;
-    
-    const verificationData = await this.cacheService.get<VerificationCode>(cacheKey);
-    
+
+    const verificationData =
+      await this.cacheService.get<VerificationCode>(cacheKey);
+
     if (!verificationData) {
       throw new Error('Verification code expired or not found');
     }
@@ -130,7 +131,9 @@ export class SmsService {
 
     // Update attempts
     verificationData.attempts++;
-    await this.cacheService.set(cacheKey, verificationData, { ttl: this.verificationTTL });
+    await this.cacheService.set(cacheKey, verificationData, {
+      ttl: this.verificationTTL,
+    });
 
     // Verify code
     if (verificationData.code !== code) {
@@ -139,18 +142,21 @@ export class SmsService {
 
     // Delete verification data on success
     await this.cacheService.delete(cacheKey);
-    
+
     return true;
   }
 
   /**
    * 매칭 알림 SMS 발송
    */
-  async sendMatchNotification(phoneNumber: string, matchedUserNickname: string): Promise<void> {
+  async sendMatchNotification(
+    phoneNumber: string,
+    matchedUserNickname: string,
+  ): Promise<void> {
     const cleanedNumber = this.cleanPhoneNumber(phoneNumber);
-    
+
     const message = `[Glimpse] 축하합니다! ${matchedUserNickname}님과 매칭되었어요 💕\n지금 앱에서 대화를 시작해보세요!`;
-    
+
     await this.provider.send(cleanedNumber, message);
     await this.logSMSActivity(cleanedNumber, 'MATCH_NOTIFICATION');
   }
@@ -158,11 +164,14 @@ export class SmsService {
   /**
    * 프리미엄 구매 확인 SMS 발송
    */
-  async sendPremiumPurchaseConfirmation(phoneNumber: string, packageName: string): Promise<void> {
+  async sendPremiumPurchaseConfirmation(
+    phoneNumber: string,
+    packageName: string,
+  ): Promise<void> {
     const cleanedNumber = this.cleanPhoneNumber(phoneNumber);
-    
+
     const message = `[Glimpse] ${packageName} 구매가 완료되었습니다.\n프리미엄 기능을 즐겨보세요!`;
-    
+
     await this.provider.send(cleanedNumber, message);
     await this.logSMSActivity(cleanedNumber, 'PREMIUM_PURCHASE');
   }
@@ -178,7 +187,10 @@ export class SmsService {
   /**
    * SMS 활동 로그 기록
    */
-  private async logSMSActivity(phoneNumber: string, type: string): Promise<void> {
+  private async logSMSActivity(
+    phoneNumber: string,
+    type: string,
+  ): Promise<void> {
     try {
       await this.prismaService.sMSLog.create({
         data: {
@@ -299,7 +311,7 @@ class ToastSMSProvider implements SMSProvider {
     this.appKey = configService.get('TOAST_APP_KEY', '');
     this.secretKey = configService.get('TOAST_SECRET_KEY', '');
     this.sendNo = configService.get('TOAST_SEND_NO', '');
-    
+
     const region = configService.get('TOAST_REGION', 'kr1');
     this.apiUrl = `https://api-sms.cloud.toast.com/sms/v3.0/appKeys/${this.appKey}/sender/sms`;
 
@@ -326,14 +338,18 @@ class ToastSMSProvider implements SMSProvider {
             'Content-Type': 'application/json',
             'X-Secret-Key': this.secretKey,
           },
-        }
+        },
       );
 
       if (!response.data.header.isSuccessful) {
-        throw new Error(`Toast SMS error: ${response.data.header.resultMessage}`);
+        throw new Error(
+          `Toast SMS error: ${response.data.header.resultMessage}`,
+        );
       }
 
-      console.log(`SMS sent successfully via Toast: ${response.data.header.resultCode}`);
+      console.log(
+        `SMS sent successfully via Toast: ${response.data.header.resultCode}`,
+      );
     } catch (error) {
       console.error('Toast SMS error:', error);
       throw new Error('SMS 전송에 실패했습니다');

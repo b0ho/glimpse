@@ -20,31 +20,33 @@ export class MatchingStatisticsService {
       messagesExchanged,
       groupsJoined,
       thisWeekLikes,
-      thisWeekMatches
+      thisWeekMatches,
     ] = await Promise.all([
       this.prisma.userLike.count({ where: { fromUserId: userId } }),
       this.prisma.userLike.count({ where: { toUserId: userId } }),
       this.prisma.match.count({
         where: {
-          OR: [{ user1Id: userId }, { user2Id: userId }]
-        }
+          OR: [{ user1Id: userId }, { user2Id: userId }],
+        },
       }),
       this.prisma.match.count({
         where: {
           OR: [{ user1Id: userId }, { user2Id: userId }],
-          status: 'ACTIVE'
-        }
+          status: 'ACTIVE',
+        },
       }),
       this.prisma.chatMessage.count({ where: { senderId: userId } }),
       this.prisma.groupMember.count({
-        where: { userId, status: 'ACTIVE' }
+        where: { userId, status: 'ACTIVE' },
       }),
       this.getWeeklyLikes(userId),
-      this.getWeeklyMatches(userId)
+      this.getWeeklyMatches(userId),
     ]);
 
-    const matchRate = totalLikesSent > 0 ? (totalMatches / totalLikesSent) * 100 : 0;
-    const responseRate = totalLikesReceived > 0 ? (totalMatches / totalLikesReceived) * 100 : 0;
+    const matchRate =
+      totalLikesSent > 0 ? (totalMatches / totalLikesSent) * 100 : 0;
+    const responseRate =
+      totalLikesReceived > 0 ? (totalMatches / totalLikesReceived) * 100 : 0;
 
     return {
       overview: {
@@ -53,18 +55,18 @@ export class MatchingStatisticsService {
         totalMatches,
         activeMatches,
         messagesExchanged,
-        groupsJoined
+        groupsJoined,
       },
       rates: {
         matchRate: Math.round(matchRate * 100) / 100,
-        responseRate: Math.round(responseRate * 100) / 100
+        responseRate: Math.round(responseRate * 100) / 100,
       },
       thisWeek: {
         likes: thisWeekLikes,
-        matches: thisWeekMatches
+        matches: thisWeekMatches,
       },
       activity: await this.getUserActivityStats(userId),
-      topGroups: await this.getUserTopGroups(userId)
+      topGroups: await this.getUserTopGroups(userId),
     };
   }
 
@@ -79,41 +81,41 @@ export class MatchingStatisticsService {
       totalMessages,
       totalGroups,
       averageMatchesPerUser,
-      topGroups
+      topGroups,
     ] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.user.count({
         where: {
           lastActive: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last 7 days
-          }
-        }
+            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+          },
+        },
       }),
       this.prisma.match.count({ where: { status: 'ACTIVE' } }),
       this.prisma.chatMessage.count(),
       this.prisma.group.count({ where: { isActive: true } }),
       this.getAverageMatchesPerUser(),
-      this.getTopPerformingGroups()
+      this.getTopPerformingGroups(),
     ]);
 
     return {
       users: {
         total: totalUsers,
         active: activeUsers,
-        activeRate: totalUsers > 0 ? (activeUsers / totalUsers) * 100 : 0
+        activeRate: totalUsers > 0 ? (activeUsers / totalUsers) * 100 : 0,
       },
       matching: {
         totalMatches,
-        averageMatchesPerUser
+        averageMatchesPerUser,
       },
       engagement: {
         totalMessages,
-        messagesPerMatch: totalMatches > 0 ? totalMessages / totalMatches : 0
+        messagesPerMatch: totalMatches > 0 ? totalMessages / totalMatches : 0,
       },
       groups: {
         total: totalGroups,
-        topPerforming: topGroups
-      }
+        topPerforming: topGroups,
+      },
     };
   }
 
@@ -128,7 +130,7 @@ export class MatchingStatisticsService {
       totalMatches,
       averageAge,
       genderDistribution,
-      recentActivity
+      recentActivity,
     ] = await Promise.all([
       this.prisma.groupMember.count({ where: { groupId } }),
       this.prisma.groupMember.count({ where: { groupId, status: 'ACTIVE' } }),
@@ -136,27 +138,29 @@ export class MatchingStatisticsService {
       this.prisma.match.count({ where: { groupId, status: 'ACTIVE' } }),
       this.getGroupAverageAge(groupId),
       this.getGroupGenderDistribution(groupId),
-      this.getGroupRecentActivity(groupId)
+      this.getGroupRecentActivity(groupId),
     ]);
 
-    const matchRate = totalLikes > 0 ? (totalMatches * 2 / totalLikes) * 100 : 0; // *2 because each match involves 2 likes
+    const matchRate =
+      totalLikes > 0 ? ((totalMatches * 2) / totalLikes) * 100 : 0; // *2 because each match involves 2 likes
 
     return {
       members: {
         total: memberCount,
         active: activeMemberCount,
-        activeRate: memberCount > 0 ? (activeMemberCount / memberCount) * 100 : 0
+        activeRate:
+          memberCount > 0 ? (activeMemberCount / memberCount) * 100 : 0,
       },
       activity: {
         totalLikes,
         totalMatches,
-        matchRate: Math.round(matchRate * 100) / 100
+        matchRate: Math.round(matchRate * 100) / 100,
       },
       demographics: {
         averageAge,
-        genderDistribution
+        genderDistribution,
       },
-      recentActivity
+      recentActivity,
     };
   }
 
@@ -170,8 +174,8 @@ export class MatchingStatisticsService {
     return await this.prisma.userLike.count({
       where: {
         fromUserId: userId,
-        createdAt: { gte: weekAgo }
-      }
+        createdAt: { gte: weekAgo },
+      },
     });
   }
 
@@ -185,8 +189,8 @@ export class MatchingStatisticsService {
     return await this.prisma.match.count({
       where: {
         OR: [{ user1Id: userId }, { user2Id: userId }],
-        createdAt: { gte: weekAgo }
-      }
+        createdAt: { gte: weekAgo },
+      },
     });
   }
 
@@ -201,9 +205,9 @@ export class MatchingStatisticsService {
       by: ['createdAt'],
       where: {
         fromUserId: userId,
-        createdAt: { gte: thirtyDaysAgo }
+        createdAt: { gte: thirtyDaysAgo },
       },
-      _count: true
+      _count: true,
     });
 
     // Process daily activity into a format suitable for charts
@@ -215,12 +219,15 @@ export class MatchingStatisticsService {
       activityMap.set(dateStr, 0);
     }
 
-    dailyActivity.forEach(activity => {
+    dailyActivity.forEach((activity) => {
       const dateStr = activity.createdAt.toISOString().split('T')[0];
       activityMap.set(dateStr, activity._count);
     });
 
-    return Array.from(activityMap.entries()).map(([date, count]) => ({ date, count }));
+    return Array.from(activityMap.entries()).map(([date, count]) => ({
+      date,
+      count,
+    }));
   }
 
   /**
@@ -230,8 +237,8 @@ export class MatchingStatisticsService {
     const topGroups = await this.prisma.group.findMany({
       where: {
         members: {
-          some: { userId, status: 'ACTIVE' }
-        }
+          some: { userId, status: 'ACTIVE' },
+        },
       },
       include: {
         _count: {
@@ -240,24 +247,24 @@ export class MatchingStatisticsService {
             matches: {
               where: {
                 OR: [{ user1Id: userId }, { user2Id: userId }],
-                status: 'ACTIVE'
-              }
-            }
-          }
-        }
+                status: 'ACTIVE',
+              },
+            },
+          },
+        },
       },
       orderBy: {
-        matches: { _count: 'desc' }
+        matches: { _count: 'desc' },
       },
-      take: 5
+      take: 5,
     });
 
-    return topGroups.map(group => ({
+    return topGroups.map((group) => ({
       id: group.id,
       name: group.name,
       type: group.type,
       likesInGroup: group._count.likes,
-      matchesInGroup: group._count.matches
+      matchesInGroup: group._count.matches,
     }));
   }
 
@@ -268,11 +275,11 @@ export class MatchingStatisticsService {
     const result = await this.prisma.match.groupBy({
       by: ['user1Id'],
       where: { status: 'ACTIVE' },
-      _count: true
+      _count: true,
     });
 
     if (result.length === 0) return 0;
-    
+
     const totalMatches = result.reduce((sum, item) => sum + item._count, 0);
     return Math.round((totalMatches / result.length) * 100) / 100;
   }
@@ -281,32 +288,37 @@ export class MatchingStatisticsService {
    * 상위 성과 그룹 조회
    */
   private async getTopPerformingGroups() {
-    return await this.prisma.group.findMany({
-      where: { isActive: true },
-      include: {
-        _count: {
-          select: {
-            matches: { where: { status: 'ACTIVE' } },
-            members: { where: { status: 'ACTIVE' } }
-          }
-        }
-      },
-      orderBy: {
-        matches: { _count: 'desc' }
-      },
-      take: 10
-    }).then(groups => 
-      groups.map(group => ({
-        id: group.id,
-        name: group.name,
-        type: group.type,
-        memberCount: group._count.members,
-        matchCount: group._count.matches,
-        matchRate: group._count.members > 1 
-          ? (group._count.matches / (group._count.members * (group._count.members - 1) / 2)) * 100
-          : 0
-      }))
-    );
+    return await this.prisma.group
+      .findMany({
+        where: { isActive: true },
+        include: {
+          _count: {
+            select: {
+              matches: { where: { status: 'ACTIVE' } },
+              members: { where: { status: 'ACTIVE' } },
+            },
+          },
+        },
+        orderBy: {
+          matches: { _count: 'desc' },
+        },
+        take: 10,
+      })
+      .then((groups) =>
+        groups.map((group) => ({
+          id: group.id,
+          name: group.name,
+          type: group.type,
+          memberCount: group._count.members,
+          matchCount: group._count.matches,
+          matchRate:
+            group._count.members > 1
+              ? (group._count.matches /
+                  ((group._count.members * (group._count.members - 1)) / 2)) *
+                100
+              : 0,
+        })),
+      );
   }
 
   /**
@@ -316,11 +328,11 @@ export class MatchingStatisticsService {
     const result = await this.prisma.user.aggregate({
       where: {
         groupMemberships: {
-          some: { groupId, status: 'ACTIVE' }
+          some: { groupId, status: 'ACTIVE' },
         },
-        age: { not: null }
+        age: { not: null },
       },
-      _avg: { age: true }
+      _avg: { age: true },
     });
 
     return result._avg.age ? Math.round(result._avg.age) : null;
@@ -334,19 +346,22 @@ export class MatchingStatisticsService {
       by: ['gender'],
       where: {
         groupMemberships: {
-          some: { groupId, status: 'ACTIVE' }
+          some: { groupId, status: 'ACTIVE' },
         },
-        gender: { not: null }
+        gender: { not: null },
       },
-      _count: true
+      _count: true,
     });
 
-    return distribution.reduce((acc, item) => {
-      if (item.gender) {
-        acc[item.gender] = item._count;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+    return distribution.reduce(
+      (acc, item) => {
+        if (item.gender) {
+          acc[item.gender] = item._count;
+        }
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
   }
 
   /**
@@ -358,23 +373,23 @@ export class MatchingStatisticsService {
 
     const [recentLikes, recentMatches, recentMessages] = await Promise.all([
       this.prisma.userLike.count({
-        where: { groupId, createdAt: { gte: sevenDaysAgo } }
+        where: { groupId, createdAt: { gte: sevenDaysAgo } },
       }),
       this.prisma.match.count({
-        where: { groupId, createdAt: { gte: sevenDaysAgo } }
+        where: { groupId, createdAt: { gte: sevenDaysAgo } },
       }),
       this.prisma.chatMessage.count({
         where: {
           match: { groupId },
-          createdAt: { gte: sevenDaysAgo }
-        }
-      })
+          createdAt: { gte: sevenDaysAgo },
+        },
+      }),
     ]);
 
     return {
       likes: recentLikes,
       matches: recentMatches,
-      messages: recentMessages
+      messages: recentMessages,
     };
   }
 
@@ -389,17 +404,17 @@ export class MatchingStatisticsService {
       by: ['createdAt'],
       where: {
         createdAt: { gte: startDate },
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       },
-      _count: true
+      _count: true,
     });
 
     const dailyLikes = await this.prisma.userLike.groupBy({
       by: ['createdAt'],
       where: {
-        createdAt: { gte: startDate }
+        createdAt: { gte: startDate },
       },
-      _count: true
+      _count: true,
     });
 
     // Process into daily trends
@@ -411,14 +426,14 @@ export class MatchingStatisticsService {
       trendsMap.set(dateStr, { matches: 0, likes: 0 });
     }
 
-    dailyMatches.forEach(item => {
+    dailyMatches.forEach((item) => {
       const dateStr = item.createdAt.toISOString().split('T')[0];
       if (trendsMap.has(dateStr)) {
         trendsMap.get(dateStr).matches = item._count;
       }
     });
 
-    dailyLikes.forEach(item => {
+    dailyLikes.forEach((item) => {
       const dateStr = item.createdAt.toISOString().split('T')[0];
       if (trendsMap.has(dateStr)) {
         trendsMap.get(dateStr).likes = item._count;
@@ -429,7 +444,7 @@ export class MatchingStatisticsService {
       date,
       matches: data.matches,
       likes: data.likes,
-      matchRate: data.likes > 0 ? (data.matches / data.likes) * 100 : 0
+      matchRate: data.likes > 0 ? (data.matches / data.likes) * 100 : 0,
     }));
   }
 }

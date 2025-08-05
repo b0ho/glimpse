@@ -1,4 +1,13 @@
-import { IsString, IsEnum, IsOptional, IsNumber, Min, Max, IsBoolean, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsNumber,
+  Min,
+  Max,
+  IsBoolean,
+  IsArray,
+} from 'class-validator';
 
 /**
  * 사용자 차단/해제 DTO

@@ -1,5 +1,19 @@
-import { Controller, Post, Get, Query, Body, UseGuards, Req, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Get,
+  Query,
+  Body,
+  UseGuards,
+  Req,
+  Param,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CompanyDomainService } from './company-domain.service';
 import { AuthGuard } from '../auth/auth.guard';
 
@@ -41,7 +55,7 @@ export class CompanyDomainController {
   @ApiResponse({ status: 201, description: '인증 이메일 전송됨' })
   async requestEmailVerification(
     @Req() req: any,
-    @Body('email') email: string
+    @Body('email') email: string,
   ) {
     const userId = req.user.id;
     return this.companyDomainService.createEmailVerification(userId, email);
@@ -57,13 +71,13 @@ export class CompanyDomainController {
   @ApiResponse({ status: 200, description: '인증 성공' })
   async verifyEmailCode(
     @Req() req: any,
-    @Body() body: { email: string; code: string }
+    @Body() body: { email: string; code: string },
   ) {
     const userId = req.user.id;
     const success = await this.companyDomainService.verifyEmailCode(
       userId,
       body.email,
-      body.code
+      body.code,
     );
     return { success };
   }
@@ -78,14 +92,15 @@ export class CompanyDomainController {
   @ApiResponse({ status: 201, description: '도메인 추가됨' })
   async addCompanyDomain(
     @Req() req: any,
-    @Body() data: {
+    @Body()
+    data: {
       domain: string;
       companyName: string;
       companyNameKr?: string;
       employeeCount?: number;
       industry?: string;
       logoUrl?: string;
-    }
+    },
   ) {
     // TODO: Add admin check
     return this.companyDomainService.addCompanyDomain(data);

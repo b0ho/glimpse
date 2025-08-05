@@ -53,8 +53,11 @@ export class ChatImageUploadResponseDto {
 export class FileStatsDto {
   totalFiles: number;
   totalSize: number;
-  categories: Record<string, {
-    count: number;
-    size: number;
-  }>;
+  categories: Record<
+    string,
+    {
+      count: number;
+      size: number;
+    }
+  >;
 }

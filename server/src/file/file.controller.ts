@@ -18,7 +18,7 @@ import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 
 /**
  * 파일 업로드 컨트롤러
- * 
+ *
  * 프로필, 채팅, 그룹 이미지 및 문서 업로드를 처리합니다.
  */
 @Controller('files')
