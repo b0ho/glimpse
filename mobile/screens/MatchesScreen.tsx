@@ -52,7 +52,7 @@ export const MatchesScreen: React.FC = React.memo(() => {
     };
 
     loadMatches();
-  }, [likeStore]);
+  }, []); // dependency를 빈 배열로 변경하여 컴포넌트 마운트 시에만 실행
 
   /**
    * 채팅 시작 핸들러
