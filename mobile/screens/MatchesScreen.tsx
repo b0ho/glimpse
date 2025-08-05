@@ -23,6 +23,7 @@ import { formatTimeAgo } from '@/utils/dateUtils';
  * @description 서로 좋아요를 보내 매칭된 사용자 목록을 표시하고 채팅을 시작할 수 있는 화면
  */
 export const MatchesScreen: React.FC = React.memo(() => {
+  console.log('[MatchesScreen] 컴포넌트 렌더링');
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -36,22 +37,19 @@ export const MatchesScreen: React.FC = React.memo(() => {
    * @description 서버에서 매칭 목록을 가져와 표시
    */
   useEffect(() => {
-    const loadMatches = async () => {
-      setIsLoading(true);
-      try {
-        // 실제로는 API 호출
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const dummyMatches = generateDummyMatches();
-        setMatches(dummyMatches);
-        likeStore.setMatches(dummyMatches);
-      } catch (error) {
-        console.error('Failed to load matches:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadMatches();
+    console.log('[MatchesScreen] useEffect 실행됨');
+    // 즉시 데이터 로드 (비동기 제거)
+    try {
+      const dummyMatches = generateDummyMatches();
+      console.log('[MatchesScreen] dummyMatches 생성됨:', dummyMatches.length);
+      setMatches(dummyMatches);
+      likeStore.setMatches(dummyMatches);
+      console.log('[MatchesScreen] setIsLoading(false) 호출');
+      setIsLoading(false);
+    } catch (error) {
+      console.error('[MatchesScreen] Failed to load matches:', error);
+      setIsLoading(false);
+    }
   }, []); // dependency를 빈 배열로 변경하여 컴포넌트 마운트 시에만 실행
 
   /**
