@@ -1,3 +1,5 @@
+// Web polyfill for import.meta
+import './web-polyfill';
 import { registerRootComponent } from 'expo';
 import App from './App';
 

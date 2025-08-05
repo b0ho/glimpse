@@ -9,7 +9,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '@clerk/clerk-expo';
+// import { useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useDevAuth';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';

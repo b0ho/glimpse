@@ -28,6 +28,7 @@ export interface User {
   credits: number;
   isPremium: boolean;
   premiumUntil?: Date;
+  isAdmin?: boolean; // Admin user flag
   currentMode?: AppMode; // Current app mode (dating or friendship)
   lastActive: Date;
   lastOnline?: Date;
