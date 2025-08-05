@@ -11,7 +11,9 @@ import {
   HttpCode,
   HttpStatus,
   UnauthorizedException,
+  Headers,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { AdminGuard } from './guards/admin.guard';
@@ -40,6 +42,7 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   /**
@@ -47,10 +50,37 @@ export class AdminController {
    */
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: AdminLoginDto): Promise<AdminTokenResponseDto> {
+  async login(
+    @Body() loginDto: AdminLoginDto,
+    @Headers('x-dev-auth') devAuth?: string,
+  ): Promise<AdminTokenResponseDto> {
     const { email, password } = loginDto;
 
-    // 환경 변수에서 관리자 계정 확인
+    // 개발 모드 확인
+    const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    
+    if (useDevAuth && devAuth === 'true') {
+      // 개발 모드에서는 어떤 이메일/비밀번호도 허용
+      const payload = {
+        email,
+        role: 'admin',
+        sub: 'admin-dev-1',
+      };
+
+      const token = this.jwtService.sign(payload);
+
+      return {
+        access_token: token,
+        user: {
+          email,
+          name: '개발 관리자',
+          role: 'admin',
+          permissions: ['read', 'write', 'delete'],
+        },
+      };
+    }
+
+    // 프로덕션 모드: 환경 변수에서 관리자 계정 확인
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@glimpse.app';
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123!';
 

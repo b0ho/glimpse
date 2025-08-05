@@ -207,8 +207,24 @@ export class AuthService {
    */
   async createOrUpdateUser(clerkUserId: string): Promise<User> {
     try {
-      const clerkUser = await clerkClient.users.getUser(clerkUserId);
-      const phoneNumber = clerkUser.phoneNumbers?.[0]?.phoneNumber || '';
+      // 개발 모드 확인
+      const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+      const devAccountType = this.configService.get<string>('DEV_ACCOUNT_TYPE', 'premium');
+      
+      let clerkUser;
+      let phoneNumber: string;
+      
+      if (useDevAuth) {
+        // 개발 모드에서는 더미 데이터 사용
+        phoneNumber = clerkUserId.startsWith('+') ? clerkUserId : '+82' + clerkUserId;
+        clerkUser = {
+          id: 'dev_' + Date.now(),
+          phoneNumbers: [{ phoneNumber }],
+        };
+      } else {
+        clerkUser = await clerkClient.users.getUser(clerkUserId);
+        phoneNumber = clerkUser.phoneNumbers?.[0]?.phoneNumber || '';
+      }
 
       // Check if user already exists by phone number
       const existingUser = await this.prismaService.user.findUnique({
@@ -237,12 +253,14 @@ export class AuthService {
       // Create new user
       const newUser = await this.prismaService.user.create({
         data: {
-          clerkId: clerkUserId,
+          clerkId: useDevAuth ? 'dev_' + clerkUserId : clerkUserId,
           phoneNumber,
           nickname: await this.generateUniqueNickname(),
-          credits: 1,
-          isPremium: false,
+          credits: useDevAuth && devAccountType === 'premium' ? 999 : 1,
+          isPremium: useDevAuth && devAccountType === 'premium',
           isVerified: true,
+          age: 25,
+          gender: 'MALE',
         },
       });
 
@@ -314,6 +332,29 @@ export class AuthService {
    * JWT 토큰 검증
    */
   async verifyToken(token: string): Promise<any> {
+    // 개발 모드 확인
+    const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    
+    if (useDevAuth && token.startsWith('dev-')) {
+      // 개발 모드 간단한 토큰 처리
+      if (token === 'dev-token') {
+        return {
+          sub: 'admin-dev-1',
+          role: 'admin',
+          email: 'admin@glimpse.app',
+        };
+      }
+      // dev-user-{userId} 형식 처리
+      const match = token.match(/^dev-user-(.+)$/);
+      if (match) {
+        return {
+          sub: match[1],
+          userId: match[1],
+          role: 'user',
+        };
+      }
+    }
+    
     try {
       // Try Clerk token first
       const clerkVerification = await clerkClient.verifyToken(token);

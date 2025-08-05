@@ -14,12 +14,21 @@ export async function GET() {
       );
     }
 
+    // 개발 모드 확인
+    const useDevAuth = process.env.USE_DEV_AUTH === 'true' || process.env.NODE_ENV === 'development';
+    
+    const headers: HeadersInit = {
+      'Authorization': `Bearer ${adminToken.value}`,
+    };
+    
+    if (useDevAuth) {
+      headers['X-Dev-Auth'] = 'true';
+    }
+
     // 백엔드 API로 요청 전달
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
     const response = await fetch(`${backendUrl}/admin/dashboard`, {
-      headers: {
-        'Authorization': `Bearer ${adminToken.value}`,
-      },
+      headers,
     });
 
     if (response.ok) {

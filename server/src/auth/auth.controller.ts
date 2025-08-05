@@ -6,6 +6,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Headers,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,6 +18,7 @@ import {
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * 인증 컨트롤러
@@ -26,7 +28,10 @@ import { CurrentUser } from './decorators/current-user.decorator';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   /**
    * Clerk 연동 회원가입/로그인
@@ -38,12 +43,27 @@ export class AuthController {
    */
   @Post('register')
   @ApiOperation({ summary: 'Clerk 연동 회원가입/로그인' })
-  @ApiBody({ schema: { properties: { clerkUserId: { type: 'string' } } } })
+  @ApiBody({ schema: { properties: { clerkUserId: { type: 'string' }, phoneNumber: { type: 'string' } } } })
   @ApiResponse({ status: 200, description: '회원가입 성공' })
   @ApiResponse({ status: 400, description: '회원가입 실패' })
-  async register(@Body() body: { clerkUserId: string }) {
+  async register(
+    @Body() body: { clerkUserId?: string; phoneNumber?: string },
+    @Headers('x-dev-auth') devAuth?: string,
+  ) {
     try {
-      const user = await this.authService.createOrUpdateUser(body.clerkUserId);
+      const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+      
+      let userId: string;
+      if (useDevAuth && devAuth === 'true' && body.phoneNumber) {
+        // 개발 모드에서는 전화번호를 사용자 ID로 사용
+        userId = body.phoneNumber;
+      } else if (body.clerkUserId) {
+        userId = body.clerkUserId;
+      } else {
+        throw new Error('사용자 ID가 필요합니다.');
+      }
+      
+      const user = await this.authService.createOrUpdateUser(userId);
       return {
         success: true,
         data: {

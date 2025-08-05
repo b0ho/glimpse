@@ -6,11 +6,21 @@ export async function POST(request: Request) {
     
     // 백엔드 API로 요청 전달
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+    
+    // 개발 모드 확인
+    const useDevAuth = process.env.USE_DEV_AUTH === 'true' || process.env.NODE_ENV === 'development';
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (useDevAuth) {
+      headers['X-Dev-Auth'] = 'true';
+    }
+    
     const response = await fetch(`${backendUrl}/admin/login`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(body),
     });
 

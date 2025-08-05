@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService } from '../auth.service';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * 인증 가드
@@ -14,11 +15,18 @@ import { AuthService } from '../auth.service';
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
+
+    // 개발 모드 확인
+    const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    const devAuth = request.headers['x-dev-auth'];
 
     if (!token) {
       throw new UnauthorizedException('인증 토큰이 필요합니다.');
@@ -31,6 +39,29 @@ export class AuthGuard implements CanActivate {
         throw new UnauthorizedException('유효하지 않은 토큰입니다.');
       }
 
+      // 개발 모드에서 관리자 토큰 처리
+      if (useDevAuth && devAuth === 'true' && payload.role === 'admin') {
+        request['user'] = {
+          id: payload.sub,
+          email: payload.email,
+          role: payload.role,
+          nickname: payload.name || '개발 관리자',
+        };
+        (request as any)['userId'] = payload.sub;
+        return true;
+      }
+
+      // 개발 모드 사용자 토큰 처리
+      if (useDevAuth && devAuth === 'true' && payload.role === 'user' && payload.userId) {
+        // userId로 사용자 찾기
+        const user = await this.authService.findUserByClerkId(payload.userId);
+        if (user) {
+          request['user'] = user;
+          (request as any)['userId'] = user.id;
+          return true;
+        }
+      }
+      
       // Clerk token verification
       if (payload.sub) {
         const user = await this.authService.findUserByClerkId(payload.sub);
