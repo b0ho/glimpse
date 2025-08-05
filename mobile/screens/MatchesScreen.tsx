@@ -37,7 +37,14 @@ export const MatchesScreen: React.FC = React.memo(() => {
    * @description 서버에서 매칭 목록을 가져와 표시
    */
   useEffect(() => {
-    console.log('[MatchesScreen] useEffect 실행됨');
+    console.log('[MatchesScreen] useEffect 실행됨, isLoading:', isLoading);
+    
+    // 이미 로드된 경우 스킵
+    if (!isLoading) {
+      console.log('[MatchesScreen] 이미 로드됨, 스킵');
+      return;
+    }
+    
     // 즉시 데이터 로드 (비동기 제거)
     try {
       const dummyMatches = generateDummyMatches();
@@ -50,6 +57,11 @@ export const MatchesScreen: React.FC = React.memo(() => {
       console.error('[MatchesScreen] Failed to load matches:', error);
       setIsLoading(false);
     }
+    
+    // Cleanup 함수
+    return () => {
+      console.log('[MatchesScreen] 컴포넌트 언마운트됨');
+    };
   }, []); // dependency를 빈 배열로 변경하여 컴포넌트 마운트 시에만 실행
 
   /**
