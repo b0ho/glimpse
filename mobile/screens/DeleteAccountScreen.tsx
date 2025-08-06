@@ -13,7 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 // import { useAuth } from '@clerk/clerk-expo';
 import { useAuth } from '@/hooks/useDevAuth';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { authService } from '@/services/api/authService';

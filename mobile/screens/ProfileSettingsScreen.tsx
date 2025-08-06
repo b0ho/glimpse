@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useProfileStore } from '@/store/slices/profileSlice';
 import profileService from '@/services/profile/profileService';
@@ -29,7 +29,7 @@ interface SettingItem {
   route?: string;
 }
 
-const ProfileSettingsScreen: React.FC = () => {
+const ProfileSettingsScreen= () => () => {
   const navigation = useNavigation();
   const { userProfile } = useProfileStore();
   

@@ -11,7 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { authService } from '@/services/api/authService';
@@ -36,7 +36,7 @@ interface EditNicknameModalProps {
  * @returns {JSX.Element} 닉네임 수정 모달 UI
  * @description 사용자가 자신의 닉네임을 수정할 수 있는 모달 컴포넌트
  */
-export const EditNicknameModal: React.FC<EditNicknameModalProps> = ({
+export const EditNicknameModal= ({
   visible,
   onClose,
   onSuccess,

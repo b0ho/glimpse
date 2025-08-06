@@ -2,13 +2,13 @@
  * API 기본 URL
  * @constant {string}
  */
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+export const API_BASE_URL = 'http://localhost:3001/api/v1';
 
 /**
  * WebSocket URL
  * @constant {string}
  */
-export const SOCKET_URL = process.env.EXPO_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8000';
+export const SOCKET_URL = 'ws://localhost:3001';
 
 /**
  * API 설정 객체

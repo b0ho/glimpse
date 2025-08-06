@@ -20,7 +20,7 @@ export class EncryptionService {
    */
   constructor() {
     // In production, this should come from secure storage or environment variable
-    this.encryptionKey = process.env.EXPO_PUBLIC_ENCRYPTION_KEY || 'default-encryption-key-change-in-production';
+    this.encryptionKey = 'default-encryption-key-change-in-production';
   }
 
   /**

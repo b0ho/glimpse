@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 /**
@@ -37,7 +37,7 @@ interface ProfileInfoCardsProps {
  * @returns {JSX.Element} 프로필 정보 카드 UI
  * @description 직장, 학교, 지역, 키 등 사용자 기본 정보를 카드 형식으로 표시
  */
-export const ProfileInfoCards: React.FC<ProfileInfoCardsProps> = ({
+export const ProfileInfoCards= ({
   companyName,
   education,
   location,

@@ -31,7 +31,7 @@ interface GroupInvite {
   link: string;
 }
 
-export const GroupInviteScreen: React.FC = () => {
+export const GroupInviteScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { groupId } = route.params as { groupId: string };

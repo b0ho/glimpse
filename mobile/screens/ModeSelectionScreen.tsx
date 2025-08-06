@@ -16,7 +16,7 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 const { width } = Dimensions.get('window');
 
-export const ModeSelectionScreen: React.FC = () => {
+export const ModeSelectionScreen = () => {
   const navigation = useNavigation() as any;
   const { setAppMode } = useAuthStore();
 

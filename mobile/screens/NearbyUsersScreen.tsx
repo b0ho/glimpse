@@ -27,7 +27,7 @@ interface LocationData {
 
 // NearbyUser interface is now imported from shared/types
 
-export const NearbyUsersScreen: React.FC = React.memo(() => {
+export const NearbyUsersScreen= () => React.memo(() => {
   const navigation = useNavigation();
   const { user } = useAuthStore();
   const { sendLike, sentLikes } = useLikeStore();

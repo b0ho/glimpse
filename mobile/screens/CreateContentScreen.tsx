@@ -18,7 +18,7 @@ import { useGroupStore } from '@/store/slices/groupSlice';
 import { Group, Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
-export const CreateContentScreen: React.FC = () => {
+export const CreateContentScreen = () => {
   const [contentText, setContentText] = useState('');
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);

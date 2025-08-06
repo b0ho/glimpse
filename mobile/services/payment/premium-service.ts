@@ -138,7 +138,7 @@ class PremiumService {
   async getCurrentSubscription(userId: string): Promise<SubscriptionInfo> {
     try {
       // Clerk User Metadata에서 구독 정보 조회
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/subscription/${userId}`, {
+      const response = await fetch(`${'http://localhost:3001'}/api/subscription/${userId}`, {
         headers: {
           'Authorization': `Bearer ${await this.getAuthToken()}`,
         },
@@ -309,7 +309,7 @@ class PremiumService {
    */
   async createPaymentIntent(productId: string, userId: string): Promise<{clientSecret: string}> {
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/payment/create-intent`, {
+      const response = await fetch(`${'http://localhost:3001'}/api/payment/create-intent`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -345,7 +345,7 @@ class PremiumService {
    */
   async createSubscription(planId: string, userId: string): Promise<{clientSecret: string}> {
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/subscription/create`, {
+      const response = await fetch(`${'http://localhost:3001'}/api/subscription/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -380,7 +380,7 @@ class PremiumService {
    */
   async cancelSubscription(userId: string): Promise<void> {
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/subscription/cancel`, {
+      const response = await fetch(`${'http://localhost:3001'}/api/subscription/cancel`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -408,7 +408,7 @@ class PremiumService {
    */
   async useLike(userId: string): Promise<{success: boolean; remainingLikes: number}> {
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/likes/use`, {
+      const response = await fetch(`${'http://localhost:3001'}/api/likes/use`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -437,7 +437,7 @@ class PremiumService {
    */
   async checkDailyReset(userId: string): Promise<void> {
     try {
-      await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/likes/daily-reset`, {
+      await fetch(`${'http://localhost:3001'}/api/likes/daily-reset`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

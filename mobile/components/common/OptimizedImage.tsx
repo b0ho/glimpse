@@ -52,7 +52,7 @@ const { width: screenWidth } = Dimensions.get('window');
  * @returns {JSX.Element} 최적화된 이미지 UI
  * @description 화면 크기와 품질 설정에 따라 최적의 이미지 변형을 선택하여 표시
  */
-export const OptimizedImage: React.FC<OptimizedImageProps> = ({
+export const OptimizedImage= ({
   source,
   width,
   height,

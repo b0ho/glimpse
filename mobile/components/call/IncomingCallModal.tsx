@@ -8,7 +8,7 @@ import {
   Vibration,
   Animated,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 /**
@@ -35,13 +35,13 @@ interface IncomingCallModalProps {
  * @returns {JSX.Element} 수신 전화 모달 UI
  * @description 통화 수신 시 표시되는 모달로 진동과 애니메이션 효과 포함
  */
-export const IncomingCallModal: React.FC<IncomingCallModalProps> = ({
+export const IncomingCallModal = ({
   visible,
   callerName,
   callType,
   onAccept,
   onReject,
-}) => {
+}: IncomingCallModalProps) => {
   const [pulseAnim] = useState(new Animated.Value(1));
 
   useEffect(() => {

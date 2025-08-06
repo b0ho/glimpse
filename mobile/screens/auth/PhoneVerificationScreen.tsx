@@ -17,9 +17,9 @@ interface PhoneVerificationScreenProps {
   onVerificationSent: (phoneNumber: string) => void;
 }
 
-export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = ({
+export const PhoneVerificationScreen = ({
   onVerificationSent,
-}) => {
+}: PhoneVerificationScreenProps) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const authService = useAuthService();

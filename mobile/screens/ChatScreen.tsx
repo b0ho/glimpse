@@ -49,7 +49,7 @@ type ChatScreenRouteProp = RouteProp<{
  * @component
  * @returns {JSX.Element} 채팅 화면 UI
  */
-export const ChatScreen: React.FC = () => {
+export const ChatScreen = () => {
   const route = useRoute<ChatScreenRouteProp>();
   const navigation = useNavigation();
   const { roomId, matchId, otherUserNickname } = route.params;

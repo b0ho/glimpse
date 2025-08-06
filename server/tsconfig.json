@@ -20,5 +20,10 @@
     "esModuleInterop": true,
     "moduleResolution": "node"
   },
-  "exclude": ["eslint.config.mjs", "node_modules", "dist"]
+  "exclude": [
+    "eslint.config.mjs",
+    "node_modules",
+    "dist"
+  ],
+  "extends": "expo/tsconfig.base"
 }

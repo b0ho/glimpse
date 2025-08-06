@@ -17,7 +17,7 @@ import { useAuth } from '@/hooks/useDevAuth';
 import { SUPER_ACCOUNTS, isAuthBypassEnabled, DEV_CONFIG } from '@/config/dev.config';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
-export const DevModePanel: React.FC = () => {
+export const DevModePanel = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const auth = useAuth();
 
@@ -96,8 +96,8 @@ export const DevModePanel: React.FC = () => {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>디버그 정보</Text>
-            <Text style={styles.info}>환경: {process.env.EXPO_PUBLIC_ENV}</Text>
-            <Text style={styles.info}>API: {process.env.EXPO_PUBLIC_API_URL}</Text>
+            <Text style={styles.info}>환경: development</Text>
+            <Text style={styles.info}>API: http://localhost:3001/api/v1</Text>
             <Text style={styles.info}>Mock API: {DEV_CONFIG.mockApiCalls ? 'ON' : 'OFF'}</Text>
           </View>
 

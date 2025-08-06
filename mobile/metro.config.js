@@ -3,6 +3,11 @@ const path = require('path');
 
 const config = getDefaultConfig(__dirname);
 
+// Web 지원을 위한 설정
+config.resolver.sourceExts = [...config.resolver.sourceExts, 'web.js', 'web.ts', 'web.tsx'];
+
+// transformer 설정은 기본값 사용
+
 // Resolve platform-specific dependencies for web
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   // Mock native modules for web platform

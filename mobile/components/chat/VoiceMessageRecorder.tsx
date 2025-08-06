@@ -7,7 +7,7 @@ import {
   Animated,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { audioService } from '../../services/audioService';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
@@ -29,7 +29,7 @@ interface VoiceMessageRecorderProps {
  * @returns {JSX.Element} 음성 녹음 UI
  * @description 음성 녹음, 일시정지, 재개, 취소 및 전송 기능을 제공하는 컴포넌트
  */
-export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
+export const VoiceMessageRecorder= ({
   onSend,
   onCancel,
 }) => {

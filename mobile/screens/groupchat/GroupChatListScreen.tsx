@@ -24,7 +24,7 @@ interface ChatItemProps {
   onPress: () => void;
 }
 
-const ChatItem: React.FC<ChatItemProps> = ({ chat, onPress }) => {
+const ChatItem = ({ chat, onPress }: ChatItemProps) => {
   const unreadCount = 0; // TODO: 실제 안읽은 메시지 수 계산
 
   return (
@@ -67,7 +67,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ chat, onPress }) => {
   );
 };
 
-export const GroupChatListScreen: React.FC = () => {
+export const GroupChatListScreen = () => {
   const navigation = useNavigation() as any;
   const { user } = useAuthStore();
   const { currentGroup } = useGroupStore();

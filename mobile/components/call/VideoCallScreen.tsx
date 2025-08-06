@@ -9,7 +9,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { RTCView } from 'react-native-webrtc';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { webRTCService } from '../../services/webrtcService';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
@@ -37,7 +37,7 @@ interface VideoCallScreenProps {
  * @returns {JSX.Element} 영상 통화 화면 UI
  * @description 영상/음성 통화를 위한 전체 화면 컴포넌트로 PIP 모드 및 컨트롤 버튼 포함
  */
-export const VideoCallScreen: React.FC<VideoCallScreenProps> = ({
+export const VideoCallScreen= ({
   remoteUserId,
   remoteUserName,
   isIncoming,

@@ -19,7 +19,7 @@ interface CompanyVerificationScreenProps {
   onSkip?: () => void;
 }
 
-export const CompanyVerificationScreen: React.FC<CompanyVerificationScreenProps> = ({
+export const CompanyVerificationScreen= ({
   onVerificationSubmitted,
   onSkip,
 }) => {

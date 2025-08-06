@@ -24,7 +24,7 @@ import { ACTION_ICONS } from '@/utils/icons';
  * @returns {JSX.Element} 그룹 목록 화면 UI
  * @description 공식/생성/인스턴트/위치 기반 그룹을 탐색하고 참여할 수 있는 화면
  */
-export const GroupsScreen: React.FC = () => {
+export const GroupsScreen = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);

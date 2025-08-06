@@ -56,7 +56,7 @@ const ALL_REACTIONS = [
  * @returns {JSX.Element} 메시지 리액션 UI
  * @description 메시지에 이모지 리액션을 추가/제거하고 표시하는 컴포넌트
  */
-export const MessageReactions: React.FC<MessageReactionsProps> = ({
+export const MessageReactions= ({
   reactions,
   onAddReaction,
   onRemoveReaction,

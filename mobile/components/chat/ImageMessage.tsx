@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   Modal,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, SIZES } from '../../constants/theme';
 
 /**
@@ -31,7 +31,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
  * @returns {JSX.Element} 이미지 메시지 UI
  * @description 채팅에서 이미지를 표시하고 탭 시 전체 화면으로 볼 수 있는 컴포넌트
  */
-export const ImageMessage: React.FC<ImageMessageProps> = ({
+export const ImageMessage= ({
   imageUrl,
   isOwnMessage = false,
 }) => {

@@ -14,7 +14,7 @@ interface RadiusSelectorProps {
   onRadiusChange: (radius: number) => void;
 }
 
-export const RadiusSelector: React.FC<RadiusSelectorProps> = ({
+export const RadiusSelector= ({
   radiusOptions,
   selectedRadius,
   onRadiusChange,

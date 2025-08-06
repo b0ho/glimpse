@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native';
 // @env 모듈은 Expo에서 환경변수를 위해 설정이 필요합니다
-const EXPO_PUBLIC_SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN || '';
+const EXPO_PUBLIC_SENTRY_DSN = '';
 
 export function initializeSentry() {
   if (EXPO_PUBLIC_SENTRY_DSN) {

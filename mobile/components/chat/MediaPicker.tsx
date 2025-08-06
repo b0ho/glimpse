@@ -7,7 +7,7 @@ import {
   ActionSheetIOS,
   Platform,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, SIZES } from '../../constants/theme';
 
@@ -29,7 +29,7 @@ interface MediaPickerProps {
  * @returns {JSX.Element} 미디어 선택기 UI
  * @description 카메라 촬영 또는 라이브러리에서 사진/비디오를 선택할 수 있는 컴포넌트
  */
-export const MediaPicker: React.FC<MediaPickerProps> = ({
+export const MediaPicker= ({
   onMediaSelected,
   disabled = false,
 }) => {

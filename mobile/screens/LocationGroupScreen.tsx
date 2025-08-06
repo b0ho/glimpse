@@ -12,7 +12,7 @@ import {
   TextInput,
   Image,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
@@ -50,7 +50,7 @@ interface LocationGroup {
  * @returns {JSX.Element} 위치 그룹 화면 UI
  * @description GPS 기반 주변 그룹 탐색, QR 코드 스캔, 그룹 생성 기능을 제공하는 화면
  */
-const LocationGroupScreen: React.FC = () => {
+const LocationGroupScreen= () => () => {
   const navigation = useNavigation();
   const [nearbyGroups, setNearbyGroups] = useState<LocationGroup[]>([]);
   const [loading, setLoading] = useState(true);

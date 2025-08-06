@@ -14,7 +14,7 @@ interface LocationHeaderProps {
   onRefresh: () => void;
 }
 
-export const LocationHeader: React.FC<LocationHeaderProps> = ({
+export const LocationHeader= ({
   address,
   nearbyCount,
   onRefresh,

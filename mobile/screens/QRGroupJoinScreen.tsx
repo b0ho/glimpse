@@ -26,7 +26,7 @@ interface QRGroupData {
   };
 }
 
-export const QRGroupJoinScreen: React.FC = () => {
+export const QRGroupJoinScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);

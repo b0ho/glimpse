@@ -1,44 +1,29 @@
 {
   "compilerOptions": {
-    "strict": true,
+    "target": "ESNext",
+    "module": "commonjs",
+    "lib": ["ESNext"],
+    "jsx": "react-native",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@shared/*": [
-        "../shared/*"
-      ]
-    },
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "jsx": "react-jsx",
-    "moduleResolution": "bundler",
-    "module": "esnext",
-    "target": "es2020",
-    "lib": [
-      "es2020",
-      "dom",
-      "dom.iterable"
-    ],
-    "noEmit": true,
-    "isolatedModules": true,
-    "allowJs": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+      "@/*": ["./*"],
+      "@shared/*": ["../shared/*"]
+    }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "../shared/**/*.ts"
-  ],
   "exclude": [
     "node_modules",
-    "../server/**/*",
-    "../tests/**/*",
+    "__tests__",
+    "**/*.test.ts",
+    "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.test.ts"
-  ],
-  "extends": "expo/tsconfig.base"
+    "**/*.spec.tsx"
+  ]
 }

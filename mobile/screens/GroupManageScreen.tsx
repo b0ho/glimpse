@@ -30,7 +30,7 @@ interface PendingMember {
   joinedAt: Date;
 }
 
-export const GroupManageScreen: React.FC = () => {
+export const GroupManageScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { groupId } = route.params as { groupId: string };

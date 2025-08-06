@@ -25,7 +25,7 @@ interface TypingIndicatorProps {
  * @returns {JSX.Element | null} 타이핑 표시기 UI
  * @description 세 개의 점이 위아래로 움직이는 애니메이션으로 타이핑 상태 표시
  */
-export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
+export const TypingIndicator= ({
   isTyping,
   userName = '상대방',
 }) => {

@@ -18,9 +18,9 @@ interface NicknameSetupScreenProps {
   onNicknameSet: () => void;
 }
 
-export const NicknameSetupScreen: React.FC<NicknameSetupScreenProps> = ({
+export const NicknameSetupScreen = ({
   onNicknameSet,
-}) => {
+}: NicknameSetupScreenProps) => {
   const [nickname, setNickname] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
   const [isLoading, setIsLoading] = useState(false);

@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootNavigationParamList } from '@/navigation/AppNavigator';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNotificationStore } from '@/store/slices/notificationSlice';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { useAuthStore } from '@/store/slices/authSlice';

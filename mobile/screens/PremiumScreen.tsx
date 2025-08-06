@@ -31,7 +31,7 @@ import { STATE_ICONS, UI_ICONS } from '@/utils/icons';
  * @component
  * @returns {JSX.Element} 프리미엄 화면 UI
  */
-export const PremiumScreen: React.FC = () => {
+export const PremiumScreen = () => {
   const navigation = useNavigation();
   const { user } = useUser();
   

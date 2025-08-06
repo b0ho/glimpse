@@ -22,7 +22,7 @@ import { formatTimeAgo } from '@/utils/dateUtils';
  * @returns {JSX.Element} 매칭 화면 UI
  * @description 서로 좋아요를 보내 매칭된 사용자 목록을 표시하고 채팅을 시작할 수 있는 화면
  */
-export const MatchesScreen: React.FC = React.memo(() => {
+export const MatchesScreen= () => React.memo(() => {
   console.log('[MatchesScreen] 컴포넌트 렌더링');
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);

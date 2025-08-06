@@ -4,7 +4,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, SIZES } from '../../constants/theme';
 
 /**
@@ -31,13 +31,13 @@ interface CallButtonProps {
  * @returns {JSX.Element} 통화 버튼 UI
  * @description 음성 또는 영상 통화를 시작하는 버튼 컴포넌트
  */
-export const CallButton: React.FC<CallButtonProps> = ({
+export const CallButton = ({
   type,
   onPress,
   disabled = false,
   loading = false,
   size = 24,
-}) => {
+}: CallButtonProps) => {
   return (
     <TouchableOpacity
       style={[

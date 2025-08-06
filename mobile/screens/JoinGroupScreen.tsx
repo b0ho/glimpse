@@ -21,7 +21,7 @@ interface GroupInfo {
   memberCount?: number;
 }
 
-export const JoinGroupScreen: React.FC = () => {
+export const JoinGroupScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { inviteCode } = route.params as { inviteCode: string };

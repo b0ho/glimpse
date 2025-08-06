@@ -49,7 +49,7 @@ interface GroupFormData {
  * @returns {JSX.Element} 그룹 생성 화면 UI
  * @description 새로운 그룹을 생성하기 위한 폼 화면
  */
-export const CreateGroupScreen: React.FC = () => {
+export const CreateGroupScreen = () => {
   const [formData, setFormData] = useState<GroupFormData>({
     name: '',
     description: '',

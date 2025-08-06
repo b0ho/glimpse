@@ -11,7 +11,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 // import { useAuth } from '@clerk/clerk-expo';
 import { useAuth } from '@/hooks/useDevAuth';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
@@ -26,7 +26,7 @@ import { AppMode, MODE_TEXTS } from '@shared/types';
  * @returns {JSX.Element} 프로필 화면 UI
  * @description 사용자 프로필, 통계, 프리미엄 상태, 설정 기능을 제공하는 화면
  */
-export const ProfileScreen: React.FC = () => {
+export const ProfileScreen = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isNicknameModalVisible, setIsNicknameModalVisible] = useState(false);
   

@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 /**
@@ -60,7 +60,7 @@ interface StoryListProps {
  * @returns {JSX.Element} 스토리 리스트 UI
  * @description 사용자 스토리를 가로 스크롤 리스트로 표시하고 미확인 스토리 강조
  */
-export const StoryList: React.FC<StoryListProps> = ({
+export const StoryList= ({
   stories,
   onStoryPress,
   onAddStoryPress,

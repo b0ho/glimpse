@@ -27,7 +27,7 @@ interface LikeInfo {
   isSuper: boolean;
 }
 
-export const WhoLikesYouScreen: React.FC = () => {
+export const WhoLikesYouScreen = () => {
   const navigation = useNavigation();
   const { user } = useUser();
   

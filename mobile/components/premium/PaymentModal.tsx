@@ -47,7 +47,7 @@ interface PaymentModalProps {
  * @returns {JSX.Element} 결제 모달 UI
  * @description Stripe를 사용한 프리미엄 구독 및 좋아요 결제 처리 모달
  */
-export const PaymentModal: React.FC<PaymentModalProps> = ({
+export const PaymentModal= ({
   visible,
   product,
   onClose,

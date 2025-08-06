@@ -20,7 +20,7 @@ interface SMSVerificationScreenProps {
   onBack: () => void;
 }
 
-export const SMSVerificationScreen: React.FC<SMSVerificationScreenProps> = ({
+export const SMSVerificationScreen= ({
   phoneNumber,
   onVerificationSuccess,
   onBack,

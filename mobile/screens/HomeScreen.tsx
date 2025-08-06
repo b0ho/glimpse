@@ -30,7 +30,7 @@ import { ACTION_ICONS } from '@/utils/icons';
  * @returns {JSX.Element} 홈 스크린 UI
  * @description 사용자의 메인 피드, 스토리, 좋아요 기능을 제공하는 홈 화면
  */
-export const HomeScreen: React.FC = () => {
+export const HomeScreen = () => {
   const [contents, setContents] = useState<Content[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);

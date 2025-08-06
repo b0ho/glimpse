@@ -65,7 +65,7 @@ interface KakaoMapViewProps {
  * @returns {JSX.Element} 카카오 맵 UI
  * @description 카카오맵 API를 사용하여 지도 표시, 마커 및 상호작용 기능 제공
  */
-export const KakaoMapView: React.FC<KakaoMapViewProps> = ({
+export const KakaoMapView= ({
   center,
   markers = [],
   onMarkerPress,

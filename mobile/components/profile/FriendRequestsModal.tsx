@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useProfileStore } from '@/store/slices/profileSlice';
 import { FriendRequest } from '@shared/types';
@@ -33,7 +33,7 @@ interface FriendRequestsModalProps {
  * @returns {JSX.Element} 친구 요청 모달 UI
  * @description 받은 친구 요청을 표시하고 수락/거절할 수 있는 모달 컴포넌트
  */
-export const FriendRequestsModal: React.FC<FriendRequestsModalProps> = ({
+export const FriendRequestsModal= ({
   visible,
   onClose,
 }) => {

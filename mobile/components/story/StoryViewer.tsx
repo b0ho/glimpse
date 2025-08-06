@@ -13,7 +13,7 @@ import {
   Animated,
 } from 'react-native';
 import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -96,7 +96,7 @@ interface StoryViewerProps {
  * @returns {JSX.Element} 스토리 뷰어 UI
  * @description 인스타그램 스타일의 전체 화면 스토리 뷰어로 자동 재생 및 터치 제어 포함
  */
-export const StoryViewer: React.FC<StoryViewerProps> = ({
+export const StoryViewer= ({
   storyGroups,
   initialGroupIndex = 0,
   initialStoryIndex = 0,

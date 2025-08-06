@@ -6,7 +6,7 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { User } from '@shared/types';
 
@@ -58,7 +58,7 @@ interface ProfileHeaderProps {
  * @returns {JSX.Element} 프로필 헤더 UI
  * @description 사용자 프로필 이미지, 이름, 통계, 배지 및 자기소개를 표시하는 헤더 컴포넌트
  */
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+export const ProfileHeader= ({
   user,
   stats,
   badges,

@@ -6,7 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import Slider from '@react-native-community/slider';
 import { audioService } from '../../services/audioService';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
@@ -32,7 +32,7 @@ interface VoiceMessagePlayerProps {
  * @returns {JSX.Element} 음성 메시지 플레이어 UI
  * @description 음성 메시지를 재생하고 진행 상황을 표시하는 플레이어 컴포넌트
  */
-export const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({
+export const VoiceMessagePlayer= ({
   uri,
   duration,
   isOwnMessage = false,

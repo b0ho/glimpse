@@ -9,7 +9,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useProfileStore } from '@/store/slices/profileSlice';
 import { Like } from '@shared/types';
@@ -34,7 +34,7 @@ interface LikesReceivedModalProps {
  * @returns {JSX.Element} 받은 좋아요 모달 UI
  * @description 다른 사용자로부터 받은 좋아요 목록을 표시하는 모달 컴포넌트
  */
-export const LikesReceivedModal: React.FC<LikesReceivedModalProps> = ({
+export const LikesReceivedModal= ({
   visible,
   onClose,
   onLikePress,

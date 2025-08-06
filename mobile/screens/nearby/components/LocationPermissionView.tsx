@@ -14,7 +14,7 @@ interface LocationPermissionViewProps {
   onRequestPermission: () => void;
 }
 
-export const LocationPermissionView: React.FC<LocationPermissionViewProps> = ({
+export const LocationPermissionView= ({
   isLoading,
   onRequestPermission,
 }) => {

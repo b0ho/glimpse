@@ -18,7 +18,7 @@ interface UserCardProps {
   onMessage: () => void;
 }
 
-export const UserCard: React.FC<UserCardProps> = ({
+export const UserCard= ({
   user,
   currentUserId,
   hasLiked,

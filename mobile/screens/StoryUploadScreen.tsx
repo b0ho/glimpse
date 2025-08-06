@@ -15,12 +15,12 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Video, ResizeMode } from 'expo-av';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 import { API_BASE_URL } from '../services/api/config';
 import { useAuthService } from '../services/auth/auth-service';
 
-export const StoryUploadScreen: React.FC = () => {
+export const StoryUploadScreen = () => {
   const navigation = useNavigation();
   const authService = useAuthService();
   const [media, setMedia] = useState<{ uri: string; type: 'image' | 'video' } | null>(null);

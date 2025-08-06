@@ -28,7 +28,7 @@ interface AuthScreenProps {
  * @returns {JSX.Element} 인증 화면 UI
  * @description 전화번호 인증, SMS 확인, 닉네임 설정, 회사 인증 단계를 관리하는 컴포넌트
  */
-export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
+export const AuthScreen= ({ onAuthCompleted }) => {
   const [currentStep, setCurrentStep] = useState<AuthStep>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
 

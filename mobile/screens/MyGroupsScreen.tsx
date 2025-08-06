@@ -14,7 +14,7 @@ import { useGroupStore } from '@/store/slices/groupSlice';
 import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
-export const MyGroupsScreen: React.FC = () => {
+export const MyGroupsScreen = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'joined' | 'created'>('joined');
   

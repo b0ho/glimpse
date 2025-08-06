@@ -39,7 +39,7 @@ interface SelectedMarkerData {
   position: { x: number; y: number };
 }
 
-export const MapScreen: React.FC = React.memo(() => {
+export const MapScreen= () => React.memo(() => {
   const navigation = useNavigation();
   const { user } = useAuthStore();
   const { groups } = useGroupStore();

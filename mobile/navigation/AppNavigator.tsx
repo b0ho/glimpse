@@ -4,15 +4,16 @@
  * @description 데이팅/친구 모드 및 모든 화면 네비게이션 관리
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 // import { useAuth } from '@clerk/clerk-expo';
 import { useAuth } from '@/hooks/useDevAuth';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from '@/components/IconWrapper';
 import { NAVIGATION_ICONS } from '@/utils/icons';
-import { CallProvider } from '@/providers/CallProvider';
+// import { CallProvider } from '@/providers/CallProvider';
 import { navigationService } from '@/services/navigation/navigationService';
 import { initializeFCM, cleanupFCM } from '@/services/notifications/initializeFCM';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -583,28 +584,28 @@ function AppNavigator() {
  */
 export default function RootNavigator() {
   const navigationRef = useRef<NavigationContainerRef<RootNavigationParamList>>(null);
-  const { isSignedIn } = useAuth();
-
+  
   useEffect(() => {
-    if (navigationRef.current) {
+    if (navigationRef.current && Platform.OS !== 'web') {
       navigationService.setNavigationRef(navigationRef.current);
     }
   }, []);
 
-  useEffect(() => {
-    // Initialize FCM when user is signed in
-    if (isSignedIn) {
-      initializeFCM();
-    } else {
-      cleanupFCM();
-    }
-  }, [isSignedIn]);
+  // 웹 환경에서는 간단한 네비게이션 구조 사용
+  if (Platform.OS === 'web') {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Main" component={MainTabNavigator} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
 
+  // 네이티브 환경에서는 기존 구조 사용
   return (
     <NavigationContainer ref={navigationRef}>
-      <CallProvider>
-        <AppNavigator />
-      </CallProvider>
+      <AppNavigator />
     </NavigationContainer>
   );
 }

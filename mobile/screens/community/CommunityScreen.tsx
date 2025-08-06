@@ -23,7 +23,7 @@ interface PostItemProps {
   onPress: () => void;
 }
 
-const PostItem: React.FC<PostItemProps> = ({ post, onPress }) => {
+const PostItem= ({ post, onPress }) => {
   return (
     <TouchableOpacity style={styles.postCard} onPress={onPress} activeOpacity={0.7}>
       {/* Author Info */}
@@ -80,7 +80,7 @@ const PostItem: React.FC<PostItemProps> = ({ post, onPress }) => {
   );
 };
 
-export const CommunityScreen: React.FC = () => {
+export const CommunityScreen = () => {
   const navigation = useNavigation() as any;
   const { user } = useAuthStore();
   const { currentGroup } = useGroupStore();

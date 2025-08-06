@@ -24,7 +24,7 @@ interface CallProviderProps {
   children: ReactNode;
 }
 
-export const CallProvider: React.FC<CallProviderProps> = ({ children }) => {
+export const CallProvider= ({ children }) => {
   const [showIncomingCall, setShowIncomingCall] = useState(false);
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [incomingCallData, setIncomingCallData] = useState<any>(null);

@@ -72,7 +72,7 @@ export { tokenCache };
  * @property {TokenCache} tokenCache - 토큰 캐시 구현체
  */
 export const CLERK_CONFIG = {
-  publishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!,
+  publishableKey: 'pk_test_xxx',
   tokenCache,
 } as const;
 

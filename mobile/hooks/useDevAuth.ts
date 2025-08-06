@@ -45,7 +45,7 @@ export function useDevAuth() {
     switchAccount: (accountType: string) => {
       if (!isAuthBypassEnabled) return;
       
-      process.env.EXPO_PUBLIC_DEV_ACCOUNT_TYPE = accountType;
+      // process.env.EXPO_PUBLIC_DEV_ACCOUNT_TYPE = accountType;
       // 앱 새로고침이 필요함
       console.log('[DevAuth] Switching to account:', accountType);
       console.log('[DevAuth] Please reload the app to apply changes');

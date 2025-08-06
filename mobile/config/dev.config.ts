@@ -9,14 +9,12 @@ import { User, AppMode } from '@shared/types';
 /**
  * 개발 환경인지 확인
  */
-export const isDevelopment = process.env.EXPO_PUBLIC_ENV === 'development';
+export const isDevelopment = true;
 
 /**
  * 개발 모드 인증 우회 활성화 여부
  */
-export const isAuthBypassEnabled = isDevelopment && 
-  (process.env.EXPO_PUBLIC_USE_DEV_AUTH === 'true' || 
-   process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY === 'pk_test_xxx');
+export const isAuthBypassEnabled = true;
 
 /**
  * 슈퍼 계정 정의
@@ -128,7 +126,7 @@ export const DEV_CONFIG = {
   defaultSuperAccount: 'dev-user',
   
   // API 모킹 활성화
-  mockApiCalls: process.env.EXPO_PUBLIC_MOCK_API === 'true',
+  mockApiCalls: false,
   
   // 디버그 로깅 활성화
   enableDebugLogging: isDevelopment,
@@ -147,7 +145,7 @@ export function getCurrentSuperAccount(): User | null {
   if (!isAuthBypassEnabled) return null;
   
   // 웹 환경에서는 localStorage 확인
-  let accountType = process.env.EXPO_PUBLIC_DEV_ACCOUNT_TYPE || DEV_CONFIG.defaultSuperAccount;
+  let accountType = 'admin-user';
   
   if (typeof window !== 'undefined' && window.localStorage) {
     const storedAccountType = window.localStorage.getItem('DEV_ACCOUNT_TYPE');

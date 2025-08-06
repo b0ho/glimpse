@@ -9,6 +9,8 @@ module.exports = function (api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
+      // import.meta 처리
+      'babel-plugin-transform-import-meta',
       [
         'module-resolver',
         {
@@ -23,6 +25,9 @@ module.exports = function (api) {
             '@/types': './types',
             '@/hooks': './hooks',
             '@/navigation': './navigation',
+            '@/config': './config',
+            '@/providers': './providers',
+            '@shared': '../shared',
           },
         },
       ],
