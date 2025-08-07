@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { useStripe } from '@stripe/stripe-react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuthStore } from '@/store/slices/authSlice';
 import { PaymentProduct } from '@/services/payment/premium-service';
 import { usePremiumStore } from '@/store/slices/premiumSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -54,7 +54,7 @@ export const PaymentModal= ({
   onSuccess,
   formatPrice,
 }) => {
-  const { user } = useUser();
+  const { user } = useAuthStore();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { initiatePurchase, confirmPayment, isProcessingPayment, clearError } = usePremiumStore();
   
@@ -91,8 +91,8 @@ export const PaymentModal= ({
         customerEphemeralKeySecret: undefined, // 실제로는 백엔드에서 생성
         allowsDelayedPaymentMethods: false,
         defaultBillingDetails: {
-          name: user.firstName + ' ' + user.lastName,
-          email: user.emailAddresses[0]?.emailAddress,
+          name: user.nickname || '사용자',
+          email: user.email,
         },
         returnURL: 'glimpse://payment-success',
         appearance: {

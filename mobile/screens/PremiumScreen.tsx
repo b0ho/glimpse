@@ -17,7 +17,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuthStore } from '@/store/slices/authSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { PricingCard } from '@/components/premium/PricingCard';
 import { PaymentModal } from '@/components/premium/PaymentModal';
@@ -33,7 +33,7 @@ import { STATE_ICONS, UI_ICONS } from '@/utils/icons';
  */
 export const PremiumScreen = () => {
   const navigation = useNavigation();
-  const { user } = useUser();
+  const { user } = useAuthStore();
   
   const {
     subscription,

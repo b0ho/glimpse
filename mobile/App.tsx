@@ -6,6 +6,7 @@ import { Platform } from 'react-native';
 import RootNavigator from './navigation/AppNavigator';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { DevModePanel } from './components/DevModePanel';
+import { CallProvider } from './providers/CallProvider';
 import { isAuthBypassEnabled } from './config/dev.config';
 
 // SecureStore polyfill for web
@@ -82,8 +83,10 @@ export default function App() {
   const AppContent = () => (
     <SafeAreaProvider>
       <StatusBar style="auto" />
-      <RootNavigator />
-      {isAuthBypassEnabled && Platform.OS !== 'web' && <DevModePanel />}
+      <CallProvider>
+        <RootNavigator />
+        {isAuthBypassEnabled && Platform.OS !== 'web' && <DevModePanel />}
+      </CallProvider>
     </SafeAreaProvider>
   );
 

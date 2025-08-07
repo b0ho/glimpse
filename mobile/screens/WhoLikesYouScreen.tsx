@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuthStore } from '@/store/slices/authSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
@@ -29,7 +29,7 @@ interface LikeInfo {
 
 export const WhoLikesYouScreen = () => {
   const navigation = useNavigation();
-  const { user } = useUser();
+  const { user } = useAuthStore();
   
   const [likesReceived, setLikesReceived] = useState<LikeInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
