@@ -15,8 +15,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { generateDummyGroups } from '@/utils/mockData';
 import { ACTION_ICONS } from '@/utils/icons';
+import { groupApi } from '@/services/api/groupApi';
 
 /**
  * 그룹 탐색 화면 컴포넌트 - 다양한 타입의 그룹 목록 표시
@@ -46,13 +46,15 @@ export const GroupsScreen = () => {
     }
 
     try {
-      // 실제로는 API 호출
-      await new Promise(resolve => setTimeout(resolve, 800));
-      const dummyGroups = generateDummyGroups();
-      setGroups(dummyGroups);
-      groupStore.setGroups(dummyGroups);
-    } catch (error) {
-      console.error('Failed to load groups:', error);
+      // API 호출하여 그룹 목록 가져오기
+      console.log('[GroupsScreen] 그룹 목록 로드 시작');
+      const loadedGroups = await groupApi.getGroups();
+      console.log('[GroupsScreen] 그룹 목록 로드 성공:', loadedGroups);
+      setGroups(loadedGroups);
+      groupStore.setGroups(loadedGroups);
+    } catch (error: any) {
+      console.error('[GroupsScreen] 그룹 목록 로드 실패:', error);
+      Alert.alert('오류', error?.message || '그룹 목록을 불러오는데 실패했습니다.');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -92,8 +94,9 @@ export const GroupsScreen = () => {
           text: '참여하기',
           onPress: async () => {
             try {
-              // 실제로는 API 호출
-              await new Promise(resolve => setTimeout(resolve, 500));
+              // API 호출하여 그룹 참여
+              console.log('[GroupsScreen] 그룹 참여 시도:', group.id);
+              await groupApi.joinGroup(group.id);
               
               groupStore.joinGroup(group);
               Alert.alert(
@@ -121,7 +124,7 @@ export const GroupsScreen = () => {
 
   useEffect(() => {
     loadGroups();
-  }, [loadGroups]);
+  }, []); // 빈 의존성 배열로 변경하여 무한 루프 방지
 
   /**
    * 그룹 타입 아이콘 렌더링

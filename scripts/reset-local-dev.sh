@@ -25,7 +25,7 @@ echo ""
 echo -e "${YELLOW}이 작업은 다음을 수행합니다:${NC}"
 echo "  • 모든 프로세스 종료"
 echo "  • Docker 컨테이너 삭제 및 재생성"
-echo "  • 데이터베이스 완전 초기화"
+echo "  • 데이터베이스 완전 초기화 및 목데이터 추가"
 echo "  • node_modules 재설치"
 echo ""
 echo -e "${RED}계속하시겠습니까? (y/N)${NC}"
@@ -81,6 +81,42 @@ echo "컨테이너 시작 대기 중..."
 sleep 10
 echo -e "${GREEN}✅ Docker 컨테이너 재생성 완료${NC}"
 
+# 3-1. 데이터베이스 초기화 및 시드 데이터 추가
+echo -e "\n${YELLOW}📋 Step 3-1: 데이터베이스 스키마 적용 및 시드 데이터 추가${NC}"
+
+# Prisma 스키마 적용
+echo "Prisma 스키마를 데이터베이스에 적용 중..."
+cd "$PROJECT_ROOT/server"
+npx prisma db push --force-reset
+echo -e "${GREEN}✅ 데이터베이스 스키마 적용 완료${NC}"
+
+# Prisma Client 생성
+echo "Prisma Client 생성 중..."
+npx prisma generate
+echo -e "${GREEN}✅ Prisma Client 생성 완료${NC}"
+
+# 목데이터 추가
+echo "목데이터 추가 중..."
+echo "  • 사용자 데이터 (9명)"
+echo "  • 그룹 데이터 (8개 - 공식/생성/인스턴스/위치 그룹)"
+echo "  • 그룹 멤버십 데이터"
+echo "  • 컨텐츠 데이터 (15개)"
+echo "  • 좋아요 데이터 (5개)"
+echo "  • 매칭 데이터 (3개)"
+echo "  • 채팅룸 및 메시지 데이터"
+npm run seed || npx tsx prisma/seed.ts
+echo -e "${GREEN}✅ 목데이터 추가 완료${NC}"
+
+# 회사 도메인 시드 데이터 추가
+echo "회사 도메인 시드 데이터 추가 중..."
+echo "  • 한국 주요 기업 도메인 (삼성, 카카오, 네이버 등)"
+echo "  • 주요 대학교 도메인 (서울대, 연세대, 고려대 등)"
+echo "  • 스타트업 및 컨설팅 회사 도메인"
+npm run seed:domains || npx tsx src/scripts/seed-company-domains.ts
+echo -e "${GREEN}✅ 회사 도메인 시드 데이터 추가 완료${NC}"
+
+cd "$PROJECT_ROOT"
+
 # 4. 의존성 재설치
 echo -e "\n${YELLOW}📋 Step 4: 의존성 재설치${NC}"
 echo "node_modules를 재설치하시겠습니까? (시간이 오래 걸립니다) (y/N)"
@@ -111,9 +147,21 @@ echo -e "${GREEN}✅ 캐시 정리 완료${NC}"
 
 echo ""
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}✅ 리셋 완료!${NC}"
+echo -e "${GREEN}✅ 리셋 및 데이터 초기화 완료!${NC}"
 echo -e "${GREEN}========================================${NC}"
+echo ""
+echo -e "${BLUE}추가된 목데이터:${NC}"
+echo "  • 테스트 사용자: 9명 (일반 7명, 프리미엄 2명, 관리자 1명)"
+echo "  • 그룹: 8개 (공식 3개, 생성 3개, 인스턴스 1개, 위치 1개)"
+echo "  • 콘텐츠: 15개 (텍스트, 이미지)"
+echo "  • 좋아요 및 매칭: 5개 좋아요, 3개 매칭"
+echo "  • 채팅: 3개 채팅룸, 초기 메시지"
+echo "  • 회사 도메인: 60+ 한국 기업 및 대학교"
 echo ""
 echo -e "${BLUE}이제 다음 명령으로 개발 환경을 시작할 수 있습니다:${NC}"
 echo "  ./scripts/start-local-dev.sh"
+echo ""
+echo -e "${YELLOW}💡 테스트 계정 정보:${NC}"
+echo "  • 일반 사용자: +821012345678 ~ +821089012345 (비밀번호: password123)"
+echo "  • 관리자: +821000000000 (비밀번호: admin123)"
 echo ""

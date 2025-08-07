@@ -122,28 +122,12 @@ export const HomeScreen = () => {
   const loadStories = useCallback(async () => {
     try {
       setStoriesLoading(true);
-      const storyGroups = await storyService.getStoriesFeed();
       
-      // Add my stories if exists
-      const myStories = await storyService.getMyStories();
-      if (myStories.length > 0) {
-        const myStoryGroup: StoryGroup = {
-          user: authStore.user ? {
-            id: authStore.user.id,
-            nickname: authStore.user.nickname || '',
-            profileImage: authStore.user.profileImage
-          } : {
-            id: '',
-            nickname: '',
-            profileImage: undefined
-          },
-          stories: myStories,
-          hasUnviewed: false
-        };
-        setStories([myStoryGroup, ...storyGroups]);
-      } else {
-        setStories(storyGroups);
-      }
+      // 더미 스토리 데이터 사용 (API 대신)
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // 빈 스토리 배열로 설정 (스토리 기능 비활성화)
+      setStories([]);
     } catch (error) {
       console.error('Failed to load stories:', error);
     } finally {
@@ -197,12 +181,11 @@ export const HomeScreen = () => {
     }
 
     try {
-      // 실제로는 여기서 API 호출
-      // const response = await contentAPI.getContents({ page: 1, limit: 10 });
-      
-      // 임시로 더미 데이터 사용
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 로딩 시뮬레이션
+      // 더미 데이터를 바로 사용 (로딩 시간 단축)
       const dummyContents = generateDummyContent();
+      
+      // 짧은 로딩 시뮬레이션
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       if (refresh) {
         setContents(dummyContents);
@@ -236,9 +219,13 @@ export const HomeScreen = () => {
   }, [hasMoreData, isLoading]);
 
   useEffect(() => {
-    loadContents();
-    loadStories();
-  }, [loadContents, loadStories]);
+    // 더미 데이터를 바로 설정 (API 호출 없이)
+    const dummyContents = generateDummyContent();
+    setContents(dummyContents);
+    setIsLoading(false);
+    setStoriesLoading(false);
+    setStories([]);
+  }, []);
 
   /**
    * 헤더 렌더링

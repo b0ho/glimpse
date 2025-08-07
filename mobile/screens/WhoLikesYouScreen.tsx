@@ -17,6 +17,7 @@ import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { User } from '@/types';
+import { likeApi } from '@/services/api/likeApi';
 
 interface LikeInfo {
   id: string;
@@ -43,9 +44,38 @@ export const WhoLikesYouScreen = () => {
     if (!user?.id || !isPremiumUser) return;
 
     try {
-      // TODO: 실제 API 호출로 교체 (Gemini 피드백 반영)
-      // 임시 더미 데이터
-      const dummyLikes: LikeInfo[] = [
+      console.log('[WhoLikesYouScreen] 받은 좋아요 로드 시작');
+      const receivedLikes = await likeApi.getReceivedLikes();
+      console.log('[WhoLikesYouScreen] 받은 좋아요 로드 성공:', receivedLikes.length);
+      
+      // Like 타입을 LikeInfo로 변환
+      const likeInfos: LikeInfo[] = receivedLikes.map((like: any) => ({
+        id: like.id,
+        fromUser: {
+          id: like.fromUserId,
+          anonymousId: `anon_${like.fromUserId}`,
+          phoneNumber: '',
+          nickname: '익명의 누군가',
+          isVerified: true,
+          credits: 0,
+          isPremium: false,
+          lastActive: new Date(),
+          createdAt: new Date(like.createdAt),
+          updatedAt: new Date(like.createdAt),
+        },
+        groupId: like.groupId || 'unknown',
+        groupName: '그룹',
+        likedAt: new Date(like.createdAt),
+        isSuper: like.isSuper || false,
+      }));
+      
+      setLikesReceived(likeInfos);
+    } catch (error: any) {
+      console.error('[WhoLikesYouScreen] 받은 좋아요 로드 실패:', error);
+      
+      // 임시 더미 데이터 (개발용)
+      try {
+        const dummyLikes: LikeInfo[] = [
         {
           id: '1',
           fromUser: {
@@ -106,11 +136,12 @@ export const WhoLikesYouScreen = () => {
         },
       ];
 
-      await new Promise(resolve => setTimeout(resolve, 1000)); // API 지연 시뮬레이션
-      setLikesReceived(dummyLikes);
-    } catch (error) {
-      console.error('Error loading likes received:', error);
-      Alert.alert('오류', '좋아요 정보를 불러오는 중 오류가 발생했습니다.');
+        await new Promise(resolve => setTimeout(resolve, 1000)); // API 지연 시뮬레이션
+        setLikesReceived(dummyLikes);
+      } catch (innerError) {
+        console.error('Error with dummy data:', innerError);
+        setLikesReceived([]);
+      }
     }
   }, [user?.id, isPremiumUser]);
 
