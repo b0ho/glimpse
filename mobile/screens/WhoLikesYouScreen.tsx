@@ -72,76 +72,8 @@ export const WhoLikesYouScreen = () => {
       setLikesReceived(likeInfos);
     } catch (error: any) {
       console.error('[WhoLikesYouScreen] 받은 좋아요 로드 실패:', error);
-      
-      // 임시 더미 데이터 (개발용)
-      try {
-        const dummyLikes: LikeInfo[] = [
-        {
-          id: '1',
-          fromUser: {
-            id: 'user1',
-            anonymousId: 'anon1',
-            phoneNumber: '+821000000001',
-            nickname: '익명의 누군가',
-            isVerified: true,
-            credits: 10,
-            isPremium: false,
-            lastActive: new Date(),
-            createdAt: new Date('2024-01-15'),
-            updatedAt: new Date('2024-01-15'),
-          },
-          groupId: 'group1',
-          groupName: '테크 스타트업',
-          likedAt: new Date('2024-01-20'),
-          isSuper: true,
-        },
-        {
-          id: '2',
-          fromUser: {
-            id: 'user2',
-            anonymousId: 'anon2',
-            phoneNumber: '+821000000002',
-            nickname: '미스터리한 그 사람',
-            isVerified: false,
-            credits: 5,
-            isPremium: false,
-            lastActive: new Date(),
-            createdAt: new Date('2024-01-10'),
-            updatedAt: new Date('2024-01-10'),
-          },
-          groupId: 'group2',
-          groupName: '카페 애호가들',
-          likedAt: new Date('2024-01-19'),
-          isSuper: false,
-        },
-        {
-          id: '3',
-          fromUser: {
-            id: 'user3',
-            anonymousId: 'anon3',
-            phoneNumber: '+821000000003',
-            nickname: '조용한 관찰자',
-            isVerified: true,
-            credits: 15,
-            isPremium: true,
-            premiumUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-            lastActive: new Date(),
-            createdAt: new Date('2024-01-12'),
-            updatedAt: new Date('2024-01-12'),
-          },
-          groupId: 'group1',
-          groupName: '테크 스타트업',
-          likedAt: new Date('2024-01-18'),
-          isSuper: false,
-        },
-      ];
-
-        await new Promise(resolve => setTimeout(resolve, 1000)); // API 지연 시뮬레이션
-        setLikesReceived(dummyLikes);
-      } catch (innerError) {
-        console.error('Error with dummy data:', innerError);
-        setLikesReceived([]);
-      }
+      Alert.alert('오류', '좋아요 정보를 불러오는 중 오류가 발생했습니다.');
+      setLikesReceived([]);
     }
   }, [user?.id, isPremiumUser]);
 

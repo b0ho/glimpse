@@ -29,6 +29,20 @@ export class AuthGuard implements CanActivate {
       this.configService.get<string>('USE_DEV_AUTH') === 'true';
     const devAuth = request.headers['x-dev-auth'];
 
+    // 개발 모드이고 토큰이 없으면 스킵 가능
+    if (!token && useDevAuth) {
+      console.log('[AuthGuard] No token in dev mode, allowing request');
+      // 기본 사용자 설정
+      request['user'] = {
+        id: 'user_1',
+        email: 'user1@example.com',
+        nickname: '커피러버',
+        role: 'user',
+      };
+      (request as any)['userId'] = 'user_1';
+      return true;
+    }
+
     if (!token) {
       throw new UnauthorizedException('인증 토큰이 필요합니다.');
     }

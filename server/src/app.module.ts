@@ -29,6 +29,7 @@ import { VideoCallModule } from './video-call/video-call.module';
 import { CompanyDomainModule } from './company-domain/company-domain.module';
 import { FriendModule } from './friend/friend.module';
 import { StoryModule } from './story/story.module';
+import { ContentModule } from './content/content.module';
 
 /**
  * 애플리케이션 루트 모듈
@@ -108,6 +109,8 @@ import { StoryModule } from './story/story.module';
     FriendModule,
 
     StoryModule,
+    
+    ContentModule,
   ],
   controllers: [AppController],
 })

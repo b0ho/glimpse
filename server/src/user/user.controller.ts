@@ -11,7 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 
 /**
@@ -20,7 +20,7 @@ import { CurrentUserId } from '../auth/decorators/current-user.decorator';
  * 사용자 프로필, 추천, 크레딧 관련 API를 제공합니다.
  */
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

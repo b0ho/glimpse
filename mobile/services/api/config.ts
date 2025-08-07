@@ -2,13 +2,19 @@
  * API 기본 URL
  * @constant {string}
  */
-export const API_BASE_URL = 'http://localhost:3001/api/v1';
+export const API_BASE_URL = process.env.API_URL || 'http://localhost:3001/api/v1';
 
 /**
  * WebSocket URL
  * @constant {string}
  */
-export const SOCKET_URL = 'ws://localhost:3001';
+export const SOCKET_URL = process.env.WEBSOCKET_URL || 'ws://localhost:3001';
+
+/**
+ * Development Auth Token
+ * @constant {string | undefined}
+ */
+export const DEV_AUTH_TOKEN = process.env.DEV_AUTH_TOKEN;
 
 /**
  * API 설정 객체
@@ -86,6 +92,10 @@ class ApiClient {
    */
   private async getAuthToken(): Promise<string | null> {
     try {
+      // 개발 모드에서는 DEV_AUTH_TOKEN 사용
+      if (DEV_AUTH_TOKEN && process.env.ENV === 'development') {
+        return DEV_AUTH_TOKEN;
+      }
       return currentAuthToken;
     } catch (error) {
       console.error('Failed to get auth token:', error);

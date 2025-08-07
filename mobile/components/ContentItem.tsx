@@ -59,7 +59,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
           </View>
           <View>
             <Text style={styles.authorName}>{displayName}</Text>
-            <Text style={styles.timeText}>{formatTimeAgo(item.createdAt)}</Text>
+            <Text style={styles.timeText}>{formatTimeAgo(new Date(item.createdAt))}</Text>
           </View>
         </View>
       </View>

@@ -21,7 +21,7 @@ import { StoryViewer } from '@/components/story/StoryViewer';
 import { storyService, StoryGroup } from '@/services/storyService';
 import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { generateDummyContent } from '@/utils/mockData';
+import { contentApi } from '@/services/api/contentApi';
 import { ACTION_ICONS } from '@/utils/icons';
 
 /**
@@ -181,19 +181,17 @@ export const HomeScreen = () => {
     }
 
     try {
-      // 더미 데이터를 바로 사용 (로딩 시간 단축)
-      const dummyContents = generateDummyContent();
+      // 실제 API 호출로 콘텐츠 가져오기
+      console.log('[HomeScreen] 콘텐츠 로드 시작');
+      const contents = await contentApi.getContents(undefined, 1, 20);
+      console.log('[HomeScreen] 콘텐츠 로드 성공:', contents.length);
       
-      // 짧은 로딩 시뮬레이션
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      if (refresh) {
-        setContents(dummyContents);
-      } else {
-        setContents(dummyContents);
-      }
+      setContents(contents);
+      setHasMoreData(contents.length >= 20);
     } catch (error) {
-      console.error('Failed to load contents:', error);
+      console.error('[HomeScreen] 콘텐츠 로드 실패:', error);
+      Alert.alert('오류', '콘텐츠를 불러오는 중 오류가 발생했습니다.');
+      setContents([]);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -219,10 +217,10 @@ export const HomeScreen = () => {
   }, [hasMoreData, isLoading]);
 
   useEffect(() => {
-    // 더미 데이터를 바로 설정 (API 호출 없이)
-    const dummyContents = generateDummyContent();
-    setContents(dummyContents);
-    setIsLoading(false);
+    // 컴포넌트 마운트 시 콘텐츠 로드
+    loadContents();
+    
+    // 스토리는 일단 빈 배열로 설정
     setStoriesLoading(false);
     setStories([]);
   }, []);
