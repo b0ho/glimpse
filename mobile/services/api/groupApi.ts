@@ -84,8 +84,11 @@ export const groupApi = {
     page?: number;
     limit?: number;
   }): Promise<Group[]> {
-    const response = await apiClient.get<{ data: Group[] }>('/groups', params);
-    return response.data;
+    const response = await apiClient.get<{ success: boolean; data: Group[] }>('/groups', params);
+    if (response.success && response.data) {
+      return response.data;
+    }
+    throw new Error('그룹 목록 조회 실패');
   },
 
   /**
@@ -95,8 +98,11 @@ export const groupApi = {
    * @returns {Promise<Group>} 생성된 그룹 정보
    */
   async createGroup(data: CreateGroupData): Promise<Group> {
-    const response = await apiClient.post<{ data: Group }>('/groups', data);
-    return response.data;
+    const response = await apiClient.post<{ success: boolean; data: Group }>('/groups', data);
+    if (response.success && response.data) {
+      return response.data;
+    }
+    throw new Error('그룹 생성 실패');
   },
 
   /**
@@ -106,8 +112,11 @@ export const groupApi = {
    * @returns {Promise<Group>} 그룹 상세 정보
    */
   async getGroupById(groupId: string): Promise<Group> {
-    const response = await apiClient.get<{ data: Group }>(`/groups/${groupId}`);
-    return response.data;
+    const response = await apiClient.get<{ success: boolean; data: Group }>(`/groups/${groupId}`);
+    if (response.success && response.data) {
+      return response.data;
+    }
+    throw new Error('그룹 조회 실패');
   },
 
   /**
@@ -118,8 +127,11 @@ export const groupApi = {
    * @returns {Promise<Group>} 업데이트된 그룹 정보
    */
   async updateGroup(groupId: string, data: Partial<CreateGroupData>): Promise<Group> {
-    const response = await apiClient.put<{ data: Group }>(`/groups/${groupId}`, data);
-    return response.data;
+    const response = await apiClient.put<{ success: boolean; data: Group }>(`/groups/${groupId}`, data);
+    if (response.success && response.data) {
+      return response.data;
+    }
+    throw new Error('그룹 수정 실패');
   },
 
   /**

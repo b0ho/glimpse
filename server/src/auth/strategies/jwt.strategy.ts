@@ -13,10 +13,10 @@ import { clerkClient } from '@clerk/clerk-sdk-node';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
     const useDevAuth = configService.get<string>('USE_DEV_AUTH') === 'true';
-    const secretKey = useDevAuth 
+    const secretKey = useDevAuth
       ? configService.get('JWT_SECRET', 'development_jwt_secret_key_12345')
       : configService.get('CLERK_PUBLISHABLE_KEY', 'dummy-key');
-      
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -35,8 +35,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid token payload');
     }
 
-    const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
-    
+    const useDevAuth =
+      this.configService.get<string>('USE_DEV_AUTH') === 'true';
+
     // 개발 모드에서는 payload를 그대로 반환
     if (useDevAuth && payload.userId) {
       return {
@@ -45,7 +46,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         isVerified: payload.isVerified,
       };
     }
-    
+
     // Production mode - Clerk validation
     if (!payload.sub) {
       throw new UnauthorizedException('Invalid token payload');
