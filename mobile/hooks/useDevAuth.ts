@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { getCurrentSuperAccount, DEV_CONFIG, isAuthBypassEnabled } from '@/config/dev.config';
+import { setAuthToken } from '@/services/api/config';
 
 /**
  * 개발 환경 인증 우회 훅
@@ -24,6 +25,8 @@ export function useDevAuth() {
       console.log('[DevAuth] Logging in with super account:', superAccount.email);
       setUser(superAccount);
       setToken(DEV_CONFIG.devToken);
+      // API 클라이언트에도 토큰 설정
+      setAuthToken(DEV_CONFIG.devToken);
       setIsLoaded(true);
     } else if (!isAuthBypassEnabled) {
       console.warn('[DevAuth] Auth bypass is disabled');

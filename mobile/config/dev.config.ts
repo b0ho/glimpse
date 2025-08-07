@@ -54,7 +54,7 @@ export const SUPER_ACCOUNTS: Record<string, User> = {
   
   // 프리미엄 테스트 계정
   'premium-user': {
-    id: 'premium-user-001',
+    id: 'cme0xrol20000ura4w0h2fytv', // 실제 DB의 ID로 변경
     anonymousId: 'anon-premium-001',
     email: 'premium@glimpse.test',
     phone: '010-9876-5432',
@@ -131,8 +131,8 @@ export const DEV_CONFIG = {
   // 디버그 로깅 활성화
   enableDebugLogging: isDevelopment,
   
-  // 개발 토큰
-  devToken: 'dev-token-glimpse-2024',
+  // 개발 토큰 (실제 DB의 사용자 ID와 매칭되는 JWT)
+  devToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWUweHJvbDIwMDAwdXJhNHcwaDJmeXR2Iiwic3ViIjoiY21lMHhyb2wyMDAwMHVyYTR3MGgyZnl0diIsInBob25lTnVtYmVyIjoiKzgyMDEwMTIzNDU2NzgiLCJpc1ZlcmlmaWVkIjp0cnVlLCJpYXQiOjE3NTQ1NTU0NjgsImV4cCI6MTc1NzE0NzQ2OH0.T4IX4a4h9eRVak-vooa6wFjVXeu4vtIVrBpqsmJIiw4',
   
   // 개발 세션 ID
   devSessionId: 'dev-session-glimpse',
