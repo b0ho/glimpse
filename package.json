@@ -36,6 +36,7 @@
     "db:migrate": "cd server && npx prisma migrate dev",
     "db:studio": "cd server && npx prisma studio",
     "db:generate": "cd server && npx prisma generate",
+    "db:seed": "cd server && npx tsx prisma/migrate-mockdata.ts",
     "env:setup": "node scripts/env-setup.js",
     "env:check": "node scripts/env-check.js",
     "env:vault": "npx dotenv-vault@latest",
