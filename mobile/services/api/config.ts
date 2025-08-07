@@ -131,6 +131,13 @@ class ApiClient {
     }
 
     try {
+      console.log('[ApiClient] Request:', {
+        url,
+        method: requestOptions.method || 'GET',
+        headers,
+        body: requestOptions.body,
+      });
+      
       const response = await fetch(url, {
         ...requestOptions,
         headers,
@@ -144,6 +151,7 @@ class ApiClient {
 
       // Parse JSON response
       const data = await response.json();
+      console.log('[ApiClient] Response:', data);
       return data;
     } catch (error) {
       console.error('API request failed:', error);
