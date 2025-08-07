@@ -93,10 +93,10 @@ docs/
 
 ### 기술 스택별 가이드
 
-- **React Native**: [개발 규칙](./development/rules/react-native.md)
-- **TypeScript**: [개발 규칙](./development/rules/typescript.md)
-- **Express.js**: [개발 규칙](./development/rules/express.md)
-- **Prisma**: [개발 규칙](./development/rules/prisma.mdc)
+- **React Native**: [개발 규칙](../rules/react-native.md)
+- **TypeScript**: [개발 규칙](../rules/typescript.md)
+- **Express.js**: [개발 규칙](../rules/express.md)
+- **Prisma**: [개발 규칙](../rules/prisma.mdc)
 
 ## 📝 문서 작성 규칙
 

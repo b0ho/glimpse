@@ -326,11 +326,13 @@ cd server && npx prisma migrate dev  # Run development migrations
 
 ### Code Quality Standards
 - **Response Language:** Always respond in Korean (응답은 한글로한다)
-- **TypeScript:** Strict mode, explicit types, no any across all packages
+- **TypeScript:** Strict mode, explicit types, no any across all packages. MUST ensure all implementations strictly follow TypeScript types to prevent type errors, lint errors, and runtime errors
+- **Type Safety:** When implementing features, MUST strictly adhere to defined interfaces and types. Never use 'any' type. Always fix TypeScript errors before completing implementation
 - **Accessibility:** All interactive elements labeled
 - **Error Handling:** Comprehensive try-catch with user feedback
 - **Testing:** 80%+ coverage for business logic
 - **Security:** Input validation, rate limiting, encryption
+- **Git Commits:** NEVER commit changes unless the user explicitly asks. Only commit when user specifically requests "커밋해줘" or similar commands
 
 ## External Service Integrations
 
