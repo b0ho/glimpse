@@ -163,19 +163,15 @@ export class PaymentService {
 
     let result;
 
-    try {
-      switch (payment.method) {
-        case 'TOSS_PAY':
-          result = await this.processTossPayment(payment, data.paymentKey!);
-          break;
-        case 'KAKAO_PAY':
-          result = await this.processKakaoPayment(payment, data.paymentToken!);
-          break;
-        default:
-          result = await this.processGenericPayment(payment, data);
-      }
-    } catch (error) {
-      throw error;
+    switch (payment.method) {
+      case 'TOSS_PAY':
+        result = await this.processTossPayment(payment, data.paymentKey!);
+        break;
+      case 'KAKAO_PAY':
+        result = await this.processKakaoPayment(payment, data.paymentToken!);
+        break;
+      default:
+        result = await this.processGenericPayment(payment, data);
     }
 
     // 결제 상태 업데이트
@@ -748,7 +744,7 @@ export class PaymentService {
    */
   async handleStripeWebhook(event: any) {
     switch (event.type) {
-      case 'checkout.session.completed':
+      case 'checkout.session.completed': {
         const session = event.data.object;
         console.log('Stripe payment successful:', {
           id: session.id,
@@ -756,6 +752,7 @@ export class PaymentService {
           amount_total: session.amount_total,
         });
         break;
+      }
       default:
         console.log('Unhandled Stripe event type:', event.type);
     }
@@ -1067,7 +1064,7 @@ export class PaymentService {
    */
   private getOrderName(type: string, packageType?: string): string {
     switch (type) {
-      case 'LIKE_CREDITS':
+      case 'LIKE_CREDITS': {
         const creditNames: Record<string, string> = {
           SMALL: '라이크 5개',
           MEDIUM: '라이크 15개 + 보너스 2개',
@@ -1075,6 +1072,7 @@ export class PaymentService {
           XLARGE: '라이크 50개 + 보너스 10개',
         };
         return creditNames[packageType || 'SMALL'] || '라이크 구매';
+      }
       case 'PREMIUM_SUBSCRIPTION':
         return packageType === 'PREMIUM_YEARLY'
           ? '글림프스 프리미엄 연간'

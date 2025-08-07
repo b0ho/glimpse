@@ -99,7 +99,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ClerkProvider 
-        publishableKey={clerkPublishableKey as string} 
+        publishableKey={clerkPublishableKey!} 
         tokenCache={tokenCache}
       >
         <AppContent />

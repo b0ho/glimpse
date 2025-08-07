@@ -317,20 +317,22 @@ export class PaymentRetryService {
     delay: number,
     config: RetryConfig,
   ): Promise<void> {
-    setTimeout(async () => {
-      try {
-        await this.processPaymentWithRetry(
-          paymentId,
-          userId,
-          paymentData,
-          config,
-        );
-      } catch (error) {
-        this.logger.error(
-          `Scheduled retry failed for payment ${paymentId}:`,
-          error,
-        );
-      }
+    setTimeout(() => {
+      void (async () => {
+        try {
+          await this.processPaymentWithRetry(
+            paymentId,
+            userId,
+            paymentData,
+            config,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Scheduled retry failed for payment ${paymentId}:`,
+            error,
+          );
+        }
+      })();
     }, delay);
   }
 

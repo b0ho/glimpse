@@ -43,7 +43,14 @@ export class AuthController {
    */
   @Post('register')
   @ApiOperation({ summary: 'Clerk 연동 회원가입/로그인' })
-  @ApiBody({ schema: { properties: { clerkUserId: { type: 'string' }, phoneNumber: { type: 'string' } } } })
+  @ApiBody({
+    schema: {
+      properties: {
+        clerkUserId: { type: 'string' },
+        phoneNumber: { type: 'string' },
+      },
+    },
+  })
   @ApiResponse({ status: 200, description: '회원가입 성공' })
   @ApiResponse({ status: 400, description: '회원가입 실패' })
   async register(
@@ -51,8 +58,9 @@ export class AuthController {
     @Headers('x-dev-auth') devAuth?: string,
   ) {
     try {
-      const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
-      
+      const useDevAuth =
+        this.configService.get<string>('USE_DEV_AUTH') === 'true';
+
       let userId: string;
       if (useDevAuth && devAuth === 'true' && body.phoneNumber) {
         // 개발 모드에서는 전화번호를 사용자 ID로 사용
@@ -62,7 +70,7 @@ export class AuthController {
       } else {
         throw new Error('사용자 ID가 필요합니다.');
       }
-      
+
       const user = await this.authService.createOrUpdateUser(userId);
       return {
         success: true,

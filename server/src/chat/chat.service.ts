@@ -72,7 +72,7 @@ export class ChatService {
 
         if (message.isEncrypted) {
           try {
-            content = await this.encryptionService.decrypt(message.content);
+            content = this.encryptionService.decrypt(message.content);
           } catch (error) {
             console.error('Failed to decrypt message:', error);
             content = '[암호화된 메시지]';
@@ -140,7 +140,7 @@ export class ChatService {
     const finalContent = content.trim();
 
     // 내용 암호화
-    const encryptedContent = await this.encryptionService.encrypt(finalContent);
+    const encryptedContent = this.encryptionService.encrypt(finalContent);
 
     const message = await this.prisma.chatMessage.create({
       data: {
@@ -246,7 +246,7 @@ export class ChatService {
 
           if (lastMessage.isEncrypted) {
             try {
-              content = await this.encryptionService.decrypt(content);
+              content = this.encryptionService.decrypt(content);
             } catch (error) {
               content = '[암호화된 메시지]';
             }

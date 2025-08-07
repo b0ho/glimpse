@@ -25,7 +25,8 @@ export class AuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     // 개발 모드 확인
-    const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    const useDevAuth =
+      this.configService.get<string>('USE_DEV_AUTH') === 'true';
     const devAuth = request.headers['x-dev-auth'];
 
     if (!token) {
@@ -52,7 +53,12 @@ export class AuthGuard implements CanActivate {
       }
 
       // 개발 모드 사용자 토큰 처리
-      if (useDevAuth && devAuth === 'true' && payload.role === 'user' && payload.userId) {
+      if (
+        useDevAuth &&
+        devAuth === 'true' &&
+        payload.role === 'user' &&
+        payload.userId
+      ) {
         // userId로 사용자 찾기
         const user = await this.authService.findUserByClerkId(payload.userId);
         if (user) {
@@ -61,7 +67,7 @@ export class AuthGuard implements CanActivate {
           return true;
         }
       }
-      
+
       // Clerk token verification
       if (payload.sub) {
         const user = await this.authService.findUserByClerkId(payload.sub);

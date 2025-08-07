@@ -208,15 +208,21 @@ export class AuthService {
   async createOrUpdateUser(clerkUserId: string): Promise<User> {
     try {
       // 개발 모드 확인
-      const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
-      const devAccountType = this.configService.get<string>('DEV_ACCOUNT_TYPE', 'premium');
-      
+      const useDevAuth =
+        this.configService.get<string>('USE_DEV_AUTH') === 'true';
+      const devAccountType = this.configService.get<string>(
+        'DEV_ACCOUNT_TYPE',
+        'premium',
+      );
+
       let clerkUser;
       let phoneNumber: string;
-      
+
       if (useDevAuth) {
         // 개발 모드에서는 더미 데이터 사용
-        phoneNumber = clerkUserId.startsWith('+') ? clerkUserId : '+82' + clerkUserId;
+        phoneNumber = clerkUserId.startsWith('+')
+          ? clerkUserId
+          : '+82' + clerkUserId;
         clerkUser = {
           id: 'dev_' + Date.now(),
           phoneNumbers: [{ phoneNumber }],
@@ -333,8 +339,9 @@ export class AuthService {
    */
   async verifyToken(token: string): Promise<any> {
     // 개발 모드 확인
-    const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
-    
+    const useDevAuth =
+      this.configService.get<string>('USE_DEV_AUTH') === 'true';
+
     if (useDevAuth && token.startsWith('dev-')) {
       // 개발 모드 간단한 토큰 처리
       if (token === 'dev-token') {
@@ -354,7 +361,7 @@ export class AuthService {
         };
       }
     }
-    
+
     try {
       // Try Clerk token first
       const clerkVerification = await clerkClient.verifyToken(token);

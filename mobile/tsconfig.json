@@ -1,9 +1,12 @@
 {
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "target": "ESNext",
     "module": "commonjs",
-    "lib": ["ESNext"],
-    "jsx": "react-native",
+    "lib": [
+      "ESNext"
+    ],
+    "jsx": "react-jsx",
     "noEmit": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
@@ -14,16 +17,30 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@shared/*": ["../shared/*"]
-    }
+      "@/*": [
+        "./*"
+      ],
+      "@shared/*": [
+        "../shared/*"
+      ]
+    },
+    "types": ["react", "react-native", "jest"]
   },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "types/**/*.d.ts"
+  ],
   "exclude": [
     "node_modules",
     "__tests__",
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.spec.tsx"
+    "**/*.spec.tsx",
+    "babel.config.js",
+    "metro.config.js"
   ]
 }

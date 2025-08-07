@@ -57,8 +57,9 @@ export class AdminController {
     const { email, password } = loginDto;
 
     // 개발 모드 확인
-    const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
-    
+    const useDevAuth =
+      this.configService.get<string>('USE_DEV_AUTH') === 'true';
+
     if (useDevAuth && devAuth === 'true') {
       // 개발 모드에서는 어떤 이메일/비밀번호도 허용
       const payload = {

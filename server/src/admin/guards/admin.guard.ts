@@ -22,11 +22,12 @@ export class AdminGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const userId = request.user?.id || request.userId;
-    
+
     // 개발 모드 확인
-    const useDevAuth = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    const useDevAuth =
+      this.configService.get<string>('USE_DEV_AUTH') === 'true';
     const devAuth = request.headers['x-dev-auth'];
-    
+
     // 개발 모드에서 관리자 역할 확인
     if (useDevAuth && devAuth === 'true' && request.user?.role === 'admin') {
       return true;

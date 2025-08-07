@@ -66,7 +66,6 @@ export const PaymentModal= ({
     if (visible && product && user) {
       initializePaymentSheet();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, product, user]);
 
   /**

@@ -118,7 +118,7 @@ export class VideoCallService {
 
     // 푸시 알림 전송
     await this.notificationService.sendPushNotification(receiverId, {
-      title: `${callerId}님의 ${type === 'VIDEO' ? '영상' : '음성'} 통화`,
+      title: `${callerId}님의 ${type === ('VIDEO' as any) ? '영상' : '음성'} 통화`,
       body: '통화 요청이 왔습니다.',
       data: {
         type: 'INCOMING_CALL',

@@ -71,6 +71,7 @@ export class FirebaseService implements OnModuleInit {
         );
 
         if (serviceAccountPath && serviceAccountPath.trim() !== '') {
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           const serviceAccount = require(path.resolve(serviceAccountPath));
 
           admin.initializeApp({

@@ -24,6 +24,5 @@
     "eslint.config.mjs",
     "node_modules",
     "dist"
-  ],
-  "extends": "expo/tsconfig.base"
+  ]
 }

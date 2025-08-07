@@ -24,7 +24,6 @@ export function useNotifications() {
     if (isSignedIn && !isInitialized) {
       initializeNotifications();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn, isInitialized]);
 
   useEffect(() => {
@@ -68,7 +67,6 @@ export function useNotifications() {
       notificationListener.current?.remove();
       responseListener.current?.remove();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitialized, settings.pushEnabled]);
 
   const handleNotificationPress = (data: { type: string; userId?: string; groupId?: string; matchId?: string; messageId?: string; roomId?: string }) => {

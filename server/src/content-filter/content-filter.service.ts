@@ -39,7 +39,7 @@ export class ContentFilterService {
       // 카카오톡 ID 패턴
       /카카오톡|카톡|kakao|kt|line|라인/gi,
       // URL 패턴
-      /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g,
+      /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/g,
       // 외부 만남 유도 패턴
       /만나|보자|나와|나오|직접|바로|연락|전화|통화/gi,
     ];
@@ -261,7 +261,7 @@ export class ContentFilterService {
       { pattern: /클릭|방문|가입|신청/gi, weight: 0.2 },
       { pattern: /할인|이벤트|무료|특가/gi, weight: 0.2 },
       { pattern: /bit\.ly|tinyurl|goo\.gl/gi, weight: 0.4 },
-      { pattern: /[\$\₩][0-9,]+/g, weight: 0.2 },
+      { pattern: /[$₩][0-9,]+/g, weight: 0.2 },
     ];
 
     indicators.forEach(({ pattern, weight }) => {
