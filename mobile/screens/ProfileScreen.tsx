@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { EditNicknameModal } from '@/components/modals/EditNicknameModal';
 import { AppMode, MODE_TEXTS } from '@shared/types';
+import apiClient from '@/services/api/config';
 
 /**
  * 프로필 화면 컴포넌트 - 사용자 정보 및 설정 관리
@@ -40,6 +41,33 @@ export const ProfileScreen = () => {
   const currentPlan = usePremiumStore(premiumSelectors.getCurrentPlan());
   const currentMode = authStore.currentMode || AppMode.DATING;
   const modeTexts = MODE_TEXTS[currentMode];
+  
+  // 화면이 포커스될 때마다 최신 프로필 가져오기
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', async () => {
+      try {
+        const response = await apiClient.get<{ success: boolean; data: any }>('/users/profile');
+        if (response.success && response.data) {
+          // 사용자 정보 업데이트
+          const currentUser = authStore.user;
+          if (currentUser) {
+            authStore.updateUserProfile({
+              ...currentUser,
+              nickname: response.data.nickname,
+              bio: response.data.bio,
+              profileImage: response.data.profileImage,
+              isPremium: response.data.isPremium,
+              credits: response.data.credits,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch latest profile:', error);
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, authStore]);
 
   /**
    * 로그아웃 핸들러

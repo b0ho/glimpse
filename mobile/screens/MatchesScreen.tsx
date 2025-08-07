@@ -13,8 +13,8 @@ import { useLikeStore } from '@/store/slices/likeSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { Match } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { generateDummyMatches, dummyUserNicknames } from '@/utils/mockData';
 import { formatTimeAgo } from '@/utils/dateUtils';
+import { matchApi } from '@/services/api/matchApi';
 
 /**
  * 매칭 화면 컴포넌트 - 서로 좋아요한 사용자 목록
@@ -45,18 +45,25 @@ export const MatchesScreen = React.memo(() => {
       return;
     }
     
-    // 즉시 데이터 로드 (비동기 제거)
-    try {
-      const dummyMatches = generateDummyMatches();
-      console.log('[MatchesScreen] dummyMatches 생성됨:', dummyMatches.length);
-      setMatches(dummyMatches);
-      likeStore.setMatches(dummyMatches);
-      console.log('[MatchesScreen] setIsLoading(false) 호출');
-      setIsLoading(false);
-    } catch (error) {
-      console.error('[MatchesScreen] Failed to load matches:', error);
-      setIsLoading(false);
-    }
+    // API에서 매칭 데이터 로드
+    const loadMatches = async () => {
+      try {
+        console.log('[MatchesScreen] API에서 매칭 데이터 로드 시작');
+        const matchData = await matchApi.getMatches();
+        console.log('[MatchesScreen] 매칭 데이터 로드 성공:', matchData.length);
+        setMatches(matchData);
+        likeStore.setMatches(matchData);
+        console.log('[MatchesScreen] setIsLoading(false) 호출');
+        setIsLoading(false);
+      } catch (error) {
+        console.error('[MatchesScreen] Failed to load matches:', error);
+        // API 실패 시 빈 배열로 설정
+        setMatches([]);
+        setIsLoading(false);
+      }
+    };
+    
+    loadMatches();
     
     // Cleanup 함수
     return () => {
@@ -94,7 +101,7 @@ export const MatchesScreen = React.memo(() => {
     // 익명성 시스템: 매칭된 상대방이므로 실명 표시
     const displayName = user?.id 
       ? likeStore.getUserDisplayName(otherUserId, user.id)
-      : (dummyUserNicknames[otherUserId] || '익명사용자');
+      : '익명사용자';
 
     return (
       <View style={styles.matchItem}>

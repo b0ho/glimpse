@@ -15,6 +15,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { authService } from '@/services/api/authService';
+import apiClient from '@/services/api/config';
 
 /**
  * EditNicknameModal 컴포넌트 Props
@@ -86,8 +87,26 @@ export const EditNicknameModal= ({
       });
       
       if (response.success) {
-        // 스토어 업데이트
-        updateUserProfile({ nickname: trimmedNickname });
+        // API에서 최신 프로필 다시 가져오기
+        try {
+          const profileResponse = await apiClient.get<{ success: boolean; data: any }>('/users/profile');
+          if (profileResponse.success && profileResponse.data) {
+            // 전체 사용자 정보 업데이트
+            const currentUser = useAuthStore.getState().user;
+            if (currentUser) {
+              updateUserProfile({
+                ...currentUser,
+                nickname: profileResponse.data.nickname,
+                bio: profileResponse.data.bio,
+                profileImage: profileResponse.data.profileImage,
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch updated profile:', error);
+          // 실패해도 로컬 업데이트는 진행
+          updateUserProfile({ nickname: trimmedNickname });
+        }
         
         Alert.alert(
           '성공',

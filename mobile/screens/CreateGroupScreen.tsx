@@ -116,6 +116,12 @@ export const CreateGroupScreen = () => {
 
     setIsSubmitting(true);
     try {
+      console.log('[CreateGroupScreen] 그룹 생성 시도:', {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        type: formData.type,
+      });
+      
       // API 호출하여 그룹 생성
       const newGroup = await groupApi.createGroup({
         name: formData.name.trim(),
@@ -132,6 +138,8 @@ export const CreateGroupScreen = () => {
           longitude: formData.location.longitude,
         } : undefined,
       });
+      
+      console.log('[CreateGroupScreen] 그룹 생성 성공:', newGroup);
 
       // 로컬 스토어에 추가
       groupStore.createGroup(newGroup);
@@ -152,8 +160,9 @@ export const CreateGroupScreen = () => {
         ]
       );
     } catch (error: any) {
-      console.error('Group creation error:', error);
-      Alert.alert('오류', error.response?.data?.message || '그룹 생성 중 오류가 발생했습니다.');
+      console.error('[CreateGroupScreen] 그룹 생성 오류:', error);
+      const errorMessage = error?.message || error?.response?.data?.message || '그룹 생성 중 오류가 발생했습니다.';
+      Alert.alert('그룹 생성 실패', errorMessage);
     } finally {
       setIsSubmitting(false);
     }
