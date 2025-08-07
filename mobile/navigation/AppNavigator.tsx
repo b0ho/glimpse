@@ -11,7 +11,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 // import { useAuth } from '@clerk/clerk-expo';
 import { useAuth } from '@/hooks/useDevAuth';
-import Icon from '@/components/IconWrapper';
+import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { NAVIGATION_ICONS } from '@/utils/icons';
 // import { CallProvider } from '@/providers/CallProvider';
 import { navigationService } from '@/services/navigation/navigationService';
