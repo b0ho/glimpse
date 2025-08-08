@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { Content } from '@shared/types';
 
@@ -16,7 +20,7 @@ export class ContentService {
     limit: number = 20,
   ): Promise<Content[]> {
     const skip = (page - 1) * limit;
-    
+
     // CommunityPost를 Content 형태로 변환하여 반환
     const posts = await this.prisma.communityPost.findMany({
       where: {
@@ -43,7 +47,7 @@ export class ContentService {
       userId: post.authorId,
       authorId: post.authorId,
       authorNickname: post.author.nickname || '익명',
-      type: post.imageUrls.length > 0 ? 'image' as const : 'text' as const,
+      type: post.imageUrls.length > 0 ? ('image' as const) : ('text' as const),
       text: post.content,
       imageUrls: post.imageUrls,
       likes: post._count.likes,

@@ -73,7 +73,10 @@ export class ContentController {
     @Body() contentData: any,
   ) {
     try {
-      const content = await this.contentService.createContent(userId, contentData);
+      const content = await this.contentService.createContent(
+        userId,
+        contentData,
+      );
       return {
         success: true,
         data: content,
