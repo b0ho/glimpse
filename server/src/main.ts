@@ -3,6 +3,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import helmet from 'helmet';
+import compression from 'compression';
 
 /**
  * NestJS 애플리케이션 부트스트랩
@@ -16,6 +19,23 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 3000);
+
+  // 보안 헤더 설정
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+        },
+      },
+    }),
+  );
+
+  // 응답 압축
+  app.use(compression());
 
   // CORS 설정
   app.enableCors({
@@ -37,8 +57,14 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
+
+  // 전역 예외 필터
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // API 프리픽스 설정
   app.setGlobalPrefix('api/v1', {

@@ -44,11 +44,22 @@ import { ContentModule } from './content/content.module';
       envFilePath: '.env',
     }),
 
-    // 요청 속도 제한
+    // 요청 속도 제한 - 다층 보호
     ThrottlerModule.forRoot([
       {
+        name: 'short',
+        ttl: 1000, // 1초
+        limit: 10, // 10회 - 단기 버스트 방지
+      },
+      {
+        name: 'medium',
         ttl: 60000, // 1분
-        limit: 60, // 60회
+        limit: 100, // 100회 - 일반적인 사용 패턴
+      },
+      {
+        name: 'long',
+        ttl: 900000, // 15분
+        limit: 1000, // 1000회 - 장기 제한
       },
     ]),
 
@@ -109,7 +120,7 @@ import { ContentModule } from './content/content.module';
     FriendModule,
 
     StoryModule,
-    
+
     ContentModule,
   ],
   controllers: [AppController],
