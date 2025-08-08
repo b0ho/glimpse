@@ -164,7 +164,7 @@ const AuthScreenWrapper = () => {
  */
 function AuthNavigator() {
   return (
-    <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+    <AuthStack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
       <AuthStack.Screen 
         name="Auth" 
         component={AuthScreenWrapper}
@@ -182,7 +182,7 @@ function AuthNavigator() {
  */
 function HomeStackNavigator() {
   return (
-    <HomeStack.Navigator>
+    <HomeStack.Navigator id={undefined}>
       <HomeStack.Screen 
         name="HomeTab" 
         component={HomeScreen} 
@@ -218,7 +218,7 @@ function HomeStackNavigator() {
  */
 function GroupsStackNavigator() {
   return (
-    <GroupsStack.Navigator>
+    <GroupsStack.Navigator id={undefined}>
       <GroupsStack.Screen 
         name="GroupsTab" 
         component={GroupsScreen} 
@@ -296,7 +296,7 @@ function GroupsStackNavigator() {
  */
 function MatchesStackNavigator() {
   return (
-    <MatchesStack.Navigator>
+    <MatchesStack.Navigator id={undefined}>
       <MatchesStack.Screen 
         name="MatchesTab" 
         component={MatchesScreen} 
@@ -321,7 +321,7 @@ function MatchesStackNavigator() {
  */
 function ProfileStackNavigator() {
   return (
-    <ProfileStack.Navigator>
+    <ProfileStack.Navigator id={undefined}>
       <ProfileStack.Screen 
         name="ProfileTab" 
         component={ProfileScreen} 
@@ -386,6 +386,7 @@ function DatingTabNavigator() {
   
   return (
     <Tab.Navigator
+      id={undefined}
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
@@ -451,6 +452,7 @@ function DatingTabNavigator() {
 function FriendshipTabNavigator() {
   return (
     <Tab.Navigator
+      id={undefined}
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
@@ -551,7 +553,7 @@ function AppNavigator() {
   }
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
       {isSignedIn ? (
         <>
           {!hasSelectedMode ? (
@@ -595,7 +597,7 @@ export default function RootNavigator() {
   if (Platform.OS === 'web') {
     return (
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Main" component={MainTabNavigator} />
         </Stack.Navigator>
       </NavigationContainer>
