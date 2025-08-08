@@ -24,7 +24,7 @@ export function useDevAuth() {
     // 개발 환경에서 자동 로그인
     const loadUserFromAPI = async () => {
       if (isAuthBypassEnabled && superAccount && !user) {
-        console.log('[DevAuth] Logging in with super account:', superAccount.email);
+        console.log('[DevAuth] Logging in with super account:', superAccount.nickname);
         
         // API 클라이언트에 토큰 설정
         setAuthToken(DEV_CONFIG.devToken);

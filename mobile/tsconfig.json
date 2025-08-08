@@ -4,7 +4,8 @@
     "target": "ESNext",
     "module": "commonjs",
     "lib": [
-      "ESNext"
+      "ESNext",
+      "DOM"
     ],
     "jsx": "react-jsx",
     "noEmit": true,
@@ -24,7 +25,7 @@
         "../shared/*"
       ]
     },
-    "types": ["react", "react-native", "jest"]
+    "types": ["react", "react-native", "jest", "node"]
   },
   "include": [
     "**/*.ts",

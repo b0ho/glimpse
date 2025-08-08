@@ -92,7 +92,8 @@ export const PaymentModal= ({
         allowsDelayedPaymentMethods: false,
         defaultBillingDetails: {
           name: user.nickname || '사용자',
-          email: user.email,
+          // email은 User 인터페이스에 없음 - phoneNumber 사용
+          phone: user.phoneNumber,
         },
         returnURL: 'glimpse://payment-success',
         appearance: {

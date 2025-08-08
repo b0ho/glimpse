@@ -93,7 +93,7 @@ function SettingItem({
   );
 }
 
-export default function NotificationSettingsScreen() {
+export function NotificationSettingsScreen() {
   const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
   const { currentMode } = useAuthStore();
   const {

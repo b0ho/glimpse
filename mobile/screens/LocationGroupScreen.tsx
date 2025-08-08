@@ -50,7 +50,7 @@ interface LocationGroup {
  * @returns {JSX.Element} 위치 그룹 화면 UI
  * @description GPS 기반 주변 그룹 탐색, QR 코드 스캔, 그룹 생성 기능을 제공하는 화면
  */
-const LocationGroupScreen= () => () => {
+const LocationGroupScreen = () => {
   const navigation = useNavigation();
   const [nearbyGroups, setNearbyGroups] = useState<LocationGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -640,4 +640,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LocationGroupScreen;
+export { LocationGroupScreen };

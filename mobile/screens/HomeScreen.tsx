@@ -182,9 +182,7 @@ export const HomeScreen = () => {
 
     try {
       // 실제 API 호출로 콘텐츠 가져오기
-      console.log('[HomeScreen] 콘텐츠 로드 시작');
       const contents = await contentApi.getContents(undefined, 1, 20);
-      console.log('[HomeScreen] 콘텐츠 로드 성공:', contents.length);
       
       setContents(contents);
       setHasMoreData(contents.length >= 20);
@@ -367,6 +365,7 @@ export const HomeScreen = () => {
             initialGroupIndex={selectedStoryIndex}
             onClose={() => setShowStoryViewer(false)}
             onViewStory={handleViewStory}
+            onEndReached={() => {}} // 필수 prop 추가
             currentUserId={authStore.user?.id || ''}
           />
         )}
