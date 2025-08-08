@@ -140,13 +140,27 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
+    // Add dev auth header in development mode
+    // Always add in development environment
+    const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : 
+                  process.env.NODE_ENV === 'development' || 
+                  process.env.ENV === 'development' ||
+                  url.includes('localhost') ||
+                  url.includes('127.0.0.1');
+    
+    if (isDev) {
+      headers['x-dev-auth'] = 'true';
+      console.log('[ApiClient] Development mode detected, adding x-dev-auth header');
+    }
+
     try {
-      console.log('[ApiClient] Request:', {
-        url,
-        method: requestOptions.method || 'GET',
-        headers,
-        body: requestOptions.body,
-      });
+      if (isDev) {
+        console.log('[ApiClient] Request:', {
+          url,
+          method: requestOptions.method || 'GET',
+          headers,
+        });
+      }
       
       const response = await fetch(url, {
         ...requestOptions,
@@ -161,7 +175,9 @@ class ApiClient {
 
       // Parse JSON response
       const data = await response.json();
-      console.log('[ApiClient] Response:', data);
+      if (isDev) {
+        console.log('[ApiClient] Response received from:', endpoint);
+      }
       return data;
     } catch (error) {
       console.error('API request failed:', error);

@@ -10,7 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { LocationService } from './location.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { NearbyUsersQueryDto } from './dto/nearby-users.dto';
 import {
@@ -24,7 +24,7 @@ import {
  * 사용자 위치 업데이트, 주변 검색, 위치 기반 그룹 등의 API를 제공합니다.
  */
 @Controller('location')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard)
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 

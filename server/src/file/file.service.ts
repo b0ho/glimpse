@@ -94,20 +94,52 @@ export class FileService {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET') || '';
+    // AWS 설정 확인
+    const awsAccessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
+    const awsSecretKey = this.configService.get<string>(
+      'AWS_SECRET_ACCESS_KEY',
+    );
+    const awsBucket = this.configService.get<string>('AWS_S3_BUCKET');
+
+    // 개발 환경에서는 AWS 설정이 없어도 동작하도록 함
+    const isDevelopment =
+      this.configService.get<string>('NODE_ENV') === 'development';
+
+    if (!isDevelopment && (!awsAccessKeyId || !awsSecretKey || !awsBucket)) {
+      throw new Error(
+        'AWS credentials and S3 bucket are required for file service in production',
+      );
+    }
+
+    this.bucketName = awsBucket || 'dummy-bucket';
     this.cloudFrontDomain =
       this.configService.get<string>('AWS_CLOUDFRONT_DOMAIN') || '';
     this.cloudFrontDistributionId =
       this.configService.get<string>('AWS_CLOUDFRONT_DISTRIBUTION_ID') || '';
 
-    this.s3Client = new S3Client({
-      region: this.configService.get<string>('AWS_REGION') || 'us-east-1',
-      credentials: {
-        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID') || '',
-        secretAccessKey:
-          this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
-      },
-    });
+    // AWS 설정이 있을 때만 S3 클라이언트 생성
+    if (awsAccessKeyId && awsSecretKey) {
+      this.s3Client = new S3Client({
+        region:
+          this.configService.get<string>('AWS_REGION') || 'ap-northeast-2',
+        credentials: {
+          accessKeyId: awsAccessKeyId,
+          secretAccessKey: awsSecretKey,
+        },
+      });
+    } else {
+      console.warn(
+        '[FileService] AWS credentials not configured. File upload will not work.',
+      );
+      // 더미 S3 클라이언트 (실제 업로드는 실패함)
+      this.s3Client = new S3Client({
+        region: 'us-east-1',
+        credentials: {
+          accessKeyId: 'dummy',
+          secretAccessKey: 'dummy',
+        },
+      });
+    }
 
     // this.cloudFrontClient = new CloudFrontClient({
     //   region: this.configService.get<string>('AWS_REGION'),
@@ -141,6 +173,14 @@ export class FileService {
     if (file.size > 10 * 1024 * 1024) {
       throw new HttpException(
         '파일 크기는 10MB를 초과할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // 파일 시그니처 검증
+    if (!validateFileSignature(file.buffer, file.mimetype)) {
+      throw new HttpException(
+        '파일 형식이 일치하지 않습니다.',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -254,6 +294,14 @@ export class FileService {
     if (file.size > 10 * 1024 * 1024) {
       throw new HttpException(
         '파일 크기는 10MB를 초과할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // 파일 시그니처 검증
+    if (!validateFileSignature(file.buffer, file.mimetype)) {
+      throw new HttpException(
+        '파일 형식이 일치하지 않습니다.',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -431,6 +479,14 @@ export class FileService {
     if (file.size > 5 * 1024 * 1024) {
       throw new HttpException(
         '파일 크기는 5MB를 초과할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // 파일 시그니처 검증
+    if (!validateFileSignature(file.buffer, file.mimetype)) {
+      throw new HttpException(
+        '파일 형식이 일치하지 않습니다.',
         HttpStatus.BAD_REQUEST,
       );
     }

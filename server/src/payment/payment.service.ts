@@ -1030,24 +1030,32 @@ export class PaymentService {
    * 토스 웹훅 서명 검증
    */
   verifyTossWebhook(signature: string, body: any): boolean {
+    // 타이밍 공격 방지를 위한 constant-time comparison
     const expectedSignature = crypto
       .createHmac('sha256', this.webhookSecret)
       .update(JSON.stringify(body))
       .digest('base64');
 
-    return signature === expectedSignature;
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature),
+    );
   }
 
   /**
    * 카카오 웹훅 서명 검증
    */
   verifyKakaoWebhook(signature: string, body: any): boolean {
+    // 타이밍 공격 방지를 위한 constant-time comparison
     const expectedSignature = crypto
       .createHmac('sha256', this.webhookSecret)
       .update(JSON.stringify(body))
       .digest('base64');
 
-    return signature === expectedSignature;
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature),
+    );
   }
 
   /**

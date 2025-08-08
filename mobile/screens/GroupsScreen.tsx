@@ -47,9 +47,7 @@ export const GroupsScreen = () => {
 
     try {
       // API 호출하여 그룹 목록 가져오기
-      console.log('[GroupsScreen] 그룹 목록 로드 시작');
       const loadedGroups = await groupApi.getGroups();
-      console.log('[GroupsScreen] 그룹 목록 로드 성공:', loadedGroups);
       setGroups(loadedGroups);
       groupStore.setGroups(loadedGroups);
     } catch (error: any) {
@@ -95,7 +93,6 @@ export const GroupsScreen = () => {
           onPress: async () => {
             try {
               // API 호출하여 그룹 참여
-              console.log('[GroupsScreen] 그룹 참여 시도:', group.id);
               await groupApi.joinGroup(group.id);
               
               groupStore.joinGroup(group);

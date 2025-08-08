@@ -20,10 +20,16 @@ export class EncryptionService {
 
   constructor(private readonly configService: ConfigService) {
     const encryptionKey = this.configService.get<string>('ENCRYPTION_KEY');
-    if (!encryptionKey || encryptionKey.length !== 32) {
-      throw new Error('Invalid encryption key: must be exactly 32 characters');
+    if (!encryptionKey || encryptionKey.length !== 64) {
+      throw new Error(
+        'Invalid encryption key: must be exactly 64 hex characters (32 bytes)',
+      );
     }
-    this.masterKey = Buffer.from(encryptionKey);
+    // Parse hex string to buffer
+    this.masterKey = Buffer.from(encryptionKey, 'hex');
+    if (this.masterKey.length !== 32) {
+      throw new Error('Invalid encryption key: must be 32 bytes');
+    }
   }
 
   /**

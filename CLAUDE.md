@@ -417,6 +417,31 @@ cd server && npx prisma migrate dev  # Run development migrations
 - **Payment Integration:** Test all Korean payment methods thoroughly
 - **Character Encoding:** Proper handling of Korean text in all systems
 
+### Development Environment API Connection
+**Problem**: 401 Unauthorized errors when mobile app connects to server in development
+**Root Cause**: Server requires `x-dev-auth: true` header in development mode for security
+
+**Solution Checklist**:
+1. **Mobile API Client** (`mobile/services/api/config.ts`):
+   - Must send `x-dev-auth: true` header when detecting development environment
+   - Detection logic: Check for `__DEV__`, `NODE_ENV=development`, or localhost URLs
+   
+2. **Server CORS** (`server/src/main.ts`):
+   - Must include `x-dev-auth` in `allowedHeaders`
+   - In development, use `origin: true` to allow all origins
+   
+3. **Network Access** (`mobile/.env`):
+   - Use machine's actual IP address instead of localhost
+   - Example: `API_URL=http://172.20.10.13:3001/api/v1`
+   
+4. **Verification**:
+   ```bash
+   # Test server API directly
+   curl -H "x-dev-auth: true" http://localhost:3001/api/v1/groups
+   ```
+
+**Prevention**: When modifying authentication or security middleware, always update both server AND client configurations simultaneously
+
 ## Next Development Priorities
 
 ### Phase 4 Options (Choose Based on Business Needs):

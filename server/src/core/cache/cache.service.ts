@@ -104,12 +104,16 @@ export class CacheService {
   async keys(pattern: string): Promise<string[]> {
     try {
       const store = (this.cacheManager as any).store;
-      if (store.keys) {
+      if (store && store.keys) {
         return await store.keys(pattern);
       }
+      // Redis가 없을 때는 빈 배열 반환
       return [];
     } catch (error) {
-      console.error(`Cache keys error for pattern ${pattern}:`, error);
+      // Redis 연결 실패 시 에러 로깅 최소화
+      if (!error.message?.includes('Cannot read properties of undefined')) {
+        console.error(`Cache keys error for pattern ${pattern}:`, error);
+      }
       return [];
     }
   }

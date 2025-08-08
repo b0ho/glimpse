@@ -43,18 +43,25 @@ async function bootstrap() {
   // 응답 압축
   app.use(compression());
 
-  // CORS 설정
+  // CORS 설정 - 개발 환경에서는 모든 origin 허용
+  const isDevelopment = configService.get<string>('NODE_ENV') === 'development';
+
   app.enableCors({
-    origin: [
-      'http://localhost:8081',
-      'http://localhost:8082',
-      'http://localhost:19000',
-      'http://localhost:3001',
-      'exp://192.168.0.2:8081',
-    ],
+    origin: isDevelopment
+      ? true
+      : [
+          'http://localhost:8081',
+          'http://localhost:8082',
+          'http://localhost:19000',
+          'http://localhost:19001',
+          'http://localhost:3000',
+          'http://localhost:3001',
+          'exp://192.168.0.2:8081',
+          'exp://192.168.0.2:19000',
+        ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-dev-auth'],
   });
 
   // 전역 파이프

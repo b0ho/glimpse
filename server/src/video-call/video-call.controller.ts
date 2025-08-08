@@ -8,7 +8,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { VideoCallService } from './video-call.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { CreateCallDto } from './dto/create-call.dto';
 import { CallEventDto } from './dto/call-event.dto';
 
@@ -18,7 +18,7 @@ import { CallEventDto } from './dto/call-event.dto';
  * WebRTC 기반 P2P 통화를 위한 API를 제공합니다.
  */
 @Controller('video-call')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard)
 export class VideoCallController {
   constructor(private readonly videoCallService: VideoCallService) {}
 
