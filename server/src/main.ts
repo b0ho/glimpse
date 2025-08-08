@@ -26,11 +26,17 @@ async function bootstrap() {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          styleSrc: ["'self'", "'unsafe-inline'"], // CSS는 unsafe-inline 필요 (React Native)
+          scriptSrc: ["'self'"], // unsafe-inline과 unsafe-eval 제거
           imgSrc: ["'self'", 'data:', 'https:'],
+          connectSrc: ["'self'", 'ws:', 'wss:'], // WebSocket 연결 허용
+          fontSrc: ["'self'", 'data:'],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'none'"],
         },
       },
+      crossOriginEmbedderPolicy: false, // 모바일 앱 호환성
     }),
   );
 

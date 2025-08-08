@@ -70,32 +70,18 @@ export class SanitizeInterceptor implements NestInterceptor {
 
   /**
    * 문자열에서 잠재적인 XSS 위협 제거
+   * Prisma ORM이 SQL Injection을 방지하므로 XSS 방지에만 집중
    */
   private sanitizeString(str: string): string {
-    // HTML 태그 제거
-    let sanitized = DOMPurify.sanitize(str, {
+    // HTML 태그 제거 - XSS 방지
+    const sanitized = DOMPurify.sanitize(str, {
       ALLOWED_TAGS: [],
       ALLOWED_ATTR: [],
       KEEP_CONTENT: true,
     });
 
-    // SQL Injection 방지를 위한 특수 문자 이스케이프
-    sanitized = sanitized
-      .replace(/'/g, "''") // 작은따옴표 이스케이프
-      .replace(/--/g, '') // SQL 주석 제거
-      .replace(/\/\*/g, '') // SQL 블록 주석 시작 제거
-      .replace(/\*\//g, '') // SQL 블록 주석 끝 제거
-      .replace(/;/g, '') // 세미콜론 제거 (쿼리 구분자)
-      .replace(/\bDROP\b/gi, '') // DROP 키워드 제거
-      .replace(/\bDELETE\b/gi, '') // DELETE 키워드 제거
-      .replace(/\bUPDATE\b/gi, '') // UPDATE 키워드 제거
-      .replace(/\bINSERT\b/gi, '') // INSERT 키워드 제거
-      .replace(/\bSELECT\b/gi, '') // SELECT 키워드 제거
-      .replace(/\bUNION\b/gi, '') // UNION 키워드 제거
-      .replace(/\bEXEC\b/gi, '') // EXEC 키워드 제거
-      .replace(/\bEXECUTE\b/gi, '') // EXECUTE 키워드 제거
-      .trim();
-
-    return sanitized;
+    // 전처리 후 문자열 반환 (SQL 키워드 제거하지 않음)
+    // Prisma ORM이 prepared statements를 사용하여 SQL Injection 방지
+    return sanitized.trim();
   }
 }

@@ -22,7 +22,37 @@ import { SendMessageDto } from './dto/chat.dto';
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
-    origin: '*',
+    origin: (origin, callback) => {
+      // 허용된 도메인 목록
+      const allowedOrigins = [
+        'http://localhost:8081',
+        'http://localhost:8082',
+        'http://localhost:19000',
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'exp://192.168.0.2:8081',
+        // 운영 도메인 추가
+        process.env.CLIENT_URL,
+      ].filter(Boolean);
+
+      // 개발 환경에서는 localhost 허용
+      if (process.env.NODE_ENV === 'development') {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else if (origin.includes('localhost') || origin.includes('192.168')) {
+          callback(null, true);
+        } else {
+          callback(new Error('WebSocket CORS 정책에 의해 차단되었습니다.'));
+        }
+      } else {
+        // 운영 환경에서는 명시적으로 허용된 도메인만
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('WebSocket CORS 정책에 의해 차단되었습니다.'));
+        }
+      }
+    },
     credentials: true,
   },
 })

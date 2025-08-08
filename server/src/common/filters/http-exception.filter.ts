@@ -25,22 +25,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse();
 
-    // 보호된 엔드포인트에 대한 404를 401로 변환
-    const protectedPaths = [
-      '/api/v1/users/me',
-      '/api/v1/matches',
-      '/api/v1/likes',
-      '/api/v1/chats',
-      '/api/v1/groups/create',
-      '/api/v1/credits',
-      '/api/v1/premium',
-    ];
-
-    const isProtectedPath = protectedPaths.some((path) =>
-      request.url.startsWith(path),
-    );
-
-    const finalStatus = status === 404 && isProtectedPath ? 401 : status;
+    // 404 에러는 그대로 반환 (정보 노출 방지)
+    // 인증이 필요한 경우는 미들웨어에서 401을 직접 반환해야 함
+    const finalStatus = status;
 
     const errorResponse = {
       statusCode: finalStatus,

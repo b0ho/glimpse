@@ -18,6 +18,28 @@ const generateId = (): string => {
   return crypto.randomBytes(16).toString('hex');
 };
 
+// 파일 시그니처 검증을 위한 매직 넘버
+const FILE_SIGNATURES: Record<string, number[]> = {
+  'image/jpeg': [0xff, 0xd8, 0xff],
+  'image/png': [0x89, 0x50, 0x4e, 0x47],
+  'image/gif': [0x47, 0x49, 0x46],
+  'image/webp': [0x52, 0x49, 0x46, 0x46],
+  'application/pdf': [0x25, 0x50, 0x44, 0x46],
+};
+
+const validateFileSignature = (buffer: Buffer, mimeType: string): boolean => {
+  const signature = FILE_SIGNATURES[mimeType];
+  if (!signature) return true; // 시그니처가 정의되지 않은 타입은 통과
+
+  // 버퍼의 시작 부분과 시그니처 비교
+  for (let i = 0; i < signature.length; i++) {
+    if (buffer[i] !== signature[i]) {
+      return false;
+    }
+  }
+  return true;
+};
+
 const validateFileType = (
   mimeType: string,
   allowedTypes?: string[],
@@ -33,10 +55,20 @@ const validateFileType = (
 };
 
 const sanitizeFilename = (filename: string): string => {
-  return filename
-    .replace(/[^a-zA-Z0-9.-]/g, '_')
-    .replace(/_{2,}/g, '_')
-    .toLowerCase();
+  // 경로 순회 공격 방지
+  const basename = filename.split(/[/\\]/).pop() || 'file';
+
+  // 위험한 문자 제거 및 정규화
+  const sanitized = basename
+    .replace(/^\.+/, '') // 숨김 파일 방지
+    .replace(/[^a-zA-Z0-9.-]/g, '_') // 특수문자 제거
+    .replace(/\.{2,}/g, '.') // 연속된 점 제거
+    .replace(/_{2,}/g, '_') // 연속된 언더스코어 제거
+    .toLowerCase()
+    .slice(0, 255); // 파일명 길이 제한
+
+  // 최소 파일명 보장
+  return sanitized || `file_${Date.now()}`;
 };
 import {
   ImageProcessingOptionsDto,

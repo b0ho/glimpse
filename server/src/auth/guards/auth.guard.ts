@@ -24,23 +24,33 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
 
-    // 개발 모드 확인
+    // 개발 모드 확인 - 운영 환경에서는 절대 허용하지 않음
+    const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
     const useDevAuth =
       this.configService.get<string>('USE_DEV_AUTH') === 'true';
-    const devAuth = request.headers['x-dev-auth'];
 
-    // 개발 모드이고 토큰이 없으면 스킵 가능
-    if (!token && useDevAuth) {
-      console.log('[AuthGuard] No token in dev mode, allowing request');
-      // 기본 사용자 설정
-      request['user'] = {
-        id: 'user_1',
-        email: 'user1@example.com',
-        nickname: '커피러버',
-        role: 'user',
-      };
-      (request as any)['userId'] = 'user_1';
-      return true;
+    // 운영 환경에서 개발 모드 사용 시 에러
+    if (nodeEnv === 'production' && useDevAuth) {
+      throw new UnauthorizedException(
+        '운영 환경에서는 개발 모드를 사용할 수 없습니다.',
+      );
+    }
+
+    // 개발 환경에서만 개발 모드 허용
+    if (nodeEnv === 'development' && !token && useDevAuth) {
+      const devAuth = request.headers['x-dev-auth'];
+      if (devAuth === 'true') {
+        console.log('[AuthGuard] Dev mode auth in development environment');
+        // 기본 사용자 설정
+        request['user'] = {
+          id: 'user_1',
+          email: 'user1@example.com',
+          nickname: '커피러버',
+          role: 'user',
+        };
+        (request as any)['userId'] = 'user_1';
+        return true;
+      }
     }
 
     if (!token) {
@@ -55,7 +65,8 @@ export class AuthGuard implements CanActivate {
       }
 
       // 개발 모드에서 관리자 토큰 처리
-      if (useDevAuth && devAuth === 'true' && payload.role === 'admin') {
+      const devAuthHeader = request.headers['x-dev-auth'];
+      if (useDevAuth && devAuthHeader === 'true' && payload.role === 'admin') {
         request['user'] = {
           id: payload.sub,
           email: payload.email,
@@ -69,7 +80,7 @@ export class AuthGuard implements CanActivate {
       // 개발 모드 사용자 토큰 처리
       if (
         useDevAuth &&
-        devAuth === 'true' &&
+        devAuthHeader === 'true' &&
         payload.role === 'user' &&
         payload.userId
       ) {
