@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # Enable version updates for npm
+  # Enable version updates for npm - root workspace
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -8,15 +8,14 @@ updates:
       day: "monday"
       time: "04:00"
     open-pull-requests-limit: 10
-    reviewers:
-      - "security-team"
     labels:
       - "dependencies"
-      - "security"
+      - "root"
     commit-message:
       prefix: "chore"
       include: "scope"
     
+  # Enable version updates for npm - server
   - package-ecosystem: "npm"
     directory: "/server"
     schedule:
@@ -24,12 +23,11 @@ updates:
       day: "monday"
       time: "04:00"
     open-pull-requests-limit: 10
-    reviewers:
-      - "backend-team"
     labels:
       - "dependencies"
       - "backend"
     
+  # Enable version updates for npm - mobile
   - package-ecosystem: "npm"
     directory: "/mobile"
     schedule:
@@ -37,21 +35,17 @@ updates:
       day: "monday"
       time: "04:00"
     open-pull-requests-limit: 10
-    reviewers:
-      - "mobile-team"
     labels:
       - "dependencies"
       - "mobile"
   
   # Enable version updates for Docker
   - package-ecosystem: "docker"
-    directory: "/server"
+    directory: "/docker"
     schedule:
       interval: "weekly"
       day: "monday"
       time: "04:00"
-    reviewers:
-      - "devops-team"
     labels:
       - "docker"
       - "infrastructure"
@@ -63,8 +57,6 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "04:00"
-    reviewers:
-      - "devops-team"
     labels:
       - "github-actions"
       - "ci/cd"
