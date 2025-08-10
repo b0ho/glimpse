@@ -38,10 +38,16 @@ import { ContentModule } from './content/content.module';
  */
 @Module({
   imports: [
-    // 환경변수 설정
+    // 환경변수 설정 - 통합 환경 변수 시스템 사용
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: [
+        '../config/private/secrets.env',
+        '../config/private/.env.local',
+        '../.env.defaults',
+        '.env', // 레거시 호환성
+      ],
+      expandVariables: true,
     }),
 
     // 요청 속도 제한 - 다층 보호
