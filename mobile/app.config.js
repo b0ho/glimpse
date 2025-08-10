@@ -75,26 +75,13 @@ export default {
       bundler: 'metro',
     },
     
-    // 플러그인
+    // 플러그인 (개발 중 필요한 것만)
     plugins: [
-      'expo-barcode-scanner',
-      'expo-notifications',
-      'expo-location',
-      'expo-camera',
-      'expo-av',
-      [
-        'expo-build-properties',
-        {
-          android: {
-            compileSdkVersion: 34,
-            targetSdkVersion: 34,
-            buildToolsVersion: '34.0.0',
-          },
-          ios: {
-            deploymentTarget: '13.0',
-          },
-        },
-      ],
+      // 'expo-barcode-scanner', // 패키지 확인 후 활성화
+      // 'expo-notifications',   // 패키지 확인 후 활성화
+      // 'expo-location',        // 패키지 확인 후 활성화
+      // 'expo-camera',          // 패키지 설치 후 활성화
+      // 'expo-av',              // 패키지 확인 후 활성화
     ],
     
     // 환경별 설정

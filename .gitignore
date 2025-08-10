@@ -1,15 +1,19 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# =====================================================
+# GLIMPSE MONOREPO .gitignore (통합 정리 완료)
+# =====================================================
 
-# dependencies
+# Dependencies
 node_modules/
 
-# Expo
+# =====================================================
+# EXPO & REACT NATIVE
+# =====================================================
 .expo/
 dist/
 web-build/
-expo-env.d.ts
+mobile/expo-env.d.ts
 
-# Native
+# Native builds
 .kotlin/
 *.orig.*
 *.jks
@@ -18,13 +22,16 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
-# Metro
+# Metro bundler
 .metro-health-check*
 
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
+# =====================================================
+# ENVIRONMENT & CONFIG
+# =====================================================
+
+# Private configuration (Git에서 제외)
+config/private/
+config/private/*
 
 # Environment files (비밀 정보 포함)
 .env.local
@@ -34,21 +41,92 @@ yarn-error.*
 .env.development
 .env.test
 
-# Private configuration (비밀 설정 폴더)
-config/private/
-config/private/*
+# Note: server/.env 와 mobile/.env 는 이제 Git으로 관리 (공개 개발 설정)
+# 실제 비밀키들은 config/private/secrets.env 에 설정
 
-# typescript
+# Legacy environment files
+shared/.env
+
+# =====================================================
+# BUILD & COMPILE
+# =====================================================
 *.tsbuildinfo
+build/
+dist/
 
-# IDEs and editors
+# =====================================================
+# LOGS & DEBUG
+# =====================================================
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+logs/
+*.log
+combined.log
+error.log
+
+# =====================================================
+# DATABASE & CACHE
+# =====================================================
+*.sqlite
+*.sqlite3
+*.db
+postgres-data/
+postgres_data/
+redis-data/
+redis_data/
+pgadmin_data/
+
+# =====================================================
+# UPLOADS & TEMP FILES
+# =====================================================
+uploads/
+server/uploads/
+temp/
+tmp/
+*.tmp
+*.temp
+*.cache
+.turbo
+
+# Backup files
+*.backup
+*.bak
+backup_temp/
+*.dump
+
+# =====================================================
+# DOCKER & DEPLOYMENT
+# =====================================================
+docker-compose.override.yml
+.env.docker
+
+# =====================================================
+# SECURITY & CERTIFICATES
+# =====================================================
+firebase-admin-sdk.json
+serviceAccountKey.json
+*.crt
+*.csr
+*.pfx
+*.pem
+ssl/
+certificates/
+nginx/ssl/
+
+# =====================================================
+# IDE & EDITORS
+# =====================================================
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
 
-# OS generated files
+# =====================================================
+# OS FILES
+# =====================================================
 .DS_Store
 .DS_Store?
 ._*
@@ -56,110 +134,38 @@ config/private/*
 .Trashes
 ehthumbs.db
 Thumbs.db
-*.pem
-
-# Security
-firebase-admin-sdk.json
-serviceAccountKey.json
-*.crt
-*.csr
-*.pfx
-
-# Logs
-logs/
-combined.log
-error.log
-
-# Database
-*.sqlite
-*.sqlite3
-*.db
-postgres-data/
-redis-data/
-
-# Uploads  
-uploads/
-temp/
-tmp/
-
-# Monitoring
-prometheus_data/
-grafana_data/
-
-# Backup
-backup_temp/
-*.backup
-*.dump
-
-# Docker
-docker-compose.override.yml
-
-# Certificates
-ssl/
-certificates/
 
 # Runtime data
 pids
 *.pid
 *.seed
 
-# Coverage directory used by tools like istanbul
+# =====================================================
+# TESTING & COVERAGE
+# =====================================================
 coverage/
-
-# Build outputs (kept only one dist/ entry)
-build/
-
-# Playwright test results
+.nyc_output/
+jest-results/
 test-results/
 playwright-report/
 
-# Docker
-.env.docker
-docker-compose.override.yml
-
-# SSL certificates
-nginx/ssl/
-*.pem
-*.crt
-*.key
-
-# Logs
-logs/
-*.log
-
-# Uploads
-uploads/
-server/uploads/
-
-# Database
-postgres_data/
-redis_data/
-pgadmin_data/
-
-# Environment files
-.env.production
-.env.development
-.env.test
-
-# Backup files
-*.backup
-*.bak
+# =====================================================
+# FRAMEWORKS & TOOLS
+# =====================================================
 
 # Next.js
 .next/
 out/
 
-# Testing
-.nyc_output/
-jest-results/
+# Monitoring
+prometheus_data/
+grafana_data/
+monitoring/elasticsearch/data/
+monitoring/prometheus/data/
+monitoring/grafana/data/
 
 # Temporary files
 *.tmp
 *.temp
 *.cache
 .turbo
-
-# Monitoring data
-monitoring/elasticsearch/data/
-monitoring/prometheus/data/
-monitoring/grafana/data/
