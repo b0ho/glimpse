@@ -26,13 +26,23 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# local env files
-.env*.local
+# Environment files (비밀 정보 포함)
 .env
+.env.local
+.env.*.local
 .env.production
 .env.staging
 .env.development
 .env.test
+
+# Private configuration (비밀 설정 폴더)
+config/private/
+config/private/*
+
+# Legacy environment files (기존 패키지별 환경 파일들)
+mobile/.env
+server/.env
+shared/.env
 
 # typescript
 *.tsbuildinfo
