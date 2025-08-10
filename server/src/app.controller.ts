@@ -9,4 +9,15 @@ export class AppController {
       timestamp: new Date().toISOString(),
     };
   }
+
+  @Get('api/health')
+  getApiHealth() {
+    return {
+      status: 'ok',
+      service: 'glimpse-api',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'development',
+    };
+  }
 }
