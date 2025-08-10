@@ -18,12 +18,13 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "lib": ["ES2021"]
   },
+  "include": ["src/**/*"],
   "exclude": [
     "eslint.config.mjs",
     "node_modules",
     "dist"
-  ],
-  "extends": "expo/tsconfig.base"
+  ]
 }
