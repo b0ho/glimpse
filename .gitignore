@@ -27,7 +27,6 @@ yarn-debug.*
 yarn-error.*
 
 # Environment files (비밀 정보 포함)
-.env
 .env.local
 .env.*.local
 .env.production
@@ -38,11 +37,6 @@ yarn-error.*
 # Private configuration (비밀 설정 폴더)
 config/private/
 config/private/*
-
-# Legacy environment files (기존 패키지별 환경 파일들)
-mobile/.env
-server/.env
-shared/.env
 
 # typescript
 *.tsbuildinfo
@@ -143,7 +137,6 @@ redis_data/
 pgadmin_data/
 
 # Environment files
-.env
 .env.production
 .env.development
 .env.test
