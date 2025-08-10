@@ -38,7 +38,7 @@ jobs:
       
       - name: Copy deployment files
         run: |
-          scp -i ~/.ssh/deploy_key docker-compose.yml \
+          scp -i ~/.ssh/deploy_key docker/docker-compose.yml \
             ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:~/glimpse/
           
           scp -i ~/.ssh/deploy_key nginx/nginx.conf \

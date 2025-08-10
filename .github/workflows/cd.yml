@@ -54,7 +54,7 @@ jobs:
       
       - name: Copy deployment files
         run: |
-          scp docker-compose.prod.yml ${{ env.DEPLOY_USER }}@${{ steps.vars.outputs.deploy_host }}:${{ env.DEPLOY_PATH }}/
+          scp docker/docker-compose.prod.yml ${{ env.DEPLOY_USER }}@${{ steps.vars.outputs.deploy_host }}:${{ env.DEPLOY_PATH }}/
           scp nginx/nginx.conf ${{ env.DEPLOY_USER }}@${{ steps.vars.outputs.deploy_host }}:${{ env.DEPLOY_PATH }}/nginx/
           scp monitoring/prometheus.yml ${{ env.DEPLOY_USER }}@${{ steps.vars.outputs.deploy_host }}:${{ env.DEPLOY_PATH }}/monitoring/
       
