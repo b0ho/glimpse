@@ -27,7 +27,7 @@
     "@aws-sdk/client-ses": "^3.859.0",
     "@aws-sdk/s3-request-presigner": "^3.859.0",
     "@clerk/clerk-sdk-node": "^5.1.6",
-    "@expo/metro-runtime": "~4.0.1",
+    "@expo/metro-runtime": "~5.0.4",
     "@nestjs-modules/mailer": "^1.11.2",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
