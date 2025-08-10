@@ -82,7 +82,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Build Docker image for scanning
-        run: docker build -t glimpse-server:scan ./server
+        run: docker build -f docker/Dockerfile.server -t glimpse-server:scan .
       
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
@@ -101,7 +101,7 @@ jobs:
       - name: Run Hadolint Dockerfile linter
         uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: server/Dockerfile
+          dockerfile: docker/Dockerfile.server
           failure-threshold: warning
 
   secrets-scan:
