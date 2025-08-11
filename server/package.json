@@ -57,7 +57,7 @@
     "compression": "^1.8.1",
     "dotenv": "^16.4.7",
     "dotenv-expand": "^11.0.7",
-    "expo": "~52.0.0",
+    "expo": "~53.0.20",
     "firebase-admin": "^13.4.0",
     "helmet": "^8.1.0",
     "i18next": "^25.3.4",
