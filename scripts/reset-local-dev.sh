@@ -130,8 +130,11 @@ echo "회사 도메인 시드 데이터 추가 중..."
 echo "  • 한국 주요 기업 도메인 (삼성, 카카오, 네이버 등)"
 echo "  • 주요 대학교 도메인 (서울대, 연세대, 고려대 등)"
 echo "  • 스타트업 및 컨설팅 회사 도메인"
-npm run seed:domains || npx tsx src/scripts/seed-company-domains.ts
-echo -e "${GREEN}✅ 회사 도메인 시드 데이터 추가 완료${NC}"
+if npm run seed:domains 2>/dev/null; then
+    echo -e "${GREEN}✅ 회사 도메인 시드 데이터 추가 완료${NC}"
+else
+    echo -e "${YELLOW}⚠️ 회사 도메인 시드 데이터 추가 실패 (선택적)${NC}"
+fi
 
 cd "$PROJECT_ROOT"
 

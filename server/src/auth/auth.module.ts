@@ -17,6 +17,7 @@ import { PrismaModule } from '../core/prisma/prisma.module';
 @Global()
 @Module({
   imports: [
+    ConfigModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
