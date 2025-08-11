@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { User } from '@shared/types';
@@ -68,6 +69,7 @@ export const ProfileHeader= ({
   onFriendsPress,
   onGroupsPress,
 }) => {
+  const { t } = useTranslation(['common', 'profile']);
   return (
     <View style={styles.container}>
       <View style={styles.profileImageContainer}>
@@ -85,7 +87,7 @@ export const ProfileHeader= ({
         )}
       </View>
       
-      <Text style={styles.profileName}>{user.nickname || '닉네임'}</Text>
+      <Text style={styles.profileName}>{user.nickname || t('user.noNickname', { ns: 'common' })}</Text>
       
       {badges.length > 0 && (
         <View style={styles.badgesContainer}>
@@ -98,12 +100,12 @@ export const ProfileHeader= ({
         </View>
       )}
       
-      <Text style={styles.profileBio}>{user.bio || '자기소개가 없습니다'}</Text>
+      <Text style={styles.profileBio}>{user.bio || t('user.noSelfIntroduction', { ns: 'common' })}</Text>
       
       <View style={styles.statsContainer}>
         <TouchableOpacity style={styles.statItem} onPress={onLikesPress}>
           <Text style={styles.statNumber}>{stats.totalLikes}</Text>
-          <Text style={styles.statLabel}>좋아요</Text>
+          <Text style={styles.statLabel}>{t('stats.likes', { ns: 'profile' })}</Text>
           {!user.isPremium && stats.totalLikes > 0 && (
             <MaterialCommunityIcons name="lock" size={12} color="#999" style={styles.lockIcon} />
           )}
@@ -113,21 +115,21 @@ export const ProfileHeader= ({
         
         <TouchableOpacity style={styles.statItem} onPress={onMatchesPress}>
           <Text style={styles.statNumber}>{stats.mutualMatches}</Text>
-          <Text style={styles.statLabel}>매칭</Text>
+          <Text style={styles.statLabel}>{t('stats.matches', { ns: 'profile' })}</Text>
         </TouchableOpacity>
         
         <View style={styles.statDivider} />
         
         <TouchableOpacity style={styles.statItem} onPress={onFriendsPress}>
           <Text style={styles.statNumber}>{stats.friendCount}</Text>
-          <Text style={styles.statLabel}>친구</Text>
+          <Text style={styles.statLabel}>{t('stats.friends', { ns: 'profile' })}</Text>
         </TouchableOpacity>
         
         <View style={styles.statDivider} />
         
         <TouchableOpacity style={styles.statItem} onPress={onGroupsPress}>
           <Text style={styles.statNumber}>{stats.groupCount}</Text>
-          <Text style={styles.statLabel}>그룹</Text>
+          <Text style={styles.statLabel}>{t('stats.groups', { ns: 'profile' })}</Text>
         </TouchableOpacity>
       </View>
       
@@ -136,7 +138,7 @@ export const ProfileHeader= ({
         onPress={onEditPress}
       >
         <MaterialCommunityIcons name="pencil" size={20} color="#fff" />
-        <Text style={styles.editButtonText}>프로필 수정</Text>
+        <Text style={styles.editButtonText}>{t('actions.editProfile', { ns: 'common' })}</Text>
       </TouchableOpacity>
     </View>
   );

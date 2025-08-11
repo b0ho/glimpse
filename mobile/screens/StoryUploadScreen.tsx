@@ -13,6 +13,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import { Video, ResizeMode } from 'expo-av';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -21,6 +22,7 @@ import { API_BASE_URL } from '../services/api/config';
 import { useAuthService } from '../services/auth/auth-service';
 
 export const StoryUploadScreen = () => {
+  const { t } = useTranslation('story');
   const navigation = useNavigation();
   const authService = useAuthService();
   const [media, setMedia] = useState<{ uri: string; type: 'image' | 'video' } | null>(null);
@@ -31,7 +33,7 @@ export const StoryUploadScreen = () => {
   const requestCameraPermission = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('권한 필요', '카메라 권한이 필요합니다.');
+      Alert.alert(t('permissions.required'), t('permissions.camera'));
       return false;
     }
     return true;
@@ -41,7 +43,7 @@ export const StoryUploadScreen = () => {
   const requestMediaLibraryPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('권한 필요', '사진 라이브러리 접근 권한이 필요합니다.');
+      Alert.alert(t('permissions.required'), t('permissions.mediaLibrary'));
       return false;
     }
     return true;
@@ -53,11 +55,11 @@ export const StoryUploadScreen = () => {
     if (!hasPermission) return;
 
     Alert.alert(
-      '선택',
-      '사진 또는 동영상을 선택하세요',
+      t('camera.selectTitle'),
+      t('camera.selectMessage'),
       [
         {
-          text: '사진',
+          text: t('camera.photo'),
           onPress: async () => {
             const result = await ImagePicker.launchCameraAsync({
               mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -72,7 +74,7 @@ export const StoryUploadScreen = () => {
           },
         },
         {
-          text: '동영상',
+          text: t('camera.video'),
           onPress: async () => {
             const result = await ImagePicker.launchCameraAsync({
               mediaTypes: ImagePicker.MediaTypeOptions.Videos,
@@ -86,7 +88,7 @@ export const StoryUploadScreen = () => {
             }
           },
         },
-        { text: '취소', style: 'cancel' },
+        { text: t('camera.cancel'), style: 'cancel' },
       ]
     );
   };
@@ -114,7 +116,7 @@ export const StoryUploadScreen = () => {
   // Upload story
   const uploadStory = async () => {
     if (!media) {
-      Alert.alert('오류', '업로드할 미디어를 선택해주세요.');
+      Alert.alert(t('upload.error'), t('upload.selectMedia'));
       return;
     }
 
@@ -125,7 +127,7 @@ export const StoryUploadScreen = () => {
       // This needs to be implemented or replaced with proper Clerk token fetching
       const token = ''; // TODO: Get token from Clerk
       if (!token) {
-        throw new Error('인증 토큰이 없습니다.');
+        throw new Error(t('upload.noToken'));
       }
 
       const formData = new FormData();
@@ -149,18 +151,18 @@ export const StoryUploadScreen = () => {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || '업로드 실패');
+        throw new Error(error.message || t('upload.failed'));
       }
 
-      Alert.alert('성공', '스토리가 업로드되었습니다!', [
+      Alert.alert(t('upload.success'), t('upload.successMessage'), [
         {
-          text: '확인',
+          text: t('upload.confirm'),
           onPress: () => navigation.goBack(),
         },
       ]);
     } catch (error: any) {
       console.error('Story upload failed:', error);
-      Alert.alert('오류', error.message || '스토리 업로드에 실패했습니다.');
+      Alert.alert(t('upload.error'), error.message || t('upload.failed'));
     } finally {
       setIsUploading(false);
     }
@@ -180,7 +182,7 @@ export const StoryUploadScreen = () => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="close" size={28} color={COLORS.white} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>새 스토리</Text>
+          <Text style={styles.headerTitle}>{t('newStory')}</Text>
           <View style={{ width: 28 }} />
         </View>
 
@@ -189,14 +191,14 @@ export const StoryUploadScreen = () => {
             <View style={styles.mediaIconContainer}>
               <Ionicons name="camera" size={40} color={COLORS.white} />
             </View>
-            <Text style={styles.mediaOptionText}>카메라</Text>
+            <Text style={styles.mediaOptionText}>{t('camera.title')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.mediaOption} onPress={pickFromGallery}>
             <View style={styles.mediaIconContainer}>
               <Ionicons name="images" size={40} color={COLORS.white} />
             </View>
-            <Text style={styles.mediaOptionText}>갤러리</Text>
+            <Text style={styles.mediaOptionText}>{t('gallery')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -214,7 +216,7 @@ export const StoryUploadScreen = () => {
           <TouchableOpacity onPress={clearMedia}>
             <Ionicons name="arrow-back" size={28} color={COLORS.white} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>스토리 미리보기</Text>
+          <Text style={styles.headerTitle}>{t('preview.title')}</Text>
           <TouchableOpacity
             onPress={uploadStory}
             disabled={isUploading}
@@ -223,7 +225,7 @@ export const StoryUploadScreen = () => {
             {isUploading ? (
               <ActivityIndicator size="small" color={COLORS.white} />
             ) : (
-              <Text style={styles.shareButtonText}>공유</Text>
+              <Text style={styles.shareButtonText}>{t('preview.share')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -245,7 +247,7 @@ export const StoryUploadScreen = () => {
           <View style={styles.captionContainer}>
             <TextInput
               style={styles.captionInput}
-              placeholder="캡션 추가..."
+              placeholder={t('preview.captionPlaceholder')}
               placeholderTextColor={COLORS.gray}
               value={caption}
               onChangeText={setCaption}

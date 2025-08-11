@@ -60,12 +60,12 @@ export const CreateContentScreen = () => {
 
   const handleSubmit = async () => {
     if (!contentText.trim() && selectedImages.length === 0) {
-      Alert.alert('내용 입력', '텍스트를 입력하거나 이미지를 선택해주세요.');
+      Alert.alert(t('common:errors.invalid'), t('common:content.validation.contentRequired'));
       return;
     }
 
     if (!selectedGroup) {
-      Alert.alert('그룹 선택', '게시할 그룹을 선택해주세요.');
+      Alert.alert(t('common:errors.required'), t('common:content.validation.groupRequired'));
       return;
     }
 
@@ -78,7 +78,7 @@ export const CreateContentScreen = () => {
         id: `content_${Date.now()}`,
         userId: authStore.user?.id || 'current_user',
         authorId: authStore.user?.id || 'current_user',
-        authorNickname: authStore.user?.nickname || '익명사용자',
+        authorNickname: authStore.user?.nickname || t('common:user.anonymous'),
         type: selectedImages.length > 0 ? 'image' : 'text',
         text: contentText.trim() || undefined,
         imageUrls: selectedImages.length > 0 ? selectedImages : undefined,
@@ -95,18 +95,18 @@ export const CreateContentScreen = () => {
       console.log('Created content:', newContent);
 
       Alert.alert(
-        '게시물 작성 완료! 🎉',
-        `"${selectedGroup.name}" 그룹에 게시물이 성공적으로 작성되었습니다.`,
+        t('common:content.success.title'),
+        t('common:content.success.message', { groupName: selectedGroup.name }),
         [
           {
-            text: '확인',
+            text: t('common:buttons.confirm'),
             onPress: () => navigation.goBack(),
           },
         ]
       );
     } catch (error) {
       console.error('Content submission error:', error);
-      Alert.alert('오류', '게시물 작성 중 오류가 발생했습니다.');
+      Alert.alert(t('common:errors.error'), t('common:errors.unknown'));
     } finally {
       setIsSubmitting(false);
     }
@@ -118,7 +118,7 @@ export const CreateContentScreen = () => {
     return (
       <View style={styles.groupPickerOverlay}>
         <View style={styles.groupPickerModal}>
-          <Text style={styles.groupPickerTitle}>그룹 선택</Text>
+          <Text style={styles.groupPickerTitle}>{t('group:picker.title')}</Text>
           <ScrollView style={styles.groupList}>
             {groupStore.joinedGroups.map(group => (
               <TouchableOpacity
@@ -135,7 +135,7 @@ export const CreateContentScreen = () => {
             style={styles.cancelButton}
             onPress={() => setShowGroupPicker(false)}
           >
-            <Text style={styles.cancelButtonText}>취소</Text>
+            <Text style={styles.cancelButtonText}>{t('group:picker.cancel')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -148,7 +148,7 @@ export const CreateContentScreen = () => {
     return (
       <View style={styles.imagePreviewContainer}>
         <Text style={styles.imagePreviewTitle}>
-          선택된 이미지 ({selectedImages.length}/5)
+          {t('common:content.create.selectedImages', { count: selectedImages.length })}
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {selectedImages.map((uri, index) => (
@@ -174,9 +174,9 @@ export const CreateContentScreen = () => {
           style={styles.headerButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.headerButtonText}>취소</Text>
+          <Text style={styles.headerButtonText}>{t('common:content.create.cancel')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>새 게시물</Text>
+        <Text style={styles.headerTitle}>{t('common:content.create.title')}</Text>
         <TouchableOpacity
           style={[
             styles.headerButton,
@@ -189,30 +189,30 @@ export const CreateContentScreen = () => {
           {isSubmitting ? (
             <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
           ) : (
-            <Text style={styles.submitButtonText}>게시</Text>
+            <Text style={styles.submitButtonText}>{t('common:content.create.publish')}</Text>
           )}
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
         <View style={styles.groupSelector}>
-          <Text style={styles.sectionLabel}>게시할 그룹</Text>
+          <Text style={styles.sectionLabel}>{t('common:content.create.publishTo')}</Text>
           <TouchableOpacity
             style={styles.groupSelectorButton}
             onPress={() => setShowGroupPicker(true)}
           >
             <Text style={styles.groupSelectorText}>
-              {selectedGroup ? selectedGroup.name : '그룹을 선택해주세요'}
+              {selectedGroup ? selectedGroup.name : t('common:content.create.selectGroup')}
             </Text>
             <Text style={styles.groupSelectorArrow}>{'>'}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.textInputContainer}>
-          <Text style={styles.sectionLabel}>내용</Text>
+          <Text style={styles.sectionLabel}>{t('common:content.create.contentLabel')}</Text>
           <TextInput
             style={styles.textInput}
-            placeholder="무슨 일이 일어나고 있나요?"
+            placeholder={t('common:content.create.placeholder')}
             placeholderTextColor={COLORS.TEXT.LIGHT}
             value={contentText}
             onChangeText={setContentText}
@@ -221,7 +221,7 @@ export const CreateContentScreen = () => {
             textAlignVertical="top"
           />
           <Text style={styles.characterCount}>
-            {contentText.length}/500
+            {t('common:content.create.characterCount', { current: contentText.length, max: 500 })}
           </Text>
         </View>
 
@@ -238,18 +238,18 @@ export const CreateContentScreen = () => {
           >
             <Text style={styles.mediaButtonIcon}>📷</Text>
             <Text style={styles.mediaButtonText}>
-              사진 추가 ({selectedImages.length}/5)
+              {t('common:content.create.addPhotos', { current: selectedImages.length, max: 5 })}
             </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.guidelines}>
-          <Text style={styles.guidelinesTitle}>게시물 작성 가이드라인</Text>
+          <Text style={styles.guidelinesTitle}>{t('common:content.create.guidelines.title')}</Text>
           <Text style={styles.guidelinesText}>
-            • 익명성을 유지하기 위해 개인정보가 포함된 내용은 피해주세요{'\n'}
-            • 존중과 예의를 지켜주세요{'\n'}
-            • 부적절한 내용은 삭제될 수 있습니다{'\n'}
-            • 이미지는 최대 5개까지 업로드 가능합니다
+            {t('common:content.create.guidelines.privacy')}{'\n'}
+            {t('common:content.create.guidelines.respect')}{'\n'}
+            {t('common:content.create.guidelines.inappropriate')}{'\n'}
+            {t('common:content.create.guidelines.images')}
           </Text>
         </View>
       </ScrollView>

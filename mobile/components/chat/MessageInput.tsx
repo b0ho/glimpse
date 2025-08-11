@@ -13,6 +13,7 @@ import {
   Keyboard,
   Platform,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -44,8 +45,10 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
   onSendMessage,
   onTypingStatusChange,
   disabled = false,
-  placeholder = '메시지를 입력하세요...',
+  placeholder,
 }) => {
+  const { t } = useTranslation();
+  const placeholderText = placeholder || t('chat:input.placeholder');
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false);
@@ -109,7 +112,7 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
       textInputRef.current?.focus();
     } catch (error) {
       console.error('Failed to send message:', error);
-      Alert.alert('오류', '메시지 전송에 실패했습니다.');
+      Alert.alert(t('common:status.error'), t('chat:errors.sendFailed'));
     } finally {
       setIsSending(false);
     }
@@ -126,7 +129,7 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
       // 권한 요청
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('권한 필요', '사진을 선택하려면 갤러리 접근 권한이 필요합니다.');
+        Alert.alert(t('common:permissions.title'), t('common:permissions.gallery'));
         return;
       }
 
@@ -148,14 +151,14 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
           await onSendMessage(asset.uri, 'IMAGE');
         } catch (error) {
           console.error('Failed to send image:', error);
-          Alert.alert('오류', '이미지 전송에 실패했습니다.');
+          Alert.alert(t('common:status.error'), t('chat:errors.imageSendFailed'));
         } finally {
           setIsSending(false);
         }
       }
     } catch (error) {
       console.error('Image picker error:', error);
-      Alert.alert('오류', '이미지를 선택하는 중 오류가 발생했습니다.');
+      Alert.alert(t('common:status.error'), t('chat:errors.imageSelectFailed'));
     }
   }, [onSendMessage]);
 
@@ -170,7 +173,7 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
       // 권한 요청
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('권한 필요', '사진을 촬영하려면 카메라 접근 권한이 필요합니다.');
+        Alert.alert(t('common:permissions.title'), t('common:permissions.camera'));
         return;
       }
 
@@ -190,14 +193,14 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
           await onSendMessage(asset.uri, 'IMAGE');
         } catch (error) {
           console.error('Failed to send camera image:', error);
-          Alert.alert('오류', '사진 전송에 실패했습니다.');
+          Alert.alert(t('common:status.error'), t('chat:errors.photoSendFailed'));
         } finally {
           setIsSending(false);
         }
       }
     } catch (error) {
       console.error('Camera error:', error);
-      Alert.alert('오류', '카메라를 실행하는 중 오류가 발생했습니다.');
+      Alert.alert(t('common:status.error'), t('chat:errors.cameraFailed'));
     }
   }, [onSendMessage]);
 
@@ -230,20 +233,20 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
           style={styles.attachmentOption}
           onPress={handleCamera}
           accessibilityRole="button"
-          accessibilityLabel="카메라로 사진 촬영"
+          accessibilityLabel={t('chat:attachment.takePhoto')}
         >
           <Icon name={UI_ICONS.CAMERA} size={24} color={COLORS.PRIMARY} />
-          <Text style={styles.attachmentOptionText}>카메라</Text>
+          <Text style={styles.attachmentOptionText}>{t('chat:attachment.camera')}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
           style={styles.attachmentOption}
           onPress={handleImagePicker}
           accessibilityRole="button"
-          accessibilityLabel="갤러리에서 사진 선택"
+          accessibilityLabel={t('chat:attachment.selectPhoto')}
         >
           <Icon name={UI_ICONS.IMAGE} size={24} color={COLORS.PRIMARY} />
-          <Text style={styles.attachmentOptionText}>갤러리</Text>
+          <Text style={styles.attachmentOptionText}>{t('chat:attachment.gallery')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -262,8 +265,8 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
           onPress={toggleAttachmentOptions}
           disabled={disabled}
           accessibilityRole="button"
-          accessibilityLabel="첨부파일"
-          accessibilityHint="이미지를 첨부할 수 있습니다"
+          accessibilityLabel={t('chat:attachment.button')}
+          accessibilityHint={t('chat:attachment.hint')}
         >
           <Icon
             name={showAttachmentOptions ? UI_ICONS.CLOSE : ACTION_ICONS.ADD}
@@ -278,15 +281,15 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
           style={[styles.textInput, disabled && styles.disabledInput]}
           value={message}
           onChangeText={handleTextChange}
-          placeholder={placeholder}
+          placeholder={placeholderText}
           placeholderTextColor={COLORS.TEXT.LIGHT}
           multiline
           maxLength={1000}
           editable={!disabled}
           returnKeyType="send"
           onSubmitEditing={handleSubmitEditing}
-          accessibilityLabel="메시지 입력"
-          accessibilityHint="여기에 보낼 메시지를 입력하세요"
+          accessibilityLabel={t('chat:input.label')}
+          accessibilityHint={t('chat:input.hint')}
         />
 
         {/* 전송 버튼 */}

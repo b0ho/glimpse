@@ -143,7 +143,7 @@ export const NicknameSetupScreen = ({
                 styles.genderButtonText,
                 gender === 'MALE' && styles.genderButtonTextSelected,
               ]}>
-                남성
+                {t('nicknameSetup.male')}
               </Text>
             </TouchableOpacity>
             
@@ -158,7 +158,7 @@ export const NicknameSetupScreen = ({
                 styles.genderButtonText,
                 gender === 'FEMALE' && styles.genderButtonTextSelected,
               ]}>
-                여성
+                {t('nicknameSetup.female')}
               </Text>
             </TouchableOpacity>
           </View>

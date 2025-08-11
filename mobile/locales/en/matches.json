@@ -1,0 +1,24 @@
+{
+  "title": "Matches",
+  "subtitle": "Chat with people who liked each other",
+  "stats": {
+    "totalMatches": "Total matches: {{count}}",
+    "receivedLikes": "Received likes: {{count}}"
+  },
+  "actions": {
+    "startChat": "Start Chat"
+  },
+  "messages": {
+    "matchDescription": "You both liked each other, it's a match! 💕\nYou can now see each other's nicknames."
+  },
+  "emptyState": {
+    "title": "No matches yet",
+    "subtitle": "Send likes to posts you find interesting\non the home feed!\n\nWhen you both like each other, you'll match."
+  },
+  "loading": {
+    "text": "Loading match information..."
+  },
+  "user": {
+    "anonymous": "Anonymous User"
+  }
+}

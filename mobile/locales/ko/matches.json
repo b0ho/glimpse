@@ -1,0 +1,24 @@
+{
+  "title": "매칭",
+  "subtitle": "서로 좋아요를 보낸 사람들과 대화해보세요",
+  "stats": {
+    "totalMatches": "총 매칭: {{count}}명",
+    "receivedLikes": "받은 좋아요: {{count}}개"
+  },
+  "actions": {
+    "startChat": "채팅하기"
+  },
+  "messages": {
+    "matchDescription": "서로 좋아요를 보내서 매칭되었어요! 💕\n지금부터 서로의 닉네임을 확인할 수 있습니다."
+  },
+  "emptyState": {
+    "title": "아직 매칭된 사람이 없어요",
+    "subtitle": "홈 피드에서 마음에 드는 게시물에\n좋아요를 보내보세요!\n\n서로 좋아요를 보내면 매칭됩니다."
+  },
+  "loading": {
+    "text": "매칭 정보를 불러오는 중..."
+  },
+  "user": {
+    "anonymous": "익명사용자"
+  }
+}

@@ -13,12 +13,14 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useDevAuth';
 import { SUPER_ACCOUNTS, isAuthBypassEnabled, DEV_CONFIG } from '@/config/dev.config';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 export const DevModePanel = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { t } = useTranslation(['common', 'dev']);
   const auth = useAuth();
 
   if (!isAuthBypassEnabled) return null;
@@ -30,12 +32,12 @@ export const DevModePanel = () => {
 
   const handleAccountSwitch = (accountType: string) => {
     Alert.alert(
-      '계정 전환',
-      `${SUPER_ACCOUNTS[accountType].nickname} 계정으로 전환하시겠습니까?\n앱이 새로고침됩니다.`,
+      t('accountSwitch', { ns: 'dev' }),
+      t('switchAccount', { nickname: SUPER_ACCOUNTS[accountType].nickname, ns: 'dev' }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('actions.cancel', { ns: 'common' }), style: 'cancel' },
         {
-          text: '전환',
+          text: t('actions.switch', { ns: 'common' }),
           onPress: () => {
             // 환경변수를 동적으로 변경할 수 없으므로 로컬 스토리지 사용
             if (typeof window !== 'undefined') {
@@ -61,10 +63,10 @@ export const DevModePanel = () => {
 
       {isExpanded && (
         <View style={styles.panel}>
-          <Text style={styles.title}>개발 모드 패널</Text>
+          <Text style={styles.title}>{t('devModePanel', { ns: 'dev' })}</Text>
           
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>현재 계정</Text>
+            <Text style={styles.sectionTitle}>{t('currentAccount', { ns: 'dev' })}</Text>
             <Text style={styles.info}>타입: {currentAccountType}</Text>
             <Text style={styles.info}>이메일: {currentAccount?.email}</Text>
             <Text style={styles.info}>프리미엄: {currentAccount?.isPremium ? 'Yes' : 'No'}</Text>
@@ -72,7 +74,7 @@ export const DevModePanel = () => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>계정 전환</Text>
+            <Text style={styles.sectionTitle}>{t('accountSwitch', { ns: 'dev' })}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {Object.entries(SUPER_ACCOUNTS).map(([type, account]) => (
                 <TouchableOpacity
@@ -95,17 +97,17 @@ export const DevModePanel = () => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>디버그 정보</Text>
-            <Text style={styles.info}>환경: development</Text>
+            <Text style={styles.sectionTitle}>{t('debugInfo', { ns: 'dev' })}</Text>
+            <Text style={styles.info}>{t('environment', { ns: 'dev' })}: development</Text>
             <Text style={styles.info}>API: http://localhost:3001/api/v1</Text>
-            <Text style={styles.info}>Mock API: {DEV_CONFIG.mockApiCalls ? 'ON' : 'OFF'}</Text>
+            <Text style={styles.info}>{t('mockApi', { ns: 'dev' })}: {DEV_CONFIG.mockApiCalls ? 'ON' : 'OFF'}</Text>
           </View>
 
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => setIsExpanded(false)}
           >
-            <Text style={styles.closeButtonText}>닫기</Text>
+            <Text style={styles.closeButtonText}>{t('actions.close', { ns: 'common' })}</Text>
           </TouchableOpacity>
         </View>
       )}

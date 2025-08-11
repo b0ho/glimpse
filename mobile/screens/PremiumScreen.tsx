@@ -17,6 +17,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/slices/authSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { PricingCard } from '@/components/premium/PricingCard';
@@ -34,6 +35,7 @@ import { STATE_ICONS, UI_ICONS } from '@/utils/icons';
 export const PremiumScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuthStore();
+  const { t } = useTranslation('premium');
   
   const {
     subscription,
@@ -122,19 +124,19 @@ export const PremiumScreen = () => {
     if (!user?.id) return;
 
     Alert.alert(
-      '구독 취소',
-      '정말로 프리미엄 구독을 취소하시겠습니까?\n\n취소 후에도 현재 구독 기간이 끝날 때까지는 프리미엄 기능을 사용할 수 있습니다.',
+      t('subscription.confirmCancel.title'),
+      t('subscription.confirmCancel.message'),
       [
-        { text: '돌아가기', style: 'cancel' },
+        { text: t('subscription.confirmCancel.goBack'), style: 'cancel' },
         {
-          text: '취소하기',
+          text: t('subscription.confirmCancel.confirm'),
           style: 'destructive',
           onPress: async () => {
             try {
               await cancelSubscription(user.id);
-              Alert.alert('완료', '구독이 취소되었습니다.');
+              Alert.alert(t('common:actions.completed'), t('subscription.confirmCancel.success'));
             } catch {
-              Alert.alert('오류', '구독 취소 중 오류가 발생했습니다.');
+              Alert.alert(t('errors.title'), t('subscription.confirmCancel.error'));
             }
           },
         },
@@ -150,9 +152,9 @@ export const PremiumScreen = () => {
   const error = usePremiumStore(state => state.error);
   useEffect(() => {
     if (error) {
-      Alert.alert('오류', error, [
+      Alert.alert(t('errors.title'), error, [
         {
-          text: '확인',
+          text: t('common:actions.confirm'),
           onPress: clearError,
         },
       ]);
@@ -171,26 +173,26 @@ export const PremiumScreen = () => {
       <View style={styles.currentSubscription}>
         <View style={styles.subscriptionHeader}>
           <Icon name={STATE_ICONS.SUCCESS} size={24} color={COLORS.SUCCESS} />
-          <Text style={styles.subscriptionTitle}>활성 구독</Text>
+          <Text style={styles.subscriptionTitle}>{t('subscription.activeTitle')}</Text>
         </View>
         
         <View style={styles.subscriptionInfo}>
           <Text style={styles.planName}>
-            {currentPlan === PremiumPlan.PREMIUM_MONTHLY ? 'Premium 월간' : 'Premium 연간'}
+            {currentPlan === PremiumPlan.PREMIUM_MONTHLY ? t('subscription.monthlyPlan') : t('subscription.yearlyPlan')}
           </Text>
           
           {subscription?.expiresAt && (
             <Text style={styles.expiryInfo}>
               {daysUntilExpiry > 0 
-                ? `${daysUntilExpiry}일 남음` 
-                : '오늘 만료'
+                ? t('subscription.daysLeft', { days: daysUntilExpiry })
+                : t('subscription.expiresToday')
               }
             </Text>
           )}
           
           {subscription?.cancelAtPeriodEnd && (
             <Text style={styles.cancelNotice}>
-              구독이 취소되었습니다. 현재 기간 종료 시까지 이용 가능합니다.
+              {t('subscription.cancelNotice')}
             </Text>
           )}
         </View>
@@ -200,9 +202,9 @@ export const PremiumScreen = () => {
             style={styles.cancelButton}
             onPress={handleCancelSubscription}
             accessibilityRole="button"
-            accessibilityLabel="구독 취소"
+            accessibilityLabel={t('subscription.cancel')}
           >
-            <Text style={styles.cancelButtonText}>구독 취소</Text>
+            <Text style={styles.cancelButtonText}>{t('subscription.cancel')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -219,9 +221,9 @@ export const PremiumScreen = () => {
 
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>프리미엄 구독</Text>
+        <Text style={styles.sectionTitle}>{t('subscription.title')}</Text>
         <Text style={styles.sectionDescription}>
-          모든 기능을 무제한으로 이용하세요
+          {t('subscription.description')}
         </Text>
         
         {subscriptionProducts.map((product, index) => (
@@ -248,9 +250,9 @@ export const PremiumScreen = () => {
 
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>추가 좋아요</Text>
+        <Text style={styles.sectionTitle}>{t('likes.title')}</Text>
         <Text style={styles.sectionDescription}>
-          좋아요가 부족할 때 필요한 만큼만 구매하세요
+          {t('likes.description')}
         </Text>
         
         <ScrollView 
@@ -284,12 +286,12 @@ export const PremiumScreen = () => {
         onPress={() => navigation.goBack()}
         style={styles.backButton}
         accessibilityRole="button"
-        accessibilityLabel="뒤로 가기"
+        accessibilityLabel={t('actions.back')}
       >
         <Icon name={UI_ICONS.ARROW_LEFT} size={24} color={COLORS.TEXT.PRIMARY} />
       </TouchableOpacity>
       
-      <Text style={styles.headerTitle}>Glimpse Premium</Text>
+      <Text style={styles.headerTitle}>{t('title')}</Text>
       
       <View style={styles.placeholder} />
     </View>
@@ -302,27 +304,27 @@ export const PremiumScreen = () => {
    */
   const renderFAQ = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>자주 묻는 질문</Text>
+      <Text style={styles.sectionTitle}>{t('faq.title')}</Text>
       
       <View style={styles.faqContainer}>
         <View style={styles.faqItem}>
-          <Text style={styles.faqQuestion}>언제든지 구독을 취소할 수 있나요?</Text>
+          <Text style={styles.faqQuestion}>{t('faq.questions.cancel.question')}</Text>
           <Text style={styles.faqAnswer}>
-            네, 언제든지 구독을 취소할 수 있습니다. 취소 후에도 현재 구독 기간이 끝날 때까지는 프리미엄 기능을 계속 사용하실 수 있습니다.
+            {t('faq.questions.cancel.answer')}
           </Text>
         </View>
         
         <View style={styles.faqItem}>
-          <Text style={styles.faqQuestion}>결제 정보는 안전한가요?</Text>
+          <Text style={styles.faqQuestion}>{t('faq.questions.payment.question')}</Text>
           <Text style={styles.faqAnswer}>
-            모든 결제 정보는 Stripe를 통해 안전하게 처리되며, Glimpse는 카드 정보를 저장하지 않습니다.
+            {t('faq.questions.payment.answer')}
           </Text>
         </View>
         
         <View style={styles.faqItem}>
-          <Text style={styles.faqQuestion}>구매한 좋아요는 언제까지 사용할 수 있나요?</Text>
+          <Text style={styles.faqQuestion}>{t('faq.questions.likes.question')}</Text>
           <Text style={styles.faqAnswer}>
-            구매한 좋아요는 사용할 때까지 계정에 보관되며, 만료되지 않습니다.
+            {t('faq.questions.likes.answer')}
           </Text>
         </View>
       </View>

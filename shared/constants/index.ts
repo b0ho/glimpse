@@ -214,5 +214,9 @@ export const STORAGE_KEYS = {
   DEVICE_TOKEN: 'device_token',
   SETTINGS: 'app_settings',
   LOCATION_PERMISSION: 'location_permission',
-  NOTIFICATION_PERMISSION: 'notification_permission'
+  NOTIFICATION_PERMISSION: 'notification_permission',
+  USER_LANGUAGE: 'user_language'
 } as const;
+
+// Export i18n constants
+export * from './i18n';

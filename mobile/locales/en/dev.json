@@ -1,0 +1,9 @@
+{
+  "devModePanel": "Dev Mode Panel",
+  "currentAccount": "Current Account",
+  "accountSwitch": "Account Switch",
+  "switchAccount": "Switch to {{nickname}} account?\nApp will refresh.",
+  "debugInfo": "Debug Info",
+  "environment": "Environment",
+  "mockApi": "Mock API"
+}

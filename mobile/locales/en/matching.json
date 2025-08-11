@@ -1,0 +1,55 @@
+{
+  "like": {
+    "title": "Likes",
+    "sendLike": "Send Like",
+    "superLike": "Super Like",
+    "likeSent": "Like sent successfully",
+    "likeReceived": "{{name}} sent you a like",
+    "dailyLikes": "Today's Likes",
+    "remainingLikes": "Remaining Likes: {{count}}",
+    "unlimitedLikes": "Unlimited Likes",
+    "buyMoreLikes": "Buy More Likes",
+    "cooldownMessage": "You can like again in {{days}} days",
+    "selfLikeNotAllowed": "You cannot like yourself",
+    "alreadyLiked": "You already liked this user",
+    "limitExceeded": "Like Limit Exceeded",
+    "dailyLimitMessage": "You've used all your free likes today.\nYou can purchase more likes."
+  },
+  "match": {
+    "title": "Matches",
+    "newMatch": "New Match!",
+    "matchMessage": "You matched with {{name}}",
+    "matchList": "Match List",
+    "activeMatches": "Active Matches",
+    "expiredMatches": "Expired Matches",
+    "sendMessage": "Send Message",
+    "viewProfile": "View Profile",
+    "unmatch": "Unmatch",
+    "reportMatch": "Report"
+  },
+  "discover": {
+    "title": "Discover",
+    "noMoreProfiles": "No more profiles",
+    "refreshProfiles": "Refresh Profiles",
+    "filterProfiles": "Filter Settings",
+    "ageRange": "Age Range",
+    "distance": "Distance",
+    "interests": "Interests"
+  },
+  "whoLikesYou": {
+    "title": "Who Likes You",
+    "premium": "Premium Feature",
+    "upgradeMessage": "Upgrade to Premium to see who likes you",
+    "likeBack": "Like Back",
+    "pass": "Pass"
+  },
+  "friendship": {
+    "sendRequest": "Send Friend Request",
+    "requestSent": "Friend request sent",
+    "requestReceived": "{{name}} sent you a friend request",
+    "acceptRequest": "Accept",
+    "rejectRequest": "Reject",
+    "friendList": "Friend List",
+    "mutualFriends": "{{count}} mutual friends"
+  }
+}

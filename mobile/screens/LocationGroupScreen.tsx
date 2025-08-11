@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 import { locationService } from '../services/locationService';
@@ -57,6 +58,7 @@ const LocationGroupScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [scanning, setScanning] = useState(false);
+  const { t } = useTranslation('location');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
     name: '',
@@ -87,10 +89,10 @@ const LocationGroupScreen = () => {
       // 카메라 권한 확인 (QR 스캔용)
       const { status } = await BarCodeScanner.requestPermissionsAsync();
       if (status !== 'granted') {
-        console.log('카메라 권한이 거부되었습니다.');
+        console.log(t('permissions.cameraRequired'));
       }
     } catch (error) {
-      console.error('권한 확인 오류:', error);
+      console.error(t('errors.permissionError'), error);
     } finally {
       setLoading(false);
     }
@@ -107,7 +109,7 @@ const LocationGroupScreen = () => {
       setNearbyGroups(groups);
     } catch (error) {
       console.error('주변 그룹 로드 오류:', error);
-      Alert.alert('오류', '주변 그룹을 불러오는데 실패했습니다.');
+      Alert.alert(t('errors.title'), t('errors.loadNearbyFailed'));
     }
   };
 
@@ -134,13 +136,13 @@ const LocationGroupScreen = () => {
       const result = await locationService.joinLocationGroup(groupId);
       
       if (result.alreadyMember) {
-        Alert.alert('알림', '이미 참여중인 그룹입니다.');
+        Alert.alert(t('common:notifications.info'), t('group.alreadyMember'));
       } else {
-        Alert.alert('성공', '그룹에 참여했습니다!');
+        Alert.alert(t('common:actions.success'), t('group.joinSuccess'));
         await loadNearbyGroups();
       }
     } catch (error: any) {
-      Alert.alert('오류', error.message || '그룹 참여에 실패했습니다.');
+      Alert.alert(t('errors.title'), error.message || t('group.joinError'));
     } finally {
       setLoading(false);
     }
@@ -162,13 +164,13 @@ const LocationGroupScreen = () => {
       const result = await locationService.joinGroupByQRCode(data);
       
       if (result.alreadyMember) {
-        Alert.alert('알림', '이미 참여중인 그룹입니다.');
+        Alert.alert(t('common:notifications.info'), t('group.alreadyMember'));
       } else {
-        Alert.alert('성공', 'QR 코드로 그룹에 참여했습니다!');
+        Alert.alert(t('common:actions.success'), t('qr.success'));
         await loadNearbyGroups();
       }
     } catch (error: any) {
-      Alert.alert('오류', error.message || 'QR 코드 인식에 실패했습니다.');
+      Alert.alert(t('errors.title'), error.message || t('qr.error'));
     } finally {
       setLoading(false);
     }
@@ -181,7 +183,7 @@ const LocationGroupScreen = () => {
    */
   const handleCreateGroup = async () => {
     if (!createForm.name.trim()) {
-      Alert.alert('오류', '그룹 이름을 입력해주세요.');
+      Alert.alert(t('errors.title'), t('form.nameRequired'));
       return;
     }
 
@@ -196,17 +198,17 @@ const LocationGroupScreen = () => {
 
       // QR 코드 표시
       Alert.alert(
-        '그룹 생성 완료',
-        '그룹이 생성되었습니다. QR 코드를 공유하여 다른 사람들을 초대할 수 있습니다.',
+        t('common:actions.completed'),
+        t('group.createSuccess'),
         [
           {
-            text: 'QR 코드 보기',
+            text: t('group.viewQRCode'),
             onPress: () => {
               // QR 코드 모달 표시
-              Alert.alert('그룹 생성 완료', `QR 코드: ${group.qrCode}`);
+              Alert.alert(t('common:actions.completed'), `QR Code: ${group.qrCode}`);
             },
           },
-          { text: '확인' },
+          { text: t('common:actions.confirm') },
         ]
       );
 
@@ -214,7 +216,7 @@ const LocationGroupScreen = () => {
       setCreateForm({ name: '', description: '', radius: '100', maxMembers: '50' });
       await loadNearbyGroups();
     } catch (error: any) {
-      Alert.alert('오류', error.message || '그룹 생성에 실패했습니다.');
+      Alert.alert(t('errors.title'), error.message || t('group.createError'));
     } finally {
       setLoading(false);
     }
@@ -245,12 +247,12 @@ const LocationGroupScreen = () => {
     return (
       <View style={styles.centerContainer}>
         <Ionicons name="location-outline" size={60} color={COLORS.gray} />
-        <Text style={styles.permissionText}>위치 권한이 필요합니다</Text>
+        <Text style={styles.permissionText}>{t('permissions.required')}</Text>
         <TouchableOpacity 
           style={styles.permissionButton}
           onPress={checkPermissionsAndLoadGroups}
         >
-          <Text style={styles.permissionButtonText}>권한 요청</Text>
+          <Text style={styles.permissionButtonText}>{t('permissions.request')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -259,7 +261,7 @@ const LocationGroupScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>주변 그룹</Text>
+        <Text style={styles.title}>{t('title')}</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
             style={styles.headerButton}
@@ -285,8 +287,8 @@ const LocationGroupScreen = () => {
         {nearbyGroups.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Ionicons name="location-outline" size={60} color={COLORS.gray} />
-            <Text style={styles.emptyText}>주변에 그룹이 없습니다</Text>
-            <Text style={styles.emptySubText}>새로운 그룹을 만들어보세요!</Text>
+            <Text style={styles.emptyText}>{t('emptyState.title')}</Text>
+            <Text style={styles.emptySubText}>{t('emptyState.subtitle')}</Text>
           </View>
         ) : (
           nearbyGroups.map((group) => (
@@ -305,7 +307,7 @@ const LocationGroupScreen = () => {
                 <Text style={styles.distance}>{formatDistance(group.distance)}</Text>
                 <Text style={styles.memberCount}>
                   <Ionicons name="people" size={14} color={COLORS.gray} />
-                  {' '}{group._count.members}명
+                  {' '}{t('group.memberCount', { count: group._count.members })}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -325,7 +327,7 @@ const LocationGroupScreen = () => {
             <TouchableOpacity onPress={() => setScanning(false)}>
               <Ionicons name="close" size={28} color={COLORS.white} />
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>QR 코드 스캔</Text>
+            <Text style={styles.modalTitle}>{t('qr.title')}</Text>
             <View style={{ width: 28 }} />
           </View>
           
@@ -336,7 +338,7 @@ const LocationGroupScreen = () => {
           
           <View style={styles.scanOverlay}>
             <View style={styles.scanFrame} />
-            <Text style={styles.scanText}>QR 코드를 화면에 맞춰주세요</Text>
+            <Text style={styles.scanText}>{t('qr.instruction')}</Text>
           </View>
         </View>
       </Modal>
@@ -350,18 +352,18 @@ const LocationGroupScreen = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.createModalContent}>
-            <Text style={styles.createModalTitle}>위치 그룹 만들기</Text>
+            <Text style={styles.createModalTitle}>{t('group.create')}</Text>
             
             <TextInput
               style={styles.input}
-              placeholder="그룹 이름"
+              placeholder={t('form.name')}
               value={createForm.name}
               onChangeText={(text) => setCreateForm({ ...createForm, name: text })}
             />
             
             <TextInput
               style={[styles.input, styles.textArea]}
-              placeholder="그룹 설명 (선택)"
+              placeholder={t('form.description')}
               value={createForm.description}
               onChangeText={(text) => setCreateForm({ ...createForm, description: text })}
               multiline
@@ -370,7 +372,7 @@ const LocationGroupScreen = () => {
             
             <View style={styles.inputRow}>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>반경 (m)</Text>
+                <Text style={styles.inputLabel}>{t('form.radius')}</Text>
                 <TextInput
                   style={[styles.input, styles.smallInput]}
                   placeholder="100"
@@ -381,7 +383,7 @@ const LocationGroupScreen = () => {
               </View>
               
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>최대 인원</Text>
+                <Text style={styles.inputLabel}>{t('form.maxMembers')}</Text>
                 <TextInput
                   style={[styles.input, styles.smallInput]}
                   placeholder="50"
@@ -397,14 +399,14 @@ const LocationGroupScreen = () => {
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowCreateModal(false)}
               >
-                <Text style={styles.cancelButtonText}>취소</Text>
+                <Text style={styles.cancelButtonText}>{t('form.cancel')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={[styles.modalButton, styles.createButton]}
                 onPress={handleCreateGroup}
               >
-                <Text style={styles.createButtonText}>만들기</Text>
+                <Text style={styles.createButtonText}>{t('form.create')}</Text>
               </TouchableOpacity>
             </View>
           </View>

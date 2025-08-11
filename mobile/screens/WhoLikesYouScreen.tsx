@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/slices/authSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
@@ -29,6 +30,7 @@ interface LikeInfo {
 }
 
 export const WhoLikesYouScreen = () => {
+  const { t } = useTranslation('premium');
   const navigation = useNavigation();
   const { user } = useAuthStore();
   
@@ -55,7 +57,7 @@ export const WhoLikesYouScreen = () => {
           id: like.fromUserId,
           anonymousId: `anon_${like.fromUserId}`,
           phoneNumber: '',
-          nickname: '익명의 누군가',
+          nickname: t('whoLikesYou.anonymousUser'),
           isVerified: true,
           credits: 0,
           isPremium: false,
@@ -64,7 +66,7 @@ export const WhoLikesYouScreen = () => {
           updatedAt: new Date(like.createdAt),
         },
         groupId: like.groupId || 'unknown',
-        groupName: '그룹',
+        groupName: t('whoLikesYou.group'),
         likedAt: new Date(like.createdAt),
         isSuper: like.isSuper || false,
       }));
@@ -72,7 +74,7 @@ export const WhoLikesYouScreen = () => {
       setLikesReceived(likeInfos);
     } catch (error: any) {
       console.error('[WhoLikesYouScreen] 받은 좋아요 로드 실패:', error);
-      Alert.alert('오류', '좋아요 정보를 불러오는 중 오류가 발생했습니다.');
+      Alert.alert(t('whoLikesYou.error'), t('whoLikesYou.loadError'));
       setLikesReceived([]);
     }
   }, [user?.id, isPremiumUser]);
@@ -90,12 +92,12 @@ export const WhoLikesYouScreen = () => {
   const handleLikeBack = useCallback(async (likeInfo: LikeInfo) => {
     try {
       Alert.alert(
-        '좋아요 보내기',
-        `${likeInfo.fromUser.nickname}님에게 좋아요를 보내시겠습니까?`,
+        t('whoLikesYou.sendLike.title'),
+        t('whoLikesYou.sendLike.message', { nickname: likeInfo.fromUser.nickname }),
         [
-          { text: '취소', style: 'cancel' },
+          { text: t('whoLikesYou.sendLike.cancel'), style: 'cancel' },
           {
-            text: '좋아요',
+            text: t('whoLikesYou.sendLike.confirm'),
             onPress: async () => {
               const success = await sendLike(
                 likeInfo.fromUser.id,
@@ -135,12 +137,12 @@ export const WhoLikesYouScreen = () => {
       // 프리미엄 사용자가 아닌 경우 체크
       if (!isPremiumUser) {
         Alert.alert(
-          '프리미엄 전용 기능',
-          '슈퍼 좋아요는 프리미엄 사용자만 사용할 수 있습니다.',
+          t('whoLikesYou.premiumFeature.title'),
+          t('whoLikesYou.premiumFeature.message'),
           [
-            { text: '취소', style: 'cancel' },
+            { text: t('common:buttons.cancel'), style: 'cancel' },
             {
-              text: '프리미엄 가입',
+              text: t('whoLikesYou.premiumFeature.subscribe'),
               onPress: () => navigation.navigate('Premium' as never),
             },
           ]

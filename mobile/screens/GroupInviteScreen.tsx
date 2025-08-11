@@ -13,6 +13,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { groupApi } from '@/services/api/groupApi';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import QRCode from 'react-native-qrcode-svg';
@@ -35,6 +36,7 @@ export const GroupInviteScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { groupId } = route.params as { groupId: string };
+  const { t } = useTranslation();
 
   const [inviteLink, setInviteLink] = useState<string>('');
   const [invites, setInvites] = useState<GroupInvite[]>([]);
@@ -70,9 +72,9 @@ export const GroupInviteScreen = () => {
       const link = await groupApi.generateInviteLink(groupId);
       setInviteLink(link);
       await loadInvites(); // 초대 목록 새로고침
-      Alert.alert('성공', '새로운 초대 링크가 생성되었습니다.');
+      Alert.alert(t('group:invite.alerts.generateSuccess.title'), t('group:invite.alerts.generateSuccess.message'));
     } catch (error: any) {
-      Alert.alert('오류', error.response?.data?.message || '초대 링크 생성에 실패했습니다.');
+      Alert.alert(t('group:invite.alerts.generateError.title'), error.response?.data?.message || t('group:invite.alerts.generateError.message'));
     } finally {
       setIsGenerating(false);
     }
@@ -86,8 +88,8 @@ export const GroupInviteScreen = () => {
 
     try {
       await Share.share({
-        message: `Glimpse 그룹에 초대합니다!\n\n${inviteLink}\n\n위 링크를 클릭하여 그룹에 참여하세요.`,
-        title: 'Glimpse 그룹 초대',
+        message: t('group:invite.link.shareMessage', { link: inviteLink }),
+        title: t('group:invite.link.shareTitle'),
       });
     } catch (error) {
       console.error('Share error:', error);
@@ -98,18 +100,18 @@ export const GroupInviteScreen = () => {
     if (!inviteLink) return;
     
     Clipboard.setString(inviteLink);
-    Alert.alert('복사됨', '초대 링크가 클립보드에 복사되었습니다.');
+    Alert.alert(t('group:invite.alerts.copied.title'), t('group:invite.alerts.copied.message'));
   };
 
   const inviteByPhoneNumbers = async () => {
     if (!phoneNumbers.trim()) {
-      Alert.alert('오류', '전화번호를 입력해주세요.');
+      Alert.alert(t('group:invite.alerts.phoneRequired.title'), t('group:invite.alerts.phoneRequired.message'));
       return;
     }
 
     const numbers = phoneNumbers.split(',').map(num => num.trim()).filter(num => num);
     if (numbers.length === 0) {
-      Alert.alert('오류', '유효한 전화번호를 입력해주세요.');
+      Alert.alert(t('group:invite.alerts.phoneInvalid.title'), t('group:invite.alerts.phoneInvalid.message'));
       return;
     }
 
@@ -122,14 +124,14 @@ export const GroupInviteScreen = () => {
       const errors = result.filter((r: any) => r.status === 'error').length;
 
       let message = '';
-      if (invited > 0) message += `${invited}명 초대 완료\n`;
-      if (notFound > 0) message += `${notFound}명 미가입 사용자\n`;
-      if (errors > 0) message += `${errors}명 초대 실패`;
+      if (invited > 0) message += t('group:invite.alerts.inviteResult.invited', { count: invited }) + '\n';
+      if (notFound > 0) message += t('group:invite.alerts.inviteResult.notFound', { count: notFound }) + '\n';
+      if (errors > 0) message += t('group:invite.alerts.inviteResult.errors', { count: errors });
 
-      Alert.alert('초대 결과', message.trim());
+      Alert.alert(t('group:invite.alerts.inviteResult.title'), message.trim());
       setPhoneNumbers('');
     } catch (error: any) {
-      Alert.alert('오류', error.response?.data?.message || '초대에 실패했습니다.');
+      Alert.alert(t('group:invite.alerts.inviteError.title'), error.response?.data?.message || t('group:invite.alerts.inviteError.message'));
     } finally {
       setIsInviting(false);
     }
@@ -137,20 +139,20 @@ export const GroupInviteScreen = () => {
 
   const revokeInvite = async (inviteId: string) => {
     Alert.alert(
-      '초대 취소',
-      '이 초대 링크를 취소하시겠습니까?',
+      t('group:invite.alerts.revokeConfirm.title'),
+      t('group:invite.alerts.revokeConfirm.message'),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('group:invite.alerts.revokeConfirm.cancel'), style: 'cancel' },
         {
-          text: '확인',
+          text: t('group:invite.alerts.revokeConfirm.confirm'),
           style: 'destructive',
           onPress: async () => {
             try {
               await groupApi.revokeInvite(inviteId);
               await loadInvites();
-              Alert.alert('성공', '초대가 취소되었습니다.');
+              Alert.alert(t('group:invite.alerts.revokeSuccess.title'), t('group:invite.alerts.revokeSuccess.message'));
             } catch (error: any) {
-              Alert.alert('오류', error.response?.data?.message || '초대 취소에 실패했습니다.');
+              Alert.alert(t('group:invite.alerts.revokeError.title'), error.response?.data?.message || t('group:invite.alerts.revokeError.message'));
             }
           },
         },
@@ -170,16 +172,16 @@ export const GroupInviteScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.headerButton}>닫기</Text>
+          <Text style={styles.headerButton}>{t('common:buttons.close')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>그룹 초대</Text>
+        <Text style={styles.headerTitle}>{t('group:invite.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView style={styles.content}>
         {/* QR 코드 섹션 */}
         <View style={styles.qrSection}>
-          <Text style={styles.sectionTitle}>QR 코드로 초대</Text>
+          <Text style={styles.sectionTitle}>{t('group:invite.qr.title')}</Text>
           {inviteLink ? (
             <View style={styles.qrContainer}>
               <QRCode
@@ -188,7 +190,7 @@ export const GroupInviteScreen = () => {
                 backgroundColor="white"
               />
               <Text style={styles.qrHelperText}>
-                QR 코드를 스캔하여 그룹에 참여할 수 있습니다
+                {t('group:invite.qr.helperText')}
               </Text>
             </View>
           ) : (
@@ -200,7 +202,7 @@ export const GroupInviteScreen = () => {
               {isGenerating ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <Text style={styles.generateButtonText}>초대 링크 생성</Text>
+                <Text style={styles.generateButtonText}>{t('group:invite.qr.generate')}</Text>
               )}
             </TouchableOpacity>
           )}
@@ -209,7 +211,7 @@ export const GroupInviteScreen = () => {
         {/* 링크 공유 섹션 */}
         {inviteLink && (
           <View style={styles.linkSection}>
-            <Text style={styles.sectionTitle}>초대 링크</Text>
+            <Text style={styles.sectionTitle}>{t('group:invite.link.title')}</Text>
             <View style={styles.linkContainer}>
               <Text style={styles.linkText} numberOfLines={1}>
                 {inviteLink}
@@ -219,13 +221,13 @@ export const GroupInviteScreen = () => {
                   style={styles.linkButton}
                   onPress={copyToClipboard}
                 >
-                  <Text style={styles.linkButtonText}>복사</Text>
+                  <Text style={styles.linkButtonText}>{t('group:invite.link.copy')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.linkButton, styles.shareButton]}
                   onPress={shareInviteLink}
                 >
-                  <Text style={styles.linkButtonText}>공유</Text>
+                  <Text style={styles.linkButtonText}>{t('group:invite.link.share')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -234,13 +236,13 @@ export const GroupInviteScreen = () => {
 
         {/* 전화번호로 초대 섹션 */}
         <View style={styles.phoneSection}>
-          <Text style={styles.sectionTitle}>전화번호로 초대</Text>
+          <Text style={styles.sectionTitle}>{t('group:invite.phone.title')}</Text>
           <Text style={styles.helperText}>
-            콤마(,)로 구분하여 여러 번호를 입력할 수 있습니다
+            {t('group:invite.phone.helperText')}
           </Text>
           <TextInput
             style={styles.phoneInput}
-            placeholder="010-1234-5678, 010-9876-5432"
+            placeholder={t('group:invite.phone.placeholder')}
             placeholderTextColor={COLORS.TEXT.LIGHT}
             value={phoneNumbers}
             onChangeText={setPhoneNumbers}
@@ -254,7 +256,7 @@ export const GroupInviteScreen = () => {
             {isInviting ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text style={styles.inviteButtonText}>초대하기</Text>
+              <Text style={styles.inviteButtonText}>{t('group:invite.phone.button')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -262,16 +264,19 @@ export const GroupInviteScreen = () => {
         {/* 활성 초대 목록 */}
         {invites.length > 0 && (
           <View style={styles.invitesSection}>
-            <Text style={styles.sectionTitle}>활성 초대 링크</Text>
+            <Text style={styles.sectionTitle}>{t('group:invite.active.title')}</Text>
             {invites.map(invite => {
               const isExpired = new Date(invite.expiresAt) < new Date();
               return (
                 <View key={invite.id} style={[styles.inviteItem, isExpired && styles.inviteItemExpired]}>
                   <View style={styles.inviteInfo}>
-                    <Text style={styles.inviteCode}>코드: {invite.inviteCode}</Text>
+                    <Text style={styles.inviteCode}>{t('group:invite.active.code', { code: invite.inviteCode })}</Text>
                     <Text style={styles.inviteStats}>
-                      사용: {invite.uses}{invite.maxUses ? `/${invite.maxUses}` : ''} • 
-                      {isExpired ? ' 만료됨' : ` ${new Date(invite.expiresAt).toLocaleDateString()} 까지`}
+                      {t('group:invite.active.stats', {
+                        uses: invite.uses,
+                        maxUses: invite.maxUses ? t('group:invite.active.maxUses', { count: invite.maxUses }) : '',
+                        expiry: isExpired ? t('group:invite.active.expired') : t('group:invite.active.expiresOn', { date: new Date(invite.expiresAt).toLocaleDateString() })
+                      })}
                     </Text>
                   </View>
                   {!isExpired && (
@@ -279,7 +284,7 @@ export const GroupInviteScreen = () => {
                       style={styles.revokeButton}
                       onPress={() => revokeInvite(invite.id)}
                     >
-                      <Text style={styles.revokeButtonText}>취소</Text>
+                      <Text style={styles.revokeButtonText}>{t('group:invite.active.revoke')}</Text>
                     </TouchableOpacity>
                   )}
                 </View>

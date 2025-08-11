@@ -9,6 +9,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 // import { useAuth } from '@clerk/clerk-expo';
 import { useAuth } from '@/hooks/useDevAuth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -18,6 +19,7 @@ import { useGroupStore } from '@/store/slices/groupSlice';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { EditNicknameModal } from '@/components/modals/EditNicknameModal';
+import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { AppMode, MODE_TEXTS } from '@shared/types';
 import apiClient from '@/services/api/config';
 
@@ -32,6 +34,7 @@ export const ProfileScreen = () => {
   const [isNicknameModalVisible, setIsNicknameModalVisible] = useState(false);
   
   const navigation = useNavigation();
+  const { t } = useTranslation();
   const { signOut } = useAuth();
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
@@ -131,26 +134,29 @@ export const ProfileScreen = () => {
     const timeLeft = Math.ceil((lastLike.createdAt.getTime() + 5 * 60 * 1000 - Date.now()) / 1000 / 60);
     
     Alert.alert(
-      '좋아요 되돌리기',
-      `마지막으로 보낸 좋아요를 되돌리시겠습니까?\n\n• 대상: 익명 사용자\n• ${lastLike.isSuper ? '슈퍼 좋아요' : '일반 좋아요'}\n• 남은 시간: ${Math.max(0, timeLeft)}분\n\n⚠️ 되돌린 후에는 다시 되돌릴 수 없습니다.`,
+      t('profile:likeSystem.rewindTitle'),
+      t('profile:likeSystem.rewindMessage', { 
+        type: lastLike.isSuper ? t('profile:likeSystem.superLike') : t('profile:likeSystem.normalLike'),
+        timeLeft: Math.max(0, timeLeft)
+      }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('common:buttons.cancel'), style: 'cancel' },
         {
-          text: '되돌리기',
+          text: t('profile:likeSystem.rewindButton'),
           style: 'destructive',
           onPress: async () => {
             const success = await likeStore.rewindLastLike();
             if (success) {
               Alert.alert(
-                '완료',
-                '좋아요가 성공적으로 되돌려졌습니다.\n해당 사용자에게 보낸 좋아요가 취소되었습니다.',
-                [{ text: '확인' }]
+                t('profile:likeSystem.rewindSuccess'),
+                t('profile:likeSystem.rewindSuccessMessage'),
+                [{ text: t('common:buttons.confirm') }]
               );
             } else {
               Alert.alert(
-                '오류',
-                likeStore.error || '좋아요 되돌리기에 실패했습니다.',
-                [{ text: '확인' }]
+                t('common:status.error'),
+                likeStore.error || t('profile:likeSystem.rewindError'),
+                [{ text: t('common:buttons.confirm') }]
               );
             }
           },
@@ -258,27 +264,27 @@ export const ProfileScreen = () => {
    */
   const renderStatsSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>활동 통계</Text>
+      <Text style={styles.sectionTitle}>{t('profile:stats.title', '활동 통계')}</Text>
       
       <View style={styles.statsGrid}>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{groupStore.joinedGroups.length}</Text>
-          <Text style={styles.statLabel}>참여 그룹</Text>
+          <Text style={styles.statLabel}>{t('profile:stats.joinedGroups', '참여 그룹')}</Text>
         </View>
         
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{likeStore.sentLikes.length}</Text>
-          <Text style={styles.statLabel}>보낸 좋아요</Text>
+          <Text style={styles.statLabel}>{t('profile:stats.sentLikes', '보낸 좋아요')}</Text>
         </View>
         
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{likeStore.getReceivedLikesCount()}</Text>
-          <Text style={styles.statLabel}>받은 좋아요</Text>
+          <Text style={styles.statLabel}>{t('profile:stats.receivedLikes', '받은 좋아요')}</Text>
         </View>
         
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{likeStore.matches.length}</Text>
-          <Text style={styles.statLabel}>총 매칭</Text>
+          <Text style={styles.statLabel}>{t('profile:stats.totalMatches', '총 매칭')}</Text>
         </View>
       </View>
     </View>
@@ -367,9 +373,10 @@ export const ProfileScreen = () => {
    */
   const renderSettingsSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>설정</Text>
+      <Text style={styles.sectionTitle}>{t('common:navigation.settings')}</Text>
       
       <View style={styles.settingsCard}>
+        <LanguageSelector onLanguageChange={() => {}} />
         <TouchableOpacity 
           style={styles.settingItem}
           onPress={() => navigation.navigate('LikeHistory' as never)}

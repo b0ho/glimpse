@@ -10,11 +10,13 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 export const MyGroupsScreen = () => {
+  const { t } = useTranslation('group');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'joined' | 'created'>('joined');
   
@@ -35,29 +37,29 @@ export const MyGroupsScreen = () => {
 
   const handleLeaveGroup = useCallback((group: Group) => {
     Alert.alert(
-      '그룹 나가기',
-      `정말 "${group.name}" 그룹에서 나가시겠습니까?\n\n나간 후에는 다시 참여해야 그룹 내 활동에 참여할 수 있습니다.`,
+      t('myGroups.leaveGroup.title'),
+      t('myGroups.leaveGroup.message', { groupName: group.name }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('myGroups.leaveGroup.cancel'), style: 'cancel' },
         {
-          text: '나가기',
+          text: t('myGroups.leaveGroup.confirm'),
           style: 'destructive',
           onPress: () => {
             groupStore.leaveGroup(group.id);
-            Alert.alert('완료', `"${group.name}" 그룹에서 나갔습니다.`);
+            Alert.alert(t('myGroups.leaveGroup.successTitle'), t('myGroups.leaveGroup.successMessage', { groupName: group.name }));
           },
         },
       ]
     );
-  }, [groupStore]);
+  }, [groupStore, t]);
 
   const handleManageGroup = useCallback((_group: Group) => {
     Alert.alert(
-      '그룹 관리',
-      '그룹 관리 기능은 곧 추가될 예정입니다.',
-      [{ text: '확인' }]
+      t('myGroups.manageGroup.title'),
+      t('myGroups.manageGroup.message'),
+      [{ text: t('myGroups.manageGroup.confirm') }]
     );
-  }, []);
+  }, [t]);
 
   const renderGroupTypeIcon = (type: GroupType): string => {
     switch (type) {
@@ -87,13 +89,16 @@ export const MyGroupsScreen = () => {
             <View style={styles.groupDetails}>
               <View style={styles.groupTitleRow}>
                 <Text style={styles.groupName}>{item.name}</Text>
-                {isCreator && <Text style={styles.creatorBadge}>관리자</Text>}
+                {isCreator && <Text style={styles.creatorBadge}>{t('myGroups.creatorBadge')}</Text>}
               </View>
               <Text style={styles.groupDescription} numberOfLines={2}>
                 {item.description}
               </Text>
               <Text style={styles.groupStats}>
-                멤버 {item.memberCount}명 • 매칭 {item.isMatchingActive ? '활성' : '비활성'}
+                {t('myGroups.groupStats', { 
+                  memberCount: item.memberCount,
+                  matchingStatus: item.isMatchingActive ? t('myGroups.active') : t('myGroups.inactive')
+                })}
               </Text>
             </View>
           </View>
@@ -105,25 +110,25 @@ export const MyGroupsScreen = () => {
               style={[styles.actionButton, styles.manageButton]}
               onPress={() => handleManageGroup(item)}
             >
-              <Text style={styles.manageButtonText}>관리</Text>
+              <Text style={styles.manageButtonText}>{t('myGroups.manageButton')}</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               style={[styles.actionButton, styles.leaveButton]}
               onPress={() => handleLeaveGroup(item)}
             >
-              <Text style={styles.leaveButtonText}>나가기</Text>
+              <Text style={styles.leaveButtonText}>{t('myGroups.leaveButton')}</Text>
             </TouchableOpacity>
           )}
           
           <TouchableOpacity
             style={[styles.actionButton, styles.viewButton]}
             onPress={() => {
-              // TODO: 그룹 상세 페이지로 이동
-              Alert.alert('알림', '그룹 상세 보기 기능이 곧 추가됩니다.');
+              // TODO: Navigate to group detail page
+              Alert.alert(t('myGroups.viewGroup.title'), t('myGroups.viewGroup.message'));
             }}
           >
-            <Text style={styles.viewButtonText}>보기</Text>
+            <Text style={styles.viewButtonText}>{t('myGroups.viewButton')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -145,7 +150,7 @@ export const MyGroupsScreen = () => {
             selectedTab === 'joined' && styles.tabButtonTextActive,
           ]}
         >
-          참여 중인 그룹 ({groupStore.joinedGroups.length})
+          {t('myGroups.joinedTab', { count: groupStore.joinedGroups.length })}
         </Text>
       </TouchableOpacity>
       
@@ -162,7 +167,7 @@ export const MyGroupsScreen = () => {
             selectedTab === 'created' && styles.tabButtonTextActive,
           ]}
         >
-          내가 만든 그룹 ({groupStore.joinedGroups.filter(g => g.creatorId === 'current_user').length})
+          {t('myGroups.createdTab', { count: groupStore.joinedGroups.filter(g => g.creatorId === 'current_user').length })}
         </Text>
       </TouchableOpacity>
     </View>
@@ -170,9 +175,9 @@ export const MyGroupsScreen = () => {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <Text style={styles.headerTitle}>내 그룹</Text>
+      <Text style={styles.headerTitle}>{t('myGroups.title')}</Text>
       <Text style={styles.headerSubtitle}>
-        참여하고 있는 그룹과 내가 만든 그룹을 관리하세요
+        {t('myGroups.subtitle')}
       </Text>
     </View>
   );
@@ -184,14 +189,14 @@ export const MyGroupsScreen = () => {
       </Text>
       <Text style={styles.emptyStateTitle}>
         {selectedTab === 'joined' 
-          ? '참여 중인 그룹이 없어요'
-          : '만든 그룹이 없어요'
+          ? t('myGroups.emptyJoined.title')
+          : t('myGroups.emptyCreated.title')
         }
       </Text>
       <Text style={styles.emptyStateSubtitle}>
         {selectedTab === 'joined'
-          ? '그룹 탐색에서 관심있는 그룹에 참여해보세요!'
-          : '새로운 그룹을 만들어 사람들과 만나보세요!'
+          ? t('myGroups.emptyJoined.subtitle')
+          : t('myGroups.emptyCreated.subtitle')
         }
       </Text>
       <TouchableOpacity
@@ -205,7 +210,7 @@ export const MyGroupsScreen = () => {
         }}
       >
         <Text style={styles.emptyStateButtonText}>
-          {selectedTab === 'joined' ? '그룹 탐색하기' : '새 그룹 만들기'}
+          {selectedTab === 'joined' ? t('myGroups.emptyJoined.button') : t('myGroups.emptyCreated.button')}
         </Text>
       </TouchableOpacity>
     </View>

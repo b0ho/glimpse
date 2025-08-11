@@ -12,6 +12,7 @@ import {
   FlatList,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as Location from 'expo-location';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -29,6 +30,7 @@ interface LocationData {
 
 export const NearbyUsersScreen = React.memo(() => {
   const navigation = useNavigation();
+  const { t } = useTranslation('location');
   const { user } = useAuthStore();
   const { sendLike, sentLikes } = useLikeStore();
   
@@ -63,9 +65,9 @@ export const NearbyUsersScreen = React.memo(() => {
         
         if (status !== 'granted') {
           Alert.alert(
-            '위치 권한 필요',
-            '근처 사용자를 찾기 위해 위치 권한이 필요합니다.\n설정에서 위치 권한을 허용해주세요.',
-            [{ text: '나중에', style: 'cancel' }]
+            t('permissions.requestTitle'),
+            t('permissions.requestMessage'),
+            [{ text: t('permissions.later'), style: 'cancel' }]
           );
           setIsLoading(false);
           return;
@@ -76,7 +78,7 @@ export const NearbyUsersScreen = React.memo(() => {
       await getCurrentLocation();
     } catch (error) {
       console.error('Location permission error:', error);
-      Alert.alert('오류', '위치 권한 요청에 실패했습니다.');
+      Alert.alert(t('errors.title'), t('permissions.locationRequestError'));
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +115,7 @@ export const NearbyUsersScreen = React.memo(() => {
       setCurrentLocation(locationData);
     } catch (error) {
       console.error('Get current location error:', error);
-      Alert.alert('위치 오류', '현재 위치를 가져올 수 없습니다.');
+      Alert.alert(t('errors.title'), t('permissions.locationError'));
     }
   };
 
@@ -217,39 +219,42 @@ export const NearbyUsersScreen = React.memo(() => {
       );
 
       if (existingLike) {
-        Alert.alert('알림', '이미 좋아요를 보낸 사용자입니다.');
+        Alert.alert(t('common:notification'), t('matching.alreadySent'));
         return;
       }
 
       // 크레딧 확인
       if (!user.isPremium && (user.credits || 0) <= 0) {
         Alert.alert(
-          '크레딧 부족',
-          '좋아요를 보내려면 크레딧이 필요합니다.\n크레딧을 구매하거나 프리미엄으로 업그레이드하세요.',
+          t('matching.creditError.title'),
+          t('matching.creditError.message'),
           [
-            { text: '나중에', style: 'cancel' },
-            { text: '크레딧 구매', onPress: () => navigation.navigate('Premium' as never) },
+            { text: t('matching.creditError.later'), style: 'cancel' },
+            { text: t('matching.creditError.buyCredits'), onPress: () => navigation.navigate('Premium' as never) },
           ]
         );
         return;
       }
 
       Alert.alert(
-        '익명 좋아요 보내기',
-        `${targetUser.nickname}님에게 익명으로 좋아요를 보내시겠습니까?\n\n${user.isPremium ? '프리미엄 회원은 무제한!' : '크레딧 1개가 소모됩니다.'}`,
+        t('matching.sendLike'),
+        t('matching.sendLikeMessage', {
+          nickname: targetUser.nickname,
+          premium: user.isPremium ? t('matching.premiumUnlimited') : t('matching.creditCost')
+        }),
         [
-          { text: '취소', style: 'cancel' },
+          { text: t('matching.cancel'), style: 'cancel' },
           {
-            text: '보내기',
+            text: t('matching.send'),
             onPress: async () => {
               try {
                 await sendLike(
                   targetUser.id,
                   targetUser.commonGroups[0] || 'location_group'
                 );
-                Alert.alert('성공', '익명 좋아요를 보냈습니다! 💕');
+                Alert.alert(t('common:success'), t('matching.success'));
               } catch (error) {
-                Alert.alert('오류', '좋아요 전송에 실패했습니다.');
+                Alert.alert(t('errors.title'), t('matching.error'));
               }
             },
           },
@@ -257,7 +262,7 @@ export const NearbyUsersScreen = React.memo(() => {
       );
     } catch (error) {
       console.error('Send like error:', error);
-      Alert.alert('오류', '좋아요 전송에 실패했습니다.');
+      Alert.alert(t('errors.title'), t('matching.error'));
     }
   };
 
@@ -275,7 +280,7 @@ export const NearbyUsersScreen = React.memo(() => {
         <View style={styles.userInfo}>
           <View style={styles.userNameRow}>
             <Text style={styles.userName}>{item.nickname}</Text>
-            <Text style={styles.userAge}>{item.age || 25}세</Text>
+            <Text style={styles.userAge}>{item.age || 25}{t('nearbyUsers.ageUnit')}</Text>
             {item.isVerified && (
               <Icon name="checkmark-circle" size={16} color={COLORS.SUCCESS} />
             )}
@@ -314,7 +319,7 @@ export const NearbyUsersScreen = React.memo(() => {
 
       {item.commonGroups.length > 0 && (
         <View style={styles.commonGroups}>
-          <Text style={styles.commonGroupsTitle}>공통 그룹:</Text>
+          <Text style={styles.commonGroupsTitle}>{t('nearbyUsers.commonGroups')}</Text>
           <View style={styles.groupTags}>
             {item.commonGroups.slice(0, 2).map((group, index) => (
               <View key={index} style={styles.groupTag}>
@@ -322,7 +327,7 @@ export const NearbyUsersScreen = React.memo(() => {
               </View>
             ))}
             {item.commonGroups.length > 2 && (
-              <Text style={styles.moreGroups}>+{item.commonGroups.length - 2}</Text>
+              <Text style={styles.moreGroups}>{t('nearbyUsers.moreGroups', { count: item.commonGroups.length - 2 })}</Text>
             )}
           </View>
         </View>
@@ -332,7 +337,7 @@ export const NearbyUsersScreen = React.memo(() => {
 
   const renderRadiusSelector = () => (
     <View style={styles.radiusSelector}>
-      <Text style={styles.radiusSelectorTitle}>검색 반경</Text>
+      <Text style={styles.radiusSelectorTitle}>{t('nearbyUsers.searchRadius')}</Text>
       <View style={styles.radiusOptions}>
         {radiusOptions.map(radius => (
           <TouchableOpacity
@@ -365,13 +370,13 @@ export const NearbyUsersScreen = React.memo(() => {
           >
             <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>근처 사용자</Text>
+          <Text style={styles.headerTitle}>{t('nearbyUsers.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>근처 사용자를 찾는 중...</Text>
+          <Text style={styles.loadingText}>{t('nearbyUsers.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -387,21 +392,21 @@ export const NearbyUsersScreen = React.memo(() => {
           >
             <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>근처 사용자</Text>
+          <Text style={styles.headerTitle}>{t('nearbyUsers.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         
         <View style={styles.permissionContainer}>
           <Icon name="people-outline" size={64} color={COLORS.TEXT.LIGHT} />
-          <Text style={styles.permissionTitle}>위치 권한이 필요합니다</Text>
+          <Text style={styles.permissionTitle}>{t('permissions.required')}</Text>
           <Text style={styles.permissionDescription}>
-            근처 사용자를 찾기 위해{'\n'}위치 권한이 필요합니다
+            {t('permissions.description')}
           </Text>
           <TouchableOpacity
             style={styles.permissionButton}
             onPress={requestLocationPermission}
           >
-            <Text style={styles.permissionButtonText}>위치 권한 허용하기</Text>
+            <Text style={styles.permissionButtonText}>{t('permissions.requestButton')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -417,7 +422,7 @@ export const NearbyUsersScreen = React.memo(() => {
         >
           <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>근처 사용자</Text>
+        <Text style={styles.headerTitle}>{t('nearbyUsers.title')}</Text>
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={handleRefresh}
@@ -439,9 +444,9 @@ export const NearbyUsersScreen = React.memo(() => {
               <View style={styles.currentLocationCard}>
                 <Icon name="location" size={20} color={COLORS.PRIMARY} />
                 <View style={styles.currentLocationInfo}>
-                  <Text style={styles.currentLocationTitle}>현재 위치</Text>
+                  <Text style={styles.currentLocationTitle}>{t('nearbyUsers.currentLocation')}</Text>
                   <Text style={styles.currentLocationAddress}>
-                    {currentLocation.address || '위치 정보를 가져오는 중...'}
+                    {currentLocation.address || t('nearbyUsers.loadingLocation')}
                   </Text>
                 </View>
               </View>
@@ -449,10 +454,10 @@ export const NearbyUsersScreen = React.memo(() => {
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>
-                근처 사용자 ({nearbyUsers.length})
+                {t('nearbyUsers.userCount', { count: nearbyUsers.length })}
               </Text>
               <Text style={styles.sectionSubtitle}>
-                {selectedRadius}km 반경 내 활성 사용자
+                {t('nearbyUsers.radiusDistance', { radius: selectedRadius })}
               </Text>
             </View>
           </View>
@@ -460,9 +465,9 @@ export const NearbyUsersScreen = React.memo(() => {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Icon name="people-outline" size={64} color={COLORS.TEXT.LIGHT} />
-            <Text style={styles.emptyTitle}>근처에 사용자가 없어요</Text>
+            <Text style={styles.emptyTitle}>{t('nearbyUsers.emptyState.title')}</Text>
             <Text style={styles.emptyDescription}>
-              검색 반경을 늘려보거나{'\n'}다른 시간에 다시 확인해보세요
+              {t('nearbyUsers.emptyState.subtitle')}
             </Text>
           </View>
         }

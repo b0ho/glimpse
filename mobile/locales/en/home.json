@@ -1,0 +1,30 @@
+{
+  "title": "Home",
+  "header": {
+    "greeting": "Hello, {{name}}! 👋",
+    "receivedLikes": "Received Likes: {{count}}",
+    "remainingLikes": "Remaining Likes: {{count}}"
+  },
+  "location": {
+    "nearbyGroups": "Nearby Groups & Users"
+  },
+  "likeMessage": {
+    "title": "Like Sent! 💕",
+    "description": "You've sent an anonymous like to {{name}}.\nIf you both like each other, you'll be matched!"
+  },
+  "errors": {
+    "likeError": "An error occurred while processing the like.",
+    "loadError": "An error occurred while loading content."
+  },
+  "loading": {
+    "content": "Loading content...",
+    "moreContent": "Loading more content..."
+  },
+  "empty": {
+    "title": "No content yet",
+    "subtitle": "Join a group or create your first post!"
+  },
+  "fab": {
+    "createPost": "Create new post"
+  }
+}

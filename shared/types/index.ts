@@ -767,3 +767,6 @@ export const MODE_TEXTS: Record<AppMode, ModeTexts> = {
     viewProfile: '프로필 보기'
   }
 };
+
+// Export i18n types
+export * from './i18n';

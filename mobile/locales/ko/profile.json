@@ -1,0 +1,81 @@
+{
+  "title": "프로필",
+  "premium": {
+    "active": "✨ Premium 활성",
+    "upgrade": "⭐ Premium으로 업그레이드",
+    "monthly": "월간",
+    "yearly": "연간",
+    "activeDescription": "모든 프리미엄 기능을 이용하고 있습니다",
+    "inactiveDescription": "무제한 좋아요, 매칭 우선권 등 프리미엄 기능을 만나보세요",
+    "features": {
+      "unlimitedLikes": "무제한 좋아요",
+      "dailyToUnlimited": "일일 좋아요 1개 → 무제한",
+      "seeWhoLikedYou": "좋아요 받은 사람 확인 가능",
+      "seeWhoLikedYouInfo": "누가 좋아요를 보냈는지 확인",
+      "priorityMatching": "우선 매칭 활성",
+      "priorityMatchingInfo": "우선 매칭으로 더 빠른 연결"
+    }
+  },
+  "stats": {
+    "title": "활동 통계",
+    "joinedGroups": "참여 그룹",
+    "sentLikes": "보낸 좋아요",
+    "receivedLikes": "받은 좋아요",
+    "totalMatches": "총 매칭"
+  },
+  "likeSystem": {
+    "title": "좋아요 시스템",
+    "dailyFreeLikes": "일일 무료 좋아요",
+    "premiumLikes": "프리미엄 좋아요",
+    "premiumStatus": "프리미엄 상태",
+    "active": "활성",
+    "inactive": "비활성",
+    "superLikes": "⭐ 슈퍼 좋아요",
+    "rewind": "↩️ 좋아요 되돌리기",
+    "available": "사용 가능",
+    "unavailable": "사용 불가",
+    "noRewinds": "되돌릴 좋아요가 없습니다.",
+    "rewindTitle": "좋아요 되돌리기",
+    "rewindMessage": "마지막으로 보낸 좋아요를 되돌리시겠습니까?\n\n• 대상: 익명 사용자\n• {{type}}\n• 남은 시간: {{timeLeft}}분\n\n⚠️ 되돌린 후에는 다시 되돌릴 수 없습니다.",
+    "rewindButton": "되돌리기",
+    "rewindSuccess": "완료",
+    "rewindSuccessMessage": "좋아요가 성공적으로 되돌려졌습니다.\n해당 사용자에게 보낸 좋아요가 취소되었습니다.",
+    "rewindError": "좋아요 되돌리기에 실패했습니다.",
+    "superLike": "슈퍼 좋아요",
+    "normalLike": "일반 좋아요"
+  },
+  "info": {
+    "basicInfo": "기본 정보",
+    "company": "직장",
+    "school": "학교",
+    "location": "지역",
+    "height": "키",
+    "interests": "관심사",
+    "mbti": "MBTI",
+    "drinking": "음주",
+    "smoking": "흡연",
+    "notRegistered": "미등록"
+  },
+  "stats": {
+    "likes": "좋아요",
+    "matches": "매칭",
+    "friends": "친구",
+    "groups": "그룹"
+  },
+  "settings": {
+    "likeManagement": "호감 관리",
+    "friendRequestManagement": "친구 요청 관리",
+    "whoLikesYou": "나를 좋아하는 사람들",
+    "premiumOnly": "프리미엄 전용",
+    "companyVerification": "회사 인증",
+    "verified": "인증 완료",
+    "notVerified": "미인증",
+    "notificationSettings": "알림 설정",
+    "profileSettings": "프로필 설정",
+    "accountSettings": "계정 설정",
+    "deleteAccount": "계정 삭제",
+    "logout": "로그아웃",
+    "logoutConfirm": "정말 로그아웃하시겠습니까?",
+    "logoutError": "로그아웃 중 오류가 발생했습니다."
+  }
+}

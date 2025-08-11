@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { Group, GroupType } from '@/types';
@@ -25,6 +26,7 @@ import { groupApi } from '@/services/api/groupApi';
  * @description 공식/생성/인스턴트/위치 기반 그룹을 탐색하고 참여할 수 있는 화면
  */
 export const GroupsScreen = () => {
+  const { t } = useTranslation(['group', 'common']);
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -52,7 +54,7 @@ export const GroupsScreen = () => {
       groupStore.setGroups(loadedGroups);
     } catch (error: any) {
       console.error('[GroupsScreen] 그룹 목록 로드 실패:', error);
-      Alert.alert('오류', error?.message || '그룹 목록을 불러오는데 실패했습니다.');
+      Alert.alert(t('common:status.error'), error?.message || t('group:errors.loadFailed'));
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -68,7 +70,7 @@ export const GroupsScreen = () => {
   const handleJoinGroup = useCallback(async (group: Group) => {
     // 이미 참여한 그룹인지 확인
     if (groupStore.isUserInGroup(group.id)) {
-      Alert.alert('알림', '이미 참여 중인 그룹입니다.');
+      Alert.alert(t('common:status.notification'), t('group:alerts.alreadyJoined'));
       return;
     }
 
@@ -76,20 +78,20 @@ export const GroupsScreen = () => {
     const genderRatio = (group.maleCount || 0) / (group.femaleCount || 1);
     if (group.maleCount && group.femaleCount && (genderRatio > 2 || genderRatio < 0.5)) {
       Alert.alert(
-        '그룹 참여 제한',
-        '성별 균형을 위해 현재 참여가 제한되어 있습니다.\n나중에 다시 시도해주세요.',
-        [{ text: '확인' }]
+        t('group:alerts.joinTitle'),
+        t('group:alerts.joinRestricted'),
+        [{ text: t('common:buttons.confirm') }]
       );
       return;
     }
 
     Alert.alert(
-      '그룹 참여',
-      `"${group.name}" 그룹에 참여하시겠습니까?\n\n참여 후에는 그룹 내 다른 멤버들과 익명으로 소통할 수 있습니다.`,
+      t('group:alerts.joinTitle'),
+      t('group:alerts.joinConfirm', { name: group.name }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('common:buttons.cancel'), style: 'cancel' },
         {
-          text: '참여하기',
+          text: t('group:alerts.join'),
           onPress: async () => {
             try {
               // API 호출하여 그룹 참여
@@ -97,8 +99,8 @@ export const GroupsScreen = () => {
               
               groupStore.joinGroup(group);
               Alert.alert(
-                '참여 완료! 🎉',
-                `"${group.name}" 그룹에 성공적으로 참여했습니다.\n이제 홈 피드에서 그룹 멤버들의 게시물을 확인할 수 있습니다.`
+                t('group:join.success.title'),
+                t('group:join.success.message', { groupName: group.name })
               );
               
               // 로컬 상태 업데이트
@@ -111,7 +113,7 @@ export const GroupsScreen = () => {
               );
             } catch (error) {
               console.error('Join group error:', error);
-              Alert.alert('오류', '그룹 참여 중 오류가 발생했습니다.');
+              Alert.alert(t('common:status.error'), t('group:alerts.error'));
             }
           },
         },
@@ -238,7 +240,7 @@ export const GroupsScreen = () => {
             styles.joinButtonText,
             groupStore.isUserInGroup(item.id) && styles.joinButtonTextDisabled,
           ]}>
-            {groupStore.isUserInGroup(item.id) ? '참여중' : '참여하기'}
+            {groupStore.isUserInGroup(item.id) ? t('group:explore.joined') : t('group:explore.join')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -272,9 +274,9 @@ export const GroupsScreen = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>🔍</Text>
-      <Text style={styles.emptyStateTitle}>그룹을 찾을 수 없어요</Text>
+      <Text style={styles.emptyStateTitle}>{t('group:explore.empty.title')}</Text>
       <Text style={styles.emptyStateSubtitle}>
-        새로운 그룹이 곧 추가될 예정입니다!
+        {t('group:explore.empty.subtitle')}
       </Text>
     </View>
   );
@@ -284,7 +286,7 @@ export const GroupsScreen = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>그룹을 불러오는 중...</Text>
+          <Text style={styles.loadingText}>{t('group:loading.groups')}</Text>
         </View>
       </SafeAreaView>
     );

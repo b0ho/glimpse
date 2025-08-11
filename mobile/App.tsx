@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ClerkProvider } from '@clerk/clerk-expo';
-import { Platform } from 'react-native';
+import { Platform, ActivityIndicator, View } from 'react-native';
 import RootNavigator from './navigation/AppNavigator';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { DevModePanel } from './components/DevModePanel';
 import { CallProvider } from './providers/CallProvider';
 import { isAuthBypassEnabled } from './config/dev.config';
+import { initI18n } from './services/i18n/i18n';
+import { I18nextProvider } from 'react-i18next';
+import i18n from './services/i18n/i18n';
 
 // SecureStore polyfill for web
 let SecureStore: any;
@@ -70,10 +73,34 @@ const tokenCache = {
 };
 
 export default function App() {
+  const [isI18nInitialized, setIsI18nInitialized] = useState(false);
+
+  useEffect(() => {
+    // Initialize i18n
+    initI18n()
+      .then(() => {
+        setIsI18nInitialized(true);
+      })
+      .catch((error) => {
+        console.error('Failed to initialize i18n:', error);
+        // Even if i18n fails, continue loading the app
+        setIsI18nInitialized(true);
+      });
+  }, []);
+
   // 웹 환경 체크
   if (Platform.OS === 'web') {
     console.log('Glimpse 앱이 웹에서 실행 중입니다');
     console.log('개발 모드 인증 우회:', isAuthBypassEnabled);
+  }
+
+  // Show loading screen while i18n is initializing
+  if (!isI18nInitialized) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
   // Clerk publishable key - 실제 환경에서는 환경 변수로 관리
@@ -81,13 +108,15 @@ export default function App() {
   
   // 앱 컨텐츠
   const AppContent = () => (
-    <SafeAreaProvider>
-      <StatusBar style="auto" />
-      <CallProvider>
-        <RootNavigator />
-        {isAuthBypassEnabled && Platform.OS !== 'web' && <DevModePanel />}
-      </CallProvider>
-    </SafeAreaProvider>
+    <I18nextProvider i18n={i18n}>
+      <SafeAreaProvider>
+        <StatusBar style="auto" />
+        <CallProvider>
+          <RootNavigator />
+          {isAuthBypassEnabled && Platform.OS !== 'web' && <DevModePanel />}
+        </CallProvider>
+      </SafeAreaProvider>
+    </I18nextProvider>
   );
 
   // Clerk 키가 유효하지 않거나 개발 모드 인증 우회가 활성화된 경우

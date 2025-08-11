@@ -1,0 +1,83 @@
+{
+  "title": "Nearby Groups",
+  "nearbyUsers": {
+    "title": "Nearby Users",
+    "loading": "Finding nearby users...",
+    "searchRadius": "Search Radius",
+    "currentLocation": "Current Location",
+    "loadingLocation": "Getting location info...",
+    "userCount": "Nearby Users ({{count}})",
+    "radiusDistance": "Active users within {{radius}}km radius",
+    "ageUnit": " years old",
+    "commonGroups": "Common Groups:",
+    "moreGroups": "+{{count}}",
+    "emptyState": {
+      "title": "No users nearby",
+      "subtitle": "Try expanding the search radius or\ncheck again at a different time"
+    }
+  },
+  "permissions": {
+    "required": "Location permission required",
+    "description": "Location permission is needed to\nfind nearby users",
+    "requestTitle": "Location Permission Needed",
+    "requestMessage": "Location permission is required to find nearby users.\nPlease allow location access in settings.",
+    "requestButton": "Allow Location Permission",
+    "later": "Later",
+    "request": "Request Permission",
+    "cameraRequired": "Camera permission denied.",
+    "locationError": "Unable to get current location.",
+    "locationRequestError": "Failed to request location permission."
+  },
+  "matching": {
+    "sendLike": "Send Anonymous Like",
+    "sendLikeMessage": "Send an anonymous like to {{nickname}}?\n\n{{premium}}",
+    "premiumUnlimited": "Premium members get unlimited likes!",
+    "creditCost": "This will use 1 credit.",
+    "cancel": "Cancel",
+    "send": "Send",
+    "alreadySent": "You've already liked this user.",
+    "success": "Anonymous like sent! 💕",
+    "error": "Failed to send like.",
+    "creditError": {
+      "title": "Insufficient Credits",
+      "message": "You need credits to send likes.\nPurchase credits or upgrade to premium.",
+      "later": "Later",
+      "buyCredits": "Buy Credits"
+    }
+  },
+  "emptyState": {
+    "title": "No nearby groups found",
+    "subtitle": "Create a new group!"
+  },
+  "qr": {
+    "title": "Scan QR Code",
+    "instruction": "Align the QR code within the frame",
+    "success": "Successfully joined group via QR code!",
+    "error": "Failed to recognize QR code."
+  },
+  "group": {
+    "join": "Join Group",
+    "alreadyMember": "You are already a member of this group.",
+    "joinSuccess": "Successfully joined the group!",
+    "joinError": "Failed to join group.",
+    "create": "Create Location Group",
+    "createSuccess": "Group created successfully. You can share the QR code to invite others.",
+    "createError": "Failed to create group.",
+    "viewQRCode": "View QR Code",
+    "memberCount": "{{count}} members"
+  },
+  "form": {
+    "name": "Group Name",
+    "nameRequired": "Please enter a group name.",
+    "description": "Group Description (Optional)",
+    "radius": "Radius (m)",
+    "maxMembers": "Max Members",
+    "cancel": "Cancel",
+    "create": "Create"
+  },
+  "errors": {
+    "title": "Error",
+    "loadNearbyFailed": "Failed to load nearby groups.",
+    "permissionError": "Permission check error:"
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "title": "설정",
+  "error": "오류",
+  "settingUpdateFailed": "설정 변경에 실패했습니다.",
+  "accountSettings": {
+    "title": "계정 설정",
+    "editProfile": "프로필 수정",
+    "changePassword": "비밀번호 변경",
+    "changePhone": "전화번호 변경",
+    "notRegistered": "미등록"
+  },
+  "privacySettings": {
+    "title": "개인정보 보호",
+    "showProfile": "프로필 공개",
+    "showOnlineStatus": "온라인 상태 표시",
+    "showLastSeen": "마지막 접속 시간 표시",
+    "allowFriendRequests": "친구 요청 허용",
+    "blockedUsers": "차단 목록"
+  },
+  "notificationSettings": {
+    "title": "알림 설정",
+    "likes": "좋아요 알림",
+    "matches": "매칭 알림",
+    "messages": "메시지 알림",
+    "friendRequests": "친구 요청 알림"
+  },
+  "otherSettings": {
+    "title": "기타",
+    "terms": "이용약관",
+    "privacy": "개인정보 처리방침",
+    "support": "고객센터",
+    "appInfo": "앱 정보",
+    "deleteAccount": "계정 삭제"
+  },
+  "language": {
+    "title": "언어",
+    "selectLanguage": "언어 선택",
+    "changeSuccess": "언어 변경 완료",
+    "changeSuccessMessage": "언어가 성공적으로 변경되었습니다",
+    "changeFailed": "언어 변경 실패",
+    "changeFailedMessage": "언어 변경에 실패했습니다. 다시 시도해주세요."
+  },
+  "notifications": {
+    "title": "알림",
+    "likes": "좋아요 알림",
+    "matches": "매칭 알림",
+    "messages": "메시지 알림",
+    "friendRequests": "친구 요청 알림"
+  },
+  "privacy": {
+    "title": "프라이버시",
+    "showProfile": "프로필 공개",
+    "showOnlineStatus": "온라인 상태 표시",
+    "showLastSeen": "마지막 접속 시간 표시",
+    "allowFriendRequests": "친구 요청 허용"
+  },
+  "account": {
+    "title": "계정",
+    "editProfile": "프로필 수정",
+    "changePassword": "비밀번호 변경",
+    "deleteAccount": "계정 삭제",
+    "logout": "로그아웃"
+  },
+  "deleteAccount": {
+    "title": "계정 삭제",
+    "message": "정말로 계정을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
+    "cancel": "취소",
+    "confirm": "삭제",
+    "warning": {
+      "title": "탈퇴 전 확인해주세요",
+      "description": "회원 탈퇴 시 다음과 같은 작업이 수행됩니다:",
+      "items": {
+        "profile": "모든 프로필 정보와 사진이 삭제됩니다",
+        "matches": "모든 매칭과 대화 내용이 삭제됩니다",
+        "credits": "구매한 크레딧과 프리미엄 구독이 취소됩니다",
+        "recovery": "30일 간 계정 복구 기간이 주어집니다",
+        "permanent": "30일 후 모든 데이터가 영구적으로 삭제됩니다"
+      }
+    },
+    "reason": {
+      "title": "탈퇴 사유 (선택)",
+      "options": {
+        "not_useful": "앱이 더 이상 필요하지 않아요",
+        "privacy_concern": "개인정보 보호가 걱정돼요",
+        "found_partner": "좋은 사람을 만났어요",
+        "technical_issues": "기술적 문제가 많아요",
+        "other": "기타 이유"
+      }
+    },
+    "confirm": {
+      "title": "탈퇴 확인",
+      "description": "탈퇴를 진행하려면 아래에",
+      "descriptionEnd": "를 입력해주세요.",
+      "placeholder": "탈퇴하기",
+      "confirmText": "탈퇴하기",
+      "button": "회원 탈퇴"
+    },
+    "alerts": {
+      "confirmRequired": {
+        "title": "알림",
+        "message": "확인 문구를 정확히 입력해주세요."
+      },
+      "finalConfirm": {
+        "title": "최종 확인",
+        "message": "정말로 계정을 삭제하시겠습니까?\n\n• 30일 내 로그인 시 복구 가능\n• 30일 후 모든 데이터 영구 삭제\n• 프리미엄 구독은 즉시 해지",
+        "cancel": "취소",
+        "delete": "탈퇴"
+      },
+      "success": {
+        "title": "탈퇴 완료",
+        "message": "계정이 비활성화되었습니다.\n30일 내 로그인 시 복구할 수 있습니다."
+      },
+      "error": {
+        "title": "오류",
+        "message": "탈퇴 처리 중 오류가 발생했습니다."
+      }
+    }
+  }
+}

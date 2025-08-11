@@ -1,0 +1,81 @@
+{
+  "title": "Profile",
+  "premium": {
+    "active": "✨ Premium Active",
+    "upgrade": "⭐ Upgrade to Premium",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "activeDescription": "You have access to all premium features",
+    "inactiveDescription": "Unlock unlimited likes, priority matching, and more premium features",
+    "features": {
+      "unlimitedLikes": "Unlimited Likes",
+      "dailyToUnlimited": "1 daily like → Unlimited",
+      "seeWhoLikedYou": "See who liked you",
+      "seeWhoLikedYouInfo": "Find out who sent you likes",
+      "priorityMatching": "Priority Matching Active",
+      "priorityMatchingInfo": "Get faster connections with priority matching"
+    }
+  },
+  "stats": {
+    "title": "Activity Stats",
+    "joinedGroups": "Joined Groups",
+    "sentLikes": "Sent Likes",
+    "receivedLikes": "Received Likes",
+    "totalMatches": "Total Matches"
+  },
+  "likeSystem": {
+    "title": "Like System",
+    "dailyFreeLikes": "Daily Free Likes",
+    "premiumLikes": "Premium Likes",
+    "premiumStatus": "Premium Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "superLikes": "⭐ Super Likes",
+    "rewind": "↩️ Rewind Likes",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "noRewinds": "No likes to rewind.",
+    "rewindTitle": "Rewind Like",
+    "rewindMessage": "Do you want to rewind your last like?\n\n• Target: Anonymous user\n• {{type}}\n• Time remaining: {{timeLeft}} minutes\n\n⚠️ This action cannot be undone.",
+    "rewindButton": "Rewind",
+    "rewindSuccess": "Success",
+    "rewindSuccessMessage": "Your like has been successfully rewound.\nThe like sent to that user has been cancelled.",
+    "rewindError": "Failed to rewind like.",
+    "superLike": "Super Like",
+    "normalLike": "Normal Like"
+  },
+  "info": {
+    "basicInfo": "Basic Information",
+    "company": "Company",
+    "school": "School",
+    "location": "Location",
+    "height": "Height",
+    "interests": "Interests",
+    "mbti": "MBTI",
+    "drinking": "Drinking",
+    "smoking": "Smoking",
+    "notRegistered": "Not registered"
+  },
+  "stats": {
+    "likes": "Likes",
+    "matches": "Matches",
+    "friends": "Friends",
+    "groups": "Groups"
+  },
+  "settings": {
+    "likeManagement": "Like Management",
+    "friendRequestManagement": "Friend Request Management",
+    "whoLikesYou": "Who Likes You",
+    "premiumOnly": "Premium Only",
+    "companyVerification": "Company Verification",
+    "verified": "Verified",
+    "notVerified": "Not Verified",
+    "notificationSettings": "Notification Settings",
+    "profileSettings": "Profile Settings",
+    "accountSettings": "Account Settings",
+    "deleteAccount": "Delete Account",
+    "logout": "Logout",
+    "logoutConfirm": "Are you sure you want to logout?",
+    "logoutError": "An error occurred while logging out."
+  }
+}

@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { groupApi } from '@/services/api/groupApi';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -22,6 +23,7 @@ interface GroupInfo {
 }
 
 export const JoinGroupScreen = () => {
+  const { t } = useTranslation('group');
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { inviteCode } = route.params as { inviteCode: string };
@@ -47,22 +49,22 @@ export const JoinGroupScreen = () => {
 
       if (result.requiresApproval) {
         Alert.alert(
-          '가입 신청 완료',
-          '그룹 관리자의 승인을 기다리고 있습니다.',
+          t('joinInvite.pendingApprovalTitle'),
+          t('joinInvite.pendingApprovalMessage'),
           [
             {
-              text: '확인',
+              text: t('joinInvite.confirm'),
               onPress: () => navigation.navigate('Groups' as never),
             },
           ]
         );
       } else {
         Alert.alert(
-          '가입 완료! 🎉',
-          `${result.group.name} 그룹에 성공적으로 가입했습니다.`,
+          t('joinInvite.successTitle'),
+          t('joinInvite.successMessage', { groupName: result.group.name }),
           [
             {
-              text: '그룹으로 이동',
+              text: t('joinInvite.goToGroup'),
               onPress: () => navigation.navigate('GroupDetail' as never, { groupId: result.group.id } as never),
             },
           ]
@@ -71,14 +73,14 @@ export const JoinGroupScreen = () => {
     } catch (error: any) {
       console.error('Join group error:', error);
       
-      let errorMessage = '그룹 가입에 실패했습니다.';
+      let errorMessage = t('joinInvite.defaultError');
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
       
-      Alert.alert('오류', errorMessage, [
+      Alert.alert(t('joinInvite.error'), errorMessage, [
         {
-          text: '확인',
+          text: t('joinInvite.confirm'),
           onPress: () => navigation.goBack(),
         },
       ]);
@@ -95,10 +97,10 @@ export const JoinGroupScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.card}>
-          <Text style={styles.title}>그룹 초대</Text>
+          <Text style={styles.title}>{t('joinInvite.title')}</Text>
           
           <View style={styles.codeContainer}>
-            <Text style={styles.codeLabel}>초대 코드</Text>
+            <Text style={styles.codeLabel}>{t('joinInvite.inviteCode')}</Text>
             <Text style={styles.codeText}>{inviteCode}</Text>
           </View>
 
@@ -110,15 +112,14 @@ export const JoinGroupScreen = () => {
               )}
               {groupInfo.memberCount && (
                 <Text style={styles.groupMembers}>
-                  현재 {groupInfo.memberCount}명 참여 중
+                  {t('joinInvite.currentMembers', { count: groupInfo.memberCount })}
                 </Text>
               )}
             </View>
           )}
 
           <Text style={styles.description}>
-            이 그룹에 가입하시겠습니까?{'\n'}
-            가입 후 그룹 멤버들과 익명으로 매칭될 수 있습니다.
+            {t('joinInvite.confirmMessage')}
           </Text>
 
           <View style={styles.buttonContainer}>
@@ -127,7 +128,7 @@ export const JoinGroupScreen = () => {
               onPress={handleCancel}
               disabled={isJoining}
             >
-              <Text style={styles.cancelButtonText}>취소</Text>
+              <Text style={styles.cancelButtonText}>{t('joinInvite.cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
@@ -138,18 +139,16 @@ export const JoinGroupScreen = () => {
               {isJoining ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
-                <Text style={styles.joinButtonText}>가입하기</Text>
+                <Text style={styles.joinButtonText}>{t('joinInvite.joinButton')}</Text>
               )}
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.notice}>
-          <Text style={styles.noticeTitle}>안내사항</Text>
+          <Text style={styles.noticeTitle}>{t('joinInvite.noticeTitle')}</Text>
           <Text style={styles.noticeText}>
-            • 그룹 가입은 무료입니다{'\n'}
-            • 언제든지 그룹을 나갈 수 있습니다{'\n'}
-            • 부적절한 행동 시 그룹에서 제외될 수 있습니다
+            {t('joinInvite.noticeText')}
           </Text>
         </View>
       </View>

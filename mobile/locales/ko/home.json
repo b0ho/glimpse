@@ -1,0 +1,30 @@
+{
+  "title": "홈",
+  "header": {
+    "greeting": "안녕하세요, {{name}}님! 👋",
+    "receivedLikes": "받은 좋아요: {{count}}개",
+    "remainingLikes": "남은 좋아요: {{count}}개"
+  },
+  "location": {
+    "nearbyGroups": "근처 그룹 및 사용자"
+  },
+  "likeMessage": {
+    "title": "좋아요 전송 완료! 💕",
+    "description": "{{name}}님에게 익명으로 좋아요를 보냈습니다.\n서로 좋아요를 보내면 매칭됩니다!"
+  },
+  "errors": {
+    "likeError": "좋아요 처리 중 오류가 발생했습니다.",
+    "loadError": "콘텐츠를 불러오는 중 오류가 발생했습니다."
+  },
+  "loading": {
+    "content": "콘텐츠를 불러오는 중...",
+    "moreContent": "더 많은 콘텐츠를 불러오는 중..."
+  },
+  "empty": {
+    "title": "아직 콘텐츠가 없어요",
+    "subtitle": "그룹에 참여하거나 첫 번째 게시물을 작성해보세요!"
+  },
+  "fab": {
+    "createPost": "새 게시물 작성"
+  }
+}

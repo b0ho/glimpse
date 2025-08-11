@@ -19,6 +19,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useChatStore, chatSelectors } from '@/store/slices/chatSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { MessageBubble } from '@/components/chat/MessageBubble';
@@ -54,6 +55,7 @@ export const ChatScreen = () => {
   const navigation = useNavigation();
   const { roomId, matchId, otherUserNickname } = route.params;
   const { initiateCall, isInCall } = useCall();
+  const { t } = useTranslation('chat');
 
   // Store states
   const authStore = useAuthStore();
@@ -92,7 +94,7 @@ export const ChatScreen = () => {
   useEffect(() => {
     const initChat = async () => {
       if (!authStore.user?.id || !authStore.token) {
-        Alert.alert('오류', '로그인이 필요합니다.');
+        Alert.alert(t('errors.error'), t('errors.loginRequired'));
         navigation.goBack();
         return;
       }
@@ -111,7 +113,7 @@ export const ChatScreen = () => {
         await loadMessages(roomId);
       } catch (error) {
         console.error('Chat initialization failed:', error);
-        Alert.alert('오류', '채팅방을 불러오는데 실패했습니다.');
+        Alert.alert(t('errors.error'), t('errors.chatLoadFailed'));
       }
     };
 
@@ -210,21 +212,21 @@ export const ChatScreen = () => {
    */
   const handleMessageLongPress = useCallback((message: Message) => {
     Alert.alert(
-      '메시지 옵션',
-      '이 메시지를 복사하시겠습니까?',
+      t('errors.messageOptions'),
+      t('errors.copyConfirm'),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('errors.cancel'), style: 'cancel' },
         {
-          text: '복사',
+          text: t('errors.copy'),
           onPress: () => {
             // 실제 구현에서는 Clipboard API 사용
             console.log('Copy message:', message.content);
-            Alert.alert('완료', '메시지가 복사되었습니다.');
+            Alert.alert(t('common:actions.completed'), t('errors.copySuccess'));
           },
         },
       ]
     );
-  }, []);
+  }, [t]);
 
   /**
    * 추가 메시지 로드 (페이지네이션)
@@ -310,7 +312,7 @@ export const ChatScreen = () => {
     return (
       <View style={styles.loadingMore}>
         <ActivityIndicator size="small" color={COLORS.PRIMARY} />
-        <Text style={styles.loadingMoreText}>이전 메시지를 불러오는 중...</Text>
+        <Text style={styles.loadingMoreText}>{t('loading.previousMessages')}</Text>
       </View>
     );
   };
@@ -337,10 +339,9 @@ export const ChatScreen = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>💬</Text>
-      <Text style={styles.emptyStateTitle}>대화를 시작해보세요!</Text>
+      <Text style={styles.emptyStateTitle}>{t('emptyState.title')}</Text>
       <Text style={styles.emptyStateSubtitle}>
-        {otherUserNickname}님과 첫 메시지를 나눠보세요.{'\n'}
-        서로에 대해 알아가는 시간을 가져보세요.
+        {t('emptyState.subtitle', { name: otherUserNickname })}
       </Text>
     </View>
   );
@@ -352,9 +353,9 @@ export const ChatScreen = () => {
    */
   useEffect(() => {
     if (error) {
-      Alert.alert('오류', error, [
+      Alert.alert(t('errors.error'), error, [
         {
-          text: '확인',
+          text: t('common:actions.confirm'),
           onPress: () => clearError(),
         },
       ]);
@@ -366,7 +367,7 @@ export const ChatScreen = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>채팅방을 불러오는 중...</Text>
+          <Text style={styles.loadingText}>{t('loading.text')}</Text>
         </View>
       </SafeAreaView>
     );

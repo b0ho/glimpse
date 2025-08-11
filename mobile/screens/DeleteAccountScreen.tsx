@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 // import { useAuth } from '@clerk/clerk-expo';
 import { useAuth } from '@/hooks/useDevAuth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -22,32 +23,33 @@ export const DeleteAccountScreen = () => {
   const navigation = useNavigation();
   const { signOut } = useAuth();
   const { user, clearAuth } = useAuthStore();
+  const { t } = useTranslation();
   
   const [deleteReason, setDeleteReason] = useState('');
   const [confirmText, setConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   
   const reasons = [
-    { id: 'not_useful', text: '앱이 더 이상 필요하지 않아요' },
-    { id: 'privacy_concern', text: '개인정보 보호가 걱정돼요' },
-    { id: 'found_partner', text: '좋은 사람을 만났어요' },
-    { id: 'technical_issues', text: '기술적 문제가 많아요' },
-    { id: 'other', text: '기타 이유' },
+    { id: 'not_useful', text: t('settings:deleteAccount.reason.options.not_useful') },
+    { id: 'privacy_concern', text: t('settings:deleteAccount.reason.options.privacy_concern') },
+    { id: 'found_partner', text: t('settings:deleteAccount.reason.options.found_partner') },
+    { id: 'technical_issues', text: t('settings:deleteAccount.reason.options.technical_issues') },
+    { id: 'other', text: t('settings:deleteAccount.reason.options.other') },
   ];
   
   const handleDelete = async () => {
-    if (confirmText !== '탈퇴하기') {
-      Alert.alert('알림', '확인 문구를 정확히 입력해주세요.');
+    if (confirmText !== t('settings:deleteAccount.confirm.confirmText')) {
+      Alert.alert(t('settings:deleteAccount.alerts.confirmRequired.title'), t('settings:deleteAccount.alerts.confirmRequired.message'));
       return;
     }
     
     Alert.alert(
-      '최종 확인',
-      '정말로 계정을 삭제하시겠습니까?\n\n• 30일 내 로그인 시 복구 가능\n• 30일 후 모든 데이터 영구 삭제\n• 프리미엄 구독은 즉시 해지',
+      t('settings:deleteAccount.alerts.finalConfirm.title'),
+      t('settings:deleteAccount.alerts.finalConfirm.message'),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('settings:deleteAccount.alerts.finalConfirm.cancel'), style: 'cancel' },
         {
-          text: '탈퇴',
+          text: t('settings:deleteAccount.alerts.finalConfirm.delete'),
           style: 'destructive',
           onPress: handleDeleteConfirmed,
         },
@@ -66,11 +68,11 @@ export const DeleteAccountScreen = () => {
       
       if (response.success) {
         Alert.alert(
-          '탈퇴 완료',
-          '계정이 비활성화되었습니다.\n30일 내 로그인 시 복구할 수 있습니다.',
+          t('settings:deleteAccount.alerts.success.title'),
+          t('settings:deleteAccount.alerts.success.message'),
           [
             {
-              text: '확인',
+              text: t('common:buttons.confirm'),
               onPress: async () => {
                 // 로그아웃 및 스토어 초기화
                 await signOut();
@@ -81,11 +83,11 @@ export const DeleteAccountScreen = () => {
           { cancelable: false }
         );
       } else {
-        Alert.alert('오류', response.message || '탈퇴 처리 중 오류가 발생했습니다.');
+        Alert.alert(t('settings:deleteAccount.alerts.error.title'), response.message || t('settings:deleteAccount.alerts.error.message'));
       }
     } catch (error) {
       console.error('Delete account error:', error);
-      Alert.alert('오류', '탈퇴 처리 중 오류가 발생했습니다.');
+      Alert.alert(t('settings:deleteAccount.alerts.error.title'), t('settings:deleteAccount.alerts.error.message'));
     } finally {
       setIsDeleting(false);
     }
@@ -100,7 +102,7 @@ export const DeleteAccountScreen = () => {
         >
           <Ionicons name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>회원 탈퇴</Text>
+        <Text style={styles.headerTitle}>{t('settings:deleteAccount.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
       
@@ -110,47 +112,47 @@ export const DeleteAccountScreen = () => {
       >
         <View style={styles.warningCard}>
           <Ionicons name="warning" size={48} color={COLORS.ERROR} />
-          <Text style={styles.warningTitle}>탈퇴 전 확인해주세요</Text>
+          <Text style={styles.warningTitle}>{t('settings:deleteAccount.warning.title')}</Text>
           <Text style={styles.warningText}>
-            회원 탈퇴 시 다음과 같은 작업이 수행됩니다:
+            {t('settings:deleteAccount.warning.description')}
           </Text>
           
           <View style={styles.warningList}>
             <View style={styles.warningItem}>
               <Text style={styles.warningBullet}>•</Text>
               <Text style={styles.warningItemText}>
-                모든 프로필 정보와 사진이 삭제됩니다
+                {t('settings:deleteAccount.warning.items.profile')}
               </Text>
             </View>
             <View style={styles.warningItem}>
               <Text style={styles.warningBullet}>•</Text>
               <Text style={styles.warningItemText}>
-                모든 매칭과 대화 내용이 삭제됩니다
+                {t('settings:deleteAccount.warning.items.matches')}
               </Text>
             </View>
             <View style={styles.warningItem}>
               <Text style={styles.warningBullet}>•</Text>
               <Text style={styles.warningItemText}>
-                구매한 크레딧과 프리미엄 구독이 취소됩니다
+                {t('settings:deleteAccount.warning.items.credits')}
               </Text>
             </View>
             <View style={styles.warningItem}>
               <Text style={styles.warningBullet}>•</Text>
               <Text style={styles.warningItemText}>
-                30일 간 계정 복구 기간이 주어집니다
+                {t('settings:deleteAccount.warning.items.recovery')}
               </Text>
             </View>
             <View style={styles.warningItem}>
               <Text style={styles.warningBullet}>•</Text>
               <Text style={styles.warningItemText}>
-                30일 후 모든 데이터가 영구적으로 삭제됩니다
+                {t('settings:deleteAccount.warning.items.permanent')}
               </Text>
             </View>
           </View>
         </View>
         
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>탈퇴 사유 (선택)</Text>
+          <Text style={styles.sectionTitle}>{t('settings:deleteAccount.reason.title')}</Text>
           <View style={styles.reasonContainer}>
             {reasons.map((reason) => (
               <TouchableOpacity
@@ -176,15 +178,15 @@ export const DeleteAccountScreen = () => {
         </View>
         
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>탈퇴 확인</Text>
+          <Text style={styles.sectionTitle}>{t('settings:deleteAccount.confirm.title')}</Text>
           <Text style={styles.confirmDescription}>
-            탈퇴를 진행하려면 아래에 <Text style={styles.confirmHighlight}>탈퇴하기</Text>를 입력해주세요.
+            {t('settings:deleteAccount.confirm.description')} <Text style={styles.confirmHighlight}>{t('settings:deleteAccount.confirm.confirmText')}</Text>{t('settings:deleteAccount.confirm.descriptionEnd')}
           </Text>
           <TextInput
             style={styles.confirmInput}
             value={confirmText}
             onChangeText={setConfirmText}
-            placeholder="탈퇴하기"
+            placeholder={t('settings:deleteAccount.confirm.placeholder')}
             placeholderTextColor={COLORS.textSecondary}
             autoCapitalize="none"
             autoCorrect={false}
@@ -195,15 +197,15 @@ export const DeleteAccountScreen = () => {
         <TouchableOpacity
           style={[
             styles.deleteButton,
-            confirmText !== '탈퇴하기' && styles.deleteButtonDisabled,
+            confirmText !== t('settings:deleteAccount.confirm.confirmText') && styles.deleteButtonDisabled,
           ]}
           onPress={handleDelete}
-          disabled={confirmText !== '탈퇴하기' || isDeleting}
+          disabled={confirmText !== t('settings:deleteAccount.confirm.confirmText') || isDeleting}
         >
           {isDeleting ? (
             <ActivityIndicator size="small" color={COLORS.white} />
           ) : (
-            <Text style={styles.deleteButtonText}>회원 탈퇴</Text>
+            <Text style={styles.deleteButtonText}>{t('settings:deleteAccount.confirm.button')}</Text>
           )}
         </TouchableOpacity>
         
@@ -212,7 +214,7 @@ export const DeleteAccountScreen = () => {
           onPress={() => navigation.goBack()}
           disabled={isDeleting}
         >
-          <Text style={styles.cancelButtonText}>취소</Text>
+          <Text style={styles.cancelButtonText}>{t('common:buttons.cancel')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

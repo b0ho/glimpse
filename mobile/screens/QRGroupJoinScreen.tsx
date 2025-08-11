@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import Icon from 'react-native-vector-icons/Ionicons';
 import QRCode from 'react-native-qrcode-svg';
@@ -27,6 +28,7 @@ interface QRGroupData {
 }
 
 export const QRGroupJoinScreen = () => {
+  const { t } = useTranslation('group');
   const navigation = useNavigation();
   const route = useRoute();
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -71,7 +73,7 @@ export const QRGroupJoinScreen = () => {
       const now = Date.now();
       const fiveMinutes = 5 * 60 * 1000;
       if (now - qrData.timestamp > fiveMinutes) {
-        Alert.alert('만료된 QR 코드', 'QR 코드가 만료되었습니다. 새로운 QR 코드를 요청해주세요.');
+        Alert.alert(t('qrJoin.expiredTitle'), t('qrJoin.expiredMessage'));
         setScanned(false);
         setIsLoading(false);
         return;
@@ -79,11 +81,11 @@ export const QRGroupJoinScreen = () => {
 
       // 그룹 참여 확인
       Alert.alert(
-        '그룹 참여',
-        `"${qrData.groupName}" 그룹에 참여하시겠습니까?`,
+        t('qrJoin.joinTitle'),
+        t('qrJoin.joinMessage', { groupName: qrData.groupName }),
         [
           {
-            text: '취소',
+            text: t('qrJoin.cancel'),
             style: 'cancel',
             onPress: () => {
               setScanned(false);
@@ -91,13 +93,13 @@ export const QRGroupJoinScreen = () => {
             },
           },
           {
-            text: '참여하기',
+            text: t('qrJoin.joinButton'),
             onPress: async () => {
               try {
                 // 그룹 ID로 그룹 정보 찾기
                 const targetGroup = groups.find(g => g.id === qrData.groupId);
                 if (!targetGroup) {
-                  Alert.alert('오류', '해당 그룹을 찾을 수 없습니다.');
+                  Alert.alert(t('qrJoin.error'), t('qrJoin.groupNotFound'));
                   setScanned(false);
                   setIsLoading(false);
                   return;
@@ -106,11 +108,11 @@ export const QRGroupJoinScreen = () => {
                 await joinGroup(targetGroup);
                 // 참여 성공으로 간주
                 Alert.alert(
-                  '참여 완료',
-                  `"${qrData.groupName}" 그룹에 성공적으로 참여했습니다!`,
+                  t('qrJoin.successTitle'),
+                  t('qrJoin.successMessage', { groupName: qrData.groupName }),
                   [
                     {
-                      text: '확인',
+                      text: t('qrJoin.confirm'),
                       onPress: () => {
                         navigation.navigate('Groups' as never);
                       },
@@ -119,7 +121,7 @@ export const QRGroupJoinScreen = () => {
                 );
               } catch (error) {
                 console.error('Join group error:', error);
-                Alert.alert('오류', '그룹 참여 중 오류가 발생했습니다.');
+                Alert.alert(t('qrJoin.error'), t('qrJoin.joinError'));
                 setScanned(false);
               } finally {
                 setIsLoading(false);
@@ -130,7 +132,7 @@ export const QRGroupJoinScreen = () => {
       );
     } catch (error) {
       console.error('QR code parse error:', error);
-      Alert.alert('잘못된 QR 코드', '올바른 Glimpse 그룹 QR 코드가 아닙니다.');
+      Alert.alert(t('qrJoin.invalidTitle'), t('qrJoin.invalidMessage'));
       setScanned(false);
       setIsLoading(false);
     }
@@ -153,7 +155,7 @@ export const QRGroupJoinScreen = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>카메라 권한을 확인하는 중...</Text>
+          <Text style={styles.loadingText}>{t('qrJoin.checkingPermission')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -169,16 +171,15 @@ export const QRGroupJoinScreen = () => {
           >
             <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>QR 코드 그룹</Text>
+          <Text style={styles.headerTitle}>{t('qrJoin.title')}</Text>
           <View style={styles.headerRight} />
         </View>
 
         <View style={styles.permissionContainer}>
           <Icon name="camera-outline" size={64} color={COLORS.TEXT.LIGHT} />
-          <Text style={styles.permissionTitle}>카메라 권한이 필요합니다</Text>
+          <Text style={styles.permissionTitle}>{t('qrJoin.permissionRequired')}</Text>
           <Text style={styles.permissionDescription}>
-            QR 코드를 스캔하여 그룹에 참여하려면{'\n'}
-            카메라 권한이 필요합니다
+            {t('qrJoin.permissionDescription')}
           </Text>
           <TouchableOpacity
             style={styles.permissionButton}
@@ -187,7 +188,7 @@ export const QRGroupJoinScreen = () => {
               setHasPermission(status === 'granted');
             }}
           >
-            <Text style={styles.permissionButtonText}>카메라 권한 허용하기</Text>
+            <Text style={styles.permissionButtonText}>{t('qrJoin.allowPermission')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -203,7 +204,7 @@ export const QRGroupJoinScreen = () => {
         >
           <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>QR 코드 그룹</Text>
+        <Text style={styles.headerTitle}>{t('qrJoin.title')}</Text>
         <TouchableOpacity
           style={styles.switchButton}
           onPress={() => setMode(mode === 'scan' ? 'generate' : 'scan')}
@@ -218,10 +219,9 @@ export const QRGroupJoinScreen = () => {
 
       {mode === 'scan' ? (
         <View style={styles.scanContainer}>
-          <Text style={styles.instructionTitle}>QR 코드를 스캔하세요</Text>
+          <Text style={styles.instructionTitle}>{t('qrJoin.scanTitle')}</Text>
           <Text style={styles.instructionText}>
-            다른 사용자가 생성한 그룹 QR 코드를{'\n'}
-            카메라로 스캔하여 그룹에 참여하세요
+            {t('qrJoin.scanDescription')}
           </Text>
 
           <View style={styles.cameraContainer}>
@@ -257,10 +257,9 @@ export const QRGroupJoinScreen = () => {
         </View>
       ) : (
         <View style={styles.generateContainer}>
-          <Text style={styles.instructionTitle}>그룹 QR 코드 생성</Text>
+          <Text style={styles.instructionTitle}>{t('qrJoin.generateTitle')}</Text>
           <Text style={styles.instructionText}>
-            다른 사용자들이 스캔하여{'\n'}
-            그룹에 쉽게 참여할 수 있게 해주세요
+            {t('qrJoin.generateDescription')}
           </Text>
 
           {selectedGroup ? (
@@ -277,10 +276,10 @@ export const QRGroupJoinScreen = () => {
               <View style={styles.groupInfo}>
                 <Text style={styles.groupName}>{selectedGroup.name}</Text>
                 <Text style={styles.groupDetails}>
-                  멤버 {selectedGroup.memberCount}명 • {selectedGroup.type}
+                  {t('qrJoin.groupDetails', { memberCount: selectedGroup.memberCount, type: selectedGroup.type })}
                 </Text>
                 <Text style={styles.qrWarning}>
-                  ⚠️ 이 QR 코드는 5분 후 만료됩니다
+                  {t('qrJoin.qrExpiry')}
                 </Text>
               </View>
 
@@ -292,22 +291,21 @@ export const QRGroupJoinScreen = () => {
                 }}
               >
                 <Icon name="refresh" size={16} color={COLORS.PRIMARY} />
-                <Text style={styles.regenerateButtonText}>새로 생성</Text>
+                <Text style={styles.regenerateButtonText}>{t('qrJoin.regenerate')}</Text>
               </TouchableOpacity>
             </View>  
           ) : (
             <View style={styles.noGroupContainer}>
               <Icon name="people-outline" size={48} color={COLORS.TEXT.LIGHT} />
-              <Text style={styles.noGroupTitle}>선택된 그룹이 없습니다</Text>
+              <Text style={styles.noGroupTitle}>{t('qrJoin.noGroupSelected')}</Text>
               <Text style={styles.noGroupDescription}>
-                그룹 목록에서 QR 코드를 생성할{'\n'}
-                그룹을 선택해주세요
+                {t('qrJoin.selectGroupDescription')}
               </Text>
               <TouchableOpacity
                 style={styles.selectGroupButton}
                 onPress={() => navigation.navigate('Groups' as never)}
               >
-                <Text style={styles.selectGroupButtonText}>그룹 선택하기</Text>
+                <Text style={styles.selectGroupButtonText}>{t('qrJoin.selectGroup')}</Text>
               </TouchableOpacity>
             </View>
           )}

@@ -9,10 +9,14 @@ import {
   UseGuards,
   HttpException,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
+import { I18n, UserLang } from '../i18n/i18n.decorator';
+import { formatLocalizedResponse, formatLocalizedError } from '../i18n/i18n.config';
+import { SupportedLanguage } from '../i18n/i18n.config';
 
 /**
  * 사용자 컨트롤러
@@ -28,37 +32,40 @@ export class UserController {
    * 현재 사용자 프로필 조회
    *
    * @param userId 현재 사용자 ID
+   * @param req Express Request object for i18n
+   * @param userLang User's preferred language
    * @returns 사용자 프로필
    */
   @Get('profile')
-  async getMyProfile(@CurrentUserId() userId: string) {
+  async getMyProfile(
+    @CurrentUserId() userId: string,
+    @Req() req: any,
+    @UserLang() userLang: SupportedLanguage,
+  ) {
     try {
       const user = await this.userService.findById(userId);
-      return {
-        success: true,
-        data: {
-          id: user.id,
-          nickname: user.nickname,
-          phoneNumber: user.phoneNumber,
-          profileImage: user.profileImage,
-          bio: user.bio,
-          age: user.age,
-          gender: user.gender,
-          height: user.height,
-          mbti: user.mbti,
-          location: user.location,
-          isPremium: user.isPremium,
-          credits: user.credits,
-          lastActive: user.lastActive,
-        },
+      const profileData = {
+        id: user.id,
+        nickname: user.nickname,
+        phoneNumber: user.phoneNumber,
+        profileImage: user.profileImage,
+        bio: user.bio,
+        age: user.age,
+        gender: user.gender,
+        height: user.height,
+        mbti: user.mbti,
+        location: user.location,
+        isPremium: user.isPremium,
+        credits: user.credits,
+        lastActive: user.lastActive,
+        preferredLanguage: userLang,
       };
+      
+      return formatLocalizedResponse(req, profileData);
     } catch (error) {
       throw new HttpException(
-        {
-          success: false,
-          message: error.message || '프로필 조회에 실패했습니다.',
-        },
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        formatLocalizedError(req, 'user.notFound', HttpStatus.NOT_FOUND),
+        HttpStatus.NOT_FOUND,
       );
     }
   }
@@ -68,31 +75,29 @@ export class UserController {
    *
    * @param userId 현재 사용자 ID
    * @param updateData 업데이트할 데이터
+   * @param req Express Request object for i18n
    * @returns 업데이트된 프로필
    */
   @Put('profile')
   async updateProfile(
     @CurrentUserId() userId: string,
     @Body() updateData: any,
+    @Req() req: any,
   ) {
     try {
       const user = await this.userService.updateProfile(userId, updateData);
-      return {
-        success: true,
-        data: {
-          id: user.id,
-          nickname: user.nickname,
-          bio: user.bio,
-          profileImage: user.profileImage,
-        },
+      const profileData = {
+        id: user.id,
+        nickname: user.nickname,
+        bio: user.bio,
+        profileImage: user.profileImage,
       };
+      
+      return formatLocalizedResponse(req, profileData, 'user.updated', 'success');
     } catch (error) {
       throw new HttpException(
-        {
-          success: false,
-          message: error.message || '프로필 업데이트에 실패했습니다.',
-        },
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        formatLocalizedError(req, 'user.updateFailed', HttpStatus.BAD_REQUEST),
+        HttpStatus.BAD_REQUEST,
       );
     }
   }

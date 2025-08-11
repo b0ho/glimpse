@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useProfileStore } from '@/store/slices/profileSlice';
@@ -29,7 +30,8 @@ interface SettingItem {
   route?: string;
 }
 
-const ProfileSettingsScreen= () => () => {
+const ProfileSettingsScreen = () => {
+  const { t } = useTranslation('settings');
   const navigation = useNavigation();
   const { userProfile } = useProfileStore();
   
@@ -58,7 +60,7 @@ const ProfileSettingsScreen= () => () => {
     if (!success) {
       // Revert on failure
       setPrivacySettings(privacySettings);
-      Alert.alert('오류', '설정 변경에 실패했습니다.');
+      Alert.alert(t('error'), t('settingUpdateFailed'));
     }
   };
 
@@ -73,102 +75,102 @@ const ProfileSettingsScreen= () => () => {
     if (!success) {
       // Revert on failure
       setNotificationSettings(notificationSettings);
-      Alert.alert('오류', '설정 변경에 실패했습니다.');
+      Alert.alert(t('error'), t('settingUpdateFailed'));
     }
   };
 
   const settingSections: SettingSection[] = [
     {
-      title: '계정 설정',
+      title: t('accountSettings.title'),
       items: [
         {
           icon: 'account-edit',
-          label: '프로필 수정',
+          label: t('accountSettings.editProfile'),
           type: 'navigate',
           route: 'ProfileEdit',
         },
         {
           icon: 'lock-reset',
-          label: '비밀번호 변경',
+          label: t('accountSettings.changePassword'),
           type: 'navigate',
           route: 'ChangePassword',
         },
         // Email change removed - not in User type
         {
           icon: 'phone-outline',
-          label: '전화번호 변경',
-          value: userProfile?.phoneNumber || '미등록',
+          label: t('accountSettings.changePhone'),
+          value: userProfile?.phoneNumber || t('accountSettings.notRegistered'),
           type: 'navigate',
           route: 'ChangePhone',
         },
       ],
     },
     {
-      title: '개인정보 보호',
+      title: t('privacySettings.title'),
       items: [
         {
           icon: 'eye-outline',
-          label: '프로필 공개',
+          label: t('privacySettings.showProfile'),
           value: privacySettings.showProfile,
           type: 'toggle',
           action: () => handlePrivacyToggle('showProfile'),
         },
         {
           icon: 'circle-outline',
-          label: '온라인 상태 표시',
+          label: t('privacySettings.showOnlineStatus'),
           value: privacySettings.showOnlineStatus,
           type: 'toggle',
           action: () => handlePrivacyToggle('showOnlineStatus'),
         },
         {
           icon: 'clock-outline',
-          label: '마지막 접속 시간 표시',
+          label: t('privacySettings.showLastSeen'),
           value: privacySettings.showLastSeen,
           type: 'toggle',
           action: () => handlePrivacyToggle('showLastSeen'),
         },
         {
           icon: 'account-plus-outline',
-          label: '친구 요청 허용',
+          label: t('privacySettings.allowFriendRequests'),
           value: privacySettings.allowFriendRequests,
           type: 'toggle',
           action: () => handlePrivacyToggle('allowFriendRequests'),
         },
         {
           icon: 'account-cancel-outline',
-          label: '차단 목록',
+          label: t('privacySettings.blockedUsers'),
           type: 'navigate',
           route: 'BlockedUsers',
         },
       ],
     },
     {
-      title: '알림 설정',
+      title: t('notificationSettings.title'),
       items: [
         {
           icon: 'heart-outline',
-          label: '좋아요 알림',
+          label: t('notificationSettings.likes'),
           value: notificationSettings.likes,
           type: 'toggle',
           action: () => handleNotificationToggle('likes'),
         },
         {
           icon: 'account-check-outline',
-          label: '매칭 알림',
+          label: t('notificationSettings.matches'),
           value: notificationSettings.matches,
           type: 'toggle',
           action: () => handleNotificationToggle('matches'),
         },
         {
           icon: 'message-outline',
-          label: '메시지 알림',
+          label: t('notificationSettings.messages'),
           value: notificationSettings.messages,
           type: 'toggle',
           action: () => handleNotificationToggle('messages'),
         },
         {
           icon: 'account-multiple-plus-outline',
-          label: '친구 요청 알림',
+          label: t('notificationSettings.friendRequests'),
           value: notificationSettings.friendRequests,
           type: 'toggle',
           action: () => handleNotificationToggle('friendRequests'),
@@ -176,44 +178,44 @@ const ProfileSettingsScreen= () => () => {
       ],
     },
     {
-      title: '기타',
+      title: t('otherSettings.title'),
       items: [
         {
           icon: 'file-document-outline',
-          label: '이용약관',
+          label: t('otherSettings.terms'),
           type: 'navigate',
           route: 'Terms',
         },
         {
           icon: 'shield-lock-outline',
-          label: '개인정보 처리방침',
+          label: t('otherSettings.privacy'),
           type: 'navigate',
           route: 'Privacy',
         },
         {
           icon: 'help-circle-outline',
-          label: '고객센터',
+          label: t('otherSettings.support'),
           type: 'navigate',
           route: 'Support',
         },
         {
           icon: 'information-outline',
-          label: '앱 정보',
+          label: t('otherSettings.appInfo'),
           type: 'navigate',
           route: 'AppInfo',
         },
         {
           icon: 'account-remove-outline',
-          label: '계정 삭제',
+          label: t('otherSettings.deleteAccount'),
           type: 'action',
           action: () => {
             Alert.alert(
-              '계정 삭제',
-              '정말로 계정을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.',
+              t('deleteAccount.title'),
+              t('deleteAccount.message'),
               [
-                { text: '취소', style: 'cancel' },
+                { text: t('deleteAccount.cancel'), style: 'cancel' },
                 {
-                  text: '삭제',
+                  text: t('deleteAccount.confirm'),
                   style: 'destructive',
                   onPress: () => navigation.navigate('DeleteAccount' as never),
                 },
@@ -289,7 +291,7 @@ const ProfileSettingsScreen= () => () => {
         >
           <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>설정</Text>
+        <Text style={styles.headerTitle}>{t('title')}</Text>
         <View style={styles.backButton} />
       </View>
       

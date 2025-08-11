@@ -1,0 +1,49 @@
+{
+  "title": "Glimpse Premium",
+  "subscription": {
+    "title": "Premium Subscription",
+    "description": "Use all features unlimited",
+    "activeTitle": "Active Subscription",
+    "monthlyPlan": "Premium Monthly",
+    "yearlyPlan": "Premium Yearly",
+    "daysLeft": "{{days}} days left",
+    "expiresToday": "Expires today",
+    "cancelNotice": "Your subscription has been cancelled. Premium features will remain available until the end of your current billing period.",
+    "cancel": "Cancel Subscription",
+    "confirmCancel": {
+      "title": "Cancel Subscription",
+      "message": "Are you sure you want to cancel your premium subscription?\n\nYou'll continue to have access to premium features until the end of your current billing period.",
+      "goBack": "Go Back",
+      "confirm": "Cancel",
+      "success": "Your subscription has been cancelled.",
+      "error": "An error occurred while cancelling your subscription."
+    }
+  },
+  "likes": {
+    "title": "Additional Likes",
+    "description": "Buy only what you need when you run out of likes"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "questions": {
+      "cancel": {
+        "question": "Can I cancel my subscription anytime?",
+        "answer": "Yes, you can cancel your subscription anytime. Even after cancellation, you'll continue to have access to premium features until the end of your current billing period."
+      },
+      "payment": {
+        "question": "Is my payment information secure?",
+        "answer": "All payment information is securely processed through Stripe, and Glimpse does not store any card information."
+      },
+      "likes": {
+        "question": "How long can I use purchased likes?",
+        "answer": "Purchased likes are stored in your account until used and never expire."
+      }
+    }
+  },
+  "actions": {
+    "back": "Go Back"
+  },
+  "errors": {
+    "title": "Error"
+  }
+}

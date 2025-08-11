@@ -1,0 +1,62 @@
+{
+  "app": {
+    "name": "Glimpse",
+    "tagline": "从匿名开始的特别相遇"
+  },
+  "navigation": {
+    "home": "首页",
+    "groups": "群组",
+    "matches": "匹配",
+    "chat": "聊天",
+    "profile": "个人资料",
+    "settings": "设置",
+    "premium": "高级会员"
+  },
+  "buttons": {
+    "confirm": "确认",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "back": "返回",
+    "next": "下一步",
+    "skip": "跳过",
+    "submit": "提交",
+    "retry": "重试",
+    "close": "关闭",
+    "share": "分享",
+    "report": "举报",
+    "block": "屏蔽"
+  },
+  "status": {
+    "loading": "加载中...",
+    "online": "在线",
+    "offline": "离线",
+    "typing": "正在输入...",
+    "lastSeen": "最后上线: {{time}}",
+    "active": "活跃",
+    "inactive": "不活跃",
+    "pending": "待处理",
+    "completed": "已完成",
+    "failed": "失败"
+  },
+  "time": {
+    "justNow": "刚刚",
+    "minute": "{{count}}分钟前",
+    "hour": "{{count}}小时前",
+    "day": "{{count}}天前",
+    "week": "{{count}}周前",
+    "month": "{{count}}个月前",
+    "year": "{{count}}年前"
+  },
+  "gender": {
+    "male": "男性",
+    "female": "女性",
+    "other": "其他"
+  },
+  "mode": {
+    "dating": "约会",
+    "friendship": "找朋友",
+    "switchMode": "切换模式"
+  }
+}

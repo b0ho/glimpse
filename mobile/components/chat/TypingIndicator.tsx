@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Animated,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 /**
@@ -27,8 +28,9 @@ interface TypingIndicatorProps {
  */
 export const TypingIndicator= ({
   isTyping,
-  userName = '상대방',
+  userName,
 }) => {
+  const { t } = useTranslation(['chat']);
   const dot1 = useRef(new Animated.Value(0)).current;
   const dot2 = useRef(new Animated.Value(0)).current;
   const dot3 = useRef(new Animated.Value(0)).current;
@@ -100,7 +102,9 @@ export const TypingIndicator= ({
     >
       <View style={styles.bubbleContainer}>
         <View style={styles.textContainer}>
-          <Text style={styles.typingText}>{userName}님이 입력 중</Text>
+          <Text style={styles.typingText}>
+            {userName ? t('notifications.typing', { name: userName }) : t('notifications.typingDefault')}
+          </Text>
           <View style={styles.dotsContainer}>
             <Animated.View
               style={[

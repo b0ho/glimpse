@@ -1,0 +1,51 @@
+{
+  "like": {
+    "title": "좋아요",
+    "sendLike": "좋아요 보내기",
+    "superLike": "슈퍼 좋아요",
+    "likeSent": "좋아요를 보냈습니다",
+    "likeReceived": "{{name}}님이 좋아요를 보냈습니다",
+    "dailyLikes": "오늘의 좋아요",
+    "remainingLikes": "남은 좋아요: {{count}}개",
+    "unlimitedLikes": "무제한 좋아요",
+    "buyMoreLikes": "좋아요 추가 구매",
+    "cooldownMessage": "{{days}}일 후 다시 좋아요할 수 있습니다"
+  },
+  "match": {
+    "title": "매칭",
+    "newMatch": "새로운 매칭!",
+    "matchMessage": "{{name}}님과 매칭되었습니다",
+    "matchList": "매칭 목록",
+    "activeMatches": "활성 매칭",
+    "expiredMatches": "만료된 매칭",
+    "sendMessage": "메시지 보내기",
+    "viewProfile": "프로필 보기",
+    "unmatch": "매칭 해제",
+    "reportMatch": "신고하기"
+  },
+  "discover": {
+    "title": "탐색",
+    "noMoreProfiles": "더 이상 프로필이 없습니다",
+    "refreshProfiles": "프로필 새로고침",
+    "filterProfiles": "필터 설정",
+    "ageRange": "나이 범위",
+    "distance": "거리",
+    "interests": "관심사"
+  },
+  "whoLikesYou": {
+    "title": "나를 좋아하는 사람들",
+    "premium": "프리미엄 전용",
+    "upgradeMessage": "누가 당신을 좋아하는지 확인하려면 프리미엄으로 업그레이드하세요",
+    "likeBack": "맞좋아요",
+    "pass": "패스"
+  },
+  "friendship": {
+    "sendRequest": "친구 신청",
+    "requestSent": "친구 신청을 보냈습니다",
+    "requestReceived": "{{name}}님이 친구 신청을 보냈습니다",
+    "acceptRequest": "수락",
+    "rejectRequest": "거절",
+    "friendList": "친구 목록",
+    "mutualFriends": "공통 친구 {{count}}명"
+  }
+}

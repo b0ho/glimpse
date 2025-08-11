@@ -1,0 +1,70 @@
+{
+  "premium": {
+    "title": "프리미엄 멤버십",
+    "benefits": {
+      "unlimitedLikes": "무제한 좋아요",
+      "seeWhoLikesYou": "나를 좋아하는 사람 확인",
+      "priorityMatching": "우선 매칭",
+      "rewindLikes": "좋아요 되돌리기",
+      "superLikes": "슈퍼 좋아요 5개/일",
+      "readReceipts": "읽음 표시",
+      "onlineStatus": "온라인 상태 표시",
+      "premiumBadge": "프리미엄 배지",
+      "advancedFilters": "고급 필터"
+    },
+    "pricing": {
+      "monthly": "월간 멤버십",
+      "yearly": "연간 멤버십",
+      "monthlyPrice": "₩9,900/월",
+      "yearlyPrice": "₩99,000/년",
+      "yearlySavings": "2개월 무료!",
+      "discount": "{{percent}}% 할인"
+    },
+    "subscribe": "구독하기",
+    "upgrade": "프리미엄으로 업그레이드",
+    "manage": "구독 관리",
+    "cancel": "구독 취소",
+    "restore": "구매 복원"
+  },
+  "credits": {
+    "title": "좋아요 크레딧",
+    "balance": "잔액: {{count}}개",
+    "packages": {
+      "small": "5개",
+      "medium": "10개",
+      "large": "20개",
+      "xlarge": "50개"
+    },
+    "prices": {
+      "small": "₩2,500",
+      "medium": "₩4,500",
+      "large": "₩8,500",
+      "xlarge": "₩19,000"
+    },
+    "bestValue": "인기",
+    "purchase": "구매하기"
+  },
+  "methods": {
+    "card": "신용/체크카드",
+    "kakaoPay": "카카오페이",
+    "tossPay": "토스페이",
+    "naverPay": "네이버페이",
+    "applePay": "Apple Pay",
+    "googlePay": "Google Pay"
+  },
+  "status": {
+    "processing": "결제 처리 중...",
+    "success": "결제 완료",
+    "failed": "결제 실패",
+    "cancelled": "결제 취소",
+    "refunded": "환불 완료"
+  },
+  "messages": {
+    "purchaseSuccess": "구매가 완료되었습니다",
+    "subscriptionActive": "프리미엄 멤버십이 활성화되었습니다",
+    "subscriptionCancelled": "구독이 취소되었습니다",
+    "subscriptionExpired": "프리미엄 멤버십이 만료되었습니다",
+    "insufficientCredits": "크레딧이 부족합니다",
+    "paymentError": "결제 중 오류가 발생했습니다"
+  }
+}

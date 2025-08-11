@@ -6,6 +6,7 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import helmet from 'helmet';
 import compression from 'compression';
+import { initI18n, getI18nMiddleware } from './i18n/i18n.config';
 
 /**
  * NestJS 애플리케이션 부트스트랩
@@ -42,6 +43,10 @@ async function bootstrap() {
 
   // 응답 압축
   app.use(compression());
+
+  // Initialize i18n
+  await initI18n();
+  app.use(getI18nMiddleware());
 
   // CORS 설정 - 개발 환경에서는 모든 origin 허용
   const isDevelopment = configService.get<string>('NODE_ENV') === 'development';

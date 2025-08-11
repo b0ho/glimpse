@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuthService } from '@/services/auth/auth-service';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
@@ -23,6 +24,7 @@ export const PhoneVerificationScreen = ({
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const authService = useAuthService();
+  const { t } = useTranslation('auth');
 
   const formatPhoneInput = (input: string): string => {
     // 숫자만 추출
@@ -41,13 +43,13 @@ export const PhoneVerificationScreen = ({
 
   const handleSendVerification = async (): Promise<void> => {
     if (!phoneNumber.trim()) {
-      Alert.alert('오류', '전화번호를 입력해주세요.');
+      Alert.alert(t('common:errors.error'), t('phoneVerification.errors.phoneRequired'));
       return;
     }
 
     const rawNumbers = phoneNumber.replace(/\D/g, '');
     if (!validatePhoneNumber(rawNumbers)) {
-      Alert.alert('오류', '올바른 전화번호를 입력해주세요. (010으로 시작하는 11자리)');
+      Alert.alert(t('common:errors.error'), t('phoneVerification.errors.invalidPhone'));
       return;
     }
 
@@ -58,21 +60,21 @@ export const PhoneVerificationScreen = ({
       
       if (result.success) {
         Alert.alert(
-          '인증번호 전송',
-          '입력하신 전화번호로 인증번호를 전송했습니다.',
+          t('phoneVerification.success.title'),
+          t('phoneVerification.success.message'),
           [
             {
-              text: '확인',
+              text: t('common:actions.confirm'),
               onPress: () => onVerificationSent(rawNumbers),
             },
           ]
         );
       } else {
-        Alert.alert('오류', typeof result.error === 'string' ? result.error : result.error?.message || '인증번호 전송에 실패했습니다.');
+        Alert.alert(t('common:errors.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('phoneVerification.errors.sendFailed'));
       }
     } catch (error) {
       console.error('Phone verification error:', error);
-      Alert.alert('오류', '네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+      Alert.alert(t('common:errors.error'), t('phoneVerification.errors.networkError'));
     } finally {
       setIsLoading(false);
     }
@@ -91,19 +93,18 @@ export const PhoneVerificationScreen = ({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>🌟 Glimpse</Text>
-        <Text style={styles.subtitle}>익명 데이팅의 새로운 시작</Text>
+        <Text style={styles.title}>{t('phoneVerification.title')}</Text>
+        <Text style={styles.subtitle}>{t('phoneVerification.subtitle')}</Text>
         
         <View style={styles.form}>
-          <Text style={styles.label}>전화번호</Text>
+          <Text style={styles.label}>{t('phoneVerification.phoneLabel')}</Text>
           <Text style={styles.description}>
-            SMS 인증을 통해 안전하게 가입하세요.{'\n'}
-            개인정보는 철저히 보호됩니다.
+            {t('phoneVerification.description')}
           </Text>
           
           <TextInput
             style={styles.input}
-            placeholder="010-1234-5678"
+            placeholder={t('phoneVerification.placeholder')}
             value={phoneNumber}
             onChangeText={handlePhoneChange}
             keyboardType="phone-pad"
@@ -123,18 +124,17 @@ export const PhoneVerificationScreen = ({
               <View style={styles.buttonContent}>
                 <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
                 <Text style={[styles.buttonText, { marginLeft: SPACING.SM }]}>
-                  전송 중...
+                  {t('phoneVerification.sendingButton')}
                 </Text>
               </View>
             ) : (
-              <Text style={styles.buttonText}>인증번호 받기</Text>
+              <Text style={styles.buttonText}>{t('phoneVerification.sendButton')}</Text>
             )}
           </TouchableOpacity>
         </View>
         
         <Text style={styles.privacy}>
-          계속 진행하면 개인정보 처리방침과{'\n'}
-          서비스 이용약관에 동의하는 것으로 간주됩니다.
+          {t('phoneVerification.privacyNotice')}
         </Text>
       </View>
     </KeyboardAvoidingView>

@@ -1,0 +1,70 @@
+{
+  "title": "Settings",
+  "error": "Error",
+  "settingUpdateFailed": "Failed to update settings.",
+  "accountSettings": {
+    "title": "Account Settings",
+    "editProfile": "Edit Profile",
+    "changePassword": "Change Password",
+    "changePhone": "Change Phone Number",
+    "notRegistered": "Not Registered"
+  },
+  "privacySettings": {
+    "title": "Privacy Settings",
+    "showProfile": "Show Profile",
+    "showOnlineStatus": "Show Online Status",
+    "showLastSeen": "Show Last Seen",
+    "allowFriendRequests": "Allow Friend Requests",
+    "blockedUsers": "Blocked Users"
+  },
+  "notificationSettings": {
+    "title": "Notification Settings",
+    "likes": "Like Notifications",
+    "matches": "Match Notifications",
+    "messages": "Message Notifications",
+    "friendRequests": "Friend Request Notifications"
+  },
+  "otherSettings": {
+    "title": "Other",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "support": "Support Center",
+    "appInfo": "App Information",
+    "deleteAccount": "Delete Account"
+  },
+  "deleteAccount": {
+    "title": "Delete Account",
+    "message": "Are you sure you want to delete your account?\nThis action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Delete"
+  },
+  "language": {
+    "title": "Language",
+    "selectLanguage": "Select Language",
+    "changeSuccess": "Language Changed",
+    "changeSuccessMessage": "The language has been changed successfully",
+    "changeFailed": "Language Change Failed",
+    "changeFailedMessage": "Failed to change language. Please try again."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "likes": "Like Notifications",
+    "matches": "Match Notifications",
+    "messages": "Message Notifications",
+    "friendRequests": "Friend Request Notifications"
+  },
+  "privacy": {
+    "title": "Privacy",
+    "showProfile": "Show Profile",
+    "showOnlineStatus": "Show Online Status",
+    "showLastSeen": "Show Last Seen",
+    "allowFriendRequests": "Allow Friend Requests"
+  },
+  "account": {
+    "title": "Account",
+    "editProfile": "Edit Profile",
+    "changePassword": "Change Password",
+    "deleteAccount": "Delete Account",
+    "logout": "Logout"
+  }
+}

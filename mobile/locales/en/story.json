@@ -1,0 +1,31 @@
+{
+  "newStory": "New Story",
+  "permissions": {
+    "required": "Permission Required",
+    "camera": "Camera permission is required.",
+    "mediaLibrary": "Media library access permission is required."
+  },
+  "camera": {
+    "title": "Camera",
+    "selectTitle": "Select",
+    "selectMessage": "Choose photo or video",
+    "photo": "Photo",
+    "video": "Video",
+    "cancel": "Cancel"
+  },
+  "gallery": "Gallery",
+  "upload": {
+    "error": "Error",
+    "selectMedia": "Please select media to upload.",
+    "noToken": "No authentication token.",
+    "failed": "Upload failed",
+    "success": "Success",
+    "successMessage": "Story has been uploaded!",
+    "confirm": "OK"
+  },
+  "preview": {
+    "title": "Story Preview",
+    "share": "Share",
+    "captionPlaceholder": "Add caption..."
+  }
+}

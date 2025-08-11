@@ -11,6 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -42,6 +43,7 @@ export const EditNicknameModal= ({
   onClose,
   onSuccess,
 }) => {
+  const { t } = useTranslation(['common']);
   const { user, updateUserProfile } = useAuthStore();
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -63,18 +65,18 @@ export const EditNicknameModal= ({
     
     // 유효성 검사
     if (trimmedNickname.length < 1) {
-      Alert.alert('알림', '닉네임은 최소 1자 이상이어야 합니다.');
+      Alert.alert(t('notifications.info'), t('modals.editNickname.minLength'));
       return;
     }
     
     if (trimmedNickname.length > 40) {
-      Alert.alert('알림', '닉네임은 최대 40자까지 가능합니다.');
+      Alert.alert(t('notifications.info'), t('modals.editNickname.maxLength'));
       return;
     }
     
     // 기존 닉네임과 동일한지 확인
     if (trimmedNickname === user?.nickname) {
-      Alert.alert('알림', '동일한 닉네임입니다.');
+      Alert.alert(t('notifications.info'), t('modals.editNickname.sameNickname'));
       return;
     }
     
@@ -109,11 +111,11 @@ export const EditNicknameModal= ({
         }
         
         Alert.alert(
-          '성공',
-          '닉네임이 변경되었습니다.',
+          t('notifications.success'),
+          t('modals.editNickname.changeSuccess'),
           [
             {
-              text: '확인',
+              text: t('actions.confirm'),
               onPress: () => {
                 onSuccess?.();
                 onClose();
@@ -122,11 +124,11 @@ export const EditNicknameModal= ({
           ]
         );
       } else {
-        Alert.alert('오류', response.message || '닉네임 변경에 실패했습니다.');
+        Alert.alert(t('notifications.error'), response.message || t('modals.editNickname.changeFailed'));
       }
     } catch (error) {
       console.error('Nickname update error:', error);
-      Alert.alert('오류', '닉네임 변경 중 오류가 발생했습니다.');
+      Alert.alert(t('notifications.error'), t('modals.editNickname.changeError'));
     } finally {
       setIsLoading(false);
     }
@@ -164,7 +166,7 @@ export const EditNicknameModal= ({
         
         <View style={styles.modalContent}>
           <View style={styles.header}>
-            <Text style={styles.title}>닉네임 수정</Text>
+            <Text style={styles.title}>{t('modals.editNickname.title')}</Text>
             <TouchableOpacity
               onPress={onClose}
               style={styles.closeButton}
@@ -174,13 +176,13 @@ export const EditNicknameModal= ({
           </View>
           
           <View style={styles.body}>
-            <Text style={styles.label}>새 닉네임</Text>
+            <Text style={styles.label}>{t('modals.editNickname.newNickname')}</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
                 value={nickname}
                 onChangeText={handleTextChange}
-                placeholder="닉네임을 입력하세요"
+                placeholder={t('modals.editNickname.placeholder')}
                 placeholderTextColor={COLORS.textSecondary}
                 autoFocus
                 maxLength={40}
@@ -201,9 +203,9 @@ export const EditNicknameModal= ({
                 color={COLORS.textSecondary} 
               />
               <Text style={styles.infoText}>
-                • 닉네임은 1자 이상 40자 이하로 입력 가능합니다{`\n`}
-                • 다른 사용자와 중복된 닉네임도 사용 가능합니다{`\n`}
-                • 각 사용자는 고유 ID로 구별됩니다
+                {t('modals.editNickname.info.line1')}{`\n`}
+                {t('modals.editNickname.info.line2')}{`\n`}
+                {t('modals.editNickname.info.line3')}
               </Text>
             </View>
           </View>
@@ -214,7 +216,7 @@ export const EditNicknameModal= ({
               onPress={onClose}
               disabled={isLoading}
             >
-              <Text style={styles.cancelButtonText}>취소</Text>
+              <Text style={styles.cancelButtonText}>{t('actions.cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
@@ -228,7 +230,7 @@ export const EditNicknameModal= ({
               {isLoading ? (
                 <ActivityIndicator size="small" color={COLORS.white} />
               ) : (
-                <Text style={styles.saveButtonText}>저장</Text>
+                <Text style={styles.saveButtonText}>{t('actions.save')}</Text>
               )}
             </TouchableOpacity>
           </View>

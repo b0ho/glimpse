@@ -12,6 +12,7 @@ import {
   Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
@@ -45,6 +46,7 @@ export const HomeScreen = () => {
   const navigation = useNavigation() as any;
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
+  const { t } = useTranslation();
 
   /**
    * 좋아요 토글 핸들러
@@ -59,13 +61,13 @@ export const HomeScreen = () => {
 
     // 자기 자신의 콘텐츠에는 좋아요 불가
     if (authorId === authStore.user?.id) {
-      Alert.alert('알림', '자신의 게시물에는 좋아요를 누를 수 없습니다.');
+      Alert.alert(t('common:status.notification'), t('matching:like.selfLikeNotAllowed'));
       return;
     }
 
     // 이미 좋아요를 눌렀다면
     if (content.isLikedByUser) {
-      Alert.alert('알림', '이미 좋아요를 누른 게시물입니다.');
+      Alert.alert(t('common:status.notification'), t('matching:like.alreadyLiked'));
       return;
     }
 
@@ -74,16 +76,16 @@ export const HomeScreen = () => {
       const remainingLikes = likeStore.getRemainingFreeLikes();
       if (remainingLikes === 0) {
         Alert.alert(
-          '좋아요 한도 초과',
-          '오늘의 무료 좋아요를 모두 사용했습니다.\n추가 좋아요는 결제를 통해 구매할 수 있습니다.',
+          t('matching:like.limitExceeded'),
+          t('matching:like.dailyLimitMessage'),
           [
-            { text: '취소', style: 'cancel' },
-            { text: '구매하기', onPress: () => console.log('Navigate to purchase') },
+            { text: t('common:buttons.cancel'), style: 'cancel' },
+            { text: t('matching:like.buyMoreLikes'), onPress: () => navigation.navigate('Premium') },
           ]
         );
         return;
       } else {
-        Alert.alert('알림', '2주 이내에 이미 좋아요를 보낸 사용자입니다.');
+        Alert.alert(t('common:status.notification'), t('matching:like.cooldownMessage', { days: 14 }));
         return;
       }
     }
@@ -104,13 +106,13 @@ export const HomeScreen = () => {
         );
 
         Alert.alert(
-          '좋아요 전송 완료! 💕',
-          `${content.authorNickname}님에게 익명으로 좋아요를 보냈습니다.\n서로 좋아요를 보내면 매칭됩니다!`
+          t('home:likeMessage.title'),
+          t('home:likeMessage.description', { name: content.authorNickname })
         );
       }
     } catch (error) {
       console.error('Like toggle error:', error);
-      Alert.alert('오류', '좋아요 처리 중 오류가 발생했습니다.');
+      Alert.alert(t('common:status.error'), t('home:errors.likeError'));
     }
   }, [contents, authStore.user?.id, likeStore]);
 
@@ -188,7 +190,7 @@ export const HomeScreen = () => {
       setHasMoreData(contents.length >= 20);
     } catch (error) {
       console.error('[HomeScreen] 콘텐츠 로드 실패:', error);
-      Alert.alert('오류', '콘텐츠를 불러오는 중 오류가 발생했습니다.');
+      Alert.alert(t('common:status.error'), t('home:errors.loadError'));
       setContents([]);
     } finally {
       setIsLoading(false);
@@ -232,14 +234,14 @@ export const HomeScreen = () => {
     <View style={styles.header}>
       <Text style={styles.headerTitle}>Glimpse</Text>
       <Text style={styles.headerSubtitle}>
-        안녕하세요, {authStore.user?.nickname || '사용자'}님! 👋
+        {t('home:header.greeting', { name: authStore.user?.nickname || t('common:user.defaultName', '사용자') })}
       </Text>
       <View style={styles.headerStats}>
         <Text style={styles.statsText}>
-          받은 좋아요: {likeStore.getReceivedLikesCount()}개
+          {t('home:header.receivedLikes', { count: likeStore.getReceivedLikesCount() })}
         </Text>
         <Text style={styles.statsText}>
-          남은 좋아요: {likeStore.getRemainingFreeLikes()}개
+          {t('home:header.remainingLikes', { count: likeStore.getRemainingFreeLikes() })}
         </Text>
       </View>
       
@@ -249,7 +251,7 @@ export const HomeScreen = () => {
         onPress={() => navigation.navigate('LocationGroup' as never)}
       >
         <Icon name="location" size={20} color={COLORS.PRIMARY} />
-        <Text style={styles.locationButtonText}>근처 그룹 및 사용자</Text>
+        <Text style={styles.locationButtonText}>{t('home:location.nearbyGroups')}</Text>
         <Icon name="chevron-forward" size={16} color={COLORS.TEXT.SECONDARY} />
       </TouchableOpacity>
     </View>
@@ -278,9 +280,9 @@ export const HomeScreen = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>📱</Text>
-      <Text style={styles.emptyStateTitle}>아직 콘텐츠가 없어요</Text>
+      <Text style={styles.emptyStateTitle}>{t('home:empty.title')}</Text>
       <Text style={styles.emptyStateSubtitle}>
-        그룹에 참여하거나 첫 번째 게시물을 작성해보세요!
+        {t('home:empty.subtitle')}
       </Text>
     </View>
   );
@@ -296,7 +298,7 @@ export const HomeScreen = () => {
     return (
       <View style={styles.loadingFooter}>
         <ActivityIndicator size="small" color={COLORS.PRIMARY} />
-        <Text style={styles.loadingText}>더 많은 콘텐츠를 불러오는 중...</Text>
+        <Text style={styles.loadingText}>{t('home:loading.moreContent')}</Text>
       </View>
     );
   };
@@ -306,7 +308,7 @@ export const HomeScreen = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>콘텐츠를 불러오는 중...</Text>
+          <Text style={styles.loadingText}>{t('home:loading.content')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -376,7 +378,7 @@ export const HomeScreen = () => {
         style={styles.fab}
         onPress={() => navigation.navigate('CreateContent' as never)}
         activeOpacity={0.8}
-        accessibilityLabel="새 게시물 작성"
+        accessibilityLabel={t('home:fab.createPost')}
         accessibilityHint="새로운 콘텐츠를 작성할 수 있는 화면으로 이동합니다"
         accessibilityRole="button"
       >

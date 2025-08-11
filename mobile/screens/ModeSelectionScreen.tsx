@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { AppMode } from '@shared/types';
@@ -18,6 +19,7 @@ const { width } = Dimensions.get('window');
 
 export const ModeSelectionScreen = () => {
   const navigation = useNavigation() as any;
+  const { t } = useTranslation('common');
   const { setAppMode } = useAuthStore();
 
   const handleModeSelection = (mode: AppMode) => {
@@ -32,8 +34,8 @@ export const ModeSelectionScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Glimpse</Text>
-        <Text style={styles.subtitle}>어떤 만남을 원하시나요?</Text>
+        <Text style={styles.title}>{t('app.name')}</Text>
+        <Text style={styles.subtitle}>{t('mode.selection.title')}</Text>
       </View>
 
       <View style={styles.modeContainer}>
@@ -46,14 +48,14 @@ export const ModeSelectionScreen = () => {
           <View style={styles.iconContainer}>
             <Icon name="heart" size={60} color={COLORS.PRIMARY} />
           </View>
-          <Text style={styles.modeTitle}>애인 찾기</Text>
+          <Text style={styles.modeTitle}>{t('mode.selection.dating.title')}</Text>
           <Text style={styles.modeDescription}>
-            진지한 만남과 로맨틱한 관계를 원하는 분들을 위한 공간
+            {t('mode.selection.dating.description')}
           </Text>
           <View style={styles.featureList}>
-            <Text style={styles.featureItem}>• 호감 표현 시스템</Text>
-            <Text style={styles.featureItem}>• 1:1 매칭</Text>
-            <Text style={styles.featureItem}>• 익명 프로필</Text>
+            <Text style={styles.featureItem}>{t('mode.selection.dating.features.like')}</Text>
+            <Text style={styles.featureItem}>{t('mode.selection.dating.features.matching')}</Text>
+            <Text style={styles.featureItem}>{t('mode.selection.dating.features.anonymous')}</Text>
           </View>
         </TouchableOpacity>
 
@@ -66,20 +68,20 @@ export const ModeSelectionScreen = () => {
           <View style={styles.iconContainer}>
             <Icon name="people" size={60} color="#4ECDC4" />
           </View>
-          <Text style={styles.modeTitle}>친구찾기</Text>
+          <Text style={styles.modeTitle}>{t('mode.selection.friendship.title')}</Text>
           <Text style={styles.modeDescription}>
-            취미와 관심사를 공유하는 친구들을 만나는 공간
+            {t('mode.selection.friendship.description')}
           </Text>
           <View style={styles.featureList}>
-            <Text style={styles.featureItem}>• 커뮤니티 게시판</Text>
-            <Text style={styles.featureItem}>• 단체 채팅</Text>
-            <Text style={styles.featureItem}>• 모임 & 이벤트</Text>
+            <Text style={styles.featureItem}>{t('mode.selection.friendship.features.community')}</Text>
+            <Text style={styles.featureItem}>{t('mode.selection.friendship.features.groupChat')}</Text>
+            <Text style={styles.featureItem}>{t('mode.selection.friendship.features.events')}</Text>
           </View>
         </TouchableOpacity>
       </View>
 
       <Text style={styles.note}>
-        나중에 프로필 설정에서 모드를 변경할 수 있습니다
+        {t('mode.selection.note')}
       </Text>
     </SafeAreaView>
   );

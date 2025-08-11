@@ -8,6 +8,7 @@ import {
   FlatList,
   Dimensions,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 /**
@@ -43,10 +44,10 @@ interface MessageReactionsProps {
 const QUICK_REACTIONS = ['❤️', '👍', '😊', '😂', '😮', '😢', '🙏', '👏'];
 
 const ALL_REACTIONS = [
-  { category: '표정', emojis: ['😊', '😂', '🥰', '😍', '😎', '😢', '😭', '😤', '😮', '😱'] },
-  { category: '손동작', emojis: ['👍', '👎', '👏', '🙏', '🤝', '✌️', '🤟', '🤙', '💪', '🙌'] },
-  { category: '하트', emojis: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '💕', '💖'] },
-  { category: '기타', emojis: ['🔥', '💯', '✨', '🎉', '🎊', '🌟', '⭐', '🌈', '☀️', '🌙'] },
+  { category: 'expressions', emojis: ['😊', '😂', '🥰', '😍', '😎', '😢', '😭', '😤', '😮', '😱'] },
+  { category: 'gestures', emojis: ['👍', '👎', '👏', '🙏', '🤝', '✌️', '🤟', '🤙', '💪', '🙌'] },
+  { category: 'hearts', emojis: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '💕', '💖'] },
+  { category: 'others', emojis: ['🔥', '💯', '✨', '🎉', '🎊', '🌟', '⭐', '🌈', '☀️', '🌙'] },
 ];
 
 /**
@@ -63,6 +64,7 @@ export const MessageReactions= ({
   currentUserId,
 }) => {
   const [showAllReactions, setShowAllReactions] = useState(false);
+  const { t } = useTranslation(['chat']);
 
   /**
    * 리액션 터치 핸들러
@@ -140,7 +142,7 @@ export const MessageReactions= ({
         >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>반응 추가</Text>
+              <Text style={styles.modalTitle}>{t('reactions.addReaction')}</Text>
             </View>
 
             {/* 빠른 선택 */}
@@ -162,7 +164,7 @@ export const MessageReactions= ({
               keyExtractor={(item) => item.category}
               renderItem={({ item }) => (
                 <View style={styles.categoryContainer}>
-                  <Text style={styles.categoryTitle}>{item.category}</Text>
+                  <Text style={styles.categoryTitle}>{t(`reactions.categories.${item.category}`)}</Text>
                   <View style={styles.emojiGrid}>
                     {item.emojis.map((emoji) => (
                       <TouchableOpacity

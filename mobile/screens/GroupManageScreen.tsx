@@ -12,6 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { groupApi } from '@/services/api/groupApi';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatDateKorean } from '@shared/utils';
@@ -34,6 +35,7 @@ export const GroupManageScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { groupId } = route.params as { groupId: string };
+  const { t } = useTranslation();
 
   const [pendingMembers, setPendingMembers] = useState<PendingMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,8 +53,8 @@ export const GroupManageScreen = () => {
     } catch (error: any) {
       console.error('Failed to load pending members:', error);
       if (error.response?.status === 403) {
-        Alert.alert('권한 없음', '그룹 관리 권한이 없습니다.', [
-          { text: '확인', onPress: () => navigation.goBack() }
+        Alert.alert(t('group:manage.alerts.noPermission.title'), t('group:manage.alerts.noPermission.message'), [
+          { text: t('common:buttons.confirm'), onPress: () => navigation.goBack() }
         ]);
       }
     } finally {
@@ -68,20 +70,20 @@ export const GroupManageScreen = () => {
 
   const handleApprove = async (member: PendingMember) => {
     Alert.alert(
-      '가입 승인',
-      `${member.user.nickname}님의 가입을 승인하시겠습니까?`,
+      t('group:manage.alerts.approveConfirm.title'),
+      t('group:manage.alerts.approveConfirm.message', { nickname: member.user.nickname }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('group:manage.alerts.approveConfirm.cancel'), style: 'cancel' },
         {
-          text: '승인',
+          text: t('group:manage.alerts.approveConfirm.approve'),
           onPress: async () => {
             setProcessingIds(prev => [...prev, member.id]);
             try {
               await groupApi.approveMember(groupId, member.userId);
               setPendingMembers(prev => prev.filter(m => m.id !== member.id));
-              Alert.alert('성공', '가입이 승인되었습니다.');
+              Alert.alert(t('group:manage.alerts.approveSuccess.title'), t('group:manage.alerts.approveSuccess.message'));
             } catch (error: any) {
-              Alert.alert('오류', error.response?.data?.message || '승인에 실패했습니다.');
+              Alert.alert(t('group:manage.alerts.approveError.title'), error.response?.data?.message || t('group:manage.alerts.approveError.message'));
             } finally {
               setProcessingIds(prev => prev.filter(id => id !== member.id));
             }
@@ -93,21 +95,21 @@ export const GroupManageScreen = () => {
 
   const handleReject = async (member: PendingMember) => {
     Alert.alert(
-      '가입 거절',
-      `${member.user.nickname}님의 가입을 거절하시겠습니까?`,
+      t('group:manage.alerts.rejectConfirm.title'),
+      t('group:manage.alerts.rejectConfirm.message', { nickname: member.user.nickname }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('group:manage.alerts.rejectConfirm.cancel'), style: 'cancel' },
         {
-          text: '거절',
+          text: t('group:manage.alerts.rejectConfirm.reject'),
           style: 'destructive',
           onPress: async () => {
             setProcessingIds(prev => [...prev, member.id]);
             try {
               await groupApi.rejectMember(groupId, member.userId);
               setPendingMembers(prev => prev.filter(m => m.id !== member.id));
-              Alert.alert('완료', '가입이 거절되었습니다.');
+              Alert.alert(t('group:manage.alerts.rejectSuccess.title'), t('group:manage.alerts.rejectSuccess.message'));
             } catch (error: any) {
-              Alert.alert('오류', error.response?.data?.message || '거절에 실패했습니다.');
+              Alert.alert(t('group:manage.alerts.rejectError.title'), error.response?.data?.message || t('group:manage.alerts.rejectError.message'));
             } finally {
               setProcessingIds(prev => prev.filter(id => id !== member.id));
             }
@@ -133,7 +135,7 @@ export const GroupManageScreen = () => {
             <Text style={styles.nickname}>{member.user.nickname}</Text>
             {member.user.age && member.user.gender && (
               <Text style={styles.ageGender}>
-                {member.user.age}세 • {member.user.gender === 'MALE' ? '남성' : '여성'}
+                {member.user.age}{t('common:age')} • {member.user.gender === 'MALE' ? t('common:gender.male') : t('common:gender.female')}
               </Text>
             )}
             {member.user.bio && (
@@ -142,7 +144,7 @@ export const GroupManageScreen = () => {
               </Text>
             )}
             <Text style={styles.requestDate}>
-              신청일: {formatDateKorean(new Date(member.joinedAt))}
+              {t('group:manage.requestDate', { date: formatDateKorean(new Date(member.joinedAt)) })}
             </Text>
           </View>
         </View>
@@ -156,7 +158,7 @@ export const GroupManageScreen = () => {
             {isProcessing ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Text style={styles.approveButtonText}>승인</Text>
+              <Text style={styles.approveButtonText}>{t('group:manage.actions.approve')}</Text>
             )}
           </TouchableOpacity>
           
@@ -168,7 +170,7 @@ export const GroupManageScreen = () => {
             {isProcessing ? (
               <ActivityIndicator size="small" color={COLORS.ERROR} />
             ) : (
-              <Text style={styles.rejectButtonText}>거절</Text>
+              <Text style={styles.rejectButtonText}>{t('group:manage.actions.reject')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -188,9 +190,9 @@ export const GroupManageScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.headerButton}>닫기</Text>
+          <Text style={styles.headerButton}>{t('common:buttons.close')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>가입 대기 멤버</Text>
+        <Text style={styles.headerTitle}>{t('group:manage.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -206,23 +208,23 @@ export const GroupManageScreen = () => {
       >
         {pendingMembers.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>대기 중인 가입 신청이 없습니다</Text>
+            <Text style={styles.emptyText}>{t('group:manage.empty')}</Text>
           </View>
         ) : (
           <>
             <Text style={styles.countText}>
-              {pendingMembers.length}명이 가입 승인을 기다리고 있습니다
+              {t('group:manage.countText', { count: pendingMembers.length })}
             </Text>
             {pendingMembers.map(renderMember)}
           </>
         )}
 
         <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>안내사항</Text>
+          <Text style={styles.infoTitle}>{t('group:manage.info.title')}</Text>
           <Text style={styles.infoText}>
-            • 가입 승인 시 즉시 그룹 멤버가 됩니다{'\n'}
-            • 거절된 사용자는 다시 가입 신청할 수 있습니다{'\n'}
-            • 부적절한 프로필의 사용자는 거절해주세요
+            {t('group:manage.info.approval')}{'\n'}
+            {t('group:manage.info.reapply')}{'\n'}
+            {t('group:manage.info.inappropriate')}
           </Text>
         </View>
       </ScrollView>

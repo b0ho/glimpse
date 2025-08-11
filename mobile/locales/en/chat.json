@@ -1,0 +1,91 @@
+{
+  "title": "Chat",
+  "messageInput": {
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "attachPhoto": "Attach Photo",
+    "takePhoto": "Take Photo",
+    "voiceMessage": "Voice Message",
+    "location": "Share Location"
+  },
+  "messageStatus": {
+    "sending": "Sending...",
+    "sent": "Sent",
+    "delivered": "Delivered",
+    "read": "Read",
+    "failed": "Failed to send"
+  },
+  "messageTypes": {
+    "text": "Text",
+    "image": "Image",
+    "voice": "Voice Message",
+    "location": "Location",
+    "storyReply": "Story Reply"
+  },
+  "actions": {
+    "deleteMessage": "Delete Message",
+    "copyMessage": "Copy Message",
+    "replyMessage": "Reply",
+    "forwardMessage": "Forward",
+    "reportMessage": "Report"
+  },
+  "notifications": {
+    "typing": "{{name}} is typing...",
+    "typingDefault": "Someone is typing",
+    "online": "{{name}} is online",
+    "newMessage": "You have a new message"
+  },
+  "reactions": {
+    "addReaction": "Add Reaction",
+    "categories": {
+      "expressions": "Expressions",
+      "gestures": "Gestures",
+      "hearts": "Hearts",
+      "others": "Others"
+    }
+  },
+  "emptyState": {
+    "noChats": "No chats",
+    "startChatting": "Start chatting with matched people",
+    "noMessages": "No messages",
+    "sayHello": "Say hello!",
+    "title": "Start a conversation!",
+    "subtitle": "Send your first message to {{name}}.\nTake time to get to know each other."
+  },
+  "encryption": {
+    "encrypted": "End-to-end encrypted",
+    "secureChat": "Secure Chat"
+  },
+  "loading": {
+    "text": "Loading chat room...",
+    "previousMessages": "Loading previous messages..."
+  },
+  "errors": {
+    "loginRequired": "Login required",
+    "chatLoadFailed": "Failed to load chat room",
+    "messageOptions": "Message Options",
+    "copyConfirm": "Copy this message?",
+    "cancel": "Cancel",
+    "copy": "Copy",
+    "copySuccess": "Message copied",
+    "error": "Error",
+    "sendFailed": "Failed to send message.",
+    "imageSendFailed": "Failed to send image.",
+    "imageSelectFailed": "Error occurred while selecting image.",
+    "photoSendFailed": "Failed to send photo.",
+    "cameraFailed": "Error occurred while launching camera."
+  },
+  "input": {
+    "placeholder": "Type a message...",
+    "label": "Message input",
+    "hint": "Enter your message here"
+  },
+  "attachment": {
+    "button": "Attachment",
+    "hint": "You can attach images",
+    "camera": "Camera",
+    "gallery": "Gallery",
+    "takePhoto": "Take photo with camera",
+    "selectPhoto": "Select photo from gallery"
+  }
+}

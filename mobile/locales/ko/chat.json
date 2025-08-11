@@ -1,0 +1,77 @@
+{
+  "title": "채팅",
+  "messageInput": {
+    "placeholder": "메시지를 입력하세요...",
+    "send": "전송",
+    "attachPhoto": "사진 첨부",
+    "takePhoto": "사진 촬영",
+    "voiceMessage": "음성 메시지",
+    "location": "위치 공유"
+  },
+  "messageStatus": {
+    "sending": "전송 중...",
+    "sent": "전송됨",
+    "delivered": "전달됨",
+    "read": "읽음",
+    "failed": "전송 실패"
+  },
+  "messageTypes": {
+    "text": "텍스트",
+    "image": "이미지",
+    "voice": "음성 메시지",
+    "location": "위치",
+    "storyReply": "스토리 답장"
+  },
+  "actions": {
+    "deleteMessage": "메시지 삭제",
+    "copyMessage": "메시지 복사",
+    "replyMessage": "답장",
+    "forwardMessage": "전달",
+    "reportMessage": "신고"
+  },
+  "notifications": {
+    "typing": "{{name}}님이 입력 중...",
+    "typingDefault": "상대방님이 입력 중",
+    "online": "{{name}}님이 온라인입니다",
+    "newMessage": "새 메시지가 있습니다"
+  },
+  "reactions": {
+    "addReaction": "반응 추가",
+    "categories": {
+      "expressions": "표정",
+      "gestures": "손동작",
+      "hearts": "하트",
+      "others": "기타"
+    }
+  },
+  "emptyState": {
+    "noChats": "채팅이 없습니다",
+    "startChatting": "매칭된 사람과 대화를 시작해보세요",
+    "noMessages": "메시지가 없습니다",
+    "sayHello": "인사를 건네보세요!"
+  },
+  "encryption": {
+    "encrypted": "종단간 암호화됨",
+    "secureChat": "안전한 채팅"
+  },
+  "input": {
+    "placeholder": "메시지를 입력하세요...",
+    "label": "메시지 입력",
+    "hint": "여기에 보낼 메시지를 입력하세요"
+  },
+  "attachment": {
+    "button": "첨부파일",
+    "hint": "이미지를 첨부할 수 있습니다",
+    "camera": "카메라",
+    "gallery": "갤러리",
+    "takePhoto": "카메라로 사진 촬영",
+    "selectPhoto": "갤러리에서 사진 선택"
+  },
+  "errors": {
+    "sendFailed": "메시지 전송에 실패했습니다.",
+    "imageSendFailed": "이미지 전송에 실패했습니다.",
+    "imageSelectFailed": "이미지를 선택하는 중 오류가 발생했습니다.",
+    "photoSendFailed": "사진 전송에 실패했습니다.",
+    "cameraFailed": "카메라를 실행하는 중 오류가 발생했습니다."
+  }
+}

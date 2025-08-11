@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { Match } from '@/types';
@@ -30,6 +31,7 @@ export const MatchesScreen = React.memo(() => {
   const navigation = useNavigation();
   const likeStore = useLikeStore();
   const { user } = useAuthStore();
+  const { t } = useTranslation('matches');
 
   /**
    * 매칭 데이터 로드
@@ -101,7 +103,7 @@ export const MatchesScreen = React.memo(() => {
     // 익명성 시스템: 매칭된 상대방이므로 실명 표시
     const displayName = user?.id 
       ? likeStore.getUserDisplayName(otherUserId, user.id)
-      : '익명사용자';
+      : t('user.anonymous');
 
     return (
       <View style={styles.matchItem}>
@@ -124,13 +126,12 @@ export const MatchesScreen = React.memo(() => {
             style={styles.chatButton}
             onPress={() => handleStartChat(item.id, displayName)}
           >
-            <Text style={styles.chatButtonText}>채팅하기</Text>
+            <Text style={styles.chatButtonText}>{t('actions.startChat')}</Text>
           </TouchableOpacity>
         </View>
         
         <Text style={styles.matchDescription}>
-          서로 좋아요를 보내서 매칭되었어요! 💕{'\n'}
-          지금부터 서로의 닉네임을 확인할 수 있습니다.
+          {t('messages.matchDescription')}
         </Text>
       </View>
     );
@@ -143,16 +144,16 @@ export const MatchesScreen = React.memo(() => {
    */
   const renderHeader = () => (
     <View style={styles.header}>
-      <Text style={styles.headerTitle}>매칭</Text>
+      <Text style={styles.headerTitle}>{t('title')}</Text>
       <Text style={styles.headerSubtitle}>
-        서로 좋아요를 보낸 사람들과 대화해보세요
+        {t('subtitle')}
       </Text>
       <View style={styles.statsContainer}>
         <Text style={styles.statsText}>
-          총 매칭: {matches.length}명
+          {t('stats.totalMatches', { count: matches.length })}
         </Text>
         <Text style={styles.statsText}>
-          받은 좋아요: {likeStore.getReceivedLikesCount()}개
+          {t('stats.receivedLikes', { count: likeStore.getReceivedLikesCount() })}
         </Text>
       </View>
     </View>
@@ -166,11 +167,9 @@ export const MatchesScreen = React.memo(() => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>💕</Text>
-      <Text style={styles.emptyStateTitle}>아직 매칭된 사람이 없어요</Text>
+      <Text style={styles.emptyStateTitle}>{t('emptyState.title')}</Text>
       <Text style={styles.emptyStateSubtitle}>
-        홈 피드에서 마음에 드는 게시물에{'\n'}
-        좋아요를 보내보세요!{'\n\n'}
-        서로 좋아요를 보내면 매칭됩니다.
+        {t('emptyState.subtitle')}
       </Text>
     </View>
   );
@@ -180,7 +179,7 @@ export const MatchesScreen = React.memo(() => {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>매칭 정보를 불러오는 중...</Text>
+          <Text style={styles.loadingText}>{t('loading.text')}</Text>
         </View>
       </SafeAreaView>
     );

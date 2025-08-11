@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -42,11 +43,12 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
 }) => {
   const isOwnContent = item.authorId === currentUserId;
   const { getUserDisplayName } = useLikeStore();
+  const { t } = useTranslation();
 
   // 익명성 시스템: 매칭 상태에 따라 표시명 결정
   const displayName = currentUserId && item.authorId
     ? getUserDisplayName(item.authorId, currentUserId)
-    : item.authorNickname || '익명';
+    : item.authorNickname || t('common:user.anonymous');
 
   return (
     <View style={styles.contentItem}>
@@ -69,7 +71,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
         {item.type === 'image' && item.imageUrls && (
           <View style={styles.imageContainer}>
             <Text style={styles.imagePlaceholder}>
-              📷 이미지 ({item.imageUrls.length}개)
+              📷 {t('common:content.imagesCount', { count: item.imageUrls.length })}
             </Text>
           </View>
         )}
@@ -81,13 +83,13 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
             style={styles.likeButtonContainer}
             onPress={() => item.authorId && onLikeToggle(item.id, item.authorId)}
             disabled={item.isLikedByUser || isOwnContent || !item.authorId}
-            accessibilityLabel={`${item.authorNickname}님의 게시물에 좋아요`}
+            accessibilityLabel={t('common:accessibility.likePost', { name: item.authorNickname })}
             accessibilityHint={
               isOwnContent
-                ? '본인의 게시물에는 좋아요를 누를 수 없습니다'
+                ? t('common:accessibility.cannotLikeOwnPost')
                 : item.isLikedByUser
-                ? '이미 좋아요를 누른 게시물입니다'
-                : '이 게시물에 좋아요를 누를 수 있습니다'
+                ? t('common:accessibility.alreadyLiked')
+                : t('common:accessibility.canLike')
             }
             accessibilityRole="button"
           >
@@ -117,7 +119,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
 
           <View style={styles.actionInfo}>
             <Text style={styles.remainingLikes}>
-              남은 좋아요: {remainingLikes}개
+              {t('matching:like.remainingLikes', { count: remainingLikes })}
             </Text>
           </View>
         </View>

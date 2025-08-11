@@ -1,0 +1,9 @@
+{
+  "devModePanel": "개발 모드 패널",
+  "currentAccount": "현재 계정",
+  "accountSwitch": "계정 전환",
+  "switchAccount": "{{nickname}} 계정으로 전환하시겠습니까?\n앱이 새로고침됩니다.",
+  "debugInfo": "디버그 정보",
+  "environment": "환경",
+  "mockApi": "Mock API"
+}

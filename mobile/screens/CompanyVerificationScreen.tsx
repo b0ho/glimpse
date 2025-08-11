@@ -12,12 +12,14 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { companyVerificationService, CompanyDomain } from '../services/companyVerificationService';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 
 export default function CompanyVerificationScreen() {
   const navigation = useNavigation();
+  const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -64,7 +66,7 @@ export default function CompanyVerificationScreen() {
 
   const sendVerificationEmail = async () => {
     if (!companyVerificationService.validateEmail(email)) {
-      Alert.alert('오류', '올바른 이메일 주소를 입력해주세요.');
+      Alert.alert(t('common:errors.error'), t('companyVerification.email.invalidError'));
       return;
     }
 
@@ -73,9 +75,9 @@ export default function CompanyVerificationScreen() {
       const result = await companyVerificationService.sendVerificationEmail(email);
       setStep('code');
       setTimer(1800); // 30분 = 1800초
-      Alert.alert('성공', '인증 코드가 이메일로 전송되었습니다.');
+      Alert.alert(t('common:status.success'), t('companyVerification.email.success'));
     } catch (error: any) {
-      Alert.alert('오류', error.message || '이메일 전송에 실패했습니다.');
+      Alert.alert(t('common:errors.error'), error.message || t('companyVerification.email.sendFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +85,7 @@ export default function CompanyVerificationScreen() {
 
   const verifyCode = async () => {
     if (!verificationCode || verificationCode.length !== 6) {
-      Alert.alert('오류', '6자리 인증 코드를 입력해주세요.');
+      Alert.alert(t('common:errors.error'), t('companyVerification.code.invalidError'));
       return;
     }
 
@@ -92,13 +94,13 @@ export default function CompanyVerificationScreen() {
       const success = await companyVerificationService.verifyEmailCode(email, verificationCode);
       if (success) {
         Alert.alert(
-          '인증 완료',
-          '회사 인증이 완료되었습니다. 이제 회사 그룹에 참여할 수 있습니다.',
-          [{ text: '확인', onPress: () => navigation.goBack() }]
+          t('companyVerification.code.verifySuccess'),
+          t('companyVerification.code.verifySuccessMessage'),
+          [{ text: t('common:buttons.confirm'), onPress: () => navigation.goBack() }]
         );
       }
     } catch (error: any) {
-      Alert.alert('오류', error.message || '인증에 실패했습니다.');
+      Alert.alert(t('common:errors.error'), error.message || t('companyVerification.code.verifyFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +114,7 @@ export default function CompanyVerificationScreen() {
 
   const resendCode = async () => {
     if (timer > 0) {
-      Alert.alert('알림', `${formatTime(timer)} 후에 다시 시도해주세요.`);
+      Alert.alert(t('common:status.info'), t('companyVerification.code.resendWait', { time: formatTime(timer) }));
       return;
     }
     await sendVerificationEmail();
@@ -128,7 +130,7 @@ export default function CompanyVerificationScreen() {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={COLORS.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>회사 인증</Text>
+          <Text style={styles.title}>{t('companyVerification.title')}</Text>
         </View>
 
         <View style={styles.content}>
@@ -137,8 +139,7 @@ export default function CompanyVerificationScreen() {
           </View>
 
           <Text style={styles.description}>
-            회사 이메일을 인증하면 회사 동료들과 함께{'\n'}
-            특별한 그룹에서 만날 수 있습니다.
+            {t('companyVerification.description')}
           </Text>
 
           {step === 'email' ? (
@@ -146,7 +147,7 @@ export default function CompanyVerificationScreen() {
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
-                  placeholder="회사 이메일 주소"
+                  placeholder={t('companyVerification.email.placeholder')}
                   value={email}
                   onChangeText={handleEmailChange}
                   keyboardType="email-address"
@@ -164,7 +165,7 @@ export default function CompanyVerificationScreen() {
 
               {showSuggestions && (
                 <View style={styles.suggestionsContainer}>
-                  <Text style={styles.suggestionsTitle}>추천 회사 도메인</Text>
+                  <Text style={styles.suggestionsTitle}>{t('companyVerification.suggestions.title')}</Text>
                   {suggestions.map((domain) => (
                     <TouchableOpacity
                       key={domain.id}
@@ -191,7 +192,7 @@ export default function CompanyVerificationScreen() {
                 {isLoading ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <Text style={styles.buttonText}>인증 코드 받기</Text>
+                  <Text style={styles.buttonText}>{t('companyVerification.email.sendButton')}</Text>
                 )}
               </TouchableOpacity>
             </>
@@ -200,13 +201,13 @@ export default function CompanyVerificationScreen() {
               <View style={styles.codeSection}>
                 <Text style={styles.emailText}>{email}</Text>
                 <Text style={styles.codeDescription}>
-                  위 이메일로 전송된 6자리 인증 코드를 입력해주세요.
+                  {t('companyVerification.code.description')}
                 </Text>
 
                 <View style={styles.codeInputContainer}>
                   <TextInput
                     style={styles.codeInput}
-                    placeholder="000000"
+                    placeholder={t('companyVerification.code.placeholder')}
                     value={verificationCode}
                     onChangeText={setVerificationCode}
                     keyboardType="number-pad"
@@ -217,7 +218,7 @@ export default function CompanyVerificationScreen() {
 
                 {timer > 0 && (
                   <Text style={styles.timerText}>
-                    남은 시간: {formatTime(timer)}
+                    {t('companyVerification.code.timer', { time: formatTime(timer) })}
                   </Text>
                 )}
 
@@ -229,7 +230,7 @@ export default function CompanyVerificationScreen() {
                   {isLoading ? (
                     <ActivityIndicator color="white" />
                   ) : (
-                    <Text style={styles.buttonText}>인증하기</Text>
+                    <Text style={styles.buttonText}>{t('companyVerification.code.verifyButton')}</Text>
                   )}
                 </TouchableOpacity>
 
@@ -239,7 +240,7 @@ export default function CompanyVerificationScreen() {
                   disabled={timer > 0}
                 >
                   <Text style={[styles.resendButtonText, timer > 0 && styles.resendButtonTextDisabled]}>
-                    인증 코드 다시 받기
+                    {t('companyVerification.code.resendButton')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -249,8 +250,7 @@ export default function CompanyVerificationScreen() {
           <View style={styles.infoBox}>
             <Ionicons name="information-circle-outline" size={20} color={COLORS.info} />
             <Text style={styles.infoText}>
-              인증 가능한 회사/학교 도메인만 지원됩니다.{'\n'}
-              등록되지 않은 도메인은 고객센터로 문의해주세요.
+              {t('companyVerification.info.title')}
             </Text>
           </View>
         </View>
