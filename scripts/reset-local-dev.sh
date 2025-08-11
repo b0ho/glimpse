@@ -57,11 +57,11 @@ echo -e "\n${YELLOW}📋 Step 3: Docker 컨테이너 재생성${NC}"
 # PostgreSQL
 docker run -d \
     --name glimpse-postgres-dev \
-    -e POSTGRES_USER=glimpse \
-    -e POSTGRES_PASSWORD=glimpse123 \
+    -e POSTGRES_USER=postgres \
+    -e POSTGRES_PASSWORD=postgres \
     -e POSTGRES_DB=glimpse_dev \
     -p 5432:5432 \
-    --health-cmd="pg_isready -U glimpse" \
+    --health-cmd="pg_isready -U postgres" \
     --health-interval=10s \
     --health-timeout=5s \
     --health-retries=5 \
@@ -81,12 +81,31 @@ echo "컨테이너 시작 대기 중..."
 sleep 10
 echo -e "${GREEN}✅ Docker 컨테이너 재생성 완료${NC}"
 
-# 3-1. 데이터베이스 초기화 및 시드 데이터 추가
-echo -e "\n${YELLOW}📋 Step 3-1: 데이터베이스 스키마 적용 및 시드 데이터 추가${NC}"
+# 3-1. .env 파일 확인 및 생성
+echo -e "\n${YELLOW}📋 Step 3-1: 환경 변수 설정${NC}"
+cd "$PROJECT_ROOT/server"
+
+# .env 파일이 없으면 .env.example에서 복사
+if [ ! -f ".env" ]; then
+    echo ".env 파일이 없습니다. .env.example을 복사합니다..."
+    if [ -f ".env.example" ]; then
+        cp .env.example .env
+        # DATABASE_URL을 postgres/postgres로 수정
+        sed -i.bak 's|postgresql://[^@]*@|postgresql://postgres:postgres@|' .env
+        rm .env.bak
+        echo -e "${GREEN}✅ .env 파일 생성 완료${NC}"
+    else
+        echo -e "${RED}❌ .env.example 파일을 찾을 수 없습니다.${NC}"
+        echo "DATABASE_URL을 수동으로 설정해주세요:"
+        echo "  postgresql://postgres:postgres@localhost:5432/glimpse_dev?schema=public"
+    fi
+fi
+
+# 3-2. 데이터베이스 초기화 및 시드 데이터 추가
+echo -e "\n${YELLOW}📋 Step 3-2: 데이터베이스 스키마 적용 및 시드 데이터 추가${NC}"
 
 # Prisma 스키마 적용
 echo "Prisma 스키마를 데이터베이스에 적용 중..."
-cd "$PROJECT_ROOT/server"
 npx prisma db push --force-reset
 echo -e "${GREEN}✅ 데이터베이스 스키마 적용 완료${NC}"
 

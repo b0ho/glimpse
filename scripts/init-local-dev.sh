@@ -55,11 +55,11 @@ else
     docker start glimpse-postgres-dev 2>/dev/null || \
     docker run -d \
         --name glimpse-postgres-dev \
-        -e POSTGRES_USER=glimpse \
-        -e POSTGRES_PASSWORD=glimpse123 \
+        -e POSTGRES_USER=postgres \
+        -e POSTGRES_PASSWORD=postgres \
         -e POSTGRES_DB=glimpse_dev \
         -p 5432:5432 \
-        --health-cmd="pg_isready -U glimpse" \
+        --health-cmd="pg_isready -U postgres" \
         --health-interval=10s \
         --health-timeout=5s \
         --health-retries=5 \
@@ -87,7 +87,7 @@ echo "컨테이너 health check 대기 중..."
 sleep 5
 
 # PostgreSQL 연결 확인
-until docker exec glimpse-postgres-dev pg_isready -U glimpse > /dev/null 2>&1; do
+until docker exec glimpse-postgres-dev pg_isready -U postgres > /dev/null 2>&1; do
     echo "PostgreSQL 시작 대기 중..."
     sleep 2
 done
@@ -104,6 +104,19 @@ echo ""
 # 3. 데이터베이스 초기화
 echo -e "${YELLOW}📋 Step 3: 데이터베이스 초기화${NC}"
 cd "$PROJECT_ROOT/server"
+
+# .env 파일 확인 및 생성
+if [ ! -f ".env" ]; then
+    echo ".env 파일이 없습니다. .env.example을 복사합니다..."
+    if [ -f ".env.example" ]; then
+        cp .env.example .env
+        echo -e "${GREEN}✅ .env 파일 생성 완료${NC}"
+    else
+        echo -e "${RED}❌ .env.example 파일을 찾을 수 없습니다.${NC}"
+        echo "DATABASE_URL을 수동으로 설정해주세요:"
+        echo "  postgresql://postgres:postgres@localhost:5432/glimpse_dev?schema=public"
+    fi
+fi
 
 # Prisma Client 생성
 echo "Prisma Client 생성 중..."
