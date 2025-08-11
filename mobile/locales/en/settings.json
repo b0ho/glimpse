@@ -66,5 +66,8 @@
     "changePassword": "Change Password",
     "deleteAccount": "Delete Account",
     "logout": "Logout"
+  },
+  "footer": {
+    "version": "Version 1.0.0"
   }
 }

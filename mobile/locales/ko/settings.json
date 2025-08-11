@@ -115,5 +115,8 @@
         "message": "탈퇴 처리 중 오류가 발생했습니다."
       }
     }
+  },
+  "footer": {
+    "version": "Version 1.0.0"
   }
 }

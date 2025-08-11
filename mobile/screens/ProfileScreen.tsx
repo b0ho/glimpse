@@ -34,7 +34,7 @@ export const ProfileScreen = () => {
   const [isNicknameModalVisible, setIsNicknameModalVisible] = useState(false);
   
   const navigation = useNavigation();
-  const { t } = useTranslation();
+  const { t } = useTranslation(['profile', 'common', 'settings']);
   const { signOut } = useAuth();
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
@@ -78,12 +78,12 @@ export const ProfileScreen = () => {
    */
   const handleSignOut = () => {
     Alert.alert(
-      '로그아웃',
-      '정말 로그아웃하시겠습니까?',
+      t('profile:settings.logout'),
+      t('profile:settings.logoutConfirm'),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('common:buttons.cancel'), style: 'cancel' },
         {
-          text: '로그아웃',
+          text: t('profile:settings.logout'),
           style: 'destructive',
           onPress: async () => {
             setIsLoggingOut(true);
@@ -93,7 +93,7 @@ export const ProfileScreen = () => {
               // 다른 스토어들도 초기화할 수 있음
             } catch (error) {
               console.error('Sign out error:', error);
-              Alert.alert('오류', '로그아웃 중 오류가 발생했습니다.');
+              Alert.alert(t('common:status.error'), t('profile:settings.logoutError'));
             } finally {
               setIsLoggingOut(false);
             }
@@ -127,7 +127,7 @@ export const ProfileScreen = () => {
   const handleRewindLike = async () => {
     const lastLike = likeStore.getLastLike();
     if (!lastLike) {
-      Alert.alert('알림', '되돌릴 좋아요가 없습니다.');
+      Alert.alert(t('common:status.info'), t('profile:likeSystem.noRewinds'));
       return;
     }
 
@@ -172,7 +172,7 @@ export const ProfileScreen = () => {
    */
   const renderProfileSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>프로필 정보</Text>
+      <Text style={styles.sectionTitle}>{t('profile:info.basicInfo')}</Text>
       
       <View style={styles.profileCard}>
         <View style={styles.avatarContainer}>
@@ -185,13 +185,13 @@ export const ProfileScreen = () => {
         
         <View style={styles.profileInfo}>
           <Text style={styles.nickname}>
-            {authStore.user?.nickname || '닉네임 없음'}
+            {authStore.user?.nickname || t('common:user.noNickname')}
           </Text>
           <Text style={styles.userId}>
-            ID: {authStore.user?.anonymousId || 'Unknown'}
+            ID: {authStore.user?.anonymousId || t('common:user.anonymous')}
           </Text>
           <Text style={styles.joinDate}>
-            가입일: {authStore.user?.createdAt?.toLocaleDateString('ko-KR') || 'Unknown'}
+            {t('profile:info.joinDate')}: {authStore.user?.createdAt?.toLocaleDateString() || t('common:user.notRegistered')}
           </Text>
         </View>
         
@@ -224,12 +224,12 @@ export const ProfileScreen = () => {
             styles.premiumTitle,
             isPremiumUser ? styles.premiumTitleActive : styles.premiumTitleInactive,
           ]}>
-            {isPremiumUser ? '✨ Premium 활성' : '⭐ Premium으로 업그레이드'}
+            {isPremiumUser ? t('profile:premium.active') : t('profile:premium.upgrade')}
           </Text>
           {isPremiumUser && (
             <View style={styles.premiumBadge}>
               <Text style={styles.premiumBadgeText}>
-                {currentPlan.includes('yearly') ? '연간' : '월간'}
+                {currentPlan.includes('yearly') ? t('profile:premium.yearly') : t('profile:premium.monthly')}
               </Text>
             </View>
           )}
@@ -237,20 +237,20 @@ export const ProfileScreen = () => {
         
         <Text style={styles.premiumDescription}>
           {isPremiumUser 
-            ? '모든 프리미엄 기능을 이용하고 있습니다'
-            : '무제한 좋아요, 매칭 우선권 등 프리미엄 기능을 만나보세요'
+            ? t('profile:premium.activeDescription')
+            : t('profile:premium.inactiveDescription')
           }
         </Text>
         
         <View style={styles.premiumFeatures}>
           <Text style={styles.premiumFeature}>
-            💕 {isPremiumUser ? '무제한 좋아요' : '일일 좋아요 1개 → 무제한'}
+            💕 {isPremiumUser ? t('profile:premium.features.unlimitedLikes') : t('profile:premium.features.dailyToUnlimited')}
           </Text>
           <Text style={styles.premiumFeature}>
-            👀 {isPremiumUser ? '좋아요 받은 사람 확인 가능' : '누가 좋아요를 보냈는지 확인'}
+            👀 {isPremiumUser ? t('profile:premium.features.seeWhoLikedYou') : t('profile:premium.features.seeWhoLikedYouInfo')}
           </Text>
           <Text style={styles.premiumFeature}>
-            ⚡ {isPremiumUser ? '우선 매칭 활성' : '우선 매칭으로 더 빠른 연결'}
+            ⚡ {isPremiumUser ? t('profile:premium.features.priorityMatching') : t('profile:premium.features.priorityMatchingInfo')}
           </Text>
         </View>
       </TouchableOpacity>
@@ -297,49 +297,49 @@ export const ProfileScreen = () => {
    */
   const renderLikeSystemSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>좋아요 시스템</Text>
+      <Text style={styles.sectionTitle}>{t('profile:likeSystem.title')}</Text>
       
       <View style={styles.likeSystemCard}>
         <View style={styles.likeSystemItem}>
-          <Text style={styles.likeSystemLabel}>일일 무료 좋아요</Text>
+          <Text style={styles.likeSystemLabel}>{t('profile:likeSystem.dailyFreeLikes')}</Text>
           <Text style={styles.likeSystemValue}>
             {likeStore.getRemainingFreeLikes()} / 1
           </Text>
         </View>
         
         <View style={styles.likeSystemItem}>
-          <Text style={styles.likeSystemLabel}>프리미엄 좋아요</Text>
+          <Text style={styles.likeSystemLabel}>{t('profile:likeSystem.premiumLikes')}</Text>
           <Text style={styles.likeSystemValue}>
-            {likeStore.premiumLikesRemaining}개
+            {t('profile:likeSystem.premiumLikesCount', { count: likeStore.premiumLikesRemaining })}
           </Text>
         </View>
         
         <View style={styles.likeSystemItem}>
-          <Text style={styles.likeSystemLabel}>프리미엄 상태</Text>
+          <Text style={styles.likeSystemLabel}>{t('profile:likeSystem.premiumStatus')}</Text>
           <Text style={[
             styles.likeSystemValue,
             likeStore.hasPremium ? styles.premiumActive : styles.premiumInactive
           ]}>
-            {likeStore.hasPremium ? '활성' : '비활성'}
+            {likeStore.hasPremium ? t('profile:likeSystem.active') : t('profile:likeSystem.inactive')}
           </Text>
         </View>
         
         {isPremiumUser && (
           <>
             <View style={styles.likeSystemItem}>
-              <Text style={styles.likeSystemLabel}>⭐ 슈퍼 좋아요</Text>
+              <Text style={styles.likeSystemLabel}>{t('profile:likeSystem.superLikes')}</Text>
               <Text style={[styles.likeSystemValue, styles.superLikeValue]}>
                 {likeStore.getRemainingSuperLikes()} / {likeStore.dailySuperLikesLimit}
               </Text>
             </View>
             
             <View style={styles.likeSystemItem}>
-              <Text style={styles.likeSystemLabel}>↩️ 좋아요 되돌리기</Text>
+              <Text style={styles.likeSystemLabel}>{t('profile:likeSystem.rewind')}</Text>
               <Text style={[
                 styles.likeSystemValue,
                 likeStore.canRewindLike() ? styles.rewindAvailable : styles.rewindUnavailable
               ]}>
-                {likeStore.canRewindLike() ? '사용 가능' : '사용 불가'}
+                {likeStore.canRewindLike() ? t('profile:likeSystem.available') : t('profile:likeSystem.unavailable')}
               </Text>
             </View>
           </>
@@ -351,7 +351,7 @@ export const ProfileScreen = () => {
           style={styles.upgradeButton}
           onPress={() => navigation.navigate('Premium' as never)}
         >
-          <Text style={styles.upgradeButtonText}>프리미엄 업그레이드</Text>
+          <Text style={styles.upgradeButtonText}>{t('profile:premium.upgrade')}</Text>
         </TouchableOpacity>
       )}
       
@@ -360,7 +360,7 @@ export const ProfileScreen = () => {
           style={styles.rewindButton}
           onPress={handleRewindLike}
         >
-          <Text style={styles.rewindButtonText}>↩️ 마지막 좋아요 되돌리기</Text>
+          <Text style={styles.rewindButtonText}>{t('profile:likeSystem.rewind')}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -388,7 +388,7 @@ export const ProfileScreen = () => {
               color={COLORS.TEXT.PRIMARY} 
             />
             <Text style={styles.settingText}>
-              {currentMode === AppMode.DATING ? '호감 관리' : '친구 요청 관리'}
+              {currentMode === AppMode.DATING ? t('profile:settings.likeManagement') : t('profile:settings.friendRequestManagement')}
             </Text>
           </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
@@ -402,10 +402,10 @@ export const ProfileScreen = () => {
             <Ionicons name="eye-outline" size={20} color={COLORS.TEXT.PRIMARY} />
             <View style={styles.settingTextContainer}>
               <Text style={styles.settingText}>
-                {currentMode === AppMode.DATING ? '받은 호감 보기' : '받은 친구 요청 보기'}
+                {currentMode === AppMode.DATING ? t('profile:settings.whoLikesYou') : t('profile:settings.friendRequestManagement')}
               </Text>
               {!isPremiumUser && (
-                <Text style={styles.premiumBadge}>PRO</Text>
+                <Text style={styles.premiumBadge}>{t('profile:settings.premiumOnly')}</Text>
               )}
             </View>
           </View>
@@ -418,7 +418,7 @@ export const ProfileScreen = () => {
         >
           <View style={styles.settingContent}>
             <Ionicons name="layers-outline" size={20} color={COLORS.TEXT.PRIMARY} />
-            <Text style={styles.settingText}>내 그룹 관리</Text>
+            <Text style={styles.settingText}>{t('profile:settings.myGroups')}</Text>
           </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
@@ -429,7 +429,7 @@ export const ProfileScreen = () => {
         >
           <View style={styles.settingContent}>
             <Ionicons name="notifications-outline" size={20} color={COLORS.TEXT.PRIMARY} />
-            <Text style={styles.settingText}>알림 설정</Text>
+            <Text style={styles.settingText}>{t('profile:settings.notificationSettings')}</Text>
           </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
@@ -437,7 +437,7 @@ export const ProfileScreen = () => {
         <TouchableOpacity style={styles.settingItem}>
           <View style={styles.settingContent}>
             <Ionicons name="document-text-outline" size={20} color={COLORS.TEXT.PRIMARY} />
-            <Text style={styles.settingText}>개인정보 처리방침</Text>
+            <Text style={styles.settingText}>{t('profile:settings.privacy')}</Text>
           </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
@@ -445,7 +445,7 @@ export const ProfileScreen = () => {
         <TouchableOpacity style={styles.settingItem}>
           <View style={styles.settingContent}>
             <Ionicons name="book-outline" size={20} color={COLORS.TEXT.PRIMARY} />
-            <Text style={styles.settingText}>서비스 이용약관</Text>
+            <Text style={styles.settingText}>{t('profile:settings.terms')}</Text>
           </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
@@ -453,7 +453,7 @@ export const ProfileScreen = () => {
         <TouchableOpacity style={styles.settingItem}>
           <View style={styles.settingContent}>
             <Ionicons name="help-circle-outline" size={20} color={COLORS.TEXT.PRIMARY} />
-            <Text style={styles.settingText}>고객지원</Text>
+            <Text style={styles.settingText}>{t('profile:settings.support')}</Text>
           </View>
           <Text style={styles.settingArrow}>{'>'}</Text>
         </TouchableOpacity>
@@ -474,7 +474,7 @@ export const ProfileScreen = () => {
         disabled={isLoggingOut}
       >
         <Text style={styles.logoutButtonText}>
-          {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
+          {isLoggingOut ? t('profile:settings.loggingOut') : t('profile:settings.logout')}
         </Text>
       </TouchableOpacity>
       
@@ -482,7 +482,7 @@ export const ProfileScreen = () => {
         style={styles.deleteButton}
         onPress={handleDeleteAccount}
       >
-        <Text style={styles.deleteButtonText}>계정 삭제</Text>
+        <Text style={styles.deleteButtonText}>{t('profile:settings.deleteAccount')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -494,9 +494,9 @@ export const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>프로필</Text>
+          <Text style={styles.headerTitle}>{t('profile:title')}</Text>
           <Text style={styles.headerSubtitle}>
-            계정 정보와 활동 통계를 확인하세요
+            {t('profile:subtitle')}
           </Text>
         </View>
         
@@ -509,8 +509,8 @@ export const ProfileScreen = () => {
         
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Glimpse v0.1.0{'\n'}
-            익명 데이팅의 새로운 시작
+            {t('profile:footer.version')}{'\n'}
+            {t('profile:footer.tagline')}
           </Text>
         </View>
       </ScrollView>
@@ -519,7 +519,7 @@ export const ProfileScreen = () => {
         visible={isNicknameModalVisible}
         onClose={() => setIsNicknameModalVisible(false)}
         onSuccess={() => {
-          Alert.alert('성공', '닉네임이 변경되었습니다.');
+          Alert.alert(t('common:status.success'), t('common:modals.editNickname.changeSuccess'));
         }}
       />
     </SafeAreaView>

@@ -1,5 +1,6 @@
 {
   "title": "Profile",
+  "subtitle": "Check your account information and activity statistics",
   "premium": {
     "active": "✨ Premium Active",
     "upgrade": "⭐ Upgrade to Premium",
@@ -27,6 +28,7 @@
     "title": "Like System",
     "dailyFreeLikes": "Daily Free Likes",
     "premiumLikes": "Premium Likes",
+    "premiumLikesCount": "{{count}} likes",
     "premiumStatus": "Premium Status",
     "active": "Active",
     "inactive": "Inactive",
@@ -54,7 +56,8 @@
     "mbti": "MBTI",
     "drinking": "Drinking",
     "smoking": "Smoking",
-    "notRegistered": "Not registered"
+    "notRegistered": "Not registered",
+    "joinDate": "Joined"
   },
   "stats": {
     "likes": "Likes",
@@ -76,6 +79,15 @@
     "deleteAccount": "Delete Account",
     "logout": "Logout",
     "logoutConfirm": "Are you sure you want to logout?",
-    "logoutError": "An error occurred while logging out."
+    "logoutError": "An error occurred while logging out.",
+    "loggingOut": "Logging out...",
+    "myGroups": "My Groups",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "support": "Support"
+  },
+  "footer": {
+    "version": "Glimpse v0.1.0",
+    "tagline": "A new beginning for anonymous dating"
   }
 }

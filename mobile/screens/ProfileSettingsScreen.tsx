@@ -31,7 +31,7 @@ interface SettingItem {
 }
 
 const ProfileSettingsScreen = () => {
-  const { t } = useTranslation('settings');
+  const { t } = useTranslation(['settings', 'common']);
   const navigation = useNavigation();
   const { userProfile } = useProfileStore();
   
@@ -60,7 +60,7 @@ const ProfileSettingsScreen = () => {
     if (!success) {
       // Revert on failure
       setPrivacySettings(privacySettings);
-      Alert.alert(t('error'), t('settingUpdateFailed'));
+      Alert.alert(t('common:status.error'), t('settings:settingUpdateFailed'));
     }
   };
 
@@ -75,102 +75,102 @@ const ProfileSettingsScreen = () => {
     if (!success) {
       // Revert on failure
       setNotificationSettings(notificationSettings);
-      Alert.alert(t('error'), t('settingUpdateFailed'));
+      Alert.alert(t('common:status.error'), t('settings:settingUpdateFailed'));
     }
   };
 
   const settingSections: SettingSection[] = [
     {
-      title: t('accountSettings.title'),
+      title: t('settings:accountSettings.title'),
       items: [
         {
           icon: 'account-edit',
-          label: t('accountSettings.editProfile'),
+          label: t('settings:accountSettings.editProfile'),
           type: 'navigate',
           route: 'ProfileEdit',
         },
         {
           icon: 'lock-reset',
-          label: t('accountSettings.changePassword'),
+          label: t('settings:accountSettings.changePassword'),
           type: 'navigate',
           route: 'ChangePassword',
         },
         // Email change removed - not in User type
         {
           icon: 'phone-outline',
-          label: t('accountSettings.changePhone'),
-          value: userProfile?.phoneNumber || t('accountSettings.notRegistered'),
+          label: t('settings:accountSettings.changePhone'),
+          value: userProfile?.phoneNumber || t('settings:accountSettings.notRegistered'),
           type: 'navigate',
           route: 'ChangePhone',
         },
       ],
     },
     {
-      title: t('privacySettings.title'),
+      title: t('settings:privacySettings.title'),
       items: [
         {
           icon: 'eye-outline',
-          label: t('privacySettings.showProfile'),
+          label: t('settings:privacySettings.showProfile'),
           value: privacySettings.showProfile,
           type: 'toggle',
           action: () => handlePrivacyToggle('showProfile'),
         },
         {
           icon: 'circle-outline',
-          label: t('privacySettings.showOnlineStatus'),
+          label: t('settings:privacySettings.showOnlineStatus'),
           value: privacySettings.showOnlineStatus,
           type: 'toggle',
           action: () => handlePrivacyToggle('showOnlineStatus'),
         },
         {
           icon: 'clock-outline',
-          label: t('privacySettings.showLastSeen'),
+          label: t('settings:privacySettings.showLastSeen'),
           value: privacySettings.showLastSeen,
           type: 'toggle',
           action: () => handlePrivacyToggle('showLastSeen'),
         },
         {
           icon: 'account-plus-outline',
-          label: t('privacySettings.allowFriendRequests'),
+          label: t('settings:privacySettings.allowFriendRequests'),
           value: privacySettings.allowFriendRequests,
           type: 'toggle',
           action: () => handlePrivacyToggle('allowFriendRequests'),
         },
         {
           icon: 'account-cancel-outline',
-          label: t('privacySettings.blockedUsers'),
+          label: t('settings:privacySettings.blockedUsers'),
           type: 'navigate',
           route: 'BlockedUsers',
         },
       ],
     },
     {
-      title: t('notificationSettings.title'),
+      title: t('settings:notificationSettings.title'),
       items: [
         {
           icon: 'heart-outline',
-          label: t('notificationSettings.likes'),
+          label: t('settings:notificationSettings.likes'),
           value: notificationSettings.likes,
           type: 'toggle',
           action: () => handleNotificationToggle('likes'),
         },
         {
           icon: 'account-check-outline',
-          label: t('notificationSettings.matches'),
+          label: t('settings:notificationSettings.matches'),
           value: notificationSettings.matches,
           type: 'toggle',
           action: () => handleNotificationToggle('matches'),
         },
         {
           icon: 'message-outline',
-          label: t('notificationSettings.messages'),
+          label: t('settings:notificationSettings.messages'),
           value: notificationSettings.messages,
           type: 'toggle',
           action: () => handleNotificationToggle('messages'),
         },
         {
           icon: 'account-multiple-plus-outline',
-          label: t('notificationSettings.friendRequests'),
+          label: t('settings:notificationSettings.friendRequests'),
           value: notificationSettings.friendRequests,
           type: 'toggle',
           action: () => handleNotificationToggle('friendRequests'),
@@ -178,44 +178,44 @@ const ProfileSettingsScreen = () => {
       ],
     },
     {
-      title: t('otherSettings.title'),
+      title: t('settings:otherSettings.title'),
       items: [
         {
           icon: 'file-document-outline',
-          label: t('otherSettings.terms'),
+          label: t('settings:otherSettings.terms'),
           type: 'navigate',
           route: 'Terms',
         },
         {
           icon: 'shield-lock-outline',
-          label: t('otherSettings.privacy'),
+          label: t('settings:otherSettings.privacy'),
           type: 'navigate',
           route: 'Privacy',
         },
         {
           icon: 'help-circle-outline',
-          label: t('otherSettings.support'),
+          label: t('settings:otherSettings.support'),
           type: 'navigate',
           route: 'Support',
         },
         {
           icon: 'information-outline',
-          label: t('otherSettings.appInfo'),
+          label: t('settings:otherSettings.appInfo');
           type: 'navigate',
           route: 'AppInfo',
         },
         {
           icon: 'account-remove-outline',
-          label: t('otherSettings.deleteAccount'),
+          label: t('settings:otherSettings.deleteAccount'),
           type: 'action',
           action: () => {
             Alert.alert(
-              t('deleteAccount.title'),
-              t('deleteAccount.message'),
+              t('settings:deleteAccount.title'),
+              t('settings:deleteAccount.message'),
               [
-                { text: t('deleteAccount.cancel'), style: 'cancel' },
+                { text: t('settings:deleteAccount.cancel'), style: 'cancel' },
                 {
-                  text: t('deleteAccount.confirm'),
+                  text: t('settings:deleteAccount.confirm'),
                   style: 'destructive',
                   onPress: () => navigation.navigate('DeleteAccount' as never),
                 },
@@ -291,7 +291,7 @@ const ProfileSettingsScreen = () => {
         >
           <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('title')}</Text>
+        <Text style={styles.headerTitle}>{t('settings:title')}</Text>
         <View style={styles.backButton} />
       </View>
       
@@ -316,7 +316,7 @@ const ProfileSettingsScreen = () => {
         ))}
         
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Version 1.0.0</Text>
+          <Text style={styles.footerText}>{t('settings:footer.version')}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

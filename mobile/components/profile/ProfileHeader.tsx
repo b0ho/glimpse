@@ -87,7 +87,7 @@ export const ProfileHeader= ({
         )}
       </View>
       
-      <Text style={styles.profileName}>{user.nickname || t('user.noNickname', { ns: 'common' })}</Text>
+      <Text style={styles.profileName}>{user.nickname || t('common:user.noNickname')}</Text>
       
       {badges.length > 0 && (
         <View style={styles.badgesContainer}>
@@ -100,12 +100,12 @@ export const ProfileHeader= ({
         </View>
       )}
       
-      <Text style={styles.profileBio}>{user.bio || t('user.noSelfIntroduction', { ns: 'common' })}</Text>
+      <Text style={styles.profileBio}>{user.bio || t('common:user.noSelfIntroduction')}</Text>
       
       <View style={styles.statsContainer}>
         <TouchableOpacity style={styles.statItem} onPress={onLikesPress}>
           <Text style={styles.statNumber}>{stats.totalLikes}</Text>
-          <Text style={styles.statLabel}>{t('stats.likes', { ns: 'profile' })}</Text>
+          <Text style={styles.statLabel}>{t('profile:stats.likes')}</Text>
           {!user.isPremium && stats.totalLikes > 0 && (
             <MaterialCommunityIcons name="lock" size={12} color="#999" style={styles.lockIcon} />
           )}
@@ -115,21 +115,21 @@ export const ProfileHeader= ({
         
         <TouchableOpacity style={styles.statItem} onPress={onMatchesPress}>
           <Text style={styles.statNumber}>{stats.mutualMatches}</Text>
-          <Text style={styles.statLabel}>{t('stats.matches', { ns: 'profile' })}</Text>
+          <Text style={styles.statLabel}>{t('profile:stats.matches')}</Text>
         </TouchableOpacity>
         
         <View style={styles.statDivider} />
         
         <TouchableOpacity style={styles.statItem} onPress={onFriendsPress}>
           <Text style={styles.statNumber}>{stats.friendCount}</Text>
-          <Text style={styles.statLabel}>{t('stats.friends', { ns: 'profile' })}</Text>
+          <Text style={styles.statLabel}>{t('profile:stats.friends')}</Text>
         </TouchableOpacity>
         
         <View style={styles.statDivider} />
         
         <TouchableOpacity style={styles.statItem} onPress={onGroupsPress}>
           <Text style={styles.statNumber}>{stats.groupCount}</Text>
-          <Text style={styles.statLabel}>{t('stats.groups', { ns: 'profile' })}</Text>
+          <Text style={styles.statLabel}>{t('profile:stats.groups')}</Text>
         </TouchableOpacity>
       </View>
       
@@ -138,7 +138,7 @@ export const ProfileHeader= ({
         onPress={onEditPress}
       >
         <MaterialCommunityIcons name="pencil" size={20} color="#fff" />
-        <Text style={styles.editButtonText}>{t('actions.editProfile', { ns: 'common' })}</Text>
+        <Text style={styles.editButtonText}>{t('common:actions.editProfile')}</Text>
       </TouchableOpacity>
     </View>
   );

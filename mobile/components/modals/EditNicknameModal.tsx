@@ -43,7 +43,7 @@ export const EditNicknameModal= ({
   onClose,
   onSuccess,
 }) => {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['common', 'profile']);
   const { user, updateUserProfile } = useAuthStore();
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -65,18 +65,18 @@ export const EditNicknameModal= ({
     
     // 유효성 검사
     if (trimmedNickname.length < 1) {
-      Alert.alert(t('notifications.info'), t('modals.editNickname.minLength'));
+      Alert.alert(t('common:status.info'), t('common:modals.editNickname.minLength'));
       return;
     }
     
     if (trimmedNickname.length > 40) {
-      Alert.alert(t('notifications.info'), t('modals.editNickname.maxLength'));
+      Alert.alert(t('common:status.info'), t('common:modals.editNickname.maxLength'));
       return;
     }
     
     // 기존 닉네임과 동일한지 확인
     if (trimmedNickname === user?.nickname) {
-      Alert.alert(t('notifications.info'), t('modals.editNickname.sameNickname'));
+      Alert.alert(t('common:status.info'), t('common:modals.editNickname.sameNickname'));
       return;
     }
     
@@ -111,11 +111,11 @@ export const EditNicknameModal= ({
         }
         
         Alert.alert(
-          t('notifications.success'),
-          t('modals.editNickname.changeSuccess'),
+          t('common:status.success'),
+          t('common:modals.editNickname.changeSuccess'),
           [
             {
-              text: t('actions.confirm'),
+              text: t('common:actions.confirm'),
               onPress: () => {
                 onSuccess?.();
                 onClose();
@@ -124,11 +124,11 @@ export const EditNicknameModal= ({
           ]
         );
       } else {
-        Alert.alert(t('notifications.error'), response.message || t('modals.editNickname.changeFailed'));
+        Alert.alert(t('common:status.error'), response.message || t('common:modals.editNickname.changeFailed'));
       }
     } catch (error) {
       console.error('Nickname update error:', error);
-      Alert.alert(t('notifications.error'), t('modals.editNickname.changeError'));
+      Alert.alert(t('common:status.error'), t('common:modals.editNickname.changeError'));
     } finally {
       setIsLoading(false);
     }
@@ -166,7 +166,7 @@ export const EditNicknameModal= ({
         
         <View style={styles.modalContent}>
           <View style={styles.header}>
-            <Text style={styles.title}>{t('modals.editNickname.title')}</Text>
+            <Text style={styles.title}>{t('common:modals.editNickname.title')}</Text>
             <TouchableOpacity
               onPress={onClose}
               style={styles.closeButton}
@@ -176,13 +176,13 @@ export const EditNicknameModal= ({
           </View>
           
           <View style={styles.body}>
-            <Text style={styles.label}>{t('modals.editNickname.newNickname')}</Text>
+            <Text style={styles.label}>{t('common:modals.editNickname.newNickname')}</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
                 value={nickname}
                 onChangeText={handleTextChange}
-                placeholder={t('modals.editNickname.placeholder')}
+                placeholder={t('common:modals.editNickname.placeholder')}
                 placeholderTextColor={COLORS.textSecondary}
                 autoFocus
                 maxLength={40}
@@ -203,9 +203,9 @@ export const EditNicknameModal= ({
                 color={COLORS.textSecondary} 
               />
               <Text style={styles.infoText}>
-                {t('modals.editNickname.info.line1')}{`\n`}
-                {t('modals.editNickname.info.line2')}{`\n`}
-                {t('modals.editNickname.info.line3')}
+                {t('common:modals.editNickname.info.line1')}{`\n`}
+                {t('common:modals.editNickname.info.line2')}{`\n`}
+                {t('common:modals.editNickname.info.line3')}
               </Text>
             </View>
           </View>
@@ -216,7 +216,7 @@ export const EditNicknameModal= ({
               onPress={onClose}
               disabled={isLoading}
             >
-              <Text style={styles.cancelButtonText}>{t('actions.cancel')}</Text>
+              <Text style={styles.cancelButtonText}>{t('common:actions.cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
@@ -230,7 +230,7 @@ export const EditNicknameModal= ({
               {isLoading ? (
                 <ActivityIndicator size="small" color={COLORS.white} />
               ) : (
-                <Text style={styles.saveButtonText}>{t('actions.save')}</Text>
+                <Text style={styles.saveButtonText}>{t('common:actions.save')}</Text>
               )}
             </TouchableOpacity>
           </View>

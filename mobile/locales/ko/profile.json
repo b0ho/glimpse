@@ -1,5 +1,6 @@
 {
   "title": "프로필",
+  "subtitle": "계정 정보와 활동 통계를 확인하세요",
   "premium": {
     "active": "✨ Premium 활성",
     "upgrade": "⭐ Premium으로 업그레이드",
@@ -27,6 +28,7 @@
     "title": "좋아요 시스템",
     "dailyFreeLikes": "일일 무료 좋아요",
     "premiumLikes": "프리미엄 좋아요",
+    "premiumLikesCount": "{{count}}개",
     "premiumStatus": "프리미엄 상태",
     "active": "활성",
     "inactive": "비활성",
@@ -54,7 +56,8 @@
     "mbti": "MBTI",
     "drinking": "음주",
     "smoking": "흡연",
-    "notRegistered": "미등록"
+    "notRegistered": "미등록",
+    "joinDate": "가입일"
   },
   "stats": {
     "likes": "좋아요",
@@ -76,6 +79,15 @@
     "deleteAccount": "계정 삭제",
     "logout": "로그아웃",
     "logoutConfirm": "정말 로그아웃하시겠습니까?",
-    "logoutError": "로그아웃 중 오류가 발생했습니다."
+    "logoutError": "로그아웃 중 오류가 발생했습니다.",
+    "loggingOut": "로그아웃 중...",
+    "myGroups": "내 그룹 관리",
+    "privacy": "개인정보 처리방침",
+    "terms": "서비스 이용약관",
+    "support": "고객지원"
+  },
+  "footer": {
+    "version": "Glimpse v0.1.0",
+    "tagline": "익명 데이팅의 새로운 시작"
   }
 }
