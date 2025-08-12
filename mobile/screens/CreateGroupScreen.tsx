@@ -144,28 +144,29 @@ export const CreateGroupScreen = () => {
       console.log('[CreateGroupScreen] 그룹 생성 성공:', newGroup);
 
       // 로컬 스토어에 추가
+      console.log('[CreateGroupScreen] 로컬 스토어에 그룹 추가 시도');
       groupStore.createGroup(newGroup);
+      console.log('[CreateGroupScreen] 로컬 스토어에 그룹 추가 완료');
 
-      Alert.alert(
-        t('group:createGroup.success.title'),
-        t('group:createGroup.success.message', { name: newGroup.name }),
-        [
-          {
-            text: t('group:createGroup.success.invite'),
-            onPress: () => navigation.navigate('GroupInvite' as never, { groupId: newGroup.id } as never),
-          },
-          {
-            text: t('common:buttons.confirm'),
-            onPress: () => navigation.goBack(),
-            style: 'cancel',
-          },
-        ]
-      );
+      // 성공 시 즉시 그룹 화면으로 이동
+      console.log('[CreateGroupScreen] 그룹 생성 성공 - 그룹 화면으로 이동');
+      navigation.goBack();
+      
+      // 성공 알림은 나중에 표시 (옵션)
+      setTimeout(() => {
+        Alert.alert(
+          t('group:createGroup.success.title'),
+          t('group:createGroup.success.message', { name: newGroup.name })
+        );
+      }, 500);
     } catch (error: any) {
       console.error('[CreateGroupScreen] 그룹 생성 오류:', error);
+      console.error('[CreateGroupScreen] 에러 스택:', error.stack);
+      console.error('[CreateGroupScreen] 에러 상세:', JSON.stringify(error, null, 2));
       const errorMessage = error?.message || error?.response?.data?.message || t('group:createGroup.errors.createFailed');
       Alert.alert(t('group:createGroup.errors.createFailedTitle'), errorMessage);
     } finally {
+      console.log('[CreateGroupScreen] finally 블록 실행 - isSubmitting을 false로 설정');
       setIsSubmitting(false);
     }
   };

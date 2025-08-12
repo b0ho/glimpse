@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useGroupStore } from '@/store/slices/groupSlice';
@@ -49,12 +49,24 @@ export const GroupsScreen = () => {
 
     try {
       // API 호출하여 그룹 목록 가져오기
+      console.log('[GroupsScreen] API를 통한 그룹 목록 로드 시작');
       const loadedGroups = await groupApi.getGroups();
-      setGroups(loadedGroups);
-      groupStore.setGroups(loadedGroups);
+      console.log('[GroupsScreen] API에서 로드된 그룹 수:', loadedGroups.length);
+      
+      // 안전한 상태 업데이트
+      if (Array.isArray(loadedGroups)) {
+        setGroups(loadedGroups);
+        groupStore.setGroups(loadedGroups);
+        console.log('[GroupsScreen] 그룹 목록 상태 업데이트 완료');
+      } else {
+        console.warn('[GroupsScreen] 로드된 그룹이 배열이 아닙니다:', typeof loadedGroups);
+        setGroups([]);
+      }
     } catch (error: any) {
       console.error('[GroupsScreen] 그룹 목록 로드 실패:', error);
-      Alert.alert(t('common:status.error'), error?.message || t('group:errors.loadFailed'));
+      // 에러가 발생해도 빈 배열로 설정하여 UI가 멈추지 않도록
+      setGroups([]);
+      // Alert.alert(t('common:status.error'), error?.message || t('group:errors.loadFailed'));
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -124,6 +136,17 @@ export const GroupsScreen = () => {
   useEffect(() => {
     loadGroups();
   }, []); // 빈 의존성 배열로 변경하여 무한 루프 방지
+
+  // 화면으로 돌아올 때 그룹 목록 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      console.log('[GroupsScreen] 화면 포커스 - 그룹 목록 새로고침 시작');
+      // 초기 로딩이 완료된 후에만 새로고침
+      if (!isLoading) {
+        loadGroups(true);
+      }
+    }, [isLoading])
+  );
 
   /**
    * 그룹 타입 아이콘 렌더링
