@@ -21,7 +21,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "npx tsx prisma/migrate-mockdata.ts",
     "db:seed": "npx tsx prisma/migrate-mockdata.ts",
-    "seed:domains": "npx tsx src/scripts/seed-company-domains.ts"
+    "seed:domains": "npx tsx src/scripts/seed-company-domains.ts",
+    "seed:english": "npx tsx src/scripts/seed-english-data.ts",
+    "seed:all": "npm run seed:domains && npm run seed:english"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.859.0",
