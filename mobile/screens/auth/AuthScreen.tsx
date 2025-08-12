@@ -4,6 +4,7 @@ import { PhoneVerificationScreen } from './PhoneVerificationScreen';
 import { SMSVerificationScreen } from './SMSVerificationScreen';
 import { NicknameSetupScreen } from './NicknameSetupScreen';
 import { CompanyVerificationScreen } from './CompanyVerificationScreen';
+import { useTheme } from '@/hooks/useTheme';
 import { COLORS } from '@/utils/constants';
 
 /**
@@ -31,6 +32,7 @@ interface AuthScreenProps {
 export const AuthScreen= ({ onAuthCompleted }) => {
   const [currentStep, setCurrentStep] = useState<AuthStep>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const { colors } = useTheme();
 
   /**
    * 인증코드 발송 핸들러
@@ -83,7 +85,7 @@ export const AuthScreen= ({ onAuthCompleted }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       {currentStep === 'phone' && (
         <PhoneVerificationScreen onVerificationSent={handleVerificationSent} />
       )}

@@ -12,6 +12,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useProfileStore } from '@/store/slices/profileSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { Like } from '@shared/types';
 
 /**
@@ -34,12 +35,13 @@ interface LikesReceivedModalProps {
  * @returns {JSX.Element} 받은 좋아요 모달 UI
  * @description 다른 사용자로부터 받은 좋아요 목록을 표시하는 모달 컴포넌트
  */
-export const LikesReceivedModal= ({
+export const LikesReceivedModal = ({
   visible,
   onClose,
   onLikePress,
 }) => {
   const { likesReceived, fetchLikesReceived, loading } = useProfileStore();
+  const { colors } = useTheme();
 
   useEffect(() => {
     if (visible) {
@@ -58,7 +60,7 @@ export const LikesReceivedModal= ({
     
     return (
       <TouchableOpacity 
-        style={styles.likeItem}
+        style={[styles.likeItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}
         onPress={() => onLikePress(item)}
       >
         <Image
@@ -70,13 +72,13 @@ export const LikesReceivedModal= ({
         />
         
         <View style={styles.likeInfo}>
-          <Text style={styles.nickname}>
+          <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>
             {item.fromUser?.nickname || '익명'}
           </Text>
-          <Text style={styles.groupName}>
+          <Text style={[styles.groupName, { color: colors.TEXT.SECONDARY }]}>
             {item.group?.name || '그룹 정보 없음'}
           </Text>
-          <Text style={styles.timeAgo}>{timeAgo}</Text>
+          <Text style={[styles.timeAgo, { color: colors.TEXT.LIGHT }]}>{timeAgo}</Text>
         </View>
         
         <View style={styles.likeType}>
@@ -118,22 +120,22 @@ export const LikesReceivedModal= ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.header}>
-            <Text style={styles.title}>받은 좋아요</Text>
+      <View style={[styles.modalOverlay, { backgroundColor: colors.OVERLAY || 'rgba(0,0,0,0.5)' }]}>
+        <View style={[styles.modalContent, { backgroundColor: colors.BACKGROUND }]}>
+          <View style={[styles.header, { borderBottomColor: colors.BORDER }]}>
+            <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>받은 좋아요</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <MaterialCommunityIcons name="close" size={24} color={COLORS.TEXT.PRIMARY} />
+              <MaterialCommunityIcons name="close" size={24} color={colors.TEXT.PRIMARY} />
             </TouchableOpacity>
           </View>
           
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+              <ActivityIndicator size="large" color={colors.PRIMARY} />
             </View>
           ) : likesReceived && likesReceived.length > 0 ? (
             <>
-              <Text style={styles.subtitle}>
+              <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
                 {likesReceived.length}명이 당신에게 관심을 보였습니다
               </Text>
               
@@ -147,9 +149,9 @@ export const LikesReceivedModal= ({
             </>
           ) : (
             <View style={styles.emptyContainer}>
-              <MaterialCommunityIcons name="heart-off-outline" size={64} color={COLORS.TEXT.LIGHT} />
-              <Text style={styles.emptyText}>아직 받은 좋아요가 없습니다</Text>
-              <Text style={styles.emptySubtext}>
+              <MaterialCommunityIcons name="heart-off-outline" size={64} color={colors.TEXT.LIGHT} />
+              <Text style={[styles.emptyText, { color: colors.TEXT.PRIMARY }]}>아직 받은 좋아요가 없습니다</Text>
+              <Text style={[styles.emptySubtext, { color: colors.TEXT.SECONDARY }]}>
                 그룹에 참여하고 프로필을 완성하면{'\n'}더 많은 관심을 받을 수 있어요!
               </Text>
             </View>

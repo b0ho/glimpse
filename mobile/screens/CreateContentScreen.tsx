@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { Group, Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { groupApi } from '@/services/api/groupApi';
@@ -23,6 +24,7 @@ import { contentApi } from '@/services/api/contentApi';
 
 export const CreateContentScreen = ({ route }: any) => {
   const { t } = useTranslation(['common', 'group']);
+  const { colors } = useTheme();
   const editingContent = route?.params?.editingContent as Content | undefined;
   const isEditMode = !!editingContent;
   
@@ -258,34 +260,34 @@ export const CreateContentScreen = ({ route }: any) => {
     const availableGroups = groupStore.joinedGroups;
 
     return (
-      <View style={styles.groupPickerOverlay}>
-        <View style={styles.groupPickerModal}>
-          <Text style={styles.groupPickerTitle}>{t('group:picker.title')}</Text>
+      <View style={[styles.groupPickerOverlay, { backgroundColor: colors.OVERLAY }]}>
+        <View style={[styles.groupPickerModal, { backgroundColor: colors.SURFACE }]}>
+          <Text style={[styles.groupPickerTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:picker.title')}</Text>
           <ScrollView style={styles.groupList}>
             {availableGroups.length > 0 ? (
               availableGroups.map(group => (
                 <TouchableOpacity
                   key={group.id}
-                  style={styles.groupItem}
+                  style={[styles.groupItem, { borderBottomColor: colors.BORDER }]}
                   onPress={() => handleGroupSelect(group)}
                 >
-                  <Text style={styles.groupName}>{group.name}</Text>
-                  <Text style={styles.groupType}>{group.type}</Text>
+                  <Text style={[styles.groupName, { color: colors.TEXT.PRIMARY }]}>{group.name}</Text>
+                  <Text style={[styles.groupType, { color: colors.TEXT.SECONDARY }]}>{group.type}</Text>
                 </TouchableOpacity>
               ))
             ) : (
               <View style={styles.emptyGroupContainer}>
-                <Text style={styles.emptyGroupText}>
+                <Text style={[styles.emptyGroupText, { color: colors.TEXT.SECONDARY }]}>
                   {__DEV__ ? '그룹을 불러오는 중...' : '참여한 그룹이 없습니다.'}
                 </Text>
               </View>
             )}
           </ScrollView>
           <TouchableOpacity
-            style={styles.cancelButton}
+            style={[styles.cancelButton, { backgroundColor: colors.TEXT.LIGHT }]}
             onPress={() => setShowGroupPicker(false)}
           >
-            <Text style={styles.cancelButtonText}>{t('group:picker.cancel')}</Text>
+            <Text style={[styles.cancelButtonText, { color: colors.TEXT.PRIMARY }]}>{t('group:picker.cancel')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -297,7 +299,7 @@ export const CreateContentScreen = ({ route }: any) => {
 
     return (
       <View style={styles.imagePreviewContainer}>
-        <Text style={styles.imagePreviewTitle}>
+        <Text style={[styles.imagePreviewTitle, { color: colors.TEXT.PRIMARY }]}>
           {t('common:content.create.selectedImages', { count: selectedImages.length })}
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -305,10 +307,10 @@ export const CreateContentScreen = ({ route }: any) => {
             <View key={index} style={styles.imagePreviewItem}>
               <Image source={{ uri }} style={styles.previewImage} />
               <TouchableOpacity
-                style={styles.removeImageButton}
+                style={[styles.removeImageButton, { backgroundColor: colors.ERROR }]}
                 onPress={() => handleRemoveImage(index)}
               >
-                <Text style={styles.removeImageButtonText}>×</Text>
+                <Text style={[styles.removeImageButtonText, { color: colors.TEXT.WHITE }]}>×</Text>
               </TouchableOpacity>
             </View>
           ))}
@@ -318,30 +320,31 @@ export const CreateContentScreen = ({ route }: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
         <TouchableOpacity
           style={styles.headerButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.headerButtonText}>{t('common:content.create.cancel')}</Text>
+          <Text style={[styles.headerButtonText, { color: colors.TEXT.SECONDARY }]}>{t('common:content.create.cancel')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>
           {isEditMode ? '스토리 수정' : t('common:content.create.title')}
         </Text>
         <TouchableOpacity
           style={[
             styles.headerButton,
             styles.submitButton,
-            (!contentText.trim() && selectedImages.length === 0) && styles.submitButtonDisabled,
+            { backgroundColor: colors.PRIMARY },
+            (!contentText.trim() && selectedImages.length === 0) && { backgroundColor: colors.TEXT.LIGHT },
           ]}
           onPress={handleSubmit}
           disabled={isSubmitting || (!contentText.trim() && selectedImages.length === 0)}
         >
           {isSubmitting ? (
-            <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
+            <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
           ) : (
-            <Text style={styles.submitButtonText}>
+            <Text style={[styles.submitButtonText, { color: colors.TEXT.WHITE }]}>
               {isEditMode ? '수정 완료' : t('common:content.create.publish')}
             </Text>
           )}
@@ -350,31 +353,31 @@ export const CreateContentScreen = ({ route }: any) => {
 
       <ScrollView style={styles.content}>
         <View style={styles.groupSelector}>
-          <Text style={styles.sectionLabel}>{t('common:content.create.publishTo')}</Text>
+          <Text style={[styles.sectionLabel, { color: colors.TEXT.PRIMARY }]}>{t('common:content.create.publishTo')}</Text>
           <TouchableOpacity
-            style={styles.groupSelectorButton}
+            style={[styles.groupSelectorButton, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}
             onPress={() => setShowGroupPicker(true)}
           >
-            <Text style={styles.groupSelectorText}>
+            <Text style={[styles.groupSelectorText, { color: colors.TEXT.PRIMARY }]}>
               {selectedGroup ? selectedGroup.name : t('common:content.create.selectGroup')}
             </Text>
-            <Text style={styles.groupSelectorArrow}>{'>'}</Text>
+            <Text style={[styles.groupSelectorArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.textInputContainer}>
-          <Text style={styles.sectionLabel}>{t('common:content.create.contentLabel')}</Text>
+          <Text style={[styles.sectionLabel, { color: colors.TEXT.PRIMARY }]}>{t('common:content.create.contentLabel')}</Text>
           <TextInput
-            style={styles.textInput}
+            style={[styles.textInput, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY }]}
             placeholder={t('common:content.create.placeholder')}
-            placeholderTextColor={COLORS.TEXT.LIGHT}
+            placeholderTextColor={colors.TEXT.LIGHT}
             value={contentText}
             onChangeText={setContentText}
             multiline
             maxLength={500}
             textAlignVertical="top"
           />
-          <Text style={styles.characterCount}>
+          <Text style={[styles.characterCount, { color: colors.TEXT.LIGHT }]}>
             {t('common:content.create.characterCount', { current: contentText.length, max: 500 })}
           </Text>
         </View>
@@ -385,21 +388,22 @@ export const CreateContentScreen = ({ route }: any) => {
           <TouchableOpacity
             style={[
               styles.mediaButton,
+              { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
               selectedImages.length >= 5 && styles.mediaButtonDisabled,
             ]}
             onPress={handleImagePicker}
             disabled={selectedImages.length >= 5}
           >
             <Text style={styles.mediaButtonIcon}>📷</Text>
-            <Text style={styles.mediaButtonText}>
+            <Text style={[styles.mediaButtonText, { color: colors.TEXT.PRIMARY }]}>
               {t('common:content.create.addPhotos', { current: selectedImages.length, max: 5 })}
             </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.guidelines}>
-          <Text style={styles.guidelinesTitle}>{t('common:content.create.guidelines.title')}</Text>
-          <Text style={styles.guidelinesText}>
+        <View style={[styles.guidelines, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
+          <Text style={[styles.guidelinesTitle, { color: colors.TEXT.PRIMARY }]}>{t('common:content.create.guidelines.title')}</Text>
+          <Text style={[styles.guidelinesText, { color: colors.TEXT.SECONDARY }]}>
             {t('common:content.create.guidelines.privacy')}{'\n'}
             {t('common:content.create.guidelines.respect')}{'\n'}
             {t('common:content.create.guidelines.inappropriate')}{'\n'}
@@ -416,7 +420,6 @@ export const CreateContentScreen = ({ route }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: 'row',
@@ -424,9 +427,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SPACING.MD,
     paddingVertical: SPACING.SM,
-    backgroundColor: COLORS.SURFACE,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
   },
   headerButton: {
     paddingHorizontal: SPACING.MD,
@@ -434,22 +435,16 @@ const styles = StyleSheet.create({
   },
   headerButtonText: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
   },
   headerTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
   },
   submitButton: {
-    backgroundColor: COLORS.PRIMARY,
     borderRadius: 8,
   },
-  submitButtonDisabled: {
-    backgroundColor: COLORS.TEXT.LIGHT,
-  },
+  submitButtonDisabled: {},
   submitButtonText: {
-    color: COLORS.TEXT.WHITE,
     fontWeight: '600',
   },
   content: {
@@ -462,7 +457,6 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.SM,
   },
   groupSelectorButton: {
@@ -470,37 +464,29 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: SPACING.MD,
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
   },
   groupSelectorText: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
   },
   groupSelectorArrow: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
   },
   textInputContainer: {
     marginBottom: SPACING.LG,
   },
   textInput: {
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
     padding: SPACING.MD,
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
     minHeight: 120,
     maxHeight: 200,
   },
   characterCount: {
     textAlign: 'right',
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
     marginTop: SPACING.XS,
   },
   imagePreviewContainer: {
@@ -509,7 +495,6 @@ const styles = StyleSheet.create({
   imagePreviewTitle: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.SM,
   },
   imagePreviewItem: {
@@ -528,12 +513,10 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: COLORS.ERROR,
     justifyContent: 'center',
     alignItems: 'center',
   },
   removeImageButtonText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -544,10 +527,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: SPACING.MD,
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
   },
   mediaButtonDisabled: {
     opacity: 0.5,
@@ -558,24 +539,19 @@ const styles = StyleSheet.create({
   },
   mediaButtonText: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
   },
   guidelines: {
-    backgroundColor: COLORS.SURFACE,
     padding: SPACING.MD,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
   },
   guidelinesTitle: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.SM,
   },
   guidelinesText: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     lineHeight: 20,
   },
   groupPickerOverlay: {
@@ -584,12 +560,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: COLORS.OVERLAY,
     justifyContent: 'center',
     alignItems: 'center',
   },
   groupPickerModal: {
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 12,
     padding: SPACING.LG,
     width: '80%',
@@ -598,7 +572,6 @@ const styles = StyleSheet.create({
   groupPickerTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.MD,
     textAlign: 'center',
   },
@@ -608,16 +581,13 @@ const styles = StyleSheet.create({
   groupItem: {
     padding: SPACING.MD,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
   },
   groupName: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
   },
   groupType: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     marginTop: 2,
   },
   emptyGroupContainer: {
@@ -626,18 +596,15 @@ const styles = StyleSheet.create({
   },
   emptyGroupText: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
   },
   cancelButton: {
     marginTop: SPACING.MD,
     padding: SPACING.MD,
-    backgroundColor: COLORS.TEXT.LIGHT,
     borderRadius: 8,
     alignItems: 'center',
   },
   cancelButtonText: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
   },
 });

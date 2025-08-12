@@ -13,6 +13,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useProfileStore } from '@/store/slices/profileSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { FriendRequest } from '@shared/types';
 
 /**
@@ -33,7 +34,7 @@ interface FriendRequestsModalProps {
  * @returns {JSX.Element} 친구 요청 모달 UI
  * @description 받은 친구 요청을 표시하고 수락/거절할 수 있는 모달 컴포넌트
  */
-export const FriendRequestsModal= ({
+export const FriendRequestsModal = ({
   visible,
   onClose,
 }) => {
@@ -44,6 +45,7 @@ export const FriendRequestsModal= ({
     rejectFriendRequest,
     loading 
   } = useProfileStore();
+  const { colors } = useTheme();
 
   useEffect(() => {
     if (visible) {
@@ -114,7 +116,7 @@ export const FriendRequestsModal= ({
     const timeAgo = getTimeAgo(new Date(item.createdAt));
     
     return (
-      <View style={styles.requestItem}>
+      <View style={[styles.requestItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
         <Image
           source={item.fromUser?.profileImage 
             ? { uri: item.fromUser.profileImage }
@@ -124,28 +126,28 @@ export const FriendRequestsModal= ({
         />
         
         <View style={styles.requestInfo}>
-          <Text style={styles.nickname}>
+          <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>
             {item.fromUser?.nickname || '익명'}
           </Text>
-          <Text style={styles.message}>
+          <Text style={[styles.message, { color: colors.TEXT.SECONDARY }]}>
             {item.message || '친구가 되고 싶어요!'}
           </Text>
-          <Text style={styles.timeAgo}>{timeAgo}</Text>
+          <Text style={[styles.timeAgo, { color: colors.TEXT.LIGHT }]}>{timeAgo}</Text>
         </View>
         
         <View style={styles.actionButtons}>
           <TouchableOpacity 
-            style={[styles.actionButton, styles.acceptButton]}
+            style={[styles.actionButton, styles.acceptButton, { backgroundColor: colors.SUCCESS }]}
             onPress={() => handleAccept(item.id)}
           >
-            <MaterialCommunityIcons name="check" size={20} color="#fff" />
+            <MaterialCommunityIcons name="check" size={20} color={colors.TEXT.WHITE} />
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.actionButton, styles.rejectButton]}
+            style={[styles.actionButton, styles.rejectButton, { backgroundColor: colors.ERROR }]}
             onPress={() => handleReject(item.id)}
           >
-            <MaterialCommunityIcons name="close" size={20} color="#fff" />
+            <MaterialCommunityIcons name="close" size={20} color={colors.TEXT.WHITE} />
           </TouchableOpacity>
         </View>
       </View>
@@ -180,22 +182,22 @@ export const FriendRequestsModal= ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.header}>
-            <Text style={styles.title}>친구 요청</Text>
+      <View style={[styles.modalOverlay, { backgroundColor: colors.OVERLAY || 'rgba(0,0,0,0.5)' }]}>
+        <View style={[styles.modalContent, { backgroundColor: colors.BACKGROUND }]}>
+          <View style={[styles.header, { borderBottomColor: colors.BORDER }]}>
+            <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>친구 요청</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <MaterialCommunityIcons name="close" size={24} color={COLORS.TEXT.PRIMARY} />
+              <MaterialCommunityIcons name="close" size={24} color={colors.TEXT.PRIMARY} />
             </TouchableOpacity>
           </View>
           
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+              <ActivityIndicator size="large" color={colors.PRIMARY} />
             </View>
           ) : friendRequests && friendRequests.length > 0 ? (
             <>
-              <Text style={styles.subtitle}>
+              <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
                 {friendRequests.length}개의 새로운 친구 요청
               </Text>
               
@@ -209,9 +211,9 @@ export const FriendRequestsModal= ({
             </>
           ) : (
             <View style={styles.emptyContainer}>
-              <MaterialCommunityIcons name="account-question-outline" size={64} color={COLORS.TEXT.LIGHT} />
-              <Text style={styles.emptyText}>친구 요청이 없습니다</Text>
-              <Text style={styles.emptySubtext}>
+              <MaterialCommunityIcons name="account-question-outline" size={64} color={colors.TEXT.LIGHT} />
+              <Text style={[styles.emptyText, { color: colors.TEXT.PRIMARY }]}>친구 요청이 없습니다</Text>
+              <Text style={[styles.emptySubtext, { color: colors.TEXT.SECONDARY }]}>
                 커뮤니티 모드에서 새로운 친구를 만나보세요!
               </Text>
             </View>
@@ -225,11 +227,9 @@ export const FriendRequestsModal= ({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: COLORS.BACKGROUND,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '80%',
@@ -241,19 +241,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: SPACING.LG,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
   },
   title: {
     fontSize: FONT_SIZES.XL,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
   },
   closeButton: {
     padding: SPACING.XS,
   },
   subtitle: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     marginVertical: SPACING.MD,
   },
@@ -263,11 +260,9 @@ const styles = StyleSheet.create({
   requestItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 12,
     padding: SPACING.MD,
     marginBottom: SPACING.SM,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -285,17 +280,14 @@ const styles = StyleSheet.create({
   nickname: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: 2,
   },
   message: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     marginBottom: 2,
   },
   timeAgo: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -309,10 +301,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   acceptButton: {
-    backgroundColor: COLORS.SUCCESS,
+    // Applied dynamically in component
   },
   rejectButton: {
-    backgroundColor: COLORS.ERROR,
+    // Applied dynamically in component
   },
   loadingContainer: {
     flex: 1,
@@ -329,13 +321,11 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: FONT_SIZES.LG,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginTop: SPACING.MD,
     marginBottom: SPACING.SM,
   },
   emptySubtext: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     lineHeight: 22,
   },

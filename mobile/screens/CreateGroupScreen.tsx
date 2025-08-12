@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { GroupType, Group } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { groupApi } from '@/services/api/groupApi';
@@ -66,6 +67,7 @@ export const CreateGroupScreen = () => {
   const authStore = useAuthStore();
   const groupStore = useGroupStore();
   const { t } = useTranslation(['group', 'common']);
+  const { colors } = useTheme();
 
   /**
    * 폼 유효성 검사
@@ -186,27 +188,27 @@ export const CreateGroupScreen = () => {
     ];
 
     return (
-      <View style={styles.pickerOverlay}>
-        <View style={styles.pickerModal}>
-          <Text style={styles.pickerTitle}>{t('group:createGroup.selectGroupType')}</Text>
+      <View style={[styles.pickerOverlay, { backgroundColor: colors.OVERLAY }]}>
+        <View style={[styles.pickerModal, { backgroundColor: colors.SURFACE }]}>
+          <Text style={[styles.pickerTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:createGroup.selectGroupType')}</Text>
           {groupTypes.map(({ type, name, desc }) => (
             <TouchableOpacity
               key={type}
-              style={styles.pickerItem}
+              style={[styles.pickerItem, { borderBottomColor: colors.BORDER }]}
               onPress={() => {
                 setFormData(prev => ({ ...prev, type }));
                 setShowTypePicker(false);
               }}
             >
-              <Text style={styles.pickerItemName}>{name}</Text>
-              <Text style={styles.pickerItemDesc}>{desc}</Text>
+              <Text style={[styles.pickerItemName, { color: colors.TEXT.PRIMARY }]}>{name}</Text>
+              <Text style={[styles.pickerItemDesc, { color: colors.TEXT.SECONDARY }]}>{desc}</Text>
             </TouchableOpacity>
           ))}
           <TouchableOpacity
-            style={styles.pickerCancelButton}
+            style={[styles.pickerCancelButton, { backgroundColor: colors.TEXT.LIGHT }]}
             onPress={() => setShowTypePicker(false)}
           >
-            <Text style={styles.pickerCancelText}>{t('common:buttons.cancel')}</Text>
+            <Text style={[styles.pickerCancelText, { color: colors.TEXT.PRIMARY }]}>{t('common:buttons.cancel')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -235,84 +237,93 @@ export const CreateGroupScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
         <TouchableOpacity
           style={styles.headerButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.headerButtonText}>{t('common:buttons.cancel')}</Text>
+          <Text style={[styles.headerButtonText, { color: colors.TEXT.SECONDARY }]}>{t('common:buttons.cancel')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('group:createGroup.title')}</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:createGroup.title')}</Text>
         <TouchableOpacity
           style={[
             styles.headerButton,
-            styles.submitButton,
-            (!formData.name.trim() || !formData.description.trim()) && styles.submitButtonDisabled,
+            [styles.submitButton, { backgroundColor: colors.PRIMARY }],
+            (!formData.name.trim() || !formData.description.trim()) && [styles.submitButtonDisabled, { backgroundColor: colors.TEXT.LIGHT }],
           ]}
           onPress={handleSubmit}
           disabled={isSubmitting || !formData.name.trim() || !formData.description.trim()}
         >
           {isSubmitting ? (
-            <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
+            <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
           ) : (
-            <Text style={styles.submitButtonText}>{t('group:createGroup.create')}</Text>
+            <Text style={[styles.submitButtonText, { color: colors.TEXT.WHITE }]}>{t('group:createGroup.create')}</Text>
           )}
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={[styles.content, { backgroundColor: colors.BACKGROUND }]}>
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{t('group:createGroup.groupName')} *</Text>
+          <Text style={[styles.sectionLabel, { color: colors.TEXT.PRIMARY }]}>{t('group:createGroup.groupName')} *</Text>
           <TextInput
-            style={[styles.textInput, errors.name && styles.textInputError]}
+            style={[
+              styles.textInput,
+              { backgroundColor: colors.SURFACE, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY },
+              errors.name && [styles.textInputError, { borderColor: colors.ERROR }]
+            ]}
             placeholder={t('group:createGroup.groupNamePlaceholder')}
-            placeholderTextColor={COLORS.TEXT.LIGHT}
+            placeholderTextColor={colors.TEXT.LIGHT}
             value={formData.name}
             onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
             maxLength={30}
           />
-          {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
-          <Text style={styles.characterCount}>{formData.name.length}/30</Text>
+          {errors.name && <Text style={[styles.errorText, { color: colors.ERROR }]}>{errors.name}</Text>}
+          <Text style={[styles.characterCount, { color: colors.TEXT.LIGHT }]}>{formData.name.length}/30</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{t('group:createGroup.groupDescription')} *</Text>
+          <Text style={[styles.sectionLabel, { color: colors.TEXT.PRIMARY }]}>{t('group:createGroup.groupDescription')} *</Text>
           <TextInput
-            style={[styles.textAreaInput, errors.description && styles.textInputError]}
+            style={[
+              styles.textAreaInput,
+              { backgroundColor: colors.SURFACE, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY },
+              errors.description && [styles.textInputError, { borderColor: colors.ERROR }]
+            ]}
             placeholder={t('group:createGroup.groupDescriptionPlaceholder')}
-            placeholderTextColor={COLORS.TEXT.LIGHT}
+            placeholderTextColor={colors.TEXT.LIGHT}
             value={formData.description}
             onChangeText={(text) => setFormData(prev => ({ ...prev, description: text }))}
             multiline
             maxLength={200}
             textAlignVertical="top"
           />
-          {errors.description && <Text style={styles.errorText}>{errors.description}</Text>}
-          <Text style={styles.characterCount}>{formData.description.length}/200</Text>
+          {errors.description && <Text style={[styles.errorText, { color: colors.ERROR }]}>{errors.description}</Text>}
+          <Text style={[styles.characterCount, { color: colors.TEXT.LIGHT }]}>{formData.description.length}/200</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{t('group:createGroup.groupType')}</Text>
+          <Text style={[styles.sectionLabel, { color: colors.TEXT.PRIMARY }]}>{t('group:createGroup.groupType')}</Text>
           <TouchableOpacity
-            style={styles.pickerButton}
+            style={[styles.pickerButton, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}
             onPress={() => setShowTypePicker(true)}
           >
-            <Text style={styles.pickerButtonText}>{getGroupTypeName(formData.type)}</Text>
-            <Text style={styles.pickerButtonArrow}>{'>'}</Text>
+            <Text style={[styles.pickerButtonText, { color: colors.TEXT.PRIMARY }]}>{getGroupTypeName(formData.type)}</Text>
+            <Text style={[styles.pickerButtonArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
           </TouchableOpacity>
         </View>
 
         {formData.type === GroupType.LOCATION && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{t('group:createGroup.location')} *</Text>
+            <Text style={[styles.sectionLabel, { color: colors.TEXT.PRIMARY }]}>{t('group:createGroup.location')} *</Text>
             <TextInput
               style={[
-                styles.textInput, 
-                errors.location?.address && styles.textInputError
+                styles.textInput,
+                { backgroundColor: colors.SURFACE, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY },
+                errors.location?.address && [styles.textInputError, { borderColor: colors.ERROR }]
               ]}
               placeholder={t('group:createGroup.locationPlaceholder')}
-              placeholderTextColor={COLORS.TEXT.LIGHT}
+              placeholderTextColor={colors.TEXT.LIGHT}
               value={formData.location?.address || ''}
               onChangeText={(text) => 
                 setFormData(prev => ({ 
@@ -322,16 +333,16 @@ export const CreateGroupScreen = () => {
               }
             />
             {errors.location?.address && (
-              <Text style={styles.errorText}>{errors.location.address}</Text>
+              <Text style={[styles.errorText, { color: colors.ERROR }]}>{errors.location.address}</Text>
             )}
           </View>
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{t('group:createGroup.minimumMembers')}</Text>
+          <Text style={[styles.sectionLabel, { color: colors.TEXT.PRIMARY }]}>{t('group:createGroup.minimumMembers')}</Text>
           <View style={styles.numberInputContainer}>
             <TouchableOpacity
-              style={styles.numberButton}
+              style={[styles.numberButton, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}
               onPress={() => 
                 setFormData(prev => ({ 
                   ...prev, 
@@ -339,11 +350,11 @@ export const CreateGroupScreen = () => {
                 }))
               }
             >
-              <Text style={styles.numberButtonText}>-</Text>
+              <Text style={[styles.numberButtonText, { color: colors.PRIMARY }]}>-</Text>
             </TouchableOpacity>
-            <Text style={styles.numberDisplay}>{formData.minimumMembers}{t('group:createGroup.people')}</Text>
+            <Text style={[styles.numberDisplay, { color: colors.TEXT.PRIMARY }]}>{formData.minimumMembers}{t('group:createGroup.people')}</Text>
             <TouchableOpacity
-              style={styles.numberButton}
+              style={[styles.numberButton, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}
               onPress={() => 
                 setFormData(prev => ({ 
                   ...prev, 
@@ -351,10 +362,10 @@ export const CreateGroupScreen = () => {
                 }))
               }
             >
-              <Text style={styles.numberButtonText}>+</Text>
+              <Text style={[styles.numberButtonText, { color: colors.PRIMARY }]}>+</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.helperText}>
+          <Text style={[styles.helperText, { color: colors.TEXT.SECONDARY }]}>
             {t('group:createGroup.minimumMembersHelper')}
           </Text>
         </View>
@@ -362,8 +373,8 @@ export const CreateGroupScreen = () => {
         <View style={styles.section}>
           <View style={styles.switchContainer}>
             <View>
-              <Text style={styles.switchLabel}>{t('group:createGroup.privateGroup')}</Text>
-              <Text style={styles.switchDescription}>
+              <Text style={[styles.switchLabel, { color: colors.TEXT.PRIMARY }]}>{t('group:createGroup.privateGroup')}</Text>
+              <Text style={[styles.switchDescription, { color: colors.TEXT.SECONDARY }]}>
                 {t('group:createGroup.privateGroupDesc')}
               </Text>
             </View>
@@ -372,14 +383,14 @@ export const CreateGroupScreen = () => {
               onValueChange={(value) => 
                 setFormData(prev => ({ ...prev, isPrivate: value }))
               }
-              trackColor={{ false: COLORS.TEXT.LIGHT, true: COLORS.PRIMARY }}
+              trackColor={{ false: colors.TEXT.LIGHT, true: colors.PRIMARY }}
             />
           </View>
         </View>
 
-        <View style={styles.guidelines}>
-          <Text style={styles.guidelinesTitle}>{t('group:createGroup.guidelines.title')}</Text>
-          <Text style={styles.guidelinesText}>
+        <View style={[styles.guidelines, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
+          <Text style={[styles.guidelinesTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:createGroup.guidelines.title')}</Text>
+          <Text style={[styles.guidelinesText, { color: colors.TEXT.SECONDARY }]}>
             {t('group:createGroup.guidelines.content')}
           </Text>
         </View>

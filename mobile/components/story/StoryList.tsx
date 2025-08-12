@@ -13,6 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { StoryUser as StoryUserType } from '@/utils/storyData';
+import { useTheme } from '@/hooks/useTheme';
 
 /**
  * StoryList 컴포넌트 Props
@@ -52,6 +53,7 @@ export const StoryList= ({
   refreshing = false,
 }) => {
   const { t } = useTranslation();
+  const { colors } = useTheme();
   
   // Find current user's stories
   const myStories = stories.find(story => story.userId === currentUserId);
@@ -76,17 +78,17 @@ export const StoryList= ({
         <View style={styles.storyImageContainer}>
           {item.hasUnviewedStories ? (
             <LinearGradient
-              colors={[COLORS.PRIMARY, COLORS.SECONDARY]}
+              colors={[colors.PRIMARY, colors.SECONDARY || colors.PRIMARY]}
               style={styles.storyRing}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <View style={styles.storyRingInner}>
+              <View style={[styles.storyRingInner, { backgroundColor: colors.SURFACE }]}>
                 {latestStory?.imageUri ? (
                   <Image source={{ uri: latestStory.imageUri }} style={styles.profileImage} />
                 ) : (
-                  <View style={styles.profileImagePlaceholder}>
-                    <Text style={styles.profileImageText}>
+                  <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.PRIMARY }]}>
+                    <Text style={[styles.profileImageText, { color: colors.TEXT.WHITE }]}>
                       {item.nickname.charAt(0).toUpperCase()}
                     </Text>
                   </View>
@@ -94,12 +96,12 @@ export const StoryList= ({
               </View>
             </LinearGradient>
           ) : (
-            <View style={styles.viewedStoryContainer}>
+            <View style={[styles.viewedStoryContainer, { borderColor: colors.BORDER }]}>
               {latestStory?.imageUri ? (
                 <Image source={{ uri: latestStory.imageUri }} style={styles.profileImage} />
               ) : (
-                <View style={styles.profileImagePlaceholder}>
-                  <Text style={styles.profileImageText}>
+                <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.PRIMARY }]}>
+                  <Text style={[styles.profileImageText, { color: colors.TEXT.WHITE }]}>
                     {item.nickname.charAt(0).toUpperCase()}
                   </Text>
                 </View>
@@ -107,7 +109,7 @@ export const StoryList= ({
             </View>
           )}
         </View>
-        <Text style={styles.nickname} numberOfLines={1}>
+        <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]} numberOfLines={1}>
           {item.nickname}
         </Text>
       </TouchableOpacity>
@@ -125,23 +127,23 @@ export const StoryList= ({
       return (
         <TouchableOpacity style={styles.storyItem} onPress={() => onStoryPress(0)}>
           <View style={styles.storyImageContainer}>
-            <View style={styles.viewedStoryContainer}>
+            <View style={[styles.viewedStoryContainer, { borderColor: colors.BORDER }]}>
               {latestStory?.imageUri ? (
                 <Image source={{ uri: latestStory.imageUri }} style={styles.profileImage} />
               ) : (
-                <View style={styles.profileImagePlaceholder}>
-                  <Text style={styles.profileImageText}>
+                <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.PRIMARY }]}>
+                  <Text style={[styles.profileImageText, { color: colors.TEXT.WHITE }]}>
                     {myStories.nickname.charAt(0).toUpperCase()}
                   </Text>
                 </View>
               )}
               {/* 내 스토리에 + 아이콘 추가 */}
-              <View style={styles.addIconOverlay}>
-                <Ionicons name="add-circle" size={20} color={COLORS.PRIMARY} />
+              <View style={[styles.addIconOverlay, { backgroundColor: colors.SURFACE }]}>
+                <Ionicons name="add-circle" size={20} color={colors.PRIMARY} />
               </View>
             </View>
           </View>
-          <Text style={styles.nickname} numberOfLines={1}>
+          <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]} numberOfLines={1}>
             내 스토리
           </Text>
         </TouchableOpacity>
@@ -152,11 +154,11 @@ export const StoryList= ({
     return (
       <TouchableOpacity style={styles.storyItem} onPress={onAddStoryPress}>
         <View style={styles.addStoryContainer}>
-          <View style={styles.addStoryButton}>
-            <Ionicons name="add" size={28} color={COLORS.TEXT.WHITE} />
+          <View style={[styles.addStoryButton, { backgroundColor: colors.TEXT.SECONDARY }]}>
+            <Ionicons name="add" size={28} color={colors.TEXT.WHITE} />
           </View>
         </View>
-        <Text style={styles.nickname}>스토리 추가</Text>
+        <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>스토리 추가</Text>
       </TouchableOpacity>
     );
   };
@@ -164,13 +166,13 @@ export const StoryList= ({
   if (isLoading && stories.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color={COLORS.primary} />
+        <ActivityIndicator size="small" color={colors.PRIMARY} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -188,10 +190,8 @@ export const StoryList= ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.SURFACE,
     paddingVertical: SPACING.MD,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
   },
   loadingContainer: {
     height: 120,
@@ -218,7 +218,6 @@ const styles = StyleSheet.create({
   storyRingInner: {
     flex: 1,
     borderRadius: 34,
-    backgroundColor: COLORS.SURFACE,
     padding: 3,
   },
   viewedStoryContainer: {
@@ -227,7 +226,6 @@ const styles = StyleSheet.create({
     borderRadius: 37,
     padding: 3,
     borderWidth: 2,
-    borderColor: COLORS.BORDER,
     position: 'relative',
   },
   addStoryContainer: {
@@ -239,7 +237,6 @@ const styles = StyleSheet.create({
   addStoryButton: {
     flex: 1,
     borderRadius: 34,
-    backgroundColor: COLORS.TEXT.LIGHT,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -247,7 +244,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -2,
     right: -2,
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 12,
     padding: 2,
   },
@@ -260,18 +256,15 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 31,
-    backgroundColor: COLORS.PRIMARY,
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileImageText: {
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
-    color: COLORS.TEXT.WHITE,
   },
   nickname: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.PRIMARY,
     width: 74,
     textAlign: 'center',
   },

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
@@ -33,6 +34,7 @@ export const WhoLikesYouScreen = () => {
   const { t } = useTranslation('premium');
   const navigation = useNavigation();
   const { user } = useAuthStore();
+  const { colors } = useTheme();
   
   const [likesReceived, setLikesReceived] = useState<LikeInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -205,27 +207,27 @@ export const WhoLikesYouScreen = () => {
   }, [sendSuperLike, isPremiumUser, canSendSuperLike, getRemainingSuperLikes, navigation]);
 
   const renderLikeItem = ({ item }: { item: LikeInfo }) => (
-    <View style={styles.likeItem}>
+    <View style={[styles.likeItem, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
       <View style={styles.likeHeader}>
         <View style={styles.userInfo}>
-          <View style={styles.userAvatar}>
-            <Icon name="person" size={24} color={COLORS.TEXT.SECONDARY} />
+          <View style={[styles.userAvatar, { backgroundColor: colors.BACKGROUND }]}>
+            <Icon name="person" size={24} color={colors.TEXT.SECONDARY} />
           </View>
           <View style={styles.userDetails}>
             <View style={styles.nicknameRow}>
-              <Text style={styles.nickname}>{item.fromUser.nickname}</Text>
+              <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>{item.fromUser.nickname}</Text>
               {item.fromUser.isVerified && (
-                <Icon name="checkmark-circle" size={16} color={COLORS.SUCCESS} />
+                <Icon name="checkmark-circle" size={16} color={colors.SUCCESS} />
               )}
               {item.isSuper && (
-                <View style={styles.superBadge}>
-                  <Icon name="star" size={12} color={COLORS.WARNING} />
-                  <Text style={styles.superText}>SUPER</Text>
+                <View style={[styles.superBadge, { backgroundColor: colors.WARNING }]}>
+                  <Icon name="star" size={12} color={colors.TEXT.WHITE} />
+                  <Text style={[styles.superText, { color: colors.TEXT.WHITE }]}>SUPER</Text>
                 </View>
               )}
             </View>
-            <Text style={styles.groupName}>{item.groupName}</Text>
-            <Text style={styles.likedTime}>
+            <Text style={[styles.groupName, { color: colors.TEXT.SECONDARY }]}>{item.groupName}</Text>
+            <Text style={[styles.likedTime, { color: colors.TEXT.LIGHT }]}>
               {item.likedAt.toLocaleDateString('ko-KR', {
                 month: 'long',
                 day: 'numeric',
@@ -239,20 +241,20 @@ export const WhoLikesYouScreen = () => {
 
       <View style={styles.actionButtons}>
         <TouchableOpacity
-          style={[styles.actionButton, styles.likeButton]}
+          style={[styles.actionButton, styles.likeButton, { backgroundColor: colors.PRIMARY }]}
           onPress={() => handleLikeBack(item)}
         >
-          <Icon name="heart" size={20} color={COLORS.TEXT.WHITE} />
-          <Text style={styles.likeButtonText}>{t('whoLikesYou.sendLikeButton')}</Text>
+          <Icon name="heart" size={20} color={colors.TEXT.WHITE} />
+          <Text style={[styles.likeButtonText, { color: colors.TEXT.WHITE }]}>{t('whoLikesYou.sendLikeButton')}</Text>
         </TouchableOpacity>
         
         {isPremiumUser && canSendSuperLike() && (
           <TouchableOpacity
-            style={[styles.actionButton, styles.superLikeButton]}
+            style={[styles.actionButton, styles.superLikeButton, { backgroundColor: colors.WARNING }]}
             onPress={() => handleSuperLikeBack(item)}
           >
-            <Icon name="star" size={20} color={COLORS.TEXT.WHITE} />
-            <Text style={styles.superLikeButtonText}>
+            <Icon name="star" size={20} color={colors.TEXT.WHITE} />
+            <Text style={[styles.superLikeButtonText, { color: colors.TEXT.WHITE }]}>
               {t('whoLikesYou.superLikeButton')} ({getRemainingSuperLikes()})
             </Text>
           </TouchableOpacity>
@@ -260,11 +262,11 @@ export const WhoLikesYouScreen = () => {
         
         {isPremiumUser && !canSendSuperLike() && (
           <TouchableOpacity
-            style={[styles.actionButton, styles.superLikeButtonDisabled]}
+            style={[styles.actionButton, styles.superLikeButtonDisabled, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER }]}
             disabled={true}
           >
-            <Icon name="star-outline" size={20} color={COLORS.TEXT.LIGHT} />
-            <Text style={styles.superLikeButtonDisabledText}>{t('whoLikesYou.limitExceeded')}</Text>
+            <Icon name="star-outline" size={20} color={colors.TEXT.LIGHT} />
+            <Text style={[styles.superLikeButtonDisabledText, { color: colors.TEXT.LIGHT }]}>{t('whoLikesYou.limitExceeded')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -273,9 +275,9 @@ export const WhoLikesYouScreen = () => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Icon name="heart-outline" size={64} color={COLORS.TEXT.LIGHT} />
-      <Text style={styles.emptyTitle}>{t('whoLikesYou.noLikes')}</Text>
-      <Text style={styles.emptyDescription}>
+      <Icon name="heart-outline" size={64} color={colors.TEXT.LIGHT} />
+      <Text style={[styles.emptyTitle, { color: colors.TEXT.PRIMARY }]}>{t('whoLikesYou.noLikes')}</Text>
+      <Text style={[styles.emptyDescription, { color: colors.TEXT.SECONDARY }]}>
         {t('whoLikesYou.noLikesFullDescription')}
       </Text>
     </View>
@@ -284,32 +286,32 @@ export const WhoLikesYouScreen = () => {
   const renderNonPremiumState = () => (
     <View style={styles.nonPremiumState}>
       <View style={styles.premiumIcon}>
-        <Icon name="diamond-outline" size={48} color={COLORS.PRIMARY} />
+        <Icon name="diamond-outline" size={48} color={colors.PRIMARY} />
       </View>
-      <Text style={styles.premiumTitle}>{t('whoLikesYou.premiumRequired')}</Text>
-      <Text style={styles.premiumDescription}>
+      <Text style={[styles.premiumTitle, { color: colors.TEXT.PRIMARY }]}>{t('whoLikesYou.premiumRequired')}</Text>
+      <Text style={[styles.premiumDescription, { color: colors.TEXT.SECONDARY }]}>
         {t('whoLikesYou.premiumDescription')}
       </Text>
       <TouchableOpacity
-        style={styles.premiumButton}
+        style={[styles.premiumButton, { backgroundColor: colors.PRIMARY }]}
         onPress={() => navigation.navigate('Premium' as never)}
       >
-        <Text style={styles.premiumButtonText}>{t('whoLikesYou.upgradeToPremium')}</Text>
+        <Text style={[styles.premiumButtonText, { color: colors.TEXT.WHITE }]}>{t('whoLikesYou.upgradeToPremium')}</Text>
       </TouchableOpacity>
     </View>
   );
 
   if (!isPremiumUser) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+        <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
+            <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('whoLikesYou.title')}</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('whoLikesYou.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         
@@ -320,41 +322,41 @@ export const WhoLikesYouScreen = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+        <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
+            <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('whoLikesYou.title')}</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('whoLikesYou.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>좋아요 정보를 불러오는 중...</Text>
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
+          <Text style={[styles.loadingText, { color: colors.TEXT.SECONDARY }]}>좋아요 정보를 불러오는 중...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
+          <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>좋아요 받은 사람</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>좋아요 받은 사람</Text>
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={handleRefresh}
         >
-          <Icon name="refresh" size={24} color={COLORS.TEXT.SECONDARY} />
+          <Icon name="refresh" size={24} color={colors.TEXT.SECONDARY} />
         </TouchableOpacity>
       </View>
 
@@ -368,16 +370,16 @@ export const WhoLikesYouScreen = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={[COLORS.PRIMARY]}
-            tintColor={COLORS.PRIMARY}
+            colors={[colors.PRIMARY]}
+            tintColor={colors.PRIMARY}
           />
         }
         showsVerticalScrollIndicator={false}
       />
       
       {likesReceived.length > 0 && (
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
+        <View style={[styles.footer, { backgroundColor: colors.SURFACE, borderTopColor: colors.BORDER }]}>
+          <Text style={[styles.footerText, { color: colors.TEXT.SECONDARY }]}>
             💡 좋아요를 보내면 매칭이 성사됩니다
           </Text>
         </View>
@@ -389,7 +391,6 @@ export const WhoLikesYouScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: 'row',
@@ -398,8 +399,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.MD,
     paddingVertical: SPACING.SM,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
-    backgroundColor: COLORS.SURFACE,
   },
   backButton: {
     padding: SPACING.SM,
@@ -407,7 +406,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
   },
   headerRight: {
     width: 40,
@@ -419,12 +417,10 @@ const styles = StyleSheet.create({
     padding: SPACING.MD,
   },
   likeItem: {
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 12,
     padding: SPACING.MD,
     marginBottom: SPACING.MD,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
   },
   likeHeader: {
     marginBottom: SPACING.MD,
@@ -437,7 +433,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.BACKGROUND,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.MD,
@@ -453,13 +448,11 @@ const styles = StyleSheet.create({
   nickname: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginRight: SPACING.XS,
   },
   superBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.WARNING,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 12,
@@ -468,17 +461,14 @@ const styles = StyleSheet.create({
   superText: {
     fontSize: 10,
     fontWeight: '600',
-    color: COLORS.TEXT.WHITE,
     marginLeft: 2,
   },
   groupName: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     marginBottom: 2,
   },
   likedTime: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -494,28 +484,21 @@ const styles = StyleSheet.create({
     gap: SPACING.XS,
   },
   likeButton: {
-    backgroundColor: COLORS.PRIMARY,
   },
   likeButtonText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.SM,
     fontWeight: '600',
   },
   superLikeButton: {
-    backgroundColor: COLORS.WARNING,
   },
   superLikeButtonText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.SM,
     fontWeight: '600',
   },
   superLikeButtonDisabled: {
-    backgroundColor: COLORS.BACKGROUND,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
   },
   superLikeButtonDisabledText: {
-    color: COLORS.TEXT.LIGHT,
     fontSize: FONT_SIZES.SM,
     fontWeight: '500',
   },
@@ -527,13 +510,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginTop: SPACING.LG,
     marginBottom: SPACING.SM,
   },
   emptyDescription: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -549,24 +530,20 @@ const styles = StyleSheet.create({
   premiumTitle: {
     fontSize: FONT_SIZES.XL,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.SM,
   },
   premiumDescription: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: SPACING.XL,
   },
   premiumButton: {
-    backgroundColor: COLORS.PRIMARY,
     paddingHorizontal: SPACING.XL,
     paddingVertical: SPACING.MD,
     borderRadius: 12,
   },
   premiumButtonText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
   },
@@ -577,18 +554,14 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     marginTop: SPACING.MD,
   },
   footer: {
     padding: SPACING.MD,
-    backgroundColor: COLORS.SURFACE,
     borderTopWidth: 1,
-    borderTopColor: COLORS.BORDER,
   },
   footerText: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
   },
 });

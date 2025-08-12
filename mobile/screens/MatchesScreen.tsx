@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { Match } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatTimeAgo } from '@/utils/dateUtils';
@@ -31,6 +32,7 @@ export const MatchesScreen = React.memo(() => {
   const navigation = useNavigation();
   const likeStore = useLikeStore();
   const { user } = useAuthStore();
+  const { colors } = useTheme();
   const { t } = useTranslation('matches');
 
   /**
@@ -106,31 +108,31 @@ export const MatchesScreen = React.memo(() => {
       : t('user.anonymous');
 
     return (
-      <View style={styles.matchItem}>
+      <View style={[styles.matchItem, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
         <View style={styles.matchHeader}>
           <View style={styles.userInfo}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
+            <View style={[styles.avatar, { backgroundColor: colors.PRIMARY }]}>
+              <Text style={[styles.avatarText, { color: colors.TEXT.WHITE }]}>
                 {displayName.charAt(0)}
               </Text>
             </View>
             <View>
-              <Text style={styles.nickname}>{displayName}</Text>
-              <Text style={styles.matchTime}>
+              <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>{displayName}</Text>
+              <Text style={[styles.matchTime, { color: colors.TEXT.SECONDARY }]}>
                 {formatTimeAgo(new Date(item.matchedAt || item.createdAt))}
               </Text>
             </View>
           </View>
           
           <TouchableOpacity
-            style={styles.chatButton}
+            style={[styles.chatButton, { backgroundColor: colors.PRIMARY }]}
             onPress={() => handleStartChat(item.id, displayName)}
           >
-            <Text style={styles.chatButtonText}>{t('actions.startChat')}</Text>
+            <Text style={[styles.chatButtonText, { color: colors.TEXT.WHITE }]}>{t('actions.startChat')}</Text>
           </TouchableOpacity>
         </View>
         
-        <Text style={styles.matchDescription}>
+        <Text style={[styles.matchDescription, { color: colors.TEXT.SECONDARY }]}>
           {t('messages.matchDescription')}
         </Text>
       </View>
@@ -143,16 +145,16 @@ export const MatchesScreen = React.memo(() => {
    * @description 매칭 통계와 안내 메시지를 표시
    */
   const renderHeader = () => (
-    <View style={styles.header}>
-      <Text style={styles.headerTitle}>{t('title')}</Text>
-      <Text style={styles.headerSubtitle}>
+    <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('title')}</Text>
+      <Text style={[styles.headerSubtitle, { color: colors.TEXT.SECONDARY }]}>
         {t('subtitle')}
       </Text>
       <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>
+        <Text style={[styles.statsText, { color: colors.TEXT.PRIMARY }]}>
           {t('stats.totalMatches', { count: matches.length })}
         </Text>
-        <Text style={styles.statsText}>
+        <Text style={[styles.statsText, { color: colors.TEXT.PRIMARY }]}>
           {t('stats.receivedLikes', { count: likeStore.getReceivedLikesCount() })}
         </Text>
       </View>
@@ -167,8 +169,8 @@ export const MatchesScreen = React.memo(() => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>💕</Text>
-      <Text style={styles.emptyStateTitle}>{t('emptyState.title')}</Text>
-      <Text style={styles.emptyStateSubtitle}>
+      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>{t('emptyState.title')}</Text>
+      <Text style={[styles.emptyStateSubtitle, { color: colors.TEXT.SECONDARY }]}>
         {t('emptyState.subtitle')}
       </Text>
     </View>
@@ -176,17 +178,17 @@ export const MatchesScreen = React.memo(() => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>{t('loading.text')}</Text>
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
+          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('loading.text')}</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <FlatList
         data={matches}
         keyExtractor={(item) => item.id}
@@ -203,7 +205,6 @@ export const MatchesScreen = React.memo(() => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   loadingContainer: {
     flex: 1,
@@ -213,24 +214,19 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: SPACING.MD,
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
   },
   header: {
-    backgroundColor: COLORS.SURFACE,
     paddingHorizontal: SPACING.LG,
     paddingVertical: SPACING.LG,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
   },
   headerTitle: {
     fontSize: FONT_SIZES.XXL,
     fontWeight: 'bold',
-    color: COLORS.PRIMARY,
     marginBottom: SPACING.XS,
   },
   headerSubtitle: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.MD,
   },
   statsContainer: {
@@ -239,17 +235,14 @@ const styles = StyleSheet.create({
   },
   statsText: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     fontWeight: '500',
   },
   matchItem: {
-    backgroundColor: COLORS.SURFACE,
     marginVertical: SPACING.XS,
     marginHorizontal: SPACING.MD,
     borderRadius: 12,
     padding: SPACING.MD,
     elevation: 2,
-    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
@@ -269,40 +262,33 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: COLORS.PRIMARY,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.MD,
   },
   avatarText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
   },
   nickname: {
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: 2,
   },
   matchTime: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
   },
   chatButton: {
-    backgroundColor: COLORS.PRIMARY,
     paddingHorizontal: SPACING.MD,
     paddingVertical: SPACING.SM,
     borderRadius: 8,
   },
   chatButtonText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.SM,
     fontWeight: '600',
   },
   matchDescription: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     lineHeight: 20,
     textAlign: 'center',
     fontStyle: 'italic',
@@ -323,13 +309,11 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.SM,
     textAlign: 'center',
   },
   emptyStateSubtitle: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     lineHeight: 22,
   },

@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { authService } from '@/services/api/authService';
 import apiClient from '@/services/api/config';
 
@@ -38,13 +39,14 @@ interface EditNicknameModalProps {
  * @returns {JSX.Element} 닉네임 수정 모달 UI
  * @description 사용자가 자신의 닉네임을 수정할 수 있는 모달 컴포넌트
  */
-export const EditNicknameModal= ({
+export const EditNicknameModal = ({
   visible,
   onClose,
   onSuccess,
 }) => {
   const { t } = useTranslation(['common', 'profile']);
   const { user, updateUserProfile } = useAuthStore();
+  const { colors } = useTheme();
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [charCount, setCharCount] = useState(0);
@@ -159,50 +161,55 @@ export const EditNicknameModal= ({
         style={styles.container}
       >
         <TouchableOpacity
-          style={styles.backdrop}
+          style={[styles.backdrop, { backgroundColor: colors.OVERLAY || 'rgba(0, 0, 0, 0.5)' }]}
           activeOpacity={1}
           onPress={onClose}
         />
         
-        <View style={styles.modalContent}>
+        <View style={[styles.modalContent, { backgroundColor: colors.BACKGROUND }]}>
           <View style={styles.header}>
-            <Text style={styles.title}>{t('common:modals.editNickname.title')}</Text>
+            <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('common:modals.editNickname.title')}</Text>
             <TouchableOpacity
               onPress={onClose}
               style={styles.closeButton}
             >
-              <Ionicons name="close" size={24} color={COLORS.text} />
+              <Ionicons name="close" size={24} color={colors.TEXT.PRIMARY} />
             </TouchableOpacity>
           </View>
           
           <View style={styles.body}>
-            <Text style={styles.label}>{t('common:modals.editNickname.newNickname')}</Text>
+            <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>{t('common:modals.editNickname.newNickname')}</Text>
             <View style={styles.inputContainer}>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { 
+                  backgroundColor: colors.SURFACE, 
+                  color: colors.TEXT.PRIMARY,
+                  borderColor: colors.BORDER
+                }]}
                 value={nickname}
                 onChangeText={handleTextChange}
                 placeholder={t('common:modals.editNickname.placeholder')}
-                placeholderTextColor={COLORS.textSecondary}
+                placeholderTextColor={colors.TEXT.LIGHT}
                 autoFocus
                 maxLength={40}
                 editable={!isLoading}
               />
               <Text style={[
                 styles.charCount,
-                charCount > 35 && styles.charCountWarning
+                { color: colors.TEXT.SECONDARY },
+                charCount > 35 && { color: colors.WARNING }
               ]}>
                 {charCount}/40
               </Text>
             </View>
             
-            <View style={styles.infoContainer}>
+            <View style={[styles.infoContainer, { backgroundColor: colors.SURFACE }]}>
               <Ionicons 
                 name="information-circle" 
                 size={16} 
-                color={COLORS.textSecondary} 
+                color={colors.TEXT.SECONDARY} 
               />
-              <Text style={styles.infoText}>
+              <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
                 {t('common:modals.editNickname.info.line1')}{`\n`}
                 {t('common:modals.editNickname.info.line2')}{`\n`}
                 {t('common:modals.editNickname.info.line3')}
@@ -212,25 +219,26 @@ export const EditNicknameModal= ({
           
           <View style={styles.footer}>
             <TouchableOpacity
-              style={styles.cancelButton}
+              style={[styles.cancelButton, { backgroundColor: colors.TEXT.LIGHT }]}
               onPress={onClose}
               disabled={isLoading}
             >
-              <Text style={styles.cancelButtonText}>{t('common:actions.cancel')}</Text>
+              <Text style={[styles.cancelButtonText, { color: colors.TEXT.PRIMARY }]}>{t('common:actions.cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
               style={[
                 styles.saveButton,
-                (isLoading || nickname.trim().length === 0) && styles.saveButtonDisabled
+                { backgroundColor: colors.PRIMARY },
+                (isLoading || nickname.trim().length === 0) && [styles.saveButtonDisabled, { backgroundColor: colors.TEXT.LIGHT }]
               ]}
               onPress={handleSave}
               disabled={isLoading || nickname.trim().length === 0}
             >
               {isLoading ? (
-                <ActivityIndicator size="small" color={COLORS.white} />
+                <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
               ) : (
-                <Text style={styles.saveButtonText}>{t('common:actions.save')}</Text>
+                <Text style={[styles.saveButtonText, { color: colors.TEXT.WHITE }]}>{t('common:actions.save')}</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -247,10 +255,8 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: COLORS.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: SPACING.md,
@@ -265,7 +271,6 @@ const styles = StyleSheet.create({
   },
   title: {
     ...TYPOGRAPHY.h2,
-    color: COLORS.text,
   },
   closeButton: {
     padding: SPACING.xs,
@@ -276,7 +281,6 @@ const styles = StyleSheet.create({
   },
   label: {
     ...TYPOGRAPHY.body,
-    color: COLORS.text,
     fontWeight: '600',
     marginBottom: SPACING.sm,
   },
@@ -286,36 +290,30 @@ const styles = StyleSheet.create({
   },
   input: {
     ...TYPOGRAPHY.body,
-    backgroundColor: COLORS.gray50,
     borderRadius: 12,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.md,
     paddingRight: 60,
-    color: COLORS.text,
     borderWidth: 1,
-    borderColor: COLORS.gray200,
   },
   charCount: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
     position: 'absolute',
     right: SPACING.md,
     top: '50%',
     transform: [{ translateY: -8 }],
   },
   charCountWarning: {
-    color: COLORS.WARNING,
+    // Applied dynamically in component
   },
   infoContainer: {
     flexDirection: 'row',
-    backgroundColor: COLORS.gray50,
     borderRadius: 8,
     padding: SPACING.sm,
     gap: SPACING.xs,
   },
   infoText: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
     flex: 1,
     lineHeight: 18,
   },
@@ -326,29 +324,25 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: COLORS.gray200,
     borderRadius: 12,
     paddingVertical: SPACING.md,
     alignItems: 'center',
   },
   cancelButtonText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.text,
     fontWeight: '600',
   },
   saveButton: {
     flex: 1,
-    backgroundColor: COLORS.primary,
     borderRadius: 12,
     paddingVertical: SPACING.md,
     alignItems: 'center',
   },
   saveButtonDisabled: {
-    backgroundColor: COLORS.gray300,
+    // Applied dynamically in component
   },
   saveButtonText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.white,
     fontWeight: '600',
   },
 });

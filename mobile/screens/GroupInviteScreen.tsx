@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@/hooks/useTheme';
 import { groupApi } from '@/services/api/groupApi';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import QRCode from 'react-native-qrcode-svg';
@@ -37,6 +38,7 @@ export const GroupInviteScreen = () => {
   const route = useRoute();
   const { groupId } = route.params as { groupId: string };
   const { t } = useTranslation();
+  const { colors } = useTheme();
 
   const [inviteLink, setInviteLink] = useState<string>('');
   const [invites, setInvites] = useState<GroupInvite[]>([]);
@@ -162,47 +164,47 @@ export const GroupInviteScreen = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.BACKGROUND }]}>
+        <ActivityIndicator size="large" color={colors.PRIMARY} />
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.headerButton}>{t('common:buttons.close')}</Text>
+          <Text style={[styles.headerButton, { color: colors.PRIMARY }]}>{t('common:buttons.close')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('group:invite.title')}</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:invite.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={[styles.content, { backgroundColor: colors.BACKGROUND }]}>
         {/* QR 코드 섹션 */}
         <View style={styles.qrSection}>
-          <Text style={styles.sectionTitle}>{t('group:invite.qr.title')}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:invite.qr.title')}</Text>
           {inviteLink ? (
-            <View style={styles.qrContainer}>
+            <View style={[styles.qrContainer, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
               <QRCode
                 value={inviteLink}
                 size={200}
                 backgroundColor="white"
               />
-              <Text style={styles.qrHelperText}>
+              <Text style={[styles.qrHelperText, { color: colors.TEXT.SECONDARY }]}>
                 {t('group:invite.qr.helperText')}
               </Text>
             </View>
           ) : (
             <TouchableOpacity
-              style={styles.generateButton}
+              style={[styles.generateButton, { backgroundColor: colors.PRIMARY }]}
               onPress={generateInviteLink}
               disabled={isGenerating}
             >
               {isGenerating ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <Text style={styles.generateButtonText}>{t('group:invite.qr.generate')}</Text>
+                <Text style={[styles.generateButtonText, { color: colors.TEXT.WHITE }]}>{t('group:invite.qr.generate')}</Text>
               )}
             </TouchableOpacity>
           )}
@@ -211,23 +213,23 @@ export const GroupInviteScreen = () => {
         {/* 링크 공유 섹션 */}
         {inviteLink && (
           <View style={styles.linkSection}>
-            <Text style={styles.sectionTitle}>{t('group:invite.link.title')}</Text>
-            <View style={styles.linkContainer}>
-              <Text style={styles.linkText} numberOfLines={1}>
+            <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:invite.link.title')}</Text>
+            <View style={[styles.linkContainer, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
+              <Text style={[styles.linkText, { color: colors.TEXT.SECONDARY }]} numberOfLines={1}>
                 {inviteLink}
               </Text>
               <View style={styles.linkActions}>
                 <TouchableOpacity
-                  style={styles.linkButton}
+                  style={[styles.linkButton, { backgroundColor: colors.TEXT.LIGHT }]}
                   onPress={copyToClipboard}
                 >
-                  <Text style={styles.linkButtonText}>{t('group:invite.link.copy')}</Text>
+                  <Text style={[styles.linkButtonText, { color: colors.TEXT.WHITE }]}>{t('group:invite.link.copy')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.linkButton, styles.shareButton]}
+                  style={[styles.linkButton, styles.shareButton, { backgroundColor: colors.PRIMARY }]}
                   onPress={shareInviteLink}
                 >
-                  <Text style={styles.linkButtonText}>{t('group:invite.link.share')}</Text>
+                  <Text style={[styles.linkButtonText, { color: colors.TEXT.WHITE }]}>{t('group:invite.link.share')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -236,27 +238,30 @@ export const GroupInviteScreen = () => {
 
         {/* 전화번호로 초대 섹션 */}
         <View style={styles.phoneSection}>
-          <Text style={styles.sectionTitle}>{t('group:invite.phone.title')}</Text>
-          <Text style={styles.helperText}>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:invite.phone.title')}</Text>
+          <Text style={[styles.helperText, { color: colors.TEXT.SECONDARY }]}>
             {t('group:invite.phone.helperText')}
           </Text>
           <TextInput
-            style={styles.phoneInput}
+            style={[styles.phoneInput, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY }]}
             placeholder={t('group:invite.phone.placeholder')}
-            placeholderTextColor={COLORS.TEXT.LIGHT}
+            placeholderTextColor={colors.TEXT.LIGHT}
             value={phoneNumbers}
             onChangeText={setPhoneNumbers}
             keyboardType="phone-pad"
           />
           <TouchableOpacity
-            style={[styles.inviteButton, !phoneNumbers.trim() && styles.inviteButtonDisabled]}
+            style={[
+              [styles.inviteButton, { backgroundColor: colors.PRIMARY }],
+              !phoneNumbers.trim() && [styles.inviteButtonDisabled, { backgroundColor: colors.TEXT.LIGHT }]
+            ]}
             onPress={inviteByPhoneNumbers}
             disabled={isInviting || !phoneNumbers.trim()}
           >
             {isInviting ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text style={styles.inviteButtonText}>{t('group:invite.phone.button')}</Text>
+              <Text style={[styles.inviteButtonText, { color: colors.TEXT.WHITE }]}>{t('group:invite.phone.button')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -264,14 +269,18 @@ export const GroupInviteScreen = () => {
         {/* 활성 초대 목록 */}
         {invites.length > 0 && (
           <View style={styles.invitesSection}>
-            <Text style={styles.sectionTitle}>{t('group:invite.active.title')}</Text>
+            <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:invite.active.title')}</Text>
             {invites.map(invite => {
               const isExpired = new Date(invite.expiresAt) < new Date();
               return (
-                <View key={invite.id} style={[styles.inviteItem, isExpired && styles.inviteItemExpired]}>
+                <View key={invite.id} style={[
+                  styles.inviteItem,
+                  { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
+                  isExpired && styles.inviteItemExpired
+                ]}>
                   <View style={styles.inviteInfo}>
-                    <Text style={styles.inviteCode}>{t('group:invite.active.code', { code: invite.inviteCode })}</Text>
-                    <Text style={styles.inviteStats}>
+                    <Text style={[styles.inviteCode, { color: colors.TEXT.PRIMARY }]}>{t('group:invite.active.code', { code: invite.inviteCode })}</Text>
+                    <Text style={[styles.inviteStats, { color: colors.TEXT.SECONDARY }]}>
                       {t('group:invite.active.stats', {
                         uses: invite.uses,
                         maxUses: invite.maxUses ? t('group:invite.active.maxUses', { count: invite.maxUses }) : '',
@@ -284,7 +293,7 @@ export const GroupInviteScreen = () => {
                       style={styles.revokeButton}
                       onPress={() => revokeInvite(invite.id)}
                     >
-                      <Text style={styles.revokeButtonText}>{t('group:invite.active.revoke')}</Text>
+                      <Text style={[styles.revokeButtonText, { color: colors.ERROR }]}>{t('group:invite.active.revoke')}</Text>
                     </TouchableOpacity>
                   )}
                 </View>

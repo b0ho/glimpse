@@ -13,6 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAuthService } from '@/services/auth/auth-service';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, FONT_SIZES, SECURITY } from '@/utils/constants';
 
 interface SMSVerificationScreenProps {
@@ -34,6 +35,7 @@ export const SMSVerificationScreen= ({
   const authStore = useAuthStore();
   const inputRef = useRef<TextInput>(null);
   const { t } = useTranslation();
+  const { colors } = useTheme();
 
   useEffect(() => {
     // 타이머 시작

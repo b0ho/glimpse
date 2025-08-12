@@ -12,6 +12,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useGroupStore } from '@/store/slices/groupSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
@@ -22,6 +23,7 @@ export const MyGroupsScreen = () => {
   
   const navigation = useNavigation();
   const groupStore = useGroupStore();
+  const { colors } = useTheme();
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -80,7 +82,7 @@ export const MyGroupsScreen = () => {
     const isCreator = item.creatorId === 'current_user'; // TODO: 실제 사용자 ID와 비교
 
     return (
-      <View style={styles.groupItem}>
+      <View style={[styles.groupItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
         <View style={styles.groupHeader}>
           <View style={styles.groupInfo}>
             <Text style={styles.groupIcon}>
@@ -88,13 +90,13 @@ export const MyGroupsScreen = () => {
             </Text>
             <View style={styles.groupDetails}>
               <View style={styles.groupTitleRow}>
-                <Text style={styles.groupName}>{item.name}</Text>
-                {isCreator && <Text style={styles.creatorBadge}>{t('myGroups.creatorBadge')}</Text>}
+                <Text style={[styles.groupName, { color: colors.TEXT.PRIMARY }]}>{item.name}</Text>
+                {isCreator && <Text style={[styles.creatorBadge, { color: colors.TEXT.WHITE, backgroundColor: colors.SUCCESS }]}>{t('myGroups.creatorBadge')}</Text>}
               </View>
-              <Text style={styles.groupDescription} numberOfLines={2}>
+              <Text style={[styles.groupDescription, { color: colors.TEXT.SECONDARY }]} numberOfLines={2}>
                 {item.description}
               </Text>
-              <Text style={styles.groupStats}>
+              <Text style={[styles.groupStats, { color: colors.TEXT.LIGHT }]}>
                 {t('myGroups.groupStats', { 
                   memberCount: item.memberCount,
                   matchingStatus: item.isMatchingActive ? t('myGroups.active') : t('myGroups.inactive')
@@ -107,28 +109,28 @@ export const MyGroupsScreen = () => {
         <View style={styles.groupActions}>
           {isCreator ? (
             <TouchableOpacity
-              style={[styles.actionButton, styles.manageButton]}
+              style={[styles.actionButton, styles.manageButton, { backgroundColor: colors.PRIMARY }]}
               onPress={() => handleManageGroup(item)}
             >
-              <Text style={styles.manageButtonText}>{t('myGroups.manageButton')}</Text>
+              <Text style={[styles.manageButtonText, { color: colors.TEXT.WHITE }]}>{t('myGroups.manageButton')}</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              style={[styles.actionButton, styles.leaveButton]}
+              style={[styles.actionButton, styles.leaveButton, { backgroundColor: colors.ERROR }]}
               onPress={() => handleLeaveGroup(item)}
             >
-              <Text style={styles.leaveButtonText}>{t('myGroups.leaveButton')}</Text>
+              <Text style={[styles.leaveButtonText, { color: colors.TEXT.WHITE }]}>{t('myGroups.leaveButton')}</Text>
             </TouchableOpacity>
           )}
           
           <TouchableOpacity
-            style={[styles.actionButton, styles.viewButton]}
+            style={[styles.actionButton, styles.viewButton, { backgroundColor: colors.TEXT.LIGHT }]}
             onPress={() => {
               // TODO: Navigate to group detail page
               Alert.alert(t('myGroups.viewGroup.title'), t('myGroups.viewGroup.message'));
             }}
           >
-            <Text style={styles.viewButtonText}>{t('myGroups.viewButton')}</Text>
+            <Text style={[styles.viewButtonText, { color: colors.TEXT.PRIMARY }]}>{t('myGroups.viewButton')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -136,18 +138,18 @@ export const MyGroupsScreen = () => {
   };
 
   const renderTabBar = () => (
-    <View style={styles.tabBar}>
+    <View style={[styles.tabBar, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
       <TouchableOpacity
         style={[
           styles.tabButton,
-          selectedTab === 'joined' && styles.tabButtonActive,
+          selectedTab === 'joined' && [styles.tabButtonActive, { borderBottomColor: colors.PRIMARY }],
         ]}
         onPress={() => setSelectedTab('joined')}
       >
         <Text
           style={[
-            styles.tabButtonText,
-            selectedTab === 'joined' && styles.tabButtonTextActive,
+            [styles.tabButtonText, { color: colors.TEXT.SECONDARY }],
+            selectedTab === 'joined' && [styles.tabButtonTextActive, { color: colors.PRIMARY }],
           ]}
         >
           {t('myGroups.joinedTab', { count: groupStore.joinedGroups.length })}
@@ -157,14 +159,14 @@ export const MyGroupsScreen = () => {
       <TouchableOpacity
         style={[
           styles.tabButton,
-          selectedTab === 'created' && styles.tabButtonActive,
+          selectedTab === 'created' && [styles.tabButtonActive, { borderBottomColor: colors.PRIMARY }],
         ]}
         onPress={() => setSelectedTab('created')}
       >
         <Text
           style={[
-            styles.tabButtonText,
-            selectedTab === 'created' && styles.tabButtonTextActive,
+            [styles.tabButtonText, { color: colors.TEXT.SECONDARY }],
+            selectedTab === 'created' && [styles.tabButtonTextActive, { color: colors.PRIMARY }],
           ]}
         >
           {t('myGroups.createdTab', { count: groupStore.joinedGroups.filter(g => g.creatorId === 'current_user').length })}
@@ -174,9 +176,9 @@ export const MyGroupsScreen = () => {
   );
 
   const renderHeader = () => (
-    <View style={styles.header}>
-      <Text style={styles.headerTitle}>{t('myGroups.title')}</Text>
-      <Text style={styles.headerSubtitle}>
+    <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>{t('myGroups.title')}</Text>
+      <Text style={[styles.headerSubtitle, { color: colors.TEXT.PRIMARY }]}>
         {t('myGroups.subtitle')}
       </Text>
     </View>
@@ -187,20 +189,20 @@ export const MyGroupsScreen = () => {
       <Text style={styles.emptyStateEmoji}>
         {selectedTab === 'joined' ? '👥' : '➕'}
       </Text>
-      <Text style={styles.emptyStateTitle}>
+      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>
         {selectedTab === 'joined' 
           ? t('myGroups.emptyJoined.title')
           : t('myGroups.emptyCreated.title')
         }
       </Text>
-      <Text style={styles.emptyStateSubtitle}>
+      <Text style={[styles.emptyStateSubtitle, { color: colors.TEXT.SECONDARY }]}>
         {selectedTab === 'joined'
           ? t('myGroups.emptyJoined.subtitle')
           : t('myGroups.emptyCreated.subtitle')
         }
       </Text>
       <TouchableOpacity
-        style={styles.emptyStateButton}
+        style={[styles.emptyStateButton, { backgroundColor: colors.PRIMARY }]}
         onPress={() => {
           if (selectedTab === 'joined') {
             navigation.navigate('Groups' as never);
@@ -209,7 +211,7 @@ export const MyGroupsScreen = () => {
           }
         }}
       >
-        <Text style={styles.emptyStateButtonText}>
+        <Text style={[styles.emptyStateButtonText, { color: colors.TEXT.WHITE }]}>
           {selectedTab === 'joined' ? t('myGroups.emptyJoined.button') : t('myGroups.emptyCreated.button')}
         </Text>
       </TouchableOpacity>
@@ -227,7 +229,7 @@ export const MyGroupsScreen = () => {
   const currentGroups = getCurrentTabGroups();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       {renderHeader()}
       {renderTabBar()}
       
@@ -240,8 +242,8 @@ export const MyGroupsScreen = () => {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={handleRefresh}
-            colors={[COLORS.PRIMARY]}
-            tintColor={COLORS.PRIMARY}
+            colors={[colors.PRIMARY]}
+            tintColor={colors.PRIMARY}
           />
         }
         showsVerticalScrollIndicator={false}

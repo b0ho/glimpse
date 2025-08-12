@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import { Video, ResizeMode } from 'expo-av';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTheme } from '@/hooks/useTheme';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 import { API_BASE_URL } from '../services/api/config';
 import { useAuthService } from '../services/auth/auth-service';
@@ -25,6 +26,7 @@ export const StoryUploadScreen = () => {
   const { t } = useTranslation('story');
   const navigation = useNavigation();
   const authService = useAuthService();
+  const { colors } = useTheme();
   const [media, setMedia] = useState<{ uri: string; type: 'image' | 'video' } | null>(null);
   const [caption, setCaption] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -177,28 +179,28 @@ export const StoryUploadScreen = () => {
   if (!media) {
     // Media selection screen
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+        <View style={[styles.header, { backgroundColor: colors.BACKGROUND }]}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="close" size={28} color={COLORS.white} />
+            <Ionicons name="close" size={28} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('newStory')}</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('newStory')}</Text>
           <View style={{ width: 28 }} />
         </View>
 
         <View style={styles.mediaSelectionContainer}>
           <TouchableOpacity style={styles.mediaOption} onPress={takePhotoOrVideo}>
-            <View style={styles.mediaIconContainer}>
-              <Ionicons name="camera" size={40} color={COLORS.white} />
+            <View style={[styles.mediaIconContainer, { backgroundColor: colors.PRIMARY + '20' }]}>
+              <Ionicons name="camera" size={40} color={colors.PRIMARY} />
             </View>
-            <Text style={styles.mediaOptionText}>{t('camera.title')}</Text>
+            <Text style={[styles.mediaOptionText, { color: colors.TEXT.PRIMARY }]}>{t('camera.title')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.mediaOption} onPress={pickFromGallery}>
-            <View style={styles.mediaIconContainer}>
-              <Ionicons name="images" size={40} color={COLORS.white} />
+            <View style={[styles.mediaIconContainer, { backgroundColor: colors.PRIMARY + '20' }]}>
+              <Ionicons name="images" size={40} color={colors.PRIMARY} />
             </View>
-            <Text style={styles.mediaOptionText}>{t('gallery')}</Text>
+            <Text style={[styles.mediaOptionText, { color: colors.TEXT.PRIMARY }]}>{t('gallery')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -207,25 +209,25 @@ export const StoryUploadScreen = () => {
 
   // Media preview and upload screen
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.BACKGROUND }]}>
           <TouchableOpacity onPress={clearMedia}>
-            <Ionicons name="arrow-back" size={28} color={COLORS.white} />
+            <Ionicons name="arrow-back" size={28} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('preview.title')}</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('preview.title')}</Text>
           <TouchableOpacity
             onPress={uploadStory}
             disabled={isUploading}
-            style={[styles.shareButton, isUploading && styles.shareButtonDisabled]}
+            style={[styles.shareButton, { backgroundColor: colors.PRIMARY }, isUploading && styles.shareButtonDisabled]}
           >
             {isUploading ? (
-              <ActivityIndicator size="small" color={COLORS.white} />
+              <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
             ) : (
-              <Text style={styles.shareButtonText}>{t('preview.share')}</Text>
+              <Text style={[styles.shareButtonText, { color: colors.TEXT.WHITE }]}>{t('preview.share')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -244,18 +246,18 @@ export const StoryUploadScreen = () => {
             />
           )}
 
-          <View style={styles.captionContainer}>
+          <View style={[styles.captionContainer, { backgroundColor: colors.BACKGROUND + 'B3' }]}>
             <TextInput
-              style={styles.captionInput}
+              style={[styles.captionInput, { color: colors.TEXT.PRIMARY }]}
               placeholder={t('preview.captionPlaceholder')}
-              placeholderTextColor={COLORS.gray}
+              placeholderTextColor={colors.TEXT.LIGHT}
               value={caption}
               onChangeText={setCaption}
               multiline
               maxLength={200}
               returnKeyType="done"
             />
-            <Text style={styles.captionCount}>{caption.length}/200</Text>
+            <Text style={[styles.captionCount, { color: colors.TEXT.LIGHT }]}>{caption.length}/200</Text>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -266,7 +268,6 @@ export const StoryUploadScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.black,
   },
   header: {
     flexDirection: 'row',
@@ -277,12 +278,10 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...FONTS.h3,
-    color: COLORS.white,
   },
   shareButton: {
     paddingHorizontal: SIZES.padding,
     paddingVertical: SIZES.base,
-    backgroundColor: COLORS.primary,
     borderRadius: SIZES.radius,
   },
   shareButtonDisabled: {
@@ -290,7 +289,6 @@ const styles = StyleSheet.create({
   },
   shareButtonText: {
     ...FONTS.body3,
-    color: COLORS.white,
     fontWeight: '600',
   },
   mediaSelectionContainer: {
@@ -307,14 +305,12 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SIZES.base,
   },
   mediaOptionText: {
     ...FONTS.body3,
-    color: COLORS.white,
   },
   previewContainer: {
     flex: 1,
@@ -329,18 +325,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     padding: SIZES.padding,
   },
   captionInput: {
     ...FONTS.body3,
-    color: COLORS.white,
     minHeight: 40,
     maxHeight: 100,
   },
   captionCount: {
     ...FONTS.body5,
-    color: COLORS.gray,
     textAlign: 'right',
     marginTop: SIZES.base,
   },

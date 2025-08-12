@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { ContentItem } from '@/components/ContentItem';
 import { StoryList } from '@/components/story/StoryList';
 import { StoryFullViewer } from '@/components/story/StoryFullViewer';
@@ -49,6 +50,7 @@ export const HomeScreen = () => {
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
+  const { colors } = useTheme();
   const { t } = useTranslation();
 
   /**
@@ -407,28 +409,28 @@ export const HomeScreen = () => {
    * @description 앱 타이틀, 사용자 정보, 통계를 표시하는 헤더
    */
   const renderHeader = () => (
-    <View style={styles.header}>
-      <Text style={styles.headerTitle}>Glimpse</Text>
-      <Text style={styles.headerSubtitle}>
+    <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>Glimpse</Text>
+      <Text style={[styles.headerSubtitle, { color: colors.TEXT.PRIMARY }]}>
         {t('home:header.greeting', { name: authStore.user?.nickname || t('common:user.defaultName', '사용자') })}
       </Text>
       <View style={styles.headerStats}>
-        <Text style={styles.statsText}>
+        <Text style={[styles.statsText, { color: colors.TEXT.SECONDARY }]}>
           {t('home:header.receivedLikes', { count: likeStore.getReceivedLikesCount() })}
         </Text>
-        <Text style={styles.statsText}>
+        <Text style={[styles.statsText, { color: colors.TEXT.SECONDARY }]}>
           {t('home:header.remainingLikes', { count: likeStore.getRemainingFreeLikes() })}
         </Text>
       </View>
       
       {/* 위치 기반 기능 버튼 */}
       <TouchableOpacity
-        style={styles.locationButton}
+        style={[styles.locationButton, { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY + '20' }]}
         onPress={() => navigation.navigate('LocationGroup' as never)}
       >
-        <Icon name="location" size={20} color={COLORS.PRIMARY} />
-        <Text style={styles.locationButtonText}>{t('home:location.nearbyGroups')}</Text>
-        <Icon name="chevron-forward" size={16} color={COLORS.TEXT.SECONDARY} />
+        <Icon name="location" size={20} color={colors.PRIMARY} />
+        <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>{t('home:location.nearbyGroups')}</Text>
+        <Icon name="chevron-forward" size={16} color={colors.TEXT.SECONDARY} />
       </TouchableOpacity>
     </View>
   );
@@ -473,8 +475,8 @@ export const HomeScreen = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>📱</Text>
-      <Text style={styles.emptyStateTitle}>{t('home:empty.title')}</Text>
-      <Text style={styles.emptyStateSubtitle}>
+      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>{t('home:empty.title')}</Text>
+      <Text style={[styles.emptyStateSubtitle, { color: colors.TEXT.SECONDARY }]}>
         {t('home:empty.subtitle')}
       </Text>
     </View>
@@ -490,25 +492,25 @@ export const HomeScreen = () => {
     
     return (
       <View style={styles.loadingFooter}>
-        <ActivityIndicator size="small" color={COLORS.PRIMARY} />
-        <Text style={styles.loadingText}>{t('home:loading.moreContent')}</Text>
+        <ActivityIndicator size="small" color={colors.PRIMARY} />
+        <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('home:loading.moreContent')}</Text>
       </View>
     );
   };
 
   if (isLoading && contents.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>{t('home:loading.content')}</Text>
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
+          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('home:loading.content')}</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <FlatList
         data={contents}
         keyExtractor={(item) => item.id}
@@ -537,8 +539,9 @@ export const HomeScreen = () => {
               loadContents(true);
               loadStories();
             }}
-            colors={[COLORS.PRIMARY]}
-            tintColor={COLORS.PRIMARY}
+            colors={[colors.PRIMARY]}
+            tintColor={colors.PRIMARY}
+            backgroundColor={colors.SURFACE}
           />
         }
         onEndReached={loadMoreContents}
@@ -559,14 +562,14 @@ export const HomeScreen = () => {
       
       {/* Floating Action Button - 게시물 작성 */}
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: colors.PRIMARY, shadowColor: colors.SHADOW }]}
         onPress={() => navigation.navigate('CreateContent' as never)}
         activeOpacity={0.8}
         accessibilityLabel="게시물 작성"
         accessibilityHint="새로운 게시물을 작성할 수 있는 화면으로 이동합니다"
         accessibilityRole="button"
       >
-        <Icon name={ACTION_ICONS.CREATE} color="white" size={28} />
+        <Icon name={ACTION_ICONS.CREATE} color={colors.TEXT.WHITE} size={28} />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -576,7 +579,6 @@ export const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   loadingContainer: {
     flex: 1,
@@ -586,24 +588,19 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: SPACING.MD,
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
   },
   header: {
-    backgroundColor: COLORS.SURFACE,
     paddingHorizontal: SPACING.LG,
     paddingVertical: SPACING.LG,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
   },
   headerTitle: {
     fontSize: FONT_SIZES.XXL,
     fontWeight: 'bold',
-    color: COLORS.PRIMARY,
     marginBottom: SPACING.XS,
   },
   headerSubtitle: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.MD,
   },
   headerStats: {
@@ -613,23 +610,19 @@ const styles = StyleSheet.create({
   locationButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 12,
     padding: SPACING.MD,
     marginTop: SPACING.MD,
     borderWidth: 1,
-    borderColor: COLORS.PRIMARY + '20',
   },
   locationButtonText: {
     flex: 1,
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
     fontWeight: '500',
     marginLeft: SPACING.SM,
   },
   statsText: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     fontWeight: '500',
   },
   emptyContainer: {
@@ -648,13 +641,11 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.SM,
     textAlign: 'center',
   },
   emptyStateSubtitle: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -669,11 +660,9 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: COLORS.PRIMARY,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
-    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

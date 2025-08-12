@@ -15,6 +15,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@/hooks/useTheme';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 import { locationService } from '../services/locationService';
@@ -59,6 +60,7 @@ const LocationGroupScreen = () => {
   const [hasPermission, setHasPermission] = useState(false);
   const [scanning, setScanning] = useState(false);
   const { t } = useTranslation('location');
+  const { colors } = useTheme();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
     name: '',
@@ -237,43 +239,43 @@ const LocationGroupScreen = () => {
 
   if (loading && !refreshing) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={[styles.centerContainer, { backgroundColor: colors.BACKGROUND }]}>
+        <ActivityIndicator size="large" color={colors.PRIMARY} />
       </View>
     );
   }
 
   if (!hasPermission) {
     return (
-      <View style={styles.centerContainer}>
-        <Ionicons name="location-outline" size={60} color={COLORS.gray} />
-        <Text style={styles.permissionText}>{t('permissions.required')}</Text>
+      <View style={[styles.centerContainer, { backgroundColor: colors.BACKGROUND }]}>
+        <Ionicons name="location-outline" size={60} color={colors.TEXT.LIGHT} />
+        <Text style={[styles.permissionText, { color: colors.TEXT.SECONDARY }]}>{t('permissions.required')}</Text>
         <TouchableOpacity 
-          style={styles.permissionButton}
+          style={[styles.permissionButton, { backgroundColor: colors.PRIMARY }]}
           onPress={checkPermissionsAndLoadGroups}
         >
-          <Text style={styles.permissionButtonText}>{t('permissions.request')}</Text>
+          <Text style={[styles.permissionButtonText, { color: colors.TEXT.WHITE }]}>{t('permissions.request')}</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{t('title')}</Text>
+    <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+        <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('title')}</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => setScanning(true)}
           >
-            <Ionicons name="qr-code-outline" size={24} color={COLORS.primary} />
+            <Ionicons name="qr-code-outline" size={24} color={colors.PRIMARY} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => setShowCreateModal(true)}
           >
-            <Ionicons name="add" size={24} color={COLORS.primary} />
+            <Ionicons name="add" size={24} color={colors.PRIMARY} />
           </TouchableOpacity>
         </View>
       </View>
@@ -281,32 +283,32 @@ const LocationGroupScreen = () => {
       <ScrollView
         style={styles.content}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.PRIMARY} />
         }
       >
         {nearbyGroups.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="location-outline" size={60} color={COLORS.gray} />
-            <Text style={styles.emptyText}>{t('emptyState.title')}</Text>
-            <Text style={styles.emptySubText}>{t('emptyState.subtitle')}</Text>
+            <Ionicons name="location-outline" size={60} color={colors.TEXT.LIGHT} />
+            <Text style={[styles.emptyText, { color: colors.TEXT.SECONDARY }]}>{t('emptyState.title')}</Text>
+            <Text style={[styles.emptySubText, { color: colors.TEXT.LIGHT }]}>{t('emptyState.subtitle')}</Text>
           </View>
         ) : (
           nearbyGroups.map((group) => (
             <TouchableOpacity
               key={group.id}
-              style={styles.groupItem}
+              style={[styles.groupItem, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}
               onPress={() => handleJoinGroup(group.id)}
             >
               <View style={styles.groupContent}>
-                <Text style={styles.groupName}>{group.name}</Text>
-                <Text style={styles.groupDescription}>
+                <Text style={[styles.groupName, { color: colors.TEXT.PRIMARY }]}>{group.name}</Text>
+                <Text style={[styles.groupDescription, { color: colors.TEXT.SECONDARY }]}>
                   {group.description || group.address}
                 </Text>
               </View>
               <View style={styles.groupInfo}>
-                <Text style={styles.distance}>{formatDistance(group.distance)}</Text>
-                <Text style={styles.memberCount}>
-                  <Ionicons name="people" size={14} color={COLORS.gray} />
+                <Text style={[styles.distance, { color: colors.PRIMARY }]}>{formatDistance(group.distance)}</Text>
+                <Text style={[styles.memberCount, { color: colors.TEXT.LIGHT }]}>
+                  <Ionicons name="people" size={14} color={colors.TEXT.LIGHT} />
                   {' '}{t('group.memberCount', { count: group._count.members })}
                 </Text>
               </View>
@@ -322,12 +324,12 @@ const LocationGroupScreen = () => {
         visible={scanning}
         onRequestClose={() => setScanning(false)}
       >
-        <View style={styles.modalContainer}>
+        <View style={[styles.modalContainer, { backgroundColor: colors.BACKGROUND }]}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setScanning(false)}>
-              <Ionicons name="close" size={28} color={COLORS.white} />
+              <Ionicons name="close" size={28} color={colors.TEXT.WHITE} />
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>{t('qr.title')}</Text>
+            <Text style={[styles.modalTitle, { color: colors.TEXT.WHITE }]}>{t('qr.title')}</Text>
             <View style={{ width: 28 }} />
           </View>
           
@@ -338,7 +340,7 @@ const LocationGroupScreen = () => {
           
           <View style={styles.scanOverlay}>
             <View style={styles.scanFrame} />
-            <Text style={styles.scanText}>{t('qr.instruction')}</Text>
+            <Text style={[styles.scanText, { color: colors.TEXT.WHITE }]}>{t('qr.instruction')}</Text>
           </View>
         </View>
       </Modal>
@@ -351,19 +353,21 @@ const LocationGroupScreen = () => {
         onRequestClose={() => setShowCreateModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.createModalContent}>
-            <Text style={styles.createModalTitle}>{t('group.create')}</Text>
+          <View style={[styles.createModalContent, { backgroundColor: colors.SURFACE }]}>
+            <Text style={[styles.createModalTitle, { color: colors.TEXT.PRIMARY }]}>{t('group.create')}</Text>
             
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY }]}
               placeholder={t('form.name')}
+              placeholderTextColor={colors.TEXT.LIGHT}
               value={createForm.name}
               onChangeText={(text) => setCreateForm({ ...createForm, name: text })}
             />
             
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[styles.input, styles.textArea, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY }]}
               placeholder={t('form.description')}
+              placeholderTextColor={colors.TEXT.LIGHT}
               value={createForm.description}
               onChangeText={(text) => setCreateForm({ ...createForm, description: text })}
               multiline
@@ -372,10 +376,11 @@ const LocationGroupScreen = () => {
             
             <View style={styles.inputRow}>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>{t('form.radius')}</Text>
+                <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>{t('form.radius')}</Text>
                 <TextInput
-                  style={[styles.input, styles.smallInput]}
+                  style={[styles.input, styles.smallInput, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY }]}
                   placeholder="100"
+                  placeholderTextColor={colors.TEXT.LIGHT}
                   value={createForm.radius}
                   onChangeText={(text) => setCreateForm({ ...createForm, radius: text })}
                   keyboardType="numeric"
@@ -383,10 +388,11 @@ const LocationGroupScreen = () => {
               </View>
               
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>{t('form.maxMembers')}</Text>
+                <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>{t('form.maxMembers')}</Text>
                 <TextInput
-                  style={[styles.input, styles.smallInput]}
+                  style={[styles.input, styles.smallInput, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY }]}
                   placeholder="50"
+                  placeholderTextColor={colors.TEXT.LIGHT}
                   value={createForm.maxMembers}
                   onChangeText={(text) => setCreateForm({ ...createForm, maxMembers: text })}
                   keyboardType="numeric"
@@ -396,17 +402,17 @@ const LocationGroupScreen = () => {
             
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+                style={[styles.modalButton, styles.cancelButton, { backgroundColor: colors.TEXT.LIGHT }]}
                 onPress={() => setShowCreateModal(false)}
               >
-                <Text style={styles.cancelButtonText}>{t('form.cancel')}</Text>
+                <Text style={[styles.cancelButtonText, { color: colors.TEXT.SECONDARY }]}>{t('form.cancel')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
-                style={[styles.modalButton, styles.createButton]}
+                style={[styles.modalButton, styles.createButton, { backgroundColor: colors.PRIMARY }]}
                 onPress={handleCreateGroup}
               >
-                <Text style={styles.createButtonText}>{t('form.create')}</Text>
+                <Text style={[styles.createButtonText, { color: colors.TEXT.WHITE }]}>{t('form.create')}</Text>
               </TouchableOpacity>
             </View>
           </View>

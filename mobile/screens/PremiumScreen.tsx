@@ -19,6 +19,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { useTheme } from '@/hooks/useTheme';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { PricingCard } from '@/components/premium/PricingCard';
 import { PaymentModal } from '@/components/premium/PaymentModal';
@@ -35,6 +36,7 @@ import { STATE_ICONS, UI_ICONS } from '@/utils/icons';
 export const PremiumScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuthStore();
+  const { colors } = useTheme();
   const { t } = useTranslation('premium');
   
   const {
@@ -170,19 +172,22 @@ export const PremiumScreen = () => {
     if (!isPremiumUser) return null;
 
     return (
-      <View style={styles.currentSubscription}>
+      <View style={[styles.currentSubscription, { 
+        backgroundColor: colors.SUCCESS + '20',
+        borderColor: colors.SUCCESS + '40'
+      }]}>
         <View style={styles.subscriptionHeader}>
-          <Icon name={STATE_ICONS.SUCCESS} size={24} color={COLORS.SUCCESS} />
-          <Text style={styles.subscriptionTitle}>{t('subscription.activeTitle')}</Text>
+          <Icon name={STATE_ICONS.SUCCESS} size={24} color={colors.SUCCESS} />
+          <Text style={[styles.subscriptionTitle, { color: colors.SUCCESS }]}>{t('subscription.activeTitle')}</Text>
         </View>
         
         <View style={styles.subscriptionInfo}>
-          <Text style={styles.planName}>
+          <Text style={[styles.planName, { color: colors.TEXT.PRIMARY }]}>
             {currentPlan === PremiumPlan.PREMIUM_MONTHLY ? t('subscription.monthlyPlan') : t('subscription.yearlyPlan')}
           </Text>
           
           {subscription?.expiresAt && (
-            <Text style={styles.expiryInfo}>
+            <Text style={[styles.expiryInfo, { color: colors.TEXT.SECONDARY }]}>
               {daysUntilExpiry > 0 
                 ? t('subscription.daysLeft', { days: daysUntilExpiry })
                 : t('subscription.expiresToday')
@@ -191,7 +196,7 @@ export const PremiumScreen = () => {
           )}
           
           {subscription?.cancelAtPeriodEnd && (
-            <Text style={styles.cancelNotice}>
+            <Text style={[styles.cancelNotice, { color: colors.WARNING }]}>
               {t('subscription.cancelNotice')}
             </Text>
           )}
@@ -199,12 +204,12 @@ export const PremiumScreen = () => {
 
         {!subscription?.cancelAtPeriodEnd && (
           <TouchableOpacity
-            style={styles.cancelButton}
+            style={[styles.cancelButton, { borderColor: colors.ERROR }]}
             onPress={handleCancelSubscription}
             accessibilityRole="button"
             accessibilityLabel={t('subscription.cancel')}
           >
-            <Text style={styles.cancelButtonText}>{t('subscription.cancel')}</Text>
+            <Text style={[styles.cancelButtonText, { color: colors.ERROR }]}>{t('subscription.cancel')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -221,8 +226,8 @@ export const PremiumScreen = () => {
 
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('subscription.title')}</Text>
-        <Text style={styles.sectionDescription}>
+        <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('subscription.title')}</Text>
+        <Text style={[styles.sectionDescription, { color: colors.TEXT.SECONDARY }]}>
           {t('subscription.description')}
         </Text>
         
@@ -250,8 +255,8 @@ export const PremiumScreen = () => {
 
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('likes.title')}</Text>
-        <Text style={styles.sectionDescription}>
+        <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('likes.title')}</Text>
+        <Text style={[styles.sectionDescription, { color: colors.TEXT.SECONDARY }]}>
           {t('likes.description')}
         </Text>
         
@@ -281,17 +286,17 @@ export const PremiumScreen = () => {
    * @description 네비게이션 헤더를 표시
    */
   const renderHeader = () => (
-    <View style={styles.header}>
+    <View style={[styles.header, { borderBottomColor: colors.BORDER }]}>
       <TouchableOpacity
         onPress={() => navigation.goBack()}
         style={styles.backButton}
         accessibilityRole="button"
         accessibilityLabel={t('actions.back')}
       >
-        <Icon name={UI_ICONS.ARROW_LEFT} size={24} color={COLORS.TEXT.PRIMARY} />
+        <Icon name={UI_ICONS.ARROW_LEFT} size={24} color={colors.TEXT.PRIMARY} />
       </TouchableOpacity>
       
-      <Text style={styles.headerTitle}>{t('title')}</Text>
+      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('title')}</Text>
       
       <View style={styles.placeholder} />
     </View>
@@ -304,26 +309,26 @@ export const PremiumScreen = () => {
    */
   const renderFAQ = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{t('faq.title')}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('faq.title')}</Text>
       
-      <View style={styles.faqContainer}>
+      <View style={[styles.faqContainer, { backgroundColor: colors.SURFACE }]}>
         <View style={styles.faqItem}>
-          <Text style={styles.faqQuestion}>{t('faq.questions.cancel.question')}</Text>
-          <Text style={styles.faqAnswer}>
+          <Text style={[styles.faqQuestion, { color: colors.TEXT.PRIMARY }]}>{t('faq.questions.cancel.question')}</Text>
+          <Text style={[styles.faqAnswer, { color: colors.TEXT.SECONDARY }]}>
             {t('faq.questions.cancel.answer')}
           </Text>
         </View>
         
         <View style={styles.faqItem}>
-          <Text style={styles.faqQuestion}>{t('faq.questions.payment.question')}</Text>
-          <Text style={styles.faqAnswer}>
+          <Text style={[styles.faqQuestion, { color: colors.TEXT.PRIMARY }]}>{t('faq.questions.payment.question')}</Text>
+          <Text style={[styles.faqAnswer, { color: colors.TEXT.SECONDARY }]}>
             {t('faq.questions.payment.answer')}
           </Text>
         </View>
         
         <View style={styles.faqItem}>
-          <Text style={styles.faqQuestion}>{t('faq.questions.likes.question')}</Text>
-          <Text style={styles.faqAnswer}>
+          <Text style={[styles.faqQuestion, { color: colors.TEXT.PRIMARY }]}>{t('faq.questions.likes.question')}</Text>
+          <Text style={[styles.faqAnswer, { color: colors.TEXT.SECONDARY }]}>
             {t('faq.questions.likes.answer')}
           </Text>
         </View>
@@ -332,7 +337,7 @@ export const PremiumScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       {renderHeader()}
       
       <ScrollView
@@ -341,8 +346,8 @@ export const PremiumScreen = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[COLORS.PRIMARY]}
-            tintColor={COLORS.PRIMARY}
+            colors={[colors.PRIMARY]}
+            tintColor={colors.PRIMARY}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -370,7 +375,6 @@ export const PremiumScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: 'row',
@@ -379,7 +383,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.LG,
     paddingVertical: SPACING.MD,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
   },
   backButton: {
     width: 40,
@@ -390,7 +393,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
   },
   placeholder: {
     width: 40,
@@ -399,12 +401,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   currentSubscription: {
-    backgroundColor: COLORS.SUCCESS + '20',
     margin: SPACING.MD,
     padding: SPACING.LG,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.SUCCESS + '40',
   },
   subscriptionHeader: {
     flexDirection: 'row',
@@ -414,7 +414,6 @@ const styles = StyleSheet.create({
   subscriptionTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
-    color: COLORS.SUCCESS,
     marginLeft: SPACING.SM,
   },
   subscriptionInfo: {
@@ -423,16 +422,13 @@ const styles = StyleSheet.create({
   planName: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.XS,
   },
   expiryInfo: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
   },
   cancelNotice: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.WARNING,
     fontStyle: 'italic',
     marginTop: SPACING.XS,
   },
@@ -442,10 +438,8 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.SM,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.ERROR,
   },
   cancelButtonText: {
-    color: COLORS.ERROR,
     fontSize: FONT_SIZES.SM,
     fontWeight: '600',
   },
@@ -455,12 +449,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FONT_SIZES.XL,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.SM,
   },
   sectionDescription: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     marginBottom: SPACING.LG,
     lineHeight: 22,
   },
@@ -472,7 +464,6 @@ const styles = StyleSheet.create({
     marginRight: SPACING.MD,
   },
   faqContainer: {
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 12,
     padding: SPACING.LG,
   },
@@ -482,12 +473,10 @@ const styles = StyleSheet.create({
   faqQuestion: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.SM,
   },
   faqAnswer: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     lineHeight: 20,
   },
 });

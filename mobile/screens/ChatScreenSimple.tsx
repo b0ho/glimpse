@@ -19,8 +19,9 @@ import { useTranslation } from 'react-i18next';
 import { useChatStore } from '@/store/slices/chatSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { Message } from '@/types';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { SPACING, FONT_SIZES } from '@/utils/constants';
 import { generateDummyChatMessages } from '@/utils/mockData';
+import { useTheme } from '@/hooks/useTheme';
 
 type ChatScreenRouteProp = {
   params: {
@@ -35,6 +36,7 @@ export const ChatScreenSimple = () => {
   const navigation = useNavigation();
   const { roomId, matchId, otherUserNickname } = route.params;
   const { t } = useTranslation('chat');
+  const { colors } = useTheme();
 
   // Local states
   const [messages, setMessages] = useState<Message[]>([]);
@@ -104,11 +106,11 @@ export const ChatScreenSimple = () => {
     navigation.setOptions({
       title: otherUserNickname,
       headerStyle: {
-        backgroundColor: COLORS.SURFACE,
+        backgroundColor: colors.SURFACE,
       },
-      headerTintColor: COLORS.PRIMARY,
+      headerTintColor: colors.PRIMARY,
     });
-  }, [navigation, otherUserNickname]);
+  }, [navigation, otherUserNickname, colors]);
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
@@ -144,11 +146,13 @@ export const ChatScreenSimple = () => {
       ]}>
         <View style={[
           styles.messageBubble,
-          isOwnMessage ? styles.ownBubble : styles.otherBubble
+          isOwnMessage 
+            ? { backgroundColor: colors.PRIMARY, borderBottomRightRadius: 4 }
+            : { backgroundColor: colors.SURFACE, borderBottomLeftRadius: 4 }
         ]}>
           <Text style={[
             styles.messageText,
-            isOwnMessage ? styles.ownText : styles.otherText
+            { color: isOwnMessage ? colors.TEXT.WHITE : colors.TEXT.PRIMARY }
           ]}>
             {item.content}
           </Text>
@@ -159,17 +163,17 @@ export const ChatScreenSimple = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>채팅을 불러오는 중...</Text>
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
+          <Text style={[styles.loadingText, { color: colors.TEXT.SECONDARY }]}>채팅을 불러오는 중...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <FlatList
         style={styles.messagesList}
         data={messages}
@@ -179,21 +183,32 @@ export const ChatScreenSimple = () => {
         contentContainerStyle={styles.messagesContainer}
       />
 
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { backgroundColor: colors.SURFACE }]}>
         <TextInput
-          style={styles.textInput}
+          style={[
+            styles.textInput,
+            { 
+              borderColor: colors.BORDER,
+              backgroundColor: colors.BACKGROUND,
+              color: colors.TEXT.PRIMARY 
+            }
+          ]}
           value={inputText}
           onChangeText={setInputText}
           placeholder="메시지를 입력하세요..."
+          placeholderTextColor={colors.TEXT.SECONDARY}
           multiline
           maxLength={500}
         />
         <TouchableOpacity
-          style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
+          style={[
+            styles.sendButton,
+            { backgroundColor: inputText.trim() ? colors.PRIMARY : colors.TEXT.SECONDARY }
+          ]}
           onPress={handleSendMessage}
           disabled={!inputText.trim()}
         >
-          <Text style={styles.sendButtonText}>전송</Text>
+          <Text style={[styles.sendButtonText, { color: colors.TEXT.WHITE }]}>전송</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -203,7 +218,6 @@ export const ChatScreenSimple = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   loadingContainer: {
     flex: 1,
@@ -213,7 +227,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: SPACING.MD,
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
   },
   messagesList: {
     flex: 1,
@@ -236,28 +249,13 @@ const styles = StyleSheet.create({
     padding: SPACING.MD,
     borderRadius: 18,
   },
-  ownBubble: {
-    backgroundColor: COLORS.PRIMARY,
-    borderBottomRightRadius: 4,
-  },
-  otherBubble: {
-    backgroundColor: COLORS.SURFACE,
-    borderBottomLeftRadius: 4,
-  },
   messageText: {
     fontSize: FONT_SIZES.MD,
     lineHeight: 20,
   },
-  ownText: {
-    color: COLORS.TEXT.WHITE,
-  },
-  otherText: {
-    color: COLORS.TEXT.PRIMARY,
-  },
   inputContainer: {
     flexDirection: 'row',
     padding: SPACING.MD,
-    backgroundColor: COLORS.SURFACE,
     alignItems: 'flex-end',
   },
   textInput: {
@@ -265,27 +263,20 @@ const styles = StyleSheet.create({
     minHeight: 40,
     maxHeight: 100,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
     borderRadius: 20,
     paddingHorizontal: SPACING.MD,
     paddingVertical: SPACING.SM,
     marginRight: SPACING.SM,
     fontSize: FONT_SIZES.MD,
-    backgroundColor: COLORS.BACKGROUND,
   },
   sendButton: {
-    backgroundColor: COLORS.PRIMARY,
     paddingHorizontal: SPACING.MD,
     paddingVertical: SPACING.SM,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  sendButtonDisabled: {
-    backgroundColor: COLORS.TEXT.SECONDARY,
-  },
   sendButtonText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.SM,
     fontWeight: '600',
   },

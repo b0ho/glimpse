@@ -11,8 +11,9 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { PaymentProduct } from '@/services/payment/premium-service';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { SPACING, FONT_SIZES } from '@/utils/constants';
 import { STATE_ICONS } from '@/utils/icons';
+import { useTheme } from '@/hooks/useTheme';
 
 /**
  * PricingCard 컴포넌트 Props
@@ -48,14 +49,20 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
   onSelect,
   formatPrice,
 }) => {
+  const { colors } = useTheme();
   const isSubscription = product.type === 'subscription';
   
   return (
     <TouchableOpacity
       style={[
         styles.card,
-        isSelected && styles.selectedCard,
-        isPopular && styles.popularCard,
+        { backgroundColor: colors.SURFACE, borderColor: colors.TRANSPARENT },
+        isSelected && { borderColor: colors.SUCCESS },
+        isPopular && { 
+          borderColor: colors.PRIMARY, 
+          backgroundColor: colors.PRIMARY + '10',
+          transform: [{ scale: 1.02 }]
+        },
       ]}
       onPress={() => onSelect(product.id)}
       disabled={isLoading}
@@ -66,36 +73,44 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
     >
       {/* 인기 배지 */}
       {isPopular && (
-        <View style={styles.popularBadge}>
-          <Icon name="star" size={16} color={COLORS.TEXT.WHITE} />
-          <Text style={styles.popularText}>인기</Text>
+        <View style={[styles.popularBadge, { backgroundColor: colors.PRIMARY }]}>
+          <Icon name="star" size={16} color={colors.TEXT.WHITE} />
+          <Text style={[styles.popularText, { color: colors.TEXT.WHITE }]}>인기</Text>
         </View>
       )}
 
       {/* 선택 표시 */}
       {isSelected && (
         <View style={styles.selectedIndicator}>
-          <Icon name={STATE_ICONS.SUCCESS} size={24} color={COLORS.SUCCESS} />
+          <Icon name={STATE_ICONS.SUCCESS} size={24} color={colors.SUCCESS} />
         </View>
       )}
 
       {/* 상품 정보 */}
       <View style={styles.header}>
-        <Text style={[styles.title, isPopular && styles.popularTitle]}>
+        <Text style={[
+          styles.title, 
+          { color: colors.TEXT.PRIMARY },
+          isPopular && { color: colors.PRIMARY }
+        ]}>
           {product.name}
         </Text>
-        <Text style={styles.description}>
+        <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
           {product.description}
         </Text>
       </View>
 
       {/* 가격 정보 */}
       <View style={styles.priceContainer}>
-        <Text style={[styles.price, isPopular && styles.popularPrice]}>
+        <Text style={[
+          styles.price, 
+          { color: colors.TEXT.PRIMARY },
+          isPopular && { color: colors.PRIMARY }
+        ]}>
           {formatPrice(product.price)}
         </Text>
         {isSubscription && (
-          <Text style={styles.period}>
+          <Text style={[styles.period, { color: colors.TEXT.SECONDARY }]}>
             {product.id.includes('yearly') ? '/년' : '/월'}
           </Text>
         )}
@@ -103,8 +118,8 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
 
       {/* 할인 정보 (연간 플랜) */}
       {product.id.includes('yearly') && (
-        <View style={styles.discountBadge}>
-          <Text style={styles.discountText}>2개월 무료</Text>
+        <View style={[styles.discountBadge, { backgroundColor: colors.SUCCESS }]}>
+          <Text style={[styles.discountText, { color: colors.TEXT.WHITE }]}>2개월 무료</Text>
         </View>
       )}
 
@@ -115,11 +130,12 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
             <Icon 
               name={STATE_ICONS.SUCCESS} 
               size={16} 
-              color={isPopular ? COLORS.SUCCESS : COLORS.PRIMARY} 
+              color={isPopular ? colors.SUCCESS : colors.PRIMARY} 
             />
             <Text style={[
               styles.benefitText,
-              isPopular && styles.popularBenefitText
+              { color: colors.TEXT.PRIMARY },
+              isPopular && { fontWeight: '500' }
             ]}>
               {benefit}
             </Text>
@@ -129,8 +145,8 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
 
       {/* 구독 타입별 추가 정보 */}
       {isSubscription && (
-        <View style={styles.subscriptionInfo}>
-          <Text style={styles.subscriptionNote}>
+        <View style={[styles.subscriptionInfo, { borderTopColor: colors.BORDER }]}>
+          <Text style={[styles.subscriptionNote, { color: colors.TEXT.SECONDARY }]}>
             언제든지 취소 가능
           </Text>
         </View>
@@ -138,8 +154,8 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
 
       {/* 원타임 구매 추가 정보 */}
       {!isSubscription && (
-        <View style={styles.oneTimeInfo}>
-          <Text style={styles.oneTimeNote}>
+        <View style={[styles.oneTimeInfo, { borderTopColor: colors.BORDER }]}>
+          <Text style={[styles.oneTimeNote, { color: colors.SUCCESS }]}>
             즉시 사용 가능
           </Text>
         </View>
@@ -150,34 +166,21 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 16,
     padding: SPACING.LG,
     marginVertical: SPACING.SM,
     marginHorizontal: SPACING.MD,
     elevation: 3,
-    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     borderWidth: 2,
-    borderColor: COLORS.TRANSPARENT,
     position: 'relative',
-  },
-  selectedCard: {
-    borderColor: COLORS.SUCCESS,
-    backgroundColor: COLORS.SURFACE,
-  },
-  popularCard: {
-    borderColor: COLORS.PRIMARY,
-    backgroundColor: COLORS.PRIMARY + '10',
-    transform: [{ scale: 1.02 }],
   },
   popularBadge: {
     position: 'absolute',
     top: -8,
     right: SPACING.LG,
-    backgroundColor: COLORS.PRIMARY,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.SM,
@@ -186,7 +189,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   popularText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.XS,
     fontWeight: '600',
     marginLeft: 4,
@@ -202,15 +204,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FONT_SIZES.XL,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.XS,
-  },
-  popularTitle: {
-    color: COLORS.PRIMARY,
   },
   description: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     lineHeight: 20,
   },
   priceContainer: {
@@ -221,26 +218,19 @@ const styles = StyleSheet.create({
   price: {
     fontSize: FONT_SIZES.XXL,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
-  },
-  popularPrice: {
-    color: COLORS.PRIMARY,
   },
   period: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     marginLeft: 4,
   },
   discountBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: COLORS.SUCCESS,
     paddingHorizontal: SPACING.SM,
     paddingVertical: SPACING.XS,
     borderRadius: 12,
     marginBottom: SPACING.MD,
   },
   discountText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.XS,
     fontWeight: '600',
   },
@@ -254,23 +244,17 @@ const styles = StyleSheet.create({
   },
   benefitText: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.PRIMARY,
     marginLeft: SPACING.SM,
     flex: 1,
     lineHeight: 20,
-  },
-  popularBenefitText: {
-    fontWeight: '500',
   },
   subscriptionInfo: {
     marginTop: SPACING.MD,
     paddingTop: SPACING.MD,
     borderTopWidth: 1,
-    borderTopColor: COLORS.BORDER,
   },
   subscriptionNote: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     fontStyle: 'italic',
   },
@@ -278,11 +262,9 @@ const styles = StyleSheet.create({
     marginTop: SPACING.MD,
     paddingTop: SPACING.MD,
     borderTopWidth: 1,
-    borderTopColor: COLORS.BORDER,
   },
   oneTimeNote: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.SUCCESS,
     textAlign: 'center',
     fontWeight: '600',
   },

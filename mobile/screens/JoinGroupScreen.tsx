@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@/hooks/useTheme';
 import { groupApi } from '@/services/api/groupApi';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -29,6 +30,7 @@ export const JoinGroupScreen = () => {
   const { inviteCode } = route.params as { inviteCode: string };
   
   const groupStore = useGroupStore();
+  const { colors } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [groupInfo, setGroupInfo] = useState<GroupInfo | null>(null);
   const [isJoining, setIsJoining] = useState(false);
@@ -94,60 +96,60 @@ export const JoinGroupScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <View style={styles.content}>
-        <View style={styles.card}>
-          <Text style={styles.title}>{t('joinInvite.title')}</Text>
+        <View style={[styles.card, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
+          <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('joinInvite.title')}</Text>
           
-          <View style={styles.codeContainer}>
-            <Text style={styles.codeLabel}>{t('joinInvite.inviteCode')}</Text>
-            <Text style={styles.codeText}>{inviteCode}</Text>
+          <View style={[styles.codeContainer, { backgroundColor: colors.BACKGROUND }]}>
+            <Text style={[styles.codeLabel, { color: colors.TEXT.SECONDARY }]}>{t('joinInvite.inviteCode')}</Text>
+            <Text style={[styles.codeText, { color: colors.PRIMARY }]}>{inviteCode}</Text>
           </View>
 
           {groupInfo && (
-            <View style={styles.groupInfo}>
-              <Text style={styles.groupName}>{groupInfo.name}</Text>
+            <View style={[styles.groupInfo, { borderBottomColor: colors.BORDER }]}>
+              <Text style={[styles.groupName, { color: colors.TEXT.PRIMARY }]}>{groupInfo.name}</Text>
               {groupInfo.description && (
-                <Text style={styles.groupDescription}>{groupInfo.description}</Text>
+                <Text style={[styles.groupDescription, { color: colors.TEXT.SECONDARY }]}>{groupInfo.description}</Text>
               )}
               {groupInfo.memberCount && (
-                <Text style={styles.groupMembers}>
+                <Text style={[styles.groupMembers, { color: colors.TEXT.LIGHT }]}>
                   {t('joinInvite.currentMembers', { count: groupInfo.memberCount })}
                 </Text>
               )}
             </View>
           )}
 
-          <Text style={styles.description}>
+          <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
             {t('joinInvite.confirmMessage')}
           </Text>
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
+              style={[styles.button, styles.cancelButton, { backgroundColor: colors.TEXT.LIGHT }]}
               onPress={handleCancel}
               disabled={isJoining}
             >
-              <Text style={styles.cancelButtonText}>{t('joinInvite.cancel')}</Text>
+              <Text style={[styles.cancelButtonText, { color: colors.TEXT.PRIMARY }]}>{t('joinInvite.cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
-              style={[styles.button, styles.joinButton]}
+              style={[styles.button, styles.joinButton, { backgroundColor: colors.PRIMARY }]}
               onPress={handleJoinGroup}
               disabled={isJoining}
             >
               {isJoining ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
-                <Text style={styles.joinButtonText}>{t('joinInvite.joinButton')}</Text>
+                <Text style={[styles.joinButtonText, { color: colors.TEXT.WHITE }]}>{t('joinInvite.joinButton')}</Text>
               )}
             </TouchableOpacity>
           </View>
         </View>
 
-        <View style={styles.notice}>
-          <Text style={styles.noticeTitle}>{t('joinInvite.noticeTitle')}</Text>
-          <Text style={styles.noticeText}>
+        <View style={[styles.notice, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
+          <Text style={[styles.noticeTitle, { color: colors.TEXT.PRIMARY }]}>{t('joinInvite.noticeTitle')}</Text>
+          <Text style={[styles.noticeText, { color: colors.TEXT.SECONDARY }]}>
             {t('joinInvite.noticeText')}
           </Text>
         </View>

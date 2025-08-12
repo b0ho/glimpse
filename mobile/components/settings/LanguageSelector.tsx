@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/hooks/useTheme';
 // Types from shared - copied for now
 type SupportedLanguage = 'ko' | 'en' | 'ja' | 'zh' | 'vi' | 'th' | 'es' | 'fr';
 
@@ -31,7 +32,7 @@ const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageInfo> = {
   fr: { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
 };
 import { changeLanguage, getCurrentLanguage } from '../../services/i18n/i18n';
-import { COLORS, FONTS } from '../../constants/theme';
+import { SPACING, FONT_SIZES } from '@/utils/constants';
 
 interface LanguageSelectorProps {
   onLanguageChange?: (language: SupportedLanguage) => void;
@@ -41,6 +42,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onLanguageChange 
 }) => {
   const { t, i18n } = useTranslation();
+  const { colors } = useTheme();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(
     getCurrentLanguage()
@@ -85,7 +87,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <TouchableOpacity
         style={[
           styles.languageItem,
-          isSelected && styles.selectedLanguageItem,
+          isSelected && [styles.selectedLanguageItem, { backgroundColor: colors.PRIMARY + '20' }],
         ]}
         onPress={() => handleLanguageSelect(item.code)}
         disabled={isChanging}
@@ -95,11 +97,12 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           <View style={styles.languageText}>
             <Text style={[
               styles.languageName,
-              isSelected && styles.selectedText,
+              { color: colors.TEXT.PRIMARY },
+              isSelected && [styles.selectedText, { color: colors.PRIMARY }],
             ]}>
               {item.nativeName}
             </Text>
-            <Text style={styles.languageNameEnglish}>
+            <Text style={[styles.languageNameEnglish, { color: colors.TEXT.SECONDARY }]}>
               {item.name}
             </Text>
           </View>
@@ -108,7 +111,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           <Ionicons 
             name="checkmark-circle" 
             size={24} 
-            color={COLORS.primary} 
+            color={colors.PRIMARY} 
           />
         )}
       </TouchableOpacity>
@@ -120,25 +123,20 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   return (
     <>
       <TouchableOpacity
-        style={styles.selector}
+        style={[styles.selector, { borderBottomColor: colors.BORDER }]}
         onPress={() => setIsModalVisible(true)}
       >
         <View style={styles.selectorContent}>
-          <Text style={styles.label}>
+          <Ionicons name="language" size={20} color={colors.TEXT.PRIMARY} />
+          <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
             {t('settings:language.title', 'Language')}
           </Text>
-          <View style={styles.selectedValue}>
-            <Text style={styles.selectedFlag}>{currentLangInfo.flag}</Text>
-            <Text style={styles.selectedLanguage}>
-              {currentLangInfo.nativeName}
-            </Text>
-            <Ionicons 
-              name="chevron-forward" 
-              size={20} 
-              color={COLORS.textSecondary} 
-            />
-          </View>
         </View>
+        <Text style={styles.selectedFlag}>{currentLangInfo.flag}</Text>
+        <Text style={[styles.selectedLanguage, { color: colors.TEXT.SECONDARY }]}>
+          {currentLangInfo.nativeName}
+        </Text>
+        <Text style={[styles.arrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
       </TouchableOpacity>
 
       <Modal
@@ -147,17 +145,17 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         transparent={true}
         onRequestClose={() => setIsModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
+        <View style={[styles.modalOverlay, { backgroundColor: colors.BACKGROUND + '80' }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.SURFACE }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.BORDER }]}>
+              <Text style={[styles.modalTitle, { color: colors.TEXT.PRIMARY }]}>
                 {t('settings:language.selectLanguage', 'Select Language')}
               </Text>
               <TouchableOpacity
                 onPress={() => setIsModalVisible(false)}
                 style={styles.closeButton}
               >
-                <Ionicons name="close" size={24} color={COLORS.text} />
+                <Ionicons name="close" size={24} color={colors.TEXT.PRIMARY} />
               </TouchableOpacity>
             </View>
             
@@ -165,7 +163,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               data={Object.values(SUPPORTED_LANGUAGES)}
               keyExtractor={(item) => item.code}
               renderItem={renderLanguageItem}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: colors.BORDER }]} />}
               contentContainerStyle={styles.languageList}
             />
           </View>
@@ -177,42 +175,39 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
 const styles = StyleSheet.create({
   selector: {
-    backgroundColor: COLORS.white,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  selectorContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: SPACING.MD,
+    paddingVertical: SPACING.MD,
+    borderBottomWidth: 1,
   },
-  label: {
-    fontSize: 16,
-    color: COLORS.text,
-    fontFamily: FONTS.medium,
-  },
-  selectedValue: {
+  selectorContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+  },
+  label: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '500',
+    marginLeft: SPACING.SM,
   },
   selectedFlag: {
-    fontSize: 20,
+    fontSize: 18,
+    marginRight: SPACING.XS,
   },
   selectedLanguage: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    fontFamily: FONTS.regular,
+    fontSize: FONT_SIZES.SM,
+    marginRight: SPACING.XS,
+  },
+  arrow: {
+    fontSize: 18,
+    fontWeight: '300',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: COLORS.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '80%',
@@ -224,12 +219,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
   modalTitle: {
     fontSize: 18,
-    fontFamily: FONTS.bold,
-    color: COLORS.text,
+    fontWeight: 'bold',
   },
   closeButton: {
     padding: 4,
@@ -245,7 +238,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   selectedLanguageItem: {
-    backgroundColor: COLORS.primaryLight,
   },
   languageInfo: {
     flexDirection: 'row',
@@ -260,21 +252,17 @@ const styles = StyleSheet.create({
   },
   languageName: {
     fontSize: 16,
-    fontFamily: FONTS.medium,
-    color: COLORS.text,
+    fontWeight: '500',
   },
   languageNameEnglish: {
     fontSize: 12,
-    fontFamily: FONTS.regular,
-    color: COLORS.textSecondary,
+    fontWeight: 'normal',
   },
   selectedText: {
-    color: COLORS.primary,
-    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
   },
   separator: {
     height: 1,
-    backgroundColor: COLORS.border,
     marginHorizontal: 20,
   },
 });

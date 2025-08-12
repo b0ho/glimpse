@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@/hooks/useTheme';
 import { groupApi } from '@/services/api/groupApi';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatDateKorean } from '@shared/utils';
@@ -36,6 +37,7 @@ export const GroupManageScreen = () => {
   const route = useRoute();
   const { groupId } = route.params as { groupId: string };
   const { t } = useTranslation();
+  const { colors } = useTheme();
 
   const [pendingMembers, setPendingMembers] = useState<PendingMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -123,7 +125,7 @@ export const GroupManageScreen = () => {
     const isProcessing = processingIds.includes(member.id);
 
     return (
-      <View key={member.id} style={styles.memberCard}>
+      <View key={member.id} style={[styles.memberCard, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
         <View style={styles.memberInfo}>
           <Image
             source={{ 
@@ -132,18 +134,18 @@ export const GroupManageScreen = () => {
             style={styles.profileImage}
           />
           <View style={styles.memberDetails}>
-            <Text style={styles.nickname}>{member.user.nickname}</Text>
+            <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>{member.user.nickname}</Text>
             {member.user.age && member.user.gender && (
-              <Text style={styles.ageGender}>
+              <Text style={[styles.ageGender, { color: colors.TEXT.SECONDARY }]}>
                 {member.user.age}{t('common:age')} • {member.user.gender === 'MALE' ? t('common:gender.male') : t('common:gender.female')}
               </Text>
             )}
             {member.user.bio && (
-              <Text style={styles.bio} numberOfLines={2}>
+              <Text style={[styles.bio, { color: colors.TEXT.SECONDARY }]} numberOfLines={2}>
                 {member.user.bio}
               </Text>
             )}
-            <Text style={styles.requestDate}>
+            <Text style={[styles.requestDate, { color: colors.TEXT.LIGHT }]}>
               {t('group:manage.requestDate', { date: formatDateKorean(new Date(member.joinedAt)) })}
             </Text>
           </View>
@@ -151,26 +153,26 @@ export const GroupManageScreen = () => {
 
         <View style={styles.actionButtons}>
           <TouchableOpacity
-            style={[styles.actionButton, styles.approveButton]}
+            style={[styles.actionButton, styles.approveButton, { backgroundColor: colors.PRIMARY }]}
             onPress={() => handleApprove(member)}
             disabled={isProcessing}
           >
             {isProcessing ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Text style={styles.approveButtonText}>{t('group:manage.actions.approve')}</Text>
+              <Text style={[styles.approveButtonText, { color: colors.TEXT.WHITE }]}>{t('group:manage.actions.approve')}</Text>
             )}
           </TouchableOpacity>
           
           <TouchableOpacity
-            style={[styles.actionButton, styles.rejectButton]}
+            style={[styles.actionButton, styles.rejectButton, { backgroundColor: colors.SURFACE, borderColor: colors.ERROR }]}
             onPress={() => handleReject(member)}
             disabled={isProcessing}
           >
             {isProcessing ? (
-              <ActivityIndicator size="small" color={COLORS.ERROR} />
+              <ActivityIndicator size="small" color={colors.ERROR} />
             ) : (
-              <Text style={styles.rejectButtonText}>{t('group:manage.actions.reject')}</Text>
+              <Text style={[styles.rejectButtonText, { color: colors.ERROR }]}>{t('group:manage.actions.reject')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -180,48 +182,48 @@ export const GroupManageScreen = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.BACKGROUND }]}>
+        <ActivityIndicator size="large" color={colors.PRIMARY} />
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.headerButton}>{t('common:buttons.close')}</Text>
+          <Text style={[styles.headerButton, { color: colors.PRIMARY }]}>{t('common:buttons.close')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('group:manage.title')}</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:manage.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView
-        style={styles.content}
+        style={[styles.content, { backgroundColor: colors.BACKGROUND }]}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={handleRefresh}
-            tintColor={COLORS.PRIMARY}
+            tintColor={colors.PRIMARY}
           />
         }
       >
         {pendingMembers.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>{t('group:manage.empty')}</Text>
+            <Text style={[styles.emptyText, { color: colors.TEXT.LIGHT }]}>{t('group:manage.empty')}</Text>
           </View>
         ) : (
           <>
-            <Text style={styles.countText}>
+            <Text style={[styles.countText, { color: colors.TEXT.SECONDARY }]}>
               {t('group:manage.countText', { count: pendingMembers.length })}
             </Text>
             {pendingMembers.map(renderMember)}
           </>
         )}
 
-        <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>{t('group:manage.info.title')}</Text>
-          <Text style={styles.infoText}>
+        <View style={[styles.infoBox, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
+          <Text style={[styles.infoTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:manage.info.title')}</Text>
+          <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
             {t('group:manage.info.approval')}{'\n'}
             {t('group:manage.info.reapply')}{'\n'}
             {t('group:manage.info.inappropriate')}

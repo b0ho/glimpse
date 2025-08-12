@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as Location from 'expo-location';
+import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { User, NearbyUser } from '@/types';
@@ -31,6 +32,7 @@ interface LocationData {
 export const NearbyUsersScreen = React.memo(() => {
   const navigation = useNavigation();
   const { t } = useTranslation('location');
+  const { colors } = useTheme();
   const { user } = useAuthStore();
   const { sendLike, sentLikes } = useLikeStore();
   
@@ -267,31 +269,31 @@ export const NearbyUsersScreen = React.memo(() => {
   };
 
   const renderNearbyUser = ({ item }: { item: NearbyUser }) => (
-    <TouchableOpacity style={styles.userCard}>
+    <TouchableOpacity style={[styles.userCard, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
       <View style={styles.userHeader}>
-        <View style={styles.userAvatar}>
+        <View style={[styles.userAvatar, { backgroundColor: colors.PRIMARY }]}>
           <Icon 
             name="person" 
             size={24} 
-            color={COLORS.TEXT.WHITE} 
+            color={colors.TEXT.WHITE} 
           />
         </View>
         
         <View style={styles.userInfo}>
           <View style={styles.userNameRow}>
-            <Text style={styles.userName}>{item.nickname}</Text>
-            <Text style={styles.userAge}>{item.age || 25}{t('nearbyUsers.ageUnit')}</Text>
+            <Text style={[styles.userName, { color: colors.TEXT.PRIMARY }]}>{item.nickname}</Text>
+            <Text style={[styles.userAge, { color: colors.TEXT.SECONDARY }]}>{item.age || 25}{t('nearbyUsers.ageUnit')}</Text>
             {item.isVerified && (
-              <Icon name="checkmark-circle" size={16} color={COLORS.SUCCESS} />
+              <Icon name="checkmark-circle" size={16} color={colors.SUCCESS} />
             )}
             {item.isPremium && (
-              <Icon name="diamond" size={14} color={COLORS.WARNING} />
+              <Icon name="diamond" size={14} color={colors.WARNING} />
             )}
           </View>
           
           <View style={styles.locationRow}>
-            <Icon name="location-outline" size={14} color={COLORS.TEXT.SECONDARY} />
-            <Text style={styles.distanceText}>
+            <Icon name="location-outline" size={14} color={colors.TEXT.SECONDARY} />
+            <Text style={[styles.distanceText, { color: colors.TEXT.SECONDARY }]}>
               {item.distance < 1000 
                 ? `${Math.round(item.distance)}m` 
                 : `${(item.distance / 1000).toFixed(1)}km`
@@ -299,35 +301,35 @@ export const NearbyUsersScreen = React.memo(() => {
             </Text>
             <View style={[
               styles.onlineStatus, 
-              { backgroundColor: item.isOnline ? COLORS.SUCCESS : COLORS.TEXT.LIGHT }
+              { backgroundColor: item.isOnline ? colors.SUCCESS : colors.TEXT.LIGHT }
             ]} />
-            <Text style={styles.lastSeenText}>{item.lastSeen}</Text>
+            <Text style={[styles.lastSeenText, { color: colors.TEXT.LIGHT }]}>{item.lastSeen}</Text>
           </View>
         </View>
 
         <TouchableOpacity
-          style={styles.likeButton}
+          style={[styles.likeButton, { backgroundColor: colors.ERROR + '10' }]}
           onPress={() => handleSendLike(item)}
         >
-          <Icon name="heart-outline" size={20} color={COLORS.ERROR} />
+          <Icon name="heart-outline" size={20} color={colors.ERROR} />
         </TouchableOpacity>
       </View>
 
       {item.bio && (
-        <Text style={styles.userBio}>{item.bio}</Text>
+        <Text style={[styles.userBio, { color: colors.TEXT.SECONDARY }]}>{item.bio}</Text>
       )}
 
       {item.commonGroups.length > 0 && (
         <View style={styles.commonGroups}>
-          <Text style={styles.commonGroupsTitle}>{t('nearbyUsers.commonGroups')}</Text>
+          <Text style={[styles.commonGroupsTitle, { color: colors.TEXT.LIGHT }]}>{t('nearbyUsers.commonGroups')}</Text>
           <View style={styles.groupTags}>
             {item.commonGroups.slice(0, 2).map((group, index) => (
-              <View key={index} style={styles.groupTag}>
-                <Text style={styles.groupTagText}>{group}</Text>
+              <View key={index} style={[styles.groupTag, { backgroundColor: colors.PRIMARY + '10' }]}>
+                <Text style={[styles.groupTagText, { color: colors.PRIMARY }]}>{group}</Text>
               </View>
             ))}
             {item.commonGroups.length > 2 && (
-              <Text style={styles.moreGroups}>{t('nearbyUsers.moreGroups', { count: item.commonGroups.length - 2 })}</Text>
+              <Text style={[styles.moreGroups, { color: colors.TEXT.LIGHT }]}>{t('nearbyUsers.moreGroups', { count: item.commonGroups.length - 2 })}</Text>
             )}
           </View>
         </View>
@@ -336,21 +338,23 @@ export const NearbyUsersScreen = React.memo(() => {
   );
 
   const renderRadiusSelector = () => (
-    <View style={styles.radiusSelector}>
-      <Text style={styles.radiusSelectorTitle}>{t('nearbyUsers.searchRadius')}</Text>
+    <View style={[styles.radiusSelector, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
+      <Text style={[styles.radiusSelectorTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.searchRadius')}</Text>
       <View style={styles.radiusOptions}>
         {radiusOptions.map(radius => (
           <TouchableOpacity
             key={radius}
             style={[
               styles.radiusOption,
-              selectedRadius === radius && styles.radiusOptionSelected
+              { borderColor: colors.BORDER },
+              selectedRadius === radius && { backgroundColor: colors.PRIMARY, borderColor: colors.PRIMARY }
             ]}
             onPress={() => setSelectedRadius(radius)}
           >
             <Text style={[
               styles.radiusOptionText,
-              selectedRadius === radius && styles.radiusOptionTextSelected
+              { color: colors.TEXT.SECONDARY },
+              selectedRadius === radius && { color: colors.TEXT.WHITE, fontWeight: '600' }
             ]}>
               {radius}km
             </Text>
@@ -362,21 +366,21 @@ export const NearbyUsersScreen = React.memo(() => {
 
   if (isLoading && !nearbyUsers.length) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+        <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
+            <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('nearbyUsers.title')}</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>{t('nearbyUsers.loading')}</Text>
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
+          <Text style={[styles.loadingText, { color: colors.TEXT.SECONDARY }]}>{t('nearbyUsers.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -384,29 +388,29 @@ export const NearbyUsersScreen = React.memo(() => {
 
   if (!locationPermissionGranted) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+        <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
+            <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('nearbyUsers.title')}</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         
         <View style={styles.permissionContainer}>
-          <Icon name="people-outline" size={64} color={COLORS.TEXT.LIGHT} />
-          <Text style={styles.permissionTitle}>{t('permissions.required')}</Text>
-          <Text style={styles.permissionDescription}>
+          <Icon name="people-outline" size={64} color={colors.TEXT.LIGHT} />
+          <Text style={[styles.permissionTitle, { color: colors.TEXT.PRIMARY }]}>{t('permissions.required')}</Text>
+          <Text style={[styles.permissionDescription, { color: colors.TEXT.SECONDARY }]}>
             {t('permissions.description')}
           </Text>
           <TouchableOpacity
-            style={styles.permissionButton}
+            style={[styles.permissionButton, { backgroundColor: colors.PRIMARY }]}
             onPress={requestLocationPermission}
           >
-            <Text style={styles.permissionButtonText}>{t('permissions.requestButton')}</Text>
+            <Text style={[styles.permissionButtonText, { color: colors.TEXT.WHITE }]}>{t('permissions.requestButton')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -414,20 +418,20 @@ export const NearbyUsersScreen = React.memo(() => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
+          <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('nearbyUsers.title')}</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.title')}</Text>
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={handleRefresh}
         >
-          <Icon name="refresh" size={20} color={COLORS.TEXT.SECONDARY} />
+          <Icon name="refresh" size={20} color={colors.TEXT.SECONDARY} />
         </TouchableOpacity>
       </View>
 
@@ -441,11 +445,11 @@ export const NearbyUsersScreen = React.memo(() => {
             {renderRadiusSelector()}
             
             {currentLocation && (
-              <View style={styles.currentLocationCard}>
-                <Icon name="location" size={20} color={COLORS.PRIMARY} />
+              <View style={[styles.currentLocationCard, { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY + '20' }]}>
+                <Icon name="location" size={20} color={colors.PRIMARY} />
                 <View style={styles.currentLocationInfo}>
-                  <Text style={styles.currentLocationTitle}>{t('nearbyUsers.currentLocation')}</Text>
-                  <Text style={styles.currentLocationAddress}>
+                  <Text style={[styles.currentLocationTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.currentLocation')}</Text>
+                  <Text style={[styles.currentLocationAddress, { color: colors.TEXT.SECONDARY }]}>
                     {currentLocation.address || t('nearbyUsers.loadingLocation')}
                   </Text>
                 </View>
@@ -453,10 +457,10 @@ export const NearbyUsersScreen = React.memo(() => {
             )}
 
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>
+              <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
                 {t('nearbyUsers.userCount', { count: nearbyUsers.length })}
               </Text>
-              <Text style={styles.sectionSubtitle}>
+              <Text style={[styles.sectionSubtitle, { color: colors.TEXT.SECONDARY }]}>
                 {t('nearbyUsers.radiusDistance', { radius: selectedRadius })}
               </Text>
             </View>
@@ -464,9 +468,9 @@ export const NearbyUsersScreen = React.memo(() => {
         }
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Icon name="people-outline" size={64} color={COLORS.TEXT.LIGHT} />
-            <Text style={styles.emptyTitle}>{t('nearbyUsers.emptyState.title')}</Text>
-            <Text style={styles.emptyDescription}>
+            <Icon name="people-outline" size={64} color={colors.TEXT.LIGHT} />
+            <Text style={[styles.emptyTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.emptyState.title')}</Text>
+            <Text style={[styles.emptyDescription, { color: colors.TEXT.SECONDARY }]}>
               {t('nearbyUsers.emptyState.subtitle')}
             </Text>
           </View>
@@ -475,8 +479,8 @@ export const NearbyUsersScreen = React.memo(() => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={[COLORS.PRIMARY]}
-            tintColor={COLORS.PRIMARY}
+            colors={[colors.PRIMARY]}
+            tintColor={colors.PRIMARY}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -488,7 +492,6 @@ export const NearbyUsersScreen = React.memo(() => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: 'row',
@@ -497,8 +500,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.MD,
     paddingVertical: SPACING.SM,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
-    backgroundColor: COLORS.SURFACE,
   },
   backButton: {
     padding: SPACING.SM,
@@ -506,7 +507,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
   },
   headerRight: {
     width: 40,
@@ -524,7 +524,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     marginTop: SPACING.MD,
   },
   permissionContainer: {
@@ -536,40 +535,33 @@ const styles = StyleSheet.create({
   permissionTitle: {
     fontSize: FONT_SIZES.XL,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginTop: SPACING.LG,
     marginBottom: SPACING.SM,
   },
   permissionDescription: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: SPACING.XL,
   },
   permissionButton: {
-    backgroundColor: COLORS.PRIMARY,
     paddingHorizontal: SPACING.XL,
     paddingVertical: SPACING.MD,
     borderRadius: 12,
   },
   permissionButtonText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
   },
   radiusSelector: {
-    backgroundColor: COLORS.SURFACE,
     margin: SPACING.MD,
     padding: SPACING.MD,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
   },
   radiusSelectorTitle: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.SM,
   },
   radiusOptions: {
@@ -582,32 +574,25 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
     alignItems: 'center',
   },
   radiusOptionSelected: {
-    backgroundColor: COLORS.PRIMARY,
-    borderColor: COLORS.PRIMARY,
   },
   radiusOptionText: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     fontWeight: '500',
   },
   radiusOptionTextSelected: {
-    color: COLORS.TEXT.WHITE,
     fontWeight: '600',
   },
   currentLocationCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.SURFACE,
     margin: SPACING.MD,
     marginTop: 0,
     padding: SPACING.MD,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.PRIMARY + '20',
   },
   currentLocationInfo: {
     flex: 1,
@@ -616,11 +601,9 @@ const styles = StyleSheet.create({
   currentLocationTitle: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
   },
   currentLocationAddress: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     marginTop: 2,
   },
   sectionHeader: {
@@ -630,21 +613,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
   },
   sectionSubtitle: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     marginTop: 2,
   },
   userCard: {
-    backgroundColor: COLORS.SURFACE,
     marginHorizontal: SPACING.MD,
     marginBottom: SPACING.MD,
     borderRadius: 12,
     padding: SPACING.MD,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
   },
   userHeader: {
     flexDirection: 'row',
@@ -654,7 +633,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.PRIMARY,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -670,12 +648,10 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginRight: SPACING.SM,
   },
   userAge: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     marginRight: SPACING.XS,
   },
   locationRow: {
@@ -684,7 +660,6 @@ const styles = StyleSheet.create({
   },
   distanceText: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     marginLeft: 4,
     marginRight: SPACING.SM,
   },
@@ -696,16 +671,13 @@ const styles = StyleSheet.create({
   },
   lastSeenText: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
   },
   likeButton: {
     padding: SPACING.SM,
     borderRadius: 20,
-    backgroundColor: COLORS.ERROR + '10',
   },
   userBio: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     marginTop: SPACING.SM,
     lineHeight: 18,
   },
@@ -714,7 +686,6 @@ const styles = StyleSheet.create({
   },
   commonGroupsTitle: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
     marginBottom: SPACING.XS,
   },
   groupTags: {
@@ -723,7 +694,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   groupTag: {
-    backgroundColor: COLORS.PRIMARY + '10',
     paddingHorizontal: SPACING.SM,
     paddingVertical: 4,
     borderRadius: 12,
@@ -732,12 +702,10 @@ const styles = StyleSheet.create({
   },
   groupTagText: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.PRIMARY,
     fontWeight: '500',
   },
   moreGroups: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
     fontWeight: '500',
   },
   emptyState: {
@@ -748,13 +716,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginTop: SPACING.MD,
     marginBottom: SPACING.SM,
   },
   emptyDescription: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     lineHeight: 20,
   },

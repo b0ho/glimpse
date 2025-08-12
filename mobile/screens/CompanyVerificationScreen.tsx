@@ -14,12 +14,14 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTheme } from '@/hooks/useTheme';
 import { companyVerificationService, CompanyDomain } from '../services/companyVerificationService';
-import { COLORS, FONTS, SIZES } from '../constants/theme';
+import { FONTS, SIZES } from '../constants/theme';
 
 export default function CompanyVerificationScreen() {
   const navigation = useNavigation();
   const { t } = useTranslation('auth');
+  const { colors } = useTheme();
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -122,23 +124,23 @@ export default function CompanyVerificationScreen() {
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.BACKGROUND }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+            <Ionicons name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.title}>{t('companyVerification.title')}</Text>
+          <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('companyVerification.title')}</Text>
         </View>
 
         <View style={styles.content}>
           <View style={styles.iconContainer}>
-            <Ionicons name="business" size={60} color={COLORS.primary} />
+            <Ionicons name="business" size={60} color={colors.PRIMARY} />
           </View>
 
-          <Text style={styles.description}>
+          <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
             {t('companyVerification.description')}
           </Text>
 
@@ -146,8 +148,13 @@ export default function CompanyVerificationScreen() {
             <>
               <View style={styles.inputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { 
+                    backgroundColor: colors.SURFACE, 
+                    color: colors.TEXT.PRIMARY,
+                    borderColor: colors.BORDER 
+                  }]}
                   placeholder={t('companyVerification.email.placeholder')}
+                  placeholderTextColor={colors.TEXT.LIGHT}
                   value={email}
                   onChangeText={handleEmailChange}
                   keyboardType="email-address"
@@ -155,8 +162,8 @@ export default function CompanyVerificationScreen() {
                   autoCorrect={false}
                 />
                 {selectedDomain && (
-                  <View style={styles.selectedDomainBadge}>
-                    <Text style={styles.selectedDomainText}>
+                  <View style={[styles.selectedDomainBadge, { backgroundColor: colors.PRIMARY + '20' }]}>
+                    <Text style={[styles.selectedDomainText, { color: colors.PRIMARY }]}>
                       {companyVerificationService.formatCompanyName(selectedDomain)}
                     </Text>
                   </View>
@@ -164,50 +171,62 @@ export default function CompanyVerificationScreen() {
               </View>
 
               {showSuggestions && (
-                <View style={styles.suggestionsContainer}>
-                  <Text style={styles.suggestionsTitle}>{t('companyVerification.suggestions.title')}</Text>
+                <View style={[styles.suggestionsContainer, { 
+                  backgroundColor: colors.SURFACE, 
+                  borderColor: colors.BORDER 
+                }]}>
+                  <Text style={[styles.suggestionsTitle, { color: colors.TEXT.SECONDARY }]}>{t('companyVerification.suggestions.title')}</Text>
                   {suggestions.map((domain) => (
                     <TouchableOpacity
                       key={domain.id}
-                      style={styles.suggestionItem}
+                      style={[styles.suggestionItem, { borderBottomColor: colors.BORDER }]}
                       onPress={() => selectDomain(domain)}
                     >
                       <View style={styles.suggestionContent}>
-                        <Text style={styles.suggestionDomain}>@{domain.domain}</Text>
-                        <Text style={styles.suggestionCompany}>
+                        <Text style={[styles.suggestionDomain, { color: colors.TEXT.PRIMARY }]}>@{domain.domain}</Text>
+                        <Text style={[styles.suggestionCompany, { color: colors.TEXT.SECONDARY }]}>
                           {companyVerificationService.formatCompanyName(domain)}
                         </Text>
                       </View>
-                      <Ionicons name="chevron-forward" size={20} color={COLORS.textLight} />
+                      <Ionicons name="chevron-forward" size={20} color={colors.TEXT.SECONDARY} />
                     </TouchableOpacity>
                   ))}
                 </View>
               )}
 
               <TouchableOpacity
-                style={[styles.button, !email && styles.buttonDisabled]}
+                style={[
+                  styles.button, 
+                  { backgroundColor: colors.PRIMARY },
+                  !email && [styles.buttonDisabled, { backgroundColor: colors.DISABLED }]
+                ]}
                 onPress={sendVerificationEmail}
                 disabled={!email || isLoading}
               >
                 {isLoading ? (
-                  <ActivityIndicator color="white" />
+                  <ActivityIndicator color={colors.TEXT.WHITE} />
                 ) : (
-                  <Text style={styles.buttonText}>{t('companyVerification.email.sendButton')}</Text>
+                  <Text style={[styles.buttonText, { color: colors.TEXT.WHITE }]}>{t('companyVerification.email.sendButton')}</Text>
                 )}
               </TouchableOpacity>
             </>
           ) : (
             <>
               <View style={styles.codeSection}>
-                <Text style={styles.emailText}>{email}</Text>
-                <Text style={styles.codeDescription}>
+                <Text style={[styles.emailText, { color: colors.TEXT.PRIMARY }]}>{email}</Text>
+                <Text style={[styles.codeDescription, { color: colors.TEXT.SECONDARY }]}>
                   {t('companyVerification.code.description')}
                 </Text>
 
                 <View style={styles.codeInputContainer}>
                   <TextInput
-                    style={styles.codeInput}
+                    style={[styles.codeInput, { 
+                      backgroundColor: colors.SURFACE,
+                      color: colors.TEXT.PRIMARY,
+                      borderColor: colors.PRIMARY 
+                    }]}
                     placeholder={t('companyVerification.code.placeholder')}
+                    placeholderTextColor={colors.TEXT.LIGHT}
                     value={verificationCode}
                     onChangeText={setVerificationCode}
                     keyboardType="number-pad"
@@ -217,20 +236,24 @@ export default function CompanyVerificationScreen() {
                 </View>
 
                 {timer > 0 && (
-                  <Text style={styles.timerText}>
+                  <Text style={[styles.timerText, { color: colors.ERROR }]}>
                     {t('companyVerification.code.timer', { time: formatTime(timer) })}
                   </Text>
                 )}
 
                 <TouchableOpacity
-                  style={[styles.button, verificationCode.length !== 6 && styles.buttonDisabled]}
+                  style={[
+                    styles.button, 
+                    { backgroundColor: colors.PRIMARY },
+                    verificationCode.length !== 6 && [styles.buttonDisabled, { backgroundColor: colors.DISABLED }]
+                  ]}
                   onPress={verifyCode}
                   disabled={verificationCode.length !== 6 || isLoading}
                 >
                   {isLoading ? (
-                    <ActivityIndicator color="white" />
+                    <ActivityIndicator color={colors.TEXT.WHITE} />
                   ) : (
-                    <Text style={styles.buttonText}>{t('companyVerification.code.verifyButton')}</Text>
+                    <Text style={[styles.buttonText, { color: colors.TEXT.WHITE }]}>{t('companyVerification.code.verifyButton')}</Text>
                   )}
                 </TouchableOpacity>
 
@@ -239,7 +262,11 @@ export default function CompanyVerificationScreen() {
                   onPress={resendCode}
                   disabled={timer > 0}
                 >
-                  <Text style={[styles.resendButtonText, timer > 0 && styles.resendButtonTextDisabled]}>
+                  <Text style={[
+                    styles.resendButtonText, 
+                    { color: colors.PRIMARY },
+                    timer > 0 && [styles.resendButtonTextDisabled, { color: colors.TEXT.SECONDARY }]
+                  ]}>
                     {t('companyVerification.code.resendButton')}
                   </Text>
                 </TouchableOpacity>
@@ -247,9 +274,9 @@ export default function CompanyVerificationScreen() {
             </>
           )}
 
-          <View style={styles.infoBox}>
-            <Ionicons name="information-circle-outline" size={20} color={COLORS.info} />
-            <Text style={styles.infoText}>
+          <View style={[styles.infoBox, { backgroundColor: colors.INFO + '20' }]}>
+            <Ionicons name="information-circle-outline" size={20} color={colors.INFO} />
+            <Text style={[styles.infoText, { color: colors.INFO }]}>
               {t('companyVerification.info.title')}
             </Text>
           </View>
@@ -262,7 +289,6 @@ export default function CompanyVerificationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -279,7 +305,6 @@ const styles = StyleSheet.create({
   },
   title: {
     ...FONTS.h2,
-    color: COLORS.text,
   },
   content: {
     flex: 1,
@@ -291,7 +316,6 @@ const styles = StyleSheet.create({
   },
   description: {
     ...FONTS.body3,
-    color: COLORS.textLight,
     textAlign: 'center',
     marginBottom: SIZES.padding * 2,
     lineHeight: 24,
@@ -300,17 +324,13 @@ const styles = StyleSheet.create({
     marginBottom: SIZES.padding,
   },
   input: {
-    backgroundColor: COLORS.surface,
     borderRadius: SIZES.radius,
     paddingHorizontal: SIZES.padding,
     paddingVertical: SIZES.padding * 0.75,
     ...FONTS.body3,
-    color: COLORS.text,
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
   selectedDomainBadge: {
-    backgroundColor: COLORS.primaryLight,
     paddingHorizontal: SIZES.padding,
     paddingVertical: SIZES.base,
     borderRadius: SIZES.radius,
@@ -318,19 +338,15 @@ const styles = StyleSheet.create({
   },
   selectedDomainText: {
     ...FONTS.body4,
-    color: COLORS.primary,
   },
   suggestionsContainer: {
-    backgroundColor: COLORS.surface,
     borderRadius: SIZES.radius,
     marginBottom: SIZES.padding,
     padding: SIZES.padding,
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
   suggestionsTitle: {
     ...FONTS.body4,
-    color: COLORS.textLight,
     marginBottom: SIZES.base,
   },
   suggestionItem: {
@@ -339,45 +355,37 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: SIZES.base,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
   suggestionContent: {
     flex: 1,
   },
   suggestionDomain: {
     ...FONTS.body3,
-    color: COLORS.text,
   },
   suggestionCompany: {
     ...FONTS.body4,
-    color: COLORS.textLight,
     marginTop: 2,
   },
   button: {
-    backgroundColor: COLORS.primary,
     borderRadius: SIZES.radius,
     paddingVertical: SIZES.padding,
     alignItems: 'center',
     marginBottom: SIZES.padding,
   },
   buttonDisabled: {
-    backgroundColor: COLORS.disabled,
   },
   buttonText: {
     ...FONTS.body3,
-    color: 'white',
   },
   codeSection: {
     alignItems: 'center',
   },
   emailText: {
     ...FONTS.body3,
-    color: COLORS.text,
     marginBottom: SIZES.base,
   },
   codeDescription: {
     ...FONTS.body4,
-    color: COLORS.textLight,
     textAlign: 'center',
     marginBottom: SIZES.padding,
   },
@@ -385,21 +393,17 @@ const styles = StyleSheet.create({
     marginBottom: SIZES.padding,
   },
   codeInput: {
-    backgroundColor: COLORS.surface,
     borderRadius: SIZES.radius,
     paddingHorizontal: SIZES.padding * 2,
     paddingVertical: SIZES.padding,
     ...FONTS.h2,
-    color: COLORS.text,
     textAlign: 'center',
     letterSpacing: 10,
     borderWidth: 2,
-    borderColor: COLORS.primary,
     minWidth: 200,
   },
   timerText: {
     ...FONTS.body4,
-    color: COLORS.error,
     marginBottom: SIZES.padding,
   },
   resendButton: {
@@ -410,16 +414,13 @@ const styles = StyleSheet.create({
   },
   resendButtonText: {
     ...FONTS.body4,
-    color: COLORS.primary,
     textDecorationLine: 'underline',
   },
   resendButtonTextDisabled: {
-    color: COLORS.textLight,
     textDecorationLine: 'none',
   },
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: COLORS.infoBackground,
     borderRadius: SIZES.radius,
     padding: SIZES.padding,
     marginTop: SIZES.padding,
@@ -427,7 +428,6 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     ...FONTS.body4,
-    color: COLORS.info,
     marginLeft: SIZES.base,
     lineHeight: 20,
   },

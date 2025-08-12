@@ -15,6 +15,7 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { STATE_ICONS } from '@/utils/icons';
 import { useLikeStore } from '@/store/slices/likeSlice';
+import { useTheme } from '@/hooks/useTheme';
 
 /**
  * ContentItem 컴포넌트 Props
@@ -55,6 +56,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
 }) => {
   const isOwnContent = item.authorId === currentUserId;
   const { getUserDisplayName } = useLikeStore();
+  const { colors } = useTheme();
   const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
   
@@ -92,30 +94,30 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   };
 
   return (
-    <View style={styles.contentItem}>
+    <View style={[styles.contentItem, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
       <View style={styles.contentHeader}>
         <View style={styles.authorInfo}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
+          <View style={[styles.avatar, { backgroundColor: colors.PRIMARY }]}>
+            <Text style={[styles.avatarText, { color: colors.TEXT.WHITE }]}>
               {displayName?.charAt(0) || '?'}
             </Text>
           </View>
           <View style={styles.authorDetails}>
-            <Text style={styles.authorName}>{displayName}</Text>
+            <Text style={[styles.authorName, { color: colors.TEXT.PRIMARY }]}>{displayName}</Text>
             {groupName && (
               <View style={styles.groupInfo}>
-                <Icon name="people" size={12} color={COLORS.TEXT.SECONDARY} />
-                <Text style={styles.groupName}>{groupName}</Text>
+                <Icon name="people" size={12} color={colors.TEXT.SECONDARY} />
+                <Text style={[styles.groupName, { color: colors.TEXT.SECONDARY }]}>{groupName}</Text>
               </View>
             )}
             {/* 디버깅용 - 임시로 모든 경우에 그룹명 표시 */}
             {!groupName && (
               <View style={styles.groupInfo}>
-                <Icon name="people" size={12} color={COLORS.TEXT.SECONDARY} />
-                <Text style={styles.groupName}>그룹명 없음</Text>
+                <Icon name="people" size={12} color={colors.TEXT.SECONDARY} />
+                <Text style={[styles.groupName, { color: colors.TEXT.SECONDARY }]}>그룹명 없음</Text>
               </View>
             )}
-            <Text style={styles.timeText}>{formatTimeAgo(new Date(item.createdAt))}</Text>
+            <Text style={[styles.timeText, { color: colors.TEXT.SECONDARY }]}>{formatTimeAgo(new Date(item.createdAt))}</Text>
           </View>
         </View>
         
@@ -128,7 +130,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
               accessibilityLabel="게시물 옵션"
               accessibilityRole="button"
             >
-              <Icon name="ellipsis-horizontal" size={20} color={COLORS.TEXT.SECONDARY} />
+              <Icon name="ellipsis-horizontal" size={20} color={colors.TEXT.SECONDARY} />
             </TouchableOpacity>
             
             <Modal
@@ -138,19 +140,19 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
               onRequestClose={() => setShowMenu(false)}
             >
               <TouchableWithoutFeedback onPress={() => setShowMenu(false)}>
-                <View style={styles.menuOverlay}>
+                <View style={[styles.menuOverlay, { backgroundColor: colors.OVERLAY }]}>
                   <TouchableWithoutFeedback onPress={() => {}}>
-                    <View style={styles.menuPopup}>
+                    <View style={[styles.menuPopup, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
                       {onEdit && (
-                        <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
-                          <Icon name="create-outline" size={16} color={COLORS.TEXT.PRIMARY} />
-                          <Text style={styles.menuText}>수정</Text>
+                        <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.BORDER }]} onPress={handleEdit}>
+                          <Icon name="create-outline" size={16} color={colors.TEXT.PRIMARY} />
+                          <Text style={[styles.menuText, { color: colors.TEXT.PRIMARY }]}>수정</Text>
                         </TouchableOpacity>
                       )}
                       {onDelete && (
-                        <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
-                          <Icon name="trash-outline" size={16} color={COLORS.ERROR} />
-                          <Text style={[styles.menuText, { color: COLORS.ERROR }]}>삭제</Text>
+                        <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.BORDER }]} onPress={handleDelete}>
+                          <Icon name="trash-outline" size={16} color={colors.ERROR} />
+                          <Text style={[styles.menuText, { color: colors.ERROR }]}>삭제</Text>
                         </TouchableOpacity>
                       )}
                     </View>
@@ -163,10 +165,10 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
       </View>
 
       <View style={styles.contentBody}>
-        {item.text && <Text style={styles.contentText}>{item.text}</Text>}
+        {item.text && <Text style={[styles.contentText, { color: colors.TEXT.PRIMARY }]}>{item.text}</Text>}
         {item.type === 'image' && item.imageUrls && (
-          <View style={styles.imageContainer}>
-            <Text style={styles.imagePlaceholder}>
+          <View style={[styles.imageContainer, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER }]}>
+            <Text style={[styles.imagePlaceholder, { color: colors.TEXT.SECONDARY }]}>
               📷 {t('common:content.imagesCount', { count: item.imageUrls.length })}
             </Text>
           </View>
@@ -195,17 +197,18 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
                 size={20}
                 color={
                   item.isLikedByUser
-                    ? COLORS.PRIMARY
+                    ? colors.PRIMARY
                     : isOwnContent
-                    ? COLORS.TEXT.LIGHT
-                    : COLORS.TEXT.SECONDARY
+                    ? colors.TEXT.LIGHT
+                    : colors.TEXT.SECONDARY
                 }
               />
               <Text
                 style={[
                   styles.likeButtonText,
-                  item.isLikedByUser && styles.likeButtonTextActive,
-                  isOwnContent && styles.likeButtonTextDisabled,
+                  { color: colors.TEXT.SECONDARY },
+                  item.isLikedByUser && { color: colors.PRIMARY },
+                  isOwnContent && { color: colors.TEXT.LIGHT },
                 ]}
               >
                 {item.likeCount}
@@ -214,7 +217,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
           </TouchableOpacity>
 
           <View style={styles.actionInfo}>
-            <Text style={styles.remainingLikes}>
+            <Text style={[styles.remainingLikes, { color: colors.TEXT.SECONDARY }]}>
               {t('matching:like.remainingLikes', { count: remainingLikes })}
             </Text>
           </View>
@@ -226,13 +229,11 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
 
 const styles = StyleSheet.create({
   contentItem: {
-    backgroundColor: COLORS.SURFACE,
     marginVertical: SPACING.XS,
     marginHorizontal: SPACING.MD,
     borderRadius: 12,
     padding: SPACING.MD,
     elevation: 2,
-    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
@@ -251,13 +252,11 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: COLORS.PRIMARY,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.SM,
   },
   avatarText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.MD,
     fontWeight: 'bold',
   },
@@ -267,7 +266,6 @@ const styles = StyleSheet.create({
   authorName: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: 2,
   },
   groupInfo: {
@@ -277,9 +275,7 @@ const styles = StyleSheet.create({
   },
   groupName: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.SECONDARY,
     marginLeft: 4,
-    backgroundColor: COLORS.PRIMARY + '15',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,
@@ -287,30 +283,25 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.SECONDARY,
   },
   contentBody: {
     marginBottom: SPACING.MD,
   },
   contentText: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
     lineHeight: 22,
   },
   imageContainer: {
     marginTop: SPACING.SM,
     padding: SPACING.LG,
-    backgroundColor: COLORS.BACKGROUND,
     borderRadius: 8,
     alignItems: 'center',
   },
   imagePlaceholder: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
   },
   contentFooter: {
     borderTopWidth: 1,
-    borderTopColor: COLORS.BORDER,
     paddingTop: SPACING.SM,
   },
   actionButtons: {
@@ -322,7 +313,6 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.XS,
     paddingHorizontal: SPACING.SM,
     borderRadius: 20,
-    backgroundColor: COLORS.BACKGROUND,
   },
   likeButton: {
     flexDirection: 'row',
@@ -330,16 +320,13 @@ const styles = StyleSheet.create({
   },
   likeButtonText: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     fontWeight: '500',
     marginLeft: SPACING.XS,
   },
   likeButtonTextActive: {
-    color: COLORS.PRIMARY,
     fontWeight: '600',
   },
   likeButtonTextDisabled: {
-    color: COLORS.TEXT.LIGHT,
     opacity: 0.6,
   },
   actionInfo: {
@@ -347,7 +334,6 @@ const styles = StyleSheet.create({
   },
   remainingLikes: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
     fontWeight: '500',
   },
   menuButton: {
@@ -357,24 +343,20 @@ const styles = StyleSheet.create({
   },
   menuOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'flex-start',
     alignItems: 'flex-end',
     paddingTop: 100,
     paddingRight: 20,
   },
   menuPopup: {
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 12,
     paddingVertical: SPACING.SM,
     minWidth: 150,
     elevation: 20,
-    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 16,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
   },
   menuItem: {
     flexDirection: 'row',
@@ -385,6 +367,5 @@ const styles = StyleSheet.create({
   menuText: {
     marginLeft: SPACING.SM,
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
   },
 });

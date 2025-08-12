@@ -12,8 +12,9 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useTheme } from '@/hooks/useTheme';
 import { Message } from '@/types';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { STATE_ICONS } from '@/utils/icons';
 
@@ -52,6 +53,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
   onLongPress,
 }) => {
   const { t } = useTranslation('chat');
+  const { colors } = useTheme();
   /**
    * 메시지 컨텐츠 렌더링
    * @returns {JSX.Element | null} 메시지 타입에 따른 컨텐츠
@@ -63,7 +65,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           <Text 
             style={[
               styles.messageText,
-              isOwnMessage ? styles.ownMessageText : styles.otherMessageText,
+              {
+                color: isOwnMessage ? colors.TEXT.WHITE : colors.TEXT.PRIMARY,
+              },
             ]}
             accessibilityLabel={`${t('accessibility.messageText')} ${message.content}`}
           >
@@ -84,11 +88,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
               style={styles.messageImage}
               resizeMode="cover"
             />
-            <View style={styles.imageOverlay}>
+            <View style={[styles.imageOverlay, { backgroundColor: colors.OVERLAY }]}>
               <Icon
                 name="expand"
                 size={20}
-                color={COLORS.TEXT.WHITE}
+                color={colors.TEXT.WHITE}
                 style={styles.expandIcon}
               />
             </View>
@@ -101,12 +105,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
             <Icon
               name="document-attach"
               size={24}
-              color={isOwnMessage ? COLORS.TEXT.WHITE : COLORS.PRIMARY}
+              color={isOwnMessage ? colors.TEXT.WHITE : colors.PRIMARY}
             />
             <Text
               style={[
                 styles.fileName,
-                isOwnMessage ? styles.ownMessageText : styles.otherMessageText,
+                {
+                  color: isOwnMessage ? colors.TEXT.WHITE : colors.TEXT.PRIMARY,
+                },
               ]}
             >
               {message.content}
@@ -145,7 +151,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
         <Icon
           name={message.isRead ? STATE_ICONS.LIKED : STATE_ICONS.UNLIKED}
           size={12}
-          color={message.isRead ? COLORS.SUCCESS : COLORS.TEXT.LIGHT}
+          color={message.isRead ? colors.SUCCESS : colors.TEXT.LIGHT}
         />
       </View>
     );
@@ -162,7 +168,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
       <Text
         style={[
           styles.timestamp,
-          isOwnMessage ? styles.ownTimestamp : styles.otherTimestamp,
+          { color: colors.TEXT.LIGHT },
         ]}
       >
         {formatTimeAgo(message.createdAt)}
@@ -185,7 +191,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
         <TouchableOpacity
           style={[
             styles.messageBubble,
-            isOwnMessage ? styles.ownMessageBubble : styles.otherMessageBubble,
+            {
+              backgroundColor: isOwnMessage ? colors.PRIMARY : colors.SURFACE,
+            },
             message.type === 'IMAGE' && styles.imageMessageBubble,
           ]}
           onLongPress={() => onLongPress?.(message)}
@@ -230,7 +238,6 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: COLORS.PRIMARY,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.SM,
@@ -244,18 +251,9 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.SM,
     borderRadius: 18,
     elevation: 1,
-    shadowColor: COLORS.SHADOW,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-  },
-  ownMessageBubble: {
-    backgroundColor: COLORS.PRIMARY,
-    borderBottomRightRadius: 6,
-  },
-  otherMessageBubble: {
-    backgroundColor: COLORS.SURFACE,
-    borderBottomLeftRadius: 6,
   },
   imageMessageBubble: {
     padding: 4,
@@ -263,12 +261,6 @@ const styles = StyleSheet.create({
   messageText: {
     fontSize: FONT_SIZES.MD,
     lineHeight: 20,
-  },
-  ownMessageText: {
-    color: COLORS.TEXT.WHITE,
-  },
-  otherMessageText: {
-    color: COLORS.TEXT.PRIMARY,
   },
   messageImage: {
     width: 200,
@@ -279,7 +271,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: SPACING.XS,
     right: SPACING.XS,
-    backgroundColor: COLORS.OVERLAY,
     borderRadius: 12,
     padding: 4,
   },
@@ -309,7 +300,6 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
   },
   ownTimestamp: {
     marginRight: SPACING.XS,

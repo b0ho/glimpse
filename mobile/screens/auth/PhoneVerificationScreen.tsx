@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuthService } from '@/services/auth/auth-service';
+import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 interface PhoneVerificationScreenProps {
@@ -25,6 +26,7 @@ export const PhoneVerificationScreen = ({
   const [isLoading, setIsLoading] = useState(false);
   const authService = useAuthService();
   const { t } = useTranslation('auth');
+  const { colors } = useTheme();
 
   const formatPhoneInput = (input: string): string => {
     // 숫자만 추출
@@ -89,22 +91,27 @@ export const PhoneVerificationScreen = ({
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.BACKGROUND }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>{t('phoneVerification.title')}</Text>
-        <Text style={styles.subtitle}>{t('phoneVerification.subtitle')}</Text>
+        <Text style={[styles.title, { color: colors.PRIMARY }]}>{t('phoneVerification.title')}</Text>
+        <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>{t('phoneVerification.subtitle')}</Text>
         
         <View style={styles.form}>
-          <Text style={styles.label}>{t('phoneVerification.phoneLabel')}</Text>
-          <Text style={styles.description}>
+          <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>{t('phoneVerification.phoneLabel')}</Text>
+          <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
             {t('phoneVerification.description')}
           </Text>
           
           <TextInput
-            style={styles.input}
+            style={[styles.input, { 
+              backgroundColor: colors.SURFACE,
+              borderColor: colors.BORDER,
+              color: colors.TEXT.PRIMARY
+            }]}
             placeholder={t('phoneVerification.placeholder')}
+            placeholderTextColor={colors.TEXT.LIGHT}
             value={phoneNumber}
             onChangeText={handlePhoneChange}
             keyboardType="phone-pad"
@@ -115,25 +122,26 @@ export const PhoneVerificationScreen = ({
           <TouchableOpacity
             style={[
               styles.button,
-              (!phoneNumber.trim() || isLoading) && styles.buttonDisabled,
+              { backgroundColor: colors.PRIMARY },
+              (!phoneNumber.trim() || isLoading) && [styles.buttonDisabled, { backgroundColor: colors.TEXT.LIGHT }],
             ]}
             onPress={handleSendVerification}
             disabled={!phoneNumber.trim() || isLoading}
           >
             {isLoading ? (
               <View style={styles.buttonContent}>
-                <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
-                <Text style={[styles.buttonText, { marginLeft: SPACING.SM }]}>
+                <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
+                <Text style={[styles.buttonText, { color: colors.TEXT.WHITE, marginLeft: SPACING.SM }]}>
                   {t('phoneVerification.sendingButton')}
                 </Text>
               </View>
             ) : (
-              <Text style={styles.buttonText}>{t('phoneVerification.sendButton')}</Text>
+              <Text style={[styles.buttonText, { color: colors.TEXT.WHITE }]}>{t('phoneVerification.sendButton')}</Text>
             )}
           </TouchableOpacity>
         </View>
         
-        <Text style={styles.privacy}>
+        <Text style={[styles.privacy, { color: colors.TEXT.LIGHT }]}>
           {t('phoneVerification.privacyNotice')}
         </Text>
       </View>

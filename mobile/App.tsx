@@ -11,6 +11,7 @@ import { isAuthBypassEnabled } from './config/dev.config';
 import { initI18n } from './services/i18n/i18n';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './services/i18n/i18n';
+import { useIsDark, useColors } from './hooks/useTheme';
 
 // SecureStore polyfill for web
 let SecureStore: any;
@@ -97,8 +98,8 @@ export default function App() {
   // Show loading screen while i18n is initializing
   if (!isI18nInitialized) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000' }}>
+        <ActivityIndicator size="large" color="#FF8A8A" />
       </View>
     );
   }
@@ -107,17 +108,24 @@ export default function App() {
   const clerkPublishableKey = 'pk_test_xxx';
   
   // 앱 컨텐츠
-  const AppContent = () => (
-    <I18nextProvider i18n={i18n}>
-      <SafeAreaProvider>
-        <StatusBar style="auto" />
-        <CallProvider>
-          <RootNavigator />
-          {isAuthBypassEnabled && Platform.OS !== 'web' && <DevModePanel />}
-        </CallProvider>
-      </SafeAreaProvider>
-    </I18nextProvider>
-  );
+  const AppContent = () => {
+    const isDark = useIsDark();
+    const colors = useColors();
+    
+    return (
+      <I18nextProvider i18n={i18n}>
+        <SafeAreaProvider>
+          <StatusBar style={isDark ? "light" : "dark"} backgroundColor={colors.BACKGROUND} />
+          <View style={{ flex: 1, backgroundColor: colors.BACKGROUND }}>
+            <CallProvider>
+              <RootNavigator />
+              {isAuthBypassEnabled && Platform.OS !== 'web' && <DevModePanel />}
+            </CallProvider>
+          </View>
+        </SafeAreaProvider>
+      </I18nextProvider>
+    );
+  };
 
   // Clerk 키가 유효하지 않거나 개발 모드 인증 우회가 활성화된 경우
   if (isAuthBypassEnabled || clerkPublishableKey === 'pk_test_xxx' || Platform.OS === 'web') {

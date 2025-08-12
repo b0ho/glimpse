@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { AppMode } from '@shared/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
@@ -21,6 +22,7 @@ export const ModeSelectionScreen = () => {
   const navigation = useNavigation() as any;
   const { t } = useTranslation('common');
   const { setAppMode } = useAuthStore();
+  const { colors } = useTheme();
 
   const handleModeSelection = (mode: AppMode) => {
     setAppMode(mode);
@@ -32,55 +34,69 @@ export const ModeSelectionScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('app.name')}</Text>
-        <Text style={styles.subtitle}>{t('mode.selection.title')}</Text>
+        <Text style={[styles.title, { color: colors.PRIMARY }]}>{t('app.name')}</Text>
+        <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.title')}</Text>
       </View>
 
       <View style={styles.modeContainer}>
         {/* Dating Mode */}
         <TouchableOpacity
-          style={[styles.modeCard, styles.datingCard]}
+          style={[
+            styles.modeCard, 
+            styles.datingCard, 
+            { 
+              backgroundColor: colors.SURFACE,
+              borderColor: colors.PRIMARY + '20',
+            }
+          ]}
           onPress={() => handleModeSelection(AppMode.DATING)}
           activeOpacity={0.8}
         >
           <View style={styles.iconContainer}>
-            <Icon name="heart" size={60} color={COLORS.PRIMARY} />
+            <Icon name="heart" size={60} color={colors.PRIMARY} />
           </View>
-          <Text style={styles.modeTitle}>{t('mode.selection.dating.title')}</Text>
-          <Text style={styles.modeDescription}>
+          <Text style={[styles.modeTitle, { color: colors.TEXT.PRIMARY }]}>{t('mode.selection.dating.title')}</Text>
+          <Text style={[styles.modeDescription, { color: colors.TEXT.SECONDARY }]}>
             {t('mode.selection.dating.description')}
           </Text>
           <View style={styles.featureList}>
-            <Text style={styles.featureItem}>{t('mode.selection.dating.features.like')}</Text>
-            <Text style={styles.featureItem}>{t('mode.selection.dating.features.matching')}</Text>
-            <Text style={styles.featureItem}>{t('mode.selection.dating.features.anonymous')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.dating.features.like')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.dating.features.matching')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.dating.features.anonymous')}</Text>
           </View>
         </TouchableOpacity>
 
         {/* Friendship Mode */}
         <TouchableOpacity
-          style={[styles.modeCard, styles.friendshipCard]}
+          style={[
+            styles.modeCard, 
+            styles.friendshipCard, 
+            { 
+              backgroundColor: colors.SURFACE,
+              borderColor: '#4ECDC420',
+            }
+          ]}
           onPress={() => handleModeSelection(AppMode.FRIENDSHIP)}
           activeOpacity={0.8}
         >
           <View style={styles.iconContainer}>
-            <Icon name="people" size={60} color="#4ECDC4" />
+            <Icon name="people" size={60} color={colors.SECONDARY || "#4ECDC4"} />
           </View>
-          <Text style={styles.modeTitle}>{t('mode.selection.friendship.title')}</Text>
-          <Text style={styles.modeDescription}>
+          <Text style={[styles.modeTitle, { color: colors.TEXT.PRIMARY }]}>{t('mode.selection.friendship.title')}</Text>
+          <Text style={[styles.modeDescription, { color: colors.TEXT.SECONDARY }]}>
             {t('mode.selection.friendship.description')}
           </Text>
           <View style={styles.featureList}>
-            <Text style={styles.featureItem}>{t('mode.selection.friendship.features.community')}</Text>
-            <Text style={styles.featureItem}>{t('mode.selection.friendship.features.groupChat')}</Text>
-            <Text style={styles.featureItem}>{t('mode.selection.friendship.features.events')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.friendship.features.community')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.friendship.features.groupChat')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.friendship.features.events')}</Text>
           </View>
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.note}>
+      <Text style={[styles.note, { color: colors.TEXT.MUTED }]}>
         {t('mode.selection.note')}
       </Text>
     </SafeAreaView>
@@ -90,7 +106,6 @@ export const ModeSelectionScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
   },
   header: {
     alignItems: 'center',
@@ -100,12 +115,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: COLORS.PRIMARY,
     marginBottom: SPACING.SM,
   },
   subtitle: {
     fontSize: FONT_SIZES.LG,
-    color: COLORS.TEXT.SECONDARY,
   },
   modeContainer: {
     flex: 1,
@@ -114,7 +127,6 @@ const styles = StyleSheet.create({
     gap: SPACING.LG,
   },
   modeCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 20,
     padding: SPACING.XL,
     shadowColor: '#000',
@@ -129,10 +141,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   datingCard: {
-    borderColor: COLORS.PRIMARY + '20',
   },
   friendshipCard: {
-    borderColor: '#4ECDC420',
   },
   iconContainer: {
     alignItems: 'center',
@@ -141,13 +151,11 @@ const styles = StyleSheet.create({
   modeTitle: {
     fontSize: FONT_SIZES.XL,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
     textAlign: 'center',
     marginBottom: SPACING.SM,
   },
   modeDescription: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     marginBottom: SPACING.MD,
     lineHeight: 22,
@@ -157,12 +165,10 @@ const styles = StyleSheet.create({
   },
   featureItem: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     marginBottom: SPACING.XS,
   },
   note: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.MUTED,
     textAlign: 'center',
     marginBottom: SPACING.XL,
     paddingHorizontal: SPACING.LG,

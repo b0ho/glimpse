@@ -107,6 +107,21 @@
     "changeFailed": "언어 변경 실패",
     "changeFailedMessage": "언어 변경에 실패했습니다. 다시 시도해주세요."
   },
+  "theme": {
+    "title": "테마",
+    "selectTheme": "테마 선택",
+    "light": "라이트",
+    "dark": "다크",
+    "system": "시스템 기본값",
+    "lightDescription": "밝은 테마를 사용합니다",
+    "darkDescription": "어두운 테마를 사용합니다 (배터리 절약)",
+    "systemDescription": "기기 설정에 따라 자동으로 변경됩니다",
+    "changeSuccess": "테마 변경 완료",
+    "changeSuccessMessage": "{{theme}} 모드로 변경되었습니다",
+    "changeFailed": "테마 변경 실패",
+    "changeFailedMessage": "테마 변경에 실패했습니다. 다시 시도해주세요.",
+    "footerNote": "시스템 기본값은 기기 설정을 따릅니다"
+  },
   "notifications": {
     "title": "알림",
     "likes": "좋아요 알림",

@@ -14,6 +14,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useGroupStore } from '@/store/slices/groupSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { ACTION_ICONS } from '@/utils/icons';
@@ -27,6 +28,7 @@ import { groupApi } from '@/services/api/groupApi';
  */
 export const GroupsScreen = () => {
   const { t } = useTranslation(['group', 'common']);
+  const { colors } = useTheme();
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -198,32 +200,32 @@ export const GroupsScreen = () => {
    * @description 각 그룹의 정보를 카드 형태로 표시
    */
   const renderGroupItem = ({ item }: { item: Group }) => (
-    <View style={styles.groupItem}>
+    <View style={[styles.groupItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
       <View style={styles.groupHeader}>
         <View style={styles.groupInfo}>
           <Text style={styles.groupIcon}>
             {renderGroupTypeIcon(item.type)}
           </Text>
           <View style={styles.groupDetails}>
-            <Text style={styles.groupName}>{item.name}</Text>
-            <Text style={styles.groupType}>
+            <Text style={[styles.groupName, { color: colors.TEXT.PRIMARY }]}>{item.name}</Text>
+            <Text style={[styles.groupType, { color: colors.TEXT.SECONDARY }]}>
               {renderGroupTypeName(item.type)}
             </Text>
           </View>
         </View>
         
         <View style={styles.memberInfo}>
-          <Text style={styles.memberCount}>
+          <Text style={[styles.memberCount, { color: colors.TEXT.SECONDARY }]}>
             {t('group:members.count', { count: item.memberCount })}
           </Text>
-          <Text style={styles.genderBalance}>
+          <Text style={[styles.genderBalance, { color: colors.TEXT.LIGHT }]}>
             👨 {item.maleCount} · 👩 {item.femaleCount}
           </Text>
         </View>
       </View>
 
       {item.description && (
-        <Text style={styles.groupDescription}>
+        <Text style={[styles.groupDescription, { color: colors.TEXT.PRIMARY }]}>
           {item.description}
         </Text>
       )}
@@ -276,13 +278,13 @@ export const GroupsScreen = () => {
    * @description 그룹 탐색 화면의 헤더 영역
    */
   const renderHeader = () => (
-    <View style={styles.header}>
-      <Text style={styles.headerTitle}>{t('group:explore.title')}</Text>
-      <Text style={styles.headerSubtitle}>
+    <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>{t('group:explore.title')}</Text>
+      <Text style={[styles.headerSubtitle, { color: colors.TEXT.PRIMARY }]}>
         {t('group:explore.subtitle')}
       </Text>
       <View style={styles.joinedGroupsInfo}>
-        <Text style={styles.joinedCount}>
+        <Text style={[styles.joinedCount, { color: colors.TEXT.SECONDARY }]}>
           {t('group:explore.joinedCount', { count: groupStore.joinedGroups.length })}
         </Text>
       </View>
@@ -297,8 +299,8 @@ export const GroupsScreen = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>🔍</Text>
-      <Text style={styles.emptyStateTitle}>{t('group:explore.empty.title')}</Text>
-      <Text style={styles.emptyStateSubtitle}>
+      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>{t('group:explore.empty.title')}</Text>
+      <Text style={[styles.emptyStateSubtitle, { color: colors.TEXT.SECONDARY }]}>
         {t('group:explore.empty.subtitle')}
       </Text>
     </View>
@@ -306,17 +308,17 @@ export const GroupsScreen = () => {
 
   if (isLoading && groups.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>{t('group:loading.groups')}</Text>
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
+          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('group:loading.groups')}</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <FlatList
         data={groups}
         keyExtractor={(item) => item.id}
@@ -327,8 +329,8 @@ export const GroupsScreen = () => {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={() => loadGroups(true)}
-            colors={[COLORS.PRIMARY]}
-            tintColor={COLORS.PRIMARY}
+            colors={[colors.PRIMARY]}
+            tintColor={colors.PRIMARY}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -337,14 +339,14 @@ export const GroupsScreen = () => {
       
       {/* Create Group Floating Action Button */}
       <TouchableOpacity
-        style={styles.createGroupFab}
+        style={[styles.createGroupFab, { backgroundColor: colors.SUCCESS, shadowColor: colors.SHADOW }]}
         onPress={() => navigation.navigate('CreateGroup' as never)}
         activeOpacity={0.8}
         accessibilityLabel={t('group:create.accessibilityLabel')}
         accessibilityHint={t('group:create.accessibilityHint')}
         accessibilityRole="button"
       >
-        <Icon name={ACTION_ICONS.ADD} color="white" size={32} />
+        <Icon name={ACTION_ICONS.ADD} color={colors.TEXT.WHITE} size={32} />
       </TouchableOpacity>
     </SafeAreaView>
   );

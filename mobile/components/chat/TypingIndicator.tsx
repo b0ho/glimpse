@@ -6,7 +6,8 @@ import {
   Animated,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { COLORS, FONTS, SIZES } from '../../constants/theme';
+import { useTheme } from '@/hooks/useTheme';
+import { FONTS, SIZES } from '../../constants/theme';
 
 /**
  * TypingIndicator 컴포넌트 Props
@@ -31,6 +32,7 @@ export const TypingIndicator= ({
   userName,
 }) => {
   const { t } = useTranslation(['chat']);
+  const { colors } = useTheme();
   const dot1 = useRef(new Animated.Value(0)).current;
   const dot2 = useRef(new Animated.Value(0)).current;
   const dot3 = useRef(new Animated.Value(0)).current;
@@ -101,14 +103,15 @@ export const TypingIndicator= ({
       ]}
     >
       <View style={styles.bubbleContainer}>
-        <View style={styles.textContainer}>
-          <Text style={styles.typingText}>
+        <View style={[styles.textContainer, { backgroundColor: colors.SURFACE }]}>
+          <Text style={[styles.typingText, { color: colors.TEXT.SECONDARY }]}>
             {userName ? t('notifications.typing', { name: userName }) : t('notifications.typingDefault')}
           </Text>
           <View style={styles.dotsContainer}>
             <Animated.View
               style={[
                 styles.dot,
+                { backgroundColor: colors.TEXT.SECONDARY },
                 {
                   transform: [
                     {
@@ -124,6 +127,7 @@ export const TypingIndicator= ({
             <Animated.View
               style={[
                 styles.dot,
+                { backgroundColor: colors.TEXT.SECONDARY },
                 {
                   transform: [
                     {
@@ -139,6 +143,7 @@ export const TypingIndicator= ({
             <Animated.View
               style={[
                 styles.dot,
+                { backgroundColor: colors.TEXT.SECONDARY },
                 {
                   transform: [
                     {
@@ -171,14 +176,12 @@ const styles = StyleSheet.create({
   textContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.lightGray,
     paddingHorizontal: SIZES.padding,
     paddingVertical: SIZES.base,
     borderRadius: SIZES.radius,
   },
   typingText: {
     ...FONTS.body4,
-    color: COLORS.gray,
     marginRight: SIZES.base,
   },
   dotsContainer: {
@@ -189,7 +192,6 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: COLORS.gray,
     marginHorizontal: 2,
   },
 });

@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 // import { useAuth } from '@clerk/clerk-expo';
 import { useAuth } from '@/hooks/useDevAuth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { authService } from '@/services/api/authService';
@@ -24,6 +25,7 @@ export const DeleteAccountScreen = () => {
   const { signOut } = useAuth();
   const { user, clearAuth } = useAuthStore();
   const { t } = useTranslation();
+  const { colors } = useTheme();
   
   const [deleteReason, setDeleteReason] = useState('');
   const [confirmText, setConfirmText] = useState('');
@@ -94,15 +96,15 @@ export const DeleteAccountScreen = () => {
   };
   
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          <Ionicons name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('settings:deleteAccount.title')}</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('settings:deleteAccount.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
       
@@ -110,41 +112,41 @@ export const DeleteAccountScreen = () => {
         style={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.warningCard}>
-          <Ionicons name="warning" size={48} color={COLORS.ERROR} />
-          <Text style={styles.warningTitle}>{t('settings:deleteAccount.warning.title')}</Text>
-          <Text style={styles.warningText}>
+        <View style={[styles.warningCard, { backgroundColor: colors.ERROR + '10', borderColor: colors.ERROR + '20' }]}>
+          <Ionicons name="warning" size={48} color={colors.ERROR} />
+          <Text style={[styles.warningTitle, { color: colors.ERROR }]}>{t('settings:deleteAccount.warning.title')}</Text>
+          <Text style={[styles.warningText, { color: colors.TEXT.PRIMARY }]}>
             {t('settings:deleteAccount.warning.description')}
           </Text>
           
           <View style={styles.warningList}>
             <View style={styles.warningItem}>
-              <Text style={styles.warningBullet}>•</Text>
-              <Text style={styles.warningItemText}>
+              <Text style={[styles.warningBullet, { color: colors.ERROR }]}>•</Text>
+              <Text style={[styles.warningItemText, { color: colors.TEXT.PRIMARY }]}>
                 {t('settings:deleteAccount.warning.items.profile')}
               </Text>
             </View>
             <View style={styles.warningItem}>
-              <Text style={styles.warningBullet}>•</Text>
-              <Text style={styles.warningItemText}>
+              <Text style={[styles.warningBullet, { color: colors.ERROR }]}>•</Text>
+              <Text style={[styles.warningItemText, { color: colors.TEXT.PRIMARY }]}>
                 {t('settings:deleteAccount.warning.items.matches')}
               </Text>
             </View>
             <View style={styles.warningItem}>
-              <Text style={styles.warningBullet}>•</Text>
-              <Text style={styles.warningItemText}>
+              <Text style={[styles.warningBullet, { color: colors.ERROR }]}>•</Text>
+              <Text style={[styles.warningItemText, { color: colors.TEXT.PRIMARY }]}>
                 {t('settings:deleteAccount.warning.items.credits')}
               </Text>
             </View>
             <View style={styles.warningItem}>
-              <Text style={styles.warningBullet}>•</Text>
-              <Text style={styles.warningItemText}>
+              <Text style={[styles.warningBullet, { color: colors.ERROR }]}>•</Text>
+              <Text style={[styles.warningItemText, { color: colors.TEXT.PRIMARY }]}>
                 {t('settings:deleteAccount.warning.items.recovery')}
               </Text>
             </View>
             <View style={styles.warningItem}>
-              <Text style={styles.warningBullet}>•</Text>
-              <Text style={styles.warningItemText}>
+              <Text style={[styles.warningBullet, { color: colors.ERROR }]}>•</Text>
+              <Text style={[styles.warningItemText, { color: colors.TEXT.PRIMARY }]}>
                 {t('settings:deleteAccount.warning.items.permanent')}
               </Text>
             </View>
@@ -152,42 +154,43 @@ export const DeleteAccountScreen = () => {
         </View>
         
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings:deleteAccount.reason.title')}</Text>
-          <View style={styles.reasonContainer}>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('settings:deleteAccount.reason.title')}</Text>
+          <View style={[styles.reasonContainer, { backgroundColor: colors.SURFACE }]}>
             {reasons.map((reason) => (
               <TouchableOpacity
                 key={reason.id}
                 style={[
                   styles.reasonItem,
-                  deleteReason === reason.id && styles.reasonItemSelected,
+                  deleteReason === reason.id && [styles.reasonItemSelected, { backgroundColor: colors.PRIMARY + '05' }],
                 ]}
                 onPress={() => setDeleteReason(reason.id)}
               >
                 <View style={[
                   styles.radio,
-                  deleteReason === reason.id && styles.radioSelected,
+                  { borderColor: colors.BORDER },
+                  deleteReason === reason.id && [styles.radioSelected, { borderColor: colors.PRIMARY }],
                 ]}>
                   {deleteReason === reason.id && (
-                    <View style={styles.radioInner} />
+                    <View style={[styles.radioInner, { backgroundColor: colors.PRIMARY }]} />
                   )}
                 </View>
-                <Text style={styles.reasonText}>{reason.text}</Text>
+                <Text style={[styles.reasonText, { color: colors.TEXT.PRIMARY }]}>{reason.text}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
         
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings:deleteAccount.confirm.title')}</Text>
-          <Text style={styles.confirmDescription}>
-            {t('settings:deleteAccount.confirm.description')} <Text style={styles.confirmHighlight}>{t('settings:deleteAccount.confirm.confirmText')}</Text>{t('settings:deleteAccount.confirm.descriptionEnd')}
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('settings:deleteAccount.confirm.title')}</Text>
+          <Text style={[styles.confirmDescription, { color: colors.TEXT.PRIMARY }]}>
+            {t('settings:deleteAccount.confirm.description')} <Text style={[styles.confirmHighlight, { color: colors.ERROR }]}>{t('settings:deleteAccount.confirm.confirmText')}</Text>{t('settings:deleteAccount.confirm.descriptionEnd')}
           </Text>
           <TextInput
-            style={styles.confirmInput}
+            style={[styles.confirmInput, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY }]}
             value={confirmText}
             onChangeText={setConfirmText}
             placeholder={t('settings:deleteAccount.confirm.placeholder')}
-            placeholderTextColor={COLORS.textSecondary}
+            placeholderTextColor={colors.TEXT.LIGHT}
             autoCapitalize="none"
             autoCorrect={false}
             editable={!isDeleting}
@@ -197,24 +200,25 @@ export const DeleteAccountScreen = () => {
         <TouchableOpacity
           style={[
             styles.deleteButton,
-            confirmText !== t('settings:deleteAccount.confirm.confirmText') && styles.deleteButtonDisabled,
+            { backgroundColor: colors.ERROR },
+            confirmText !== t('settings:deleteAccount.confirm.confirmText') && [styles.deleteButtonDisabled, { backgroundColor: colors.TEXT.LIGHT }],
           ]}
           onPress={handleDelete}
           disabled={confirmText !== t('settings:deleteAccount.confirm.confirmText') || isDeleting}
         >
           {isDeleting ? (
-            <ActivityIndicator size="small" color={COLORS.white} />
+            <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
           ) : (
-            <Text style={styles.deleteButtonText}>{t('settings:deleteAccount.confirm.button')}</Text>
+            <Text style={[styles.deleteButtonText, { color: colors.TEXT.WHITE }]}>{t('settings:deleteAccount.confirm.button')}</Text>
           )}
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={styles.cancelButton}
+          style={[styles.cancelButton, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}
           onPress={() => navigation.goBack()}
           disabled={isDeleting}
         >
-          <Text style={styles.cancelButtonText}>{t('common:buttons.cancel')}</Text>
+          <Text style={[styles.cancelButtonText, { color: colors.TEXT.PRIMARY }]}>{t('common:buttons.cancel')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -224,7 +228,6 @@ export const DeleteAccountScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: 'row',
@@ -232,39 +235,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.white,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.gray200,
   },
   backButton: {
     padding: SPACING.xs,
   },
   headerTitle: {
     ...TYPOGRAPHY.h2,
-    color: COLORS.text,
   },
   content: {
     flex: 1,
     paddingHorizontal: SPACING.md,
   },
   warningCard: {
-    backgroundColor: COLORS.ERROR + '10',
     borderRadius: 12,
     padding: SPACING.lg,
     marginTop: SPACING.lg,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.ERROR + '20',
   },
   warningTitle: {
     ...TYPOGRAPHY.h3,
-    color: COLORS.ERROR,
     marginTop: SPACING.sm,
     marginBottom: SPACING.xs,
   },
   warningText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.text,
     textAlign: 'center',
     marginBottom: SPACING.md,
   },
@@ -277,12 +273,10 @@ const styles = StyleSheet.create({
   },
   warningBullet: {
     ...TYPOGRAPHY.body,
-    color: COLORS.ERROR,
     marginRight: SPACING.xs,
   },
   warningItemText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.text,
     flex: 1,
   },
   section: {
@@ -290,11 +284,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.h3,
-    color: COLORS.text,
     marginBottom: SPACING.md,
   },
   reasonContainer: {
-    backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: SPACING.md,
   },
@@ -304,7 +296,6 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
   },
   reasonItemSelected: {
-    backgroundColor: COLORS.primary + '05',
     marginHorizontal: -SPACING.sm,
     paddingHorizontal: SPACING.sm,
     borderRadius: 8,
@@ -314,45 +305,35 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: COLORS.gray300,
     marginRight: SPACING.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
   radioSelected: {
-    borderColor: COLORS.primary,
   },
   radioInner: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: COLORS.primary,
   },
   reasonText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.text,
   },
   confirmDescription: {
     ...TYPOGRAPHY.body,
-    color: COLORS.text,
     marginBottom: SPACING.sm,
   },
   confirmHighlight: {
     fontWeight: '700',
-    color: COLORS.ERROR,
   },
   confirmInput: {
     ...TYPOGRAPHY.body,
-    backgroundColor: COLORS.white,
     borderRadius: 12,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.gray200,
-    color: COLORS.text,
   },
   deleteButton: {
-    backgroundColor: COLORS.ERROR,
     borderRadius: 12,
     paddingVertical: SPACING.md,
     alignItems: 'center',
@@ -360,25 +341,20 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   deleteButtonDisabled: {
-    backgroundColor: COLORS.gray300,
   },
   deleteButtonText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.white,
     fontWeight: '700',
   },
   cancelButton: {
-    backgroundColor: COLORS.white,
     borderRadius: 12,
     paddingVertical: SPACING.md,
     alignItems: 'center',
     marginBottom: SPACING.xl,
     borderWidth: 1,
-    borderColor: COLORS.gray200,
   },
   cancelButtonText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.text,
     fontWeight: '600',
   },
 });

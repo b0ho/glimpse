@@ -15,6 +15,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNotificationStore } from '@/store/slices/notificationSlice';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants/index';
 import { fcmService } from '@/services/notifications/fcmService';
 import { AppMode, MODE_TEXTS } from '@shared/types';
@@ -39,6 +40,7 @@ function SettingItem({
 }: SettingItemProps) {
   const isPremium = usePremiumStore(premiumSelectors.isPremiumUser());
   const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
+  const { colors } = useTheme();
   const { t } = useTranslation(['settings', 'common']);
 
   const handleToggle = () => {
@@ -70,14 +72,14 @@ function SettingItem({
     >
       <View style={styles.settingContent}>
         <View style={styles.settingText}>
-          <Text style={styles.settingTitle}>
+          <Text style={[styles.settingTitle, { color: colors.TEXT.PRIMARY }]}>
             {title}
             {isPremiumFeature && !isPremium && (
-              <Ionicons name="diamond" size={14} color={COLORS.premium} />
+              <Ionicons name="diamond" size={14} color={colors.premium} />
             )}
           </Text>
           {description && (
-            <Text style={styles.settingDescription}>{description}</Text>
+            <Text style={[styles.settingDescription, { color: colors.TEXT.SECONDARY }]}>{description}</Text>
           )}
         </View>
         <Switch
@@ -85,10 +87,10 @@ function SettingItem({
           onValueChange={handleToggle}
           disabled={disabled || (isPremiumFeature && !isPremium)}
           trackColor={{
-            false: COLORS.gray300,
-            true: COLORS.primary + '40',
+            false: colors.gray300 || '#DEE2E6',
+            true: colors.primary + '40',
           }}
-          thumbColor={value ? COLORS.primary : COLORS.gray500}
+          thumbColor={value ? colors.primary : colors.gray500 || '#ADB5BD'}
         />
       </View>
     </TouchableOpacity>
@@ -98,6 +100,7 @@ function SettingItem({
 export function NotificationSettingsScreen() {
   const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
   const { currentMode } = useAuthStore();
+  const { colors } = useTheme();
   const { t } = useTranslation(['settings', 'common']);
   const {
     settings,
@@ -156,24 +159,24 @@ export function NotificationSettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <View style={[styles.header, { borderBottomColor: colors.BORDER }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          <Ionicons name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('settings:notificationSettings.title')}</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('settings:notificationSettings.title')}</Text>
         <TouchableOpacity onPress={handleResetNotifications}>
-          <Text style={styles.resetButton}>{t('common:reset')}</Text>
+          <Text style={[styles.resetButton, { color: colors.PRIMARY }]}>{t('common:reset')}</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* 전체 알림 설정 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings:notificationSettings.globalSettings.title')}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('settings:notificationSettings.globalSettings.title')}</Text>
           <SettingItem
             title={t('settings:notificationSettings.globalSettings.pushNotifications')}
             description={t('settings:notificationSettings.globalSettings.pushNotificationsDescription')}
@@ -184,7 +187,7 @@ export function NotificationSettingsScreen() {
 
         {/* 매치 관련 알림 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
             {t(`settings:notificationSettings.matchSettings.title${currentMode === AppMode.DATING ? '' : 'Friendship'}`)}
           </Text>
           <SettingItem
@@ -196,7 +199,7 @@ export function NotificationSettingsScreen() {
             onToggle={() => toggleNotificationType('newMatches')}
             disabled={!settings.pushEnabled}
           />
-          <View style={styles.separator} />
+          <View style={[styles.separator, { backgroundColor: colors.BORDER }]} />
           <SettingItem
             title={t(`settings:notificationSettings.matchSettings.likesReceived${currentMode === AppMode.DATING ? '' : 'Friendship'}`)}
             description={
@@ -209,7 +212,7 @@ export function NotificationSettingsScreen() {
           />
           {currentMode === AppMode.DATING && (
             <>
-              <View style={styles.separator} />
+              <View style={[styles.separator, { backgroundColor: colors.BORDER }]} />
               <SettingItem
                 title={t('settings:notificationSettings.matchSettings.superLikes')}
                 description={t('settings:notificationSettings.matchSettings.superLikesDescription')}
@@ -223,7 +226,7 @@ export function NotificationSettingsScreen() {
 
         {/* 메시지 관련 알림 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings:notificationSettings.messageSettings.title')}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('settings:notificationSettings.messageSettings.title')}</Text>
           <SettingItem
             title={t('settings:notificationSettings.messageSettings.newMessage')}
             description={t('settings:notificationSettings.messageSettings.newMessageDescription')}
@@ -235,7 +238,7 @@ export function NotificationSettingsScreen() {
 
         {/* 그룹 관련 알림 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings:notificationSettings.groupSettings.title')}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('settings:notificationSettings.groupSettings.title')}</Text>
           <SettingItem
             title={t('settings:notificationSettings.groupSettings.groupInvites')}
             description={t('settings:notificationSettings.groupSettings.groupInvitesDescription')}
@@ -248,17 +251,17 @@ export function NotificationSettingsScreen() {
         {/* 프리미엄 안내 */}
         {!isPremium && (
           <View style={styles.premiumSection}>
-            <View style={styles.premiumCard}>
-              <Ionicons name="diamond" size={24} color={COLORS.premium} />
-              <Text style={styles.premiumTitle}>{t('settings:notificationSettings.premium.title')}</Text>
-              <Text style={styles.premiumDescription}>
+            <View style={[styles.premiumCard, { backgroundColor: colors.premium + '10', borderColor: colors.premium + '20' }]}>
+              <Ionicons name="diamond" size={24} color={colors.premium} />
+              <Text style={[styles.premiumTitle, { color: colors.TEXT.PRIMARY }]}>{t('settings:notificationSettings.premium.title')}</Text>
+              <Text style={[styles.premiumDescription, { color: colors.TEXT.SECONDARY }]}>
                 {t('settings:notificationSettings.premium.description')}
               </Text>
               <TouchableOpacity
-                style={styles.premiumButton}
+                style={[styles.premiumButton, { backgroundColor: colors.premium }]}
                 onPress={() => navigation.navigate('Premium')}
               >
-                <Text style={styles.premiumButtonText}>{t('settings:notificationSettings.premium.viewPremium')}</Text>
+                <Text style={[styles.premiumButtonText, { color: colors.TEXT.WHITE }]}>{t('settings:notificationSettings.premium.viewPremium')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -266,27 +269,27 @@ export function NotificationSettingsScreen() {
 
         {/* 테스트 알림 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings:notificationSettings.test.title')}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('settings:notificationSettings.test.title')}</Text>
           <TouchableOpacity
-            style={styles.testButton}
+            style={[styles.testButton, { backgroundColor: colors.PRIMARY + '10', borderColor: colors.PRIMARY + '20' }]}
             onPress={handleSendTestNotification}
             disabled={!settings.pushEnabled || !isInitialized}
           >
-            <Ionicons name="notifications" size={20} color={COLORS.primary} />
-            <Text style={styles.testButtonText}>{t('settings:notificationSettings.test.sendNotification')}</Text>
+            <Ionicons name="notifications" size={20} color={colors.PRIMARY} />
+            <Text style={[styles.testButtonText, { color: colors.PRIMARY }]}>{t('settings:notificationSettings.test.sendNotification')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* 알림 설정 안내 */}
-        <View style={styles.infoSection}>
-          <Text style={styles.infoTitle}>{t('settings:notificationSettings.info.title')}</Text>
-          <Text style={styles.infoText}>
+        <View style={[styles.infoSection, { backgroundColor: colors.SURFACE }]}>
+          <Text style={[styles.infoTitle, { color: colors.TEXT.PRIMARY }]}>{t('settings:notificationSettings.info.title')}</Text>
+          <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
             {t('settings:notificationSettings.info.deviceSettings')}
           </Text>
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
             {t('settings:notificationSettings.info.batterySaver')}
           </Text>
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
             {t('settings:notificationSettings.info.appClosed')}
           </Text>
         </View>
@@ -298,7 +301,6 @@ export function NotificationSettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
   },
   header: {
     flexDirection: 'row',
@@ -307,18 +309,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.gray200,
   },
   backButton: {
     padding: SPACING.xs,
   },
   headerTitle: {
     ...TYPOGRAPHY.h2,
-    color: COLORS.text,
   },
   resetButton: {
     ...TYPOGRAPHY.bodySmall,
-    color: COLORS.primary,
     fontWeight: '600',
   },
   content: {
@@ -330,7 +329,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.h3,
-    color: COLORS.text,
     marginBottom: SPACING.sm,
   },
   settingItem: {
@@ -350,17 +348,14 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     ...TYPOGRAPHY.body,
-    color: COLORS.text,
     fontWeight: '500',
   },
   settingDescription: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
     marginTop: SPACING.xs,
   },
   separator: {
     height: 1,
-    backgroundColor: COLORS.gray200,
     marginVertical: SPACING.sm,
   },
   premiumSection: {
@@ -368,66 +363,54 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
   },
   premiumCard: {
-    backgroundColor: COLORS.premium + '10',
     borderRadius: 12,
     padding: SPACING.lg,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.premium + '20',
   },
   premiumTitle: {
     ...TYPOGRAPHY.h3,
-    color: COLORS.text,
     marginTop: SPACING.sm,
     marginBottom: SPACING.xs,
   },
   premiumDescription: {
     ...TYPOGRAPHY.body,
-    color: COLORS.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.md,
   },
   premiumButton: {
-    backgroundColor: COLORS.premium,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
     borderRadius: 8,
   },
   premiumButtonText: {
     ...TYPOGRAPHY.bodySmall,
-    color: COLORS.white,
     fontWeight: '600',
   },
   testButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.primary + '10',
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.lg,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.primary + '20',
   },
   testButtonText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.primary,
     fontWeight: '500',
     marginLeft: SPACING.sm,
   },
   infoSection: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.lg,
-    backgroundColor: COLORS.gray50,
   },
   infoTitle: {
     ...TYPOGRAPHY.h4,
-    color: COLORS.text,
     marginBottom: SPACING.sm,
   },
   infoText: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
     marginBottom: SPACING.xs,
     lineHeight: 18,
   },

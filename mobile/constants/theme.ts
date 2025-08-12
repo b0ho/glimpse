@@ -4,10 +4,90 @@
  * @description 애플리케이션 전체에서 사용되는 디자인 테마 상수
  */
 
+import { ColorPalette } from '@/types/theme';
+
 /**
- * 색상 테마
+ * 라이트 모드 색상 팔레트
+ * @constant LIGHT_COLORS
+ * @description 라이트 모드에서 사용되는 색상 정의
+ */
+export const LIGHT_COLORS: ColorPalette = {
+  PRIMARY: '#FF6B6B',
+  SECONDARY: '#4ECDC4',
+  SUCCESS: '#45B7D1',
+  WARNING: '#FFA726',
+  ERROR: '#EF5350',
+  BACKGROUND: '#F8F9FA',
+  SURFACE: '#FFFFFF',
+  TEXT: {
+    PRIMARY: '#212529',
+    SECONDARY: '#6C757D',
+    LIGHT: '#ADB5BD',
+    WHITE: '#FFFFFF',
+    MUTED: '#ADB5BD',
+  },
+  BORDER: '#E9ECEF',
+  BLACK: '#000000',
+  TRANSPARENT: 'transparent',
+  SHADOW: '#000',
+  OVERLAY: 'rgba(0, 0, 0, 0.5)',
+  OVERLAY_LIGHT: 'rgba(0, 0, 0, 0.3)',
+  // 추가 색상들
+  primary: '#FF6B6B',
+  text: '#212529',
+  textSecondary: '#6C757D',
+  white: '#FFFFFF',
+  gray50: '#F8F9FA',
+  gray200: '#E9ECEF',
+  gray300: '#DEE2E6',
+  gray500: '#ADB5BD',
+  premium: '#FFD700',
+  WHITE: '#FFFFFF',
+};
+
+/**
+ * 다크 모드 색상 팔레트
+ * @constant DARK_COLORS
+ * @description 다크 모드에서 사용되는 색상 정의 (OLED 최적화)
+ */
+export const DARK_COLORS: ColorPalette = {
+  PRIMARY: '#FF8A8A', // 더 밝은 핑크로 가시성 향상
+  SECONDARY: '#66D9E8', // 더 밝은 시안으로 가시성 향상
+  SUCCESS: '#4ECDC4', // 성공 색상 더 밝게
+  WARNING: '#FFC947', // 경고 색상 더 밝게
+  ERROR: '#FF7A7A', // 에러 색상 더 밝게
+  BACKGROUND: '#000000', // 진짜 검은색 (OLED 최적화)
+  SURFACE: '#1C1C1E', // 카드/표면 조금 더 밝게
+  TEXT: {
+    PRIMARY: '#FFFFFF', // 흰색 텍스트
+    SECONDARY: '#D1D1D6', // 보조 텍스트 더 밝게
+    LIGHT: '#A1A1AA', // 연한 텍스트 더 밝게
+    WHITE: '#FFFFFF',
+    MUTED: '#A1A1AA', // 뮤트된 텍스트 더 밝게
+  },
+  BORDER: '#48484A', // 보더 더 밝게
+  BLACK: '#000000',
+  TRANSPARENT: 'transparent',
+  SHADOW: '#000',
+  OVERLAY: 'rgba(0, 0, 0, 0.8)', // 오버레이 더 어둡게
+  OVERLAY_LIGHT: 'rgba(0, 0, 0, 0.6)',
+  // 추가 색상들
+  primary: '#FF8A8A',
+  text: '#FFFFFF',
+  textSecondary: '#D1D1D6',
+  white: '#FFFFFF',
+  gray50: '#1C1C1E',
+  gray200: '#48484A',
+  gray300: '#636366',
+  gray500: '#A1A1AA',
+  premium: '#FFD60A', // 골드 색상 더 밝게
+  WHITE: '#FFFFFF',
+};
+
+/**
+ * 레거시 색상 (호환성)
  * @constant COLORS
- * @description 브랜드 아이덴티티와 UI 일관성을 위한 색상 팔레트
+ * @description 기존 코드 호환성을 위한 색상 (기본 라이트 모드)
  */
 export const COLORS = {
   primary: '#FF6B6B',

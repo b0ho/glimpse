@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { format } from 'date-fns';
 import { ko, enUS } from 'date-fns/locale';
+import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
@@ -23,6 +24,7 @@ import { Like, AppMode, MODE_TEXTS } from '@shared/types';
 export const LikeHistoryScreen = () => {
   const navigation = useNavigation();
   const { t, i18n } = useTranslation(['matching', 'common']);
+  const { colors } = useTheme();
   const { currentMode } = useAuthStore();
   const {
     sentLikes,
@@ -148,7 +150,8 @@ export const LikeHistoryScreen = () => {
       <TouchableOpacity
         style={[
           styles.likeItem,
-          isSelected && styles.likeItemSelected,
+          { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
+          isSelected && [styles.likeItemSelected, { borderColor: colors.PRIMARY, backgroundColor: colors.PRIMARY + '05' }],
         ]}
         onPress={() => {
           if (isSelectionMode) {
@@ -162,21 +165,21 @@ export const LikeHistoryScreen = () => {
       >
         <View style={styles.likeContent}>
           {isSelectionMode && (
-            <View style={styles.checkbox}>
+            <View style={[styles.checkbox, { borderColor: colors.PRIMARY }]}>
               {isSelected && (
-                <Ionicons name="checkmark" size={16} color={COLORS.primary} />
+                <Ionicons name="checkmark" size={16} color={colors.PRIMARY} />
               )}
             </View>
           )}
           
           <View style={styles.userInfo}>
-            <View style={styles.userAvatar}>
-              <Text style={styles.userAvatarText}>?</Text>
+            <View style={[styles.userAvatar, { backgroundColor: colors.BACKGROUND }]}>
+              <Text style={[styles.userAvatarText, { color: colors.TEXT.SECONDARY }]}>?</Text>
             </View>
             <View style={styles.userDetails}>
-              <Text style={styles.userName}>{t('matching:likeHistory.anonymousUser')}</Text>
-              <Text style={styles.groupName}>{t('matching:likeHistory.group')}: {item.groupId}</Text>
-              <Text style={styles.likeDate}>
+              <Text style={[styles.userName, { color: colors.TEXT.PRIMARY }]}>{t('matching:likeHistory.anonymousUser')}</Text>
+              <Text style={[styles.groupName, { color: colors.TEXT.SECONDARY }]}>{t('matching:likeHistory.group')}: {item.groupId}</Text>
+              <Text style={[styles.likeDate, { color: colors.TEXT.LIGHT }]}>
                 {format(new Date(item.createdAt), 
                   i18n.language === 'ko' ? 'M월 d일 HH:mm' : 'MMM d, HH:mm',
                   { locale: i18n.language === 'ko' ? ko : enUS }
@@ -187,18 +190,18 @@ export const LikeHistoryScreen = () => {
 
           <View style={styles.likeActions}>
             {item.isSuper && (
-              <View style={styles.superLikeBadge}>
-                <Ionicons name="star" size={14} color={COLORS.WARNING} />
-                <Text style={styles.superLikeText}>{t('matching:likeHistory.super')}</Text>
+              <View style={[styles.superLikeBadge, { backgroundColor: colors.WARNING + '20' }]}>
+                <Ionicons name="star" size={14} color={colors.WARNING} />
+                <Text style={[styles.superLikeText, { color: colors.WARNING }]}>{t('matching:likeHistory.super')}</Text>
               </View>
             )}
             
             {canCancel && !isSelectionMode && (
               <TouchableOpacity
-                style={styles.cancelButton}
+                style={[styles.cancelButton, { backgroundColor: colors.ERROR + '10' }]}
                 onPress={() => handleCancelLike(item.id)}
               >
-                <Text style={styles.cancelButtonText}>{t('matching:likeHistory.cancelLike')}</Text>
+                <Text style={[styles.cancelButtonText, { color: colors.ERROR }]}>{t('matching:likeHistory.cancelLike')}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -212,15 +215,15 @@ export const LikeHistoryScreen = () => {
       <Ionicons 
         name={currentMode === AppMode.DATING ? "heart-outline" : "people-outline"} 
         size={64} 
-        color={COLORS.textSecondary} 
+        color={colors.TEXT.SECONDARY} 
       />
-      <Text style={styles.emptyTitle}>
+      <Text style={[styles.emptyTitle, { color: colors.TEXT.PRIMARY }]}>
         {currentMode === AppMode.DATING 
           ? t('matching:likeHistory.emptyTitle')
           : t('matching:likeHistory.emptyFriendTitle')
         }
       </Text>
-      <Text style={styles.emptyDescription}>
+      <Text style={[styles.emptyDescription, { color: colors.TEXT.SECONDARY }]}>
         {currentMode === AppMode.DATING
           ? t('matching:likeHistory.emptyDescription')
           : t('matching:likeHistory.emptyFriendDescription')
@@ -230,15 +233,15 @@ export const LikeHistoryScreen = () => {
   );
 
   const renderHeader = () => (
-    <View style={styles.header}>
+    <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
       <TouchableOpacity
         onPress={() => navigation.goBack()}
         style={styles.backButton}
       >
-        <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        <Ionicons name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
       </TouchableOpacity>
       
-      <Text style={styles.headerTitle}>
+      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>
         {currentMode === AppMode.DATING 
           ? t('matching:likeHistory.title')
           : t('matching:likeHistory.friendTitle')
@@ -254,14 +257,14 @@ export const LikeHistoryScreen = () => {
             }}
             style={styles.headerAction}
           >
-            <Text style={styles.cancelText}>{t('matching:likeHistory.cancel')}</Text>
+            <Text style={[styles.cancelText, { color: colors.TEXT.SECONDARY }]}>{t('matching:likeHistory.cancel')}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity
             onPress={handleDeleteHistory}
             style={styles.headerAction}
           >
-            <Ionicons name="trash-outline" size={20} color={COLORS.ERROR} />
+            <Ionicons name="trash-outline" size={20} color={colors.ERROR} />
           </TouchableOpacity>
         </View>
       ) : (
@@ -269,19 +272,19 @@ export const LikeHistoryScreen = () => {
           onPress={() => setIsSelectionMode(true)}
           style={styles.selectButton}
         >
-          <Text style={styles.selectText}>{t('matching:likeHistory.select')}</Text>
+          <Text style={[styles.selectText, { color: colors.PRIMARY }]}>{t('matching:likeHistory.select')}</Text>
         </TouchableOpacity>
       )}
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       {renderHeader()}
       
       {isLoading && !refreshing ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
         </View>
       ) : (
         <FlatList
@@ -293,7 +296,8 @@ export const LikeHistoryScreen = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              colors={[COLORS.primary]}
+              colors={[colors.PRIMARY]}
+              tintColor={colors.PRIMARY}
             />
           }
           contentContainerStyle={[
@@ -304,8 +308,8 @@ export const LikeHistoryScreen = () => {
       )}
       
       {isSelectionMode && selectedLikes.length > 0 && (
-        <View style={styles.selectionBar}>
-          <Text style={styles.selectionText}>
+        <View style={[styles.selectionBar, { backgroundColor: colors.PRIMARY }]}>
+          <Text style={[styles.selectionText, { color: colors.TEXT.WHITE }]}>
             {t('matching:likeHistory.deleteSelected', { count: selectedLikes.length })}
           </Text>
         </View>
@@ -317,7 +321,6 @@ export const LikeHistoryScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: 'row',
@@ -325,16 +328,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.white,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.gray200,
   },
   backButton: {
     padding: SPACING.xs,
   },
   headerTitle: {
     ...TYPOGRAPHY.h2,
-    color: COLORS.text,
     flex: 1,
     textAlign: 'center',
   },
@@ -351,12 +351,10 @@ const styles = StyleSheet.create({
   },
   selectText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.primary,
     fontWeight: '600',
   },
   cancelText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.textSecondary,
   },
   loadingContainer: {
     flex: 1,
@@ -370,17 +368,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   likeItem: {
-    backgroundColor: COLORS.white,
     marginHorizontal: SPACING.md,
     marginVertical: SPACING.xs,
     borderRadius: 12,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.gray200,
   },
   likeItemSelected: {
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.primary + '05',
   },
   likeContent: {
     flexDirection: 'row',
@@ -391,7 +385,6 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: COLORS.primary,
     marginRight: SPACING.sm,
     justifyContent: 'center',
     alignItems: 'center',
@@ -405,32 +398,27 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.gray200,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.sm,
   },
   userAvatarText: {
     ...TYPOGRAPHY.h3,
-    color: COLORS.textSecondary,
   },
   userDetails: {
     flex: 1,
   },
   userName: {
     ...TYPOGRAPHY.body,
-    color: COLORS.text,
     fontWeight: '600',
     marginBottom: 2,
   },
   groupName: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
     marginBottom: 2,
   },
   likeDate: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
   },
   likeActions: {
     alignItems: 'flex-end',
@@ -439,7 +427,6 @@ const styles = StyleSheet.create({
   superLikeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.WARNING + '20',
     paddingHorizontal: SPACING.xs,
     paddingVertical: 2,
     borderRadius: 12,
@@ -447,18 +434,15 @@ const styles = StyleSheet.create({
   },
   superLikeText: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.WARNING,
     fontWeight: '600',
   },
   cancelButton: {
-    backgroundColor: COLORS.ERROR + '10',
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     borderRadius: 6,
   },
   cancelButtonText: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.ERROR,
     fontWeight: '600',
   },
   emptyState: {
@@ -469,13 +453,11 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...TYPOGRAPHY.h3,
-    color: COLORS.text,
     marginTop: SPACING.md,
     marginBottom: SPACING.xs,
   },
   emptyDescription: {
     ...TYPOGRAPHY.body,
-    color: COLORS.textSecondary,
     textAlign: 'center',
   },
   selectionBar: {
@@ -483,14 +465,12 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: COLORS.primary,
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
     paddingBottom: SPACING.md,
   },
   selectionText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.white,
     fontWeight: '600',
     textAlign: 'center',
   },

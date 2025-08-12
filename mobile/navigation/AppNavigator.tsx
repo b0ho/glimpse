@@ -6,7 +6,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 // import { useAuth } from '@clerk/clerk-expo';
@@ -19,6 +19,7 @@ import { initializeFCM, cleanupFCM } from '@/services/notifications/initializeFC
 import { useAuthStore } from '@/store/slices/authSlice';
 import { AppMode, MODE_TEXTS } from '@shared/types';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@/hooks/useTheme';
 
 // Screens
 import { AuthScreen } from '@/screens/auth/AuthScreen';
@@ -186,9 +187,21 @@ function AuthNavigator() {
  */
 function HomeStackNavigator() {
   const { t } = useTranslation('navigation');
+  const { colors } = useTheme();
   
   return (
-    <HomeStack.Navigator id={undefined}>
+    <HomeStack.Navigator 
+      id={undefined}
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.SURFACE,
+        },
+        headerTitleStyle: {
+          color: colors.TEXT.PRIMARY,
+        },
+        headerTintColor: colors.TEXT.PRIMARY,
+      }}
+    >
       <HomeStack.Screen 
         name="HomeTab" 
         component={HomeScreen} 
@@ -233,9 +246,21 @@ function HomeStackNavigator() {
  */
 function GroupsStackNavigator() {
   const { t } = useTranslation('navigation');
+  const { colors } = useTheme();
   
   return (
-    <GroupsStack.Navigator id={undefined}>
+    <GroupsStack.Navigator 
+      id={undefined}
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.SURFACE,
+        },
+        headerTitleStyle: {
+          color: colors.TEXT.PRIMARY,
+        },
+        headerTintColor: colors.TEXT.PRIMARY,
+      }}
+    >
       <GroupsStack.Screen 
         name="GroupsTab" 
         component={GroupsScreen} 
@@ -312,8 +337,21 @@ function GroupsStackNavigator() {
  * @description 매칭 목록과 채팅 화면
  */
 function MatchesStackNavigator() {
+  const { colors } = useTheme();
+  
   return (
-    <MatchesStack.Navigator id={undefined}>
+    <MatchesStack.Navigator 
+      id={undefined}
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.SURFACE,
+        },
+        headerTitleStyle: {
+          color: colors.TEXT.PRIMARY,
+        },
+        headerTintColor: colors.TEXT.PRIMARY,
+      }}
+    >
       <MatchesStack.Screen 
         name="MatchesTab" 
         component={MatchesScreen} 
@@ -337,8 +375,21 @@ function MatchesStackNavigator() {
  * @description 프로필, 프리미엄, 알림 설정, 계정 관리
  */
 function ProfileStackNavigator() {
+  const { colors } = useTheme();
+  
   return (
-    <ProfileStack.Navigator id={undefined}>
+    <ProfileStack.Navigator 
+      id={undefined}
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.SURFACE,
+        },
+        headerTitleStyle: {
+          color: colors.TEXT.PRIMARY,
+        },
+        headerTintColor: colors.TEXT.PRIMARY,
+      }}
+    >
       <ProfileStack.Screen 
         name="ProfileTab" 
         component={ProfileScreen} 
@@ -401,6 +452,7 @@ function DatingTabNavigator() {
   const { currentMode } = useAuthStore();
   const modeTexts = MODE_TEXTS[currentMode];
   const { t } = useTranslation('navigation');
+  const { colors } = useTheme();
   
   return (
     <Tab.Navigator
@@ -408,13 +460,13 @@ function DatingTabNavigator() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.BACKGROUND,
           borderTopWidth: 1,
-          borderTopColor: '#E9ECEF',
+          borderTopColor: colors.BORDER,
           height: 60,
         },
-        tabBarActiveTintColor: '#FF6B6B',
-        tabBarInactiveTintColor: '#6C757D',
+        tabBarActiveTintColor: colors.PRIMARY,
+        tabBarInactiveTintColor: colors.TEXT.SECONDARY,
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '500',
@@ -469,6 +521,7 @@ function DatingTabNavigator() {
  */
 function FriendshipTabNavigator() {
   const { t } = useTranslation('navigation');
+  const { colors } = useTheme();
   
   return (
     <Tab.Navigator
@@ -476,13 +529,13 @@ function FriendshipTabNavigator() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.BACKGROUND,
           borderTopWidth: 1,
-          borderTopColor: '#E9ECEF',
+          borderTopColor: colors.BORDER,
           height: 60,
         },
-        tabBarActiveTintColor: '#4ECDC4',
-        tabBarInactiveTintColor: '#6C757D',
+        tabBarActiveTintColor: colors.SECONDARY || '#4ECDC4',
+        tabBarInactiveTintColor: colors.TEXT.SECONDARY,
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '500',
@@ -559,6 +612,7 @@ function MainTabNavigator() {
 function AppNavigator() {
   const { isSignedIn, isLoaded } = useAuth();
   const { currentMode } = useAuthStore();
+  const { colors } = useTheme();
   const [hasSelectedMode, setHasSelectedMode] = React.useState(false);
 
   useEffect(() => {
@@ -573,7 +627,15 @@ function AppNavigator() {
   }
 
   return (
-    <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
+    <Stack.Navigator 
+      id={undefined} 
+      screenOptions={{ 
+        headerShown: false,
+        cardStyle: {
+          backgroundColor: colors.BACKGROUND,
+        },
+      }}
+    >
       {isSignedIn ? (
         <>
           {!hasSelectedMode ? (
@@ -606,6 +668,7 @@ function AppNavigator() {
  */
 export default function RootNavigator() {
   const navigationRef = useRef<NavigationContainerRef<RootNavigationParamList>>(null);
+  const { colors, isDark } = useTheme();
   
   useEffect(() => {
     if (navigationRef.current && Platform.OS !== 'web') {
@@ -613,10 +676,23 @@ export default function RootNavigator() {
     }
   }, []);
 
+  // 커스텀 네비게이션 테마
+  const customTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      primary: colors.PRIMARY,
+      background: colors.BACKGROUND,
+      card: colors.SURFACE,
+      text: colors.TEXT.PRIMARY,
+      border: colors.BORDER,
+    },
+  };
+
   // 웹 환경에서는 간단한 네비게이션 구조 사용
   if (Platform.OS === 'web') {
     return (
-      <NavigationContainer>
+      <NavigationContainer theme={customTheme}>
         <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Main" component={MainTabNavigator} />
         </Stack.Navigator>
@@ -626,7 +702,7 @@ export default function RootNavigator() {
 
   // 네이티브 환경에서는 기존 구조 사용
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer ref={navigationRef} theme={customTheme}>
       <AppNavigator />
     </NavigationContainer>
   );

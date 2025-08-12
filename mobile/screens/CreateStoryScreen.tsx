@@ -17,6 +17,7 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { saveStory } from '@/utils/storyData';
+import { useTheme } from '@/hooks/useTheme';
 
 export const CreateStoryScreen = () => {
   const { t } = useTranslation(['common', 'story']);
@@ -25,6 +26,7 @@ export const CreateStoryScreen = () => {
   
   const navigation = useNavigation();
   const authStore = useAuthStore();
+  const { colors } = useTheme();
 
   const handleImagePicker = async () => {
     try {
@@ -136,62 +138,63 @@ export const CreateStoryScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
         <TouchableOpacity
           style={styles.headerButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="close" size={24} color={COLORS.TEXT.SECONDARY} />
+          <Icon name="close" size={24} color={colors.TEXT.SECONDARY} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>스토리 만들기</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>스토리 만들기</Text>
         <TouchableOpacity
           style={[
             styles.headerButton,
             styles.submitButton,
+            { backgroundColor: selectedImage ? colors.PRIMARY : colors.TEXT.LIGHT },
             !selectedImage && styles.submitButtonDisabled,
           ]}
           onPress={handleSubmit}
           disabled={isSubmitting || !selectedImage}
         >
           {isSubmitting ? (
-            <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
+            <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
           ) : (
-            <Text style={styles.submitButtonText}>공유</Text>
+            <Text style={[styles.submitButtonText, { color: colors.TEXT.WHITE }]}>공유</Text>
           )}
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={[styles.content, { backgroundColor: colors.BACKGROUND }]}>
         {selectedImage ? (
           <View style={styles.imagePreviewContainer}>
             <Image source={{ uri: selectedImage }} style={styles.storyPreview} />
             <TouchableOpacity
-              style={styles.changeImageButton}
+              style={[styles.changeImageButton, { backgroundColor: colors.OVERLAY }]}
               onPress={handleImagePicker}
             >
-              <Icon name="camera" size={20} color={COLORS.TEXT.WHITE} />
-              <Text style={styles.changeImageText}>사진 바꾸기</Text>
+              <Icon name="camera" size={20} color={colors.TEXT.WHITE} />
+              <Text style={[styles.changeImageText, { color: colors.TEXT.WHITE }]}>사진 바꾸기</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={styles.emptyState}>
+          <View style={[styles.emptyState, { backgroundColor: colors.SURFACE }]}>
             <TouchableOpacity
               style={styles.addPhotoButton}
               onPress={handleImagePicker}
             >
-              <Icon name="camera" size={48} color={COLORS.PRIMARY} />
-              <Text style={styles.addPhotoText}>사진 추가</Text>
-              <Text style={styles.addPhotoSubtext}>
+              <Icon name="camera" size={48} color={colors.PRIMARY} />
+              <Text style={[styles.addPhotoText, { color: colors.TEXT.PRIMARY }]}>사진 추가</Text>
+              <Text style={[styles.addPhotoSubtext, { color: colors.TEXT.SECONDARY }]}>
                 스토리에 공유할 사진을 선택해주세요
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        <View style={styles.guidelines}>
-          <Text style={styles.guidelinesTitle}>📖 스토리 가이드라인</Text>
-          <Text style={styles.guidelinesText}>
+        <View style={[styles.guidelines, { backgroundColor: colors.SURFACE }]}>
+          <Text style={[styles.guidelinesTitle, { color: colors.TEXT.PRIMARY }]}>📖 스토리 가이드라인</Text>
+          <Text style={[styles.guidelinesText, { color: colors.TEXT.SECONDARY }]}>
             • 스토리는 24시간 후 자동으로 사라집니다{'\n'}
             • 본인만의 순간을 자연스럽게 공유해보세요{'\n'}
             • 부적절한 내용은 신고될 수 있습니다{'\n'}
@@ -206,7 +209,6 @@ export const CreateStoryScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: 'row',
@@ -214,9 +216,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SPACING.MD,
     paddingVertical: SPACING.SM,
-    backgroundColor: COLORS.SURFACE,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
   },
   headerButton: {
     paddingHorizontal: SPACING.MD,
@@ -225,17 +225,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
   },
   submitButton: {
-    backgroundColor: COLORS.PRIMARY,
     borderRadius: 8,
   },
   submitButtonDisabled: {
-    backgroundColor: COLORS.TEXT.LIGHT,
+    opacity: 0.5,
   },
   submitButtonText: {
-    color: COLORS.TEXT.WHITE,
     fontWeight: '600',
   },
   content: {
@@ -251,22 +248,16 @@ const styles = StyleSheet.create({
   addPhotoButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.SURFACE,
     borderRadius: 20,
     padding: SPACING.XL * 2,
-    borderWidth: 2,
-    borderColor: COLORS.PRIMARY,
-    borderStyle: 'dashed',
   },
   addPhotoText: {
     fontSize: FONT_SIZES.LG,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginTop: SPACING.MD,
   },
   addPhotoSubtext: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     marginTop: SPACING.SM,
   },
@@ -279,39 +270,32 @@ const styles = StyleSheet.create({
     width: 200,
     height: 356, // 9:16 비율
     borderRadius: 16,
-    backgroundColor: COLORS.SURFACE,
-  },
+      },
   changeImageButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.PRIMARY,
     paddingHorizontal: SPACING.MD,
     paddingVertical: SPACING.SM,
     borderRadius: 20,
     marginTop: SPACING.MD,
   },
   changeImageText: {
-    color: COLORS.TEXT.WHITE,
     fontWeight: '600',
     marginLeft: SPACING.SM,
   },
   guidelines: {
-    backgroundColor: COLORS.SURFACE,
-    padding: SPACING.MD,
+        padding: SPACING.MD,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
     marginTop: SPACING.LG,
   },
   guidelinesTitle: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.SM,
   },
   guidelinesText: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
     lineHeight: 20,
   },
 });

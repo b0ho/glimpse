@@ -20,6 +20,8 @@ import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { EditNicknameModal } from '@/components/modals/EditNicknameModal';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
+import { ThemeSelector } from '@/components/settings/ThemeSelector';
+import { useTheme } from '@/hooks/useTheme';
 import { AppMode, MODE_TEXTS } from '@shared/types';
 import apiClient from '@/services/api/config';
 
@@ -36,6 +38,7 @@ export const ProfileScreen = () => {
   const navigation = useNavigation();
   const { t } = useTranslation(['profile', 'common', 'settings']);
   const { signOut } = useAuth();
+  const { colors } = useTheme();
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
@@ -172,34 +175,34 @@ export const ProfileScreen = () => {
    */
   const renderProfileSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{t('profile:info.basicInfo')}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('profile:info.basicInfo')}</Text>
       
-      <View style={styles.profileCard}>
+      <View style={[styles.profileCard, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
         <View style={styles.avatarContainer}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
+          <View style={[styles.avatar, { backgroundColor: colors.PRIMARY }]}>
+            <Text style={[styles.avatarText, { color: colors.TEXT.WHITE }]}>
               {authStore.user?.nickname?.charAt(0) || '?'}
             </Text>
           </View>
         </View>
         
         <View style={styles.profileInfo}>
-          <Text style={styles.nickname}>
+          <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>
             {authStore.user?.nickname || t('common:user.noNickname')}
           </Text>
-          <Text style={styles.userId}>
+          <Text style={[styles.userId, { color: colors.TEXT.SECONDARY }]}>
             ID: {authStore.user?.anonymousId || t('common:user.anonymous')}
           </Text>
-          <Text style={styles.joinDate}>
+          <Text style={[styles.joinDate, { color: colors.TEXT.SECONDARY }]}>
             {t('profile:info.joinDate')}: {authStore.user?.createdAt?.toLocaleDateString() || t('common:user.notRegistered')}
           </Text>
         </View>
         
         <TouchableOpacity
-          style={styles.editButton}
+          style={[styles.editButton, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER }]}
           onPress={handleEditNickname}
         >
-          <Ionicons name="pencil" size={16} color={COLORS.TEXT.PRIMARY} />
+          <Ionicons name="pencil" size={16} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
       </View>
     </View>
@@ -215,27 +218,30 @@ export const ProfileScreen = () => {
       <TouchableOpacity
         style={[
           styles.premiumCard,
-          isPremiumUser ? styles.premiumCardActive : styles.premiumCardInactive,
+          { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
+          isPremiumUser 
+            ? { borderColor: colors.SUCCESS, backgroundColor: colors.SUCCESS + '10' } 
+            : { borderColor: colors.PRIMARY + '40', backgroundColor: colors.PRIMARY + '10' },
         ]}
         onPress={() => navigation.navigate('Premium' as never)}
       >
         <View style={styles.premiumHeader}>
           <Text style={[
             styles.premiumTitle,
-            isPremiumUser ? styles.premiumTitleActive : styles.premiumTitleInactive,
+            { color: isPremiumUser ? colors.SUCCESS : colors.PRIMARY },
           ]}>
             {isPremiumUser ? t('profile:premium.active') : t('profile:premium.upgrade')}
           </Text>
           {isPremiumUser && (
-            <View style={styles.premiumBadge}>
-              <Text style={styles.premiumBadgeText}>
+            <View style={[styles.premiumBadge, { backgroundColor: colors.SUCCESS }]}>
+              <Text style={[styles.premiumBadgeText, { color: colors.TEXT.WHITE }]}>
                 {currentPlan.includes('yearly') ? t('profile:premium.yearly') : t('profile:premium.monthly')}
               </Text>
             </View>
           )}
         </View>
         
-        <Text style={styles.premiumDescription}>
+        <Text style={[styles.premiumDescription, { color: colors.TEXT.SECONDARY }]}>
           {isPremiumUser 
             ? t('profile:premium.activeDescription')
             : t('profile:premium.inactiveDescription')
@@ -243,13 +249,13 @@ export const ProfileScreen = () => {
         </Text>
         
         <View style={styles.premiumFeatures}>
-          <Text style={styles.premiumFeature}>
+          <Text style={[styles.premiumFeature, { color: colors.TEXT.PRIMARY }]}>
             💕 {isPremiumUser ? t('profile:premium.features.unlimitedLikes') : t('profile:premium.features.dailyToUnlimited')}
           </Text>
-          <Text style={styles.premiumFeature}>
+          <Text style={[styles.premiumFeature, { color: colors.TEXT.PRIMARY }]}>
             👀 {isPremiumUser ? t('profile:premium.features.seeWhoLikedYou') : t('profile:premium.features.seeWhoLikedYouInfo')}
           </Text>
-          <Text style={styles.premiumFeature}>
+          <Text style={[styles.premiumFeature, { color: colors.TEXT.PRIMARY }]}>
             ⚡ {isPremiumUser ? t('profile:premium.features.priorityMatching') : t('profile:premium.features.priorityMatchingInfo')}
           </Text>
         </View>
@@ -264,27 +270,27 @@ export const ProfileScreen = () => {
    */
   const renderStatsSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{t('profile:stats.title', '활동 통계')}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('profile:stats.title', '활동 통계')}</Text>
       
       <View style={styles.statsGrid}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{groupStore.joinedGroups.length}</Text>
-          <Text style={styles.statLabel}>{t('profile:stats.joinedGroups', '참여 그룹')}</Text>
+        <View style={[styles.statItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
+          <Text style={[styles.statNumber, { color: colors.PRIMARY }]}>{groupStore.joinedGroups.length}</Text>
+          <Text style={[styles.statLabel, { color: colors.TEXT.SECONDARY }]}>{t('profile:stats.joinedGroups', '참여 그룹')}</Text>
         </View>
         
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{likeStore.sentLikes.length}</Text>
-          <Text style={styles.statLabel}>{t('profile:stats.sentLikes', '보낸 좋아요')}</Text>
+        <View style={[styles.statItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
+          <Text style={[styles.statNumber, { color: colors.PRIMARY }]}>{likeStore.sentLikes.length}</Text>
+          <Text style={[styles.statLabel, { color: colors.TEXT.SECONDARY }]}>{t('profile:stats.sentLikes', '보낸 좋아요')}</Text>
         </View>
         
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{likeStore.getReceivedLikesCount()}</Text>
-          <Text style={styles.statLabel}>{t('profile:stats.receivedLikes', '받은 좋아요')}</Text>
+        <View style={[styles.statItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
+          <Text style={[styles.statNumber, { color: colors.PRIMARY }]}>{likeStore.getReceivedLikesCount()}</Text>
+          <Text style={[styles.statLabel, { color: colors.TEXT.SECONDARY }]}>{t('profile:stats.receivedLikes', '받은 좋아요')}</Text>
         </View>
         
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{likeStore.matches.length}</Text>
-          <Text style={styles.statLabel}>{t('profile:stats.totalMatches', '총 매칭')}</Text>
+        <View style={[styles.statItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
+          <Text style={[styles.statNumber, { color: colors.PRIMARY }]}>{likeStore.matches.length}</Text>
+          <Text style={[styles.statLabel, { color: colors.TEXT.SECONDARY }]}>{t('profile:stats.totalMatches', '총 매칭')}</Text>
         </View>
       </View>
     </View>
@@ -297,28 +303,29 @@ export const ProfileScreen = () => {
    */
   const renderLikeSystemSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{t('profile:likeSystem.title')}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('profile:likeSystem.title')}</Text>
       
-      <View style={styles.likeSystemCard}>
-        <View style={styles.likeSystemItem}>
-          <Text style={styles.likeSystemLabel}>{t('profile:likeSystem.dailyFreeLikes')}</Text>
-          <Text style={styles.likeSystemValue}>
+      <View style={[styles.likeSystemCard, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
+        <View style={[styles.likeSystemItem, { borderBottomColor: colors.BORDER }]}>
+          <Text style={[styles.likeSystemLabel, { color: colors.TEXT.PRIMARY }]}>{t('profile:likeSystem.dailyFreeLikes')}</Text>
+          <Text style={[styles.likeSystemValue, { color: colors.TEXT.PRIMARY }]}>
             {likeStore.getRemainingFreeLikes()} / 1
           </Text>
         </View>
         
-        <View style={styles.likeSystemItem}>
-          <Text style={styles.likeSystemLabel}>{t('profile:likeSystem.premiumLikes')}</Text>
-          <Text style={styles.likeSystemValue}>
+        <View style={[styles.likeSystemItem, { borderBottomColor: colors.BORDER }]}>
+          <Text style={[styles.likeSystemLabel, { color: colors.TEXT.PRIMARY }]}>{t('profile:likeSystem.premiumLikes')}</Text>
+          <Text style={[styles.likeSystemValue, { color: colors.TEXT.PRIMARY }]}>
             {t('profile:likeSystem.premiumLikesCount', { count: likeStore.premiumLikesRemaining })}
           </Text>
         </View>
         
-        <View style={styles.likeSystemItem}>
-          <Text style={styles.likeSystemLabel}>{t('profile:likeSystem.premiumStatus')}</Text>
+        <View style={[styles.likeSystemItem, { borderBottomColor: colors.BORDER }]}>
+          <Text style={[styles.likeSystemLabel, { color: colors.TEXT.PRIMARY }]}>{t('profile:likeSystem.premiumStatus')}</Text>
           <Text style={[
             styles.likeSystemValue,
-            likeStore.hasPremium ? styles.premiumActive : styles.premiumInactive
+            { color: colors.TEXT.PRIMARY },
+            likeStore.hasPremium ? { color: colors.SUCCESS } : { color: colors.TEXT.SECONDARY }
           ]}>
             {likeStore.hasPremium ? t('profile:likeSystem.active') : t('profile:likeSystem.inactive')}
           </Text>
@@ -326,18 +333,20 @@ export const ProfileScreen = () => {
         
         {isPremiumUser && (
           <>
-            <View style={styles.likeSystemItem}>
-              <Text style={styles.likeSystemLabel}>{t('profile:likeSystem.superLikes')}</Text>
-              <Text style={[styles.likeSystemValue, styles.superLikeValue]}>
+            <View style={[styles.likeSystemItem, { borderBottomColor: colors.BORDER }]}>
+              <Text style={[styles.likeSystemLabel, { color: colors.TEXT.PRIMARY }]}>{t('profile:likeSystem.superLikes')}</Text>
+              <Text style={[styles.likeSystemValue, { color: colors.WARNING, fontWeight: '600' }]}>
                 {likeStore.getRemainingSuperLikes()} / {likeStore.dailySuperLikesLimit}
               </Text>
             </View>
             
-            <View style={styles.likeSystemItem}>
-              <Text style={styles.likeSystemLabel}>{t('profile:likeSystem.rewind')}</Text>
+            <View style={[styles.likeSystemItem, { borderBottomColor: colors.BORDER }]}>
+              <Text style={[styles.likeSystemLabel, { color: colors.TEXT.PRIMARY }]}>{t('profile:likeSystem.rewind')}</Text>
               <Text style={[
                 styles.likeSystemValue,
-                likeStore.canRewindLike() ? styles.rewindAvailable : styles.rewindUnavailable
+                likeStore.canRewindLike() 
+                  ? { color: colors.SUCCESS, fontWeight: '600' }
+                  : { color: colors.TEXT.LIGHT, fontWeight: '500' }
               ]}>
                 {likeStore.canRewindLike() ? t('profile:likeSystem.available') : t('profile:likeSystem.unavailable')}
               </Text>
@@ -375,23 +384,24 @@ export const ProfileScreen = () => {
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{t('common:navigation.settings')}</Text>
       
-      <View style={styles.settingsCard}>
+      <View style={[styles.settingsCard, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
         <LanguageSelector onLanguageChange={() => {}} />
+        <ThemeSelector onThemeChange={() => {}} />
         <TouchableOpacity 
-          style={styles.settingItem}
+          style={[styles.settingItem, { borderBottomColor: colors.BORDER }]}
           onPress={() => navigation.navigate('LikeHistory' as never)}
         >
           <View style={styles.settingContent}>
             <Ionicons 
               name={currentMode === AppMode.DATING ? "heart-outline" : "people-outline"} 
               size={20} 
-              color={COLORS.TEXT.PRIMARY} 
+              color={colors.TEXT.PRIMARY} 
             />
-            <Text style={styles.settingText}>
+            <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>
               {currentMode === AppMode.DATING ? t('profile:settings.likeManagement') : t('profile:settings.friendRequestManagement')}
             </Text>
           </View>
-          <Text style={styles.settingArrow}>{'>'}</Text>
+          <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -399,17 +409,17 @@ export const ProfileScreen = () => {
           onPress={() => navigation.navigate('WhoLikesYou' as never)}
         >
           <View style={styles.settingContent}>
-            <Ionicons name="eye-outline" size={20} color={COLORS.TEXT.PRIMARY} />
+            <Ionicons name="eye-outline" size={20} color={colors.TEXT.PRIMARY} />
             <View style={styles.settingTextContainer}>
-              <Text style={styles.settingText}>
+              <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>
                 {currentMode === AppMode.DATING ? t('profile:settings.whoLikesYou') : t('profile:settings.friendRequestManagement')}
               </Text>
               {!isPremiumUser && (
-                <Text style={styles.premiumBadge}>{t('profile:settings.premiumOnly')}</Text>
+                <Text style={[styles.premiumBadge, { color: colors.TEXT.WHITE }]}>{t('profile:settings.premiumOnly')}</Text>
               )}
             </View>
           </View>
-          <Text style={styles.settingArrow}>{'>'}</Text>
+          <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -417,10 +427,10 @@ export const ProfileScreen = () => {
           onPress={() => navigation.navigate('MyGroups' as never)}
         >
           <View style={styles.settingContent}>
-            <Ionicons name="layers-outline" size={20} color={COLORS.TEXT.PRIMARY} />
-            <Text style={styles.settingText}>{t('profile:settings.myGroups')}</Text>
+            <Ionicons name="layers-outline" size={20} color={colors.TEXT.PRIMARY} />
+            <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>{t('profile:settings.myGroups')}</Text>
           </View>
-          <Text style={styles.settingArrow}>{'>'}</Text>
+          <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -428,34 +438,34 @@ export const ProfileScreen = () => {
           onPress={() => navigation.navigate('NotificationSettings' as never)}
         >
           <View style={styles.settingContent}>
-            <Ionicons name="notifications-outline" size={20} color={COLORS.TEXT.PRIMARY} />
-            <Text style={styles.settingText}>{t('profile:settings.notificationSettings')}</Text>
+            <Ionicons name="notifications-outline" size={20} color={colors.TEXT.PRIMARY} />
+            <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>{t('profile:settings.notificationSettings')}</Text>
           </View>
-          <Text style={styles.settingArrow}>{'>'}</Text>
+          <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingItem}>
           <View style={styles.settingContent}>
-            <Ionicons name="document-text-outline" size={20} color={COLORS.TEXT.PRIMARY} />
-            <Text style={styles.settingText}>{t('profile:settings.privacy')}</Text>
+            <Ionicons name="document-text-outline" size={20} color={colors.TEXT.PRIMARY} />
+            <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>{t('profile:settings.privacy')}</Text>
           </View>
-          <Text style={styles.settingArrow}>{'>'}</Text>
+          <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingItem}>
           <View style={styles.settingContent}>
-            <Ionicons name="book-outline" size={20} color={COLORS.TEXT.PRIMARY} />
-            <Text style={styles.settingText}>{t('profile:settings.terms')}</Text>
+            <Ionicons name="book-outline" size={20} color={colors.TEXT.PRIMARY} />
+            <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>{t('profile:settings.terms')}</Text>
           </View>
-          <Text style={styles.settingArrow}>{'>'}</Text>
+          <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingItem}>
           <View style={styles.settingContent}>
-            <Ionicons name="help-circle-outline" size={20} color={COLORS.TEXT.PRIMARY} />
-            <Text style={styles.settingText}>{t('profile:settings.support')}</Text>
+            <Ionicons name="help-circle-outline" size={20} color={colors.TEXT.PRIMARY} />
+            <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>{t('profile:settings.support')}</Text>
           </View>
-          <Text style={styles.settingArrow}>{'>'}</Text>
+          <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -488,14 +498,14 @@ export const ProfileScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <ScrollView 
         style={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>{t('profile:title')}</Text>
-          <Text style={styles.headerSubtitle}>
+        <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+          <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>{t('profile:title')}</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.TEXT.PRIMARY }]}>
             {t('profile:subtitle')}
           </Text>
         </View>
@@ -508,7 +518,7 @@ export const ProfileScreen = () => {
         {renderDangerSection()}
         
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
+          <Text style={[styles.footerText, { color: colors.TEXT.LIGHT }]}>
             {t('profile:footer.version')}{'\n'}
             {t('profile:footer.tagline')}
           </Text>
@@ -790,16 +800,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: SPACING.LG,
     marginBottom: SPACING.MD,
-  },
-  premiumCardActive: {
-    backgroundColor: COLORS.SUCCESS + '20',
     borderWidth: 2,
-    borderColor: COLORS.SUCCESS,
-  },
-  premiumCardInactive: {
-    backgroundColor: COLORS.PRIMARY + '10',
-    borderWidth: 2,
-    borderColor: COLORS.PRIMARY,
   },
   premiumHeader: {
     flexDirection: 'row',
@@ -812,37 +813,26 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     flex: 1,
   },
-  premiumTitleActive: {
-    color: COLORS.SUCCESS,
-  },
-  premiumTitleInactive: {
-    color: COLORS.PRIMARY,
-  },
   premiumBadge: {
-    backgroundColor: COLORS.PRIMARY,
     paddingHorizontal: SPACING.XS,
     paddingVertical: 2,
     borderRadius: 8,
   },
   premiumBadgeText: {
-    color: COLORS.TEXT.WHITE,
     fontSize: FONT_SIZES.XS,
     fontWeight: '600',
   },
   premiumDescription: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.MD,
     lineHeight: 20,
   },
   premiumFeatures: {
-    backgroundColor: COLORS.SURFACE + '80',
     borderRadius: 8,
     padding: SPACING.MD,
   },
   premiumFeature: {
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.XS,
     lineHeight: 18,
   },

@@ -22,6 +22,7 @@ import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useChatStore, chatSelectors } from '@/store/slices/chatSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { useTheme } from '@/hooks/useTheme';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
@@ -55,6 +56,7 @@ export const ChatScreen = () => {
   const navigation = useNavigation();
   const { roomId, matchId, otherUserNickname } = route.params;
   const { initiateCall, isInCall } = useCall();
+  const { colors } = useTheme();
   const { t } = useTranslation('chat');
 
   // Store states
@@ -143,9 +145,9 @@ export const ChatScreen = () => {
     navigation.setOptions({
       title: otherUserNickname,
       headerStyle: {
-        backgroundColor: COLORS.SURFACE,
+        backgroundColor: colors.SURFACE,
       },
-      headerTintColor: COLORS.PRIMARY,
+      headerTintColor: colors.PRIMARY,
       headerTitleStyle: {
         fontSize: FONT_SIZES.LG,
         fontWeight: '600',
@@ -318,8 +320,8 @@ export const ChatScreen = () => {
 
     return (
       <View style={styles.loadingMore}>
-        <ActivityIndicator size="small" color={COLORS.PRIMARY} />
-        <Text style={styles.loadingMoreText}>{t('loading.previousMessages')}</Text>
+        <ActivityIndicator size="small" color={colors.PRIMARY} />
+        <Text style={[styles.loadingMoreText, { color: colors.TEXT.SECONDARY }]}>{t('loading.previousMessages')}</Text>
       </View>
     );
   };
@@ -346,8 +348,8 @@ export const ChatScreen = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>💬</Text>
-      <Text style={styles.emptyStateTitle}>{t('emptyState.title')}</Text>
-      <Text style={styles.emptyStateSubtitle}>
+      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>{t('emptyState.title')}</Text>
+      <Text style={[styles.emptyStateSubtitle, { color: colors.TEXT.SECONDARY }]}>
         {t('emptyState.subtitle', { name: otherUserNickname })}
       </Text>
     </View>
@@ -371,18 +373,18 @@ export const ChatScreen = () => {
 
   if (isLoading && !isInitialized) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>{t('loading.text')}</Text>
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
+          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('loading.text')}</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.SURFACE} />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <StatusBar barStyle="dark-content" backgroundColor={colors.SURFACE} />
       
       <KeyboardAvoidingView 
         style={styles.container}
@@ -427,7 +429,6 @@ export const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   headerButtons: {
     flexDirection: 'row',
@@ -442,7 +443,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: SPACING.MD,
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
   },
   messagesList: {
     flex: 1,
@@ -466,13 +466,11 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: FONT_SIZES.LG,
     fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
     marginBottom: SPACING.SM,
     textAlign: 'center',
   },
   emptyStateSubtitle: {
     fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -483,6 +481,5 @@ const styles = StyleSheet.create({
   loadingMoreText: {
     marginTop: SPACING.SM,
     fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
   },
 });

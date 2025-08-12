@@ -113,6 +113,21 @@
     "changeFailed": "Language Change Failed",
     "changeFailedMessage": "Failed to change language. Please try again."
   },
+  "theme": {
+    "title": "Theme",
+    "selectTheme": "Select Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "lightDescription": "Use light theme",
+    "darkDescription": "Use dark theme (battery saving)",
+    "systemDescription": "Automatically switches based on device settings",
+    "changeSuccess": "Theme Changed",
+    "changeSuccessMessage": "Changed to {{theme}} mode",
+    "changeFailed": "Theme Change Failed",
+    "changeFailedMessage": "Failed to change theme. Please try again.",
+    "footerNote": "System mode follows device settings"
+  },
   "notifications": {
     "title": "Notifications",
     "likes": "Like Notifications",
