@@ -2,13 +2,13 @@
  * API 기본 URL
  * @constant {string}
  */
-export const API_BASE_URL = process.env.API_URL || 'http://localhost:3001/api/v1';
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || process.env.API_URL || 'http://localhost:3002/api/v1';
 
 /**
  * WebSocket URL
  * @constant {string}
  */
-export const SOCKET_URL = process.env.WEBSOCKET_URL || 'ws://localhost:3001';
+export const SOCKET_URL = process.env.EXPO_PUBLIC_WEBSOCKET_URL || process.env.WEBSOCKET_URL || 'ws://localhost:3002';
 
 /**
  * Development Auth Token
