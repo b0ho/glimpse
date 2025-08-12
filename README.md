@@ -86,7 +86,7 @@ npm run dev
 - 모바일 앱: http://localhost:8081 (Expo)
 - 서버 API: http://localhost:3002
 - 랜딩 페이지: http://localhost:5173 (Vite)
-- 관리자 대시보드: http://localhost:3000 (Next.js)
+- 관리자 대시보드: http://localhost:3004 (Next.js)
 
 ## 🐳 프로덕션 배포
 

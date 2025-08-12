@@ -79,7 +79,7 @@ case $SERVICE in
         echo ""
         print_status "추가 서비스 (별도 실행):"
         echo "  🌐 랜딩 페이지: npm run dev:web (포트 5173)"
-        echo "  🛠 관리자 대시보드: npm run dev:admin (포트 3000)"
+        echo "  🛠 관리자 대시보드: npm run dev:admin (포트 3004)"
         echo ""
         npm run dev
         ;;
@@ -100,7 +100,7 @@ case $SERVICE in
         ;;
     "admin")
         print_header "🛠 Glimpse 관리자 대시보드 시작"
-        echo "📍 URL: http://localhost:3000"
+        echo "📍 URL: http://localhost:3004"
         npm run dev:admin
         ;;
     *)

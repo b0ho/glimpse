@@ -19,6 +19,7 @@ import {
   Clock,
 } from 'lucide-react';
 import SystemMonitor from '@/components/admin/SystemMonitor';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface DashboardStats {
   totalUsers: number;
@@ -251,8 +252,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <AdminLayout>
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
         {/* 헤더 */}
         <div className="flex items-center justify-between">
           <div>
@@ -477,7 +479,8 @@ export default function AdminDashboard() {
             <SystemMonitor />
           </TabsContent>
         </Tabs>
+        </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
