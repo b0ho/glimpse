@@ -1,0 +1,31 @@
+{
+  "tabs": {
+    "home": "Home",
+    "groups": "Groups",
+    "matches": "Matches",
+    "profile": "Profile",
+    "community": "Community",
+    "groupChat": "Group Chat",
+    "friends": "Friends"
+  },
+  "screens": {
+    "createContent": "New Post",
+    "storyUpload": "Add Story",
+    "createGroup": "Create New Group",
+    "locationGroup": "Location-based Group",
+    "nearbyUsers": "Nearby Users",
+    "map": "Map",
+    "groupInvite": "Group Invite",
+    "joinGroup": "Join Group",
+    "groupManage": "Manage Group"
+  },
+  "accessibility": {
+    "home": "Navigate to Home screen",
+    "groups": "Navigate to Groups screen",
+    "matches": "Navigate to Matches screen",
+    "profile": "Navigate to Profile screen",
+    "community": "Navigate to Community screen",
+    "groupChat": "Navigate to Group Chat screen",
+    "friends": "Navigate to Friends list"
+  }
+}

@@ -28,7 +28,9 @@
     "close": "닫기",
     "share": "공유",
     "report": "신고",
-    "block": "차단"
+    "block": "차단",
+    "reset": "초기화",
+    "done": "완료"
   },
   "status": {
     "loading": "로딩 중...",

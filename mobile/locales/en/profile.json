@@ -59,12 +59,6 @@
     "notRegistered": "Not registered",
     "joinDate": "Joined"
   },
-  "stats": {
-    "likes": "Likes",
-    "matches": "Matches",
-    "friends": "Friends",
-    "groups": "Groups"
-  },
   "settings": {
     "likeManagement": "Like Management",
     "friendRequestManagement": "Friend Request Management",

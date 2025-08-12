@@ -48,7 +48,9 @@
     "noChats": "채팅이 없습니다",
     "startChatting": "매칭된 사람과 대화를 시작해보세요",
     "noMessages": "메시지가 없습니다",
-    "sayHello": "인사를 건네보세요!"
+    "sayHello": "인사를 건네보세요!",
+    "title": "대화를 시작하세요!",
+    "subtitle": "{{name}}님과 첫 메시지를 보내세요.\n서로를 알아가는 시간을 가져보세요."
   },
   "encryption": {
     "encrypted": "종단간 암호화됨",
@@ -67,7 +69,19 @@
     "takePhoto": "카메라로 사진 촬영",
     "selectPhoto": "갤러리에서 사진 선택"
   },
+  "loading": {
+    "text": "채팅방을 불러오는 중...",
+    "previousMessages": "이전 메시지를 불러오는 중..."
+  },
   "errors": {
+    "loginRequired": "로그인이 필요합니다",
+    "chatLoadFailed": "채팅방을 불러오지 못했습니다",
+    "messageOptions": "메시지 옵션",
+    "copyConfirm": "이 메시지를 복사하시겠습니까?",
+    "cancel": "취소",
+    "copy": "복사",
+    "copySuccess": "메시지가 복사되었습니다",
+    "error": "오류",
     "sendFailed": "메시지 전송에 실패했습니다.",
     "imageSendFailed": "이미지 전송에 실패했습니다.",
     "imageSelectFailed": "이미지를 선택하는 중 오류가 발생했습니다.",

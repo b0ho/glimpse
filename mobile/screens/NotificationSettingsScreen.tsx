@@ -18,6 +18,7 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants/index';
 import { fcmService } from '@/services/notifications/fcmService';
 import { AppMode, MODE_TEXTS } from '@shared/types';
+import { useTranslation } from 'react-i18next';
 
 interface SettingItemProps {
   title: string;
@@ -38,16 +39,17 @@ function SettingItem({
 }: SettingItemProps) {
   const isPremium = usePremiumStore(premiumSelectors.isPremiumUser());
   const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
+  const { t } = useTranslation(['settings', 'common']);
 
   const handleToggle = () => {
     if (isPremiumFeature && !isPremium) {
       Alert.alert(
-        '프리미엄 기능',
-        '이 기능은 프리미엄 사용자만 이용할 수 있습니다. 프리미엄으로 업그레이드하시겠어요?',
+        t('settings:notificationSettings.alerts.premiumFeature'),
+        t('settings:notificationSettings.alerts.premiumFeatureDescription'),
         [
-          { text: '취소', style: 'cancel' },
+          { text: t('common:cancel'), style: 'cancel' },
           {
-            text: '업그레이드',
+            text: t('settings:notificationSettings.alerts.upgrade'),
             onPress: () => navigation.navigate('Premium'),
           },
         ]
@@ -96,6 +98,7 @@ function SettingItem({
 export function NotificationSettingsScreen() {
   const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
   const { currentMode } = useAuthStore();
+  const { t } = useTranslation(['settings', 'common']);
   const {
     settings,
     isInitialized,
@@ -124,27 +127,27 @@ export function NotificationSettingsScreen() {
   const handleSendTestNotification = async () => {
     try {
       await sendTestNotification();
-      Alert.alert('테스트 완료', '테스트 알림이 전송되었습니다!');
+      Alert.alert(t('settings:notificationSettings.alerts.testComplete'), t('settings:notificationSettings.alerts.testCompleteDescription'));
     } catch {
-      Alert.alert('오류', '테스트 알림 전송에 실패했습니다.');
+      Alert.alert(t('common:error'), t('settings:notificationSettings.alerts.testFailed'));
     }
   };
 
   const handleResetNotifications = () => {
     Alert.alert(
-      '알림 설정 초기화',
-      '모든 알림 설정을 기본값으로 초기화하시겠어요?',
+      t('settings:notificationSettings.alerts.resetTitle'),
+      t('settings:notificationSettings.alerts.resetDescription'),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('common:cancel'), style: 'cancel' },
         {
-          text: '초기화',
+          text: t('common:reset'),
           style: 'destructive',
           onPress: async () => {
             try {
               await resetSettings();
-              Alert.alert('완료', '알림 설정이 초기화되었습니다.');
+              Alert.alert(t('common:done'), t('settings:notificationSettings.alerts.resetComplete'));
             } catch {
-              Alert.alert('오류', '설정 초기화에 실패했습니다.');
+              Alert.alert(t('common:error'), t('settings:notificationSettings.alerts.resetFailed'));
             }
           },
         },
@@ -161,19 +164,19 @@ export function NotificationSettingsScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>알림 설정</Text>
+        <Text style={styles.headerTitle}>{t('settings:notificationSettings.title')}</Text>
         <TouchableOpacity onPress={handleResetNotifications}>
-          <Text style={styles.resetButton}>초기화</Text>
+          <Text style={styles.resetButton}>{t('common:reset')}</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* 전체 알림 설정 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>전체 설정</Text>
+          <Text style={styles.sectionTitle}>{t('settings:notificationSettings.globalSettings.title')}</Text>
           <SettingItem
-            title="푸시 알림"
-            description="앱에서 보내는 모든 푸시 알림을 활성화합니다"
+            title={t('settings:notificationSettings.globalSettings.pushNotifications')}
+            description={t('settings:notificationSettings.globalSettings.pushNotificationsDescription')}
             value={settings.pushEnabled}
             onToggle={() => toggleNotificationType('pushEnabled')}
           />
@@ -182,14 +185,12 @@ export function NotificationSettingsScreen() {
         {/* 매치 관련 알림 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {currentMode === AppMode.DATING ? '매치' : '친구'}
+            {t(`settings:notificationSettings.matchSettings.title${currentMode === AppMode.DATING ? '' : 'Friendship'}`)}
           </Text>
           <SettingItem
-            title={currentMode === AppMode.DATING ? "새로운 매치" : "새로운 친구"}
+            title={t(`settings:notificationSettings.matchSettings.newMatch${currentMode === AppMode.DATING ? '' : 'Friendship'}`)}
             description={
-              currentMode === AppMode.DATING 
-                ? "서로 좋아요를 눌렀을 때 알림을 받습니다"
-                : "서로 친구가 되었을 때 알림을 받습니다"
+              t(`settings:notificationSettings.matchSettings.newMatch${currentMode === AppMode.DATING ? '' : 'Friendship'}Description`)
             }
             value={settings.newMatches}
             onToggle={() => toggleNotificationType('newMatches')}
@@ -197,11 +198,9 @@ export function NotificationSettingsScreen() {
           />
           <View style={styles.separator} />
           <SettingItem
-            title={currentMode === AppMode.DATING ? "좋아요 받음" : "친구 요청 받음"}
+            title={t(`settings:notificationSettings.matchSettings.likesReceived${currentMode === AppMode.DATING ? '' : 'Friendship'}`)}
             description={
-              currentMode === AppMode.DATING
-                ? "누군가 나에게 좋아요를 보냈을 때 알림을 받습니다"
-                : "누군가 나에게 친구 요청을 보냈을 때 알림을 받습니다"
+              t(`settings:notificationSettings.matchSettings.likesReceived${currentMode === AppMode.DATING ? '' : 'Friendship'}Description`)
             }
             value={settings.likesReceived}
             onToggle={() => toggleNotificationType('likesReceived')}
@@ -212,8 +211,8 @@ export function NotificationSettingsScreen() {
             <>
               <View style={styles.separator} />
               <SettingItem
-                title="슈퍼 좋아요"
-                description="슈퍼 좋아요를 받았을 때 알림을 받습니다"
+                title={t('settings:notificationSettings.matchSettings.superLikes')}
+                description={t('settings:notificationSettings.matchSettings.superLikesDescription')}
                 value={settings.superLikes}
                 onToggle={() => toggleNotificationType('superLikes')}
                 disabled={!settings.pushEnabled}
@@ -224,10 +223,10 @@ export function NotificationSettingsScreen() {
 
         {/* 메시지 관련 알림 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>메시지</Text>
+          <Text style={styles.sectionTitle}>{t('settings:notificationSettings.messageSettings.title')}</Text>
           <SettingItem
-            title="새로운 메시지"
-            description="매치된 상대로부터 메시지를 받았을 때 알림을 받습니다"
+            title={t('settings:notificationSettings.messageSettings.newMessage')}
+            description={t('settings:notificationSettings.messageSettings.newMessageDescription')}
             value={settings.newMessages}
             onToggle={() => toggleNotificationType('newMessages')}
             disabled={!settings.pushEnabled}
@@ -236,10 +235,10 @@ export function NotificationSettingsScreen() {
 
         {/* 그룹 관련 알림 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>그룹</Text>
+          <Text style={styles.sectionTitle}>{t('settings:notificationSettings.groupSettings.title')}</Text>
           <SettingItem
-            title="그룹 초대"
-            description="새로운 그룹에 초대받았을 때 알림을 받습니다"
+            title={t('settings:notificationSettings.groupSettings.groupInvites')}
+            description={t('settings:notificationSettings.groupSettings.groupInvitesDescription')}
             value={settings.groupInvites}
             onToggle={() => toggleNotificationType('groupInvites')}
             disabled={!settings.pushEnabled}
@@ -251,15 +250,15 @@ export function NotificationSettingsScreen() {
           <View style={styles.premiumSection}>
             <View style={styles.premiumCard}>
               <Ionicons name="diamond" size={24} color={COLORS.premium} />
-              <Text style={styles.premiumTitle}>프리미엄 알림 기능</Text>
+              <Text style={styles.premiumTitle}>{t('settings:notificationSettings.premium.title')}</Text>
               <Text style={styles.premiumDescription}>
-                프리미엄으로 업그레이드하면 좋아요 받음 알림과 더 많은 기능을 이용할 수 있어요!
+                {t('settings:notificationSettings.premium.description')}
               </Text>
               <TouchableOpacity
                 style={styles.premiumButton}
                 onPress={() => navigation.navigate('Premium')}
               >
-                <Text style={styles.premiumButtonText}>프리미엄 보기</Text>
+                <Text style={styles.premiumButtonText}>{t('settings:notificationSettings.premium.viewPremium')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -267,28 +266,28 @@ export function NotificationSettingsScreen() {
 
         {/* 테스트 알림 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>테스트</Text>
+          <Text style={styles.sectionTitle}>{t('settings:notificationSettings.test.title')}</Text>
           <TouchableOpacity
             style={styles.testButton}
             onPress={handleSendTestNotification}
             disabled={!settings.pushEnabled || !isInitialized}
           >
             <Ionicons name="notifications" size={20} color={COLORS.primary} />
-            <Text style={styles.testButtonText}>테스트 알림 보내기</Text>
+            <Text style={styles.testButtonText}>{t('settings:notificationSettings.test.sendNotification')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* 알림 설정 안내 */}
         <View style={styles.infoSection}>
-          <Text style={styles.infoTitle}>📱 알림 설정 안내</Text>
+          <Text style={styles.infoTitle}>{t('settings:notificationSettings.info.title')}</Text>
           <Text style={styles.infoText}>
-            • 알림을 받으려면 기기의 설정에서도 알림을 허용해야 합니다
+            {t('settings:notificationSettings.info.deviceSettings')}
           </Text>
           <Text style={styles.infoText}>
-            • 배터리 절약 모드에서는 알림이 지연될 수 있습니다
+            {t('settings:notificationSettings.info.batterySaver')}
           </Text>
           <Text style={styles.infoText}>
-            • 앱을 완전히 종료하면 일부 알림을 받지 못할 수 있습니다
+            {t('settings:notificationSettings.info.appClosed')}
           </Text>
         </View>
       </ScrollView>

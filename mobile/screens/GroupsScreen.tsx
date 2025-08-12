@@ -155,15 +155,15 @@ export const GroupsScreen = () => {
   const renderGroupTypeName = (type: GroupType): string => {
     switch (type) {
       case GroupType.OFFICIAL:
-        return '공식 그룹';
+        return t('group:types.official');
       case GroupType.CREATED:
-        return '생성 그룹';
+        return t('group:types.created');
       case GroupType.INSTANCE:
-        return '이벤트 그룹';
+        return t('group:types.instance');
       case GroupType.LOCATION:
-        return '장소 그룹';
+        return t('group:types.location');
       default:
-        return '일반 그룹';
+        return t('group:types.general');
     }
   };
 
@@ -191,7 +191,7 @@ export const GroupsScreen = () => {
         
         <View style={styles.memberInfo}>
           <Text style={styles.memberCount}>
-            {item.memberCount}명
+            {t('group:members.count', { count: item.memberCount })}
           </Text>
           <Text style={styles.genderBalance}>
             👨 {item.maleCount} · 👩 {item.femaleCount}
@@ -211,7 +211,7 @@ export const GroupsScreen = () => {
             styles.matchingStatus,
             item.isMatchingActive ? styles.statusActive : styles.statusInactive
           ]}>
-            {item.isMatchingActive ? '🟢 매칭 활성' : '🔴 매칭 비활성'}
+            {item.isMatchingActive ? `🟢 ${t('group:status.matchingActive')}` : `🔴 ${t('group:status.matchingInactive')}`}
           </Text>
           
           {item.location && (
@@ -222,7 +222,7 @@ export const GroupsScreen = () => {
           
           {item.expiresAt && (
             <Text style={styles.expiryText}>
-              ⏰ {item.expiresAt.toLocaleDateString('ko-KR')}까지
+              ⏰ {t('group:status.expiresAt', { date: item.expiresAt.toLocaleDateString() })}
             </Text>
           )}
         </View>
@@ -254,13 +254,13 @@ export const GroupsScreen = () => {
    */
   const renderHeader = () => (
     <View style={styles.header}>
-      <Text style={styles.headerTitle}>그룹 탐색</Text>
+      <Text style={styles.headerTitle}>{t('group:explore.title')}</Text>
       <Text style={styles.headerSubtitle}>
-        관심사와 소속이 비슷한 사람들을 만나보세요
+        {t('group:explore.subtitle')}
       </Text>
       <View style={styles.joinedGroupsInfo}>
         <Text style={styles.joinedCount}>
-          참여 중인 그룹: {groupStore.joinedGroups.length}개
+          {t('group:explore.joinedCount', { count: groupStore.joinedGroups.length })}
         </Text>
       </View>
     </View>
@@ -317,8 +317,8 @@ export const GroupsScreen = () => {
         style={styles.createGroupFab}
         onPress={() => navigation.navigate('CreateGroup' as never)}
         activeOpacity={0.8}
-        accessibilityLabel="새 그룹 만들기"
-        accessibilityHint="새로운 그룹을 생성할 수 있는 화면으로 이동합니다"
+        accessibilityLabel={t('group:create.accessibilityLabel')}
+        accessibilityHint={t('group:create.accessibilityHint')}
         accessibilityRole="button"
       >
         <Icon name={ACTION_ICONS.ADD} color="white" size={32} />

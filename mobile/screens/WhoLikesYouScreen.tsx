@@ -106,11 +106,11 @@ export const WhoLikesYouScreen = () => {
 
               if (success) {
                 Alert.alert(
-                  '매칭 성공!',
-                  `${likeInfo.fromUser.nickname}님과 매칭되었습니다!\n이제 채팅을 시작할 수 있습니다.`,
+                  t('whoLikesYou.matchSuccess.title'),
+                  t('whoLikesYou.matchSuccess.message', { nickname: likeInfo.fromUser.nickname }),
                   [
                     {
-                      text: '채팅하기',
+                      text: t('whoLikesYou.matchSuccess.startChat'),
                       onPress: () => {
                         // TODO: 실제 채팅 화면으로 이동 로직 구현 (Gemini 피드백 반영)
                         // navigation.navigate('Chat', { matchId: newMatchId, roomId: roomId });
@@ -120,7 +120,7 @@ export const WhoLikesYouScreen = () => {
                   ]
                 );
               } else {
-                Alert.alert('오류', '좋아요 전송에 실패했습니다.');
+                Alert.alert(t('common:error'), t('whoLikesYou.errors.sendLikeFailed'));
               }
             },
           },
@@ -128,7 +128,7 @@ export const WhoLikesYouScreen = () => {
       );
     } catch (error) {
       console.error('Error sending like back:', error);
-      Alert.alert('오류', '좋아요 전송 중 오류가 발생했습니다.');
+      Alert.alert(t('common:error'), t('whoLikesYou.errors.sendLikeError'));
     }
   }, [sendLike]);
 
@@ -154,21 +154,21 @@ export const WhoLikesYouScreen = () => {
       if (!canSendSuperLike()) {
         const remaining = getRemainingSuperLikes();
         Alert.alert(
-          '슈퍼 좋아요 한도 초과',
-          `오늘 사용 가능한 슈퍼 좋아요가 ${remaining}개 남았습니다.\n내일 다시 시도해주세요.`,
-          [{ text: '확인' }]
+          t('whoLikesYou.superLike.limitExceeded'),
+          t('whoLikesYou.superLike.limitExceededMessage', { remaining }),
+          [{ text: t('common:buttons.confirm') }]
         );
         return;
       }
 
       const remainingSuperLikes = getRemainingSuperLikes();
       Alert.alert(
-        '슈퍼 좋아요 보내기',
-        `${likeInfo.fromUser.nickname}님에게 슈퍼 좋아요를 보내시겠습니까?\n\n⭐ 슈퍼 좋아요는 즉시 상대방에게 알림이 가며 더 높은 매칭 확률을 제공합니다.\n💎 오늘 ${remainingSuperLikes - 1}개 더 사용할 수 있습니다.`,
+        t('whoLikesYou.superLike.sendTitle'),
+        t('whoLikesYou.superLike.sendMessage', { nickname: likeInfo.fromUser.nickname, remaining: remainingSuperLikes - 1 }),
         [
-          { text: '취소', style: 'cancel' },
+          { text: t('common:buttons.cancel'), style: 'cancel' },
           {
-            text: '⭐ 슈퍼 좋아요',
+            text: t('whoLikesYou.superLike.sendButton'),
             style: 'default',
             onPress: async () => {
               const success = await sendSuperLike(
@@ -178,11 +178,11 @@ export const WhoLikesYouScreen = () => {
 
               if (success) {
                 Alert.alert(
-                  '🌟 슈퍼 매칭 성공!',
-                  `⭐ ${likeInfo.fromUser.nickname}님과 슈퍼 매칭되었습니다!\n특별한 대화를 시작해보세요!`,
+                  t('whoLikesYou.superLike.matchSuccess'),
+                  t('whoLikesYou.superLike.matchSuccessMessage', { nickname: likeInfo.fromUser.nickname }),
                   [
                     {
-                      text: '💬 채팅하기',
+                      text: t('whoLikesYou.superLike.startChat'),
                       onPress: () => {
                         // TODO: 실제 채팅 화면으로 이동 로직 구현 (Gemini 피드백 반영)
                         // navigation.navigate('Chat', { matchId: newMatchId, roomId: roomId });
@@ -192,7 +192,7 @@ export const WhoLikesYouScreen = () => {
                   ]
                 );
               } else {
-                Alert.alert('오류', '슈퍼 좋아요 전송에 실패했습니다.');
+                Alert.alert(t('common:status.error'), t('whoLikesYou.superLike.sendFailed'));
               }
             },
           },
@@ -200,7 +200,7 @@ export const WhoLikesYouScreen = () => {
       );
     } catch (error) {
       console.error('Error sending super like back:', error);
-      Alert.alert('오류', '슈퍼 좋아요 전송 중 오류가 발생했습니다.');
+      Alert.alert(t('common:status.error'), t('whoLikesYou.superLike.sendError'));
     }
   }, [sendSuperLike, isPremiumUser, canSendSuperLike, getRemainingSuperLikes, navigation]);
 
@@ -243,7 +243,7 @@ export const WhoLikesYouScreen = () => {
           onPress={() => handleLikeBack(item)}
         >
           <Icon name="heart" size={20} color={COLORS.TEXT.WHITE} />
-          <Text style={styles.likeButtonText}>좋아요</Text>
+          <Text style={styles.likeButtonText}>{t('whoLikesYou.sendLikeButton')}</Text>
         </TouchableOpacity>
         
         {isPremiumUser && canSendSuperLike() && (
@@ -253,7 +253,7 @@ export const WhoLikesYouScreen = () => {
           >
             <Icon name="star" size={20} color={COLORS.TEXT.WHITE} />
             <Text style={styles.superLikeButtonText}>
-              슈퍼 ({getRemainingSuperLikes()})
+              {t('whoLikesYou.superLikeButton')} ({getRemainingSuperLikes()})
             </Text>
           </TouchableOpacity>
         )}
@@ -264,7 +264,7 @@ export const WhoLikesYouScreen = () => {
             disabled={true}
           >
             <Icon name="star-outline" size={20} color={COLORS.TEXT.LIGHT} />
-            <Text style={styles.superLikeButtonDisabledText}>한도 초과</Text>
+            <Text style={styles.superLikeButtonDisabledText}>{t('whoLikesYou.limitExceeded')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -274,10 +274,9 @@ export const WhoLikesYouScreen = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Icon name="heart-outline" size={64} color={COLORS.TEXT.LIGHT} />
-      <Text style={styles.emptyTitle}>아직 받은 좋아요가 없어요</Text>
+      <Text style={styles.emptyTitle}>{t('whoLikesYou.noLikes')}</Text>
       <Text style={styles.emptyDescription}>
-        그룹에 참여하고 활동하면{'\n'}
-        더 많은 사람들이 관심을 보일 거예요!
+        {t('whoLikesYou.noLikesFullDescription')}
       </Text>
     </View>
   );
@@ -287,16 +286,15 @@ export const WhoLikesYouScreen = () => {
       <View style={styles.premiumIcon}>
         <Icon name="diamond-outline" size={48} color={COLORS.PRIMARY} />
       </View>
-      <Text style={styles.premiumTitle}>프리미엄 전용 기능</Text>
+      <Text style={styles.premiumTitle}>{t('whoLikesYou.premiumRequired')}</Text>
       <Text style={styles.premiumDescription}>
-        누가 나에게 좋아요를 보냈는지 확인하려면{'\n'}
-        프리미엄 구독이 필요해요
+        {t('whoLikesYou.premiumDescription')}
       </Text>
       <TouchableOpacity
         style={styles.premiumButton}
         onPress={() => navigation.navigate('Premium' as never)}
       >
-        <Text style={styles.premiumButtonText}>프리미엄 가입하기</Text>
+        <Text style={styles.premiumButtonText}>{t('whoLikesYou.upgradeToPremium')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -311,7 +309,7 @@ export const WhoLikesYouScreen = () => {
           >
             <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>좋아요 받은 사람</Text>
+          <Text style={styles.headerTitle}>{t('whoLikesYou.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         
@@ -330,7 +328,7 @@ export const WhoLikesYouScreen = () => {
           >
             <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>좋아요 받은 사람</Text>
+          <Text style={styles.headerTitle}>{t('whoLikesYou.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         

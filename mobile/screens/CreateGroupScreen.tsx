@@ -12,6 +12,7 @@ import {
   Switch,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { GroupType, Group } from '@/types';
@@ -64,6 +65,7 @@ export const CreateGroupScreen = () => {
   const navigation = useNavigation<any>();
   const authStore = useAuthStore();
   const groupStore = useGroupStore();
+  const { t } = useTranslation(['group', 'common']);
 
   /**
    * 폼 유효성 검사
@@ -74,19 +76,19 @@ export const CreateGroupScreen = () => {
     const newErrors: Partial<GroupFormData> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = '그룹 이름을 입력해주세요';
+      newErrors.name = t('group:createGroup.validation.nameRequired');
     } else if (formData.name.length < 2) {
-      newErrors.name = '그룹 이름은 최소 2글자 이상이어야 합니다';
+      newErrors.name = t('group:createGroup.validation.nameMinLength');
     } else if (formData.name.length > 30) {
-      newErrors.name = '그룹 이름은 30글자를 초과할 수 없습니다';
+      newErrors.name = t('group:createGroup.validation.nameMaxLength');
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = '그룹 설명을 입력해주세요';
+      newErrors.description = t('group:createGroup.validation.descriptionRequired');
     } else if (formData.description.length < 10) {
-      newErrors.description = '그룹 설명은 최소 10글자 이상이어야 합니다';
+      newErrors.description = t('group:createGroup.validation.descriptionMinLength');
     } else if (formData.description.length > 200) {
-      newErrors.description = '그룹 설명은 200글자를 초과할 수 없습니다';
+      newErrors.description = t('group:createGroup.validation.descriptionMaxLength');
     }
 
     if (formData.minimumMembers < 4) {
@@ -96,7 +98,7 @@ export const CreateGroupScreen = () => {
     }
 
     if (formData.type === GroupType.LOCATION && !formData.location?.address.trim()) {
-      newErrors.location = { address: '장소를 입력해주세요' };
+      newErrors.location = { address: t('group:createGroup.validation.locationRequired') };
     }
 
     setErrors(newErrors);
@@ -110,7 +112,7 @@ export const CreateGroupScreen = () => {
    */
   const handleSubmit = async () => {
     if (!validateForm()) {
-      Alert.alert('입력 오류', '모든 필드를 올바르게 입력해주세요.');
+      Alert.alert(t('group:createGroup.errors.inputError'), t('group:createGroup.errors.fillAllFields'));
       return;
     }
 
@@ -145,15 +147,15 @@ export const CreateGroupScreen = () => {
       groupStore.createGroup(newGroup);
 
       Alert.alert(
-        '그룹 생성 완료! 🎉',
-        `"${newGroup.name}" 그룹이 성공적으로 생성되었습니다.\n다른 사용자들이 참여하면 매칭이 활성화됩니다.`,
+        t('group:createGroup.success.title'),
+        t('group:createGroup.success.message', { name: newGroup.name }),
         [
           {
-            text: '초대하기',
+            text: t('group:createGroup.success.invite'),
             onPress: () => navigation.navigate('GroupInvite' as never, { groupId: newGroup.id } as never),
           },
           {
-            text: '확인',
+            text: t('common:buttons.confirm'),
             onPress: () => navigation.goBack(),
             style: 'cancel',
           },
@@ -161,8 +163,8 @@ export const CreateGroupScreen = () => {
       );
     } catch (error: any) {
       console.error('[CreateGroupScreen] 그룹 생성 오류:', error);
-      const errorMessage = error?.message || error?.response?.data?.message || '그룹 생성 중 오류가 발생했습니다.';
-      Alert.alert('그룹 생성 실패', errorMessage);
+      const errorMessage = error?.message || error?.response?.data?.message || t('group:createGroup.errors.createFailed');
+      Alert.alert(t('group:createGroup.errors.createFailedTitle'), errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -177,15 +179,15 @@ export const CreateGroupScreen = () => {
     if (!showTypePicker) return null;
 
     const groupTypes = [
-      { type: GroupType.CREATED, name: '생성 그룹', desc: '취미나 관심사 기반 그룹' },
-      { type: GroupType.LOCATION, name: '장소 그룹', desc: '특정 장소 기반 그룹' },
-      { type: GroupType.INSTANCE, name: '이벤트 그룹', desc: '일회성 이벤트 그룹' },
+      { type: GroupType.CREATED, name: t('group:groupTypes.created'), desc: t('group:groupTypes.createdDesc') },
+      { type: GroupType.LOCATION, name: t('group:groupTypes.location'), desc: t('group:groupTypes.locationDesc') },
+      { type: GroupType.INSTANCE, name: t('group:groupTypes.instance'), desc: t('group:groupTypes.instanceDesc') },
     ];
 
     return (
       <View style={styles.pickerOverlay}>
         <View style={styles.pickerModal}>
-          <Text style={styles.pickerTitle}>그룹 유형 선택</Text>
+          <Text style={styles.pickerTitle}>{t('group:createGroup.selectGroupType')}</Text>
           {groupTypes.map(({ type, name, desc }) => (
             <TouchableOpacity
               key={type}
@@ -203,7 +205,7 @@ export const CreateGroupScreen = () => {
             style={styles.pickerCancelButton}
             onPress={() => setShowTypePicker(false)}
           >
-            <Text style={styles.pickerCancelText}>취소</Text>
+            <Text style={styles.pickerCancelText}>{t('common:buttons.cancel')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -219,15 +221,15 @@ export const CreateGroupScreen = () => {
   const getGroupTypeName = (type: GroupType): string => {
     switch (type) {
       case GroupType.CREATED:
-        return '생성 그룹';
+        return t('group:groupTypes.created');
       case GroupType.LOCATION:
-        return '장소 그룹';
+        return t('group:groupTypes.location');
       case GroupType.INSTANCE:
-        return '이벤트 그룹';
+        return t('group:groupTypes.instance');
       case GroupType.OFFICIAL:
-        return '공식 그룹';
+        return t('group:groupTypes.official');
       default:
-        return '일반 그룹';
+        return t('group:groupTypes.general');
     }
   };
 
@@ -238,9 +240,9 @@ export const CreateGroupScreen = () => {
           style={styles.headerButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.headerButtonText}>취소</Text>
+          <Text style={styles.headerButtonText}>{t('common:buttons.cancel')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>새 그룹 만들기</Text>
+        <Text style={styles.headerTitle}>{t('group:createGroup.title')}</Text>
         <TouchableOpacity
           style={[
             styles.headerButton,
@@ -253,17 +255,17 @@ export const CreateGroupScreen = () => {
           {isSubmitting ? (
             <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
           ) : (
-            <Text style={styles.submitButtonText}>생성</Text>
+            <Text style={styles.submitButtonText}>{t('group:createGroup.create')}</Text>
           )}
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>그룹 이름 *</Text>
+          <Text style={styles.sectionLabel}>{t('group:createGroup.groupName')} *</Text>
           <TextInput
             style={[styles.textInput, errors.name && styles.textInputError]}
-            placeholder="그룹 이름을 입력해주세요"
+            placeholder={t('group:createGroup.groupNamePlaceholder')}
             placeholderTextColor={COLORS.TEXT.LIGHT}
             value={formData.name}
             onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
@@ -274,10 +276,10 @@ export const CreateGroupScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>그룹 설명 *</Text>
+          <Text style={styles.sectionLabel}>{t('group:createGroup.groupDescription')} *</Text>
           <TextInput
             style={[styles.textAreaInput, errors.description && styles.textInputError]}
-            placeholder="그룹에 대해 자세히 설명해주세요"
+            placeholder={t('group:createGroup.groupDescriptionPlaceholder')}
             placeholderTextColor={COLORS.TEXT.LIGHT}
             value={formData.description}
             onChangeText={(text) => setFormData(prev => ({ ...prev, description: text }))}
@@ -290,7 +292,7 @@ export const CreateGroupScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>그룹 유형</Text>
+          <Text style={styles.sectionLabel}>{t('group:createGroup.groupType')}</Text>
           <TouchableOpacity
             style={styles.pickerButton}
             onPress={() => setShowTypePicker(true)}
@@ -302,13 +304,13 @@ export const CreateGroupScreen = () => {
 
         {formData.type === GroupType.LOCATION && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>장소 *</Text>
+            <Text style={styles.sectionLabel}>{t('group:createGroup.location')} *</Text>
             <TextInput
               style={[
                 styles.textInput, 
                 errors.location?.address && styles.textInputError
               ]}
-              placeholder="예: 강남역 스타벅스"
+              placeholder={t('group:createGroup.locationPlaceholder')}
               placeholderTextColor={COLORS.TEXT.LIGHT}
               value={formData.location?.address || ''}
               onChangeText={(text) => 
@@ -325,7 +327,7 @@ export const CreateGroupScreen = () => {
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>최소 참여 인원</Text>
+          <Text style={styles.sectionLabel}>{t('group:createGroup.minimumMembers')}</Text>
           <View style={styles.numberInputContainer}>
             <TouchableOpacity
               style={styles.numberButton}
@@ -338,7 +340,7 @@ export const CreateGroupScreen = () => {
             >
               <Text style={styles.numberButtonText}>-</Text>
             </TouchableOpacity>
-            <Text style={styles.numberDisplay}>{formData.minimumMembers}명</Text>
+            <Text style={styles.numberDisplay}>{formData.minimumMembers}{t('group:createGroup.people')}</Text>
             <TouchableOpacity
               style={styles.numberButton}
               onPress={() => 
@@ -352,16 +354,16 @@ export const CreateGroupScreen = () => {
             </TouchableOpacity>
           </View>
           <Text style={styles.helperText}>
-            매칭이 활성화되려면 최소 이 인원이 필요합니다
+            {t('group:createGroup.minimumMembersHelper')}
           </Text>
         </View>
 
         <View style={styles.section}>
           <View style={styles.switchContainer}>
             <View>
-              <Text style={styles.switchLabel}>비공개 그룹</Text>
+              <Text style={styles.switchLabel}>{t('group:createGroup.privateGroup')}</Text>
               <Text style={styles.switchDescription}>
-                초대받은 사용자만 참여할 수 있습니다
+                {t('group:createGroup.privateGroupDesc')}
               </Text>
             </View>
             <Switch
@@ -375,13 +377,9 @@ export const CreateGroupScreen = () => {
         </View>
 
         <View style={styles.guidelines}>
-          <Text style={styles.guidelinesTitle}>그룹 생성 가이드라인</Text>
+          <Text style={styles.guidelinesTitle}>{t('group:createGroup.guidelines.title')}</Text>
           <Text style={styles.guidelinesText}>
-            • 건전하고 긍정적인 목적의 그룹을 만들어주세요{'\n'}
-            • 차별적이거나 부적절한 내용은 금지됩니다{'\n'}
-            • 그룹 이름과 설명은 명확하고 이해하기 쉽게 작성해주세요{'\n'}
-            • 최소 인원이 달성되면 자동으로 매칭이 활성화됩니다{'\n'}
-            • 그룹 관리자는 부적절한 멤버를 제재할 수 있습니다
+            {t('group:createGroup.guidelines.content')}
           </Text>
         </View>
       </ScrollView>

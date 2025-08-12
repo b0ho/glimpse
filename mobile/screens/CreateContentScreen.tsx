@@ -12,6 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
@@ -19,6 +20,7 @@ import { Group, Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 export const CreateContentScreen = () => {
+  const { t } = useTranslation(['common', 'group']);
   const [contentText, setContentText] = useState('');
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);

@@ -2,8 +2,17 @@
   "types": {
     "official": "공식 그룹",
     "created": "생성 그룹",
-    "instance": "임시 그룹",
-    "location": "위치 그룹"
+    "instance": "이벤트 그룹",
+    "location": "위치 그룹",
+    "general": "일반 그룹"
+  },
+  "members": {
+    "count": "{{count}}명"
+  },
+  "status": {
+    "matchingActive": "매칭 활성",
+    "matchingInactive": "매칭 비활성",
+    "expiresAt": "{{date}}까지"
   },
   "list": {
     "title": "그룹 목록",
@@ -17,8 +26,61 @@
     "leaveGroup": "그룹 나가기",
     "manageGroup": "그룹 관리"
   },
+  "groupTypes": {
+    "created": "생성 그룹",
+    "location": "위치 그룹",
+    "instance": "이벤트 그룹",
+    "official": "공식 그룹",
+    "general": "일반 그룹",
+    "createdDesc": "사용자가 만든 관심사 기반 그룹",
+    "locationDesc": "특정 위치 기반 그룹",
+    "instanceDesc": "이벤트나 행사를 위한 임시 그룹"
+  },
+  "createGroup": {
+    "title": "새 그룹 만들기",
+    "create": "만들기",
+    "groupName": "그룹 이름",
+    "groupNamePlaceholder": "그룹 이름을 입력하세요 (예: 서울 독서 모임)",
+    "groupDescription": "그룹 설명",
+    "groupDescriptionPlaceholder": "그룹의 목적과 활동을 설명해주세요",
+    "groupType": "그룹 유형",
+    "selectGroupType": "그룹 유형 선택",
+    "location": "장소",
+    "locationPlaceholder": "장소 주소를 입력하세요",
+    "minimumMembers": "최소 참여 인원",
+    "people": "명",
+    "minimumMembersHelper": "매칭이 활성화되려면 최소 이 인원이 필요합니다",
+    "privateGroup": "비공개 그룹",
+    "privateGroupDesc": "초대받은 사용자만 참여할 수 있습니다",
+    "validation": {
+      "nameRequired": "그룹 이름을 입력해주세요",
+      "nameMinLength": "그룹 이름은 최소 2자 이상이어야 합니다",
+      "nameMaxLength": "그룹 이름은 30자 이하여야 합니다",
+      "descriptionRequired": "그룹 설명을 입력해주세요",
+      "descriptionMinLength": "설명은 최소 10자 이상이어야 합니다",
+      "descriptionMaxLength": "설명은 200자 이하여야 합니다",
+      "locationRequired": "위치 그룹은 장소를 입력해야 합니다"
+    },
+    "errors": {
+      "inputError": "입력 오류",
+      "fillAllFields": "모든 필수 항목을 올바르게 입력해주세요",
+      "createFailed": "그룹 생성에 실패했습니다",
+      "createFailedTitle": "생성 실패"
+    },
+    "success": {
+      "title": "그룹 생성 완료!",
+      "message": "\"{{name}}\" 그룹이 성공적으로 생성되었습니다",
+      "invite": "멤버 초대하기"
+    },
+    "guidelines": {
+      "title": "그룹 생성 가이드라인",
+      "content": "• 건전하고 긍정적인 목적의 그룹을 만들어주세요\n• 차별적이거나 부적절한 내용은 금지됩니다\n• 그룹 이름과 설명은 명확하고 이해하기 쉽게 작성해주세요\n• 최소 인원이 달성되면 자동으로 매칭이 활성화됩니다\n• 그룹 관리자는 부적절한 멤버를 제재할 수 있습니다"
+    }
+  },
   "create": {
     "title": "그룹 생성",
+    "accessibilityLabel": "새 그룹 만들기",
+    "accessibilityHint": "새로운 그룹을 생성할 수 있는 화면으로 이동합니다",
     "groupName": "그룹 이름",
     "groupNamePlaceholder": "그룹 이름을 입력하세요",
     "description": "그룹 설명",
@@ -63,7 +125,7 @@
   "explore": {
     "title": "그룹 탐색",
     "subtitle": "관심사와 소속이 비슷한 사람들을 만나보세요",
-    "joinedGroups": "참여 중인 그룹: {{count}}개",
+    "joinedCount": "참여 중인 그룹: {{count}}개",
     "empty": {
       "title": "그룹을 찾을 수 없어요",
       "subtitle": "새로운 그룹이 곧 추가될 예정입니다!"
@@ -76,6 +138,15 @@
     "joined": "참여중",
     "join": "참여하기",
     "until": "{{date}}까지"
+  },
+  "join": {
+    "success": {
+      "title": "참여 완료! 🎉",
+      "message": "\"{{groupName}}\" 그룹에 성공적으로 참여했습니다."
+    }
+  },
+  "loading": {
+    "groups": "그룹을 불러오는 중..."
   },
   "alerts": {
     "alreadyJoined": "이미 참여 중인 그룹입니다.",

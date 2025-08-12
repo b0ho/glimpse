@@ -45,5 +45,52 @@
   },
   "errors": {
     "title": "오류"
+  },
+  "whoLikesYou": {
+    "title": "나를 좋아한 사람",
+    "noLikes": "아직 받은 좋아요가 없어요",
+    "noLikesDescription": "누군가 나를 좋아하면 여기에 표시됩니다",
+    "noLikesFullDescription": "그룹에 참여하고 활동하면\n더 많은 사람들이 관심을 보일 거예요!",
+    "premiumRequired": "프리미엄 전용 기능",
+    "premiumDescription": "누가 나에게 좋아요를 보냈는지 확인하려면\n프리미엄 구독이 필요해요",
+    "upgradeToPremium": "프리미엄 가입하기",
+    "likedYou": "님이 좋아합니다",
+    "superLikedYou": "님이 슈퍼 좋아합니다",
+    "sendLikeButton": "좋아요",
+    "superLikeButton": "슈퍼",
+    "limitExceeded": "한도 초과",
+    "sendLike": {
+      "title": "좋아요 보내기",
+      "message": "{{nickname}}님에게 좋아요를 보내시겠습니까?",
+      "confirm": "좋아요 보내기",
+      "cancel": "취소"
+    },
+    "matchSuccess": {
+      "title": "매칭 성공!",
+      "message": "{{nickname}}님과 매칭되었습니다!\n이제 채팅을 시작할 수 있습니다.",
+      "startChat": "채팅하기"
+    },
+    "premiumFeature": {
+      "title": "프리미엄 기능",
+      "message": "슈퍼 좋아요는 프리미엄 사용자만 이용할 수 있습니다.",
+      "subscribe": "구독하기"
+    },
+    "superLike": {
+      "limitExceeded": "슈퍼 좋아요 한도 초과",
+      "limitExceededMessage": "오늘 사용 가능한 슈퍼 좋아요가 {{remaining}}개 남았습니다.\n내일 다시 시도해주세요.",
+      "sendTitle": "슈퍼 좋아요 보내기",
+      "sendMessage": "{{nickname}}님에게 슈퍼 좋아요를 보내시겠습니까?\n\n⭐ 슈퍼 좋아요는 즉시 상대방에게 알림이 가며 더 높은 매칭 확률을 제공합니다.\n💎 오늘 {{remaining}}개 더 사용할 수 있습니다.",
+      "sendButton": "⭐ 슈퍼 좋아요",
+      "matchSuccess": "🌟 슈퍼 매칭 성공!",
+      "matchSuccessMessage": "⭐ {{nickname}}님과 슈퍼 매칭되었습니다!\n특별한 대화를 시작해보세요!",
+      "startChat": "💬 채팅하기",
+      "sendFailed": "슈퍼 좋아요 전송에 실패했습니다.",
+      "sendError": "슈퍼 좋아요 전송 중 오류가 발생했습니다."
+    },
+    "errors": {
+      "sendLikeFailed": "좋아요 전송에 실패했습니다.",
+      "sendLikeError": "좋아요 전송 중 오류가 발생했습니다.",
+      "loadFailed": "좋아요 목록을 불러올 수 없습니다"
+    }
   }
 }

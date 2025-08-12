@@ -45,5 +45,52 @@
   },
   "errors": {
     "title": "Error"
+  },
+  "whoLikesYou": {
+    "title": "Who Likes You",
+    "noLikes": "No likes yet",
+    "noLikesDescription": "When someone likes you, it will appear here",
+    "noLikesFullDescription": "Join groups and be active\nMore people will show interest!",
+    "premiumRequired": "Premium Feature",
+    "premiumDescription": "Subscribe to premium to see who likes you",
+    "upgradeToPremium": "Subscribe to Premium",
+    "likedYou": "liked you",
+    "superLikedYou": "super liked you",
+    "sendLikeButton": "Like",
+    "superLikeButton": "Super",
+    "limitExceeded": "Limit Exceeded",
+    "sendLike": {
+      "title": "Send Like",
+      "message": "Do you want to send a like to {{nickname}}?",
+      "confirm": "Send Like",
+      "cancel": "Cancel"
+    },
+    "matchSuccess": {
+      "title": "Match Success!",
+      "message": "You matched with {{nickname}}!\nYou can now start chatting.",
+      "startChat": "Start Chat"
+    },
+    "premiumFeature": {
+      "title": "Premium Feature",
+      "message": "Super likes are only available for premium users.",
+      "subscribe": "Subscribe"
+    },
+    "superLike": {
+      "limitExceeded": "Super Like Limit Exceeded",
+      "limitExceededMessage": "You have {{remaining}} super likes left today.\nPlease try again tomorrow.",
+      "sendTitle": "Send Super Like",
+      "sendMessage": "Send a super like to {{nickname}}?\n\n⭐ Super likes notify immediately and provide higher matching rates.\n💎 You can use {{remaining}} more today.",
+      "sendButton": "⭐ Super Like",
+      "matchSuccess": "🌟 Super Match Success!",
+      "matchSuccessMessage": "⭐ You super matched with {{nickname}}!\nStart a special conversation!",
+      "startChat": "💬 Start Chat",
+      "sendFailed": "Failed to send super like.",
+      "sendError": "An error occurred while sending super like."
+    },
+    "errors": {
+      "sendLikeFailed": "Failed to send like.",
+      "sendLikeError": "An error occurred while sending like.",
+      "loadFailed": "Failed to load likes"
+    }
   }
 }

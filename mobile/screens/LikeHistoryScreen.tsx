@@ -11,9 +11,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { format } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import { ko, enUS } from 'date-fns/locale';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
@@ -21,6 +22,7 @@ import { Like, AppMode, MODE_TEXTS } from '@shared/types';
 
 export const LikeHistoryScreen = () => {
   const navigation = useNavigation();
+  const { t, i18n } = useTranslation(['matching', 'common']);
   const { currentMode } = useAuthStore();
   const {
     sentLikes,
@@ -56,22 +58,33 @@ export const LikeHistoryScreen = () => {
     if (!like) return;
 
     const targetUser = like.toUserId; // 실제로는 닉네임 가져와야 함
-    const actionText = currentMode === AppMode.DATING ? '호감있어요' : '친해지고 싶어요';
 
     Alert.alert(
-      `${actionText} 취소`,
-      `이 사용자에게 보낸 ${actionText}를 취소하시겠습니까?\n\n취소 후 2주간 다시 보낼 수 없습니다.`,
+      currentMode === AppMode.DATING 
+        ? t('matching:likeHistory.cancelLikeTitle')
+        : t('matching:likeHistory.cancelFriendTitle'),
+      currentMode === AppMode.DATING
+        ? t('matching:likeHistory.cancelLikeMessage')
+        : t('matching:likeHistory.cancelFriendMessage'),
       [
-        { text: '아니오', style: 'cancel' },
+        { text: t('matching:likeHistory.no'), style: 'cancel' },
         {
-          text: '취소하기',
+          text: t('matching:likeHistory.cancelButton'),
           style: 'destructive',
           onPress: async () => {
             const success = await cancelLike(likeId);
             if (success) {
-              Alert.alert('완료', `${actionText}가 취소되었습니다.`);
+              Alert.alert(
+                t('matching:likeHistory.complete'),
+                currentMode === AppMode.DATING
+                  ? t('matching:likeHistory.likeCancelled')
+                  : t('matching:likeHistory.friendRequestCancelled')
+              );
             } else {
-              Alert.alert('오류', `취소에 실패했습니다: ${error}`);
+              Alert.alert(
+                t('matching:likeHistory.error'),
+                t('matching:likeHistory.cancelFailed', { error })
+              );
             }
           },
         },
@@ -81,26 +94,35 @@ export const LikeHistoryScreen = () => {
 
   const handleDeleteHistory = () => {
     if (selectedLikes.length === 0) {
-      Alert.alert('알림', '삭제할 항목을 선택해주세요.');
+      Alert.alert(
+        t('matching:likeHistory.notification'),
+        t('matching:likeHistory.selectItemsToDelete')
+      );
       return;
     }
 
     Alert.alert(
-      '이력 삭제',
-      `선택한 ${selectedLikes.length}개의 이력을 삭제하시겠습니까?\n\n삭제된 이력은 복구할 수 없습니다.`,
+      t('matching:likeHistory.deleteHistory'),
+      t('matching:likeHistory.deleteHistoryMessage', { count: selectedLikes.length }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('matching:likeHistory.cancelAction'), style: 'cancel' },
         {
-          text: '삭제',
+          text: t('matching:likeHistory.delete'),
           style: 'destructive',
           onPress: async () => {
             const success = await deleteLikeHistory(selectedLikes);
             if (success) {
-              Alert.alert('완료', '선택한 이력이 삭제되었습니다.');
+              Alert.alert(
+                t('matching:likeHistory.complete'),
+                t('matching:likeHistory.historyDeleted')
+              );
               setSelectedLikes([]);
               setIsSelectionMode(false);
             } else {
-              Alert.alert('오류', '삭제에 실패했습니다.');
+              Alert.alert(
+                t('matching:likeHistory.error'),
+                t('matching:likeHistory.deleteFailed')
+              );
             }
           },
         },
@@ -152,10 +174,13 @@ export const LikeHistoryScreen = () => {
               <Text style={styles.userAvatarText}>?</Text>
             </View>
             <View style={styles.userDetails}>
-              <Text style={styles.userName}>익명 사용자</Text>
-              <Text style={styles.groupName}>그룹: {item.groupId}</Text>
+              <Text style={styles.userName}>{t('matching:likeHistory.anonymousUser')}</Text>
+              <Text style={styles.groupName}>{t('matching:likeHistory.group')}: {item.groupId}</Text>
               <Text style={styles.likeDate}>
-                {format(new Date(item.createdAt), 'M월 d일 HH:mm', { locale: ko })}
+                {format(new Date(item.createdAt), 
+                  i18n.language === 'ko' ? 'M월 d일 HH:mm' : 'MMM d, HH:mm',
+                  { locale: i18n.language === 'ko' ? ko : enUS }
+                )}
               </Text>
             </View>
           </View>
@@ -164,7 +189,7 @@ export const LikeHistoryScreen = () => {
             {item.isSuper && (
               <View style={styles.superLikeBadge}>
                 <Ionicons name="star" size={14} color={COLORS.WARNING} />
-                <Text style={styles.superLikeText}>슈퍼</Text>
+                <Text style={styles.superLikeText}>{t('matching:likeHistory.super')}</Text>
               </View>
             )}
             
@@ -173,7 +198,7 @@ export const LikeHistoryScreen = () => {
                 style={styles.cancelButton}
                 onPress={() => handleCancelLike(item.id)}
               >
-                <Text style={styles.cancelButtonText}>취소</Text>
+                <Text style={styles.cancelButtonText}>{t('matching:likeHistory.cancelLike')}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -191,14 +216,14 @@ export const LikeHistoryScreen = () => {
       />
       <Text style={styles.emptyTitle}>
         {currentMode === AppMode.DATING 
-          ? '보낸 호감이 없습니다' 
-          : '보낸 친구 요청이 없습니다'
+          ? t('matching:likeHistory.emptyTitle')
+          : t('matching:likeHistory.emptyFriendTitle')
         }
       </Text>
       <Text style={styles.emptyDescription}>
         {currentMode === AppMode.DATING
-          ? '관심있는 사람에게 호감을 표시해보세요!'
-          : '새로운 친구에게 친구 요청을 보내보세요!'
+          ? t('matching:likeHistory.emptyDescription')
+          : t('matching:likeHistory.emptyFriendDescription')
         }
       </Text>
     </View>
@@ -214,7 +239,10 @@ export const LikeHistoryScreen = () => {
       </TouchableOpacity>
       
       <Text style={styles.headerTitle}>
-        {currentMode === AppMode.DATING ? '호감 관리' : '친구 요청 관리'}
+        {currentMode === AppMode.DATING 
+          ? t('matching:likeHistory.title')
+          : t('matching:likeHistory.friendTitle')
+        }
       </Text>
       
       {isSelectionMode ? (
@@ -226,7 +254,7 @@ export const LikeHistoryScreen = () => {
             }}
             style={styles.headerAction}
           >
-            <Text style={styles.cancelText}>취소</Text>
+            <Text style={styles.cancelText}>{t('matching:likeHistory.cancel')}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity
@@ -241,7 +269,7 @@ export const LikeHistoryScreen = () => {
           onPress={() => setIsSelectionMode(true)}
           style={styles.selectButton}
         >
-          <Text style={styles.selectText}>선택</Text>
+          <Text style={styles.selectText}>{t('matching:likeHistory.select')}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -278,7 +306,7 @@ export const LikeHistoryScreen = () => {
       {isSelectionMode && selectedLikes.length > 0 && (
         <View style={styles.selectionBar}>
           <Text style={styles.selectionText}>
-            {selectedLikes.length}개 선택됨
+            {t('matching:likeHistory.deleteSelected', { count: selectedLikes.length })}
           </Text>
         </View>
       )}

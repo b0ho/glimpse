@@ -19,10 +19,77 @@
   },
   "notificationSettings": {
     "title": "Notification Settings",
-    "likes": "Like Notifications",
-    "matches": "Match Notifications",
-    "messages": "Message Notifications",
-    "friendRequests": "Friend Request Notifications"
+    "reset": "Reset",
+    "resetTitle": "Reset Notification Settings",
+    "resetMessage": "Do you want to reset all notification settings to default?",
+    "resetComplete": "Complete",
+    "resetCompleteMessage": "Notification settings have been reset.",
+    "cancel": "Cancel",
+    "globalSettings": {
+      "title": "General Settings",
+      "pushNotifications": "Push Notifications",
+      "pushDescription": "Enable all push notifications from the app"
+    },
+    "matchSettings": {
+      "title": "Match",
+      "friendTitle": "Friends",
+      "newMatch": "New Match",
+      "newFriend": "New Friend",
+      "newMatchDescription": "Receive notifications when you match with someone",
+      "newFriendDescription": "Receive notifications when you become friends with someone",
+      "likesReceived": "Likes Received",
+      "friendRequestsReceived": "Friend Requests Received",
+      "likesReceivedDescription": "Receive notifications when someone likes you",
+      "friendRequestsReceivedDescription": "Receive notifications when someone sends you a friend request",
+      "superLikes": "Super Likes",
+      "superLikesDescription": "Receive notifications when you receive a super like"
+    },
+    "messageSettings": {
+      "title": "Messages",
+      "newMessage": "New Messages",
+      "newMessageDescription": "Receive notifications when you receive messages from matches"
+    },
+    "groupSettings": {
+      "title": "Groups",
+      "groupInvites": "Group Invites",
+      "groupInvitesDescription": "Receive notifications when you're invited to a new group"
+    },
+    "premium": {
+      "title": "Premium Notification Features",
+      "description": "Upgrade to Premium to receive likes notifications and more features!",
+      "viewPremium": "View Premium",
+      "feature": "Premium Feature",
+      "upgradeTitle": "Premium Feature",
+      "upgradeMessage": "This feature is only available for Premium users. Would you like to upgrade to Premium?",
+      "upgrade": "Upgrade"
+    },
+    "test": {
+      "title": "Test",
+      "sendNotification": "Send Test Notification"
+    },
+    "alerts": {
+      "premiumFeature": "Premium Feature",
+      "premiumFeatureDescription": "This feature is only available for premium users. Would you like to upgrade to premium?",
+      "upgrade": "Upgrade",
+      "testComplete": "Test Complete",
+      "testCompleteDescription": "Test notification has been sent!",
+      "testFailed": "Failed to send test notification.",
+      "resetTitle": "Reset Notification Settings",
+      "resetDescription": "Reset all notification settings to default values?",
+      "resetComplete": "Notification settings have been reset.",
+      "resetFailed": "Failed to reset settings."
+    },
+    "premium": {
+      "title": "Premium Notification Features",
+      "description": "Upgrade to premium to get like notifications and more features!",
+      "viewPremium": "View Premium"
+    },
+    "info": {
+      "title": "📱 Notification Settings Guide",
+      "deviceSettings": "• You must also allow notifications in your device settings to receive them",
+      "batterySaver": "• Notifications may be delayed in battery saver mode",
+      "appClosed": "• You may not receive some notifications if the app is completely closed"
+    }
   },
   "otherSettings": {
     "title": "Other",

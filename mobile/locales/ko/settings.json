@@ -19,10 +19,77 @@
   },
   "notificationSettings": {
     "title": "알림 설정",
-    "likes": "좋아요 알림",
-    "matches": "매칭 알림",
-    "messages": "메시지 알림",
-    "friendRequests": "친구 요청 알림"
+    "reset": "초기화",
+    "resetTitle": "알림 설정 초기화",
+    "resetMessage": "모든 알림 설정을 기본값으로 초기화하시겠어요?",
+    "resetComplete": "완료",
+    "resetCompleteMessage": "알림 설정이 초기화되었습니다.",
+    "cancel": "취소",
+    "globalSettings": {
+      "title": "전체 설정",
+      "pushNotifications": "푸시 알림",
+      "pushDescription": "앱에서 보내는 모든 푸시 알림을 활성화합니다"
+    },
+    "matchSettings": {
+      "title": "매치",
+      "friendTitle": "친구",
+      "newMatch": "새로운 매치",
+      "newFriend": "새로운 친구",
+      "newMatchDescription": "서로 좋아요를 눌렀을 때 알림을 받습니다",
+      "newFriendDescription": "서로 친구가 되었을 때 알림을 받습니다",
+      "likesReceived": "좋아요 받음",
+      "friendRequestsReceived": "친구 요청 받음",
+      "likesReceivedDescription": "누군가 나에게 좋아요를 보냈을 때 알림을 받습니다",
+      "friendRequestsReceivedDescription": "누군가 나에게 친구 요청을 보냈을 때 알림을 받습니다",
+      "superLikes": "슈퍼 좋아요",
+      "superLikesDescription": "슈퍼 좋아요를 받았을 때 알림을 받습니다"
+    },
+    "messageSettings": {
+      "title": "메시지",
+      "newMessage": "새로운 메시지",
+      "newMessageDescription": "매치된 상대로부터 메시지를 받았을 때 알림을 받습니다"
+    },
+    "groupSettings": {
+      "title": "그룹",
+      "groupInvites": "그룹 초대",
+      "groupInvitesDescription": "새로운 그룹에 초대받았을 때 알림을 받습니다"
+    },
+    "premium": {
+      "title": "프리미엄 알림 기능",
+      "description": "프리미엄으로 업그레이드하면 좋아요 받음 알림과 더 많은 기능을 이용할 수 있어요!",
+      "viewPremium": "프리미엄 보기",
+      "feature": "프리미엄 기능",
+      "upgradeTitle": "프리미엄 기능",
+      "upgradeMessage": "이 기능은 프리미엄 사용자만 이용할 수 있습니다. 프리미엄으로 업그레이드하시겠어요?",
+      "upgrade": "업그레이드"
+    },
+    "test": {
+      "title": "테스트",
+      "sendNotification": "테스트 알림 보내기"
+    },
+    "alerts": {
+      "premiumFeature": "프리미엄 기능",
+      "premiumFeatureDescription": "이 기능은 프리미엄 사용자만 이용할 수 있습니다. 프리미엄으로 업그레이드하시겠어요?",
+      "upgrade": "업그레이드",
+      "testComplete": "테스트 완료",
+      "testCompleteDescription": "테스트 알림이 전송되었습니다!",
+      "testFailed": "테스트 알림 전송에 실패했습니다.",
+      "resetTitle": "알림 설정 초기화",
+      "resetDescription": "모든 알림 설정을 기본값으로 초기화하시겠어요?",
+      "resetComplete": "알림 설정이 초기화되었습니다.",
+      "resetFailed": "설정 초기화에 실패했습니다."
+    },
+    "premium": {
+      "title": "프리미엄 알림 기능",
+      "description": "프리미엄으로 업그레이드하면 좋아요 받음 알림과 더 많은 기능을 이용할 수 있어요!",
+      "viewPremium": "프리미엄 보기"
+    },
+    "info": {
+      "title": "📱 알림 설정 안내",
+      "deviceSettings": "• 알림을 받으려면 기기의 설정에서도 알림을 허용해야 합니다",
+      "batterySaver": "• 배터리 절약 모드에서는 알림이 지연될 수 있습니다",
+      "appClosed": "• 앱을 완전히 종료하면 일부 알림을 받지 못할 수 있습니다"
+    }
   },
   "otherSettings": {
     "title": "기타",

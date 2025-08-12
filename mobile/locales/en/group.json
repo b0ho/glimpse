@@ -16,8 +16,56 @@
   "types": {
     "official": "Official Group",
     "created": "Created Group", 
-    "instance": "Instance Group",
-    "location": "Location Group"
+    "instance": "Event Group",
+    "location": "Location Group",
+    "general": "General Group"
+  },
+  "members": {
+    "count_one": "{{count}} member",
+    "count_other": "{{count}} members"
+  },
+  "status": {
+    "matchingActive": "Matching Active",
+    "matchingInactive": "Matching Inactive",
+    "expiresAt": "Until {{date}}"
+  },
+  "explore": {
+    "title": "Explore Groups",
+    "subtitle": "Meet people with similar interests and affiliations",
+    "joinedCount_one": "Joined Groups: {{count}}",
+    "joinedCount_other": "Joined Groups: {{count}}",
+    "empty": {
+      "title": "No groups found",
+      "subtitle": "New groups will be added soon!"
+    },
+    "joined": "Joined",
+    "join": "Join"
+  },
+  "join": {
+    "success": {
+      "title": "Joined Successfully! 🎉",
+      "message": "Successfully joined \"{{groupName}}\" group."
+    }
+  },
+  "loading": {
+    "groups": "Loading groups..."
+  },
+  "alerts": {
+    "alreadyJoined": "You have already joined this group.",
+    "joinRestricted": "Joining is currently restricted for gender balance.\nPlease try again later.",
+    "joinConfirm": "Do you want to join \"{{name}}\" group?\n\nAfter joining, you can communicate anonymously with other group members.",
+    "joinTitle": "Join Group",
+    "cancel": "Cancel",
+    "join": "Join",
+    "error": "An error occurred while joining the group."
+  },
+  "errors": {
+    "loadFailed": "Failed to load group list."
+  },
+  "create": {
+    "title": "Create Group",
+    "accessibilityLabel": "Create New Group",
+    "accessibilityHint": "Navigate to screen where you can create a new group"
   },
   "joinInvite": {
     "title": "Group Invitation",
@@ -75,6 +123,57 @@
       "title": "No created groups",
       "subtitle": "Create new groups and meet people!",
       "button": "Create New Group"
+    }
+  },
+  "groupTypes": {
+    "created": "Created Group",
+    "location": "Location Group",
+    "instance": "Event Group",
+    "official": "Official Group",
+    "general": "General Group",
+    "createdDesc": "Interest-based groups created by users",
+    "locationDesc": "Groups based on specific locations",
+    "instanceDesc": "Temporary groups for events or occasions"
+  },
+  "createGroup": {
+    "title": "Create New Group",
+    "create": "Create",
+    "groupName": "Group Name",
+    "groupNamePlaceholder": "Enter group name (e.g., Seoul Book Club)",
+    "groupDescription": "Group Description",
+    "groupDescriptionPlaceholder": "Describe your group's purpose and activities",
+    "groupType": "Group Type",
+    "selectGroupType": "Select Group Type",
+    "location": "Location",
+    "locationPlaceholder": "Enter location address",
+    "minimumMembers": "Minimum Members",
+    "people": " people",
+    "minimumMembersHelper": "Matching will be activated when this minimum is reached",
+    "privateGroup": "Private Group",
+    "privateGroupDesc": "Only invited users can join",
+    "validation": {
+      "nameRequired": "Group name is required",
+      "nameMinLength": "Group name must be at least 2 characters",
+      "nameMaxLength": "Group name must be less than 30 characters",
+      "descriptionRequired": "Group description is required",
+      "descriptionMinLength": "Description must be at least 10 characters",
+      "descriptionMaxLength": "Description must be less than 200 characters",
+      "locationRequired": "Location is required for location groups"
+    },
+    "errors": {
+      "inputError": "Input Error",
+      "fillAllFields": "Please fill in all required fields correctly",
+      "createFailed": "Failed to create group",
+      "createFailedTitle": "Creation Failed"
+    },
+    "success": {
+      "title": "Group Created!",
+      "message": "\"{{name}}\" group has been created successfully",
+      "invite": "Invite Members"
+    },
+    "guidelines": {
+      "title": "Group Creation Guidelines",
+      "content": "• Create groups with positive and constructive purposes\n• Discriminatory or inappropriate content is prohibited\n• Write clear and easy-to-understand names and descriptions\n• Matching will be activated automatically when minimum members are reached\n• Group admins can moderate inappropriate members"
     }
   },
   "qrJoin": {

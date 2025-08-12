@@ -22,8 +22,8 @@ const SUPPORTED_LANGUAGES = {
 };
 
 // Import translations - with fallbacks for missing files
-let koCommon, koAuth, koGroup, koMatching, koChat, koPayment, koProfile, koSettings, koMatches, koPremium, koLocation;
-let enCommon, enAuth, enProfile, enMatching, enSettings, enMatches, enChat, enPremium, enLocation;
+let koCommon, koAuth, koGroup, koMatching, koChat, koPayment, koProfile, koSettings, koMatches, koPremium, koLocation, koNavigation;
+let enCommon, enAuth, enGroup, enProfile, enMatching, enSettings, enMatches, enChat, enPremium, enLocation, enNavigation;
 
 try {
   koCommon = require('../../locales/ko/common.json');
@@ -37,9 +37,11 @@ try {
   koMatches = require('../../locales/ko/matches.json');
   koPremium = require('../../locales/ko/premium.json');
   koLocation = require('../../locales/ko/location.json');
+  koNavigation = require('../../locales/ko/navigation.json');
   
   enCommon = require('../../locales/en/common.json');
   enAuth = require('../../locales/en/auth.json');
+  enGroup = require('../../locales/en/group.json');
   enProfile = require('../../locales/en/profile.json');
   enMatching = require('../../locales/en/matching.json');
   enSettings = require('../../locales/en/settings.json');
@@ -47,6 +49,7 @@ try {
   enChat = require('../../locales/en/chat.json');
   enPremium = require('../../locales/en/premium.json');
   enLocation = require('../../locales/en/location.json');
+  enNavigation = require('../../locales/en/navigation.json');
 } catch (error) {
   console.warn('Some translation files are missing, using defaults');
   // Default fallbacks
@@ -61,9 +64,11 @@ try {
   koMatches = koMatches || {};
   koPremium = koPremium || {};
   koLocation = koLocation || {};
+  koNavigation = koNavigation || {};
   
   enCommon = enCommon || { app: { name: 'Glimpse' } };
   enAuth = enAuth || {};
+  enGroup = enGroup || {};
   enProfile = enProfile || {};
   enMatching = enMatching || {};
   enSettings = enSettings || {};
@@ -71,6 +76,7 @@ try {
   enChat = enChat || {};
   enPremium = enPremium || {};
   enLocation = enLocation || {};
+  enNavigation = enNavigation || {};
 }
 
 // Translation resources
@@ -87,11 +93,13 @@ const resources = {
     matches: koMatches,
     premium: koPremium,
     location: koLocation,
+    navigation: koNavigation,
     home: (() => { try { return require('../../locales/ko/home.json'); } catch { return {}; } })(),
   },
   en: {
     common: enCommon,
     auth: enAuth,
+    group: enGroup,
     profile: enProfile,
     matching: enMatching,
     settings: enSettings,
@@ -99,9 +107,8 @@ const resources = {
     chat: enChat,
     premium: enPremium,
     location: enLocation,
+    navigation: enNavigation,
     home: (() => { try { return require('../../locales/en/home.json'); } catch { return {}; } })(),
-    // TODO: Add other English translations
-    group: {},
     payment: {},
   },
   // Other languages with safe fallbacks
@@ -118,6 +125,7 @@ const resources = {
     matches: {},
     premium: {},
     location: {},
+    navigation: {},
   },
   zh: {
     common: (() => { try { return require('../../locales/zh/common.json'); } catch { return {}; } })(),
@@ -132,6 +140,7 @@ const resources = {
     matches: {},
     premium: {},
     location: {},
+    navigation: {},
   },
   vi: {
     common: {},
@@ -146,6 +155,7 @@ const resources = {
     matches: {},
     premium: {},
     location: {},
+    navigation: {},
   },
   th: {
     common: {},
@@ -160,6 +170,7 @@ const resources = {
     matches: {},
     premium: {},
     location: {},
+    navigation: {},
   },
   es: {
     common: {},
@@ -174,6 +185,7 @@ const resources = {
     matches: {},
     premium: {},
     location: {},
+    navigation: {},
   },
   fr: {
     common: {},
@@ -188,6 +200,7 @@ const resources = {
     matches: {},
     premium: {},
     location: {},
+    navigation: {},
   },
 };
 
@@ -257,7 +270,7 @@ export const initI18n = async () => {
       lng: detectedLanguage,
       fallbackLng: FALLBACK_LANGUAGE,
       defaultNS: 'common',
-      ns: ['common', 'auth', 'group', 'matching', 'chat', 'payment', 'profile', 'settings', 'home', 'matches', 'premium', 'location'],
+      ns: ['common', 'auth', 'group', 'matching', 'chat', 'payment', 'profile', 'settings', 'home', 'matches', 'premium', 'location', 'navigation'],
       
       interpolation: {
         escapeValue: false, // React Native already escapes values

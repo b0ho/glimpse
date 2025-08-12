@@ -28,7 +28,9 @@
     "close": "Close",
     "share": "Share",
     "report": "Report",
-    "block": "Block"
+    "block": "Block",
+    "reset": "Reset",
+    "done": "Done"
   },
   "status": {
     "loading": "Loading...",
