@@ -92,6 +92,8 @@ export const ChatScreen = () => {
    * @description WebSocket 연결, 채팅방 활성화, 메시지 로드를 처리
    */
   useEffect(() => {
+    let mounted = true;
+    
     const initChat = async () => {
       if (!authStore.user?.id || !authStore.token) {
         Alert.alert(t('errors.error'), t('errors.loginRequired'));
@@ -99,33 +101,38 @@ export const ChatScreen = () => {
         return;
       }
 
+      if (isInitialized || !mounted) return; // 이미 초기화된 경우 건너뛰기
+
       try {
         // 채팅 시스템 초기화
-        if (!isInitialized) {
-          await initializeChat(authStore.user.id, authStore.token);
+        await initializeChat(authStore.user.id, authStore.token);
+        if (mounted) {
           setIsInitialized(true);
+          
+          // 채팅방 활성화
+          setActiveRoom(roomId);
+          
+          // 메시지 로드
+          await loadMessages(roomId);
         }
-
-        // 채팅방 활성화
-        setActiveRoom(roomId);
-        
-        // 메시지 로드
-        await loadMessages(roomId);
       } catch (error) {
-        console.error('Chat initialization failed:', error);
-        Alert.alert(t('errors.error'), t('errors.chatLoadFailed'));
+        if (mounted) {
+          console.error('Chat initialization failed:', error);
+          Alert.alert(t('errors.error'), t('errors.chatLoadFailed'));
+        }
       }
     };
 
-    initChat();
+    if (!isInitialized) {
+      initChat();
+    }
 
     // 화면을 벗어날 때 채팅방에서 나가기
     return () => {
-      if (activeRoomId === roomId) {
-        setActiveRoom(null);
-      }
+      mounted = false;
+      setActiveRoom(null);
     };
-  }, [roomId, authStore.user?.id, authStore.token, isInitialized, activeRoomId, initializeChat, loadMessages, navigation, setActiveRoom]);
+  }, [roomId]);
 
   /**
    * 네비게이션 헤더 설정

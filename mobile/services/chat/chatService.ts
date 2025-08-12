@@ -2,6 +2,7 @@ import { socketService } from './socketService';
 import apiClient from '../api/config';
 import { Message, ChatRoom } from '@/types';
 import { EncryptionService } from '../encryptionService';
+import { generateDummyChatMessages } from '@/utils/mockData';
 
 /**
  * 암호화 서비스 인스턴스
@@ -128,6 +129,13 @@ class ChatService implements ChatServiceInterface {
    * @description 메시지를 암호화하여 전송
    */
   async sendMessage(matchId: string, content: string, type: 'TEXT' | 'IMAGE' = 'TEXT'): Promise<void> {
+    // 개발 환경에서는 mock 동작
+    if (__DEV__) {
+      console.log('[chatService] Mock 메시지 전송:', { matchId, content, type });
+      // 실제 전송 대신 로컬에서 시뮬레이션
+      return;
+    }
+
     // Encrypt message content
     const encryptedContent = await encryptionService.encryptMessage(content);
     
@@ -207,6 +215,15 @@ class ChatService implements ChatServiceInterface {
    */
   async getMessages(matchId: string, page = 1, limit = 20): Promise<Message[]> {
     try {
+      // 개발 환경에서는 mock 데이터 사용
+      if (__DEV__) {
+        console.log('[chatService] Mock 메시지 데이터 로드 for matchId:', matchId);
+        await new Promise(resolve => setTimeout(resolve, 300)); // 로딩 시뮬레이션
+        const mockMessages = generateDummyChatMessages(matchId);
+        console.log('[chatService] Mock 메시지 반환:', mockMessages.length, '개');
+        return mockMessages;
+      }
+
       const response = await apiClient.get<{ data: Message[] }>(`/matches/${matchId}/messages`, { page, limit });
       
       // Decrypt messages

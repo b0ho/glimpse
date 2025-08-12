@@ -188,17 +188,32 @@ export const useChatStore = create<ChatStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          // Socket.IO 연결
-          await chatService.connect(userId, authToken);
+          // 개발 환경에서는 mock 연결
+          if (__DEV__) {
+            console.log('[chatSlice] Mock 채팅 초기화:', { userId });
+            // 약간의 로딩 시뮬레이션
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            set({ 
+              connectionState: { 
+                isConnected: true, 
+                isReconnecting: false, 
+                lastConnectedAt: Date.now() 
+              } 
+            });
+          } else {
+            // Socket.IO 연결
+            await chatService.connect(userId, authToken);
 
-          // 연결 상태 업데이트
-          set({ 
-            connectionState: { 
-              isConnected: true, 
-              isReconnecting: false, 
-              lastConnectedAt: Date.now() 
-            } 
-          });
+            // 연결 상태 업데이트
+            set({ 
+              connectionState: { 
+                isConnected: true, 
+                isReconnecting: false, 
+                lastConnectedAt: Date.now() 
+              } 
+            });
+          }
 
           // 이벤트 리스너 설정
           chatService.onNewMessage(({ matchId, message }) => {
@@ -408,6 +423,27 @@ export const useChatStore = create<ChatStore>()(
           // Socket.IO로 메시지 전송 (서버에서 응답 이벤트로 받음)
           await chatService.sendMessage(roomId, content, type as 'TEXT' | 'IMAGE');
           
+          // 개발 환경에서는 로컬 상태도 업데이트
+          if (__DEV__) {
+            const newMessage: Message = {
+              id: `msg_${Date.now()}`,
+              matchId: roomId,
+              senderId: 'current_user',
+              content,
+              type,
+              isRead: true,
+              isEncrypted: false,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+
+            set((state) => ({
+              messages: {
+                ...state.messages,
+                [roomId]: [...(state.messages[roomId] || []), newMessage],
+              },
+            }));
+          }
           
         } catch (error) {
           console.error('Failed to send message:', error);
