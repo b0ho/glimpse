@@ -11,27 +11,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
-import { COLORS, FONTS, SIZES } from '../../constants/theme';
-
-/**
- * 스토리 사용자 인터페이스
- * @interface StoryUser
- */
-interface StoryUser {
-  /** 사용자 정보 */
-  user: {
-    /** 사용자 ID */
-    id: string;
-    /** 닉네임 */
-    nickname: string;
-    /** 프로필 이미지 URL */
-    profileImage?: string;
-  };
-  /** 스토리 리스트 */
-  stories: any[];
-  /** 보지 않은 스토리 여부 */
-  hasUnviewed: boolean;
-}
+import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { StoryUser as StoryUserType } from '@/utils/storyData';
 
 /**
  * StoryList 컴포넌트 Props
@@ -39,7 +20,7 @@ interface StoryUser {
  */
 interface StoryListProps {
   /** 스토리 목록 */
-  stories: StoryUser[];
+  stories: StoryUserType[];
   /** 스토리 클릭 핸들러 */
   onStoryPress: (userIndex: number) => void;
   /** 스토리 추가 핸들러 */
@@ -73,18 +54,19 @@ export const StoryList= ({
   const { t } = useTranslation();
   
   // Find current user's stories
-  const myStories = stories.find(story => story.user.id === currentUserId);
-  const otherStories = stories.filter(story => story.user.id !== currentUserId);
+  const myStories = stories.find(story => story.userId === currentUserId);
+  const otherStories = stories.filter(story => story.userId !== currentUserId);
 
   /**
    * 개별 스토리 아이템 렌더링
    * @param {Object} params - 리스트 아이템 파라미터
-   * @param {StoryUser} params.item - 스토리 사용자
+   * @param {StoryUserType} params.item - 스토리 사용자
    * @param {number} params.index - 리스트 인덱스
    * @returns {JSX.Element} 스토리 아이템 UI
    */
-  const renderStoryItem = ({ item, index }: { item: StoryUser; index: number }) => {
+  const renderStoryItem = ({ item, index }: { item: StoryUserType; index: number }) => {
     const actualIndex = myStories ? index + 1 : index;
+    const latestStory = item.stories[0]; // 최신 스토리를 프로필 이미지로 사용
     
     return (
       <TouchableOpacity
@@ -92,20 +74,20 @@ export const StoryList= ({
         onPress={() => onStoryPress(actualIndex)}
       >
         <View style={styles.storyImageContainer}>
-          {item.hasUnviewed ? (
+          {item.hasUnviewedStories ? (
             <LinearGradient
-              colors={[COLORS.primary, COLORS.secondary]}
+              colors={[COLORS.PRIMARY, COLORS.SECONDARY]}
               style={styles.storyRing}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
               <View style={styles.storyRingInner}>
-                {item.user.profileImage ? (
-                  <Image source={{ uri: item.user.profileImage }} style={styles.profileImage} />
+                {latestStory?.imageUri ? (
+                  <Image source={{ uri: latestStory.imageUri }} style={styles.profileImage} />
                 ) : (
                   <View style={styles.profileImagePlaceholder}>
                     <Text style={styles.profileImageText}>
-                      {item.user.nickname.charAt(0).toUpperCase()}
+                      {item.nickname.charAt(0).toUpperCase()}
                     </Text>
                   </View>
                 )}
@@ -113,12 +95,12 @@ export const StoryList= ({
             </LinearGradient>
           ) : (
             <View style={styles.viewedStoryContainer}>
-              {item.user.profileImage ? (
-                <Image source={{ uri: item.user.profileImage }} style={styles.profileImage} />
+              {latestStory?.imageUri ? (
+                <Image source={{ uri: latestStory.imageUri }} style={styles.profileImage} />
               ) : (
                 <View style={styles.profileImagePlaceholder}>
                   <Text style={styles.profileImageText}>
-                    {item.user.nickname.charAt(0).toUpperCase()}
+                    {item.nickname.charAt(0).toUpperCase()}
                   </Text>
                 </View>
               )}
@@ -126,7 +108,7 @@ export const StoryList= ({
           )}
         </View>
         <Text style={styles.nickname} numberOfLines={1}>
-          {item.user.nickname}
+          {item.nickname}
         </Text>
       </TouchableOpacity>
     );
@@ -137,45 +119,30 @@ export const StoryList= ({
    * @returns {JSX.Element} 내 스토리 또는 스토리 추가 버튼 UI
    */
   const renderMyStory = () => {
-    if (myStories) {
+    if (myStories && myStories.stories.length > 0) {
+      const latestStory = myStories.stories[0];
+      
       return (
         <TouchableOpacity style={styles.storyItem} onPress={() => onStoryPress(0)}>
           <View style={styles.storyImageContainer}>
-            {myStories.hasUnviewed ? (
-              <LinearGradient
-                colors={[COLORS.primary, COLORS.secondary]}
-                style={styles.storyRing}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <View style={styles.storyRingInner}>
-                  {myStories.user.profileImage ? (
-                    <Image source={{ uri: myStories.user.profileImage }} style={styles.profileImage} />
-                  ) : (
-                    <View style={styles.profileImagePlaceholder}>
-                      <Text style={styles.profileImageText}>
-                        {myStories.user.nickname.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
-                  )}
+            <View style={styles.viewedStoryContainer}>
+              {latestStory?.imageUri ? (
+                <Image source={{ uri: latestStory.imageUri }} style={styles.profileImage} />
+              ) : (
+                <View style={styles.profileImagePlaceholder}>
+                  <Text style={styles.profileImageText}>
+                    {myStories.nickname.charAt(0).toUpperCase()}
+                  </Text>
                 </View>
-              </LinearGradient>
-            ) : (
-              <View style={styles.viewedStoryContainer}>
-                {myStories.user.profileImage ? (
-                  <Image source={{ uri: myStories.user.profileImage }} style={styles.profileImage} />
-                ) : (
-                  <View style={styles.profileImagePlaceholder}>
-                    <Text style={styles.profileImageText}>
-                      {myStories.user.nickname.charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
-                )}
+              )}
+              {/* 내 스토리에 + 아이콘 추가 */}
+              <View style={styles.addIconOverlay}>
+                <Ionicons name="add-circle" size={20} color={COLORS.PRIMARY} />
               </View>
-            )}
+            </View>
           </View>
           <Text style={styles.nickname} numberOfLines={1}>
-            {t('story:myStory')}
+            내 스토리
           </Text>
         </TouchableOpacity>
       );
@@ -186,10 +153,10 @@ export const StoryList= ({
       <TouchableOpacity style={styles.storyItem} onPress={onAddStoryPress}>
         <View style={styles.addStoryContainer}>
           <View style={styles.addStoryButton}>
-            <Ionicons name="add" size={28} color={COLORS.white} />
+            <Ionicons name="add" size={28} color={COLORS.TEXT.WHITE} />
           </View>
         </View>
-        <Text style={styles.nickname}>{t('story:addStory')}</Text>
+        <Text style={styles.nickname}>스토리 추가</Text>
       </TouchableOpacity>
     );
   };
@@ -209,7 +176,7 @@ export const StoryList= ({
         showsHorizontalScrollIndicator={false}
         data={otherStories}
         renderItem={renderStoryItem}
-        keyExtractor={(item) => item.user.id}
+        keyExtractor={(item) => item.userId}
         ListHeaderComponent={renderMyStory}
         contentContainerStyle={styles.listContent}
         onRefresh={onRefresh}
@@ -221,10 +188,10 @@ export const StoryList= ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.white,
-    paddingVertical: SIZES.padding,
+    backgroundColor: COLORS.SURFACE,
+    paddingVertical: SPACING.MD,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.lightGray4,
+    borderBottomColor: COLORS.BORDER,
   },
   loadingContainer: {
     height: 120,
@@ -232,14 +199,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   listContent: {
-    paddingHorizontal: SIZES.padding,
+    paddingHorizontal: SPACING.MD,
   },
   storyItem: {
     alignItems: 'center',
-    marginRight: SIZES.padding,
+    marginRight: SPACING.MD,
   },
   storyImageContainer: {
-    marginBottom: SIZES.base,
+    marginBottom: SPACING.SM,
+    position: 'relative',
   },
   storyRing: {
     width: 74,
@@ -250,7 +218,7 @@ const styles = StyleSheet.create({
   storyRingInner: {
     flex: 1,
     borderRadius: 34,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.SURFACE,
     padding: 3,
   },
   viewedStoryContainer: {
@@ -258,8 +226,9 @@ const styles = StyleSheet.create({
     height: 74,
     borderRadius: 37,
     padding: 3,
-    borderWidth: 1,
-    borderColor: COLORS.lightGray3,
+    borderWidth: 2,
+    borderColor: COLORS.BORDER,
+    position: 'relative',
   },
   addStoryContainer: {
     width: 74,
@@ -270,9 +239,17 @@ const styles = StyleSheet.create({
   addStoryButton: {
     flex: 1,
     borderRadius: 34,
-    backgroundColor: COLORS.lightGray3,
+    backgroundColor: COLORS.TEXT.LIGHT,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  addIconOverlay: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    backgroundColor: COLORS.SURFACE,
+    borderRadius: 12,
+    padding: 2,
   },
   profileImage: {
     width: '100%',
@@ -283,17 +260,18 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 31,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.PRIMARY,
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileImageText: {
-    ...FONTS.h3,
-    color: COLORS.white,
+    fontSize: FONT_SIZES.LG,
+    fontWeight: 'bold',
+    color: COLORS.TEXT.WHITE,
   },
   nickname: {
-    ...FONTS.body5,
-    color: COLORS.black,
+    fontSize: FONT_SIZES.XS,
+    color: COLORS.TEXT.PRIMARY,
     width: 74,
     textAlign: 'center',
   },

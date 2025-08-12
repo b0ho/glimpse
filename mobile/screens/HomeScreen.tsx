@@ -9,18 +9,19 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
-  Modal,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/services/i18n/i18n';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
+import { useGroupStore } from '@/store/slices/groupSlice';
 import { ContentItem } from '@/components/ContentItem';
 import { StoryList } from '@/components/story/StoryList';
-import { StoryViewer } from '@/components/story/StoryViewer';
+import { StoryFullViewer } from '@/components/story/StoryFullViewer';
 import { storyService, StoryGroup } from '@/services/storyService';
+import { getStoriesByUser, StoryUser } from '@/utils/storyData';
 import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { contentApi } from '@/services/api/contentApi';
@@ -39,7 +40,7 @@ export const HomeScreen = () => {
   const [hasMoreData, setHasMoreData] = useState(true);
   
   // Story states
-  const [stories, setStories] = useState<StoryGroup[]>([]);
+  const [stories, setStories] = useState<StoryUser[]>([]);
   const [storiesLoading, setStoriesLoading] = useState(true);
   const [showStoryViewer, setShowStoryViewer] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
@@ -47,6 +48,7 @@ export const HomeScreen = () => {
   const navigation = useNavigation() as any;
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
+  const groupStore = useGroupStore();
   const { t } = useTranslation();
 
   /**
@@ -126,13 +128,16 @@ export const HomeScreen = () => {
     try {
       setStoriesLoading(true);
       
-      // 더미 스토리 데이터 사용 (API 대신)
-      await new Promise(resolve => setTimeout(resolve, 200));
+      const currentUserId = authStore.user?.id || 'current_user';
+      console.log('[HomeScreen] 스토리 로드 시작, userId:', currentUserId);
       
-      // 빈 스토리 배열로 설정 (스토리 기능 비활성화)
-      setStories([]);
+      const storyUsers = await getStoriesByUser(currentUserId);
+      console.log('[HomeScreen] 스토리 로드 완료:', storyUsers.length, '명의 사용자');
+      
+      setStories(storyUsers);
     } catch (error) {
-      console.error('Failed to load stories:', error);
+      console.error('[HomeScreen] 스토리 로드 실패:', error);
+      setStories([]);
     } finally {
       setStoriesLoading(false);
     }
@@ -149,11 +154,38 @@ export const HomeScreen = () => {
   }, []);
 
   /**
+   * 콘텐츠 수정 핸들러
+   * @param {Content} content - 수정할 콘텐츠
+   */
+  const handleEditContent = useCallback((content: Content) => {
+    // CreateContentScreen으로 이동하면서 수정 모드로 전환
+    navigation.navigate('CreateContent' as never, { editingContent: content } as never);
+  }, [navigation]);
+
+  /**
+   * 콘텐츠 삭제 핸들러
+   * @param {string} contentId - 삭제할 콘텐츠 ID
+   */
+  const handleDeleteContent = useCallback(async (contentId: string) => {
+    try {
+      await contentApi.deleteContent(contentId);
+      
+      // 로컬 상태에서 해당 콘텐츠 제거
+      setContents(prevContents => prevContents.filter(content => content.id !== contentId));
+      
+      Alert.alert('삭제 완료', '게시물이 삭제되었습니다.');
+    } catch (error) {
+      console.error('Content delete error:', error);
+      Alert.alert('삭제 실패', '게시물 삭제에 실패했습니다.');
+    }
+  }, []);
+
+  /**
    * 스토리 추가 핸들러
-   * @description 새 스토리 업로드 화면으로 이동하는 함수
+   * @description 새 스토리 생성 화면으로 이동하는 함수
    */
   const handleAddStoryPress = useCallback(() => {
-    navigation.navigate('StoryUpload');
+    navigation.navigate('CreateStory' as never);
   }, [navigation]);
 
   /**
@@ -208,6 +240,7 @@ export const HomeScreen = () => {
             views: 45,
             isPublic: true,
             isLikedByUser: false,
+            groupId: 'group1', // 그룹 ID 추가
             createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
             updatedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
           },
@@ -226,6 +259,7 @@ export const HomeScreen = () => {
             views: 32,
             isPublic: true,
             isLikedByUser: false,
+            groupId: 'group2', // 그룹 ID 추가
             createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
             updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
           },
@@ -244,6 +278,7 @@ export const HomeScreen = () => {
             views: 67,
             isPublic: true,
             isLikedByUser: true,
+            groupId: 'group3', // 그룹 ID 추가
             createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
             updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
           },
@@ -262,6 +297,7 @@ export const HomeScreen = () => {
             views: 89,
             isPublic: true,
             isLikedByUser: false,
+            groupId: 'group1', // 그룹 ID 추가 (기존 그룹 재사용)
             createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
             updatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
           },
@@ -280,6 +316,7 @@ export const HomeScreen = () => {
             views: 54,
             isPublic: true,
             isLikedByUser: false,
+            groupId: 'group4', // 그룹 ID 추가
             createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
             updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
           },
@@ -315,6 +352,7 @@ export const HomeScreen = () => {
           views: 45,
           isPublic: true,
           isLikedByUser: false,
+          groupId: 'group1', // 그룹 ID 추가
           createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
           updatedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
         },
@@ -348,10 +386,20 @@ export const HomeScreen = () => {
     // 컴포넌트 마운트 시 콘텐츠 로드
     loadContents();
     
-    // 스토리는 일단 빈 배열로 설정
-    setStoriesLoading(false);
-    setStories([]);
-  }, [loadContents]);
+    // 스토리 로드
+    loadStories();
+  }, [loadContents, loadStories]);
+
+  // 화면에 포커스될 때마다 콘텐츠 새로고침 (스토리 작성 후 등)
+  useFocusEffect(
+    useCallback(() => {
+      console.log('[HomeScreen] 화면 포커스 - 콘텐츠 및 스토리 새로고침');
+      if (!isLoading) {
+        loadContents(true);
+        loadStories();
+      }
+    }, [isLoading, loadContents, loadStories])
+  );
 
   /**
    * 헤더 렌더링
@@ -391,14 +439,31 @@ export const HomeScreen = () => {
    * @param {Content} params.item - 콘텐츠 객체
    * @returns {JSX.Element} 콘텐츠 아이템 UI
    */
-  const renderContentItem = ({ item }: { item: Content }) => (
-    <ContentItem
-      item={item}
-      currentUserId={authStore.user?.id}
-      remainingLikes={likeStore.getRemainingFreeLikes()}
-      onLikeToggle={handleLikeToggle}
-    />
-  );
+  const renderContentItem = ({ item }: { item: Content }) => {
+    // 그룹 정보 찾기 (디버깅 로그 추가)
+    console.log('[HomeScreen] 콘텐츠 그룹 찾기:', {
+      contentId: item.id,
+      contentGroupId: item.groupId,
+      availableGroups: groupStore.groups.map(g => ({ id: g.id, name: g.name }))
+    });
+    
+    const group = groupStore.groups.find(g => g.id === item.groupId);
+    const groupName = group?.name || '일반';
+    
+    console.log('[HomeScreen] 그룹 찾기 결과:', { groupName, foundGroup: !!group });
+    
+    return (
+      <ContentItem
+        item={item}
+        currentUserId={authStore.user?.id}
+        remainingLikes={likeStore.getRemainingFreeLikes()}
+        onLikeToggle={handleLikeToggle}
+        onEdit={handleEditContent}
+        onDelete={handleDeleteContent}
+        groupName={groupName}
+      />
+    );
+  };
 
   /**
    * 빈 상태 렌더링
@@ -483,31 +548,22 @@ export const HomeScreen = () => {
       />
       
       {/* Story Viewer Modal */}
-      <Modal
+      <StoryFullViewer
+        storyUsers={stories}
+        currentUserIndex={selectedStoryIndex}
+        currentUserId={authStore.user?.id || 'current_user'}
         visible={showStoryViewer}
-        animationType="slide"
-        statusBarTranslucent
-        onRequestClose={() => setShowStoryViewer(false)}
-      >
-        {stories.length > 0 && (
-          <StoryViewer
-            storyGroups={stories}
-            initialGroupIndex={selectedStoryIndex}
-            onClose={() => setShowStoryViewer(false)}
-            onViewStory={handleViewStory}
-            onEndReached={() => {}} // 필수 prop 추가
-            currentUserId={authStore.user?.id || ''}
-          />
-        )}
-      </Modal>
+        onClose={() => setShowStoryViewer(false)}
+        onRefresh={loadStories}
+      />
       
-      {/* Floating Action Button */}
+      {/* Floating Action Button - 게시물 작성 */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate('CreateContent' as never)}
         activeOpacity={0.8}
-        accessibilityLabel={t('home:fab.createPost')}
-        accessibilityHint="새로운 콘텐츠를 작성할 수 있는 화면으로 이동합니다"
+        accessibilityLabel="게시물 작성"
+        accessibilityHint="새로운 게시물을 작성할 수 있는 화면으로 이동합니다"
         accessibilityRole="button"
       >
         <Icon name={ACTION_ICONS.CREATE} color="white" size={28} />

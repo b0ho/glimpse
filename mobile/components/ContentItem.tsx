@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
+  Alert,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -26,6 +29,12 @@ interface ContentItemProps {
   remainingLikes: number;
   /** 좋아요 토글 핸들러 */
   onLikeToggle: (contentId: string, authorId: string) => void;
+  /** 콘텐츠 수정 핸들러 (선택적) */
+  onEdit?: (content: Content) => void;
+  /** 콘텐츠 삭제 핸들러 (선택적) */
+  onDelete?: (contentId: string) => void;
+  /** 그룹명 (선택적) */
+  groupName?: string;
 }
 
 /**
@@ -40,15 +49,47 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   currentUserId,
   remainingLikes,
   onLikeToggle,
+  onEdit,
+  onDelete,
+  groupName,
 }) => {
   const isOwnContent = item.authorId === currentUserId;
   const { getUserDisplayName } = useLikeStore();
   const { t } = useTranslation();
+  const [showMenu, setShowMenu] = useState(false);
+  
+  // 디버깅 로그
+  console.log('[ContentItem] 렌더링:', {
+    contentId: item.id,
+    receivedGroupName: groupName,
+    hasGroupName: !!groupName
+  });
 
   // 익명성 시스템: 매칭 상태에 따라 표시명 결정
-  const displayName = currentUserId && item.authorId
+  const displayName = currentUserId && item.authorId && currentUserId !== item.authorId
     ? getUserDisplayName(item.authorId, currentUserId)
-    : item.authorNickname || t('common:user.anonymous');
+    : item.authorNickname || '테스트유저';
+
+  const handleEdit = () => {
+    setShowMenu(false);
+    onEdit?.(item);
+  };
+
+  const handleDelete = () => {
+    setShowMenu(false);
+    Alert.alert(
+      '게시물 삭제',
+      '이 게시물을 삭제하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        { 
+          text: '삭제', 
+          style: 'destructive',
+          onPress: () => onDelete?.(item.id)
+        }
+      ]
+    );
+  };
 
   return (
     <View style={styles.contentItem}>
@@ -59,11 +100,66 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
               {displayName?.charAt(0) || '?'}
             </Text>
           </View>
-          <View>
+          <View style={styles.authorDetails}>
             <Text style={styles.authorName}>{displayName}</Text>
+            {groupName && (
+              <View style={styles.groupInfo}>
+                <Icon name="people" size={12} color={COLORS.TEXT.SECONDARY} />
+                <Text style={styles.groupName}>{groupName}</Text>
+              </View>
+            )}
+            {/* 디버깅용 - 임시로 모든 경우에 그룹명 표시 */}
+            {!groupName && (
+              <View style={styles.groupInfo}>
+                <Icon name="people" size={12} color={COLORS.TEXT.SECONDARY} />
+                <Text style={styles.groupName}>그룹명 없음</Text>
+              </View>
+            )}
             <Text style={styles.timeText}>{formatTimeAgo(new Date(item.createdAt))}</Text>
           </View>
         </View>
+        
+        {/* 본인 게시물인 경우 수정/삭제 메뉴 표시 */}
+        {isOwnContent && (onEdit || onDelete) && (
+          <>
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => setShowMenu(!showMenu)}
+              accessibilityLabel="게시물 옵션"
+              accessibilityRole="button"
+            >
+              <Icon name="ellipsis-horizontal" size={20} color={COLORS.TEXT.SECONDARY} />
+            </TouchableOpacity>
+            
+            <Modal
+              visible={showMenu}
+              transparent={true}
+              animationType="fade"
+              onRequestClose={() => setShowMenu(false)}
+            >
+              <TouchableWithoutFeedback onPress={() => setShowMenu(false)}>
+                <View style={styles.menuOverlay}>
+                  <TouchableWithoutFeedback onPress={() => {}}>
+                    <View style={styles.menuPopup}>
+                      {onEdit && (
+                        <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
+                          <Icon name="create-outline" size={16} color={COLORS.TEXT.PRIMARY} />
+                          <Text style={styles.menuText}>수정</Text>
+                        </TouchableOpacity>
+                      )}
+                      {onDelete && (
+                        <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+                          <Icon name="trash-outline" size={16} color={COLORS.ERROR} />
+                          <Text style={[styles.menuText, { color: COLORS.ERROR }]}>삭제</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+          </>
+        )}
       </View>
 
       <View style={styles.contentBody}>
@@ -165,15 +261,33 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.MD,
     fontWeight: 'bold',
   },
+  authorDetails: {
+    flex: 1,
+  },
   authorName: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
     color: COLORS.TEXT.PRIMARY,
+    marginBottom: 2,
+  },
+  groupInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  groupName: {
+    fontSize: FONT_SIZES.XS,
+    color: COLORS.TEXT.SECONDARY,
+    marginLeft: 4,
+    backgroundColor: COLORS.PRIMARY + '15',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   timeText: {
     fontSize: FONT_SIZES.XS,
     color: COLORS.TEXT.SECONDARY,
-    marginTop: 2,
   },
   contentBody: {
     marginBottom: SPACING.MD,
@@ -235,5 +349,42 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.XS,
     color: COLORS.TEXT.LIGHT,
     fontWeight: '500',
+  },
+  menuButton: {
+    padding: SPACING.XS,
+    borderRadius: 20,
+    backgroundColor: 'transparent',
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: 100,
+    paddingRight: 20,
+  },
+  menuPopup: {
+    backgroundColor: COLORS.SURFACE,
+    borderRadius: 12,
+    paddingVertical: SPACING.SM,
+    minWidth: 150,
+    elevation: 20,
+    shadowColor: COLORS.SHADOW,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.MD,
+    paddingVertical: SPACING.SM,
+  },
+  menuText: {
+    marginLeft: SPACING.SM,
+    fontSize: FONT_SIZES.MD,
+    color: COLORS.TEXT.PRIMARY,
   },
 });

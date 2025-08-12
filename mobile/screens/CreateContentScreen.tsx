@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,11 +18,16 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { Group, Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { groupApi } from '@/services/api/groupApi';
+import { contentApi } from '@/services/api/contentApi';
 
-export const CreateContentScreen = () => {
+export const CreateContentScreen = ({ route }: any) => {
   const { t } = useTranslation(['common', 'group']);
-  const [contentText, setContentText] = useState('');
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const editingContent = route?.params?.editingContent as Content | undefined;
+  const isEditMode = !!editingContent;
+  
+  const [contentText, setContentText] = useState(editingContent?.text || '');
+  const [selectedImages, setSelectedImages] = useState<string[]>(editingContent?.imageUrls || []);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showGroupPicker, setShowGroupPicker] = useState(false);
@@ -31,23 +36,91 @@ export const CreateContentScreen = () => {
   const authStore = useAuthStore();
   const groupStore = useGroupStore();
 
-  const handleImagePicker = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('권한 필요', '갤러리 접근 권한이 필요합니다.');
-      return;
+  // 컴포넌트 로드 시 그룹 목록 불러오기
+  useEffect(() => {
+    const loadGroups = async () => {
+      try {
+        console.log('[CreateContentScreen] 그룹 목록 로드 시작');
+        const groups = await groupApi.getGroups();
+        groupStore.setGroups(groups);
+        
+        // 개발 환경에서는 모든 그룹에 자동으로 참여한 것으로 처리
+        if (__DEV__) {
+          groups.forEach(group => {
+            groupStore.joinGroup(group);
+          });
+          console.log('[CreateContentScreen] 개발 모드: 모든 그룹에 자동 참여');
+        }
+        
+        console.log('[CreateContentScreen] 그룹 목록 로드 완료:', groups.length, '개');
+        console.log('[CreateContentScreen] 참여한 그룹:', groupStore.joinedGroups.length, '개');
+        
+        // 수정 모드일 때 기존 그룹 설정
+        if (isEditMode && editingContent?.groupId) {
+          const existingGroup = groups.find(g => g.id === editingContent.groupId);
+          if (existingGroup) {
+            setSelectedGroup(existingGroup);
+            console.log('[CreateContentScreen] 수정 모드: 기존 그룹 설정', existingGroup.name);
+          }
+        }
+      } catch (error) {
+        console.error('[CreateContentScreen] 그룹 목록 로드 실패:', error);
+      }
+    };
+
+    // 그룹 목록이 비어있는 경우에만 로드
+    if (groupStore.groups.length === 0) {
+      loadGroups();
+    } else if (isEditMode && editingContent?.groupId && !selectedGroup) {
+      // 이미 그룹이 로드되어 있고 수정 모드인 경우
+      const existingGroup = groupStore.groups.find(g => g.id === editingContent.groupId);
+      if (existingGroup) {
+        setSelectedGroup(existingGroup);
+      }
     }
+  }, [isEditMode, editingContent, selectedGroup]);
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsMultipleSelection: true,
-      quality: 0.8,
-      selectionLimit: 5 - selectedImages.length,
-    });
+  const handleImagePicker = async () => {
+    try {
+      console.log('[CreateContentScreen] 이미지 선택 시작');
+      
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      console.log('[CreateContentScreen] 권한 상태:', status);
+      
+      if (status !== 'granted') {
+        Alert.alert('권한 필요', '갤러리 접근 권한이 필요합니다.');
+        return;
+      }
 
-    if (!result.canceled && result.assets) {
-      const newImages = result.assets.map(asset => asset.uri);
-      setSelectedImages(prev => [...prev, ...newImages].slice(0, 5));
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 0.8,
+        selectionLimit: 5 - selectedImages.length,
+      });
+
+      console.log('[CreateContentScreen] 이미지 선택 결과:', {
+        canceled: result.canceled,
+        assetsCount: result.assets?.length || 0,
+        assets: result.assets?.map(asset => ({
+          uri: asset.uri,
+          width: asset.width,
+          height: asset.height
+        }))
+      });
+
+      if (!result.canceled && result.assets) {
+        const newImages = result.assets.map(asset => asset.uri);
+        console.log('[CreateContentScreen] 새 이미지 URIs:', newImages);
+        setSelectedImages(prev => {
+          const updated = [...prev, ...newImages].slice(0, 5);
+          console.log('[CreateContentScreen] 업데이트된 이미지 목록:', updated);
+          return updated;
+        });
+      }
+    } catch (error) {
+      console.error('[CreateContentScreen] 이미지 선택 에러:', error);
+      Alert.alert('오류', '이미지 선택 중 오류가 발생했습니다.');
     }
   };
 
@@ -73,42 +146,107 @@ export const CreateContentScreen = () => {
 
     setIsSubmitting(true);
     try {
-      // 실제로는 API 호출
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('[CreateContentScreen] 콘텐츠 생성 시도:', {
+        text: contentText.trim(),
+        groupId: selectedGroup.id,
+        imageCount: selectedImages.length,
+      });
 
-      const newContent: Content = {
-        id: `content_${Date.now()}`,
-        userId: authStore.user?.id || 'current_user',
-        authorId: authStore.user?.id || 'current_user',
-        authorNickname: authStore.user?.nickname || t('common:user.anonymous'),
-        type: selectedImages.length > 0 ? 'image' : 'text',
+      // 사용자 정보 가져오기 - authStore에서 우선 확인
+      let userNickname = authStore.user?.nickname;
+      let userId = authStore.user?.id;
+      
+      console.log('[CreateContentScreen] authStore 사용자 정보:', {
+        nickname: userNickname,
+        userId: userId
+      });
+      
+      // authStore에 사용자 정보가 없거나 불완전한 경우 서버에서 가져오기
+      if (!userNickname || !userId) {
+        try {
+          console.log('[CreateContentScreen] 서버에서 사용자 정보 가져오기 시도');
+          const userResponse = await fetch('http://localhost:3002/api/v1/users/profile', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-dev-auth': 'true',
+            },
+          });
+          
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            console.log('[CreateContentScreen] 서버 사용자 정보 응답:', userData);
+            if (userData.success && userData.data) {
+              userNickname = userData.data.nickname || '테스트유저';
+              userId = userData.data.id || 'current_user';
+              
+              // authStore 업데이트
+              authStore.setUser({
+                ...authStore.user,
+                id: userId,
+                nickname: userNickname,
+                ...userData.data
+              });
+              
+              console.log('[CreateContentScreen] 사용자 정보 업데이트 완료:', {
+                nickname: userNickname,
+                userId: userId
+              });
+            }
+          } else {
+            console.warn('[CreateContentScreen] 서버 응답 실패:', userResponse.status);
+            userNickname = '테스트유저';
+            userId = 'current_user';
+          }
+        } catch (error) {
+          console.warn('[CreateContentScreen] 서버 사용자 정보 가져오기 실패:', error);
+          userNickname = '테스트유저';
+          userId = 'current_user';
+        }
+      }
+
+      // 실제 API 호출로 콘텐츠 생성
+      const contentData: Partial<Content> = {
         text: contentText.trim() || undefined,
+        type: selectedImages.length > 0 ? 'image' : 'text',
         imageUrls: selectedImages.length > 0 ? selectedImages : undefined,
-        likes: 0,
-        likeCount: 0,
-        views: 0,
-        isPublic: true,
-        isLikedByUser: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        groupId: selectedGroup.id,
+        userId: userId,
+        authorId: userId,
+        authorNickname: userNickname,
       };
 
-      // TODO: 실제로는 서버에 저장하고 홈 피드 새로고침
-      console.log('Created content:', newContent);
+      console.log('[CreateContentScreen] contentData 확인:', {
+        authorNickname: contentData.authorNickname,
+        userId: contentData.userId,
+      });
 
-      Alert.alert(
-        t('common:content.success.title'),
-        t('common:content.success.message', { groupName: selectedGroup.name }),
-        [
-          {
-            text: t('common:buttons.confirm'),
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
-    } catch (error) {
-      console.error('Content submission error:', error);
-      Alert.alert(t('common:errors.error'), t('common:errors.unknown'));
+      let result: Content;
+      if (isEditMode && editingContent) {
+        // 수정 모드
+        result = await contentApi.updateContent(editingContent.id, contentData);
+        console.log('[CreateContentScreen] 콘텐츠 수정 성공:', result);
+      } else {
+        // 생성 모드
+        result = await contentApi.createContent(contentData);
+        console.log('[CreateContentScreen] 콘텐츠 생성 성공:', result);
+      }
+
+      // 성공 시 즉시 홈화면으로 이동
+      console.log('[CreateContentScreen] 콘텐츠 생성 성공 - 홈화면으로 이동');
+      navigation.navigate('HomeTab' as never);
+      
+      // 성공 알림은 나중에 표시 (옵션)
+      setTimeout(() => {
+        Alert.alert(
+          t('common:content.success.title'),
+          t('common:content.success.message', { groupName: selectedGroup.name })
+        );
+      }, 500);
+    } catch (error: any) {
+      console.error('[CreateContentScreen] 콘텐츠 생성 실패:', error);
+      const errorMessage = error?.message || t('common:errors.unknown');
+      Alert.alert(t('common:errors.error'), errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -117,21 +255,31 @@ export const CreateContentScreen = () => {
   const renderGroupPicker = () => {
     if (!showGroupPicker) return null;
 
+    const availableGroups = groupStore.joinedGroups;
+
     return (
       <View style={styles.groupPickerOverlay}>
         <View style={styles.groupPickerModal}>
           <Text style={styles.groupPickerTitle}>{t('group:picker.title')}</Text>
           <ScrollView style={styles.groupList}>
-            {groupStore.joinedGroups.map(group => (
-              <TouchableOpacity
-                key={group.id}
-                style={styles.groupItem}
-                onPress={() => handleGroupSelect(group)}
-              >
-                <Text style={styles.groupName}>{group.name}</Text>
-                <Text style={styles.groupType}>{group.type}</Text>
-              </TouchableOpacity>
-            ))}
+            {availableGroups.length > 0 ? (
+              availableGroups.map(group => (
+                <TouchableOpacity
+                  key={group.id}
+                  style={styles.groupItem}
+                  onPress={() => handleGroupSelect(group)}
+                >
+                  <Text style={styles.groupName}>{group.name}</Text>
+                  <Text style={styles.groupType}>{group.type}</Text>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View style={styles.emptyGroupContainer}>
+                <Text style={styles.emptyGroupText}>
+                  {__DEV__ ? '그룹을 불러오는 중...' : '참여한 그룹이 없습니다.'}
+                </Text>
+              </View>
+            )}
           </ScrollView>
           <TouchableOpacity
             style={styles.cancelButton}
@@ -178,7 +326,9 @@ export const CreateContentScreen = () => {
         >
           <Text style={styles.headerButtonText}>{t('common:content.create.cancel')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('common:content.create.title')}</Text>
+        <Text style={styles.headerTitle}>
+          {isEditMode ? '스토리 수정' : t('common:content.create.title')}
+        </Text>
         <TouchableOpacity
           style={[
             styles.headerButton,
@@ -191,7 +341,9 @@ export const CreateContentScreen = () => {
           {isSubmitting ? (
             <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
           ) : (
-            <Text style={styles.submitButtonText}>{t('common:content.create.publish')}</Text>
+            <Text style={styles.submitButtonText}>
+              {isEditMode ? '수정 완료' : t('common:content.create.publish')}
+            </Text>
           )}
         </TouchableOpacity>
       </View>
@@ -467,6 +619,15 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.SM,
     color: COLORS.TEXT.SECONDARY,
     marginTop: 2,
+  },
+  emptyGroupContainer: {
+    padding: SPACING.XL,
+    alignItems: 'center',
+  },
+  emptyGroupText: {
+    fontSize: FONT_SIZES.MD,
+    color: COLORS.TEXT.SECONDARY,
+    textAlign: 'center',
   },
   cancelButton: {
     marginTop: SPACING.MD,

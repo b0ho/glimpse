@@ -27,9 +27,10 @@ import { GroupsScreen } from '@/screens/GroupsScreen';
 import { MatchesScreen } from '@/screens/MatchesScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { CreateContentScreen } from '@/screens/CreateContentScreen';
+import { CreateStoryScreen } from '@/screens/CreateStoryScreen';
 import { CreateGroupScreen } from '@/screens/CreateGroupScreen';
 import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
-import { ChatScreen } from '@/screens/ChatScreen';
+import { ChatScreenSimple as ChatScreen } from '@/screens/ChatScreenSimple';
 import { PremiumScreen } from '@/screens/PremiumScreen';
 import { LocationGroupScreen } from '@/screens/LocationGroupScreen';
 import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen';
@@ -60,6 +61,7 @@ type AuthStackParamList = {
 type HomeStackParamList = {
   HomeTab: undefined;
   CreateContent: undefined;
+  CreateStory: undefined;
   StoryUpload: undefined;
 };
 
@@ -118,6 +120,7 @@ export type RootNavigationParamList = MainTabParamList & {
   NotificationSettings: undefined;
   MyGroups: undefined;
   CreateContent: undefined;
+  CreateStory: undefined;
   CreateGroup: undefined;
   WhoLikesYou: undefined;
   LikeHistory: undefined;
@@ -195,8 +198,17 @@ function HomeStackNavigator() {
         name="CreateContent" 
         component={CreateContentScreen} 
         options={{ 
-          title: t('screens.createContent'),
-          headerShown: true,
+          title: '게시물 작성',
+          headerShown: false,
+          presentation: 'modal',
+        }}
+      />
+      <HomeStack.Screen 
+        name="CreateStory" 
+        component={CreateStoryScreen} 
+        options={{ 
+          title: '스토리 만들기',
+          headerShown: false,
           presentation: 'modal',
         }}
       />
