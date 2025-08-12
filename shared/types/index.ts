@@ -18,11 +18,13 @@ export interface User {
   clerkId?: string;
   anonymousId: string;
   phoneNumber: string;
+  phone?: string; // For compatibility with mock data
   nickname?: string;
   realName?: string; // Real name (revealed after matching)
   age?: number;
   gender?: 'MALE' | 'FEMALE' | 'OTHER';
   profileImage?: string;
+  profileImageUrl?: string; // For compatibility with mock data
   bio?: string;
   isVerified: boolean;
   credits: number;
@@ -31,6 +33,7 @@ export interface User {
   isAdmin?: boolean; // Admin user flag
   currentMode?: AppMode; // Current app mode (dating or friendship)
   lastActive: Date;
+  lastActiveAt?: Date; // For compatibility with mock data
   lastOnline?: Date;
   deletedAt?: Date;
   createdAt: Date;
@@ -102,6 +105,7 @@ export interface UserResponse extends User {
  */
 export interface Group {
   id: string;
+  code?: string; // For compatibility with mock data
   name: string;
   description?: string;
   type: GroupType;
@@ -115,10 +119,15 @@ export interface Group {
   creatorId?: string;
   companyId?: string;
   location?: GroupLocation;
-  settings: GroupSettings;
+  settings?: GroupSettings; // Make optional for compatibility
+  imageUrl?: string; // For compatibility with mock data
+  tags?: string[]; // For compatibility with mock data
+  startDate?: Date; // For compatibility with mock data
+  latitude?: number; // For compatibility with mock data
+  longitude?: number; // For compatibility with mock data
   expiresAt?: Date; // For instance groups
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date; // Make optional for compatibility
 }
 
 /**
@@ -270,12 +279,14 @@ export interface Match {
   type?: 'DATING' | 'FRIENDSHIP'; // Match type
   matchedAt?: Date; // When match was created
   lastMessageAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+  unreadCount?: number; // For compatibility with mock data
+  createdAt?: Date; // Make optional for compatibility
+  updatedAt?: Date; // Make optional for compatibility
   
   // Relations
   user1?: User;
   user2?: User;
+  otherUser?: User; // For compatibility with mock data
   group?: Group;
 }
 
@@ -300,15 +311,16 @@ export interface ChatMessage {
  */
 export interface Message {
   id: string;
-  matchId: string;
+  matchId?: string; // Make optional for compatibility
+  chatRoomId?: string; // For compatibility with mock data
   senderId: string;
   content: string; // Encrypted
-  type: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY';
+  type?: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY'; // Make optional for compatibility
   metadata?: Record<string, any>;
   isRead: boolean;
   isEncrypted?: boolean;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date; // Make optional for compatibility
 }
 
 /**
@@ -324,6 +336,32 @@ export interface ChatRoom {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+/**
+ * 스토리 인터페이스 - 24시간 후 사라지는 임시 콘텐츠
+ * @interface Story
+ */
+export interface Story {
+  id: string;
+  userId: string;
+  authorId?: string; // For compatibility
+  authorNickname?: string;
+  type: 'image' | 'video' | 'text';
+  mediaType?: string; // For compatibility with mock data
+  mediaUrl?: string;
+  imageUrls?: string[];
+  text?: string;
+  thumbnailUrl?: string;
+  views: number;
+  viewerIds?: string[]; // Make optional for compatibility
+  isPublic: boolean;
+  expiresAt?: Date; // 24 hours from creation, make optional for compatibility
+  createdAt: Date;
+  updatedAt?: Date; // Make optional for compatibility
+  
+  // Relations
+  user?: User; // For compatibility with mock data
 }
 
 /**

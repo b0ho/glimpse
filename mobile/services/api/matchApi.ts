@@ -6,6 +6,7 @@
 
 import apiClient from './config';
 import { Match } from '@shared/types';
+import { generateEnhancedMatches } from '@/utils/mockData';
 
 /**
  * 매칭 API 서비스
@@ -20,6 +21,15 @@ export const matchApi = {
    * @returns {Promise<Match[]>} 매칭 목록
    */
   async getMatches(page: number = 1, limit: number = 20): Promise<Match[]> {
+    // 개발 환경에서는 mock 데이터 사용
+    if (__DEV__) {
+      // 약간의 로딩 시뮬레이션
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const mockMatches = generateEnhancedMatches();
+      console.log('[matchApi] Mock 매치 데이터 반환:', mockMatches);
+      return mockMatches;
+    }
+
     const response = await apiClient.get<{ success: boolean; data: Match[] }>('/matching/matches', {
       page,
       limit

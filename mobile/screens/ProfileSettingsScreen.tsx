@@ -200,7 +200,7 @@ const ProfileSettingsScreen = () => {
         },
         {
           icon: 'information-outline',
-          label: t('settings:otherSettings.appInfo');
+          label: t('settings:otherSettings.appInfo'),
           type: 'navigate',
           route: 'AppInfo',
         },
