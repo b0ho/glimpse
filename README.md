@@ -38,16 +38,17 @@ Glimpse는 익명성과 프라이버시를 보장하면서도 진정성 있는 �
 ## 📋 프로젝트 구조
 
 ```
-glimpse-fe/
-├── mobile/          # React Native 모바일 앱
-├── server/          # Node.js/Express 백엔드
+glimpse-monorepo/
+├── mobile/          # React Native 모바일 앱 (Expo 관리 워크플로우)
+├── server/          # Node.js/Express 백엔드 API 서버
+├── web/             # Vite + React 랜딩 페이지 (어드민 스타일)
+├── admin/           # Next.js 관리자 대시보드 
 ├── shared/          # 공유 타입 및 유틸리티
-├── web/            # Next.js 관리자 대시보드
-├── docs/           # 프로젝트 문서
-├── scripts/        # 유틸리티 스크립트
-├── docker/         # Docker 설정 파일
-├── monitoring/     # 모니터링 설정
-└── tests/          # E2E 테스트
+├── docs/            # 프로젝트 문서
+├── scripts/         # 유틸리티 스크립트  
+├── docker/          # Docker 설정 파일
+├── monitoring/      # 모니터링 설정
+└── tests/           # E2E 테스트
 ```
 
 ## 🚀 빠른 시작
@@ -83,8 +84,9 @@ npm run dev
 
 개발 서버:
 - 모바일 앱: http://localhost:8081 (Expo)
-- 서버 API: http://localhost:8080
-- 웹 대시보드: http://localhost:3000
+- 서버 API: http://localhost:3002
+- 랜딩 페이지: http://localhost:5173 (Vite)
+- 관리자 대시보드: http://localhost:3000 (Next.js)
 
 ## 🐳 프로덕션 배포
 
@@ -186,29 +188,46 @@ docker-compose down -v
 ### 개별 서비스 실행
 
 ```bash
-# 모바일 앱만
-npm run dev:mobile
+# 🚀 편리한 실행 스크립트들
+npm run start:all          # 인터랙티브 서비스 선택
+npm run start:landing      # 랜딩 페이지만 (추천 UI)
+npm run start:admin        # 관리자 대시보드만 (추천 UI)
 
-# 서버만  
-npm run dev:server
+# 🔧 개별 서비스 실행
+npm run dev:mobile         # 모바일 앱만
+npm run dev:server         # 서버만  
+npm run dev:web            # 랜딩 페이지만 (Vite)
+npm run dev:admin          # 관리자 대시보드만 (Next.js)
+npm run dev                # 기본 개발 (서버 + 모바일)
 
-# 웹만
-npm run dev:web
-
-# Database management
-npm run db:studio
+# 🗄️ 데이터베이스 관리
+npm run db:studio          # Prisma Studio 열기
 ```
 
 ## 🛠 Tech Stack
 
 ### Mobile (React Native + Expo)
-- **React Native 0.79** with Expo 53
+- **React Native 0.79** with Expo 50+
 - **TypeScript** for type safety
 - **Zustand** for state management
 - **React Navigation** for routing
 - **Socket.IO Client** for real-time features
 - **Expo Secure Store** for sensitive data
 - **Stripe React Native** for payments
+
+### Landing Page (Web)
+- **Vite** + **React 19** with TypeScript
+- **Tailwind CSS 4** for styling
+- **Framer Motion** for animations
+- **Lucide React** for icons
+- **Professional admin-style design**
+
+### Admin Dashboard
+- **Next.js 15** (App Router)
+- **TypeScript** for type safety
+- **shadcn/ui** component system
+- **Tailwind CSS** for styling
+- **System monitoring & user management**
 
 ### Backend (Node.js)
 - **Express.js** web framework
