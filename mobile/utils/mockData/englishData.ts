@@ -3,7 +3,7 @@
  * @description English language test data for UI development and i18n testing
  */
 
-import { User, Group, Match, Message, Story } from '@/types';
+import { User, Group, Match, Message, Story, GroupType } from '@/types';
 
 // English mock users
 export const mockUsersEn: User[] = [
@@ -81,7 +81,7 @@ export const mockGroupsEn: Group[] = [
     code: 'google-korea',
     name: 'Google Korea',
     description: 'Official Google Korea employees group',
-    type: 'OFFICIAL',
+    type: GroupType.OFFICIAL,
     memberCount: 156,
     imageUrl: 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png',
     isActive: true,
@@ -93,7 +93,7 @@ export const mockGroupsEn: Group[] = [
     code: 'seoul-book-club',
     name: 'Seoul Book Club',
     description: 'Monthly book discussions in English for book lovers',
-    type: 'CREATED',
+    type: GroupType.CREATED,
     memberCount: 89,
     imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
     isActive: true,
@@ -105,7 +105,7 @@ export const mockGroupsEn: Group[] = [
     code: 'hiking-seoul',
     name: 'Seoul Hiking Group',
     description: 'Weekend hiking adventures around Seoul and beyond',
-    type: 'CREATED',
+    type: GroupType.CREATED,
     memberCount: 124,
     imageUrl: 'https://images.unsplash.com/photo-1551632811-561732d1e306',
     isActive: true,
@@ -117,7 +117,7 @@ export const mockGroupsEn: Group[] = [
     code: 'tech-conf-2024',
     name: 'Tech Conference 2024',
     description: 'Annual tech conference - Network with professionals',
-    type: 'INSTANCE',
+    type: GroupType.INSTANCE,
     memberCount: 512,
     imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87',
     isActive: true,
@@ -131,7 +131,7 @@ export const mockGroupsEn: Group[] = [
     code: 'gangnam-cowork',
     name: 'Gangnam Coworking',
     description: 'Connect with professionals at Gangnam coworking spaces',
-    type: 'LOCATION',
+    type: GroupType.LOCATION,
     memberCount: 78,
     imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c',
     isActive: true,

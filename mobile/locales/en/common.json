@@ -182,5 +182,34 @@
     "camera": "Camera access permission is required to take photos.",
     "location": "Location access permission is required to use location services.",
     "notification": "Notification permission is required to receive notifications."
+  },
+  "content": {
+    "create": {
+      "title": "New Post",
+      "publishTo": "Publish to Group",
+      "selectGroup": "Please select a group",
+      "contentLabel": "Content",
+      "placeholder": "What's happening?",
+      "characterCount": "{{current}}/{{max}}",
+      "publish": "Publish",
+      "cancel": "Cancel",
+      "addPhotos": "Add Photos ({{current}}/{{max}})",
+      "selectedImages": "Selected Images ({{count}}/5)",
+      "guidelines": {
+        "title": "Post Guidelines",
+        "privacy": "• Avoid sharing personal information to maintain anonymity",
+        "respect": "• Be respectful and courteous",
+        "inappropriate": "• Inappropriate content may be removed",
+        "images": "• You can upload up to 5 images"
+      }
+    },
+    "validation": {
+      "contentRequired": "Please enter text or select an image.",
+      "groupRequired": "Please select a group to publish to."
+    },
+    "success": {
+      "title": "Post Created! 🎉",
+      "message": "Your post has been successfully published to \"{{groupName}}\" group."
+    }
   }
 }

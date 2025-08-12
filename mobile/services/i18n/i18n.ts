@@ -250,7 +250,7 @@ const detectUserLanguage = async (): Promise<SupportedLanguage> => {
     }
 
     // 2. Check device locale
-    const deviceLocale = Localization.locale;
+    const deviceLocale = Localization.getLocales()[0]?.languageTag || 'en';
     const languageCode = deviceLocale.split('-')[0].toLowerCase();
     
     // Map device locale to supported language
