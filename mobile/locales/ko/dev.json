@@ -5,5 +5,9 @@
   "switchAccount": "{{nickname}} 계정으로 전환하시겠습니까?\n앱이 새로고침됩니다.",
   "debugInfo": "디버그 정보",
   "environment": "환경",
-  "mockApi": "Mock API"
+  "mockApi": "Mock API",
+  "type": "타입",
+  "email": "이메일",
+  "premium": "프리미엄",
+  "admin": "관리자"
 }

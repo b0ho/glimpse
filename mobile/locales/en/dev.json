@@ -5,5 +5,9 @@
   "switchAccount": "Switch to {{nickname}} account?\nApp will refresh.",
   "debugInfo": "Debug Info",
   "environment": "Environment",
-  "mockApi": "Mock API"
+  "mockApi": "Mock API",
+  "type": "Type",
+  "email": "Email",
+  "premium": "Premium",
+  "admin": "Admin"
 }

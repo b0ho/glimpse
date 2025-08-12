@@ -1,4 +1,6 @@
 {
+  "myStory": "My Story",
+  "addStory": "Add Story",
   "newStory": "New Story",
   "permissions": {
     "required": "Permission Required",

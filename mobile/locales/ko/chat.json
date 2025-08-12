@@ -8,6 +8,11 @@
     "voiceMessage": "음성 메시지",
     "location": "위치 공유"
   },
+  "voiceRecording": {
+    "recordingError": "음성 녹음을 시작할 수 없습니다.",
+    "tooShort": "녹음 시간이 너무 짧습니다.",
+    "saveError": "음성 녹음을 저장할 수 없습니다."
+  },
   "messageStatus": {
     "sending": "전송 중...",
     "sent": "전송됨",
@@ -87,5 +92,14 @@
     "imageSelectFailed": "이미지를 선택하는 중 오류가 발생했습니다.",
     "photoSendFailed": "사진 전송에 실패했습니다.",
     "cameraFailed": "카메라를 실행하는 중 오류가 발생했습니다."
+  },
+  "accessibility": {
+    "sendMessage": "메시지 전송",
+    "sendHint": "메시지를 전송합니다",
+    "sendHintDisabled": "메시지를 입력한 후 전송할 수 있습니다",
+    "messageText": "메시지:",
+    "viewImage": "이미지 보기",
+    "viewImageHint": "탭하면 이미지를 크게 볼 수 있습니다",
+    "messageOptions": "길게 누르면 메시지 옵션을 볼 수 있습니다"
   }
 }

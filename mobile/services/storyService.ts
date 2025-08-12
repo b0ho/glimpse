@@ -89,7 +89,7 @@ class StoryService {
       // TODO: Get token from Clerk
       const token = '';
       if (!token) {
-        throw new Error('인증 토큰이 없습니다.');
+        throw new Error('No authentication token');
       }
 
       const formData = new FormData();
@@ -113,7 +113,7 @@ class StoryService {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || '스토리 업로드 실패');
+        throw new Error(error.message || 'Story upload failed');
       }
 
       const data = await response.json();
@@ -136,7 +136,7 @@ class StoryService {
       // TODO: Get token from Clerk
       const token = '';
       if (!token) {
-        throw new Error('인증 토큰이 없습니다.');
+        throw new Error('No authentication token');
       }
 
       const response = await fetch(`${API_BASE_URL}/stories/my`, {
@@ -148,7 +148,7 @@ class StoryService {
       });
 
       if (!response.ok) {
-        throw new Error('스토리 목록을 가져올 수 없습니다.');
+        throw new Error('Failed to fetch stories');
       }
 
       const data = await response.json();
@@ -173,7 +173,7 @@ class StoryService {
       // TODO: Get token from Clerk
       const token = '';
       if (!token) {
-        throw new Error('인증 토큰이 없습니다.');
+        throw new Error('No authentication token');
       }
 
       const response = await fetch(
@@ -188,7 +188,7 @@ class StoryService {
       );
 
       if (!response.ok) {
-        throw new Error('스토리 피드를 가져올 수 없습니다.');
+        throw new Error('Failed to fetch story feed');
       }
 
       const data = await response.json();
@@ -212,7 +212,7 @@ class StoryService {
       // TODO: Get token from Clerk
       const token = '';
       if (!token) {
-        throw new Error('인증 토큰이 없습니다.');
+        throw new Error('No authentication token');
       }
 
       const response = await fetch(`${API_BASE_URL}/stories/${storyId}`, {
@@ -224,7 +224,7 @@ class StoryService {
       });
 
       if (!response.ok) {
-        throw new Error('스토리를 가져올 수 없습니다.');
+        throw new Error('Failed to fetch story');
       }
 
       const data = await response.json();
@@ -247,7 +247,7 @@ class StoryService {
       // TODO: Get token from Clerk
       const token = '';
       if (!token) {
-        throw new Error('인증 토큰이 없습니다.');
+        throw new Error('No authentication token');
       }
 
       const response = await fetch(`${API_BASE_URL}/stories/${storyId}/view`, {
@@ -279,7 +279,7 @@ class StoryService {
       // TODO: Get token from Clerk
       const token = '';
       if (!token) {
-        throw new Error('인증 토큰이 없습니다.');
+        throw new Error('No authentication token');
       }
 
       const response = await fetch(`${API_BASE_URL}/stories/${storyId}/viewers`, {
@@ -291,7 +291,7 @@ class StoryService {
       });
 
       if (!response.ok) {
-        throw new Error('조회자 목록을 가져올 수 없습니다.');
+        throw new Error('Failed to fetch viewers');
       }
 
       const data = await response.json();
@@ -315,7 +315,7 @@ class StoryService {
       // TODO: Get token from Clerk
       const token = '';
       if (!token) {
-        throw new Error('인증 토큰이 없습니다.');
+        throw new Error('No authentication token');
       }
 
       const response = await fetch(`${API_BASE_URL}/stories/${storyId}`, {
@@ -327,7 +327,7 @@ class StoryService {
       });
 
       if (!response.ok) {
-        throw new Error('스토리 삭제에 실패했습니다.');
+        throw new Error('Failed to delete story');
       }
     } catch (error) {
       console.error('Failed to delete story:', error);
@@ -348,7 +348,7 @@ class StoryService {
       // TODO: Get token from Clerk
       const token = '';
       if (!token) {
-        throw new Error('인증 토큰이 없습니다.');
+        throw new Error('No authentication token');
       }
 
       const response = await fetch(`${API_BASE_URL}/stories/user/${userId}`, {
@@ -360,7 +360,7 @@ class StoryService {
       });
 
       if (!response.ok) {
-        throw new Error('사용자 스토리를 가져올 수 없습니다.');
+        throw new Error('Failed to fetch user stories');
       }
 
       const data = await response.json();

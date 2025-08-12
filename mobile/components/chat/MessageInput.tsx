@@ -301,8 +301,8 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
           onPress={handleSendMessage}
           disabled={!canSend}
           accessibilityRole="button"
-          accessibilityLabel="메시지 전송"
-          accessibilityHint={canSend ? '메시지를 전송합니다' : '메시지를 입력한 후 전송할 수 있습니다'}
+          accessibilityLabel={t('accessibility.sendMessage')}
+          accessibilityHint={canSend ? t('accessibility.sendHint') : t('accessibility.sendHintDisabled')}
         >
           <Icon
             name={isSending ? 'hourglass' : UI_ICONS.SEND}

@@ -8,6 +8,11 @@
     "voiceMessage": "Voice Message",
     "location": "Share Location"
   },
+  "voiceRecording": {
+    "recordingError": "Unable to start voice recording.",
+    "tooShort": "Recording is too short.",
+    "saveError": "Unable to save voice recording."
+  },
   "messageStatus": {
     "sending": "Sending...",
     "sent": "Sent",
@@ -87,5 +92,14 @@
     "gallery": "Gallery",
     "takePhoto": "Take photo with camera",
     "selectPhoto": "Select photo from gallery"
+  },
+  "accessibility": {
+    "sendMessage": "Send message",
+    "sendHint": "Send the message",
+    "sendHintDisabled": "Type a message first to send",
+    "messageText": "Message:",
+    "viewImage": "View image",
+    "viewImageHint": "Tap to view image in full screen",
+    "messageOptions": "Long press to see message options"
   }
 }

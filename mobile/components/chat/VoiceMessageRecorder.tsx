@@ -7,6 +7,7 @@ import {
   Animated,
   Alert,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { audioService } from '../../services/audioService';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
@@ -33,6 +34,7 @@ export const VoiceMessageRecorder= ({
   onSend,
   onCancel,
 }) => {
+  const { t } = useTranslation('chat');
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -99,7 +101,7 @@ export const VoiceMessageRecorder= ({
       setIsRecording(true);
       setRecordingDuration(0);
     } catch (error) {
-      Alert.alert('오류', '음성 녹음을 시작할 수 없습니다.');
+      Alert.alert(t('errors.error'), t('voiceRecording.recordingError'));
     }
   };
 
@@ -114,10 +116,10 @@ export const VoiceMessageRecorder= ({
         // 1초 이상 녹음된 경우만 전송
         onSend(result.uri, result.duration);
       } else {
-        Alert.alert('알림', '녹음 시간이 너무 짧습니다.');
+        Alert.alert(t('status.notification'), t('voiceRecording.tooShort'));
       }
     } catch (error) {
-      Alert.alert('오류', '음성 녹음을 저장할 수 없습니다.');
+      Alert.alert(t('errors.error'), t('voiceRecording.saveError'));
     } finally {
       setIsRecording(false);
       setIsPaused(false);

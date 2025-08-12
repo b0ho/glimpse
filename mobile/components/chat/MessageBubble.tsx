@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Message } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -50,6 +51,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
   onImagePress,
   onLongPress,
 }) => {
+  const { t } = useTranslation('chat');
   /**
    * 메시지 컨텐츠 렌더링
    * @returns {JSX.Element | null} 메시지 타입에 따른 컨텐츠
@@ -63,7 +65,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
               styles.messageText,
               isOwnMessage ? styles.ownMessageText : styles.otherMessageText,
             ]}
-            accessibilityLabel={`메시지: ${message.content}`}
+            accessibilityLabel={`${t('accessibility.messageText')} ${message.content}`}
           >
             {message.content}
           </Text>
@@ -74,8 +76,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           <TouchableOpacity
             onPress={() => onImagePress?.(message.content)}
             accessibilityRole="button"
-            accessibilityLabel="이미지 보기"
-            accessibilityHint="탭하면 이미지를 크게 볼 수 있습니다"
+            accessibilityLabel={t('accessibility.viewImage')}
+            accessibilityHint={t('accessibility.viewImageHint')}
           >
             <Image
               source={{ uri: message.content }}
@@ -189,7 +191,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           onLongPress={() => onLongPress?.(message)}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityHint="길게 누르면 메시지 옵션을 볼 수 있습니다"
+          accessibilityHint={t('accessibility.messageOptions')}
         >
           {renderMessageContent()}
         </TouchableOpacity>

@@ -7,6 +7,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
 import { captureError } from '../services/sentry/sentry-config';
 
@@ -14,7 +15,7 @@ import { captureError } from '../services/sentry/sentry-config';
  * ErrorBoundary 컴포넌트 Props
  * @interface Props
  */
-interface Props {
+interface Props extends WithTranslation {
   /** 자식 컴포넌트 */
   children: ReactNode;
   /** 에러 발생 시 표시할 커스텀 컴포넌트 */
@@ -36,11 +37,11 @@ interface State {
 
 /**
  * 에러 바운더리 컴포넌트 - React 컴포넌트 트리에서 발생한 에러 처리
- * @class ErrorBoundary
+ * @class ErrorBoundaryComponent
  * @extends {Component<Props, State>}
  * @description 자식 컴포넌트에서 발생한 JavaScript 에러를 포착하여 전체 앱 충돌 방지
  */
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryComponent extends Component<Props, State> {
   public state: State = {
     hasError: false,
   };
@@ -98,16 +99,16 @@ export class ErrorBoundary extends Component<Props, State> {
               <Icon name="warning" size={64} color={COLORS.ERROR} />
             </View>
             
-            <Text style={styles.title}>앗! 문제가 발생했어요</Text>
+            <Text style={styles.title}>{this.props.t('errors.errorBoundary.title')}</Text>
             
             <Text style={styles.subtitle}>
-              예상치 못한 오류가 발생했습니다.{'\n'}
-              문제가 지속되면 고객지원에 문의해주세요.
+              {this.props.t('errors.errorBoundary.description')}{'\n'}
+              {this.props.t('errors.errorBoundary.support')}
             </Text>
             
             {__DEV__ && this.state.error && (
               <View style={styles.errorDetails}>
-                <Text style={styles.errorDetailsTitle}>개발자 정보:</Text>
+                <Text style={styles.errorDetailsTitle}>{this.props.t('errors.errorBoundary.developerInfo')}</Text>
                 <Text style={styles.errorDetailsText}>
                   {this.state.error.toString()}
                 </Text>
@@ -124,7 +125,7 @@ export class ErrorBoundary extends Component<Props, State> {
               onPress={this.handleRestart}
             >
               <Icon name="refresh" size={20} color={COLORS.TEXT.WHITE} />
-              <Text style={styles.retryButtonText}>다시 시도</Text>
+              <Text style={styles.retryButtonText}>{this.props.t('buttons.retry')}</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -197,3 +198,5 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.SM,
   },
 });
+
+export const ErrorBoundary = withTranslation('common')(ErrorBoundaryComponent);

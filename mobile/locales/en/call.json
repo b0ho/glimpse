@@ -1,0 +1,19 @@
+{
+  "incomingCall": "Incoming Call",
+  "videoCall": "Video Call",
+  "audioCall": "Voice Call",
+  "reject": "Reject",
+  "accept": "Accept",
+  "status": {
+    "calling": "Calling...",
+    "ringing": "Ringing...",
+    "connecting": "Connecting...",
+    "connected": "In Call",
+    "ended": "Call Ended",
+    "failed": "Call Failed",
+    "inCall": "In Call"
+  },
+  "errors": {
+    "alreadyInCall": "Already in a call"
+  }
+}

@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTranslation } from 'react-i18next';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -105,6 +106,7 @@ export const StoryViewer= ({
   onEndReached,
   currentUserId,
 }) => {
+  const { t } = useTranslation();
   const [currentGroupIndex, setCurrentGroupIndex] = useState(initialGroupIndex);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(initialStoryIndex);
   const [isLoading, setIsLoading] = useState(true);
@@ -268,11 +270,11 @@ export const StoryViewer= ({
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
     
     if (diffInMinutes < 60) {
-      return `${diffInMinutes}분 전`;
+      return t('common:time.minutesAgo', { count: diffInMinutes });
     } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)}시간 전`;
+      return t('common:time.hoursAgo', { count: Math.floor(diffInMinutes / 60) });
     } else {
-      return `${Math.floor(diffInMinutes / 1440)}일 전`;
+      return t('common:time.daysAgo', { count: Math.floor(diffInMinutes / 1440) });
     }
   };
 

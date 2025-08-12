@@ -67,10 +67,10 @@ export const DevModePanel = () => {
           
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('currentAccount', { ns: 'dev' })}</Text>
-            <Text style={styles.info}>타입: {currentAccountType}</Text>
-            <Text style={styles.info}>이메일: {currentAccount?.email}</Text>
-            <Text style={styles.info}>프리미엄: {currentAccount?.isPremium ? 'Yes' : 'No'}</Text>
-            <Text style={styles.info}>관리자: {currentAccount?.isAdmin ? 'Yes' : 'No'}</Text>
+            <Text style={styles.info}>{t('type', { ns: 'dev' })}: {currentAccountType}</Text>
+            <Text style={styles.info}>{t('email', { ns: 'dev' })}: {currentAccount?.email}</Text>
+            <Text style={styles.info}>{t('premium', { ns: 'dev' })}: {currentAccount?.isPremium ? 'Yes' : 'No'}</Text>
+            <Text style={styles.info}>{t('admin', { ns: 'dev' })}: {currentAccount?.isAdmin ? 'Yes' : 'No'}</Text>
           </View>
 
           <View style={styles.section}>

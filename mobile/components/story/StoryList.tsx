@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTranslation } from 'react-i18next';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 /**
@@ -69,6 +70,8 @@ export const StoryList= ({
   onRefresh,
   refreshing = false,
 }) => {
+  const { t } = useTranslation();
+  
   // Find current user's stories
   const myStories = stories.find(story => story.user.id === currentUserId);
   const otherStories = stories.filter(story => story.user.id !== currentUserId);
@@ -172,7 +175,7 @@ export const StoryList= ({
             )}
           </View>
           <Text style={styles.nickname} numberOfLines={1}>
-            내 스토리
+            {t('story:myStory')}
           </Text>
         </TouchableOpacity>
       );
@@ -186,7 +189,7 @@ export const StoryList= ({
             <Ionicons name="add" size={28} color={COLORS.white} />
           </View>
         </View>
-        <Text style={styles.nickname}>스토리 추가</Text>
+        <Text style={styles.nickname}>{t('story:addStory')}</Text>
       </TouchableOpacity>
     );
   };

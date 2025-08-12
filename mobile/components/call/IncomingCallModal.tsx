@@ -8,6 +8,7 @@ import {
   Vibration,
   Animated,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
@@ -42,6 +43,7 @@ export const IncomingCallModal = ({
   onAccept,
   onReject,
 }: IncomingCallModalProps) => {
+  const { t } = useTranslation('call');
   const [pulseAnim] = useState(new Animated.Value(1));
 
   useEffect(() => {
@@ -84,7 +86,7 @@ export const IncomingCallModal = ({
     >
       <View style={styles.container}>
         <View style={styles.callCard}>
-          <Text style={styles.incomingCallText}>수신 전화</Text>
+          <Text style={styles.incomingCallText}>{t('incomingCall')}</Text>
           
           <Animated.View 
             style={[
@@ -99,7 +101,7 @@ export const IncomingCallModal = ({
 
           <Text style={styles.callerName}>{callerName}</Text>
           <Text style={styles.callTypeText}>
-            {callType === 'video' ? '영상 통화' : '음성 통화'}
+            {callType === 'video' ? t('videoCall') : t('audioCall')}
           </Text>
 
           <View style={styles.actionButtons}>
@@ -108,7 +110,7 @@ export const IncomingCallModal = ({
               onPress={onReject}
             >
               <Ionicons name="close" size={30} color={COLORS.white} />
-              <Text style={styles.actionButtonText}>거절</Text>
+              <Text style={styles.actionButtonText}>{t('reject')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -120,7 +122,7 @@ export const IncomingCallModal = ({
                 size={30} 
                 color={COLORS.white} 
               />
-              <Text style={styles.actionButtonText}>수락</Text>
+              <Text style={styles.actionButtonText}>{t('accept')}</Text>
             </TouchableOpacity>
           </View>
         </View>

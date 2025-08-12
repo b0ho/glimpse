@@ -105,7 +105,13 @@
     "permission": "Permission denied",
     "notFound": "Not found",
     "invalid": "Invalid input",
-    "required": "This field is required"
+    "required": "This field is required",
+    "errorBoundary": {
+      "title": "Oops! Something went wrong",
+      "description": "An unexpected error occurred.",
+      "support": "If the problem persists, please contact support.",
+      "developerInfo": "Developer Info:"
+    }
   },
   "actions": {
     "confirm": "Confirm",

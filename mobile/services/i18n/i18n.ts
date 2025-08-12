@@ -22,8 +22,8 @@ const SUPPORTED_LANGUAGES = {
 };
 
 // Import translations - with fallbacks for missing files
-let koCommon, koAuth, koGroup, koMatching, koChat, koPayment, koProfile, koSettings, koMatches, koPremium, koLocation, koNavigation;
-let enCommon, enAuth, enGroup, enProfile, enMatching, enSettings, enMatches, enChat, enPremium, enLocation, enNavigation;
+let koCommon, koAuth, koGroup, koMatching, koChat, koPayment, koProfile, koSettings, koMatches, koPremium, koLocation, koNavigation, koCall, koStory, koDev;
+let enCommon, enAuth, enGroup, enProfile, enMatching, enSettings, enMatches, enChat, enPremium, enLocation, enNavigation, enCall, enStory, enDev;
 
 try {
   koCommon = require('../../locales/ko/common.json');
@@ -38,6 +38,9 @@ try {
   koPremium = require('../../locales/ko/premium.json');
   koLocation = require('../../locales/ko/location.json');
   koNavigation = require('../../locales/ko/navigation.json');
+  koCall = require('../../locales/ko/call.json');
+  koStory = require('../../locales/ko/story.json');
+  koDev = require('../../locales/ko/dev.json');
   
   enCommon = require('../../locales/en/common.json');
   enAuth = require('../../locales/en/auth.json');
@@ -50,6 +53,9 @@ try {
   enPremium = require('../../locales/en/premium.json');
   enLocation = require('../../locales/en/location.json');
   enNavigation = require('../../locales/en/navigation.json');
+  enCall = require('../../locales/en/call.json');
+  enStory = require('../../locales/en/story.json');
+  enDev = require('../../locales/en/dev.json');
 } catch (error) {
   console.warn('Some translation files are missing, using defaults');
   // Default fallbacks
@@ -65,6 +71,9 @@ try {
   koPremium = koPremium || {};
   koLocation = koLocation || {};
   koNavigation = koNavigation || {};
+  koCall = koCall || {};
+  koStory = koStory || {};
+  koDev = koDev || {};
   
   enCommon = enCommon || { app: { name: 'Glimpse' } };
   enAuth = enAuth || {};
@@ -77,6 +86,9 @@ try {
   enPremium = enPremium || {};
   enLocation = enLocation || {};
   enNavigation = enNavigation || {};
+  enCall = enCall || {};
+  enStory = enStory || {};
+  enDev = enDev || {};
 }
 
 // Translation resources
@@ -95,6 +107,9 @@ const resources = {
     location: koLocation,
     navigation: koNavigation,
     home: (() => { try { return require('../../locales/ko/home.json'); } catch { return {}; } })(),
+    call: koCall,
+    story: koStory,
+    dev: koDev,
   },
   en: {
     common: enCommon,
@@ -110,6 +125,9 @@ const resources = {
     navigation: enNavigation,
     home: (() => { try { return require('../../locales/en/home.json'); } catch { return {}; } })(),
     payment: {},
+    call: enCall,
+    story: enStory,
+    dev: enDev,
   },
   // Other languages with safe fallbacks
   ja: {
@@ -270,7 +288,7 @@ export const initI18n = async () => {
       lng: detectedLanguage,
       fallbackLng: FALLBACK_LANGUAGE,
       defaultNS: 'common',
-      ns: ['common', 'auth', 'group', 'matching', 'chat', 'payment', 'profile', 'settings', 'home', 'matches', 'premium', 'location', 'navigation'],
+      ns: ['common', 'auth', 'group', 'matching', 'chat', 'payment', 'profile', 'settings', 'home', 'matches', 'premium', 'location', 'navigation', 'call', 'story', 'dev'],
       
       interpolation: {
         escapeValue: false, // React Native already escapes values
