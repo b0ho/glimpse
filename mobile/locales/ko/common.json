@@ -50,13 +50,14 @@
     "failed": "실패"
   },
   "time": {
-    "justNow": "방금",
-    "minute": "{{count}}분 전",
-    "hour": "{{count}}시간 전",
-    "day": "{{count}}일 전",
-    "week": "{{count}}주 전",
-    "month": "{{count}}개월 전",
-    "year": "{{count}}년 전"
+    "justNow": "방금 전",
+    "minutesAgo": "{{count}}분 전",
+    "hoursAgo": "{{count}}시간 전",
+    "hoursAndMinutesAgo": "{{hours}}시간 {{minutes}}분 전",
+    "daysAgo": "{{count}}일 전",
+    "weeksAgo": "{{count}}주 전",
+    "monthsAgo": "{{count}}개월 전",
+    "yearsAgo": "{{count}}년 전"
   },
   "gender": {
     "male": "남성",

@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuthService } from '@/services/auth/auth-service';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, FONT_SIZES, SECURITY } from '@/utils/constants';
@@ -32,6 +33,7 @@ export const SMSVerificationScreen= ({
   const authService = useAuthService();
   const authStore = useAuthStore();
   const inputRef = useRef<TextInput>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // 타이머 시작
@@ -78,7 +80,7 @@ export const SMSVerificationScreen= ({
 
   const handleVerifyCode = async (): Promise<void> => {
     if (code.length !== SECURITY.OTP_LENGTH) {
-      Alert.alert('오류', '6자리 인증번호를 입력해주세요.');
+      Alert.alert(t('common:status.error'), t('auth:smsVerification.errors.enterSixDigitCode'));
       return;
     }
 
@@ -94,7 +96,7 @@ export const SMSVerificationScreen= ({
           authStore.setUser({
             id: (currentUser as { id: string }).id,
             anonymousId: `anon_${(currentUser as { id: string }).id.slice(-8)}`,
-            nickname: (currentUser as { firstName?: string }).firstName || '사용자',
+            nickname: (currentUser as { firstName?: string }).firstName || t('common:user.defaultName'),
             phoneNumber: phoneNumber, // 해시화된 전화번호 (실제로는 백엔드에서 처리)
             isVerified: true,
             credits: 10, // 기본 크레딧
@@ -106,22 +108,22 @@ export const SMSVerificationScreen= ({
         }
         
         Alert.alert(
-          '인증 성공',
-          '전화번호 인증이 완료되었습니다.',
+          t('auth:smsVerification.success.title'),
+          t('auth:smsVerification.success.message'),
           [
             {
-              text: '확인',
+              text: t('common:buttons.confirm'),
               onPress: onVerificationSuccess,
             },
           ]
         );
       } else {
-        Alert.alert('오류', typeof result.error === 'string' ? result.error : result.error?.message || '인증번호가 올바르지 않습니다.');
+        Alert.alert(t('common:status.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('auth:smsVerification.errors.invalidCode'));
         setCode(''); // 코드 초기화
       }
     } catch (error) {
       console.error('SMS verification error:', error);
-      Alert.alert('오류', '인증 중 오류가 발생했습니다. 다시 시도해주세요.');
+      Alert.alert(t('common:status.error'), t('auth:smsVerification.errors.verificationFailed'));
       setCode('');
     } finally {
       setIsLoading(false);
@@ -137,16 +139,16 @@ export const SMSVerificationScreen= ({
       const result = await authService.signInWithPhone(phoneNumber);
       
       if (result.success) {
-        Alert.alert('재전송 완료', '인증번호를 다시 전송했습니다.');
+        Alert.alert(t('auth:smsVerification.resend.success.title'), t('auth:smsVerification.resend.success.message'));
         setRemainingTime(SECURITY.OTP_EXPIRY_MINUTES * 60);
         setCanResend(false);
         setCode('');
       } else {
-        Alert.alert('오류', typeof result.error === 'string' ? result.error : result.error?.message || '인증번호 재전송에 실패했습니다.');
+        Alert.alert(t('common:status.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('auth:smsVerification.resend.errors.failed'));
       }
     } catch (error) {
       console.error('Resend code error:', error);
-      Alert.alert('오류', '네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+      Alert.alert(t('common:status.error'), t('common:errors.network'));
     } finally {
       setIsLoading(false);
     }
@@ -159,13 +161,12 @@ export const SMSVerificationScreen= ({
     >
       <View style={styles.content}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <Text style={styles.backButtonText}>← 뒤로</Text>
+          <Text style={styles.backButtonText}>← {t('common:buttons.back')}</Text>
         </TouchableOpacity>
 
-        <Text style={styles.title}>인증번호 입력</Text>
+        <Text style={styles.title}>{t('auth:smsVerification.title')}</Text>
         <Text style={styles.subtitle}>
-          {formatPhoneNumber(phoneNumber)}로{'\n'}
-          전송된 6자리 인증번호를 입력해주세요.
+          {t('auth:smsVerification.subtitle', { phoneNumber: formatPhoneNumber(phoneNumber) })}
         </Text>
         
         <View style={styles.form}>
@@ -182,7 +183,7 @@ export const SMSVerificationScreen= ({
           
           <View style={styles.timerContainer}>
             <Text style={styles.timerText}>
-              {remainingTime > 0 ? `${formatTime(remainingTime)} 후 만료` : '인증번호가 만료되었습니다'}
+              {remainingTime > 0 ? t('auth:smsVerification.timer.expires', { time: formatTime(remainingTime) }) : t('auth:smsVerification.timer.expired')}
             </Text>
           </View>
           
@@ -198,11 +199,11 @@ export const SMSVerificationScreen= ({
               <View style={styles.buttonContent}>
                 <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
                 <Text style={[styles.buttonText, { marginLeft: SPACING.SM }]}>
-                  인증 중...
+                  {t('auth:smsVerification.verifying')}
                 </Text>
               </View>
             ) : (
-              <Text style={styles.buttonText}>인증하기</Text>
+              <Text style={styles.buttonText}>{t('auth:smsVerification.verifyButton')}</Text>
             )}
           </TouchableOpacity>
           
@@ -218,7 +219,7 @@ export const SMSVerificationScreen= ({
               <View style={styles.resendButtonContent}>
                 <ActivityIndicator size="small" color={COLORS.PRIMARY} />
                 <Text style={[styles.resendButtonText, { marginLeft: SPACING.XS }]}>
-                  전송 중...
+                  {t('auth:smsVerification.resending')}
                 </Text>
               </View>
             ) : (
@@ -226,15 +227,14 @@ export const SMSVerificationScreen= ({
                 styles.resendButtonText,
                 !canResend && styles.resendButtonTextDisabled,
               ]}>
-                인증번호 재전송
+                {t('auth:smsVerification.resendButton')}
               </Text>
             )}
           </TouchableOpacity>
         </View>
         
         <Text style={styles.description}>
-          인증번호를 받지 못하셨나요?{'\n'}
-          스팸 메시지함을 확인하시거나 잠시 후 다시 시도해주세요.
+          {t('auth:smsVerification.help')}
         </Text>
       </View>
     </KeyboardAvoidingView>

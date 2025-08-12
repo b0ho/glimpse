@@ -90,8 +90,8 @@ export default function App() {
 
   // 웹 환경 체크
   if (Platform.OS === 'web') {
-    console.log('Glimpse 앱이 웹에서 실행 중입니다');
-    console.log('개발 모드 인증 우회:', isAuthBypassEnabled);
+    console.log('Glimpse app is running on web');
+    console.log('Dev mode auth bypass:', isAuthBypassEnabled);
   }
 
   // Show loading screen while i18n is initializing

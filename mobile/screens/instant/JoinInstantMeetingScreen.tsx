@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { RootNavigationProp, JoinInstantMeetingScreenProps } from '@/types/navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useInstantMeetingStore } from '@/store/instantMeetingStore';
@@ -48,6 +49,7 @@ export function JoinInstantMeetingScreen() {
   const route = useRoute<JoinInstantMeetingScreenProps['route']>();
   const { code } = route.params;
   const { joinMeetingWithFeatures } = useInstantMeetingStore();
+  const { t } = useTranslation();
 
   const [step, setStep] = useState(1);
   const [nickname, setNickname] = useState('');
@@ -68,17 +70,17 @@ export function JoinInstantMeetingScreen() {
 
   const handleNext = () => {
     if (step === 1 && !nickname.trim()) {
-      Alert.alert('알림', '닉네임을 입력해주세요.');
+      Alert.alert(t('common:status.notification'), t('instant:join.errors.enterNickname'));
       return;
     }
     
     if (step === 2 && (!myUpperWear || !myLowerWear)) {
-      Alert.alert('알림', '상의와 하의 정보는 필수입니다.');
+      Alert.alert(t('common:status.notification'), t('instant:join.errors.requiredClothing'));
       return;
     }
 
     if (step === 3 && (!lookingUpperWear || !lookingLowerWear)) {
-      Alert.alert('알림', '찾는 사람의 상의와 하의 정보는 필수입니다.');
+      Alert.alert(t('common:status.notification'), t('instant:join.errors.requiredTargetClothing'));
       return;
     }
 
@@ -111,7 +113,7 @@ export function JoinInstantMeetingScreen() {
       
       navigation.replace('InstantMeeting');
     } catch (error) {
-      Alert.alert('오류', '모임 참가 중 문제가 발생했습니다.');
+      Alert.alert(t('common:status.error'), t('instant:join.errors.joinFailed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -119,14 +121,14 @@ export function JoinInstantMeetingScreen() {
 
   const renderStep1 = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>닉네임을 입력해주세요</Text>
+      <Text style={styles.stepTitle}>{t('instant:join.step1.title')}</Text>
       <Text style={styles.stepDescription}>
-        이 모임에서만 사용되는 닉네임입니다
+        {t('instant:join.step1.description')}
       </Text>
       
       <TextInput
         style={styles.nicknameInput}
-        placeholder="예: 커피러버"
+        placeholder={t('instant:join.step1.placeholder')}
         placeholderTextColor={COLORS.textLight}
         value={nickname}
         onChangeText={setNickname}
@@ -137,15 +139,15 @@ export function JoinInstantMeetingScreen() {
 
   const renderStep2 = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>내 특징 입력</Text>
+      <Text style={styles.stepTitle}>{t('instant:join.step2.title')}</Text>
       <Text style={styles.stepDescription}>
-        다른 사람이 나를 찾을 수 있도록{'\n'}현재 모습을 입력해주세요
+        {t('instant:join.step2.description')}
       </Text>
 
       <ScrollView style={styles.featureContainer}>
         {/* 상의 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>상의 *</Text>
+          <Text style={styles.sectionTitle}>{t('instant:join.clothing.upperWear')} *</Text>
           <View style={styles.optionGrid}>
             {UPPER_WEAR_OPTIONS.map((option) => (
               <TouchableOpacity
@@ -251,7 +253,7 @@ export function JoinInstantMeetingScreen() {
       <ScrollView style={styles.featureContainer}>
         {/* 상의 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>상의 *</Text>
+          <Text style={styles.sectionTitle}>{t('instant:join.clothing.upperWear')} *</Text>
           <View style={styles.optionGrid}>
             {UPPER_WEAR_OPTIONS.map((option) => (
               <TouchableOpacity

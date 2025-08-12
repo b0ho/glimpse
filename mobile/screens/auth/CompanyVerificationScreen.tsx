@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { CompanyVerification, VerificationStatus, VerificationMethod } from '@/types';
 
@@ -28,6 +29,7 @@ export const CompanyVerificationScreen= ({
   const [inviteCode, setInviteCode] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation();
 
   // 이메일 도메인에서 회사명 추출
   const extractCompanyFromEmail = (emailAddress: string): string => {
@@ -78,36 +80,36 @@ export const CompanyVerificationScreen= ({
 
   const handleSubmitVerification = async (): Promise<void> => {
     if (!selectedMethod) {
-      Alert.alert('오류', '인증 방법을 선택해주세요.');
+      Alert.alert(t('common:status.error'), t('auth:companyVerification.errors.selectMethod'));
       return;
     }
 
     if (selectedMethod === VerificationMethod.EMAIL_DOMAIN) {
       if (!email.trim()) {
-        Alert.alert('오류', '회사 이메일을 입력해주세요.');
+        Alert.alert(t('common:status.error'), t('auth:companyVerification.errors.enterEmail'));
         return;
       }
       if (!validateEmail(email)) {
-        Alert.alert('오류', '올바른 이메일 형식이 아닙니다.');
+        Alert.alert(t('common:status.error'), t('auth:companyVerification.errors.invalidEmail'));
         return;
       }
       if (!companyName.trim()) {
-        Alert.alert('오류', '회사명을 입력해주세요.');
+        Alert.alert(t('common:status.error'), t('auth:companyVerification.errors.enterCompanyName'));
         return;
       }
     }
 
     if (selectedMethod === VerificationMethod.INVITE_CODE) {
       if (!inviteCode.trim()) {
-        Alert.alert('오류', '초대 코드를 입력해주세요.');
+        Alert.alert(t('common:status.error'), t('auth:companyVerification.errors.enterInviteCode'));
         return;
       }
       if (!validateInviteCode(inviteCode)) {
-        Alert.alert('오류', '초대 코드는 8자리 영문 대문자와 숫자 조합이어야 합니다.');
+        Alert.alert(t('common:status.error'), t('auth:companyVerification.errors.invalidInviteCode'));
         return;
       }
       if (!companyName.trim()) {
-        Alert.alert('오류', '회사명을 입력해주세요.');
+        Alert.alert(t('common:status.error'), t('auth:companyVerification.errors.enterCompanyName'));
         return;
       }
     }
@@ -132,11 +134,11 @@ export const CompanyVerificationScreen= ({
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       Alert.alert(
-        '인증 요청 완료',
-        '회사 인증 요청이 제출되었습니다.\n승인까지 1-2일 소요될 수 있습니다.',
+        t('auth:companyVerification.success.title'),
+        t('auth:companyVerification.success.message'),
         [
           {
-            text: '확인',
+            text: t('common:buttons.confirm'),
             onPress: onVerificationSubmitted,
           },
         ]
@@ -144,7 +146,7 @@ export const CompanyVerificationScreen= ({
     } catch (error) {
       console.error('Company verification error:', error);
       // TODO: 실제 운영 환경에서는 Sentry, Firebase Crashlytics 등으로 에러 전송 (Gemini 피드백 반영)
-      Alert.alert('오류', '회사 인증 요청 중 오류가 발생했습니다. 다시 시도해주세요.');
+      Alert.alert(t('common:status.error'), t('auth:companyVerification.errors.submitFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -157,17 +159,16 @@ export const CompanyVerificationScreen= ({
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
-          <Text style={styles.title}>회사 인증</Text>
+          <Text style={styles.title}>{t('auth:companyVerification.title')}</Text>
           <Text style={styles.subtitle}>
-            소속 회사나 대학을 인증하여{'\n'}
-            공식 그룹에 참여해보세요
+            {t('auth:companyVerification.subtitle')}
           </Text>
           
           <View style={styles.form}>
             {/* 인증 방법 선택 */}
-            <Text style={styles.label}>인증 방법</Text>
+            <Text style={styles.label}>{t('auth:companyVerification.methodSelection.label')}</Text>
             <Text style={styles.description}>
-              회사 이메일 또는 초대 코드로 인증할 수 있습니다.
+              {t('auth:companyVerification.methodSelection.description')}
             </Text>
             
             <View style={styles.methodContainer}>
@@ -182,10 +183,10 @@ export const CompanyVerificationScreen= ({
                   styles.methodButtonText,
                   selectedMethod === VerificationMethod.EMAIL_DOMAIN && styles.methodButtonTextSelected,
                 ]}>
-                  회사 이메일 인증
+                  {t('auth:companyVerification.methods.email.title')}
                 </Text>
                 <Text style={styles.methodDescription}>
-                  회사 도메인 이메일로 인증
+                  {t('auth:companyVerification.methods.email.description')}
                 </Text>
               </TouchableOpacity>
               
@@ -200,10 +201,10 @@ export const CompanyVerificationScreen= ({
                   styles.methodButtonText,
                   selectedMethod === VerificationMethod.INVITE_CODE && styles.methodButtonTextSelected,
                 ]}>
-                  초대 코드 인증
+                  {t('auth:companyVerification.methods.inviteCode.title')}
                 </Text>
                 <Text style={styles.methodDescription}>
-                  회사에서 제공한 초대 코드로 인증
+                  {t('auth:companyVerification.methods.inviteCode.description')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -211,7 +212,7 @@ export const CompanyVerificationScreen= ({
             {/* 이메일 인증 폼 */}
             {selectedMethod === VerificationMethod.EMAIL_DOMAIN && (
               <View style={styles.inputSection}>
-                <Text style={styles.inputLabel}>회사 이메일</Text>
+                <Text style={styles.inputLabel}>{t('auth:companyVerification.form.emailLabel')}</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="company@example.com"
@@ -224,15 +225,15 @@ export const CompanyVerificationScreen= ({
                 
                 {companyName && (
                   <View style={styles.companyPreview}>
-                    <Text style={styles.companyPreviewLabel}>감지된 회사:</Text>
+                    <Text style={styles.companyPreviewLabel}>{t('auth:companyVerification.form.detectedCompany')}</Text>
                     <Text style={styles.companyPreviewText}>{companyName}</Text>
                   </View>
                 )}
                 
-                <Text style={styles.inputLabel}>회사명 (수정 가능)</Text>
+                <Text style={styles.inputLabel}>{t('auth:companyVerification.form.companyNameLabel')}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="회사명을 입력하세요"
+                  placeholder={t('auth:companyVerification.form.companyNamePlaceholder')}
                   value={companyName}
                   onChangeText={setCompanyName}
                 />
@@ -242,7 +243,7 @@ export const CompanyVerificationScreen= ({
             {/* 초대 코드 인증 폼 */}
             {selectedMethod === VerificationMethod.INVITE_CODE && (
               <View style={styles.inputSection}>
-                <Text style={styles.inputLabel}>초대 코드</Text>
+                <Text style={styles.inputLabel}>{t('auth:companyVerification.form.inviteCodeLabel')}</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="ABC12345"
@@ -253,10 +254,10 @@ export const CompanyVerificationScreen= ({
                   autoCorrect={false}
                 />
                 
-                <Text style={styles.inputLabel}>회사명</Text>
+                <Text style={styles.inputLabel}>{t('auth:companyVerification.form.companyNameLabel')}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="회사명을 입력하세요"
+                  placeholder={t('auth:companyVerification.form.companyNamePlaceholder')}
                   value={companyName}
                   onChangeText={setCompanyName}
                 />
@@ -275,11 +276,11 @@ export const CompanyVerificationScreen= ({
                 <View style={styles.buttonContent}>
                   <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
                   <Text style={[styles.buttonText, { marginLeft: SPACING.SM }]}>
-                    제출 중...
+                    {t('auth:companyVerification.form.submitting')}
                   </Text>
                 </View>
               ) : (
-                <Text style={styles.buttonText}>인증 요청하기</Text>
+                <Text style={styles.buttonText}>{t('auth:companyVerification.form.submitButton')}</Text>
               )}
             </TouchableOpacity>
 
@@ -290,15 +291,13 @@ export const CompanyVerificationScreen= ({
                 onPress={onSkip}
                 disabled={isLoading}
               >
-                <Text style={styles.skipButtonText}>나중에 인증하기</Text>
+                <Text style={styles.skipButtonText}>{t('auth:companyVerification.form.skipButton')}</Text>
               </TouchableOpacity>
             )}
           </View>
           
           <Text style={styles.notice}>
-            • 회사 인증은 관리자 승인 후 1-2일 내 완료됩니다{'\n'}
-            • 승인 완료 시 푸시 알림으로 안내해드립니다{'\n'}
-            • 인증 후 해당 회사 공식 그룹에 자동 가입됩니다
+            {t('auth:companyVerification.notice')}
           </Text>
         </View>
       </ScrollView>

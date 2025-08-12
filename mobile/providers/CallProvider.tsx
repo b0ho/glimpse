@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { callService } from '../services/callService';
 import { webRTCService } from '../services/webrtcService';
 import { VideoCallScreen } from '../components/call/VideoCallScreen';
@@ -30,6 +31,7 @@ export const CallProvider= ({ children }) => {
   const [incomingCallData, setIncomingCallData] = useState<any>(null);
   const [activeCallData, setActiveCallData] = useState<any>(null);
   const [isInCall, setIsInCall] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Set up incoming call listener
@@ -54,7 +56,7 @@ export const CallProvider= ({ children }) => {
   const initiateCall = async (userId: string, userName: string, callType: 'video' | 'audio') => {
     try {
       if (isInCall) {
-        Alert.alert('통화 중', '이미 통화 중입니다.');
+        Alert.alert(t('call:status.inCall'), t('call:errors.alreadyInCall'));
         return;
       }
 
@@ -73,7 +75,7 @@ export const CallProvider= ({ children }) => {
       setShowVideoCall(true);
     } catch (error) {
       console.error('Failed to initiate call:', error);
-      Alert.alert('오류', '통화를 시작할 수 없습니다.');
+      Alert.alert(t('common:status.error'), t('call:errors.cannotStartCall'));
     }
   };
 
@@ -97,7 +99,7 @@ export const CallProvider= ({ children }) => {
       setShowVideoCall(true);
     } catch (error) {
       console.error('Failed to accept call:', error);
-      Alert.alert('오류', '통화를 수락할 수 없습니다.');
+      Alert.alert(t('common:status.error'), t('call:errors.cannotAcceptCall'));
     }
   };
 

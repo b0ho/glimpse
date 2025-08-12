@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, FONT_SIZES, REGEX } from '@/utils/constants';
 import { Gender } from '@/types';
@@ -26,6 +27,7 @@ export const NicknameSetupScreen = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const authStore = useAuthStore();
+  const { t } = useTranslation();
 
   const validateNickname = (text: string): boolean => {
     return REGEX.NICKNAME.test(text);
@@ -39,7 +41,7 @@ export const NicknameSetupScreen = ({
 
     // 실제로는 백엔드 API를 호출하여 닉네임 중복을 확인
     // 지금은 간단한 로컬 검증만 구현
-    const unavailableNicknames = ['admin', 'system', 'glimpse', '관리자'];
+    const unavailableNicknames = ['admin', 'system', 'glimpse', 'administrator', '관리자'];
     const available = !unavailableNicknames.includes(text.toLowerCase());
     setIsAvailable(available);
   };
@@ -58,22 +60,22 @@ export const NicknameSetupScreen = ({
 
   const handleSetNickname = async (): Promise<void> => {
     if (!nickname.trim()) {
-      Alert.alert('오류', '닉네임을 입력해주세요.');
+      Alert.alert(t('common:status.error'), t('auth:nicknameSetup.errors.enterNickname'));
       return;
     }
 
     if (!gender) {
-      Alert.alert('오류', '성별을 선택해주세요.');
+      Alert.alert(t('common:status.error'), t('auth:nicknameSetup.errors.selectGender'));
       return;
     }
 
     if (!validateNickname(nickname)) {
-      Alert.alert('오류', '닉네임은 2-20자의 한글, 영문, 숫자만 사용 가능합니다.');
+      Alert.alert(t('common:status.error'), t('auth:nicknameSetup.errors.invalidNickname'));
       return;
     }
 
     if (isAvailable === false) {
-      Alert.alert('오류', '이미 사용 중인 닉네임입니다.');
+      Alert.alert(t('common:status.error'), t('auth:nicknameSetup.errors.nicknameInUse'));
       return;
     }
 
@@ -87,11 +89,11 @@ export const NicknameSetupScreen = ({
       });
       
       Alert.alert(
-        '프로필 설정 완료',
-        `"${nickname}" 닉네임으로 설정되었습니다.`,
+        t('auth:nicknameSetup.success.title'),
+        t('auth:nicknameSetup.success.message', { nickname }),
         [
           {
-            text: '확인',
+            text: t('common:buttons.confirm'),
             onPress: onNicknameSet,
           },
         ]
@@ -99,7 +101,7 @@ export const NicknameSetupScreen = ({
     } catch (error) {
       console.error('Profile setup error:', error);
       // TODO: 실제 운영 환경에서는 Sentry, Firebase Crashlytics 등으로 에러 전송
-      Alert.alert('오류', '프로필 설정 중 오류가 발생했습니다. 다시 시도해주세요.');
+      Alert.alert(t('common:status.error'), t('auth:nicknameSetup.errors.setupFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -118,17 +120,16 @@ export const NicknameSetupScreen = ({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>프로필 설정</Text>
+        <Text style={styles.title}>{t('auth:nicknameSetup.title')}</Text>
         <Text style={styles.subtitle}>
-          Glimpse에서 사용할{'\n'}
-          프로필 정보를 설정해주세요
+          {t('auth:nicknameSetup.subtitle')}
         </Text>
         
         <View style={styles.form}>
           {/* 성별 선택 */}
-          <Text style={styles.label}>성별</Text>
+          <Text style={styles.label}>{t('auth:nicknameSetup.gender.label')}</Text>
           <Text style={styles.description}>
-            매칭에 사용되는 정보입니다. 다른 사용자에게 공개되지 않습니다.
+            {t('auth:nicknameSetup.gender.description')}
           </Text>
           
           <View style={styles.genderContainer}>
@@ -143,7 +144,7 @@ export const NicknameSetupScreen = ({
                 styles.genderButtonText,
                 gender === 'MALE' && styles.genderButtonTextSelected,
               ]}>
-                {t('nicknameSetup.male')}
+                {t('common:gender.male')}
               </Text>
             </TouchableOpacity>
             
@@ -158,16 +159,15 @@ export const NicknameSetupScreen = ({
                 styles.genderButtonText,
                 gender === 'FEMALE' && styles.genderButtonTextSelected,
               ]}>
-                {t('nicknameSetup.female')}
+                {t('common:gender.female')}
               </Text>
             </TouchableOpacity>
           </View>
 
           {/* 닉네임 입력 */}
-          <Text style={[styles.label, { marginTop: SPACING.XL }]}>닉네임</Text>
+          <Text style={[styles.label, { marginTop: SPACING.XL }]}>{t('auth:nicknameSetup.nickname.label')}</Text>
           <Text style={styles.description}>
-            2-20자의 한글, 영문, 숫자를 사용할 수 있습니다.{'\n'}
-            다른 사용자에게 표시될 이름입니다.
+            {t('auth:nicknameSetup.nickname.description')}
           </Text>
           
           <TextInput
@@ -175,7 +175,7 @@ export const NicknameSetupScreen = ({
               styles.input,
               { borderColor: getInputBorderColor() }
             ]}
-            placeholder="닉네임을 입력하세요"
+            placeholder={t('auth:nicknameSetup.nickname.placeholder')}
             value={nickname}
             onChangeText={handleNicknameChange}
             maxLength={20}
@@ -186,16 +186,16 @@ export const NicknameSetupScreen = ({
           {nickname && (
             <View style={styles.validationContainer}>
               {isAvailable === null && nickname.length >= 2 && (
-                <Text style={styles.checkingText}>중복 확인 중...</Text>
+                <Text style={styles.checkingText}>{t('auth:nicknameSetup.nickname.checking')}</Text>
               )}
               {isAvailable === true && (
-                <Text style={styles.availableText}>✓ 사용 가능한 닉네임입니다</Text>
+                <Text style={styles.availableText}>✓ {t('auth:nicknameSetup.nickname.available')}</Text>
               )}
               {isAvailable === false && (
                 <Text style={styles.unavailableText}>
                   {validateNickname(nickname) 
-                    ? '이미 사용 중인 닉네임입니다' 
-                    : '2-20자의 한글, 영문, 숫자만 사용 가능합니다'
+                    ? t('auth:nicknameSetup.errors.nicknameInUse') 
+                    : t('auth:nicknameSetup.errors.invalidNicknameFormat')
                   }
                 </Text>
               )}
@@ -214,18 +214,17 @@ export const NicknameSetupScreen = ({
               <View style={styles.buttonContent}>
                 <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
                 <Text style={[styles.buttonText, { marginLeft: SPACING.SM }]}>
-                  설정 중...
+                  {t('auth:nicknameSetup.settingUp')}
                 </Text>
               </View>
             ) : (
-              <Text style={styles.buttonText}>프로필 설정하기</Text>
+              <Text style={styles.buttonText}>{t('auth:nicknameSetup.submitButton')}</Text>
             )}
           </TouchableOpacity>
         </View>
         
         <Text style={styles.notice}>
-          프로필 정보는 나중에 변경할 수 있습니다.{'\n'}
-          성별은 매칭에만 사용되며, 닉네임은 매칭 후에만 상대방에게 공개됩니다.
+          {t('auth:nicknameSetup.notice')}
         </Text>
       </View>
     </KeyboardAvoidingView>
