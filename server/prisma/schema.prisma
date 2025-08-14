@@ -82,6 +82,10 @@ model User {
   receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
   friendships1           Friendship[] @relation("User1Friends")
   friendships2           Friendship[] @relation("User2Friends")
+  
+  // Interest Search relations
+  interestSearches       InterestSearch[] @relation("UserInterests")
+  matchedInterests       InterestSearch[] @relation("MatchedInterests")
 
   @@map("users")
 }
@@ -753,6 +757,48 @@ enum GroupMessageType {
   IMAGE
   SYSTEM
   EMOJI
+}
+
+// Interest Search Models
+model InterestSearch {
+  id              String           @id @default(cuid())
+  userId          String
+  type            InterestType     // 검색 유형
+  value           String           // 검색 값
+  metadata        Json?            // 추가 메타데이터
+  status          SearchStatus     @default(ACTIVE)
+  matchedWithId   String?          // 매칭된 상대방 ID
+  matchedAt       DateTime?
+  expiresAt       DateTime?        // 만료일 (옵션)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  user            User             @relation("UserInterests", fields: [userId], references: [id], onDelete: Cascade)
+  matchedWith     User?            @relation("MatchedInterests", fields: [matchedWithId], references: [id])
+  
+  @@index([type, value])
+  @@index([userId, status])
+  @@map("interest_searches")
+}
+
+enum InterestType {
+  PHONE           // 전화번호
+  EMAIL           // 이메일
+  SOCIAL_ID       // 소셜 계정 ID
+  GROUP           // 특정 그룹
+  LOCATION        // 장소
+  APPEARANCE      // 인상착의
+  NICKNAME        // 닉네임 일부
+  COMPANY         // 회사명
+  SCHOOL          // 학교명
+  HOBBY           // 취미/관심사
+}
+
+enum SearchStatus {
+  ACTIVE          // 활성화
+  MATCHED         // 매칭됨
+  EXPIRED         // 만료됨
+  CANCELLED       // 취소됨
 }
 
 // Email Logs

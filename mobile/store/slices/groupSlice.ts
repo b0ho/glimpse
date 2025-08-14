@@ -99,14 +99,88 @@ interface GroupStore extends GroupState {
  * const { groups, joinGroup, getFilteredGroups } = useGroupStore();
  * ```
  */
+// 샘플 그룹 데이터
+const sampleGroups: Group[] = [
+  {
+    id: 'group-1',
+    name: '서강대학교',
+    type: GroupType.OFFICIAL,
+    description: '서강대학교 공식 그룹입니다.',
+    memberCount: 1234,
+    maleCount: 650,
+    femaleCount: 584,
+    creatorId: 'current_user', // 내가 만든 그룹
+    isMatchingActive: true,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'group-2',
+    name: '강남 러닝 크루',
+    type: GroupType.CREATED,
+    description: '매주 화요일, 목요일 저녁 7시 한강에서 함께 달려요!',
+    memberCount: 89,
+    maleCount: 45,
+    femaleCount: 44,
+    creatorId: 'current_user', // 내가 만든 그룹
+    isMatchingActive: true,
+    createdAt: new Date('2024-02-15'),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'group-3',
+    name: '삼성전자',
+    type: GroupType.OFFICIAL,
+    description: '삼성전자 임직원 그룹',
+    memberCount: 5678,
+    maleCount: 3500,
+    femaleCount: 2178,
+    creatorId: 'other_user', // 내가 참여한 그룹
+    isMatchingActive: true,
+    createdAt: new Date('2023-12-01'),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'group-4',
+    name: '독서 모임 - 책갈피',
+    type: GroupType.CREATED,
+    description: '매월 한 권의 책을 함께 읽고 토론하는 모임입니다.',
+    memberCount: 45,
+    maleCount: 20,
+    femaleCount: 25,
+    creatorId: 'other_user', // 내가 참여한 그룹
+    isMatchingActive: true,
+    createdAt: new Date('2024-03-10'),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'group-5',
+    name: '스타벅스 강남역점',
+    type: GroupType.LOCATION,
+    description: '스타벅스 강남역점에 있는 사람들의 그룹',
+    memberCount: 23,
+    maleCount: 12,
+    femaleCount: 11,
+    creatorId: 'other_user', // 내가 참여한 그룹
+    isMatchingActive: true,
+    location: {
+      latitude: 37.498095,
+      longitude: 127.027610,
+      address: '서울 강남구 강남대로 390',
+    },
+    createdAt: new Date('2024-03-20'),
+    updatedAt: new Date(),
+  },
+];
+
 export const useGroupStore = create<GroupStore>((set, get) => ({
-  // Initial state
+  // Initial state with sample data
   /** 전체 그룹 목록 */
-  groups: [],
+  groups: sampleGroups,
   /** 현재 선택된 그룹 */
   currentGroup: null,
-  /** 참여한 그룹 목록 */
-  joinedGroups: [],
+  /** 참여한 그룹 목록 - 샘플 데이터로 초기화 */
+  joinedGroups: sampleGroups, // 모든 샘플 그룹에 참여한 상태로 시작
   /** 로딩 상태 */
   isLoading: false,
   /** 에러 메시지 */

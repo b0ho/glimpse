@@ -387,40 +387,6 @@ export const ProfileScreen = () => {
       <View style={[styles.settingsCard, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
         <LanguageSelector onLanguageChange={() => {}} />
         <ThemeSelector onThemeChange={() => {}} />
-        <TouchableOpacity 
-          style={[styles.settingItem, { borderBottomColor: colors.BORDER }]}
-          onPress={() => navigation.navigate('LikeHistory' as never)}
-        >
-          <View style={styles.settingContent}>
-            <Ionicons 
-              name={currentMode === AppMode.DATING ? "heart-outline" : "people-outline"} 
-              size={20} 
-              color={colors.TEXT.PRIMARY} 
-            />
-            <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>
-              {currentMode === AppMode.DATING ? t('profile:settings.likeManagement') : t('profile:settings.friendRequestManagement')}
-            </Text>
-          </View>
-          <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.settingItem}
-          onPress={() => navigation.navigate('WhoLikesYou' as never)}
-        >
-          <View style={styles.settingContent}>
-            <Ionicons name="eye-outline" size={20} color={colors.TEXT.PRIMARY} />
-            <View style={styles.settingTextContainer}>
-              <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>
-                {currentMode === AppMode.DATING ? t('profile:settings.whoLikesYou') : t('profile:settings.friendRequestManagement')}
-              </Text>
-              {!isPremiumUser && (
-                <Text style={[styles.premiumBadge, { color: colors.TEXT.WHITE }]}>{t('profile:settings.premiumOnly')}</Text>
-              )}
-            </View>
-          </View>
-          <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
-        </TouchableOpacity>
         
         <TouchableOpacity 
           style={styles.settingItem}
@@ -510,7 +476,7 @@ export const ProfileScreen = () => {
           </Text>
         </View>
         
-        {renderProfileSection()}
+        {/* 기본정보 섹션 제거 - renderProfileSection() 호출 제거 */}
         {renderPremiumSection()}
         {renderStatsSection()}
         {renderLikeSystemSection()}

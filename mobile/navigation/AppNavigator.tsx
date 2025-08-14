@@ -25,7 +25,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { AuthScreen } from '@/screens/auth/AuthScreen';
 import { HomeScreen } from '@/screens/HomeScreen';
 import { GroupsScreen } from '@/screens/GroupsScreen';
-import { MatchesScreen } from '@/screens/MatchesScreen';
+import { MatchChatListScreen } from '@/screens/MatchChatListScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { CreateContentScreen } from '@/screens/CreateContentScreen';
 import { CreateStoryScreen } from '@/screens/CreateStoryScreen';
@@ -47,6 +47,10 @@ import { CommunityScreen } from '@/screens/community/CommunityScreen';
 import { GroupChatListScreen } from '@/screens/groupchat/GroupChatListScreen';
 import { LikeHistoryScreen } from '@/screens/LikeHistoryScreen';
 import { DeleteAccountScreen } from '@/screens/DeleteAccountScreen';
+import { InterestSearchScreen } from '@/screens/InterestSearchScreen';
+import { AddInterestScreen } from '@/screens/AddInterestScreen';
+import { MyInfoScreen } from '@/screens/MyInfoScreen';
+import { GroupDetailScreen } from '@/screens/GroupDetailScreen';
 // import { RootStackParamList } from '@/types';
 
 /**
@@ -75,6 +79,7 @@ type GroupsStackParamList = {
   GroupInvite: { groupId: string };
   JoinGroup: { inviteCode: string };
   GroupManage: { groupId: string };
+  GroupDetail: { groupId: string };
 };
 
 type ProfileStackParamList = {
@@ -96,9 +101,22 @@ type MatchesStackParamList = {
   };
 };
 
+type InterestStackParamList = {
+  InterestTab: undefined;
+  AddInterest: undefined;
+  MyInfo: undefined;
+  Chat: {
+    roomId: string;
+    matchId: string;
+    otherUserNickname: string;
+  };
+  Premium: undefined;
+};
+
 type MainTabParamList = {
   Home: undefined;
   Groups: undefined;
+  Interest: undefined;
   Matches: undefined;
   Profile: undefined;
   Community: undefined;
@@ -143,6 +161,7 @@ const HomeStack = createStackNavigator<HomeStackParamList>();
 const GroupsStack = createStackNavigator<GroupsStackParamList>();
 const MatchesStack = createStackNavigator<MatchesStackParamList>();
 const ProfileStack = createStackNavigator<ProfileStackParamList>();
+const InterestStack = createStackNavigator<InterestStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // 모든 메인 화면들이 실제 컴포넌트로 구현됨
@@ -271,7 +290,7 @@ function GroupsStackNavigator() {
         component={CreateGroupScreen} 
         options={{ 
           title: t('screens.createGroup'),
-          headerShown: true,
+          headerShown: false,
           presentation: 'modal',
         }}
       />
@@ -326,6 +345,14 @@ function GroupsStackNavigator() {
           presentation: 'modal',
         }}
       />
+      <GroupsStack.Screen 
+        name="GroupDetail" 
+        component={GroupDetailScreen} 
+        options={{ 
+          title: '그룹 상세',
+          headerShown: false,
+        }}
+      />
     </GroupsStack.Navigator>
   );
 }
@@ -354,7 +381,7 @@ function MatchesStackNavigator() {
     >
       <MatchesStack.Screen 
         name="MatchesTab" 
-        component={MatchesScreen} 
+        component={MatchChatListScreen} 
         options={{ headerShown: false }}
       />
       <MatchesStack.Screen 
@@ -365,6 +392,70 @@ function MatchesStackNavigator() {
         }}
       />
     </MatchesStack.Navigator>
+  );
+}
+
+/**
+ * 관심상대 찾기 스택 네비게이터
+ * @function InterestStackNavigator
+ * @returns {JSX.Element} 관심상대 찾기 스택 네비게이터
+ * @description 관심상대 검색과 등록 화면
+ */
+function InterestStackNavigator() {
+  const { colors } = useTheme();
+  const { t } = useTranslation('navigation');
+  
+  return (
+    <InterestStack.Navigator 
+      id={undefined}
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.SURFACE,
+        },
+        headerTitleStyle: {
+          color: colors.TEXT.PRIMARY,
+        },
+        headerTintColor: colors.TEXT.PRIMARY,
+      }}
+    >
+      <InterestStack.Screen 
+        name="InterestTab" 
+        component={InterestSearchScreen} 
+        options={{ headerShown: false }}
+      />
+      <InterestStack.Screen 
+        name="AddInterest" 
+        component={AddInterestScreen} 
+        options={{ 
+          title: '관심상대 등록',
+          headerShown: false,
+          presentation: 'modal',
+        }}
+      />
+      <InterestStack.Screen 
+        name="MyInfo" 
+        component={MyInfoScreen} 
+        options={{ 
+          title: '내 정보 관리',
+          headerShown: false,
+          presentation: 'modal',
+        }}
+      />
+      <InterestStack.Screen 
+        name="Chat" 
+        component={ChatScreen} 
+        options={{ 
+          headerShown: true,
+        }}
+      />
+      <InterestStack.Screen 
+        name="Premium" 
+        component={PremiumScreen} 
+        options={{ 
+          headerShown: false,
+        }}
+      />
+    </InterestStack.Navigator>
   );
 }
 
@@ -492,12 +583,21 @@ function DatingTabNavigator() {
         }}
       />
       <Tab.Screen 
+        name="Interest" 
+        component={InterestStackNavigator}
+        options={{
+          title: '찾기',
+          tabBarIcon: ({ color, size }) => <Icon name="search-outline" color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '관심상대 찾기',
+        }}
+      />
+      <Tab.Screen 
         name="Matches" 
         component={MatchesStackNavigator}
         options={{
-          title: t('tabs.matches'),
-          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.MATCHES} color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('accessibility.matches'),
+          title: '채팅',
+          tabBarIcon: ({ color, size }) => <Icon name="chatbubbles-outline" color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '채팅',
         }}
       />
       <Tab.Screen 
@@ -561,12 +661,12 @@ function FriendshipTabNavigator() {
         }}
       />
       <Tab.Screen 
-        name="GroupChat" 
-        component={GroupChatListScreen}
+        name="Interest" 
+        component={InterestStackNavigator}
         options={{
-          title: t('tabs.groupChat'),
-          tabBarIcon: ({ color, size }) => <Icon name="chatbubbles-outline" color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('accessibility.groupChat'),
+          title: '찾기',
+          tabBarIcon: ({ color, size }) => <Icon name="search-outline" color={color} size={size || 24} />,
+          tabBarAccessibilityLabel: '관심상대 찾기',
         }}
       />
       <Tab.Screen 

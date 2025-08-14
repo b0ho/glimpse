@@ -560,7 +560,25 @@ export const getAllContents = async (): Promise<Content[]> => {
       console.log('[MockData] 더미 콘텐츠 생성 완료:', dummyContents.length, '개');
     } catch (error) {
       console.error('[MockData] 더미 콘텐츠 생성 실패:', error);
-      dummyContents = [];
+      // 실패 시 기본 콘텐츠 제공
+      dummyContents = [
+        {
+          id: 'fallback_1',
+          userId: 'user_1',
+          authorId: 'user_1',
+          authorNickname: '사용자1',
+          type: 'text',
+          text: '앱이 정상적으로 작동 중입니다! 😊',
+          groupId: 'group_1',
+          likes: 5,
+          likeCount: 5,
+          views: 10,
+          isPublic: true,
+          isLikedByUser: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+      ];
     }
     
     // 저장된 콘텐츠 로드

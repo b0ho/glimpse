@@ -12,10 +12,12 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useChatStore } from '@/store/slices/chatSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { Message } from '@/types';
@@ -101,7 +103,45 @@ export const ChatScreenSimple = () => {
     loadMockMessages();
   }, [matchId]);
 
-  // Set navigation title
+  // Handle leave chat
+  const handleLeaveChat = () => {
+    Alert.alert(
+      '채팅 나가기',
+      '이 채팅방을 나가시겠습니까?\n대화 내용이 모두 삭제됩니다.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '나가기',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // 메시지 삭제
+              const key = `chat_messages_${matchId}`;
+              await AsyncStorage.removeItem(key);
+              console.log('[ChatScreenSimple] 채팅 메시지 삭제 완료');
+              
+              // 채팅방 목록에서도 제거
+              const roomsStr = await AsyncStorage.getItem('chat-rooms');
+              if (roomsStr) {
+                const rooms = JSON.parse(roomsStr);
+                const updatedRooms = rooms.filter((room: any) => room.matchId !== matchId);
+                await AsyncStorage.setItem('chat-rooms', JSON.stringify(updatedRooms));
+                console.log('[ChatScreenSimple] 채팅방 목록에서 제거 완료');
+              }
+              
+              // 이전 화면으로 돌아가기
+              navigation.goBack();
+            } catch (error) {
+              console.error('[ChatScreenSimple] 채팅 나가기 실패:', error);
+              Alert.alert('오류', '채팅 나가기에 실패했습니다.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Set navigation title with leave chat option
   useEffect(() => {
     navigation.setOptions({
       title: otherUserNickname,
@@ -109,6 +149,15 @@ export const ChatScreenSimple = () => {
         backgroundColor: colors.SURFACE,
       },
       headerTintColor: colors.PRIMARY,
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleLeaveChat}
+          style={{ marginRight: 15 }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Icon name="exit-outline" size={24} color={colors.ERROR} />
+        </TouchableOpacity>
+      ),
     });
   }, [navigation, otherUserNickname, colors]);
 

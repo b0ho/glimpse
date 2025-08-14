@@ -132,10 +132,12 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             {t('settings:language.title', 'Language')}
           </Text>
         </View>
-        <Text style={styles.selectedFlag}>{currentLangInfo.flag}</Text>
-        <Text style={[styles.selectedLanguage, { color: colors.TEXT.SECONDARY }]}>
-          {currentLangInfo.nativeName}
-        </Text>
+        <View style={styles.selectedValue}>
+          <Text style={styles.selectedFlag}>{currentLangInfo.flag}</Text>
+          <Text style={[styles.selectedLanguage, { color: colors.TEXT.SECONDARY }]}>
+            {currentLangInfo.nativeName}
+          </Text>
+        </View>
         <Text style={[styles.arrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
       </TouchableOpacity>
 
@@ -185,11 +187,18 @@ const styles = StyleSheet.create({
   selectorContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   label: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '500',
     marginLeft: SPACING.SM,
+  },
+  selectedValue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto',
+    marginRight: SPACING.SM,
   },
   selectedFlag: {
     fontSize: 18,
@@ -197,7 +206,6 @@ const styles = StyleSheet.create({
   },
   selectedLanguage: {
     fontSize: FONT_SIZES.SM,
-    marginRight: SPACING.XS,
   },
   arrow: {
     fontSize: 18,

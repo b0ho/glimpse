@@ -221,11 +221,11 @@ export const HomeScreen = () => {
     try {
       // 실제 API 호출로 콘텐츠 가져오기
       console.log('[HomeScreen] Calling API...');
-      const contents = await contentApi.getContents(undefined, 1, 20);
-      console.log('[HomeScreen] API response:', contents);
+      const apiContents = await contentApi.getContents(undefined, 1, 20);
+      console.log('[HomeScreen] API response:', apiContents);
       
       // API 응답이 없거나 에러인 경우 테스트 데이터 사용
-      if (!contents || contents.length === 0) {
+      if (!apiContents || apiContents.length === 0) {
         const testContents: Content[] = [
           {
             id: '1',
@@ -330,9 +330,9 @@ export const HomeScreen = () => {
         return;
       }
       
-      console.log('[HomeScreen] Setting real contents:', contents.length);
-      setContents(contents);
-      setHasMoreData(contents.length >= 20);
+      console.log('[HomeScreen] Setting real contents:', apiContents.length);
+      setContents(apiContents);
+      setHasMoreData(apiContents.length >= 20);
     } catch (error) {
       console.error('[HomeScreen] Content load failed:', error);
       Alert.alert(t('common:status.error'), t('home:errors.loadError'));
@@ -390,17 +390,21 @@ export const HomeScreen = () => {
     
     // 스토리 로드
     loadStories();
-  }, [loadContents, loadStories]);
+  }, []); // 빈 배열로 변경하여 마운트 시 한 번만 실행
 
   // 화면에 포커스될 때마다 콘텐츠 새로고침 (스토리 작성 후 등)
   useFocusEffect(
     useCallback(() => {
       console.log('[HomeScreen] 화면 포커스 - 콘텐츠 및 스토리 새로고침');
-      if (!isLoading) {
+      // 초기 로딩이 아닌 경우에만 새로고침
+      if (!isLoading && contents.length > 0) {
         loadContents(true);
         loadStories();
       }
-    }, [isLoading, loadContents, loadStories])
+      return () => {
+        // cleanup
+      };
+    }, []) // 빈 배열로 변경
   );
 
   /**
@@ -423,15 +427,26 @@ export const HomeScreen = () => {
         </Text>
       </View>
       
-      {/* 위치 기반 기능 버튼 */}
-      <TouchableOpacity
-        style={[styles.locationButton, { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY + '20' }]}
-        onPress={() => navigation.navigate('LocationGroup' as never)}
-      >
-        <Icon name="location" size={20} color={colors.PRIMARY} />
-        <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>{t('home:location.nearbyGroups')}</Text>
-        <Icon name="chevron-forward" size={16} color={colors.TEXT.SECONDARY} />
-      </TouchableOpacity>
+      {/* 위치 기반 기능 버튼들 */}
+      <View style={styles.locationButtonsContainer}>
+        <TouchableOpacity
+          style={[styles.locationButton, { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY + '20' }]}
+          onPress={() => navigation.navigate('LocationGroup' as never)}
+        >
+          <Icon name="location" size={20} color={colors.PRIMARY} />
+          <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>근처 그룹</Text>
+          <Icon name="chevron-forward" size={16} color={colors.TEXT.SECONDARY} />
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.locationButton, { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY + '20' }]}
+          onPress={() => navigation.navigate('NearbyUsers' as never)}
+        >
+          <Icon name="people" size={20} color={colors.PRIMARY} />
+          <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>근처 사용자</Text>
+          <Icon name="chevron-forward" size={16} color={colors.TEXT.SECONDARY} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -607,19 +622,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  locationButtonsContainer: {
+    flexDirection: 'row',
+    gap: SPACING.SM,
+    marginTop: SPACING.MD,
+  },
   locationButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 12,
     padding: SPACING.MD,
-    marginTop: SPACING.MD,
     borderWidth: 1,
   },
   locationButtonText: {
     flex: 1,
-    fontSize: FONT_SIZES.MD,
+    fontSize: FONT_SIZES.SM,
     fontWeight: '500',
-    marginLeft: SPACING.SM,
+    marginLeft: SPACING.XS,
   },
   statsText: {
     fontSize: FONT_SIZES.SM,

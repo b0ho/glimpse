@@ -14,6 +14,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useGroupStore } from '@/store/slices/groupSlice';
+import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -35,6 +36,7 @@ export const GroupsScreen = () => {
   
   const navigation = useNavigation();
   const groupStore = useGroupStore();
+  const authStore = useAuthStore();
 
   /**
    * 그룹 목록 로드
@@ -232,13 +234,6 @@ export const GroupsScreen = () => {
 
       <View style={styles.groupFooter}>
         <View style={styles.statusInfo}>
-          <Text style={[
-            styles.matchingStatus,
-            item.isMatchingActive ? styles.statusActive : styles.statusInactive
-          ]}>
-            {item.isMatchingActive ? `🟢 ${t('group:status.matchingActive')}` : `🔴 ${t('group:status.matchingInactive')}`}
-          </Text>
-          
           {item.location && (
             <Text style={styles.locationText}>
               📍 {item.location.address}
@@ -258,14 +253,16 @@ export const GroupsScreen = () => {
             groupStore.isUserInGroup(item.id) && styles.joinButtonDisabled,
             !item.isMatchingActive && styles.joinButtonInactive,
           ]}
-          onPress={() => handleJoinGroup(item)}
-          disabled={groupStore.isUserInGroup(item.id) || !item.isMatchingActive}
+          onPress={() => {
+            // 그룹 상세 화면으로 이동
+            navigation.navigate('GroupDetail' as never, { groupId: item.id } as never);
+          }}
         >
           <Text style={[
             styles.joinButtonText,
             groupStore.isUserInGroup(item.id) && styles.joinButtonTextDisabled,
           ]}>
-            {groupStore.isUserInGroup(item.id) ? t('group:explore.joined') : t('group:explore.join')}
+            {groupStore.isUserInGroup(item.id) ? '참여중' : '상세보기'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -279,14 +276,28 @@ export const GroupsScreen = () => {
    */
   const renderHeader = () => (
     <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
-      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>{t('group:explore.title')}</Text>
+      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>그룹</Text>
       <Text style={[styles.headerSubtitle, { color: colors.TEXT.PRIMARY }]}>
-        {t('group:explore.subtitle')}
+        내가 참여한 그룹과 만든 그룹을 관리하세요
       </Text>
-      <View style={styles.joinedGroupsInfo}>
-        <Text style={[styles.joinedCount, { color: colors.TEXT.SECONDARY }]}>
-          {t('group:explore.joinedCount', { count: groupStore.joinedGroups.length })}
-        </Text>
+      
+      {/* 그룹 생성 및 찾기 버튼 */}
+      <View style={styles.actionButtons}>
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: colors.PRIMARY }]}
+          onPress={() => navigation.navigate('CreateGroup' as never)}
+        >
+          <Icon name="add-circle-outline" size={20} color="#FFFFFF" />
+          <Text style={styles.actionButtonText}>새 그룹 만들기</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: colors.BACKGROUND, borderColor: colors.PRIMARY, borderWidth: 1 }]}
+          onPress={() => navigation.navigate('JoinGroup' as never, { inviteCode: '' } as never)}
+        >
+          <Icon name="search-outline" size={20} color={colors.PRIMARY} />
+          <Text style={[styles.actionButtonText, { color: colors.PRIMARY }]}>그룹 찾기</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -319,35 +330,57 @@ export const GroupsScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      <FlatList
-        data={groups}
-        keyExtractor={(item) => item.id}
-        renderItem={renderGroupItem}
-        ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderEmptyState}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={() => loadGroups(true)}
-            colors={[colors.PRIMARY]}
-            tintColor={colors.PRIMARY}
-          />
-        }
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={groups.length === 0 ? styles.emptyContainer : undefined}
-      />
+      {renderHeader()}
       
-      {/* Create Group Floating Action Button */}
-      <TouchableOpacity
-        style={[styles.createGroupFab, { backgroundColor: colors.SUCCESS, shadowColor: colors.SHADOW }]}
-        onPress={() => navigation.navigate('CreateGroup' as never)}
-        activeOpacity={0.8}
-        accessibilityLabel={t('group:create.accessibilityLabel')}
-        accessibilityHint={t('group:create.accessibilityHint')}
-        accessibilityRole="button"
-      >
-        <Icon name={ACTION_ICONS.ADD} color={colors.TEXT.WHITE} size={32} />
-      </TouchableOpacity>
+      {/* 내가 만든 그룹 섹션 */}
+      {groupStore.joinedGroups.filter(g => g.creatorId === authStore.user?.id).length > 0 && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+            내가 만든 그룹
+          </Text>
+          <FlatList
+            data={groupStore.joinedGroups.filter(g => g.creatorId === authStore.user?.id)}
+            keyExtractor={(item) => item.id}
+            renderItem={renderGroupItem}
+            scrollEnabled={false}
+            ItemSeparatorComponent={() => <View style={{ height: SPACING.XS }} />}
+          />
+        </View>
+      )}
+      
+      {/* 내가 참여한 그룹 섹션 */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+          내가 참여한 그룹
+        </Text>
+        <FlatList
+          data={groupStore.joinedGroups.filter(g => g.creatorId !== authStore.user?.id)}
+          keyExtractor={(item) => item.id}
+          renderItem={renderGroupItem}
+          ListEmptyComponent={() => (
+            <View style={styles.emptySection}>
+              <Text style={[styles.emptyText, { color: colors.TEXT.SECONDARY }]}>
+                아직 참여한 그룹이 없습니다
+              </Text>
+              <TouchableOpacity
+                style={[styles.findGroupButton, { backgroundColor: colors.PRIMARY }]}
+                onPress={() => navigation.navigate('JoinGroup' as never, { inviteCode: '' } as never)}
+              >
+                <Text style={styles.findGroupButtonText}>그룹 찾아보기</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={() => loadGroups(true)}
+              colors={[colors.PRIMARY]}
+              tintColor={colors.PRIMARY}
+            />
+          }
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -393,6 +426,80 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.SM,
     color: COLORS.TEXT.SECONDARY,
     fontWeight: '500',
+  },
+  myGroupsSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: SPACING.MD,
+    paddingTop: SPACING.MD,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.1)',
+  },
+  myGroupsTitle: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '600',
+  },
+  myGroupsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+  },
+  myGroupsButtonText: {
+    color: '#FFFFFF',
+    fontSize: FONT_SIZES.SM,
+    fontWeight: '600',
+    marginRight: 4,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: SPACING.MD,
+    gap: SPACING.SM,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.MD,
+    paddingVertical: SPACING.SM,
+    borderRadius: 12,
+    gap: SPACING.XS,
+  },
+  actionButtonText: {
+    fontSize: FONT_SIZES.SM,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  section: {
+    marginTop: SPACING.MD,
+    paddingHorizontal: SPACING.MD,
+  },
+  sectionTitle: {
+    fontSize: FONT_SIZES.LG,
+    fontWeight: '700',
+    marginBottom: SPACING.SM,
+  },
+  emptySection: {
+    alignItems: 'center',
+    paddingVertical: SPACING.XL,
+  },
+  emptyText: {
+    fontSize: FONT_SIZES.MD,
+    marginBottom: SPACING.MD,
+  },
+  findGroupButton: {
+    paddingHorizontal: SPACING.LG,
+    paddingVertical: SPACING.SM,
+    borderRadius: 20,
+  },
+  findGroupButtonText: {
+    color: '#FFFFFF',
+    fontSize: FONT_SIZES.SM,
+    fontWeight: '600',
   },
   groupItem: {
     backgroundColor: COLORS.SURFACE,

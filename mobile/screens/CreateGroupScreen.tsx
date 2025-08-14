@@ -17,6 +17,7 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { GroupType, Group } from '@/types';
+import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { groupApi } from '@/services/api/groupApi';
 

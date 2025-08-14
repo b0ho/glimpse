@@ -214,9 +214,11 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
             {t('settings:theme.title', '테마')}
           </Text>
         </View>
-        <Text style={[styles.settingValue, { color: colors.TEXT.SECONDARY }]}>
-          {getCurrentThemeText(mode)}
-        </Text>
+        <View style={styles.selectedValue}>
+          <Text style={[styles.settingValue, { color: colors.TEXT.SECONDARY }]}>
+            {getCurrentThemeText(mode)}
+          </Text>
+        </View>
         <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
       </TouchableOpacity>
 
@@ -284,15 +286,21 @@ const styles = StyleSheet.create({
   settingContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   settingText: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '500',
     marginLeft: SPACING.SM,
   },
+  selectedValue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto',
+    marginRight: SPACING.SM,
+  },
   settingValue: {
     fontSize: FONT_SIZES.SM,
-    marginRight: SPACING.XS,
   },
   settingArrow: {
     fontSize: 18,

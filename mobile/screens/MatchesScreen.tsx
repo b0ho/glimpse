@@ -146,9 +146,9 @@ export const MatchesScreen = React.memo(() => {
    */
   const renderHeader = () => (
     <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
-      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('title')}</Text>
+      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>채팅</Text>
       <Text style={[styles.headerSubtitle, { color: colors.TEXT.SECONDARY }]}>
-        {t('subtitle')}
+        매칭된 사람들과 대화를 시작하세요
       </Text>
       <View style={styles.statsContainer}>
         <Text style={[styles.statsText, { color: colors.TEXT.PRIMARY }]}>
@@ -168,10 +168,10 @@ export const MatchesScreen = React.memo(() => {
    */
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyStateEmoji}>💕</Text>
-      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>{t('emptyState.title')}</Text>
+      <Text style={styles.emptyStateEmoji}>💬</Text>
+      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>아직 채팅이 없습니다</Text>
       <Text style={[styles.emptyStateSubtitle, { color: colors.TEXT.SECONDARY }]}>
-        {t('emptyState.subtitle')}
+        매칭이 되면 여기서 대화를 시작할 수 있어요
       </Text>
     </View>
   );

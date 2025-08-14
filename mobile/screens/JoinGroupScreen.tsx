@@ -7,12 +7,17 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  TextInput,
+  FlatList,
+  ScrollView,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { groupApi } from '@/services/api/groupApi';
 import { useGroupStore } from '@/store/slices/groupSlice';
+import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 interface GroupInfo {
@@ -23,24 +28,77 @@ interface GroupInfo {
   memberCount?: number;
 }
 
+const CATEGORIES = [
+  { id: 'all', name: '전체', icon: 'apps-outline' },
+  { id: GroupType.OFFICIAL, name: '공식', icon: 'business-outline' },
+  { id: GroupType.CREATED, name: '일반', icon: 'people-outline' },
+  { id: GroupType.LOCATION, name: '장소', icon: 'location-outline' },
+  { id: 'hobby', name: '취미', icon: 'heart-outline' },
+  { id: 'study', name: '스터디', icon: 'school-outline' },
+  { id: 'sports', name: '운동', icon: 'fitness-outline' },
+];
+
 export const JoinGroupScreen = () => {
   const { t } = useTranslation('group');
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const { inviteCode } = route.params as { inviteCode: string };
+  const { inviteCode: initialCode } = route.params as { inviteCode: string };
   
   const groupStore = useGroupStore();
   const { colors } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [groupInfo, setGroupInfo] = useState<GroupInfo | null>(null);
   const [isJoining, setIsJoining] = useState(false);
+  const [inviteCode, setInviteCode] = useState(initialCode || '');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [popularGroups, setPopularGroups] = useState<Group[]>([]);
+  const [searchResults, setSearchResults] = useState<Group[]>([]);
 
   useEffect(() => {
-    // 초대 코드에서 그룹 정보를 가져오는 로직이 필요할 수 있음
-    // 현재는 바로 가입 시도
-  }, [inviteCode]);
+    loadPopularGroups();
+  }, []);
 
-  const handleJoinGroup = async () => {
+  const loadPopularGroups = async () => {
+    try {
+      // 인기 그룹 로드 (현재는 샘플 데이터)
+      const sampleGroups = groupStore.groups.slice(0, 5);
+      setPopularGroups(sampleGroups);
+    } catch (error) {
+      console.error('Failed to load popular groups:', error);
+    }
+  };
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    
+    // 검색 결과 필터링
+    const filtered = groupStore.groups.filter(group => {
+      const matchesQuery = group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          group.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || group.type === selectedCategory;
+      return matchesQuery && matchesCategory;
+    });
+    
+    setSearchResults(filtered);
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    if (searchQuery) {
+      handleSearch();
+    }
+  };
+
+  const handleJoinGroupByCode = async () => {
+    if (!inviteCode.trim()) {
+      Alert.alert('오류', '초대 코드를 입력해주세요');
+      return;
+    }
+    
     setIsJoining(true);
     try {
       const result = await groupApi.joinGroupByInvite(inviteCode);
@@ -49,111 +107,194 @@ export const JoinGroupScreen = () => {
       const group = await groupApi.getGroupById(result.group.id);
       groupStore.joinGroup(group);
 
-      if (result.requiresApproval) {
-        Alert.alert(
-          t('joinInvite.pendingApprovalTitle'),
-          t('joinInvite.pendingApprovalMessage'),
-          [
-            {
-              text: t('joinInvite.confirm'),
-              onPress: () => navigation.navigate('Groups' as never),
-            },
-          ]
-        );
-      } else {
-        Alert.alert(
-          t('joinInvite.successTitle'),
-          t('joinInvite.successMessage', { groupName: result.group.name }),
-          [
-            {
-              text: t('joinInvite.goToGroup'),
-              onPress: () => navigation.navigate('GroupDetail' as never, { groupId: result.group.id } as never),
-            },
-          ]
-        );
-      }
+      Alert.alert(
+        '성공',
+        `${result.group.name} 그룹에 참여했습니다!`,
+        [
+          {
+            text: '확인',
+            onPress: () => navigation.navigate('GroupDetail' as never, { groupId: result.group.id } as never),
+          },
+        ]
+      );
     } catch (error: any) {
       console.error('Join group error:', error);
-      
-      let errorMessage = t('joinInvite.defaultError');
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      }
-      
-      Alert.alert(t('joinInvite.error'), errorMessage, [
-        {
-          text: t('joinInvite.confirm'),
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+      Alert.alert('오류', '유효하지 않은 초대 코드입니다');
     } finally {
       setIsJoining(false);
     }
+  };
+
+  const handleGroupPress = (group: Group) => {
+    navigation.navigate('GroupDetail' as never, { groupId: group.id } as never);
   };
 
   const handleCancel = () => {
     navigation.goBack();
   };
 
+  const renderGroupItem = ({ item }: { item: Group }) => (
+    <TouchableOpacity 
+      style={[styles.groupCard, { backgroundColor: colors.SURFACE }]}
+      onPress={() => handleGroupPress(item)}
+    >
+      <View style={styles.groupCardHeader}>
+        <Text style={styles.groupEmoji}>
+          {item.type === GroupType.OFFICIAL ? '🏢' : 
+           item.type === GroupType.LOCATION ? '📍' : '👥'}
+        </Text>
+        <View style={styles.groupCardInfo}>
+          <Text style={[styles.groupCardName, { color: colors.TEXT.PRIMARY }]}>{item.name}</Text>
+          <Text style={[styles.groupCardMembers, { color: colors.TEXT.SECONDARY }]}>
+            {item.memberCount}명 참여중
+          </Text>
+        </View>
+      </View>
+      {item.description && (
+        <Text style={[styles.groupCardDesc, { color: colors.TEXT.SECONDARY }]} numberOfLines={2}>
+          {item.description}
+        </Text>
+      )}
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      <View style={styles.content}>
-        <View style={[styles.card, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
-          <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('joinInvite.title')}</Text>
-          
-          <View style={[styles.codeContainer, { backgroundColor: colors.BACKGROUND }]}>
-            <Text style={[styles.codeLabel, { color: colors.TEXT.SECONDARY }]}>{t('joinInvite.inviteCode')}</Text>
-            <Text style={[styles.codeText, { color: colors.PRIMARY }]}>{inviteCode}</Text>
-          </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* 헤더 */}
+        <View style={[styles.header, { backgroundColor: colors.SURFACE }]}>
+          <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
+            <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
+          </TouchableOpacity>
+          <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>그룹 찾기</Text>
+        </View>
 
-          {groupInfo && (
-            <View style={[styles.groupInfo, { borderBottomColor: colors.BORDER }]}>
-              <Text style={[styles.groupName, { color: colors.TEXT.PRIMARY }]}>{groupInfo.name}</Text>
-              {groupInfo.description && (
-                <Text style={[styles.groupDescription, { color: colors.TEXT.SECONDARY }]}>{groupInfo.description}</Text>
-              )}
-              {groupInfo.memberCount && (
-                <Text style={[styles.groupMembers, { color: colors.TEXT.LIGHT }]}>
-                  {t('joinInvite.currentMembers', { count: groupInfo.memberCount })}
-                </Text>
-              )}
-            </View>
-          )}
-
-          <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
-            {t('joinInvite.confirmMessage')}
-          </Text>
-
-          <View style={styles.buttonContainer}>
+        {/* 초대 코드 섹션 */}
+        <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>초대 코드로 참여</Text>
+          <View style={styles.inviteCodeContainer}>
+            <TextInput
+              style={[styles.inviteCodeInput, { 
+                backgroundColor: colors.BACKGROUND, 
+                color: colors.TEXT.PRIMARY,
+                borderColor: colors.BORDER 
+              }]}
+              placeholder="초대 코드 입력"
+              placeholderTextColor={colors.TEXT.SECONDARY}
+              value={inviteCode}
+              onChangeText={setInviteCode}
+              autoCapitalize="characters"
+            />
             <TouchableOpacity
-              style={[styles.button, styles.cancelButton, { backgroundColor: colors.TEXT.LIGHT }]}
-              onPress={handleCancel}
-              disabled={isJoining}
-            >
-              <Text style={[styles.cancelButtonText, { color: colors.TEXT.PRIMARY }]}>{t('joinInvite.cancel')}</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.button, styles.joinButton, { backgroundColor: colors.PRIMARY }]}
-              onPress={handleJoinGroup}
+              style={[styles.joinCodeButton, { backgroundColor: colors.PRIMARY }]}
+              onPress={handleJoinGroupByCode}
               disabled={isJoining}
             >
               {isJoining ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
-                <Text style={[styles.joinButtonText, { color: colors.TEXT.WHITE }]}>{t('joinInvite.joinButton')}</Text>
+                <Text style={styles.joinCodeButtonText}>참여</Text>
               )}
             </TouchableOpacity>
           </View>
         </View>
 
-        <View style={[styles.notice, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
-          <Text style={[styles.noticeTitle, { color: colors.TEXT.PRIMARY }]}>{t('joinInvite.noticeTitle')}</Text>
-          <Text style={[styles.noticeText, { color: colors.TEXT.SECONDARY }]}>
-            {t('joinInvite.noticeText')}
-          </Text>
+        {/* 검색 섹션 */}
+        <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>그룹 검색</Text>
+          
+          {/* 카테고리 */}
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoryContainer}
+          >
+            {CATEGORIES.map(category => (
+              <TouchableOpacity
+                key={category.id}
+                style={[
+                  styles.categoryButton,
+                  { 
+                    backgroundColor: selectedCategory === category.id ? colors.PRIMARY : colors.BACKGROUND,
+                    borderColor: selectedCategory === category.id ? colors.PRIMARY : colors.BORDER,
+                  }
+                ]}
+                onPress={() => handleCategoryChange(category.id)}
+              >
+                <Icon 
+                  name={category.icon} 
+                  size={16} 
+                  color={selectedCategory === category.id ? '#FFFFFF' : colors.TEXT.SECONDARY} 
+                />
+                <Text style={[
+                  styles.categoryText,
+                  { color: selectedCategory === category.id ? '#FFFFFF' : colors.TEXT.SECONDARY }
+                ]}>
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* 검색 입력 */}
+          <View style={styles.searchContainer}>
+            <View style={[styles.searchInputContainer, { 
+              backgroundColor: colors.BACKGROUND,
+              borderColor: colors.BORDER 
+            }]}>
+              <Icon name="search" size={20} color={colors.TEXT.SECONDARY} />
+              <TextInput
+                style={[styles.searchInput, { color: colors.TEXT.PRIMARY }]}
+                placeholder="그룹 이름 또는 설명 검색"
+                placeholderTextColor={colors.TEXT.SECONDARY}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                onSubmitEditing={handleSearch}
+              />
+            </View>
+            <TouchableOpacity
+              style={[styles.searchButton, { backgroundColor: colors.PRIMARY }]}
+              onPress={handleSearch}
+            >
+              <Text style={styles.searchButtonText}>검색</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+
+        {/* 검색 결과 */}
+        {searchResults.length > 0 && (
+          <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
+            <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+              검색 결과 ({searchResults.length})
+            </Text>
+            <FlatList
+              data={searchResults}
+              renderItem={renderGroupItem}
+              keyExtractor={item => item.id}
+              scrollEnabled={false}
+              ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+            />
+          </View>
+        )}
+
+        {/* 인기 그룹 */}
+        <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>인기 그룹</Text>
+          {popularGroups.length > 0 ? (
+            <FlatList
+              data={popularGroups}
+              renderItem={renderGroupItem}
+              keyExtractor={item => item.id}
+              scrollEnabled={false}
+              ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+            />
+          ) : (
+            <Text style={[styles.emptyText, { color: colors.TEXT.SECONDARY }]}>
+              인기 그룹을 불러오는 중...
+            </Text>
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

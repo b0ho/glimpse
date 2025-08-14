@@ -30,6 +30,7 @@ import { CompanyDomainModule } from './company-domain/company-domain.module';
 import { FriendModule } from './friend/friend.module';
 import { StoryModule } from './story/story.module';
 import { ContentModule } from './content/content.module';
+import { InterestModule } from './interest/interest.module';
 
 /**
  * 애플리케이션 루트 모듈
@@ -128,6 +129,8 @@ import { ContentModule } from './content/content.module';
     StoryModule,
 
     ContentModule,
+
+    InterestModule,
   ],
   controllers: [AppController],
 })
