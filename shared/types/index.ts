@@ -382,9 +382,11 @@ export interface Content {
   tags?: string[];
   likes: number;
   likeCount?: number; // Alias for likes
+  commentCount?: number; // 댓글 개수
   views: number;
   isPublic: boolean;
   isLikedByUser?: boolean;
+  groupId?: string; // 게시물이 속한 그룹 ID
   createdAt: Date;
   updatedAt: Date;
 }

@@ -240,10 +240,28 @@ export class GroupService {
       name?: string;
       description?: string;
       settings?: any;
+      location?: any;
     },
   ) {
     // 권한 확인
     await this.checkAdminPermission(groupId, userId);
+
+    // 기존 그룹 정보 가져오기
+    const existingGroup = await this.prisma.group.findUnique({
+      where: { id: groupId },
+    });
+
+    if (!existingGroup) {
+      throw new HttpException('그룹을 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+    }
+
+    // LOCATION 타입 그룹이 위치를 제거하려는 경우 방지
+    if (existingGroup.type === 'LOCATION' && data.location === null) {
+      throw new HttpException(
+        '위치 기반 그룹의 위치 정보는 제거할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     return await this.prisma.group.update({
       where: { id: groupId },
@@ -639,6 +657,65 @@ export class GroupService {
     await this.cacheService.setUserCache(userId, cacheKey, groups, 600);
 
     return groups;
+  }
+
+  /**
+   * 그룹 좋아요 토글
+   */
+  async toggleGroupLike(groupId: string, userId: string) {
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId },
+    });
+
+    if (!group) {
+      throw new HttpException('그룹을 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+    }
+
+    // 이미 좋아요 했는지 확인
+    const existingLike = await this.prisma.groupLike.findUnique({
+      where: {
+        userId_groupId: {
+          userId,
+          groupId,
+        },
+      },
+    });
+
+    if (existingLike) {
+      // 좋아요 취소
+      await this.prisma.groupLike.delete({
+        where: {
+          userId_groupId: {
+            userId,
+            groupId,
+          },
+        },
+      });
+
+      // 캐시 무효화
+      await this.cacheService.invalidateUserCache(userId);
+
+      return {
+        liked: false,
+        message: '그룹 좋아요를 취소했습니다.',
+      };
+    } else {
+      // 좋아요 추가
+      await this.prisma.groupLike.create({
+        data: {
+          userId,
+          groupId,
+        },
+      });
+
+      // 캐시 무효화
+      await this.cacheService.invalidateUserCache(userId);
+
+      return {
+        liked: true,
+        message: '그룹을 좋아요했습니다.',
+      };
+    }
   }
 
   /**

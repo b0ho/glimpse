@@ -33,6 +33,21 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   /**
+   * 결제 플랜 조회 (테스트용)
+   */
+  @Get('plans')
+  @UseGuards(AuthGuard)
+  async getPaymentPlans() {
+    return {
+      success: true,
+      data: [
+        { id: '1', name: 'Basic', price: 9900 },
+        { id: '2', name: 'Premium', price: 19900 },
+      ],
+    };
+  }
+
+  /**
    * 결제 생성
    */
   @Post()

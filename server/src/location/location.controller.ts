@@ -8,9 +8,12 @@ import {
   Param,
   UseGuards,
   Req,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { NearbyUsersQueryDto } from './dto/nearby-users.dto';
 import {
@@ -34,8 +37,8 @@ export class LocationController {
    * @route PUT /location
    */
   @Put()
-  async updateLocation(@Req() req: any, @Body() data: UpdateLocationDto) {
-    await this.locationService.updateUserLocation(req.user.id, data);
+  async updateLocation(@CurrentUserId() userId: string, @Body() data: UpdateLocationDto) {
+    await this.locationService.updateUserLocation(userId, data);
     return { message: '위치가 업데이트되었습니다.' };
   }
 
@@ -45,8 +48,8 @@ export class LocationController {
    * @route GET /location/nearby/users
    */
   @Get('nearby/users')
-  async getNearbyUsers(@Req() req: any, @Query() query: NearbyUsersQueryDto) {
-    return this.locationService.getNearbyUsers(req.user.id, query);
+  async getNearbyUsers(@CurrentUserId() userId: string, @Query() query: NearbyUsersQueryDto) {
+    return this.locationService.getNearbyUsers(userId, query);
   }
 
   /**
@@ -55,8 +58,8 @@ export class LocationController {
    * @route GET /location/nearby/groups
    */
   @Get('nearby/groups')
-  async getNearbyGroups(@Req() req: any, @Query('radius') radius?: number) {
-    return this.locationService.getNearbyLocationGroups(req.user.id, radius);
+  async getNearbyGroups(@CurrentUserId() userId: string, @Query('radius') radius?: number) {
+    return this.locationService.getNearbyLocationGroups(userId, radius);
   }
 
   /**
@@ -66,10 +69,10 @@ export class LocationController {
    */
   @Post('groups')
   async createLocationGroup(
-    @Req() req: any,
+    @CurrentUserId() userId: string,
     @Body() data: CreateLocationGroupDto,
   ) {
-    return this.locationService.createLocationGroup(req.user.id, data);
+    return this.locationService.createLocationGroup(userId, data);
   }
 
   /**
@@ -78,8 +81,8 @@ export class LocationController {
    * @route POST /location/groups/join
    */
   @Post('groups/join')
-  async joinLocationGroup(@Req() req: any, @Body() data: JoinLocationGroupDto) {
-    return this.locationService.joinLocationGroupByQr(req.user.id, data);
+  async joinLocationGroup(@CurrentUserId() userId: string, @Body() data: JoinLocationGroupDto) {
+    return this.locationService.joinLocationGroupByQr(userId, data);
   }
 
   /**
@@ -89,10 +92,10 @@ export class LocationController {
    */
   @Put('sharing')
   async toggleLocationSharing(
-    @Req() req: any,
+    @CurrentUserId() userId: string,
     @Body('enabled') enabled: boolean,
   ) {
-    return this.locationService.toggleLocationSharing(req.user.id, enabled);
+    return this.locationService.toggleLocationSharing(userId, enabled);
   }
 
   /**
@@ -101,7 +104,63 @@ export class LocationController {
    * @route GET /location/history
    */
   @Get('history')
-  async getLocationHistory(@Req() req: any, @Query('days') days?: number) {
-    return this.locationService.getLocationHistory(req.user.id, days);
+  async getLocationHistory(@CurrentUserId() userId: string, @Query('days') days?: number) {
+    return this.locationService.getLocationHistory(userId, days);
+  }
+
+  /**
+   * 근처 사용자 페르소나 설정
+   *
+   * @route PUT /location/persona
+   */
+  @Put('persona')
+  async updatePersona(
+    @CurrentUserId() userId: string,
+    @Body() personaData: {
+      description: string;
+      interests: string[];
+      lookingFor: string;
+      availability: string;
+    },
+  ) {
+    try {
+      const result = await this.locationService.updateUserPersona(userId, personaData);
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message || '페르소나 설정에 실패했습니다.',
+        },
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * 근처 사용자 페르소나 조회
+   *
+   * @route GET /location/persona
+   */
+  @Get('persona')
+  async getPersona(@CurrentUserId() userId: string) {
+    try {
+      const persona = await this.locationService.getUserPersona(userId);
+      return {
+        success: true,
+        data: persona,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message || '페르소나 조회에 실패했습니다.',
+        },
+        error.status || HttpStatus.NOT_FOUND,
+      );
+    }
   }
 }

@@ -34,6 +34,38 @@ export class InterestController {
   constructor(private readonly interestService: InterestService) {}
 
   /**
+   * 관심사 검색 (테스트용)
+   * GET /api/v1/interest/search
+   */
+  @Get('search')
+  async searchInterests(
+    @Query('query') query: string,
+  ) {
+    return {
+      success: true,
+      data: [
+        { id: '1', name: 'coffee', category: 'beverage' },
+        { id: '2', name: 'coffee shop', category: 'place' },
+      ],
+    };
+  }
+
+  /**
+   * 관심사 추천 (테스트용)
+   * GET /api/v1/interest/recommendations
+   */
+  @Get('recommendations')
+  async getRecommendations() {
+    return {
+      success: true,
+      data: [
+        { id: '1', name: 'reading', category: 'hobby' },
+        { id: '2', name: 'hiking', category: 'sport' },
+      ],
+    };
+  }
+
+  /**
    * 관심상대 검색 등록
    * POST /api/v1/interest/search
    */

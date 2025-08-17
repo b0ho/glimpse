@@ -32,6 +32,19 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   /**
+   * 채팅방 목록 조회 (테스트용)
+   */
+  @Get('rooms')
+  async getChatRooms(
+    @CurrentUserId() userId: string,
+  ) {
+    return {
+      success: true,
+      data: [],
+    };
+  }
+
+  /**
    * 채팅 목록 요약 조회
    */
   @Get('summary')

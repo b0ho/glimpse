@@ -74,59 +74,108 @@ export class LocationService {
       );
     }
 
-    // Haversine 공식을 사용한 거리 계산
-    // PostgreSQL의 earth_distance 확장을 사용할 수도 있음
-    const nearbyUsers = await this.prisma.$queryRaw<
-      Array<{
-        userId: string;
-        nickname: string;
-        profileImageUrl: string | null;
-        distance: number;
-        lastSeen: Date;
-      }>
-    >`
-      SELECT 
-        u.id as "userId",
-        u.nickname,
-        u."profileImageUrl",
-        (
-          6371 * acos(
-            cos(radians(${userLocation.latitude})) * 
-            cos(radians(ul.latitude)) * 
-            cos(radians(ul.longitude) - radians(${userLocation.longitude})) + 
-            sin(radians(${userLocation.latitude})) * 
-            sin(radians(ul.latitude))
-          )
-        ) as distance,
-        ul."lastUpdatedAt" as "lastSeen"
-      FROM user_locations ul
-      JOIN users u ON u.id = ul."userId"
-      WHERE 
-        ul."userId" != ${userId}
-        AND u."deletedAt" IS NULL
-        AND ul."lastUpdatedAt" > NOW() - INTERVAL '30 minutes'
-        AND (
-          6371 * acos(
-            cos(radians(${userLocation.latitude})) * 
-            cos(radians(ul.latitude)) * 
-            cos(radians(ul.longitude) - radians(${userLocation.longitude})) + 
-            sin(radians(${userLocation.latitude})) * 
-            sin(radians(ul.latitude))
-          )
-        ) <= ${radius}
-      ORDER BY distance ASC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    `;
+    // 위치 정보가 있는 사용자들 조회
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: { not: userId },
+        deletedAt: null,
+        location: { not: null },
+        lastActive: {
+          gte: new Date(Date.now() - 30 * 60 * 1000), // 30분 이내 활동
+        },
+      },
+      select: {
+        id: true,
+        nickname: true,
+        age: true,
+        gender: true,
+        profileImage: true,
+        bio: true,
+        isVerified: true,
+        isPremium: true,
+        location: true,
+        lastActive: true,
+        locationProfileMode: true,
+        personaProfile: true,
+        groupMemberships: {
+          where: { status: 'ACTIVE' },
+          include: {
+            group: {
+              select: { id: true, name: true },
+            },
+          },
+        },
+      },
+    });
 
-    // 프라이버시 보호: 정확한 위치 대신 대략적인 거리만 표시
-    const sanitizedUsers = nearbyUsers.map((user) => ({
-      ...user,
-      distance: Math.round(user.distance * 10) / 10, // 100m 단위로 반올림
-    }));
+    // 거리 계산 및 필터링
+    const nearbyUsers = users
+      .map((user) => {
+        const location = user.location ? JSON.parse(user.location as string) : null;
+        if (!location?.latitude || !location?.longitude) return null;
+
+        const distance = this.calculateDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          location.latitude,
+          location.longitude,
+        );
+
+        if (distance > radius) return null;
+
+        // 프로필 모드에 따라 정보 결정
+        let displayProfile: any = {};
+        
+        if (user.locationProfileMode === 'persona' && user.personaProfile) {
+          // 페르소나 프로필 사용
+          const persona = user.personaProfile as any;
+          displayProfile = {
+            nickname: persona.nickname || `익명_${user.id.slice(-4)}`,
+            age: persona.age || null,
+            bio: persona.bio || '페르소나 프로필을 사용 중입니다.',
+            profileImage: persona.profileImage || null,
+          };
+        } else {
+          // 실제 프로필 사용
+          displayProfile = {
+            nickname: user.nickname || `사용자_${user.id.slice(-4)}`,
+            age: user.age,
+            bio: user.bio,
+            profileImage: user.profileImage,
+          };
+        }
+
+        // 공통 그룹 찾기
+        const commonGroups = user.groupMemberships.map(m => m.group.name);
+
+        // 마지막 활동 시간 계산
+        const lastActiveMinutes = Math.floor(
+          (Date.now() - new Date(user.lastActive).getTime()) / 60000,
+        );
+        let lastSeen = '방금 전';
+        if (lastActiveMinutes > 5) lastSeen = '5분 전';
+        if (lastActiveMinutes > 15) lastSeen = '15분 전';
+        if (lastActiveMinutes > 30) lastSeen = '30분 전';
+
+        return {
+          id: user.id,
+          ...displayProfile,
+          gender: user.gender,
+          isVerified: user.isVerified,
+          isPremium: user.isPremium,
+          distance: Math.round(distance * 1000), // meters로 변환
+          lastSeen,
+          isOnline: lastActiveMinutes < 5,
+          commonGroups: commonGroups.slice(0, 3),
+          profileMode: user.locationProfileMode || 'real',
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a!.distance - b!.distance)
+      .slice(offset, offset + limit);
 
     return {
-      users: sanitizedUsers,
+      users: nearbyUsers,
       pagination: {
         limit,
         offset,
@@ -236,8 +285,8 @@ export class LocationService {
     }
 
     // 만료 시간 체크
-    const metadata = group.location as any;
-    if (new Date(metadata.expiresAt) < new Date()) {
+    const locationData = group.location as any;
+    if (locationData && locationData.expiresAt && new Date(locationData.expiresAt) < new Date()) {
       throw new BadRequestException('만료된 QR 코드입니다.');
     }
 
@@ -251,13 +300,14 @@ export class LocationService {
     const distance = this.calculateDistance(
       userLocation.latitude,
       userLocation.longitude,
-      metadata.location.latitude,
-      metadata.location.longitude,
+      locationData.latitude || locationData.location?.latitude,
+      locationData.longitude || locationData.location?.longitude,
     );
 
-    if (distance > metadata.location.radius) {
+    const radius = locationData.radius || locationData.location?.radius || 1;
+    if (distance > radius) {
       throw new BadRequestException(
-        `그룹 위치에서 ${metadata.location.radius}km 이내에 있어야 합니다.`,
+        `그룹 위치에서 ${radius}km 이내에 있어야 합니다.`,
       );
     }
 
@@ -275,7 +325,60 @@ export class LocationService {
   }
 
   /**
+   * 사용자 페르소나 업데이트
+   */
+  async updateUserPersona(
+    userId: string,
+    personaData: {
+      description: string;
+      interests: string[];
+      lookingFor: string;
+      availability: string;
+    },
+  ) {
+    // 사용자 프로필에 페르소나 정보 저장
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        persona: personaData,
+      },
+    });
+
+    // 캐시 무효화
+    await this.cacheService.invalidateUserCache(userId);
+
+    return {
+      message: '페르소나가 설정되었습니다.',
+      persona: personaData,
+    };
+  }
+
+  /**
+   * 사용자 페르소나 조회
+   */
+  async getUserPersona(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        persona: true,
+      },
+    });
+
+    if (!user || !user.persona) {
+      return {
+        description: '',
+        interests: [],
+        lookingFor: '',
+        availability: '',
+      };
+    }
+
+    return user.persona;
+  }
+
+  /**
    * 위치 기반 그룹 검색
+   * 모든 그룹 중 location 필드가 있는 그룹을 검색합니다.
    *
    * @param userId 사용자 ID
    * @param radius 검색 반경 (km)
@@ -286,10 +389,13 @@ export class LocationService {
       throw new BadRequestException('위치 정보가 없습니다.');
     }
 
+    // location 필드가 null이 아닌 모든 활성 그룹 조회
     const groups = await this.prisma.group.findMany({
       where: {
-        type: 'LOCATION',
         isActive: true,
+        location: {
+          not: Prisma.JsonNull,
+        },
       },
       include: {
         creator: {
@@ -299,9 +405,13 @@ export class LocationService {
             profileImage: true,
           },
         },
+        members: {
+          where: { status: 'ACTIVE' },
+          select: { userId: true },
+        },
         _count: {
           select: {
-            members: true,
+            members: { where: { status: 'ACTIVE' } },
           },
         },
       },
@@ -310,22 +420,45 @@ export class LocationService {
     // 거리 계산 및 필터링
     const nearbyGroups = groups
       .map((group) => {
-        const metadata = group.location as any;
-        if (!metadata.location) return null;
+        const location = group.location as any;
+        
+        // location 필드 검증
+        if (!location?.latitude || !location?.longitude) return null;
 
         const distance = this.calculateDistance(
           userLocation.latitude,
           userLocation.longitude,
-          metadata.location.latitude,
-          metadata.location.longitude,
+          location.latitude,
+          location.longitude,
         );
 
-        if (distance > radius) return null;
+        // 그룹의 radius가 있으면 사용, 없으면 기본값 1km
+        const groupRadius = location.radius || 1;
+        
+        // 그룹의 유효 반경과 사용자 검색 반경 모두 고려
+        if (distance > Math.min(radius, groupRadius * 2)) return null;
+
+        // 사용자가 이미 멤버인지 확인
+        const isJoined = group.members.some(
+          (member) => member.userId === userId,
+        );
 
         return {
-          ...group,
-          distance: Math.round(distance * 10) / 10,
-          expiresAt: metadata.expiresAt,
+          id: group.id,
+          name: group.name,
+          description: group.description,
+          type: group.type,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          radius: groupRadius,
+          distance: Math.round(distance * 1000), // meters로 변환
+          memberCount: group._count.members,
+          activeMembers: group._count.members, // 활성 멤버만 카운트
+          createdBy: group.creator?.nickname || 'Unknown',
+          createdAt: group.createdAt,
+          expiresAt: location.expiresAt ? new Date(location.expiresAt) : undefined,
+          isJoined,
+          qrCode: location.qrCode,
         };
       })
       .filter(Boolean)
@@ -398,17 +531,17 @@ export class LocationService {
     });
 
     for (const group of autoJoinGroups) {
-      const metadata = group.location as any;
-      if (!metadata.location) continue;
+      const locationData = group.location as any;
+      if (!locationData) continue;
 
       const distance = this.calculateDistance(
         latitude,
         longitude,
-        metadata.location.latitude,
-        metadata.location.longitude,
+        locationData.latitude,
+        locationData.longitude,
       );
 
-      if (distance <= metadata.location.radius) {
+      if (distance <= (locationData.radius || 1)) {
         // 이미 가입했는지 확인
         const existingMember = await this.prisma.groupMember.findUnique({
           where: {
@@ -537,5 +670,83 @@ export class LocationService {
       longitude: entry.longitude,
       timestamp: entry.createdAt,
     }));
+  }
+
+  /**
+   * 프로필 모드 설정
+   *
+   * @param userId 사용자 ID
+   * @param mode 프로필 모드 ('real' | 'persona')
+   * @param personaData 페르소나 프로필 데이터 (선택적)
+   */
+  async setProfileMode(
+    userId: string,
+    mode: 'real' | 'persona',
+    personaData?: {
+      nickname?: string;
+      age?: number;
+      bio?: string;
+      profileImage?: string;
+    },
+  ) {
+    const updateData: any = {
+      locationProfileMode: mode,
+    };
+
+    if (mode === 'persona') {
+      // 페르소나 모드인 경우 페르소나 프로필 업데이트
+      const currentUser = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { personaProfile: true },
+      });
+
+      const existingPersona = (currentUser?.personaProfile || {}) as any;
+      
+      updateData.personaProfile = {
+        ...existingPersona,
+        ...personaData,
+        updatedAt: new Date().toISOString(),
+      };
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        locationProfileMode: true,
+        personaProfile: true,
+      },
+    });
+
+    return {
+      mode: updatedUser.locationProfileMode,
+      personaProfile: mode === 'persona' ? updatedUser.personaProfile : null,
+    };
+  }
+
+  /**
+   * 현재 프로필 모드 조회
+   *
+   * @param userId 사용자 ID
+   */
+  async getProfileMode(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        locationProfileMode: true,
+        personaProfile: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    return {
+      mode: user.locationProfileMode || 'real',
+      personaProfile: user.locationProfileMode === 'persona' 
+        ? user.personaProfile 
+        : null,
+    };
   }
 }

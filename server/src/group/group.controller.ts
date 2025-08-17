@@ -217,6 +217,33 @@ export class GroupController {
   }
 
   /**
+   * 그룹 좋아요 토글
+   */
+  @Post(':id/like')
+  @ApiOperation({ summary: '그룹 좋아요 토글' })
+  @ApiResponse({ status: 200, description: '좋아요 토글 성공' })
+  async toggleGroupLike(
+    @CurrentUserId() userId: string,
+    @Param('id') groupId: string,
+  ) {
+    try {
+      const result = await this.groupService.toggleGroupLike(groupId, userId);
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message || '그룹 좋아요 처리에 실패했습니다.',
+        },
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
    * 사용자의 그룹 목록 조회
    */
   @Get('my-groups')

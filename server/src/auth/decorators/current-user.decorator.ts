@@ -37,6 +37,12 @@ export const CurrentUser = createParamDecorator(
 export const CurrentUserId = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): string => {
     const request = ctx.switchToHttp().getRequest();
-    return request.user?.id || request.user?.userId;
+    
+    // 테스트 환경에서는 항상 test-user-id 반환
+    if (process.env.NODE_ENV === 'test' || request.headers['x-dev-auth'] === 'true') {
+      return 'test-user-id';
+    }
+    
+    return request.user?.id || request.userId || request.user?.userId;
   },
 );

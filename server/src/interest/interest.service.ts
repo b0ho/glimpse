@@ -392,20 +392,20 @@ export class InterestService {
       }
 
       // 알림 전송
-      await this.notificationService.sendNotification(search1.userId, {
-        title: '관심상대 매칭!',
-        body: '등록하신 조건과 일치하는 상대를 찾았습니다',
+      await this.notificationService.sendNotification({
+        userId: search1.userId,
+        type: 'INTEREST_MATCH',
+        content: '등록하신 조건과 일치하는 상대를 찾았습니다',
         data: {
-          type: 'INTEREST_MATCH',
           matchId: search2.id,
         },
       });
 
-      await this.notificationService.sendNotification(search2.userId, {
-        title: '관심상대 매칭!',
-        body: '등록하신 조건과 일치하는 상대를 찾았습니다',
+      await this.notificationService.sendNotification({
+        userId: search2.userId,
+        type: 'INTEREST_MATCH',
+        content: '등록하신 조건과 일치하는 상대를 찾았습니다',
         data: {
-          type: 'INTEREST_MATCH',
           matchId: search1.id,
         },
       });
@@ -435,7 +435,7 @@ export class InterestService {
    * 암호화 필요 여부 확인
    */
   private shouldEncrypt(type: InterestType): boolean {
-    return [InterestType.PHONE, InterestType.EMAIL].includes(type);
+    return type === InterestType.PHONE || type === InterestType.EMAIL;
   }
 
   /**

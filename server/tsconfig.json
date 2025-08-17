@@ -19,9 +19,13 @@
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "lib": ["ES2021"]
+    "lib": [
+      "ES2021"
+    ]
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "eslint.config.mjs",
     "node_modules",

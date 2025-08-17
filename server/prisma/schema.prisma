@@ -45,6 +45,11 @@ model User {
   // Settings
   privacySettings Json?
   notificationSettings Json?
+  
+  // Location Profile Settings
+  locationProfileMode String? // 'real' or 'persona'
+  personaProfile Json? // 페르소나 프로필 정보
+  persona Json? // 근처 사용자 페르소나 설정
 
   // Relations
   deviceTokens       UserDeviceToken[]
@@ -76,6 +81,10 @@ model User {
   commentLikes       CommentLike[]
   groupChatMembers   GroupChatMember[]
   groupChatMessages  GroupChatMessage[]
+  groupLikes         GroupLike[]
+  feedbacks          Feedback[]
+  feedbackVotes      FeedbackVote[]
+  feedbackComments   FeedbackComment[]
   
   // Friend relations
   sentFriendRequests     FriendRequest[] @relation("SentRequests")
@@ -206,6 +215,7 @@ model Group {
   checkIns      LocationCheckIn[]
   communityPosts CommunityPost[]
   groupChats     GroupChat[]
+  groupLikes    GroupLike[]
 
   @@map("groups")
 }
@@ -301,6 +311,20 @@ model UserLike {
   @@index([toUserId, groupId])
   @@index([groupId, createdAt])
   @@map("user_likes")
+}
+
+model GroupLike {
+  id        String   @id @default(cuid())
+  userId    String
+  groupId   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@index([groupId])
+  @@map("group_likes")
 }
 
 model Match {
@@ -684,6 +708,76 @@ model CommentLike {
   
   @@unique([commentId, userId])
   @@map("comment_likes")
+}
+
+// Support/Feedback Models
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  content   String   @db.Text
+  category  String   // 'bug', 'feature', 'improvement', 'other'
+  priority  String   @default("medium") // 'low', 'medium', 'high'
+  status    String   @default("pending") // 'pending', 'in-progress', 'resolved', 'closed'
+  voteCount Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  votes     FeedbackVote[]
+  comments  FeedbackComment[]
+  
+  @@index([userId])
+  @@index([status])
+  @@index([category])
+  @@map("feedbacks")
+}
+
+model FeedbackVote {
+  id         String   @id @default(cuid())
+  feedbackId String
+  userId     String
+  voteType   String   // 'up' or 'down'
+  createdAt  DateTime @default(now())
+  
+  // Relations
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, feedbackId])
+  @@map("feedback_votes")
+}
+
+model FeedbackComment {
+  id         String   @id @default(cuid())
+  feedbackId String
+  userId     String
+  content    String   @db.Text
+  createdAt  DateTime @default(now())
+  
+  // Relations
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([feedbackId])
+  @@map("feedback_comments")
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String   @db.Text
+  category  String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([category])
+  @@index([order])
+  @@map("faqs")
 }
 
 // Group Chat Feature Models

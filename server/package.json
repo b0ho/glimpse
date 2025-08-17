@@ -19,11 +19,14 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed": "npx tsx prisma/migrate-mockdata.ts",
-    "db:seed": "npx tsx prisma/migrate-mockdata.ts",
+    "seed": "npx tsx prisma/seed.ts",
+    "db:seed": "npx tsx prisma/seed.ts",
+    "seed:mock": "npx tsx prisma/migrate-mockdata.ts",
     "seed:domains": "npx tsx src/scripts/seed-company-domains.ts",
     "seed:english": "npx tsx src/scripts/seed-english-data.ts",
-    "seed:all": "npm run seed:domains && npm run seed:english"
+    "seed:all": "npm run seed:domains && npm run seed:english",
+    "seed:test": "npx tsx prisma/seed-test.ts",
+    "seed:extended": "npx tsx prisma/seed-extended.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.859.0",
