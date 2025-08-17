@@ -33,7 +33,7 @@
     "@aws-sdk/client-ses": "^3.859.0",
     "@aws-sdk/s3-request-presigner": "^3.859.0",
     "@clerk/clerk-sdk-node": "^5.1.6",
-    "@nestjs-modules/mailer": "^1.11.2",
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
