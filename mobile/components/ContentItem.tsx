@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -58,6 +59,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   const { getUserDisplayName } = useLikeStore();
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const navigation = useNavigation();
   const [showMenu, setShowMenu] = useState(false);
   
   // 디버깅 로그
@@ -91,6 +93,10 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
         }
       ]
     );
+  };
+
+  const handlePostPress = () => {
+    navigation.navigate('PostDetail' as never, { postId: item.id } as never);
   };
 
   return (
@@ -164,7 +170,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
         )}
       </View>
 
-      <View style={styles.contentBody}>
+      <TouchableOpacity style={styles.contentBody} onPress={handlePostPress} activeOpacity={0.7}>
         {item.text && <Text style={[styles.contentText, { color: colors.TEXT.PRIMARY }]}>{item.text}</Text>}
         {item.type === 'image' && item.imageUrls && (
           <View style={[styles.imageContainer, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER }]}>
@@ -173,20 +179,22 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
             </Text>
           </View>
         )}
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.contentFooter}>
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={styles.likeButtonContainer}
             onPress={() => item.authorId && onLikeToggle(item.id, item.authorId)}
-            disabled={item.isLikedByUser || isOwnContent || !item.authorId}
+            disabled={item.isLikedByUser || isOwnContent || !item.authorId || remainingLikes === 0}
             accessibilityLabel={t('common:accessibility.likePost', { name: item.authorNickname })}
             accessibilityHint={
               isOwnContent
                 ? t('common:accessibility.cannotLikeOwnPost')
                 : item.isLikedByUser
                 ? t('common:accessibility.alreadyLiked')
+                : remainingLikes === 0
+                ? '좋아요 크레딧이 부족합니다'
                 : t('common:accessibility.canLike')
             }
             accessibilityRole="button"
@@ -216,6 +224,29 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
             </View>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={styles.commentButtonContainer}
+            onPress={handlePostPress}
+            accessibilityLabel="댓글"
+            accessibilityRole="button"
+          >
+            <View style={styles.commentButton}>
+              <Icon
+                name="chatbubble-outline"
+                size={20}
+                color={colors.TEXT.SECONDARY}
+              />
+              <Text
+                style={[
+                  styles.commentButtonText,
+                  { color: colors.TEXT.SECONDARY },
+                ]}
+              >
+                {item.commentCount || 0}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
           <View style={styles.actionInfo}>
             <Text style={[styles.remainingLikes, { color: colors.TEXT.SECONDARY }]}>
               {t('matching:like.remainingLikes', { count: remainingLikes })}
@@ -229,7 +260,8 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
 
 const styles = StyleSheet.create({
   contentItem: {
-    marginVertical: SPACING.XS,
+    marginTop: SPACING.MD,
+    marginBottom: SPACING.XS,
     marginHorizontal: SPACING.MD,
     borderRadius: 12,
     padding: SPACING.MD,
@@ -328,6 +360,20 @@ const styles = StyleSheet.create({
   },
   likeButtonTextDisabled: {
     opacity: 0.6,
+  },
+  commentButtonContainer: {
+    paddingVertical: SPACING.XS,
+    paddingHorizontal: SPACING.SM,
+    borderRadius: 20,
+  },
+  commentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  commentButtonText: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '500',
+    marginLeft: SPACING.XS,
   },
   actionInfo: {
     alignItems: 'flex-end',

@@ -927,7 +927,13 @@ export const useLikeStore = create<LikeStore>()(
        */
       getUserDisplayName: (userId: string, currentUserId: string) => {
         const anonymousInfo = get().getAnonymousUserInfo(userId, currentUserId);
-        return anonymousInfo?.displayName || '알 수 없는 사용자';
+        // 익명 사용자에게 더 친근한 이름 제공
+        if (!anonymousInfo?.displayName) {
+          const anonymousNames = ['비밀친구', '익명의 누군가', '숨은 매력', '미스터리 사용자', '시크릿 친구'];
+          const index = userId.charCodeAt(0) % anonymousNames.length;
+          return anonymousNames[index];
+        }
+        return anonymousInfo.displayName;
       },
 
       /**

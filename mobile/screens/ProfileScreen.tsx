@@ -410,7 +410,10 @@ export const ProfileScreen = () => {
           <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => navigation.navigate('PrivacyPolicy' as never)}
+        >
           <View style={styles.settingContent}>
             <Ionicons name="document-text-outline" size={20} color={colors.TEXT.PRIMARY} />
             <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>{t('profile:settings.privacy')}</Text>
@@ -418,7 +421,10 @@ export const ProfileScreen = () => {
           <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => navigation.navigate('TermsOfService' as never)}
+        >
           <View style={styles.settingContent}>
             <Ionicons name="book-outline" size={20} color={colors.TEXT.PRIMARY} />
             <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>{t('profile:settings.terms')}</Text>
@@ -426,7 +432,10 @@ export const ProfileScreen = () => {
           <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => navigation.navigate('Support' as never)}
+        >
           <View style={styles.settingContent}>
             <Ionicons name="help-circle-outline" size={20} color={colors.TEXT.PRIMARY} />
             <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>{t('profile:settings.support')}</Text>
@@ -528,8 +537,9 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT.PRIMARY,
   },
   section: {
-    margin: SPACING.MD,
-    marginBottom: SPACING.LG,
+    marginHorizontal: SPACING.MD,
+    marginTop: SPACING.MD,
+    marginBottom: SPACING.MD,
   },
   sectionTitle: {
     fontSize: FONT_SIZES.LG,

@@ -35,6 +35,7 @@ import { ChatScreenSimple as ChatScreen } from '@/screens/ChatScreenSimple';
 import { PremiumScreen } from '@/screens/PremiumScreen';
 import { LocationGroupScreen } from '@/screens/LocationGroupScreen';
 import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen';
+import { NearbyGroupsScreen } from '@/screens/NearbyGroupsScreen';
 import { MapScreen } from '@/screens/MapScreen';
 import { NotificationSettingsScreen } from '@/screens/NotificationSettingsScreen';
 import { WhoLikesYouScreen } from '@/screens/WhoLikesYouScreen';
@@ -51,6 +52,9 @@ import { InterestSearchScreen } from '@/screens/InterestSearchScreen';
 import { AddInterestScreen } from '@/screens/AddInterestScreen';
 import { MyInfoScreen } from '@/screens/MyInfoScreen';
 import { GroupDetailScreen } from '@/screens/GroupDetailScreen';
+import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen';
+import { TermsOfServiceScreen } from '@/screens/TermsOfServiceScreen';
+import { SupportScreen } from '@/screens/SupportScreen';
 // import { RootStackParamList } from '@/types';
 
 /**
@@ -68,6 +72,7 @@ type HomeStackParamList = {
   CreateContent: undefined;
   CreateStory: undefined;
   StoryUpload: undefined;
+  NearbyUsers: undefined;
 };
 
 type GroupsStackParamList = {
@@ -90,6 +95,9 @@ type ProfileStackParamList = {
   WhoLikesYou: undefined;
   LikeHistory: undefined;
   DeleteAccount: undefined;
+  PrivacyPolicy: undefined;
+  TermsOfService: undefined;
+  Support: undefined;
 };
 
 type MatchesStackParamList = {
@@ -147,6 +155,7 @@ export type RootNavigationParamList = MainTabParamList & {
   GroupInvite: { groupId: string };
   JoinGroup: { inviteCode: string };
   GroupManage: { groupId: string };
+  NearbyUsers: undefined;
 };
 
 type AppStackParamList = {
@@ -251,6 +260,22 @@ function HomeStackNavigator() {
           title: t('screens.storyUpload'),
           headerShown: false,
           presentation: 'modal',
+        }}
+      />
+      <HomeStack.Screen 
+        name="NearbyUsers" 
+        component={NearbyUsersScreen} 
+        options={{ 
+          title: t('screens.nearbyUsers'),
+          headerShown: false,
+        }}
+      />
+      <HomeStack.Screen 
+        name="NearbyGroups" 
+        component={NearbyGroupsScreen} 
+        options={{ 
+          title: '근처 그룹',
+          headerShown: false,
         }}
       />
     </HomeStack.Navigator>
@@ -525,6 +550,27 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen 
         name="DeleteAccount" 
         component={DeleteAccountScreen} 
+        options={{ 
+          headerShown: false,
+        }}
+      />
+      <ProfileStack.Screen 
+        name="PrivacyPolicy" 
+        component={PrivacyPolicyScreen} 
+        options={{ 
+          headerShown: false,
+        }}
+      />
+      <ProfileStack.Screen 
+        name="TermsOfService" 
+        component={TermsOfServiceScreen} 
+        options={{ 
+          headerShown: false,
+        }}
+      />
+      <ProfileStack.Screen 
+        name="Support" 
+        component={SupportScreen} 
         options={{ 
           headerShown: false,
         }}

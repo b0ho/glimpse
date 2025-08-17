@@ -6,7 +6,7 @@
   "description": "Glimpse Dating App - Monorepo with Mobile + Server",
   "workspaces": [
     "web",
-    "admin", 
+    "admin",
     "mobile",
     "server",
     "shared"
@@ -18,7 +18,7 @@
     "dev:mobile": "cd mobile && npm start",
     "dev:server": "cd server && npm run dev",
     "start:landing": "./scripts/start-landing.sh",
-    "start:admin": "./scripts/start-admin.sh", 
+    "start:admin": "./scripts/start-admin.sh",
     "start:all": "./scripts/start-all.sh",
     "build": "npm run build:web && npm run build:admin && npm run build:mobile",
     "build:web": "cd web && npm run build",
@@ -79,5 +79,8 @@
     "@types/react": "18.3.23",
     "@types/react-native": "0.73.0"
   },
-  "private": true
+  "private": true,
+  "dependencies": {
+    "react-native-web": "~0.19.13"
+  }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
   RefreshControl,
   FlatList,
+  Animated,
+  PanResponder,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +22,7 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { User, NearbyUser } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { API_BASE_URL } from '@/services/api/config';
 
 interface LocationData {
   latitude: number;
@@ -42,6 +45,7 @@ export const NearbyUsersScreen = React.memo(() => {
   const [refreshing, setRefreshing] = useState(false);
   const [locationPermissionGranted, setLocationPermissionGranted] = useState(false);
   const [selectedRadius, setSelectedRadius] = useState(2); // 기본 2km
+  const [hiddenUsers, setHiddenUsers] = useState<Set<string>>(new Set());
 
   const radiusOptions = [1, 2, 5, 10]; // km 단위
 
@@ -127,9 +131,45 @@ export const NearbyUsersScreen = React.memo(() => {
     try {
       setIsLoading(true);
 
-      // 실제 구현에서는 백엔드 API 호출
-      // 여기서는 더미 데이터 사용
-      const dummyUsers: NearbyUser[] = [
+      // 실제 API 호출 시도
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/location/nearby/users?latitude=${currentLocation.latitude}&longitude=${currentLocation.longitude}&radius=${selectedRadius}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-dev-auth': 'true',
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setNearbyUsers(data);
+            return;
+          }
+        }
+      } catch (apiError) {
+        console.log('API call failed, using dummy data:', apiError);
+      }
+
+      // 거리 계산 함수 (Haversine formula)
+      const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+        const R = 6371; // 지구 반지름 (km)
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+          Math.sin(dLat/2) * Math.sin(dLat/2) +
+          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+          Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c * 1000; // km를 m로 변환
+      };
+
+      // API 실패 시 더미 데이터 사용 (다양한 거리의 사용자들)
+      const allDummyUsers = [
         {
           id: 'user1',
           nickname: '카페러버',
@@ -138,7 +178,8 @@ export const NearbyUsersScreen = React.memo(() => {
           profileImage: undefined,
           isVerified: true,
           isPremium: false,
-          distance: 150,
+          latitude: currentLocation.latitude + 0.001,
+          longitude: currentLocation.longitude + 0.001,
           lastSeen: '방금 전',
           isOnline: true,
           commonGroups: ['스타벅스 강남점 모임'],
@@ -158,7 +199,8 @@ export const NearbyUsersScreen = React.memo(() => {
           profileImage: undefined,
           isVerified: false,
           isPremium: true,
-          distance: 300,
+          latitude: currentLocation.latitude - 0.003,
+          longitude: currentLocation.longitude + 0.003,
           lastSeen: '5분 전',
           isOnline: false,
           commonGroups: ['피트니스 센터', '판교 테크노밸리'],
@@ -178,7 +220,8 @@ export const NearbyUsersScreen = React.memo(() => {
           profileImage: undefined,
           isVerified: true,
           isPremium: false,
-          distance: 800,
+          latitude: currentLocation.latitude + 0.008,
+          longitude: currentLocation.longitude - 0.008,
           lastSeen: '1시간 전',
           isOnline: false,
           commonGroups: ['연세대학교'],
@@ -190,12 +233,90 @@ export const NearbyUsersScreen = React.memo(() => {
           updatedAt: new Date(),
           anonymousId: 'anon_user3',
         },
-      ].filter(dummyUser => 
-        dummyUser.distance <= selectedRadius * 1000 && // km to meters
-        dummyUser.id !== user.id
-      );
+        {
+          id: 'user4',
+          nickname: '요리왕',
+          age: 30,
+          gender: 'MALE' as const,
+          profileImage: undefined,
+          isVerified: true,
+          isPremium: true,
+          latitude: currentLocation.latitude + 0.015,
+          longitude: currentLocation.longitude + 0.015,
+          lastSeen: '30분 전',
+          isOnline: false,
+          commonGroups: ['요리 동호회'],
+          bio: '맛있는 요리를 함께 나눠요 🍳',
+          phoneNumber: '',
+          credits: 20,
+          lastActive: new Date(Date.now() - 30 * 60 * 1000),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          anonymousId: 'anon_user4',
+        },
+        {
+          id: 'user5',
+          nickname: '영화광',
+          age: 27,
+          gender: 'FEMALE' as const,
+          profileImage: undefined,
+          isVerified: false,
+          isPremium: false,
+          latitude: currentLocation.latitude + 0.04,
+          longitude: currentLocation.longitude - 0.04,
+          lastSeen: '2시간 전',
+          isOnline: false,
+          commonGroups: ['영화 감상 모임'],
+          bio: '함께 영화 보실 분 찾아요 🎬',
+          phoneNumber: '',
+          credits: 1,
+          lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          anonymousId: 'anon_user5',
+        },
+        {
+          id: 'user6',
+          nickname: '등산러',
+          age: 35,
+          gender: 'MALE' as const,
+          profileImage: undefined,
+          isVerified: true,
+          isPremium: false,
+          latitude: currentLocation.latitude - 0.08,
+          longitude: currentLocation.longitude + 0.08,
+          lastSeen: '3시간 전',
+          isOnline: false,
+          commonGroups: ['주말 등산 모임'],
+          bio: '주말마다 산에 가요 ⛰️',
+          phoneNumber: '',
+          credits: 5,
+          lastActive: new Date(Date.now() - 3 * 60 * 60 * 1000),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          anonymousId: 'anon_user6',
+        },
+      ];
 
-      setNearbyUsers(dummyUsers);
+      // 각 사용자의 실제 거리 계산 및 필터링
+      const usersWithDistance = allDummyUsers
+        .filter(dummyUser => dummyUser.id !== user.id)
+        .map(dummyUser => {
+          const distance = calculateDistance(
+            currentLocation.latitude,
+            currentLocation.longitude,
+            dummyUser.latitude!,
+            dummyUser.longitude!
+          );
+          return {
+            ...dummyUser,
+            distance,
+          };
+        })
+        .filter(dummyUser => dummyUser.distance <= selectedRadius * 1000) // km to meters
+        .sort((a, b) => a.distance - b.distance); // 거리순 정렬
+
+      setNearbyUsers(usersWithDistance as NearbyUser[]);
     } catch (error) {
       console.error('Load nearby users error:', error);
     } finally {
@@ -207,8 +328,27 @@ export const NearbyUsersScreen = React.memo(() => {
     setRefreshing(true);
     if (locationPermissionGranted) {
       await getCurrentLocation();
+      await loadNearbyUsers();
     }
     setRefreshing(false);
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    Alert.alert(
+      '사용자 숨기기',
+      '이 사용자를 목록에서 숨기시겠습니까?',
+      [
+        { text: t('common:cancel'), style: 'cancel' },
+        {
+          text: '숨기기',
+          style: 'destructive',
+          onPress: () => {
+            setHiddenUsers(prev => new Set(prev).add(userId));
+            Alert.alert(t('common:success'), '사용자가 목록에서 숨겨졌습니다.');
+          },
+        },
+      ]
+    );
   };
 
   const handleSendLike = async (targetUser: NearbyUser) => {
@@ -268,73 +408,154 @@ export const NearbyUsersScreen = React.memo(() => {
     }
   };
 
-  const renderNearbyUser = ({ item }: { item: NearbyUser }) => (
-    <TouchableOpacity style={[styles.userCard, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
-      <View style={styles.userHeader}>
-        <View style={[styles.userAvatar, { backgroundColor: colors.PRIMARY }]}>
-          <Icon 
-            name="person" 
-            size={24} 
-            color={colors.TEXT.WHITE} 
-          />
-        </View>
-        
-        <View style={styles.userInfo}>
-          <View style={styles.userNameRow}>
-            <Text style={[styles.userName, { color: colors.TEXT.PRIMARY }]}>{item.nickname}</Text>
-            <Text style={[styles.userAge, { color: colors.TEXT.SECONDARY }]}>{item.age || 25}{t('nearbyUsers.ageUnit')}</Text>
-            {item.isVerified && (
-              <Icon name="checkmark-circle" size={16} color={colors.SUCCESS} />
-            )}
-            {item.isPremium && (
-              <Icon name="diamond" size={14} color={colors.WARNING} />
-            )}
-          </View>
-          
-          <View style={styles.locationRow}>
-            <Icon name="location-outline" size={14} color={colors.TEXT.SECONDARY} />
-            <Text style={[styles.distanceText, { color: colors.TEXT.SECONDARY }]}>
-              {item.distance < 1000 
-                ? `${Math.round(item.distance)}m` 
-                : `${(item.distance / 1000).toFixed(1)}km`
-              }
-            </Text>
-            <View style={[
-              styles.onlineStatus, 
-              { backgroundColor: item.isOnline ? colors.SUCCESS : colors.TEXT.LIGHT }
-            ]} />
-            <Text style={[styles.lastSeenText, { color: colors.TEXT.LIGHT }]}>{item.lastSeen}</Text>
-          </View>
-        </View>
+  const SwipeableUserCard = ({ item }: { item: NearbyUser }) => {
+    const translateX = useRef(new Animated.Value(0)).current;
+    const opacity = useRef(new Animated.Value(1)).current;
 
-        <TouchableOpacity
-          style={[styles.likeButton, { backgroundColor: colors.ERROR + '10' }]}
-          onPress={() => handleSendLike(item)}
-        >
-          <Icon name="heart-outline" size={20} color={colors.ERROR} />
-        </TouchableOpacity>
-      </View>
+    const panResponder = useRef(
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 20,
+        onPanResponderMove: (_, gestureState) => {
+          translateX.setValue(gestureState.dx);
+          opacity.setValue(1 - Math.abs(gestureState.dx) / 300);
+        },
+        onPanResponderRelease: (_, gestureState) => {
+          if (Math.abs(gestureState.dx) > 120) {
+            // 스와이프로 삭제
+            Animated.parallel([
+              Animated.timing(translateX, {
+                toValue: gestureState.dx > 0 ? 500 : -500,
+                duration: 200,
+                useNativeDriver: true,
+              }),
+              Animated.timing(opacity, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+              }),
+            ]).start(() => {
+              handleDeleteUser(item.id);
+            });
+          } else {
+            // 원위치로 복귀
+            Animated.parallel([
+              Animated.spring(translateX, {
+                toValue: 0,
+                useNativeDriver: true,
+              }),
+              Animated.spring(opacity, {
+                toValue: 1,
+                useNativeDriver: true,
+              }),
+            ]).start();
+          }
+        },
+      })
+    ).current;
 
-      {item.bio && (
-        <Text style={[styles.userBio, { color: colors.TEXT.SECONDARY }]}>{item.bio}</Text>
-      )}
+    if (hiddenUsers.has(item.id)) {
+      return null;
+    }
 
-      {item.commonGroups.length > 0 && (
-        <View style={styles.commonGroups}>
-          <Text style={[styles.commonGroupsTitle, { color: colors.TEXT.LIGHT }]}>{t('nearbyUsers.commonGroups')}</Text>
-          <View style={styles.groupTags}>
-            {item.commonGroups.slice(0, 2).map((group, index) => (
-              <View key={index} style={[styles.groupTag, { backgroundColor: colors.PRIMARY + '10' }]}>
-                <Text style={[styles.groupTagText, { color: colors.PRIMARY }]}>{group}</Text>
+    return (
+      <Animated.View
+        style={[{
+          transform: [{ translateX }],
+          opacity,
+        }]}
+        {...panResponder.panHandlers}
+      >
+        <TouchableOpacity style={[styles.userCard, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
+          <View style={styles.userHeader}>
+            <View style={[styles.userAvatar, { backgroundColor: colors.PRIMARY }]}>
+              <Icon 
+                name="person" 
+                size={24} 
+                color={colors.TEXT.WHITE} 
+              />
+            </View>
+            
+            <View style={styles.userInfo}>
+              <View style={styles.userNameRow}>
+                <Text style={[styles.userName, { color: colors.TEXT.PRIMARY }]}>{item.nickname}</Text>
+                <Text style={[styles.userAge, { color: colors.TEXT.SECONDARY }]}>{item.age || 25}{t('nearbyUsers.ageUnit')}</Text>
+                {item.isVerified && (
+                  <Icon name="checkmark-circle" size={16} color={colors.SUCCESS} />
+                )}
+                {item.isPremium && (
+                  <Icon name="diamond" size={14} color={colors.WARNING} />
+                )}
               </View>
-            ))}
-            {item.commonGroups.length > 2 && (
-              <Text style={[styles.moreGroups, { color: colors.TEXT.LIGHT }]}>{t('nearbyUsers.moreGroups', { count: item.commonGroups.length - 2 })}</Text>
-            )}
+              
+              <View style={styles.locationRow}>
+                <Icon name="location-outline" size={14} color={colors.TEXT.SECONDARY} />
+                <Text style={[styles.distanceText, { color: colors.TEXT.SECONDARY }]}>
+                  {item.distance < 1000 
+                    ? `${Math.round(item.distance)}m` 
+                    : `${(item.distance / 1000).toFixed(1)}km`
+                  }
+                </Text>
+                <View style={[
+                  styles.onlineStatus, 
+                  { backgroundColor: item.isOnline ? colors.SUCCESS : colors.TEXT.LIGHT }
+                ]} />
+                <Text style={[styles.lastSeenText, { color: colors.TEXT.LIGHT }]}>{item.lastSeen}</Text>
+              </View>
+            </View>
+
+            <View style={styles.cardActions}>
+              <TouchableOpacity
+                style={[styles.deleteButton, { backgroundColor: colors.TEXT.LIGHT + '20' }]}
+                onPress={() => handleDeleteUser(item.id)}
+              >
+                <Icon name="close" size={18} color={colors.TEXT.SECONDARY} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.likeButton, { backgroundColor: colors.ERROR + '10' }]}
+                onPress={() => handleSendLike(item)}
+              >
+                <Icon name="heart-outline" size={20} color={colors.ERROR} />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      )}
-    </TouchableOpacity>
+
+          {item.bio && (
+            <Text style={[styles.userBio, { color: colors.TEXT.SECONDARY }]}>{item.bio}</Text>
+          )}
+
+          {item.commonGroups.length > 0 && (
+            <View style={styles.commonGroups}>
+              <Text style={[styles.commonGroupsTitle, { color: colors.TEXT.LIGHT }]}>{t('nearbyUsers.commonGroups')}</Text>
+              <View style={styles.groupTags}>
+                {item.commonGroups.slice(0, 2).map((group, index) => (
+                  <View key={index} style={[styles.groupTag, { backgroundColor: colors.PRIMARY + '10' }]}>
+                    <Text style={[styles.groupTagText, { color: colors.PRIMARY }]}>{group}</Text>
+                  </View>
+                ))}
+                {item.commonGroups.length > 2 && (
+                  <Text style={[styles.moreGroups, { color: colors.TEXT.LIGHT }]}>{t('nearbyUsers.moreGroups', { count: item.commonGroups.length - 2 })}</Text>
+                )}
+              </View>
+            </View>
+          )}
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
+  const renderNearbyUser = ({ item }: { item: NearbyUser }) => (
+    <SwipeableUserCard item={item} />
+  );
+
+  const filteredUsers = nearbyUsers.filter(user => !hiddenUsers.has(user.id));
+
+  const renderSwipeHint = () => (
+    <View style={[styles.swipeHint, { backgroundColor: colors.INFO + '10' }]}>
+      <Icon name="swap-horizontal" size={16} color={colors.INFO} />
+      <Text style={[styles.swipeHintText, { color: colors.INFO }]}>
+        좌우로 스와이프하여 카드를 숨길 수 있습니다
+      </Text>
+    </View>
   );
 
   const renderRadiusSelector = () => (
@@ -435,8 +656,20 @@ export const NearbyUsersScreen = React.memo(() => {
         </TouchableOpacity>
       </View>
 
+      {/* 페르소나 설정 버튼 */}
+      <TouchableOpacity
+        style={[styles.personaButton, { backgroundColor: colors.PRIMARY + '10', borderColor: colors.PRIMARY }]}
+        onPress={() => Alert.alert('페르소나 설정', '내 페르소나를 설정하여 다른 사람들이 나를 찾을 수 있게 하세요.')}
+      >
+        <Icon name="person-add-outline" size={20} color={colors.PRIMARY} />
+        <Text style={[styles.personaButtonText, { color: colors.PRIMARY }]}>
+          내 페르소나 설정하기
+        </Text>
+        <Icon name="chevron-forward" size={16} color={colors.PRIMARY} />
+      </TouchableOpacity>
+
       <FlatList
-        data={nearbyUsers}
+        data={filteredUsers}
         renderItem={renderNearbyUser}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
@@ -458,12 +691,13 @@ export const NearbyUsersScreen = React.memo(() => {
 
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-                {t('nearbyUsers.userCount', { count: nearbyUsers.length })}
+                {t('nearbyUsers.userCount', { count: filteredUsers.length })}
               </Text>
               <Text style={[styles.sectionSubtitle, { color: colors.TEXT.SECONDARY }]}>
                 {t('nearbyUsers.radiusDistance', { radius: selectedRadius })}
               </Text>
             </View>
+            {filteredUsers.length > 0 && renderSwipeHint()}
           </View>
         }
         ListEmptyComponent={
@@ -492,6 +726,23 @@ export const NearbyUsersScreen = React.memo(() => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  personaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: SPACING.MD,
+    marginVertical: SPACING.SM,
+    paddingHorizontal: SPACING.MD,
+    paddingVertical: SPACING.SM,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  personaButtonText: {
+    flex: 1,
+    marginLeft: SPACING.SM,
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '500',
   },
   header: {
     flexDirection: 'row',
@@ -672,9 +923,30 @@ const styles = StyleSheet.create({
   lastSeenText: {
     fontSize: FONT_SIZES.XS,
   },
+  cardActions: {
+    flexDirection: 'column',
+    gap: SPACING.XS,
+  },
+  deleteButton: {
+    padding: SPACING.XS,
+    borderRadius: 16,
+  },
   likeButton: {
     padding: SPACING.SM,
     borderRadius: 20,
+  },
+  swipeHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: SPACING.MD,
+    marginBottom: SPACING.SM,
+    paddingHorizontal: SPACING.SM,
+    paddingVertical: SPACING.XS,
+    borderRadius: 8,
+  },
+  swipeHintText: {
+    fontSize: FONT_SIZES.XS,
+    marginLeft: SPACING.XS,
   },
   userBio: {
     fontSize: FONT_SIZES.SM,

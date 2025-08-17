@@ -161,12 +161,22 @@ export const MatchChatListScreen: React.FC = () => {
       <Text style={[styles.emptySubtitle, { color: colors.TEXT.SECONDARY }]}>
         매칭된 상대와 대화를 시작해보세요!
       </Text>
-      <TouchableOpacity
-        style={[styles.goToSearchButton, { backgroundColor: colors.PRIMARY }]}
-        onPress={() => navigation.navigate('InterestSearch')}
-      >
-        <Text style={styles.goToSearchText}>관심상대 찾기</Text>
-      </TouchableOpacity>
+      <View style={styles.emptyButtonContainer}>
+        <TouchableOpacity
+          style={[styles.goToSearchButton, { backgroundColor: colors.PRIMARY }]}
+          onPress={() => navigation.navigate('Interest')}
+        >
+          <Icon name="heart-outline" size={20} color="#FFFFFF" />
+          <Text style={styles.goToSearchText}>관심상대 찾기</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.goToSearchButton, { backgroundColor: colors.SUCCESS }]}
+          onPress={() => navigation.navigate('Groups')}
+        >
+          <Icon name="people-outline" size={20} color="#FFFFFF" />
+          <Text style={styles.goToSearchText}>그룹 찾기</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -312,11 +322,18 @@ const styles = StyleSheet.create({
     marginTop: 8,
     lineHeight: 20,
   },
-  goToSearchButton: {
+  emptyButtonContainer: {
+    flexDirection: 'row',
     marginTop: 24,
-    paddingHorizontal: 24,
+    gap: 12,
+  },
+  goToSearchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 24,
+    gap: 8,
   },
   goToSearchText: {
     color: '#FFFFFF',

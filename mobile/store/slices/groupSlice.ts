@@ -5,7 +5,34 @@
  */
 
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Group, GroupType } from '@/types';
+import { API_BASE_URL } from '@/services/api/config';
+
+/**
+ * 두 지점 간 거리 계산
+ * @function calculateDistance
+ * @param {number} lat1 - 첫 번째 지점의 위도
+ * @param {number} lon1 - 첫 번째 지점의 경도
+ * @param {number} lat2 - 두 번째 지점의 위도
+ * @param {number} lon2 - 두 번째 지점의 경도
+ * @returns {number} 거리 (km)
+ * @description Haversine 공식을 사용한 두 지점 간 거리 계산
+ */
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // 지구 반지름 (km)
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 /**
  * 그룹 상태 인터페이스
@@ -20,6 +47,10 @@ interface GroupState {
   currentGroup: Group | null;
   /** 참여한 그룹 목록 */
   joinedGroups: Group[];
+  /** 좋아요한 그룹 ID 목록 */
+  likedGroupIds: string[];
+  /** 그룹별 초대코드 저장 */
+  groupInviteCodes: Record<string, string>;
   /** 로딩 상태 */
   isLoading: boolean;
   /** 에러 메시지 */
@@ -61,9 +92,17 @@ interface GroupStore extends GroupState {
   /** 현재 그룹 설정 */
   setCurrentGroup: (group: Group | null) => void;
   /** 그룹 참여 */
-  joinGroup: (group: Group) => void;
+  joinGroup: (groupId: string) => Promise<void>;
   /** 그룹 나가기 */
-  leaveGroup: (groupId: string) => void;
+  leaveGroup: (groupId: string) => Promise<void>;
+  /** 그룹 초대코드 생성 또는 가져오기 */
+  getOrCreateInviteCode: (groupId: string) => Promise<string>;
+  /** 초대코드로 그룹 참여 */
+  joinGroupByInviteCode: (inviteCode: string) => Promise<void>;
+  /** 그룹 좋아요 토글 */
+  toggleGroupLike: (groupId: string) => Promise<void>;
+  /** 그룹이 좋아요 되었는지 확인 */
+  isGroupLiked: (groupId: string) => boolean;
   /** 로딩 상태 설정 */
   setLoading: (isLoading: boolean) => void;
   /** 에러 설정 */
@@ -173,7 +212,9 @@ const sampleGroups: Group[] = [
   },
 ];
 
-export const useGroupStore = create<GroupStore>((set, get) => ({
+export const useGroupStore = create<GroupStore>()(
+  persist(
+    (set, get) => ({
   // Initial state with sample data
   /** 전체 그룹 목록 */
   groups: sampleGroups,
@@ -181,6 +222,10 @@ export const useGroupStore = create<GroupStore>((set, get) => ({
   currentGroup: null,
   /** 참여한 그룹 목록 - 샘플 데이터로 초기화 */
   joinedGroups: sampleGroups, // 모든 샘플 그룹에 참여한 상태로 시작
+  /** 좋아요한 그룹 ID 목록 */
+  likedGroupIds: [],
+  /** 그룹별 초대코드 저장 */
+  groupInviteCodes: {},
   /** 로딩 상태 */
   isLoading: false,
   /** 에러 메시지 */
@@ -270,30 +315,187 @@ export const useGroupStore = create<GroupStore>((set, get) => ({
 
   /**
    * 그룹 참여
-   * @param {Group} group - 참여할 그룹
+   * @param {string} groupId - 참여할 그룹 ID
    * @description 그룹에 참여하고 참여 목록에 추가 (중복 체크)
    */
-  joinGroup: (group: Group) => {
-    set((state) => {
-      const isAlreadyJoined = state.joinedGroups.some((g) => g.id === group.id);
-      if (isAlreadyJoined) return state;
+  joinGroup: async (groupId: string) => {
+    const state = get();
+    const isAlreadyJoined = state.joinedGroups.some((g) => g.id === groupId);
+    if (isAlreadyJoined) return;
 
-      return {
-        joinedGroups: [...state.joinedGroups, group],
-      };
-    });
+    try {
+      // API 호출
+      const response = await fetch(`/api/v1/groups/${groupId}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-dev-auth': 'true',
+        },
+      });
+
+      if (response.ok) {
+        // 그룹 찾아서 joinedGroups에 추가
+        const group = state.groups.find(g => g.id === groupId);
+        if (group) {
+          set((state) => ({
+            joinedGroups: [...state.joinedGroups, group],
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Failed to join group:', error);
+      throw error;
+    }
   },
 
   /**
    * 그룹 나가기
    * @param {string} groupId - 나갈 그룹 ID
-   * @description 참여 목록에서 그룹을 제거하고 현재 그룹 초기화
+   * @description 그룹에서 탈퇴하고 서버와 동기화
    */
-  leaveGroup: (groupId: string) => {
-    set((state) => ({
-      joinedGroups: state.joinedGroups.filter((group) => group.id !== groupId),
-      currentGroup: state.currentGroup?.id === groupId ? null : state.currentGroup,
-    }));
+  leaveGroup: async (groupId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/groups/${groupId}/leave`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-dev-auth': 'true',
+        },
+      });
+
+      if (response.ok) {
+        set((state) => ({
+          joinedGroups: state.joinedGroups.filter((group) => group.id !== groupId),
+          currentGroup: state.currentGroup?.id === groupId ? null : state.currentGroup,
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to leave group:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 그룹 초대코드 생성 또는 가져오기
+   * @param {string} groupId - 그룹 ID
+   * @returns {Promise<string>} 초대코드
+   * @description 캐시된 초대코드를 반환하거나 새로 생성
+   */
+  getOrCreateInviteCode: async (groupId: string) => {
+    const state = get();
+    
+    // 캐시된 초대코드가 있으면 반환
+    if (state.groupInviteCodes[groupId]) {
+      return state.groupInviteCodes[groupId];
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/groups/${groupId}/invites`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-dev-auth': 'true',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const inviteCode = data.data.inviteLink.split('/').pop(); // 초대코드만 추출
+        
+        // 초대코드 캐시
+        set((state) => ({
+          groupInviteCodes: {
+            ...state.groupInviteCodes,
+            [groupId]: inviteCode,
+          },
+        }));
+        
+        return inviteCode;
+      }
+      throw new Error('Failed to generate invite code');
+    } catch (error) {
+      console.error('Failed to get/create invite code:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 초대코드로 그룹 참여
+   * @param {string} inviteCode - 초대코드
+   * @description 초대코드를 사용하여 그룹에 참여
+   */
+  joinGroupByInviteCode: async (inviteCode: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/groups/join/${inviteCode}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-dev-auth': 'true',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const group = data.data;
+        
+        set((state) => {
+          const isAlreadyJoined = state.joinedGroups.some(g => g.id === group.id);
+          if (!isAlreadyJoined) {
+            return {
+              joinedGroups: [...state.joinedGroups, group],
+              groups: state.groups.some(g => g.id === group.id) 
+                ? state.groups 
+                : [...state.groups, group],
+            };
+          }
+          return state;
+        });
+      }
+    } catch (error) {
+      console.error('Failed to join group by invite code:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 그룹 좋아요 토글
+   * @param {string} groupId - 그룹 ID
+   * @description 그룹의 좋아요 상태를 토글하고 서버와 동기화
+   */
+  toggleGroupLike: async (groupId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/groups/${groupId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-dev-auth': 'true',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        set((state) => {
+          const isLiked = state.likedGroupIds.includes(groupId);
+          return {
+            likedGroupIds: data.data.liked
+              ? [...state.likedGroupIds.filter(id => id !== groupId), groupId]
+              : state.likedGroupIds.filter(id => id !== groupId)
+          };
+        });
+      }
+    } catch (error) {
+      console.error('Failed to toggle group like:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 그룹이 좋아요 되었는지 확인
+   * @param {string} groupId - 그룹 ID
+   * @returns {boolean} 좋아요 여부
+   */
+  isGroupLiked: (groupId: string) => {
+    return get().likedGroupIds.includes(groupId);
   },
 
   setLoading: (isLoading: boolean) => {
@@ -411,28 +613,14 @@ export const useGroupStore = create<GroupStore>((set, get) => ({
   isUserInGroup: (groupId: string) => {
     return get().joinedGroups.some((group) => group.id === groupId);
   },
-}));
-
-/**
- * 두 지점 간 거리 계산
- * @function calculateDistance
- * @param {number} lat1 - 첫 번째 지점의 위도
- * @param {number} lon1 - 첫 번째 지점의 경도
- * @param {number} lat2 - 두 번째 지점의 위도
- * @param {number} lon2 - 두 번째 지점의 경도
- * @returns {number} 거리 (km)
- * @description Haversine 공식을 사용한 두 지점 간 거리 계산
- */
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // 지구 반지름 (km)
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
+    }),
+    {
+      name: 'group-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        likedGroupIds: state.likedGroupIds,
+        groupInviteCodes: state.groupInviteCodes,
+      }),
+    }
+  )
+);

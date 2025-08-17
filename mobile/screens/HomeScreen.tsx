@@ -48,6 +48,13 @@ export const HomeScreen = () => {
   
   const navigation = useNavigation() as any;
   const authStore = useAuthStore();
+  
+  // 웹에서 페이지 타이틀 설정
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.title = 'Glimpse - 당신의 이상형을 찾아보세요';
+    }
+  }, []);
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
   const { colors } = useTheme();
@@ -431,9 +438,9 @@ export const HomeScreen = () => {
       <View style={styles.locationButtonsContainer}>
         <TouchableOpacity
           style={[styles.locationButton, { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY + '20' }]}
-          onPress={() => navigation.navigate('LocationGroup' as never)}
+          onPress={() => navigation.navigate('NearbyGroups' as never)}
         >
-          <Icon name="location" size={20} color={colors.PRIMARY} />
+          <Icon name="location-outline" size={20} color={colors.PRIMARY} />
           <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>근처 그룹</Text>
           <Icon name="chevron-forward" size={16} color={colors.TEXT.SECONDARY} />
         </TouchableOpacity>
@@ -442,7 +449,7 @@ export const HomeScreen = () => {
           style={[styles.locationButton, { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY + '20' }]}
           onPress={() => navigation.navigate('NearbyUsers' as never)}
         >
-          <Icon name="people" size={20} color={colors.PRIMARY} />
+          <Icon name="people-outline" size={20} color={colors.PRIMARY} />
           <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>근처 사용자</Text>
           <Icon name="chevron-forward" size={16} color={colors.TEXT.SECONDARY} />
         </TouchableOpacity>

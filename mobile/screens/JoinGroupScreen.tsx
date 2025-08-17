@@ -69,9 +69,12 @@ export const JoinGroupScreen = () => {
     }
   };
 
+  const [hasSearched, setHasSearched] = useState(false);
+
   const handleSearch = () => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
+      setHasSearched(false);
       return;
     }
     
@@ -84,6 +87,7 @@ export const JoinGroupScreen = () => {
     });
     
     setSearchResults(filtered);
+    setHasSearched(true);
   };
 
   const handleCategoryChange = (category: string) => {
@@ -262,18 +266,31 @@ export const JoinGroupScreen = () => {
         </View>
 
         {/* 검색 결과 */}
-        {searchResults.length > 0 && (
+        {hasSearched && (
           <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
             <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-              검색 결과 ({searchResults.length})
+              검색 결과 {searchResults.length > 0 && `(${searchResults.length})`}
             </Text>
-            <FlatList
-              data={searchResults}
-              renderItem={renderGroupItem}
-              keyExtractor={item => item.id}
-              scrollEnabled={false}
-              ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-            />
+            {searchResults.length > 0 ? (
+              <FlatList
+                data={searchResults}
+                renderItem={renderGroupItem}
+                keyExtractor={item => item.id}
+                scrollEnabled={false}
+                ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+              />
+            ) : (
+              <View style={styles.emptySearchResult}>
+                <Icon name="search-outline" size={48} color={colors.TEXT.TERTIARY} />
+                <Text style={[styles.emptySearchTitle, { color: colors.TEXT.PRIMARY }]}>
+                  검색 결과가 없습니다
+                </Text>
+                <Text style={[styles.emptySearchDesc, { color: colors.TEXT.SECONDARY }]}>
+                  '{searchQuery}'에 대한 그룹을 찾을 수 없습니다.{'\n'}
+                  다른 키워드로 검색해보세요.
+                </Text>
+              </View>
+            )}
           </View>
         )}
 
@@ -304,6 +321,148 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.BACKGROUND,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.MD,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.BORDER,
+  },
+  backButton: {
+    marginRight: SPACING.MD,
+  },
+  title: {
+    fontSize: FONT_SIZES.XL,
+    fontWeight: 'bold',
+    color: COLORS.TEXT.PRIMARY,
+  },
+  section: {
+    margin: SPACING.MD,
+    padding: SPACING.MD,
+    borderRadius: 12,
+    marginBottom: 0,
+  },
+  sectionTitle: {
+    fontSize: FONT_SIZES.LG,
+    fontWeight: '600',
+    marginBottom: SPACING.MD,
+  },
+  inviteCodeContainer: {
+    flexDirection: 'row',
+    gap: SPACING.SM,
+  },
+  inviteCodeInput: {
+    flex: 1,
+    height: 44,
+    borderRadius: 8,
+    paddingHorizontal: SPACING.MD,
+    borderWidth: 1,
+    fontSize: FONT_SIZES.MD,
+  },
+  joinCodeButton: {
+    paddingHorizontal: SPACING.LG,
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  joinCodeButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: FONT_SIZES.MD,
+  },
+  categoryContainer: {
+    marginBottom: SPACING.MD,
+  },
+  categoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.MD,
+    paddingVertical: SPACING.SM,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginRight: SPACING.SM,
+    gap: SPACING.XS,
+  },
+  categoryText: {
+    fontSize: FONT_SIZES.SM,
+    fontWeight: '500',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    gap: SPACING.SM,
+  },
+  searchInputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 44,
+    borderRadius: 8,
+    paddingHorizontal: SPACING.MD,
+    borderWidth: 1,
+    gap: SPACING.SM,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: FONT_SIZES.MD,
+  },
+  searchButton: {
+    paddingHorizontal: SPACING.LG,
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  searchButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: FONT_SIZES.MD,
+  },
+  groupCard: {
+    padding: SPACING.MD,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
+  },
+  groupCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.SM,
+  },
+  groupEmoji: {
+    fontSize: 24,
+    marginRight: SPACING.SM,
+  },
+  groupCardInfo: {
+    flex: 1,
+  },
+  groupCardName: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '600',
+  },
+  groupCardMembers: {
+    fontSize: FONT_SIZES.SM,
+  },
+  groupCardDesc: {
+    fontSize: FONT_SIZES.SM,
+    lineHeight: 18,
+  },
+  emptyText: {
+    fontSize: FONT_SIZES.MD,
+    textAlign: 'center',
+    padding: SPACING.LG,
+  },
+  emptySearchResult: {
+    alignItems: 'center',
+    paddingVertical: SPACING.XL * 2,
+  },
+  emptySearchTitle: {
+    fontSize: FONT_SIZES.LG,
+    fontWeight: '600',
+    marginTop: SPACING.MD,
+  },
+  emptySearchDesc: {
+    fontSize: FONT_SIZES.SM,
+    textAlign: 'center',
+    marginTop: SPACING.SM,
+    lineHeight: 20,
+  },
   content: {
     flex: 1,
     padding: SPACING.MD,
@@ -318,13 +477,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-  },
-  title: {
-    fontSize: FONT_SIZES.XL,
-    fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
-    textAlign: 'center',
-    marginBottom: SPACING.LG,
   },
   codeContainer: {
     backgroundColor: COLORS.BACKGROUND,

@@ -8,6 +8,8 @@ import {
   Alert,
   Image,
   ActivityIndicator,
+  Share,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -31,11 +33,13 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
   const navigation = useNavigation<any>();
   const { colors } = useTheme();
   const { groupId } = route.params;
-  const { groups, joinGroup, leaveGroup } = useGroupStore();
+  const { groups, joinGroup, leaveGroup, getOrCreateInviteCode, isUserInGroup } = useGroupStore();
   
   const [group, setGroup] = useState<any>(null);
   const [isJoined, setIsJoined] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteCode, setInviteCode] = useState<string>('');
 
   useEffect(() => {
     loadGroupDetail();
@@ -76,7 +80,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
     if (isJoined) {
       Alert.alert(
         '그룹 나가기',
-        '정말 이 그룹을 나가시겠습니까?',
+        '정말 이 그룹을 나가시겠습니까?\n그룹 채팅방에서도 함께 나가게 됩니다.',
         [
           { text: '취소', style: 'cancel' },
           {
@@ -84,12 +88,13 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
             style: 'destructive',
             onPress: async () => {
               try {
-                // Store에서 그룹 나가기 처리
-                leaveGroup(group);
+                // Store에서 그룹 나가기 처리 (API 호출 포함)
+                await leaveGroup(groupId);
                 setIsJoined(false);
                 // 그룹 정보 업데이트
                 setGroup({ ...group, memberCount: group.memberCount - 1 });
                 Alert.alert('알림', '그룹을 나갔습니다.');
+                navigation.goBack();
               } catch (error) {
                 Alert.alert('오류', '그룹 나가기에 실패했습니다.');
               }
@@ -99,8 +104,8 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
       );
     } else {
       try {
-        // Store에 그룹 추가
-        joinGroup(group);
+        // Store에 그룹 추가 (API 호출 포함)
+        await joinGroup(groupId);
         setIsJoined(true);
         // 그룹 정보 업데이트
         setGroup({ ...group, memberCount: group.memberCount + 1 });
@@ -108,6 +113,34 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
       } catch (error) {
         Alert.alert('오류', '그룹 참여에 실패했습니다.');
       }
+    }
+  };
+
+  const handleInviteCode = async () => {
+    if (!isJoined) {
+      Alert.alert('알림', '그룹에 참여한 후 초대코드를 생성할 수 있습니다.');
+      return;
+    }
+    
+    try {
+      const code = await getOrCreateInviteCode(groupId);
+      setInviteCode(code);
+      setShowInviteModal(true);
+    } catch (error) {
+      Alert.alert('오류', '초대코드 생성에 실패했습니다.');
+    }
+  };
+
+  const handleShareInviteCode = async () => {
+    try {
+      const message = `${group.name} 그룹에 초대합니다!\n\n초대코드: ${inviteCode}\n\nGlimpse 앱에서 초대코드를 입력하여 그룹에 참여하세요!`;
+      
+      await Share.share({
+        message,
+        title: '그룹 초대',
+      });
+    } catch (error) {
+      console.error('Share failed:', error);
     }
   };
 
@@ -199,13 +232,23 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
           </TouchableOpacity>
 
           {isJoined && (
-            <TouchableOpacity
-              style={[styles.chatButton, { backgroundColor: colors.SUCCESS }]}
-              onPress={handleGroupChat}
-            >
-              <Icon name="chatbubbles" size={20} color="#FFFFFF" />
-              <Text style={styles.chatButtonText}>그룹 채팅 참여</Text>
-            </TouchableOpacity>
+            <>
+              <TouchableOpacity
+                style={[styles.secondaryButton, { backgroundColor: colors.SUCCESS }]}
+                onPress={handleGroupChat}
+              >
+                <Icon name="chatbubbles" size={20} color="#FFFFFF" />
+                <Text style={styles.secondaryButtonText}>그룹 채팅 참여</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.secondaryButton, { backgroundColor: colors.PRIMARY + '20' }]}
+                onPress={handleInviteCode}
+              >
+                <Icon name="share-social" size={20} color={colors.PRIMARY} />
+                <Text style={[styles.secondaryButtonText, { color: colors.PRIMARY }]}>초대코드 공유</Text>
+              </TouchableOpacity>
+            </>
           )}
         </View>
 
@@ -257,6 +300,47 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
           ))}
         </View>
       </ScrollView>
+
+      {/* 초대코드 모달 */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showInviteModal}
+        onRequestClose={() => setShowInviteModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.SURFACE }]}>
+            <TouchableOpacity
+              style={styles.modalClose}
+              onPress={() => setShowInviteModal(false)}
+            >
+              <Icon name="close" size={24} color={colors.TEXT.PRIMARY} />
+            </TouchableOpacity>
+            
+            <Text style={[styles.modalTitle, { color: colors.TEXT.PRIMARY }]}>
+              그룹 초대코드
+            </Text>
+            
+            <View style={[styles.inviteCodeBox, { backgroundColor: colors.BACKGROUND }]}>
+              <Text style={[styles.inviteCodeText, { color: colors.PRIMARY }]}>
+                {inviteCode}
+              </Text>
+            </View>
+            
+            <Text style={[styles.modalDescription, { color: colors.TEXT.SECONDARY }]}>
+              이 코드를 친구와 공유하여 그룹에 초대하세요
+            </Text>
+            
+            <TouchableOpacity
+              style={[styles.shareButton, { backgroundColor: colors.PRIMARY }]}
+              onPress={handleShareInviteCode}
+            >
+              <Icon name="share-social" size={20} color="#FFFFFF" />
+              <Text style={styles.shareButtonText}>SNS로 공유하기</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -341,17 +425,69 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginLeft: 8,
   },
-  chatButton: {
+  secondaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
     borderRadius: 12,
+    marginBottom: 10,
   },
-  chatButtonText: {
+  secondaryButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
+    marginLeft: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '85%',
+    padding: 24,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  modalClose: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 20,
+  },
+  inviteCodeBox: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  inviteCodeText: {
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: 2,
+  },
+  modalDescription: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  shareButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  shareButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
     marginLeft: 8,
   },
   section: {

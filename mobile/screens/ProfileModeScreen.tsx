@@ -1,0 +1,580 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  TextInput,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useTheme } from '@/hooks/useTheme';
+import { useAuthStore } from '@/store/slices/authSlice';
+import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { API_BASE_URL } from '@/services/api/config';
+
+interface PersonaProfile {
+  nickname?: string;
+  age?: number;
+  bio?: string;
+  profileImage?: string;
+}
+
+export const ProfileModeScreen = React.memo(() => {
+  const navigation = useNavigation();
+  const { colors } = useTheme();
+  const { user, updateUser } = useAuthStore();
+  
+  const [profileMode, setProfileMode] = useState<'real' | 'persona'>('real');
+  const [personaProfile, setPersonaProfile] = useState<PersonaProfile>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    loadProfileMode();
+  }, []);
+
+  const loadProfileMode = async () => {
+    if (!user) return;
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `${API_BASE_URL}/location/profile-mode`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-dev-auth': 'true',
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setProfileMode(data.mode || 'real');
+        if (data.personaProfile) {
+          setPersonaProfile(data.personaProfile);
+        }
+      }
+    } catch (error) {
+      console.error('Load profile mode error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleModeChange = async (mode: 'real' | 'persona') => {
+    if (mode === 'persona' && !personaProfile.nickname) {
+      setIsEditing(true);
+      setProfileMode(mode);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `${API_BASE_URL}/location/profile-mode`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-dev-auth': 'true',
+          },
+          body: JSON.stringify({
+            mode,
+            personaData: mode === 'persona' ? personaProfile : undefined,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setProfileMode(mode);
+        Alert.alert(
+          '프로필 모드 변경',
+          mode === 'real' 
+            ? '실제 프로필로 변경되었습니다.' 
+            : '페르소나 프로필로 변경되었습니다.'
+        );
+      }
+    } catch (error) {
+      console.error('Change profile mode error:', error);
+      Alert.alert('오류', '프로필 모드 변경에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSavePersona = async () => {
+    if (!personaProfile.nickname) {
+      Alert.alert('알림', '페르소나 닉네임을 입력해주세요.');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `${API_BASE_URL}/location/profile-mode`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-dev-auth': 'true',
+          },
+          body: JSON.stringify({
+            mode: 'persona',
+            personaData: personaProfile,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setIsEditing(false);
+        Alert.alert('성공', '페르소나 프로필이 저장되었습니다.');
+      }
+    } catch (error) {
+      console.error('Save persona error:', error);
+      Alert.alert('오류', '페르소나 프로필 저장에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading && !personaProfile.nickname) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>프로필 모드 설정</Text>
+        <View style={styles.headerRight} />
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          {/* 모드 선택 섹션 */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+              프로필 표시 모드
+            </Text>
+            <Text style={[styles.sectionDescription, { color: colors.TEXT.SECONDARY }]}>
+              근처 사용자에게 표시될 프로필을 선택하세요
+            </Text>
+
+            <TouchableOpacity
+              style={[
+                styles.modeCard,
+                { 
+                  backgroundColor: colors.SURFACE, 
+                  borderColor: profileMode === 'real' ? colors.PRIMARY : colors.BORDER,
+                  borderWidth: profileMode === 'real' ? 2 : 1,
+                }
+              ]}
+              onPress={() => handleModeChange('real')}
+              disabled={isLoading}
+            >
+              <View style={styles.modeCardContent}>
+                <Icon 
+                  name="person-circle" 
+                  size={48} 
+                  color={profileMode === 'real' ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                />
+                <View style={styles.modeCardInfo}>
+                  <Text style={[styles.modeCardTitle, { color: colors.TEXT.PRIMARY }]}>
+                    실제 프로필
+                  </Text>
+                  <Text style={[styles.modeCardDescription, { color: colors.TEXT.SECONDARY }]}>
+                    내 실제 정보를 표시합니다
+                  </Text>
+                </View>
+              </View>
+              {profileMode === 'real' && (
+                <View style={[styles.selectedBadge, { backgroundColor: colors.PRIMARY }]}>
+                  <Icon name="checkmark" size={16} color={colors.TEXT.WHITE} />
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.modeCard,
+                { 
+                  backgroundColor: colors.SURFACE, 
+                  borderColor: profileMode === 'persona' ? colors.PRIMARY : colors.BORDER,
+                  borderWidth: profileMode === 'persona' ? 2 : 1,
+                }
+              ]}
+              onPress={() => handleModeChange('persona')}
+              disabled={isLoading}
+            >
+              <View style={styles.modeCardContent}>
+                <Icon 
+                  name="mask" 
+                  size={48} 
+                  color={profileMode === 'persona' ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                />
+                <View style={styles.modeCardInfo}>
+                  <Text style={[styles.modeCardTitle, { color: colors.TEXT.PRIMARY }]}>
+                    페르소나 프로필
+                  </Text>
+                  <Text style={[styles.modeCardDescription, { color: colors.TEXT.SECONDARY }]}>
+                    가상의 프로필을 표시합니다
+                  </Text>
+                </View>
+              </View>
+              {profileMode === 'persona' && (
+                <View style={[styles.selectedBadge, { backgroundColor: colors.PRIMARY }]}>
+                  <Icon name="checkmark" size={16} color={colors.TEXT.WHITE} />
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* 페르소나 프로필 편집 섹션 */}
+          {profileMode === 'persona' && (
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+                  페르소나 프로필
+                </Text>
+                {!isEditing && (
+                  <TouchableOpacity
+                    onPress={() => setIsEditing(true)}
+                    style={[styles.editButton, { backgroundColor: colors.PRIMARY }]}
+                  >
+                    <Icon name="pencil" size={16} color={colors.TEXT.WHITE} />
+                    <Text style={[styles.editButtonText, { color: colors.TEXT.WHITE }]}>
+                      편집
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <View style={[styles.personaCard, { backgroundColor: colors.SURFACE }]}>
+                {isEditing ? (
+                  <>
+                    <View style={styles.inputGroup}>
+                      <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+                        닉네임
+                      </Text>
+                      <TextInput
+                        style={[
+                          styles.input,
+                          { 
+                            backgroundColor: colors.BACKGROUND,
+                            color: colors.TEXT.PRIMARY,
+                            borderColor: colors.BORDER,
+                          }
+                        ]}
+                        value={personaProfile.nickname}
+                        onChangeText={(text) => setPersonaProfile({ ...personaProfile, nickname: text })}
+                        placeholder="페르소나 닉네임"
+                        placeholderTextColor={colors.TEXT.LIGHT}
+                      />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                      <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+                        나이
+                      </Text>
+                      <TextInput
+                        style={[
+                          styles.input,
+                          { 
+                            backgroundColor: colors.BACKGROUND,
+                            color: colors.TEXT.PRIMARY,
+                            borderColor: colors.BORDER,
+                          }
+                        ]}
+                        value={personaProfile.age?.toString()}
+                        onChangeText={(text) => setPersonaProfile({ ...personaProfile, age: parseInt(text) || undefined })}
+                        placeholder="나이 (선택)"
+                        placeholderTextColor={colors.TEXT.LIGHT}
+                        keyboardType="numeric"
+                      />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                      <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+                        자기소개
+                      </Text>
+                      <TextInput
+                        style={[
+                          styles.input,
+                          styles.textArea,
+                          { 
+                            backgroundColor: colors.BACKGROUND,
+                            color: colors.TEXT.PRIMARY,
+                            borderColor: colors.BORDER,
+                          }
+                        ]}
+                        value={personaProfile.bio}
+                        onChangeText={(text) => setPersonaProfile({ ...personaProfile, bio: text })}
+                        placeholder="페르소나 자기소개 (선택)"
+                        placeholderTextColor={colors.TEXT.LIGHT}
+                        multiline
+                        numberOfLines={3}
+                      />
+                    </View>
+
+                    <View style={styles.buttonRow}>
+                      <TouchableOpacity
+                        style={[styles.cancelButton, { borderColor: colors.BORDER }]}
+                        onPress={() => {
+                          setIsEditing(false);
+                          loadProfileMode();
+                        }}
+                      >
+                        <Text style={[styles.cancelButtonText, { color: colors.TEXT.SECONDARY }]}>
+                          취소
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.saveButton, { backgroundColor: colors.PRIMARY }]}
+                        onPress={handleSavePersona}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
+                        ) : (
+                          <Text style={[styles.saveButtonText, { color: colors.TEXT.WHITE }]}>
+                            저장
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                ) : (
+                  <>
+                    <View style={[styles.personaAvatar, { backgroundColor: colors.PRIMARY }]}>
+                      <Icon name="mask" size={32} color={colors.TEXT.WHITE} />
+                    </View>
+                    <Text style={[styles.personaNickname, { color: colors.TEXT.PRIMARY }]}>
+                      {personaProfile.nickname || '페르소나 미설정'}
+                    </Text>
+                    {personaProfile.age && (
+                      <Text style={[styles.personaAge, { color: colors.TEXT.SECONDARY }]}>
+                        {personaProfile.age}세
+                      </Text>
+                    )}
+                    {personaProfile.bio && (
+                      <Text style={[styles.personaBio, { color: colors.TEXT.SECONDARY }]}>
+                        {personaProfile.bio}
+                      </Text>
+                    )}
+                  </>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* 안내 섹션 */}
+          <View style={[styles.infoCard, { backgroundColor: colors.INFO + '10' }]}>
+            <Icon name="information-circle" size={20} color={colors.INFO} />
+            <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
+              프로필 모드는 근처 사용자 기능에서만 적용됩니다. 
+              일반 그룹 활동에서는 항상 실제 프로필이 사용됩니다.
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.MD,
+    paddingVertical: SPACING.SM,
+    borderBottomWidth: 1,
+  },
+  backButton: {
+    padding: SPACING.SM,
+  },
+  headerTitle: {
+    fontSize: FONT_SIZES.LG,
+    fontWeight: '600',
+  },
+  headerRight: {
+    width: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: {
+    padding: SPACING.MD,
+  },
+  section: {
+    marginBottom: SPACING.LG,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.SM,
+  },
+  sectionTitle: {
+    fontSize: FONT_SIZES.LG,
+    fontWeight: '600',
+    marginBottom: SPACING.XS,
+  },
+  sectionDescription: {
+    fontSize: FONT_SIZES.SM,
+    marginBottom: SPACING.MD,
+  },
+  modeCard: {
+    borderRadius: 12,
+    padding: SPACING.MD,
+    marginBottom: SPACING.MD,
+    position: 'relative',
+  },
+  modeCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  modeCardInfo: {
+    flex: 1,
+    marginLeft: SPACING.MD,
+  },
+  modeCardTitle: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  modeCardDescription: {
+    fontSize: FONT_SIZES.SM,
+  },
+  selectedBadge: {
+    position: 'absolute',
+    top: SPACING.SM,
+    right: SPACING.SM,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.SM,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  editButtonText: {
+    fontSize: FONT_SIZES.SM,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  personaCard: {
+    borderRadius: 12,
+    padding: SPACING.MD,
+    alignItems: 'center',
+  },
+  personaAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.MD,
+  },
+  personaNickname: {
+    fontSize: FONT_SIZES.LG,
+    fontWeight: '600',
+    marginBottom: SPACING.XS,
+  },
+  personaAge: {
+    fontSize: FONT_SIZES.MD,
+    marginBottom: SPACING.SM,
+  },
+  personaBio: {
+    fontSize: FONT_SIZES.SM,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  inputGroup: {
+    width: '100%',
+    marginBottom: SPACING.MD,
+  },
+  inputLabel: {
+    fontSize: FONT_SIZES.SM,
+    marginBottom: SPACING.XS,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: SPACING.MD,
+    paddingVertical: SPACING.SM,
+    fontSize: FONT_SIZES.MD,
+  },
+  textArea: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    marginTop: SPACING.MD,
+  },
+  cancelButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: SPACING.MD,
+    alignItems: 'center',
+    marginRight: SPACING.SM,
+  },
+  cancelButtonText: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '600',
+  },
+  saveButton: {
+    flex: 1,
+    borderRadius: 8,
+    paddingVertical: SPACING.MD,
+    alignItems: 'center',
+    marginLeft: SPACING.SM,
+  },
+  saveButtonText: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '600',
+  },
+  infoCard: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    padding: SPACING.MD,
+    marginTop: SPACING.MD,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: FONT_SIZES.SM,
+    lineHeight: 20,
+    marginLeft: SPACING.SM,
+  },
+});

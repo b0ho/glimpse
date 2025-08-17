@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -113,7 +114,8 @@ export const GroupsScreen = () => {
               // API 호출하여 그룹 참여
               await groupApi.joinGroup(group.id);
               
-              groupStore.joinGroup(group);
+              // Store 업데이트 (async로 변경됨)
+              await groupStore.joinGroup(group.id);
               Alert.alert(
                 t('group:join.success.title'),
                 t('group:join.success.message', { groupName: group.name })
@@ -198,11 +200,16 @@ export const GroupsScreen = () => {
    * 그룹 아이템 렌더링
    * @param {Object} params - 리스트 아이템 파라미터
    * @param {Group} params.item - 그룹 객체
+   * @param {boolean} params.isCreator - 생성자 여부
    * @returns {JSX.Element} 그룹 카드 UI
    * @description 각 그룹의 정보를 카드 형태로 표시
    */
-  const renderGroupItem = ({ item }: { item: Group }) => (
-    <View style={[styles.groupItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
+  const renderGroupItem = ({ item, isCreator = false }: { item: Group; isCreator?: boolean }) => (
+    <TouchableOpacity 
+      style={[styles.groupItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}
+      onPress={() => navigation.navigate('GroupDetail' as never, { groupId: item.id } as never)}
+      activeOpacity={0.7}
+    >
       <View style={styles.groupHeader}>
         <View style={styles.groupInfo}>
           <Text style={styles.groupIcon}>
@@ -247,26 +254,63 @@ export const GroupsScreen = () => {
           )}
         </View>
 
-        <TouchableOpacity
+        <View style={styles.groupActions}>
+          <TouchableOpacity
+            style={[styles.likeButton, groupStore.isGroupLiked(item.id) && { backgroundColor: colors.ERROR + '20' }]}
+            onPress={(e) => {
+              e.stopPropagation();
+              groupStore.toggleGroupLike(item.id);
+            }}
+          >
+            <Icon 
+              name={groupStore.isGroupLiked(item.id) ? "heart" : "heart-outline"} 
+              size={20} 
+              color={groupStore.isGroupLiked(item.id) ? colors.ERROR : colors.TEXT.SECONDARY} 
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
           style={[
             styles.joinButton,
-            groupStore.isUserInGroup(item.id) && styles.joinButtonDisabled,
+            isCreator && { backgroundColor: colors.ERROR + '20', borderWidth: 1, borderColor: colors.ERROR },
+            groupStore.isUserInGroup(item.id) && !isCreator && styles.joinButtonDisabled,
             !item.isMatchingActive && styles.joinButtonInactive,
           ]}
           onPress={() => {
-            // 그룹 상세 화면으로 이동
-            navigation.navigate('GroupDetail' as never, { groupId: item.id } as never);
+            if (isCreator) {
+              // 내가 만든 그룹은 나가기 확인
+              Alert.alert(
+                '그룹 나가기',
+                '정말로 이 그룹을 나가시겠습니까? 그룹 생성자가 나가면 그룹이 삭제될 수 있습니다.',
+                [
+                  { text: '취소', style: 'cancel' },
+                  {
+                    text: '나가기',
+                    style: 'destructive',
+                    onPress: () => {
+                      groupStore.leaveGroup(item.id);
+                      Alert.alert('완료', '그룹에서 나갔습니다.');
+                    },
+                  },
+                ]
+              );
+            } else {
+              // 그룹 상세 화면으로 이동
+              navigation.navigate('GroupDetail' as never, { groupId: item.id } as never);
+            }
           }}
         >
           <Text style={[
             styles.joinButtonText,
-            groupStore.isUserInGroup(item.id) && styles.joinButtonTextDisabled,
+            isCreator && { color: colors.ERROR },
+            groupStore.isUserInGroup(item.id) && !isCreator && styles.joinButtonTextDisabled,
           ]}>
-            {groupStore.isUserInGroup(item.id) ? '참여중' : '상세보기'}
+            {isCreator ? '그룹 나가기' : (groupStore.isUserInGroup(item.id) ? '참여중' : '상세보기')}
           </Text>
         </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   /**
@@ -332,32 +376,48 @@ export const GroupsScreen = () => {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       {renderHeader()}
       
-      {/* 내가 만든 그룹 섹션 */}
-      {groupStore.joinedGroups.filter(g => g.creatorId === authStore.user?.id).length > 0 && (
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={() => loadGroups(true)}
+            colors={[colors.PRIMARY]}
+            tintColor={colors.PRIMARY}
+          />
+        }
+        contentContainerStyle={styles.listContainer}
+      >
+        {/* 내가 만든 그룹 섹션 */}
+        {groupStore.joinedGroups.filter(g => g.creatorId === authStore.user?.id).length > 0 && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+              내가 만든 그룹
+            </Text>
+            {groupStore.joinedGroups
+              .filter(g => g.creatorId === authStore.user?.id)
+              .map(group => (
+                <View key={group.id} style={styles.groupItemWrapper}>
+                  {renderGroupItem({ item: group, isCreator: true })}
+                </View>
+              ))}
+          </View>
+        )}
+        
+        {/* 내가 참여한 그룹 섹션 */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            내가 만든 그룹
+            내가 참여한 그룹
           </Text>
-          <FlatList
-            data={groupStore.joinedGroups.filter(g => g.creatorId === authStore.user?.id)}
-            keyExtractor={(item) => item.id}
-            renderItem={renderGroupItem}
-            scrollEnabled={false}
-            ItemSeparatorComponent={() => <View style={{ height: SPACING.XS }} />}
-          />
-        </View>
-      )}
-      
-      {/* 내가 참여한 그룹 섹션 */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-          내가 참여한 그룹
-        </Text>
-        <FlatList
-          data={groupStore.joinedGroups.filter(g => g.creatorId !== authStore.user?.id)}
-          keyExtractor={(item) => item.id}
-          renderItem={renderGroupItem}
-          ListEmptyComponent={() => (
+          {groupStore.joinedGroups.filter(g => g.creatorId !== authStore.user?.id).length > 0 ? (
+            groupStore.joinedGroups
+              .filter(g => g.creatorId !== authStore.user?.id)
+              .map(group => (
+                <View key={group.id} style={styles.groupItemWrapper}>
+                  {renderGroupItem({ item: group })}
+                </View>
+              ))
+          ) : (
             <View style={styles.emptySection}>
               <Text style={[styles.emptyText, { color: colors.TEXT.SECONDARY }]}>
                 아직 참여한 그룹이 없습니다
@@ -370,17 +430,8 @@ export const GroupsScreen = () => {
               </TouchableOpacity>
             </View>
           )}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={() => loadGroups(true)}
-              colors={[colors.PRIMARY]}
-              tintColor={colors.PRIMARY}
-            />
-          }
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -389,6 +440,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.BACKGROUND,
+  },
+  listContainer: {
+    flexGrow: 1,
+    paddingBottom: SPACING.XL,
   },
   loadingContainer: {
     flex: 1,
@@ -504,7 +559,6 @@ const styles = StyleSheet.create({
   groupItem: {
     backgroundColor: COLORS.SURFACE,
     marginVertical: SPACING.XS,
-    marginHorizontal: SPACING.MD,
     borderRadius: 12,
     padding: SPACING.MD,
     elevation: 2,
@@ -512,6 +566,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
+  },
+  groupItemWrapper: {
+    marginBottom: SPACING.SM,
   },
   groupHeader: {
     flexDirection: 'row',
@@ -567,6 +624,17 @@ const styles = StyleSheet.create({
   },
   statusInfo: {
     flex: 1,
+  },
+  groupActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.SM,
+  },
+  likeButton: {
+    padding: SPACING.SM,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
   },
   matchingStatus: {
     fontSize: FONT_SIZES.SM,
