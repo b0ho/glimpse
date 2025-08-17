@@ -50,7 +50,7 @@ const nextConfig: NextConfig = {
 
   // 실험적 기능
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false, // critters 모듈 오류 방지
     optimizePackageImports: [
       '@radix-ui/react-avatar',
       '@radix-ui/react-dialog', 
