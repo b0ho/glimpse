@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { groupApi } from '@/services/api/groupApi';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { formatDateKorean } from '@shared/utils';
+import { formatDateKorean } from '../shared/utils';
 
 interface PendingMember {
   id: string;

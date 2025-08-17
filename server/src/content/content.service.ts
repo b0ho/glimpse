@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../core/prisma/prisma.service';
-import { Content } from '@shared/types';
+import { Content } from '../../shared/types';
 
 @Injectable()
 export class ContentService {

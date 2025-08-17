@@ -1,5 +1,5 @@
 import apiClient from './config';
-import { User } from '@shared/types';
+import { User } from '../../shared/types';
 
 /**
  * 인증 관련 API 서비스

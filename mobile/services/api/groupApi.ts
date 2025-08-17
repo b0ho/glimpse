@@ -1,5 +1,5 @@
 import apiClient from './config';
-import { Group, GroupType } from '@shared/types';
+import { Group, GroupType } from '../../shared/types';
 import { getAllGroups, saveCreatedGroup } from '@/utils/mockData';
 
 /**

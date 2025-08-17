@@ -18,7 +18,7 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants/index';
 import { fcmService } from '@/services/notifications/fcmService';
-import { AppMode, MODE_TEXTS } from '@shared/types';
+import { AppMode, MODE_TEXTS } from '../shared/types';
 import { useTranslation } from 'react-i18next';
 
 interface SettingItemProps {

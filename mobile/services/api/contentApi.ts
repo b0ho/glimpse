@@ -5,7 +5,7 @@
  */
 
 import apiClient from './config';
-import { Content } from '@shared/types';
+import { Content } from '../../shared/types';
 import { getAllContents, saveCreatedContent, getCreatedContents } from '@/utils/mockData';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

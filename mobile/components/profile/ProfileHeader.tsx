@@ -9,7 +9,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { User } from '@shared/types';
+import { User } from '../../shared/types';
 
 /**
  * ProfileHeader 컴포넌트 Props

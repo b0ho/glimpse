@@ -101,21 +101,58 @@ done
 echo -e "${GREEN}✅ Docker 컨테이너 실행 완료${NC}"
 echo ""
 
-# 3. 데이터베이스 초기화
-echo -e "${YELLOW}📋 Step 3: 데이터베이스 초기화${NC}"
+# 3. 의존성 설치
+echo -e "${YELLOW}📋 Step 3: 의존성 설치${NC}"
+
+# Server 의존성 설치
+echo "서버 의존성 설치 중..."
+cd "$PROJECT_ROOT/server"
+if [ ! -d "node_modules" ]; then
+    npm install --legacy-peer-deps
+fi
+
+# Mobile 의존성 설치
+echo "모바일 의존성 설치 중..."
+cd "$PROJECT_ROOT/mobile"
+if [ ! -d "node_modules" ]; then
+    npm install --legacy-peer-deps
+fi
+
+echo -e "${GREEN}✅ 의존성 설치 완료${NC}"
+echo ""
+
+# 4. 데이터베이스 초기화
+echo -e "${YELLOW}📋 Step 4: 데이터베이스 초기화${NC}"
 cd "$PROJECT_ROOT/server"
 
 # .env 파일 확인 및 생성
 if [ ! -f ".env" ]; then
-    echo ".env 파일이 없습니다. .env.example을 복사합니다..."
-    if [ -f ".env.example" ]; then
-        cp .env.example .env
-        echo -e "${GREEN}✅ .env 파일 생성 완료${NC}"
-    else
-        echo -e "${RED}❌ .env.example 파일을 찾을 수 없습니다.${NC}"
-        echo "DATABASE_URL을 수동으로 설정해주세요:"
-        echo "  postgresql://postgres:postgres@localhost:5432/glimpse_dev?schema=public"
-    fi
+    echo ".env 파일이 없습니다. 기본 설정으로 생성합니다..."
+    cat > .env << 'EOF'
+# Database
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/glimpse_dev
+
+# Server Configuration
+PORT=3001
+NODE_ENV=development
+
+# JWT Secret
+JWT_SECRET=your_jwt_secret_key_here_make_it_long_and_random
+
+# Encryption Key (32 bytes hex)
+ENCRYPTION_KEY=c55bb6a39f66e80e5601d53d25a5e9d3cf64397655eedfff7efd10964db4246f
+
+# Clerk Authentication
+CLERK_SECRET_KEY=sk_test_dummy_key
+CLERK_PUBLISHABLE_KEY=pk_test_dummy_key
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# Dev Auth
+DEV_AUTH_ENABLED=true
+EOF
+    echo -e "${GREEN}✅ .env 파일 생성 완료${NC}"
 fi
 
 # Prisma Client 생성
@@ -129,8 +166,8 @@ npx prisma db push --force-reset
 echo -e "${GREEN}✅ 데이터베이스 초기화 완료${NC}"
 echo ""
 
-# 4. NestJS 서버 실행
-echo -e "${YELLOW}📋 Step 4: NestJS 서버 실행${NC}"
+# 5. NestJS 서버 실행
+echo -e "${YELLOW}📋 Step 5: NestJS 서버 실행${NC}"
 echo "서버 시작 중..."
 npm run dev > ../server.log 2>&1 &
 SERVER_PID=$!
@@ -152,37 +189,46 @@ for i in {1..30}; do
 done
 echo ""
 
-# 5. Mobile 앱 실행 (웹 모드)
-echo -e "${YELLOW}📋 Step 5: Mobile 앱 웹 모드 실행${NC}"
+# 6. Mobile 앱 실행
+echo -e "${YELLOW}📋 Step 6: Mobile 앱 실행${NC}"
 cd "$PROJECT_ROOT/mobile"
 
-# Icon 컴포넌트 import 문제 수정 (필요한 경우)
-if grep -q "import Icon from '@/components/IconWrapper'" navigation/AppNavigator.tsx; then
-    echo "Icon import 수정 중..."
-    sed -i '' "s/import Icon from '@\/components\/IconWrapper'/import { IconWrapper as Icon } from '@\/components\/IconWrapper'/" navigation/AppNavigator.tsx
+# .env 파일 확인 및 생성
+if [ ! -f ".env" ]; then
+    echo ".env 파일이 없습니다. 기본 설정으로 생성합니다..."
+    cat > .env << 'EOF'
+# API Configuration
+API_URL=http://localhost:3001/api/v1
+WS_URL=http://localhost:3001
+
+# Clerk Authentication
+EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dummy_key
+
+# Development
+NODE_ENV=development
+EOF
+    echo -e "${GREEN}✅ .env 파일 생성 완료${NC}"
 fi
 
 echo "Mobile 앱 시작 중..."
-npx expo start --web --clear > ../mobile.log 2>&1 &
+npx expo start > ../mobile.log 2>&1 &
 MOBILE_PID=$!
 
 # Mobile 앱 시작 대기
 echo "Mobile 앱 시작 대기 중..."
-for i in {1..60}; do
-    if curl -s http://localhost:8081 | grep -q "<title>Glimpse</title>"; then
-        echo -e "${GREEN}✅ Mobile 웹 앱 실행 완료${NC}"
-        echo "   URL: http://localhost:8081"
-        break
-    fi
-    if [ $i -eq 60 ]; then
-        echo -e "${RED}❌ Mobile 앱 시작 실패. mobile.log를 확인하세요.${NC}"
-        exit 1
-    fi
-    sleep 1
-done
+sleep 10
+if grep -q "Metro waiting on" ../mobile.log 2>/dev/null || grep -q "Expo is ready" ../mobile.log 2>/dev/null; then
+    echo -e "${GREEN}✅ Mobile 앱 실행 완료${NC}"
+    echo "   Metro Bundler: http://localhost:8081"
+    echo "   웹 버전을 실행하려면: 터미널에서 'w' 키를 누르세요"
+    echo "   iOS 시뮬레이터: 'i' 키를 누르세요"
+    echo "   Android 에뮬레이터: 'a' 키를 누르세요"
+else
+    echo -e "${YELLOW}⚠️ Mobile 앱이 시작 중입니다. mobile.log를 확인하세요.${NC}"
+fi
 echo ""
 
-# 6. 최종 상태 확인
+# 7. 최종 상태 확인
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}📊 시스템 상태 확인${NC}"
 echo -e "${BLUE}========================================${NC}"
@@ -197,14 +243,17 @@ echo -e "\n${YELLOW}실행 중인 서비스:${NC}"
 echo "✅ PostgreSQL: localhost:5432"
 echo "✅ Redis: localhost:6379"
 echo "✅ NestJS Server: http://localhost:3001"
-echo "✅ Mobile Web App: http://localhost:8081"
+echo "✅ Mobile Metro Bundler: http://localhost:8081"
 
 echo ""
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}🎉 로컬 개발 환경 구축 완료!${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
-echo -e "${BLUE}📱 브라우저에서 http://localhost:8081 을 열어 테스트하세요.${NC}"
+echo -e "${BLUE}📱 Expo 앱 실행 방법:${NC}"
+echo "   • 웹: 터미널에서 'w' 키"
+echo "   • iOS: 터미널에서 'i' 키 (Mac만 가능)"
+echo "   • Android: 터미널에서 'a' 키"
 echo ""
 echo -e "${YELLOW}💡 개발 모드 기능:${NC}"
 echo "   • 자동 로그인 활성화"

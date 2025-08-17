@@ -1,5 +1,5 @@
 import { apiClient } from './config';
-import { UserResponse, UserCreateRequest, UserUpdateRequest } from '@shared/types';
+import { UserResponse, UserCreateRequest, UserUpdateRequest } from '../../shared/types';
 
 /**
  * 사용자 관리 API 서비스

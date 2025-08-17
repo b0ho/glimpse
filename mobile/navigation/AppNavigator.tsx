@@ -17,7 +17,7 @@ import { NAVIGATION_ICONS } from '@/utils/icons';
 import { navigationService } from '@/services/navigation/navigationService';
 import { initializeFCM, cleanupFCM } from '@/services/notifications/initializeFCM';
 import { useAuthStore } from '@/store/slices/authSlice';
-import { AppMode, MODE_TEXTS } from '@shared/types';
+import { AppMode, MODE_TEXTS } from '../shared/types';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 

@@ -4,7 +4,7 @@
  * @description 개발 환경에서 사용할 설정 및 슈퍼 계정 관리
  */
 
-import { User, AppMode } from '@shared/types';
+import { User, AppMode } from '../shared/types';
 
 /**
  * 개발 환경인지 확인

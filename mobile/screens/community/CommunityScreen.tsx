@@ -14,7 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
-import { CommunityPost } from '@shared/types';
+import { CommunityPost } from '../../shared/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatDistanceToNow } from '@/utils/dateUtils';
 

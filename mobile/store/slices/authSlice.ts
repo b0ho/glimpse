@@ -14,7 +14,7 @@ if (Platform.OS === 'web') {
 } else {
   SecureStore = require('expo-secure-store');
 }
-import { User, AuthState, AppMode } from '@shared/types';
+import { User, AuthState, AppMode } from '../../shared/types';
 
 /**
  * 인증 스토어 인터페이스

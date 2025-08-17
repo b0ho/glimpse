@@ -5,7 +5,7 @@
  */
 
 import apiClient from './config';
-import { Group, User } from '@shared/types';
+import { Group, User } from '../../shared/types';
 
 /**
  * 위치 기반 그룹 응답

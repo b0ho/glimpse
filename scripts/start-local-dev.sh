@@ -103,7 +103,7 @@ else
     cd "$PROJECT_ROOT/server"
     
     # Prisma Client 확인
-    if [ ! -d "../node_modules/@prisma/client" ]; then
+    if [ ! -d "node_modules/@prisma/client" ]; then
         echo "Prisma Client 생성 중..."
         npx prisma generate
     fi
@@ -130,30 +130,26 @@ fi
 echo ""
 
 # 3. Mobile 앱 상태 확인 및 시작
-echo -e "${YELLOW}📋 Step 3: Mobile 웹 앱 확인${NC}"
+echo -e "${YELLOW}📋 Step 3: Mobile 앱 확인${NC}"
 
-# Mobile 앱이 이미 실행 중인지 확인
-if curl -s http://localhost:8081 | grep -q "<title>Glimpse</title>" 2>/dev/null; then
+# Mobile 앱이 이미 실행 중인지 확인 (포트 8081 체크)
+if lsof -ti:8081 > /dev/null 2>&1; then
     echo "✅ Mobile 앱이 이미 실행 중입니다."
     echo "   앱을 재시작하시겠습니까? (y/N)"
     read -r response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         echo "Mobile 앱 재시작 중..."
         lsof -ti:8081 | xargs kill -9 2>/dev/null || true
-        lsof -ti:8082 | xargs kill -9 2>/dev/null || true
         sleep 2
         cd "$PROJECT_ROOT/mobile"
-        npx expo start --web --clear > ../mobile.log 2>&1 &
+        npx expo start > ../mobile.log 2>&1 &
         MOBILE_PID=$!
         
         # 앱 시작 대기
-        for i in {1..60}; do
-            if curl -s http://localhost:8081 | grep -q "<title>Glimpse</title>" 2>/dev/null; then
-                echo -e "${GREEN}✅ Mobile 앱 재시작 완료${NC}"
-                break
-            fi
-            sleep 1
-        done
+        sleep 10
+        if grep -q "Metro waiting on" ../mobile.log 2>/dev/null || grep -q "Expo is ready" ../mobile.log 2>/dev/null; then
+            echo -e "${GREEN}✅ Mobile 앱 재시작 완료${NC}"
+        fi
     else
         MOBILE_PID=$(lsof -ti:8081 | head -1)
     fi
@@ -161,29 +157,24 @@ else
     echo "Mobile 앱 시작 중..."
     cd "$PROJECT_ROOT/mobile"
     
-    # Icon 컴포넌트 import 문제 확인 및 수정
-    if grep -q "import Icon from '@/components/IconWrapper'" navigation/AppNavigator.tsx 2>/dev/null; then
-        echo "Icon import 수정 중..."
-        sed -i '' "s/import Icon from '@\/components\/IconWrapper'/import { IconWrapper as Icon } from '@\/components\/IconWrapper'/" navigation/AppNavigator.tsx
+    # 의존성 확인
+    if [ ! -d "node_modules" ]; then
+        echo "의존성 설치 중..."
+        npm install --legacy-peer-deps
     fi
     
-    npx expo start --web --clear > ../mobile.log 2>&1 &
+    npx expo start > ../mobile.log 2>&1 &
     MOBILE_PID=$!
     
     # Mobile 앱 시작 대기
     echo "Mobile 앱 시작 대기 중..."
-    for i in {1..60}; do
-        if curl -s http://localhost:8081 | grep -q "<title>Glimpse</title>" 2>/dev/null; then
-            echo -e "${GREEN}✅ Mobile 웹 앱 시작 완료${NC}"
-            echo "   URL: http://localhost:8081"
-            break
-        fi
-        if [ $i -eq 60 ]; then
-            echo -e "${RED}❌ Mobile 앱 시작 실패. mobile.log를 확인하세요.${NC}"
-            exit 1
-        fi
-        sleep 1
-    done
+    sleep 10
+    if grep -q "Metro waiting on" ../mobile.log 2>/dev/null || grep -q "Expo is ready" ../mobile.log 2>/dev/null; then
+        echo -e "${GREEN}✅ Mobile 앱 시작 완료${NC}"
+        echo "   Metro Bundler: http://localhost:8081"
+    else
+        echo -e "${YELLOW}⚠️ Mobile 앱이 시작 중입니다. mobile.log를 확인하세요.${NC}"
+    fi
 fi
 echo ""
 
@@ -197,9 +188,12 @@ echo ""
 echo "• PostgreSQL: localhost:5432"
 echo "• Redis: localhost:6379"
 echo "• NestJS Server: http://localhost:3001"
-echo "• Mobile Web App: http://localhost:8081"
+echo "• Mobile Metro Bundler: http://localhost:8081"
 echo ""
-echo -e "${BLUE}📱 브라우저에서 http://localhost:8081 을 열어 테스트하세요.${NC}"
+echo -e "${BLUE}📱 Expo 앱 실행 방법:${NC}"
+echo "• 웹: 터미널에서 'w' 키"
+echo "• iOS: 터미널에서 'i' 키 (Mac만 가능)"
+echo "• Android: 터미널에서 'a' 키"
 echo ""
 echo -e "${YELLOW}💡 팁:${NC}"
 echo "• 로그 확인: tail -f server.log 또는 tail -f mobile.log"

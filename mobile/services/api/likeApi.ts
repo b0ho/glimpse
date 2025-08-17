@@ -5,7 +5,7 @@
  */
 
 import apiClient from './config';
-import { Like, Match } from '@shared/types';
+import { Like, Match } from '../../shared/types';
 
 /**
  * 좋아요 API 인터페이스

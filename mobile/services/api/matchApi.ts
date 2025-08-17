@@ -5,7 +5,7 @@
  */
 
 import apiClient from './config';
-import { Match } from '@shared/types';
+import { Match } from '../../shared/types';
 import { generateEnhancedMatches } from '@/utils/mockData';
 
 /**

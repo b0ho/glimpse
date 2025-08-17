@@ -22,7 +22,7 @@ import { EditNicknameModal } from '@/components/modals/EditNicknameModal';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { ThemeSelector } from '@/components/settings/ThemeSelector';
 import { useTheme } from '@/hooks/useTheme';
-import { AppMode, MODE_TEXTS } from '@shared/types';
+import { AppMode, MODE_TEXTS } from '../shared/types';
 import apiClient from '@/services/api/config';
 
 /**

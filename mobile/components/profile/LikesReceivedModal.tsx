@@ -13,7 +13,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useProfileStore } from '@/store/slices/profileSlice';
 import { useTheme } from '@/hooks/useTheme';
-import { Like } from '@shared/types';
+import { Like } from '../../shared/types';
 
 /**
  * LikesReceivedModal 컴포넌트 Props

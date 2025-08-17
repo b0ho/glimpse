@@ -6,7 +6,7 @@ import {
   Like,
   FriendRequest,
   Match,
-} from '@shared/types';
+} from '../../shared/types';
 
 /**
  * 프로필 서비스 클래스

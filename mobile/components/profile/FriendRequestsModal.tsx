@@ -14,7 +14,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useProfileStore } from '@/store/slices/profileSlice';
 import { useTheme } from '@/hooks/useTheme';
-import { FriendRequest } from '@shared/types';
+import { FriendRequest } from '../../shared/types';
 
 /**
  * FriendRequestsModal 컴포넌트 Props

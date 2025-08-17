@@ -19,7 +19,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
-import { Like, AppMode, MODE_TEXTS } from '@shared/types';
+import { Like, AppMode, MODE_TEXTS } from '../shared/types';
 
 export const LikeHistoryScreen = () => {
   const navigation = useNavigation();

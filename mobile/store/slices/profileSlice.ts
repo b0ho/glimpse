@@ -9,7 +9,7 @@ import {
   Like,
   FriendRequest,
   Match,
-} from '@shared/types';
+} from '../../shared/types';
 
 /**
  * 프로필 상태 관리 인터페이스

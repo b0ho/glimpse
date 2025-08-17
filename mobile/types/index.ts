@@ -1,5 +1,5 @@
 // Re-export shared types
-export * from '@shared/types';
+export * from '../shared/types';
 
 // Mobile-specific types only
 // Note: NearbyUser and AnonymousUserInfo are already defined in shared/types

@@ -1,16 +1,9 @@
 {
-  "name": "glimpse-monorepo",
+  "name": "glimpse",
   "version": "0.1.0",
   "type": "module",
   "main": "index.ts",
-  "description": "Glimpse Dating App - Monorepo with Mobile + Server",
-  "workspaces": [
-    "web",
-    "admin",
-    "mobile",
-    "server",
-    "shared"
-  ],
+  "description": "Glimpse Dating App - Independent Projects",
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:mobile\"",
     "dev:web": "cd web && npm run dev",
@@ -45,14 +38,9 @@
     "typecheck:web": "cd web && npx tsc --noEmit",
     "typecheck:admin": "cd admin && npx tsc --noEmit",
     "typecheck:mobile": "cd mobile && npx tsc --noEmit",
-    "db:migrate": "cd server && npx prisma migrate dev",
-    "db:studio": "cd server && npx prisma studio",
-    "db:generate": "cd server && npx prisma generate",
-    "db:seed": "cd server && npx tsx prisma/migrate-mockdata.ts",
     "env:setup": "node scripts/env-setup.js",
     "env:check": "node scripts/env-check.js",
-    "env:vault": "npx dotenv-vault@latest",
-    "postinstall": "npm run db:generate"
+    "env:vault": "npx dotenv-vault@latest"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.9.0",
@@ -79,8 +67,5 @@
     "@types/react": "18.3.23",
     "@types/react-native": "0.73.0"
   },
-  "private": true,
-  "dependencies": {
-    "react-native-web": "~0.19.13"
-  }
+  "private": true
 }

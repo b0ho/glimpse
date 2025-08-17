@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
-import { AppMode } from '@shared/types';
+import { AppMode } from '../shared/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 const { width } = Dimensions.get('window');
