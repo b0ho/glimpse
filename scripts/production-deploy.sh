@@ -131,15 +131,23 @@ health_check() {
     return 1
 }
 
-# Deploy web admin to Vercel
+# Deploy web and admin to Vercel
 deploy_web_admin() {
-    echo -e "${YELLOW}Deploying web admin to Vercel...${NC}"
+    echo -e "${YELLOW}Deploying web and admin to Vercel...${NC}"
     
+    # Deploy web
+    echo "Deploying web landing page..."
     cd web
-    npx vercel --prod --token=$VERCEL_TOKEN
+    npx vercel --prod
     cd ..
     
-    echo -e "${GREEN}Web admin deployed to Vercel${NC}"
+    # Deploy admin
+    echo "Deploying admin dashboard..."
+    cd admin
+    npx vercel --prod
+    cd ..
+    
+    echo -e "${GREEN}Web and Admin deployed to Vercel${NC}"
 }
 
 # Notify deployment status

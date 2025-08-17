@@ -1,7 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, User } from '@prisma/client';
 import { getAuth } from '@clerk/nextjs/server';
-import { UserResponse, UserCreateRequest } from '@shared/types';
+
+// Type definitions
+interface UserResponse {
+  id: string;
+  anonymousId: string;
+  phoneNumber: string;
+  nickname?: string;
+  age?: number;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  profileImage?: string;
+  bio?: string;
+  isVerified: boolean;
+  credits: number;
+  isPremium: boolean;
+  lastActive: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  premiumUntil?: Date | null;
+}
+
+interface UserCreateRequest {
+  phoneNumber: string;
+  nickname: string;
+  age?: number;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  bio?: string;
+}
 
 const prisma = new PrismaClient();
 

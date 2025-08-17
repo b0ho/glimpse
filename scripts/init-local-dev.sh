@@ -7,8 +7,9 @@
 # 이 스크립트는 다음 작업을 수행합니다:
 # 1. 기존 프로세스 종료
 # 2. Docker 컨테이너 생성/재생성
-# 3. 데이터베이스 초기화
-# 4. 서버와 앱 시작
+# 3. 모든 프로젝트 의존성 설치
+# 4. 데이터베이스 초기화 및 마이그레이션
+# 5. 모든 프로젝트 실행 (server, web, admin, mobile)
 # ============================================
 
 set -e  # 에러 발생 시 스크립트 중단
@@ -32,9 +33,11 @@ echo ""
 # 1. 기존 프로세스 정리
 echo -e "${YELLOW}📋 Step 1: 기존 프로세스 정리${NC}"
 echo "기존 서버 프로세스 종료 중..."
-lsof -ti:3001 | xargs kill -9 2>/dev/null || true
-lsof -ti:8081 | xargs kill -9 2>/dev/null || true
-lsof -ti:8082 | xargs kill -9 2>/dev/null || true
+lsof -ti:3001 | xargs kill -9 2>/dev/null || true  # Server
+lsof -ti:3004 | xargs kill -9 2>/dev/null || true  # Admin
+lsof -ti:5173 | xargs kill -9 2>/dev/null || true  # Web
+lsof -ti:8081 | xargs kill -9 2>/dev/null || true  # Mobile
+lsof -ti:8082 | xargs kill -9 2>/dev/null || true  # Mobile (alternative)
 echo -e "${GREEN}✅ 프로세스 정리 완료${NC}"
 echo ""
 
@@ -102,27 +105,41 @@ echo -e "${GREEN}✅ Docker 컨테이너 실행 완료${NC}"
 echo ""
 
 # 3. 의존성 설치
-echo -e "${YELLOW}📋 Step 3: 의존성 설치${NC}"
+echo -e "${YELLOW}📋 Step 3: 모든 프로젝트 의존성 설치${NC}"
 
 # Server 의존성 설치
 echo "서버 의존성 설치 중..."
 cd "$PROJECT_ROOT/server"
-if [ ! -d "node_modules" ]; then
+if [ ! -d "node_modules" ] || [ ! -f "package-lock.json" ]; then
+    npm install --legacy-peer-deps
+fi
+
+# Web 의존성 설치
+echo "웹 의존성 설치 중..."
+cd "$PROJECT_ROOT/web"
+if [ ! -d "node_modules" ] || [ ! -f "package-lock.json" ]; then
+    npm install
+fi
+
+# Admin 의존성 설치
+echo "관리자 의존성 설치 중..."
+cd "$PROJECT_ROOT/admin"
+if [ ! -d "node_modules" ] || [ ! -f "package-lock.json" ]; then
     npm install --legacy-peer-deps
 fi
 
 # Mobile 의존성 설치
 echo "모바일 의존성 설치 중..."
 cd "$PROJECT_ROOT/mobile"
-if [ ! -d "node_modules" ]; then
+if [ ! -d "node_modules" ] || [ ! -f "package-lock.json" ]; then
     npm install --legacy-peer-deps
 fi
 
 echo -e "${GREEN}✅ 의존성 설치 완료${NC}"
 echo ""
 
-# 4. 데이터베이스 초기화
-echo -e "${YELLOW}📋 Step 4: 데이터베이스 초기화${NC}"
+# 4. 서버 데이터베이스 초기화 및 마이그레이션
+echo -e "${YELLOW}📋 Step 4: 서버 데이터베이스 초기화 및 마이그레이션${NC}"
 cd "$PROJECT_ROOT/server"
 
 # .env 파일 확인 및 생성
@@ -152,24 +169,44 @@ REDIS_URL=redis://localhost:6379
 # Dev Auth
 DEV_AUTH_ENABLED=true
 EOF
-    echo -e "${GREEN}✅ .env 파일 생성 완료${NC}"
+    echo -e "${GREEN}✅ server/.env 파일 생성 완료${NC}"
 fi
 
 # Prisma Client 생성
 echo "Prisma Client 생성 중..."
 npx prisma generate
 
-# 데이터베이스 스키마 적용
-echo "데이터베이스 스키마 적용 중..."
-npx prisma db push --force-reset
+# 데이터베이스 마이그레이션
+echo "데이터베이스 마이그레이션 실행 중..."
+npx prisma migrate reset --force
+
+# 데이터베이스 시드 (선택적)
+if [ -f "prisma/seed.ts" ] || [ -f "prisma/seed.js" ]; then
+    echo "데이터베이스 시드 실행 중..."
+    npx prisma db seed
+fi
 
 echo -e "${GREEN}✅ 데이터베이스 초기화 완료${NC}"
 echo ""
 
-# 5. NestJS 서버 실행
-echo -e "${YELLOW}📋 Step 5: NestJS 서버 실행${NC}"
+# 5. Admin 데이터베이스 마이그레이션
+echo -e "${YELLOW}📋 Step 5: Admin 데이터베이스 마이그레이션${NC}"
+cd "$PROJECT_ROOT/admin"
+
+if [ -f "prisma/schema.prisma" ]; then
+    echo "Admin Prisma Client 생성 중..."
+    npx prisma generate
+    echo "Admin 데이터베이스 마이그레이션 실행 중..."
+    npx prisma migrate deploy 2>/dev/null || npx prisma db push
+    echo -e "${GREEN}✅ Admin 데이터베이스 설정 완료${NC}"
+fi
+echo ""
+
+# 6. NestJS 서버 실행
+echo -e "${YELLOW}📋 Step 6: NestJS 서버 실행${NC}"
+cd "$PROJECT_ROOT/server"
 echo "서버 시작 중..."
-npm run dev > ../server.log 2>&1 &
+npm run dev > ../logs/server.log 2>&1 &
 SERVER_PID=$!
 
 # 서버 시작 대기
@@ -181,16 +218,82 @@ for i in {1..30}; do
         echo "   API Docs: http://localhost:3001/docs"
         break
     fi
-    if [ $i -eq 30 ]; then
-        echo -e "${RED}❌ 서버 시작 실패. server.log를 확인하세요.${NC}"
+    if [ "$i" -eq 30 ]; then
+        echo -e "${RED}❌ 서버 시작 실패. logs/server.log를 확인하세요.${NC}"
         exit 1
     fi
     sleep 1
 done
 echo ""
 
-# 6. Mobile 앱 실행
-echo -e "${YELLOW}📋 Step 6: Mobile 앱 실행${NC}"
+# 7. Web 프로젝트 실행
+echo -e "${YELLOW}📋 Step 7: Web 랜딩 페이지 실행${NC}"
+cd "$PROJECT_ROOT/web"
+
+# .env 파일 확인 및 생성
+if [ ! -f ".env" ]; then
+    echo ".env 파일이 없습니다. 기본 설정으로 생성합니다..."
+    cat > .env << 'EOF'
+# API Configuration
+VITE_API_URL=http://localhost:3001/api/v1
+
+# Development
+NODE_ENV=development
+EOF
+    echo -e "${GREEN}✅ web/.env 파일 생성 완료${NC}"
+fi
+
+echo "Web 랜딩 페이지 시작 중..."
+npm run dev > ../logs/web.log 2>&1 &
+WEB_PID=$!
+
+# Web 시작 대기
+sleep 5
+if lsof -ti:5173 > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ Web 랜딩 페이지 실행 완료${NC}"
+    echo "   URL: http://localhost:5173"
+else
+    echo -e "${YELLOW}⚠️ Web이 시작 중입니다. logs/web.log를 확인하세요.${NC}"
+fi
+echo ""
+
+# 8. Admin 프로젝트 실행
+echo -e "${YELLOW}📋 Step 8: Admin 대시보드 실행${NC}"
+cd "$PROJECT_ROOT/admin"
+
+# .env 파일 확인 및 생성
+if [ ! -f ".env" ]; then
+    echo ".env 파일이 없습니다. 기본 설정으로 생성합니다..."
+    cat > .env << 'EOF'
+# API Configuration
+NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dummy_key
+CLERK_SECRET_KEY=sk_test_dummy_key
+
+# Development
+NODE_ENV=development
+EOF
+    echo -e "${GREEN}✅ admin/.env 파일 생성 완료${NC}"
+fi
+
+echo "Admin 대시보드 시작 중..."
+npm run dev > ../logs/admin.log 2>&1 &
+ADMIN_PID=$!
+
+# Admin 시작 대기
+sleep 8
+if lsof -ti:3004 > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ Admin 대시보드 실행 완료${NC}"
+    echo "   URL: http://localhost:3004"
+else
+    echo -e "${YELLOW}⚠️ Admin이 시작 중입니다. logs/admin.log를 확인하세요.${NC}"
+fi
+echo ""
+
+# 9. Mobile 앱 실행
+echo -e "${YELLOW}📋 Step 9: Mobile 앱 실행${NC}"
 cd "$PROJECT_ROOT/mobile"
 
 # .env 파일 확인 및 생성
@@ -198,8 +301,8 @@ if [ ! -f ".env" ]; then
     echo ".env 파일이 없습니다. 기본 설정으로 생성합니다..."
     cat > .env << 'EOF'
 # API Configuration
-API_URL=http://localhost:3001/api/v1
-WS_URL=http://localhost:3001
+EXPO_PUBLIC_API_BASE_URL=http://localhost:3001/api/v1
+EXPO_PUBLIC_WEBSOCKET_URL=ws://localhost:3001
 
 # Clerk Authentication
 EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dummy_key
@@ -207,28 +310,28 @@ EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dummy_key
 # Development
 NODE_ENV=development
 EOF
-    echo -e "${GREEN}✅ .env 파일 생성 완료${NC}"
+    echo -e "${GREEN}✅ mobile/.env 파일 생성 완료${NC}"
 fi
 
 echo "Mobile 앱 시작 중..."
-npx expo start > ../mobile.log 2>&1 &
+npx expo start --web > ../logs/mobile.log 2>&1 &
 MOBILE_PID=$!
 
 # Mobile 앱 시작 대기
 echo "Mobile 앱 시작 대기 중..."
 sleep 10
-if grep -q "Metro waiting on" ../mobile.log 2>/dev/null || grep -q "Expo is ready" ../mobile.log 2>/dev/null; then
+if grep -q "Metro waiting on" ../logs/mobile.log 2>/dev/null || grep -q "Web Bundled" ../logs/mobile.log 2>/dev/null; then
     echo -e "${GREEN}✅ Mobile 앱 실행 완료${NC}"
     echo "   Metro Bundler: http://localhost:8081"
     echo "   웹 버전을 실행하려면: 터미널에서 'w' 키를 누르세요"
     echo "   iOS 시뮬레이터: 'i' 키를 누르세요"
     echo "   Android 에뮬레이터: 'a' 키를 누르세요"
 else
-    echo -e "${YELLOW}⚠️ Mobile 앱이 시작 중입니다. mobile.log를 확인하세요.${NC}"
+    echo -e "${YELLOW}⚠️ Mobile 앱이 시작 중입니다. logs/mobile.log를 확인하세요.${NC}"
 fi
 echo ""
 
-# 7. 최종 상태 확인
+# 10. 최종 상태 확인
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}📊 시스템 상태 확인${NC}"
 echo -e "${BLUE}========================================${NC}"
@@ -243,38 +346,52 @@ echo -e "\n${YELLOW}실행 중인 서비스:${NC}"
 echo "✅ PostgreSQL: localhost:5432"
 echo "✅ Redis: localhost:6379"
 echo "✅ NestJS Server: http://localhost:3001"
-echo "✅ Mobile Metro Bundler: http://localhost:8081"
+echo "✅ Web Landing Page: http://localhost:5173"
+echo "✅ Admin Dashboard: http://localhost:3004"
+echo "✅ Mobile App: http://localhost:8081"
 
 echo ""
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}🎉 로컬 개발 환경 구축 완료!${NC}"
+echo -e "${GREEN}🎉 모든 서비스가 성공적으로 실행되었습니다!${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
-echo -e "${BLUE}📱 Expo 앱 실행 방법:${NC}"
-echo "   • 웹: 터미널에서 'w' 키"
-echo "   • iOS: 터미널에서 'i' 키 (Mac만 가능)"
-echo "   • Android: 터미널에서 'a' 키"
+
+echo -e "${BLUE}📱 접속 방법:${NC}"
+echo "   • 랜딩 페이지: http://localhost:5173"
+echo "   • 관리자 대시보드: http://localhost:3004"
+echo "   • 모바일 웹 앱: http://localhost:8081"
+echo "   • API 문서: http://localhost:3001/docs"
 echo ""
+
 echo -e "${YELLOW}💡 개발 모드 기능:${NC}"
 echo "   • 자동 로그인 활성화"
 echo "   • 프리미엄 계정 자동 설정"
 echo "   • 모든 기능 테스트 가능"
 echo ""
+
 echo -e "${YELLOW}📝 로그 확인:${NC}"
-echo "   • 서버 로그: tail -f server.log"
-echo "   • Mobile 로그: tail -f mobile.log"
+echo "   • 서버 로그: tail -f logs/server.log"
+echo "   • Web 로그: tail -f logs/web.log"
+echo "   • Admin 로그: tail -f logs/admin.log"
+echo "   • Mobile 로그: tail -f logs/mobile.log"
 echo ""
+
 echo -e "${YELLOW}🛑 종료하려면:${NC}"
 echo "   • Ctrl+C를 누르거나"
 echo "   • ./scripts/stop-local-dev.sh 실행"
 echo ""
 
+# 로그 디렉토리 생성
+mkdir -p logs
+
 # 프로세스 ID 저장
 echo "$SERVER_PID" > .server.pid
+echo "$WEB_PID" > .web.pid
+echo "$ADMIN_PID" > .admin.pid
 echo "$MOBILE_PID" > .mobile.pid
 
 # 종료 시그널 처리
-trap 'echo -e "\n${YELLOW}종료 중...${NC}"; kill $SERVER_PID $MOBILE_PID 2>/dev/null; exit' INT TERM
+trap 'echo -e "\n${YELLOW}종료 중...${NC}"; kill $SERVER_PID $WEB_PID $ADMIN_PID $MOBILE_PID 2>/dev/null; exit' INT TERM
 
 # 프로세스 유지
 wait

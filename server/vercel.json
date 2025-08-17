@@ -11,10 +11,5 @@
       "src": "/(.*)",
       "dest": "dist/main.js"
     }
-  ],
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "JWT_SECRET": "@jwt_secret",
-    "CLERK_SECRET_KEY": "@clerk_secret_key"
-  }
+  ]
 }
