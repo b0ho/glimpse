@@ -85,8 +85,8 @@ export const groupApi = {
     page?: number;
     limit?: number;
   }): Promise<Group[]> {
-    // 개발 환경에서는 mock 데이터와 저장된 그룹을 함께 반환
-    if (__DEV__) {
+    // 로컬 개발 환경에서만 mock 데이터 사용 (Vercel 배포에서는 실제 API 사용)
+    if (__DEV__ && (typeof window === 'undefined' || window.location?.hostname === 'localhost')) {
       console.log('[GroupAPI] Mock 그룹 목록 조회 시작');
       try {
         const allGroups = await getAllGroups();
@@ -94,8 +94,7 @@ export const groupApi = {
         return allGroups;
       } catch (error) {
         console.error('[GroupAPI] Mock 그룹 목록 조회 실패:', error);
-        // fallback으로 빈 배열 반환
-        return [];
+        // fallback으로 실제 API 호출
       }
     }
     
@@ -113,8 +112,8 @@ export const groupApi = {
    * @returns {Promise<Group>} 생성된 그룹 정보
    */
   async createGroup(data: CreateGroupData): Promise<Group> {
-    // 개발 환경에서는 mock 데이터로 즉시 응답
-    if (__DEV__) {
+    // 로컬 개발 환경에서만 mock 데이터 사용 (Vercel 배포에서는 실제 API 사용)
+    if (__DEV__ && (typeof window === 'undefined' || window.location?.hostname === 'localhost')) {
       console.log('[GroupAPI] Mock 그룹 생성:', data);
       
       // 실제 API 호출 시뮬레이션을 위한 딜레이
