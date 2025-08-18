@@ -43,6 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await prisma.$connect();
         
         const provider = process.env.DATABASE_URL.includes('railway.app') ? 'Railway PostgreSQL' :
+                        process.env.DATABASE_URL.includes('rlwy.net') ? 'Railway PostgreSQL' :
                         process.env.DATABASE_URL.includes('localhost') ? 'Local PostgreSQL' :
                         'PostgreSQL';
         dbStatus = `Connected to ${provider}`;

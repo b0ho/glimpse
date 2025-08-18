@@ -14,7 +14,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Check environment variables
     const envStatus = {
       DATABASE_URL: !!process.env.DATABASE_URL,
-      DATABASE_URL_provider: process.env.DATABASE_URL?.includes('railway.app') ? 'Railway PostgreSQL' : 
+      DATABASE_URL_provider: process.env.DATABASE_URL?.includes('railway.app') ? 'Railway PostgreSQL' :
+                             process.env.DATABASE_URL?.includes('rlwy.net') ? 'Railway PostgreSQL' : 
                              process.env.DATABASE_URL?.includes('localhost') ? 'Local PostgreSQL' : 
                              process.env.DATABASE_URL?.includes('supabase') ? 'Supabase (Legacy)' :
                              'Other PostgreSQL',
