@@ -1,98 +1,178 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Glimpse Server
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Glimpse 데이팅 앱의 백엔드 서버입니다.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 기술 스택
 
-## Description
+- **프레임워크**: NestJS (Node.js)
+- **데이터베이스**: Railway PostgreSQL + Prisma ORM  
+- **인증**: Clerk + JWT
+- **실시간 통신**: Socket.IO
+- **파일 저장**: AWS S3
+- **배포**: Vercel (서버리스)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 환경 설정
 
-## Project setup
+### 필요한 환경변수
 
 ```bash
-$ npm install
+# Railway PostgreSQL Database
+DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@YOUR_HOST.proxy.rlwy.net:PORT/railway"
+
+# Authentication  
+CLERK_SECRET_KEY="sk_..."
+JWT_SECRET="your-secret-key"
+ENCRYPTION_KEY="your-32-byte-hex-key"
+
+# AWS S3 (선택사항)
+AWS_ACCESS_KEY_ID="..."
+AWS_SECRET_ACCESS_KEY="..."
+AWS_S3_BUCKET_NAME="..."
+
+# Firebase (선택사항)
+FIREBASE_PROJECT_ID="..."
 ```
 
-## Compile and run the project
+## 개발 환경 설정
 
 ```bash
-# development
-$ npm run start
+# 의존성 설치
+npm install
 
-# watch mode
-$ npm run start:dev
+# Railway 데이터베이스 마이그레이션
+npm run db:migrate:railway
 
-# production mode
-$ npm run start:prod
+# 개발 서버 실행
+npm run dev
 ```
 
-## Run tests
+## 주요 명령어
 
 ```bash
-# unit tests
-$ npm run test
+# 개발
+npm run dev                 # 개발 서버 실행
+npm run build              # 빌드
+npm run typecheck          # 타입 체크
+npm run lint               # 린트
 
-# e2e tests
-$ npm run test:e2e
+# 데이터베이스 관리
+npm run db:generate        # Prisma 클라이언트 생성
+npm run db:push            # 스키마 동기화
+npm run db:pull            # 스키마 가져오기
+npm run db:studio          # DB 관리 UI
+npm run db:migrate:railway # Railway 전체 마이그레이션 (generate + push)
+npm run db:reset           # 데이터베이스 리셋
 
-# test coverage
-$ npm run test:cov
+# 시드 데이터
+npm run seed               # 기본 시드 데이터
+npm run seed:domains       # 회사 도메인 데이터
+npm run seed:english       # 영어 데이터
+npm run seed:all           # 모든 시드 데이터
+npm run seed:railway       # Railway 전체 테스트 데이터 (풍부한 데이터)
+npm run seed:railway:quick # Railway 빠른 테스트 데이터 (30명 사용자)
+
+# 테스트
+npm run test               # 단위 테스트
+npm run test:e2e           # E2E 테스트
 ```
 
-## Deployment
+## Railway PostgreSQL 설정
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### 완전한 설정 (스키마 + 테스트 데이터)
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Railway URL 설정 후 전체 설정 (마이그레이션 + 시드 데이터)
+export DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@YOUR_HOST.proxy.rlwy.net:PORT/railway"
+npm run db:setup:railway
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 단계별 설정
 
-## Resources
+#### 1. 마이그레이션만
+```bash
+# Railway URL 설정 후 스키마만 생성
+export DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@YOUR_HOST.proxy.rlwy.net:PORT/railway"
+npm run db:migrate:railway
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+#### 2. 테스트 데이터 추가
+```bash
+# 풍부한 테스트 데이터 생성 (전체 앱 시나리오 커버)
+npm run seed:railway
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 수동 마이그레이션
+```bash
+# 1단계: 환경변수 설정
+export DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@YOUR_HOST.proxy.rlwy.net:PORT/railway"
 
-## Support
+# 2단계: Prisma 클라이언트 생성
+npm run db:generate
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# 3단계: 스키마 적용
+npm run db:push
 
-## Stay in touch
+# 4단계: 테스트 데이터 생성
+npm run seed:railway
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# 5단계: 확인 (선택사항)
+npm run db:studio
+```
 
-## License
+### Railway 설정 확인
+- **Dashboard**: https://railway.app/dashboard
+- **무료 플랜**: 월 $5 크레딧, 500MB RAM
+- **연결 상태 확인**: `/api/db-status`
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## API 엔드포인트
+
+### 서버 상태
+- **Health Check**: `GET /api/health`
+- **Database Status**: `GET /api/db-status`
+- **Database Migration**: `POST /api/db-migrate`
+
+### 주요 기능
+- **Groups**: `GET /api/groups` (dev: `x-dev-auth: true` 헤더 필요)
+- **Users**: `/api/users/*`
+- **Matching**: `/api/matching/*`
+- **Chat**: `/api/chat/*`
+
+## 배포
+
+### Vercel 배포
+- **Production**: https://glimpse-server-psi.vercel.app/
+- **자동 배포**: Git push 시 자동 트리거
+- **환경변수**: Vercel Dashboard에서 설정
+
+### Railway 데이터베이스
+- **Provider**: Railway PostgreSQL
+- **Connection**: 외부 URL (`.proxy.rlwy.net`)
+- **스키마**: 42개 테이블 (User, Group, Match, Chat 등)
+
+## 문제 해결
+
+### 데이터베이스 연결 문제
+```bash
+# 연결 테스트
+curl https://glimpse-server-psi.vercel.app/api/db-status
+
+# Groups API 테스트
+curl -H "x-dev-auth: true" https://glimpse-server-psi.vercel.app/api/groups
+```
+
+### Railway URL 확인
+```bash
+# Railway Dashboard → PostgreSQL → Connect 탭에서 확인
+# PUBLIC URL 사용 (internal URL 아님)
+DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@YOUR_HOST.proxy.rlwy.net:PORT/railway"
+```
+
+⚠️ **보안 주의사항**
+- **절대 실제 데이터베이스 URL을 코드에 하드코딩하지 마세요**
+- 환경변수 파일(.env)을 .gitignore에 추가하세요
+- Vercel Dashboard에서만 환경변수를 설정하세요
+- 로컬 개발: `.env` 파일 사용
+- 프로덕션: Vercel 환경변수 사용
+
+## 라이선스
+
+MIT
