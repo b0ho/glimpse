@@ -4,25 +4,23 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter';
 import express from 'express';
-import { initI18n, getI18nMiddleware } from '../src/i18n/i18n.config';
 
 const server = express();
-let isInitialized = false;
+let app: any = null;
 
 const initializeApp = async () => {
-  if (isInitialized) return;
+  if (app) return;
   
-  const app = await NestFactory.create(
-    AppModule,
-    new ExpressAdapter(server),
-    {
-      logger: ['error', 'warn', 'log'],
-    }
-  );
-
-  // Initialize i18n
-  await initI18n();
-  server.use(getI18nMiddleware());
+  try {
+    app = await NestFactory.create(
+      AppModule,
+      new ExpressAdapter(server),
+      {
+        logger: process.env.NODE_ENV === 'production' 
+          ? ['error', 'warn'] 
+          : ['error', 'warn', 'log'],
+      }
+    );
 
   // CORS 설정
   app.enableCors({
@@ -49,14 +47,25 @@ const initializeApp = async () => {
 
   // API 프리픽스 설정
   app.setGlobalPrefix('api/v1', {
-    exclude: ['/health', '/health/db', '/docs'],
+    exclude: ['health', 'health/db', 'docs'],
   });
 
   await app.init();
-  isInitialized = true;
+  } catch (error) {
+    console.error('Failed to initialize NestJS app:', error);
+    throw error;
+  }
 };
 
 export default async (req: any, res: any) => {
-  await initializeApp();
-  return server(req, res);
+  try {
+    await initializeApp();
+    return server(req, res);
+  } catch (error) {
+    console.error('Request handler error:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error',
+      message: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
 };
