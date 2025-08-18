@@ -45,10 +45,11 @@ import { HealthModule } from './health/health.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [
+        'secrets.env', // 민감한 정보 (gitignore)
+        '.env', // 기본 설정
         '../config/private/secrets.env',
         '../config/private/.env.local',
         '../.env.defaults',
-        '.env', // 레거시 호환성
       ],
       expandVariables: true,
     }),

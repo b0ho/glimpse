@@ -49,7 +49,7 @@ const initializeApp = async () => {
 
   // API 프리픽스 설정
   app.setGlobalPrefix('api/v1', {
-    exclude: ['health', 'docs'],
+    exclude: ['/health', '/health/db', '/docs'],
   });
 
   await app.init();
