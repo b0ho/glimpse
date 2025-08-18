@@ -44,7 +44,7 @@ export class HealthController {
           current_user as user,
           version() as version,
           pg_database_size(current_database()) as size
-      `;
+      ` as any[];
       
       const userCount = await this.prisma.user.count();
       const groupCount = await this.prisma.group.count();

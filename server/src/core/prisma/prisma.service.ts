@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 // Vercel 서버리스 환경을 위한 글로벌 Prisma 인스턴스
 declare global {
@@ -18,13 +18,10 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    // Production 환경에서는 로그 레벨 조정
-    const logLevel = process.env.NODE_ENV === 'production' 
-      ? ['error', 'warn']
-      : ['query', 'info', 'warn', 'error'];
-
     super({
-      log: logLevel,
+      log: process.env.NODE_ENV === 'production' 
+        ? ['error', 'warn'] as any
+        : ['query', 'info', 'warn', 'error'] as any,
       datasources: {
         db: {
           url: process.env.DATABASE_URL,
