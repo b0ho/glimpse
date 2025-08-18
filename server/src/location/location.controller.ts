@@ -37,7 +37,10 @@ export class LocationController {
    * @route PUT /location
    */
   @Put()
-  async updateLocation(@CurrentUserId() userId: string, @Body() data: UpdateLocationDto) {
+  async updateLocation(
+    @CurrentUserId() userId: string,
+    @Body() data: UpdateLocationDto,
+  ) {
     await this.locationService.updateUserLocation(userId, data);
     return { message: '위치가 업데이트되었습니다.' };
   }
@@ -48,7 +51,10 @@ export class LocationController {
    * @route GET /location/nearby/users
    */
   @Get('nearby/users')
-  async getNearbyUsers(@CurrentUserId() userId: string, @Query() query: NearbyUsersQueryDto) {
+  async getNearbyUsers(
+    @CurrentUserId() userId: string,
+    @Query() query: NearbyUsersQueryDto,
+  ) {
     return this.locationService.getNearbyUsers(userId, query);
   }
 
@@ -58,7 +64,10 @@ export class LocationController {
    * @route GET /location/nearby/groups
    */
   @Get('nearby/groups')
-  async getNearbyGroups(@CurrentUserId() userId: string, @Query('radius') radius?: number) {
+  async getNearbyGroups(
+    @CurrentUserId() userId: string,
+    @Query('radius') radius?: number,
+  ) {
     return this.locationService.getNearbyLocationGroups(userId, radius);
   }
 
@@ -81,7 +90,10 @@ export class LocationController {
    * @route POST /location/groups/join
    */
   @Post('groups/join')
-  async joinLocationGroup(@CurrentUserId() userId: string, @Body() data: JoinLocationGroupDto) {
+  async joinLocationGroup(
+    @CurrentUserId() userId: string,
+    @Body() data: JoinLocationGroupDto,
+  ) {
     return this.locationService.joinLocationGroupByQr(userId, data);
   }
 
@@ -104,7 +116,10 @@ export class LocationController {
    * @route GET /location/history
    */
   @Get('history')
-  async getLocationHistory(@CurrentUserId() userId: string, @Query('days') days?: number) {
+  async getLocationHistory(
+    @CurrentUserId() userId: string,
+    @Query('days') days?: number,
+  ) {
     return this.locationService.getLocationHistory(userId, days);
   }
 
@@ -116,7 +131,8 @@ export class LocationController {
   @Put('persona')
   async updatePersona(
     @CurrentUserId() userId: string,
-    @Body() personaData: {
+    @Body()
+    personaData: {
       description: string;
       interests: string[];
       lookingFor: string;
@@ -124,7 +140,10 @@ export class LocationController {
     },
   ) {
     try {
-      const result = await this.locationService.updateUserPersona(userId, personaData);
+      const result = await this.locationService.updateUserPersona(
+        userId,
+        personaData,
+      );
       return {
         success: true,
         data: result,

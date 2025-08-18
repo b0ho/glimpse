@@ -11,12 +11,12 @@ export class TestAuthGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    
+
     // 개발/테스트 환경에서만 동작
     if (process.env.NODE_ENV === 'production') {
       return false;
     }
-    
+
     // x-dev-auth 헤더 체크
     if (request.headers['x-dev-auth'] === 'true') {
       // 테스트용 사용자 정보 설정
@@ -29,7 +29,7 @@ export class TestAuthGuard implements CanActivate {
       };
       return true;
     }
-    
+
     return false;
   }
 }

@@ -111,7 +111,7 @@ export class LocationService {
     // 거리 계산 및 필터링
     const nearbyUsers = users
       .map((user) => {
-        const location = user.location ? JSON.parse(user.location as string) : null;
+        const location = user.location ? JSON.parse(user.location) : null;
         if (!location?.latitude || !location?.longitude) return null;
 
         const distance = this.calculateDistance(
@@ -125,7 +125,7 @@ export class LocationService {
 
         // 프로필 모드에 따라 정보 결정
         let displayProfile: any = {};
-        
+
         if (user.locationProfileMode === 'persona' && user.personaProfile) {
           // 페르소나 프로필 사용
           const persona = user.personaProfile as any;
@@ -146,7 +146,7 @@ export class LocationService {
         }
 
         // 공통 그룹 찾기
-        const commonGroups = user.groupMemberships.map(m => m.group.name);
+        const commonGroups = user.groupMemberships.map((m) => m.group.name);
 
         // 마지막 활동 시간 계산
         const lastActiveMinutes = Math.floor(
@@ -286,7 +286,11 @@ export class LocationService {
 
     // 만료 시간 체크
     const locationData = group.location as any;
-    if (locationData && locationData.expiresAt && new Date(locationData.expiresAt) < new Date()) {
+    if (
+      locationData &&
+      locationData.expiresAt &&
+      new Date(locationData.expiresAt) < new Date()
+    ) {
       throw new BadRequestException('만료된 QR 코드입니다.');
     }
 
@@ -421,7 +425,7 @@ export class LocationService {
     const nearbyGroups = groups
       .map((group) => {
         const location = group.location as any;
-        
+
         // location 필드 검증
         if (!location?.latitude || !location?.longitude) return null;
 
@@ -434,7 +438,7 @@ export class LocationService {
 
         // 그룹의 radius가 있으면 사용, 없으면 기본값 1km
         const groupRadius = location.radius || 1;
-        
+
         // 그룹의 유효 반경과 사용자 검색 반경 모두 고려
         if (distance > Math.min(radius, groupRadius * 2)) return null;
 
@@ -456,7 +460,9 @@ export class LocationService {
           activeMembers: group._count.members, // 활성 멤버만 카운트
           createdBy: group.creator?.nickname || 'Unknown',
           createdAt: group.createdAt,
-          expiresAt: location.expiresAt ? new Date(location.expiresAt) : undefined,
+          expiresAt: location.expiresAt
+            ? new Date(location.expiresAt)
+            : undefined,
           isJoined,
           qrCode: location.qrCode,
         };
@@ -701,7 +707,7 @@ export class LocationService {
       });
 
       const existingPersona = (currentUser?.personaProfile || {}) as any;
-      
+
       updateData.personaProfile = {
         ...existingPersona,
         ...personaData,
@@ -744,9 +750,8 @@ export class LocationService {
 
     return {
       mode: user.locationProfileMode || 'real',
-      personaProfile: user.locationProfileMode === 'persona' 
-        ? user.personaProfile 
-        : null,
+      personaProfile:
+        user.locationProfileMode === 'persona' ? user.personaProfile : null,
     };
   }
 }

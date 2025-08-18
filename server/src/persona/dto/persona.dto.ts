@@ -1,8 +1,18 @@
-import { IsString, IsOptional, IsInt, IsArray, Min, Max, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  IsArray,
+  Min,
+  Max,
+  IsBoolean,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePersonaDto {
-  @ApiProperty({ description: 'Persona nickname (different from main nickname)' })
+  @ApiProperty({
+    description: 'Persona nickname (different from main nickname)',
+  })
   @IsString()
   nickname: string;
 
@@ -76,7 +86,11 @@ export class GetNearbyPersonasDto {
   @ApiProperty({ description: 'Current longitude' })
   longitude: number;
 
-  @ApiProperty({ description: 'Search radius in km', required: false, default: 5 })
+  @ApiProperty({
+    description: 'Search radius in km',
+    required: false,
+    default: 5,
+  })
   @IsOptional()
   @IsInt()
   @Min(1)

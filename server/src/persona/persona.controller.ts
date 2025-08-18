@@ -10,10 +10,20 @@ import {
   Req,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { PersonaService } from './persona.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CreatePersonaDto, UpdatePersonaDto, UpdateLocationDto, GetNearbyPersonasDto } from './dto/persona.dto';
+import {
+  CreatePersonaDto,
+  UpdatePersonaDto,
+  UpdateLocationDto,
+  GetNearbyPersonasDto,
+} from './dto/persona.dto';
 
 @ApiTags('persona')
 @Controller('persona')
@@ -24,7 +34,10 @@ export class PersonaController {
 
   @Post()
   @ApiOperation({ summary: 'Create or update persona' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Persona created/updated successfully' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Persona created/updated successfully',
+  })
   async createOrUpdatePersona(@Req() req: any, @Body() dto: CreatePersonaDto) {
     const persona = await this.personaService.createOrUpdate(req.user.id, dto);
     return {
@@ -35,7 +48,10 @@ export class PersonaController {
 
   @Get('me')
   @ApiOperation({ summary: 'Get my persona' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Returns current user persona' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returns current user persona',
+  })
   async getMyPersona(@Req() req: any) {
     const persona = await this.personaService.getMyPersona(req.user.id);
     return {
@@ -48,7 +64,10 @@ export class PersonaController {
   @ApiOperation({ summary: 'Toggle persona active status' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Persona status toggled' })
   async togglePersona(@Req() req: any, @Body() body: { isActive: boolean }) {
-    const persona = await this.personaService.togglePersona(req.user.id, body.isActive);
+    const persona = await this.personaService.togglePersona(
+      req.user.id,
+      body.isActive,
+    );
     return {
       success: true,
       data: persona,
@@ -80,8 +99,14 @@ export class PersonaController {
 
   @Get('nearby')
   @ApiOperation({ summary: 'Get nearby personas' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Returns nearby personas within radius' })
-  async getNearbyPersonas(@Req() req: any, @Query() query: GetNearbyPersonasDto) {
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returns nearby personas within radius',
+  })
+  async getNearbyPersonas(
+    @Req() req: any,
+    @Query() query: GetNearbyPersonasDto,
+  ) {
     const personas = await this.personaService.getNearbyPersonas(
       req.user.id,
       query.latitude,

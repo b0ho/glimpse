@@ -19,9 +19,10 @@ export class PrismaService
 {
   constructor() {
     super({
-      log: process.env.NODE_ENV === 'production' 
-        ? ['error', 'warn'] as any
-        : ['query', 'info', 'warn', 'error'] as any,
+      log:
+        process.env.NODE_ENV === 'production'
+          ? (['error', 'warn'] as any)
+          : (['query', 'info', 'warn', 'error'] as any),
       datasources: {
         db: {
           url: process.env.DATABASE_URL,

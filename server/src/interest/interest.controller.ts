@@ -38,9 +38,7 @@ export class InterestController {
    * GET /api/v1/interest/search
    */
   @Get('search')
-  async searchInterests(
-    @Query('query') query: string,
-  ) {
+  async searchInterests(@Query('query') query: string) {
     return {
       success: true,
       data: [

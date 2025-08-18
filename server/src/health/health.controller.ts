@@ -14,7 +14,7 @@ export class HealthController {
     try {
       // Database connection check
       await this.prisma.$queryRaw`SELECT 1`;
-      
+
       return {
         status: 'ok',
         timestamp: new Date().toISOString(),
@@ -44,12 +44,12 @@ export class HealthController {
           current_user as user,
           version() as version,
           pg_database_size(current_database()) as size
-      ` as any[];
-      
+      `;
+
       const userCount = await this.prisma.user.count();
       const groupCount = await this.prisma.group.count();
       const matchCount = await this.prisma.match.count();
-      
+
       return {
         status: 'ok',
         connection: result[0],

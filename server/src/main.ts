@@ -56,25 +56,25 @@ async function bootstrap() {
     origin: isDevelopment
       ? true
       : isProduction
-      ? [
-          'https://glimpse-mobile.vercel.app',
-          'https://glimpse-web.vercel.app',
-          'https://glimpse-admin.vercel.app',
-          'https://glimpse.vercel.app',
-          // Expo production URLs
-          'exp://u.expo.dev',
-          'https://u.expo.dev',
-        ]
-      : [
-          'http://localhost:8081',
-          'http://localhost:8082',
-          'http://localhost:19000',
-          'http://localhost:19001',
-          'http://localhost:3000',
-          'http://localhost:3001',
-          'exp://192.168.0.2:8081',
-          'exp://192.168.0.2:19000',
-        ],
+        ? [
+            'https://glimpse-mobile.vercel.app',
+            'https://glimpse-web.vercel.app',
+            'https://glimpse-admin.vercel.app',
+            'https://glimpse.vercel.app',
+            // Expo production URLs
+            'exp://u.expo.dev',
+            'https://u.expo.dev',
+          ]
+        : [
+            'http://localhost:8081',
+            'http://localhost:8082',
+            'http://localhost:19000',
+            'http://localhost:19001',
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'exp://192.168.0.2:8081',
+            'exp://192.168.0.2:19000',
+          ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-dev-auth'],

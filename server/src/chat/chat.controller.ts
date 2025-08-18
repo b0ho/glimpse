@@ -35,9 +35,7 @@ export class ChatController {
    * 채팅방 목록 조회 (테스트용)
    */
   @Get('rooms')
-  async getChatRooms(
-    @CurrentUserId() userId: string,
-  ) {
+  async getChatRooms(@CurrentUserId() userId: string) {
     return {
       success: true,
       data: [],

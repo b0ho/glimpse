@@ -1,6 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../core/prisma/prisma.service';
-import { CreatePersonaDto, UpdatePersonaDto, UpdateLocationDto } from './dto/persona.dto';
+import {
+  CreatePersonaDto,
+  UpdatePersonaDto,
+  UpdateLocationDto,
+} from './dto/persona.dto';
 
 @Injectable()
 export class PersonaService {
@@ -92,13 +100,13 @@ export class PersonaService {
 
   async updateLocation(userId: string, dto: UpdateLocationDto) {
     const updateData: any = {};
-    
+
     if (dto.latitude !== undefined && dto.longitude !== undefined) {
       updateData.lastLatitude = dto.latitude;
       updateData.lastLongitude = dto.longitude;
       updateData.lastLocationUpdateAt = new Date();
     }
-    
+
     if (dto.locationSharingEnabled !== undefined) {
       updateData.locationSharingEnabled = dto.locationSharingEnabled;
     }
@@ -109,7 +117,12 @@ export class PersonaService {
     });
   }
 
-  async getNearbyPersonas(userId: string, latitude: number, longitude: number, radiusKm: number = 5) {
+  async getNearbyPersonas(
+    userId: string,
+    latitude: number,
+    longitude: number,
+    radiusKm: number = 5,
+  ) {
     // Update user's location
     await this.prisma.user.update({
       where: { id: userId },
@@ -123,7 +136,8 @@ export class PersonaService {
     // Calculate bounds for the search radius
     const kmPerDegree = 111;
     const latDelta = radiusKm / kmPerDegree;
-    const lonDelta = radiusKm / (kmPerDegree * Math.cos(latitude * Math.PI / 180));
+    const lonDelta =
+      radiusKm / (kmPerDegree * Math.cos((latitude * Math.PI) / 180));
 
     // Find nearby users with active personas
     const nearbyUsers = await this.prisma.user.findMany({
@@ -156,10 +170,10 @@ export class PersonaService {
         const distance = this.calculateDistance(
           latitude,
           longitude,
-          user.lastLatitude!,
-          user.lastLongitude!
+          user.lastLatitude,
+          user.lastLongitude,
         );
-        
+
         return {
           userId: user.id,
           anonymousId: user.anonymousId,
@@ -174,14 +188,21 @@ export class PersonaService {
     return personasWithDistance;
   }
 
-  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
     const R = 6371; // Earth's radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }

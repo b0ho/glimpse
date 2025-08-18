@@ -3,7 +3,15 @@ import i18nextMiddleware from 'i18next-http-middleware';
 import Backend from 'i18next-fs-backend';
 import path from 'path';
 // Type definitions for i18n
-export type SupportedLanguage = 'ko' | 'en' | 'ja' | 'zh' | 'vi' | 'th' | 'es' | 'fr';
+export type SupportedLanguage =
+  | 'ko'
+  | 'en'
+  | 'ja'
+  | 'zh'
+  | 'vi'
+  | 'th'
+  | 'es'
+  | 'fr';
 export const DEFAULT_LANGUAGE: SupportedLanguage = 'ko';
 export const FALLBACK_LANGUAGE: SupportedLanguage = 'ko';
 
@@ -45,7 +53,7 @@ export const getLocalizedMessage = (
   req: any,
   key: string,
   namespace: string = 'common',
-  options?: any
+  options?: any,
 ): string => {
   return req.t(`${namespace}:${key}`, options);
 };
@@ -53,19 +61,28 @@ export const getLocalizedMessage = (
 // Helper function to get user's preferred language
 export const getUserLanguage = (req: any): SupportedLanguage => {
   const detectedLang = req.language || DEFAULT_LANGUAGE;
-  const supportedLangs: SupportedLanguage[] = ['ko', 'en', 'ja', 'zh', 'vi', 'th', 'es', 'fr'];
-  
+  const supportedLangs: SupportedLanguage[] = [
+    'ko',
+    'en',
+    'ja',
+    'zh',
+    'vi',
+    'th',
+    'es',
+    'fr',
+  ];
+
   // Check if detected language is supported
   if (supportedLangs.includes(detectedLang as SupportedLanguage)) {
     return detectedLang as SupportedLanguage;
   }
-  
+
   // Check if language code matches (e.g., 'en-US' -> 'en')
   const langCode = detectedLang.split('-')[0];
   if (supportedLangs.includes(langCode as SupportedLanguage)) {
     return langCode as SupportedLanguage;
   }
-  
+
   return DEFAULT_LANGUAGE;
 };
 
@@ -74,11 +91,13 @@ export const formatLocalizedResponse = <T>(
   req: any,
   data: T,
   messageKey?: string,
-  namespace: string = 'success'
+  namespace: string = 'success',
 ) => {
   const locale = getUserLanguage(req);
-  const message = messageKey ? getLocalizedMessage(req, messageKey, namespace) : undefined;
-  
+  const message = messageKey
+    ? getLocalizedMessage(req, messageKey, namespace)
+    : undefined;
+
   return {
     success: true,
     data,
@@ -92,11 +111,11 @@ export const formatLocalizedError = (
   req: any,
   errorKey: string,
   statusCode: number = 400,
-  namespace: string = 'errors'
+  namespace: string = 'errors',
 ) => {
   const locale = getUserLanguage(req);
   const message = getLocalizedMessage(req, errorKey, namespace);
-  
+
   return {
     success: false,
     error: {

@@ -119,7 +119,8 @@ const englishGroups = [
   },
   {
     name: 'Seoul Tech Conference 2024',
-    description: 'Annual technology conference - Network with tech professionals',
+    description:
+      'Annual technology conference - Network with tech professionals',
     type: GroupType.INSTANCE,
     isActive: true,
     settings: {
@@ -165,28 +166,78 @@ const englishGroups = [
 
 // Sample messages in English
 const englishMessages = [
-  "Hi! Nice to match with you 😊",
+  'Hi! Nice to match with you 😊',
   "Hey there! I saw we're both in the hiking group. Do you have a favorite trail?",
-  "Hello! Your profile caught my attention. Would love to chat!",
-  "Great to connect! I noticed we work in similar fields.",
+  'Hello! Your profile caught my attention. Would love to chat!',
+  'Great to connect! I noticed we work in similar fields.',
   "Hi! I'm also new to Seoul. How are you finding the city?",
   "Hey! I see you're into photography too. What camera do you use?",
-  "Hello! Would you like to grab coffee sometime this week?",
+  'Hello! Would you like to grab coffee sometime this week?',
   "Nice profile! I'm also a book lover. What are you reading now?",
 ];
 
 // English company domains for verification
 const englishCompanies = [
-  { companyName: 'Google Korea', companyNameKr: '구글 코리아', domain: 'google.com', isVerified: true },
-  { companyName: 'Microsoft Korea', companyNameKr: '마이크로소프트 코리아', domain: 'microsoft.com', isVerified: true },
-  { companyName: 'Amazon Korea', companyNameKr: '아마존 코리아', domain: 'amazon.com', isVerified: true },
-  { companyName: 'Meta Korea', companyNameKr: '메타 코리아', domain: 'meta.com', isVerified: true },
-  { companyName: 'Apple Korea', companyNameKr: '애플 코리아', domain: 'apple.com', isVerified: true },
-  { companyName: 'IBM Korea', companyNameKr: 'IBM 코리아', domain: 'ibm.com', isVerified: true },
-  { companyName: 'Oracle Korea', companyNameKr: '오라클 코리아', domain: 'oracle.com', isVerified: true },
-  { companyName: 'SAP Korea', companyNameKr: 'SAP 코리아', domain: 'sap.com', isVerified: true },
-  { companyName: 'Salesforce Korea', companyNameKr: '세일즈포스 코리아', domain: 'salesforce.com', isVerified: true },
-  { companyName: 'Adobe Korea', companyNameKr: '어도비 코리아', domain: 'adobe.com', isVerified: true },
+  {
+    companyName: 'Google Korea',
+    companyNameKr: '구글 코리아',
+    domain: 'google.com',
+    isVerified: true,
+  },
+  {
+    companyName: 'Microsoft Korea',
+    companyNameKr: '마이크로소프트 코리아',
+    domain: 'microsoft.com',
+    isVerified: true,
+  },
+  {
+    companyName: 'Amazon Korea',
+    companyNameKr: '아마존 코리아',
+    domain: 'amazon.com',
+    isVerified: true,
+  },
+  {
+    companyName: 'Meta Korea',
+    companyNameKr: '메타 코리아',
+    domain: 'meta.com',
+    isVerified: true,
+  },
+  {
+    companyName: 'Apple Korea',
+    companyNameKr: '애플 코리아',
+    domain: 'apple.com',
+    isVerified: true,
+  },
+  {
+    companyName: 'IBM Korea',
+    companyNameKr: 'IBM 코리아',
+    domain: 'ibm.com',
+    isVerified: true,
+  },
+  {
+    companyName: 'Oracle Korea',
+    companyNameKr: '오라클 코리아',
+    domain: 'oracle.com',
+    isVerified: true,
+  },
+  {
+    companyName: 'SAP Korea',
+    companyNameKr: 'SAP 코리아',
+    domain: 'sap.com',
+    isVerified: true,
+  },
+  {
+    companyName: 'Salesforce Korea',
+    companyNameKr: '세일즈포스 코리아',
+    domain: 'salesforce.com',
+    isVerified: true,
+  },
+  {
+    companyName: 'Adobe Korea',
+    companyNameKr: '어도비 코리아',
+    domain: 'adobe.com',
+    isVerified: true,
+  },
 ];
 
 async function seedEnglishData() {
@@ -215,7 +266,7 @@ async function seedEnglishData() {
       const existingGroup = await prisma.group.findFirst({
         where: { name: groupData.name },
       });
-      
+
       if (!existingGroup) {
         const group = await prisma.group.create({
           data: groupData as any,
@@ -229,24 +280,24 @@ async function seedEnglishData() {
     // Add users to groups
     console.log('\nAdding users to groups...');
     const users = await prisma.user.findMany({
-      where: { 
-        phoneNumber: { 
-          in: englishUsers.map(u => u.phoneNumber) 
-        } 
+      where: {
+        phoneNumber: {
+          in: englishUsers.map((u) => u.phoneNumber),
+        },
       },
     });
     const groups = await prisma.group.findMany({
-      where: { 
-        name: { 
-          in: englishGroups.map(g => g.name) 
-        } 
+      where: {
+        name: {
+          in: englishGroups.map((g) => g.name),
+        },
       },
     });
 
     for (const user of users) {
       // Add each user to 2-3 random groups
       const randomGroups = groups.sort(() => 0.5 - Math.random()).slice(0, 3);
-      
+
       for (const group of randomGroups) {
         await prisma.groupMember.upsert({
           where: {
@@ -269,7 +320,7 @@ async function seedEnglishData() {
     // Create some matches between English users
     console.log('\nCreating sample matches...');
     const [user1, user2, user3, user4] = users;
-    
+
     if (user1 && user2) {
       // Create mutual likes (match)
       await prisma.userLike.create({
@@ -290,7 +341,7 @@ async function seedEnglishData() {
           isMatch: true,
         },
       });
-      
+
       // Create match record
       await prisma.match.create({
         data: {
@@ -323,7 +374,7 @@ async function seedEnglishData() {
           isMatch: true,
         },
       });
-      
+
       await prisma.match.create({
         data: {
           user1Id: user3.id,
@@ -346,7 +397,7 @@ async function seedEnglishData() {
       for (let i = 0; i < 5; i++) {
         const senderId = i % 2 === 0 ? match.user1Id : match.user2Id;
         const message = englishMessages[i % englishMessages.length];
-        
+
         await prisma.chatMessage.create({
           data: {
             matchId: match.id,
@@ -356,7 +407,9 @@ async function seedEnglishData() {
           },
         });
       }
-      console.log(`✅ Created chat for match: ${match.user1.nickname} ↔ ${match.user2.nickname}`);
+      console.log(
+        `✅ Created chat for match: ${match.user1.nickname} ↔ ${match.user2.nickname}`,
+      );
     }
 
     // Add company domains
@@ -372,7 +425,7 @@ async function seedEnglishData() {
 
     // Create some premium subscriptions
     console.log('\nCreating premium subscriptions...');
-    const premiumUsers = users.filter(u => u.isPremium);
+    const premiumUsers = users.filter((u) => u.isPremium);
     for (const user of premiumUsers) {
       await prisma.subscription.create({
         data: {
@@ -393,7 +446,6 @@ async function seedEnglishData() {
     console.log(`   - ${matches.length} matches created`);
     console.log(`   - ${englishCompanies.length} company domains added`);
     console.log(`   - ${premiumUsers.length} premium subscriptions created`);
-
   } catch (error) {
     console.error('❌ Error seeding English data:', error);
     throw error;
@@ -403,8 +455,7 @@ async function seedEnglishData() {
 }
 
 // Run the seeder
-seedEnglishData()
-  .catch((e) => {
-    console.error('Failed to seed English data:', e);
-    process.exit(1);
-  });
+seedEnglishData().catch((e) => {
+  console.error('Failed to seed English data:', e);
+  process.exit(1);
+});

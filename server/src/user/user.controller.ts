@@ -15,7 +15,10 @@ import { UserService } from './user.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 import { I18n, UserLang } from '../i18n/i18n.decorator';
-import { formatLocalizedResponse, formatLocalizedError } from '../i18n/i18n.config';
+import {
+  formatLocalizedResponse,
+  formatLocalizedError,
+} from '../i18n/i18n.config';
 import { SupportedLanguage } from '../i18n/i18n.config';
 
 /**
@@ -60,7 +63,7 @@ export class UserController {
         lastActive: user.lastActive,
         preferredLanguage: userLang,
       };
-      
+
       return formatLocalizedResponse(req, profileData);
     } catch (error) {
       throw new HttpException(
@@ -92,8 +95,13 @@ export class UserController {
         bio: user.bio,
         profileImage: user.profileImage,
       };
-      
-      return formatLocalizedResponse(req, profileData, 'user.updated', 'success');
+
+      return formatLocalizedResponse(
+        req,
+        profileData,
+        'user.updated',
+        'success',
+      );
     } catch (error) {
       throw new HttpException(
         formatLocalizedError(req, 'user.updateFailed', HttpStatus.BAD_REQUEST),

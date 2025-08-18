@@ -1,4 +1,12 @@
-import { IsString, IsEnum, IsOptional, IsObject, IsDateString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsObject,
+  IsDateString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { InterestType, SearchStatus } from '@prisma/client';
 
 export class CreateInterestSearchDto {
@@ -63,7 +71,7 @@ export class InterestSearchResponseDto {
   expiresAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  
+
   // 매칭된 사용자 정보 (익명)
   matchedUser?: {
     nickname: string;

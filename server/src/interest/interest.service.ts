@@ -1,14 +1,19 @@
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { EncryptionService } from '../core/encryption/encryption.service';
 import { NotificationService } from '../notification/notification.service';
-import { 
-  CreateInterestSearchDto, 
-  UpdateInterestSearchDto, 
+import {
+  CreateInterestSearchDto,
+  UpdateInterestSearchDto,
   GetInterestSearchesQueryDto,
   CheckMatchDto,
   InterestSearchResponseDto,
-  InterestMatchResponseDto 
+  InterestMatchResponseDto,
 } from './dto/interest.dto';
 import { InterestType, SearchStatus, Prisma } from '@prisma/client';
 import * as crypto from 'crypto';
@@ -64,7 +69,7 @@ export class InterestService {
     const premiumLevel = (user as any).premiumLevel || 'FREE';
     let maxSearchesPerType: number;
     let expirationDays: number | null;
-    
+
     switch (premiumLevel) {
       case 'UPPER':
         maxSearchesPerType = 999; // 무제한
@@ -82,9 +87,10 @@ export class InterestService {
     }
 
     if (activeSearchCount >= maxSearchesPerType) {
-      const message = premiumLevel === 'FREE'
-        ? `무료 사용자는 ${dto.type} 유형으로 최대 ${maxSearchesPerType}개까지만 등록 가능합니다. 프리미엄 업그레이드를 통해 더 많은 관심상대를 등록하세요.`
-        : `현재 프리미엄 레벨에서는 ${dto.type} 유형으로 최대 ${maxSearchesPerType}개까지만 등록 가능합니다.`;
+      const message =
+        premiumLevel === 'FREE'
+          ? `무료 사용자는 ${dto.type} 유형으로 최대 ${maxSearchesPerType}개까지만 등록 가능합니다. 프리미엄 업그레이드를 통해 더 많은 관심상대를 등록하세요.`
+          : `현재 프리미엄 레벨에서는 ${dto.type} 유형으로 최대 ${maxSearchesPerType}개까지만 등록 가능합니다.`;
       throw new BadRequestException(message);
     }
 
@@ -98,8 +104,8 @@ export class InterestService {
     }
 
     // 민감 정보 암호화
-    const encryptedValue = this.shouldEncrypt(dto.type) 
-      ? await this.encryptionService.encrypt(dto.value)
+    const encryptedValue = this.shouldEncrypt(dto.type)
+      ? this.encryptionService.encrypt(dto.value)
       : dto.value;
 
     // 검색 등록
@@ -156,7 +162,9 @@ export class InterestService {
       },
     });
 
-    return Promise.all(searches.map(search => this.formatInterestSearchResponse(search)));
+    return Promise.all(
+      searches.map((search) => this.formatInterestSearchResponse(search)),
+    );
   }
 
   /**
@@ -244,7 +252,7 @@ export class InterestService {
       },
     });
 
-    return matches.map(match => ({
+    return matches.map((match) => ({
       searchId: match.id,
       matchedSearchId: '', // 상대방 검색 ID는 프라이버시를 위해 숨김
       matchedUserId: match.matchedWithId!,
@@ -261,9 +269,12 @@ export class InterestService {
   /**
    * 즉시 매칭 확인
    */
-  async checkMatch(userId: string, dto: CheckMatchDto): Promise<InterestMatchResponseDto | null> {
+  async checkMatch(
+    userId: string,
+    dto: CheckMatchDto,
+  ): Promise<InterestMatchResponseDto | null> {
     const normalizedValue = this.normalizeValue(dto.type, dto.value);
-    
+
     // 양방향 매칭 확인
     const potentialMatch = await this.prisma.interestSearch.findFirst({
       where: {
@@ -348,7 +359,10 @@ export class InterestService {
   /**
    * 양방향 매칭 확인
    */
-  private async isBidirectionalMatch(search1: any, search2: any): Promise<boolean> {
+  private async isBidirectionalMatch(
+    search1: any,
+    search2: any,
+  ): Promise<boolean> {
     // 기본적으로 같은 타입, 같은 값이면 매칭
     if (search1.type === search2.type && search1.value === search2.value) {
       return true;
@@ -472,13 +486,15 @@ export class InterestService {
   /**
    * 응답 포맷팅
    */
-  private async formatInterestSearchResponse(search: any): Promise<InterestSearchResponseDto> {
+  private async formatInterestSearchResponse(
+    search: any,
+  ): Promise<InterestSearchResponseDto> {
     let displayValue = search.value;
-    
+
     // 암호화된 값 복호화 (단, 표시용으로는 마스킹)
     if (this.shouldEncrypt(search.type)) {
       try {
-        const decrypted = await this.encryptionService.decrypt(search.value);
+        const decrypted = this.encryptionService.decrypt(search.value);
         displayValue = this.maskSensitiveValue(search.type, decrypted);
       } catch {
         displayValue = '***';
@@ -496,10 +512,12 @@ export class InterestService {
       expiresAt: search.expiresAt,
       createdAt: search.createdAt,
       updatedAt: search.updatedAt,
-      matchedUser: search.matchedWith ? {
-        nickname: search.matchedWith.nickname,
-        profileImage: search.matchedWith.profileImage,
-      } : undefined,
+      matchedUser: search.matchedWith
+        ? {
+            nickname: search.matchedWith.nickname,
+            profileImage: search.matchedWith.profileImage,
+          }
+        : undefined,
     };
   }
 
@@ -514,13 +532,14 @@ export class InterestService {
           return `${value.slice(0, 3)}-****-${value.slice(-4)}`;
         }
         return '***';
-      case InterestType.EMAIL:
+      case InterestType.EMAIL: {
         // u***@example.com 형태로 마스킹
         const [local, domain] = value.split('@');
         if (local && domain) {
           return `${local[0]}***@${domain}`;
         }
         return '***';
+      }
       default:
         return value;
     }
