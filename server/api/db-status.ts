@@ -17,7 +17,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       DATABASE_URL_provider: process.env.DATABASE_URL?.includes('railway.app') ? 'Railway PostgreSQL' :
                              process.env.DATABASE_URL?.includes('rlwy.net') ? 'Railway PostgreSQL' : 
                              process.env.DATABASE_URL?.includes('localhost') ? 'Local PostgreSQL' : 
-                             process.env.DATABASE_URL?.includes('supabase') ? 'Supabase (Legacy)' :
                              'Other PostgreSQL',
       NODE_ENV: process.env.NODE_ENV,
       JWT_SECRET: !!process.env.JWT_SECRET,
