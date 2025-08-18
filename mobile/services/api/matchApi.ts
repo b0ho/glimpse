@@ -21,8 +21,8 @@ export const matchApi = {
    * @returns {Promise<Match[]>} 매칭 목록
    */
   async getMatches(page: number = 1, limit: number = 20): Promise<Match[]> {
-    // 개발 환경에서는 mock 데이터 사용
-    if (__DEV__) {
+    // 로컬 개발 환경에서만 mock 데이터 사용 (Vercel 배포에서는 실제 API 사용)
+    if (__DEV__ && (typeof window === 'undefined' || window.location?.hostname === 'localhost')) {
       // 약간의 로딩 시뮬레이션
       await new Promise(resolve => setTimeout(resolve, 500));
       const mockMatches = generateEnhancedMatches();

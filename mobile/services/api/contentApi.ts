@@ -61,8 +61,8 @@ export const contentApi = {
    * @returns {Promise<Content>} 생성된 콘텐츠
    */
   async createContent(content: Partial<Content>): Promise<Content> {
-    // 개발 환경에서는 mock 데이터로 즉시 응답
-    if (__DEV__) {
+    // 로컬 개발 환경에서만 mock 데이터 사용 (Vercel 배포에서는 실제 API 사용)
+    if (__DEV__ && (typeof window === 'undefined' || window.location?.hostname === 'localhost')) {
       console.log('[ContentAPI] Mock 콘텐츠 생성:', content);
       console.log('[ContentAPI] 전달받은 authorNickname:', content.authorNickname);
       
@@ -136,8 +136,8 @@ export const contentApi = {
    * @returns {Promise<Content>} 수정된 콘텐츠
    */
   async updateContent(contentId: string, content: Partial<Content>): Promise<Content> {
-    // 개발 환경에서는 mock 데이터로 처리
-    if (__DEV__) {
+    // 로컬 개발 환경에서만 mock 데이터 사용 (Vercel 배포에서는 실제 API 사용)
+    if (__DEV__ && (typeof window === 'undefined' || window.location?.hostname === 'localhost')) {
       console.log('[ContentAPI] Mock 콘텐츠 수정:', { contentId, content });
       
       // AsyncStorage에서 기존 콘텐츠 찾아서 업데이트
@@ -177,8 +177,8 @@ export const contentApi = {
    * @returns {Promise<void>}
    */
   async deleteContent(contentId: string): Promise<void> {
-    // 개발 환경에서는 mock 데이터에서 삭제
-    if (__DEV__) {
+    // 로컬 개발 환경에서만 mock 데이터 사용 (Vercel 배포에서는 실제 API 사용)
+    if (__DEV__ && (typeof window === 'undefined' || window.location?.hostname === 'localhost')) {
       console.log('[ContentAPI] Mock 콘텐츠 삭제:', contentId);
       
       const existingContents = await getCreatedContents();
