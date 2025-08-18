@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glimpse API</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #718096;
+            margin-bottom: 2rem;
+        }
+        .endpoint {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .method {
+            display: inline-block;
+            background: #38a169;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+        .url {
+            font-family: 'Monaco', 'Consolas', monospace;
+            color: #2d3748;
+        }
+        a {
+            color: #3182ce;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .status {
+            background: #feb2b2;
+            color: #742a2a;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Glimpse API</h1>
+        <div class="subtitle">Privacy-focused Korean dating app API</div>
+        
+        <div class="status">
+            🚧 개발 중 - NestJS 마이그레이션 진행 중
+        </div>
+        
+        <h2>사용 가능한 엔드포인트</h2>
+        
+        <div class="endpoint">
+            <span class="method">GET</span>
+            <span class="url"><a href="/api/health">/api/health</a></span>
+            <br>API 서버 상태 확인
+        </div>
+        
+        <div class="endpoint">
+            <span class="method">GET</span>
+            <span class="url"><a href="/api/index">/api/index</a></span>
+            <br>메인 API 정보
+        </div>
+        
+        <h2>개발 정보</h2>
+        <ul>
+            <li><strong>버전:</strong> 1.0.0</li>
+            <li><strong>환경:</strong> Production (Vercel)</li>
+            <li><strong>런타임:</strong> Node.js 서버리스</li>
+            <li><strong>데이터베이스:</strong> Supabase PostgreSQL</li>
+        </ul>
+        
+        <h2>문서</h2>
+        <p>
+            전체 API 문서는 NestJS 마이그레이션 완료 후 제공됩니다.<br>
+            현재는 기본적인 헬스체크 엔드포인트만 사용 가능합니다.
+        </p>
+    </div>
+</body>
+</html>
