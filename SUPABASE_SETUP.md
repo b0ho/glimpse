@@ -9,11 +9,12 @@ Vercel 대시보드에서 다음 환경변수를 설정해야 합니다:
 Supabase 대시보드 > Settings > Database에서 확인할 수 있습니다:
 
 ```bash
-# Connection Pooling (Transaction Mode) - Prisma 기본 연결용
+# Supabase Database Connection
+# Connection Pooling을 사용하면 Vercel 서버리스 환경에서 연결 제한 문제 해결
 DATABASE_URL=postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
 
-# Direct Connection - 마이그레이션용
-DIRECT_URL=postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres
+# DIRECT_URL은 선택사항 - 마이그레이션이 필요할 때만 사용
+# DIRECT_URL=postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres
 ```
 
 ### 기타 필수 환경변수
