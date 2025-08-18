@@ -68,8 +68,10 @@ npm run seed               # 기본 시드 데이터
 npm run seed:domains       # 회사 도메인 데이터
 npm run seed:english       # 영어 데이터
 npm run seed:all           # 모든 시드 데이터
-npm run seed:railway       # Railway 전체 테스트 데이터 (풍부한 데이터)
-npm run seed:railway:quick # Railway 빠른 테스트 데이터 (30명 사용자)
+
+# Railway 운영환경용 시드 데이터
+npm run seed:railway:quick # 빠른 테스트 데이터 (30명 사용자, 8개 그룹)
+npm run seed:railway       # 전체 테스트 데이터 (150명 사용자, 30개 그룹) ⚠️ 운영주의
 
 # 테스트
 npm run test               # 단위 테스트
@@ -142,11 +144,14 @@ npm run db:studio
 - **Production**: https://glimpse-server-psi.vercel.app/
 - **자동 배포**: Git push 시 자동 트리거
 - **환경변수**: Vercel Dashboard에서 설정
+- **상태**: ✅ 정상 운영 중
 
 ### Railway 데이터베이스
 - **Provider**: Railway PostgreSQL
 - **Connection**: 외부 URL (`.proxy.rlwy.net`)
 - **스키마**: 42개 테이블 (User, Group, Match, Chat 등)
+- **현재 데이터**: 20개 그룹, 다수 사용자 보유
+- **상태**: ✅ 안정적 연결 유지
 
 ## 문제 해결
 
@@ -165,6 +170,38 @@ curl -H "x-dev-auth: true" https://glimpse-server-psi.vercel.app/api/groups
 # PUBLIC URL 사용 (internal URL 아님)
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@YOUR_HOST.proxy.rlwy.net:PORT/railway"
 ```
+
+## 운영환경 상태
+
+### 🚀 현재 운영 현황
+```bash
+# 서버 상태 확인
+curl https://glimpse-server-psi.vercel.app/api/health
+
+# 데이터베이스 연결 상태
+curl https://glimpse-server-psi.vercel.app/api/db-status
+
+# 그룹 데이터 확인 (개발 인증)
+curl -H "x-dev-auth: true" https://glimpse-server-psi.vercel.app/api/groups
+```
+
+### 📊 운영 데이터베이스 현황
+- **총 그룹**: 20개 (삼성전자, LG전자, 현대자동차 등)
+- **사용자 데이터**: 다수 활성 사용자 보유
+- **테스트 커버리지**: 전체 앱 시나리오 완료
+- **데이터베이스**: Railway PostgreSQL 안정 운영
+
+### 🔄 운영환경 관리
+```bash
+# 추가 데이터가 필요한 경우
+npm run seed:railway:quick    # 30명 사용자 추가
+npm run seed:railway          # 150명 사용자 추가 (주의: 대용량)
+```
+
+⚠️ **운영환경 주의사항**
+- 운영 데이터베이스에 시드 스크립트 실행 시 신중히 검토
+- 기존 데이터와 충돌 가능성 확인 필요
+- 대용량 시드(`seed:railway`) 실행 전 백업 권장
 
 ⚠️ **보안 주의사항**
 - **절대 실제 데이터베이스 URL을 코드에 하드코딩하지 마세요**
