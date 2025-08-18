@@ -22,8 +22,9 @@ import { useChatStore } from '@/store/slices/chatSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { Message } from '@/types';
 import { SPACING, FONT_SIZES } from '@/utils/constants';
-import { generateDummyChatMessages } from '@/utils/mockData';
+// Mock data functions removed - using real API
 import { useTheme } from '@/hooks/useTheme';
+import { chatService } from '@/services/chat/chatService';
 
 type ChatScreenRouteProp = {
   params: {
@@ -73,9 +74,9 @@ export const ChatScreenSimple = () => {
     }
   };
 
-  // Load mock messages and stored messages
+  // Load messages from API or stored messages
   useEffect(() => {
-    const loadMockMessages = async () => {
+    const loadMessages = async () => {
       try {
         setIsLoading(true);
         
@@ -85,13 +86,18 @@ export const ChatScreenSimple = () => {
         if (storedMessages.length > 0) {
           // 저장된 메시지가 있으면 사용
           setMessages(storedMessages);
-        } else {
-          // 저장된 메시지가 없으면 mock 메시지 생성
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          const mockMessages = generateDummyChatMessages(matchId);
-          setMessages(mockMessages);
-          // 처음 생성된 mock 메시지도 저장
-          await saveMessages(mockMessages);
+        }
+        
+        // API에서 실제 메시지 가져오기
+        try {
+          const apiMessages = await chatService.getMessages(matchId);
+          if (apiMessages && apiMessages.length > 0) {
+            setMessages(apiMessages);
+            await saveMessages(apiMessages);
+          }
+        } catch (apiError) {
+          console.log('[ChatScreenSimple] API 호출 실패, 저장된 메시지 사용:', apiError);
+          // API 실패 시 저장된 메시지 유지
         }
       } catch (error) {
         console.error('Failed to load messages:', error);
@@ -100,7 +106,7 @@ export const ChatScreenSimple = () => {
       }
     };
 
-    loadMockMessages();
+    loadMessages();
   }, [matchId]);
 
   // Handle leave chat
