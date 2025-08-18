@@ -5,8 +5,8 @@
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 
   process.env.API_URL || 
   (process.env.NODE_ENV === 'production' 
-    ? 'https://glimpse-server-psi.vercel.app/api' 
-    : 'http://localhost:3001/api');
+    ? 'https://glimpse-server-psi.vercel.app/api/v1' 
+    : 'http://localhost:3001/api/v1');
 
 /**
  * WebSocket URL
