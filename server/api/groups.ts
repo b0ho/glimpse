@@ -34,14 +34,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
       // Try to connect to database
-      if (process.env.DATABASE_URL?.includes('supabase')) {
+      if (process.env.DATABASE_URL) {
         const { PrismaClient } = await import('@prisma/client');
         const prisma = new PrismaClient({
           log: process.env.NODE_ENV === 'production' ? ['error'] : ['query', 'info', 'warn', 'error'],
         });
 
         await prisma.$connect();
-        dbStatus = 'Connected to Supabase';
+        
+        const provider = process.env.DATABASE_URL.includes('railway.app') ? 'Railway PostgreSQL' :
+                        process.env.DATABASE_URL.includes('rlwy.net') ? 'Railway PostgreSQL' :
+                        process.env.DATABASE_URL.includes('localhost') ? 'Local PostgreSQL' :
+                        'PostgreSQL';
+        dbStatus = `Connected to ${provider}`;
 
         // Get groups from database
         if (req.method === 'GET') {
@@ -60,7 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         await prisma.$disconnect();
       } else {
-        dbStatus = 'Database URL not configured for Supabase';
+        dbStatus = 'Database URL not configured';
       }
     } catch (dbError) {
       console.error('Database error:', dbError);
