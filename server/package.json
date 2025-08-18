@@ -29,7 +29,19 @@
     "seed:english": "npx tsx src/scripts/seed-english-data.ts",
     "seed:all": "npm run seed:domains && npm run seed:english",
     "seed:test": "npx tsx prisma/seed-test.ts",
-    "seed:extended": "npx tsx prisma/seed-extended.ts"
+    "seed:extended": "npx tsx prisma/seed-extended.ts",
+    "seed:local": "npx tsx prisma/seed-local.ts",
+    "seed:railway": "npx tsx prisma/seed-railway.ts",
+    "seed:railway:quick": "npx tsx prisma/seed-railway-quick.ts",
+    "db:generate": "npx prisma generate",
+    "db:push": "npx prisma db push",
+    "db:pull": "npx prisma db pull",
+    "db:studio": "npx prisma studio",
+    "db:migrate:railway": "npx prisma generate && npx prisma db push",
+    "db:reset": "npx prisma db push --force-reset",
+    "db:setup:local": "npm run db:generate && npm run db:push && npm run seed:local",
+    "db:setup:railway": "npm run db:migrate:railway && npm run seed:railway",
+    "db:setup:railway:quick": "npm run db:migrate:railway && npm run seed:railway:quick"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.859.0",
