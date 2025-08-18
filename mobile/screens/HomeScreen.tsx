@@ -27,6 +27,7 @@ import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { contentApi } from '@/services/api/contentApi';
 import { ACTION_ICONS } from '@/utils/icons';
+import { ApiTestComponent } from '@/components/ApiTestComponent';
 
 /**
  * 홈 스크린 컴포넌트 - 메인 피드 및 스토리 표시
@@ -539,6 +540,9 @@ export const HomeScreen = () => {
         renderItem={renderContentItem}
         ListHeaderComponent={
           <>
+            {/* API 연결 테스트 컴포넌트 */}
+            <ApiTestComponent />
+            
             {/* Stories */}
             <StoryList
               stories={stories}
