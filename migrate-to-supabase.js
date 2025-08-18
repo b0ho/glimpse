@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 
-const { exec } = require('child_process');
-const { promisify } = require('util');
-const fs = require('fs').promises;
-const path = require('path');
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const execAsync = promisify(exec);
 
@@ -114,8 +118,8 @@ DEV_AUTH_ENABLED=false
 }
 
 // 스크립트 직접 실행 시
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   migrateToSupabase();
 }
 
-module.exports = { migrateToSupabase };
+export { migrateToSupabase };
