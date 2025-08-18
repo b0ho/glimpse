@@ -48,12 +48,23 @@ async function bootstrap() {
   await initI18n();
   app.use(getI18nMiddleware());
 
-  // CORS 설정 - 개발 환경에서는 모든 origin 허용
+  // CORS 설정 - 개발 환경과 프로덕션 환경 구분
   const isDevelopment = configService.get<string>('NODE_ENV') === 'development';
+  const isProduction = configService.get<string>('NODE_ENV') === 'production';
 
   app.enableCors({
     origin: isDevelopment
       ? true
+      : isProduction
+      ? [
+          'https://glimpse-mobile.vercel.app',
+          'https://glimpse-web.vercel.app',
+          'https://glimpse-admin.vercel.app',
+          'https://glimpse.vercel.app',
+          // Expo production URLs
+          'exp://u.expo.dev',
+          'https://u.expo.dev',
+        ]
       : [
           'http://localhost:8081',
           'http://localhost:8082',

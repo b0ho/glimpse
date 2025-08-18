@@ -32,6 +32,7 @@ import { StoryModule } from './story/story.module';
 import { ContentModule } from './content/content.module';
 import { InterestModule } from './interest/interest.module';
 import { PersonaModule } from './persona/persona.module';
+import { HealthModule } from './health/health.module';
 
 /**
  * 애플리케이션 루트 모듈
@@ -134,6 +135,8 @@ import { PersonaModule } from './persona/persona.module';
     InterestModule,
 
     PersonaModule,
+    
+    HealthModule,
   ],
   controllers: [AppController],
 })

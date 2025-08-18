@@ -1,10 +1,16 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
+// Vercel 서버리스 환경을 위한 글로벌 Prisma 인스턴스
+declare global {
+  var prisma: PrismaClient | undefined;
+}
+
 /**
  * Prisma 서비스
  *
  * 데이터베이스 연결을 관리하고 Prisma 클라이언트를 제공합니다.
+ * Vercel 서버리스 환경에 최적화된 싱글톤 패턴 구현
  */
 @Injectable()
 export class PrismaService
@@ -12,9 +18,27 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
+    // Production 환경에서는 로그 레벨 조정
+    const logLevel = process.env.NODE_ENV === 'production' 
+      ? ['error', 'warn']
+      : ['query', 'info', 'warn', 'error'];
+
     super({
-      log: ['query', 'info', 'warn', 'error'],
+      log: logLevel,
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL,
+        },
+      },
     });
+
+    // Vercel 서버리스 환경에서 연결 재사용
+    if (process.env.NODE_ENV === 'production') {
+      if (!global.prisma) {
+        global.prisma = this;
+      }
+      return global.prisma as any;
+    }
   }
 
   /**
