@@ -6,8 +6,6 @@
 
 import apiClient from './config';
 import { Content } from '../../shared/types';
-import { getAllContents, saveCreatedContent, getCreatedContents } from '@/utils/mockData';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * 콘텐츠 API 서비스
@@ -23,26 +21,6 @@ export const contentApi = {
    * @returns {Promise<Content[]>} 콘텐츠 목록
    */
   async getContents(groupId?: string, page: number = 1, limit: number = 20): Promise<Content[]> {
-    // 개발 환경에서는 mock 데이터와 저장된 콘텐츠를 함께 반환
-    if (__DEV__) {
-      console.log('[ContentAPI] Mock 콘텐츠 목록 조회 시작');
-      try {
-        const allContents = await getAllContents();
-        console.log('[ContentAPI] Mock 콘텐츠 목록 반환:', allContents.length, '개');
-        
-        // groupId 필터링 (선택적)
-        if (groupId) {
-          const filteredContents = allContents.filter(content => content.groupId === groupId);
-          console.log('[ContentAPI] 그룹 필터링 결과:', filteredContents.length, '개');
-          return filteredContents;
-        }
-        
-        return allContents;
-      } catch (error) {
-        console.error('[ContentAPI] Mock 콘텐츠 목록 조회 실패:', error);
-        return [];
-      }
-    }
     
     const params: any = { page, limit };
     if (groupId) params.groupId = groupId;
@@ -136,33 +114,6 @@ export const contentApi = {
    * @returns {Promise<Content>} 수정된 콘텐츠
    */
   async updateContent(contentId: string, content: Partial<Content>): Promise<Content> {
-    // 로컬 개발 환경에서만 mock 데이터 사용 (Vercel 배포에서는 실제 API 사용)
-    if (__DEV__ && (typeof window === 'undefined' || window.location?.hostname === 'localhost')) {
-      console.log('[ContentAPI] Mock 콘텐츠 수정:', { contentId, content });
-      
-      // AsyncStorage에서 기존 콘텐츠 찾아서 업데이트
-      const existingContents = await getCreatedContents();
-      const contentIndex = existingContents.findIndex(c => c.id === contentId);
-      
-      if (contentIndex === -1) {
-        throw new Error('수정할 콘텐츠를 찾을 수 없습니다.');
-      }
-      
-      const updatedContent: Content = {
-        ...existingContents[contentIndex],
-        ...content,
-        updatedAt: new Date(),
-      };
-      
-      // AsyncStorage 업데이트
-      const updatedContents = [...existingContents];
-      updatedContents[contentIndex] = updatedContent;
-      await AsyncStorage.setItem('user_created_contents', JSON.stringify(updatedContents));
-      
-      console.log('[ContentAPI] Mock 콘텐츠 수정 완료:', updatedContent);
-      return updatedContent;
-    }
-    
     const response = await apiClient.put<{ success: boolean; data: Content }>(`/contents/${contentId}`, content);
     if (response.success && response.data) {
       return response.data;
@@ -177,18 +128,6 @@ export const contentApi = {
    * @returns {Promise<void>}
    */
   async deleteContent(contentId: string): Promise<void> {
-    // 로컬 개발 환경에서만 mock 데이터 사용 (Vercel 배포에서는 실제 API 사용)
-    if (__DEV__ && (typeof window === 'undefined' || window.location?.hostname === 'localhost')) {
-      console.log('[ContentAPI] Mock 콘텐츠 삭제:', contentId);
-      
-      const existingContents = await getCreatedContents();
-      const filteredContents = existingContents.filter(c => c.id !== contentId);
-      await AsyncStorage.setItem('user_created_contents', JSON.stringify(filteredContents));
-      
-      console.log('[ContentAPI] Mock 콘텐츠 삭제 완료');
-      return;
-    }
-    
     const response = await apiClient.delete<{ success: boolean }>(`/contents/${contentId}`);
     if (!response.success) {
       throw new Error('콘텐츠 삭제 실패');

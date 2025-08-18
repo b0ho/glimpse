@@ -1,6 +1,5 @@
 import apiClient from './config';
 import { Group, GroupType } from '../../shared/types';
-import { getAllGroups, saveCreatedGroup } from '@/utils/mockData';
 
 /**
  * 그룹 생성 데이터 인터페이스
@@ -85,18 +84,6 @@ export const groupApi = {
     page?: number;
     limit?: number;
   }): Promise<Group[]> {
-    // 로컬 개발 환경에서만 mock 데이터 사용 (Vercel 배포에서는 실제 API 사용)
-    if (__DEV__ && (typeof window === 'undefined' || window.location?.hostname === 'localhost')) {
-      console.log('[GroupAPI] Mock 그룹 목록 조회 시작');
-      try {
-        const allGroups = await getAllGroups();
-        console.log('[GroupAPI] Mock 그룹 목록 반환:', allGroups.length, '개');
-        return allGroups;
-      } catch (error) {
-        console.error('[GroupAPI] Mock 그룹 목록 조회 실패:', error);
-        // fallback으로 실제 API 호출
-      }
-    }
     
     const response = await apiClient.get<{ success: boolean; data: Group[] }>('/groups', params);
     if (response.success && response.data) {
@@ -112,50 +99,6 @@ export const groupApi = {
    * @returns {Promise<Group>} 생성된 그룹 정보
    */
   async createGroup(data: CreateGroupData): Promise<Group> {
-    // 로컬 개발 환경에서만 mock 데이터 사용 (Vercel 배포에서는 실제 API 사용)
-    if (__DEV__ && (typeof window === 'undefined' || window.location?.hostname === 'localhost')) {
-      console.log('[GroupAPI] Mock 그룹 생성:', data);
-      
-      // 실제 API 호출 시뮬레이션을 위한 딜레이
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockGroup: Group = {
-        id: `mock_group_${Date.now()}`,
-        name: data.name,
-        description: data.description,
-        type: data.type,
-        imageUrl: null,
-        isActive: true,
-        maxMembers: data.settings?.isPrivate ? 50 : 200,
-        memberCount: 1, // 생성자 포함
-        maleCount: 1,
-        femaleCount: 0,
-        isMatchingActive: true,
-        settings: {
-          requiresApproval: data.settings?.requiresApproval || false,
-          allowInvites: data.settings?.allowInvites || true,
-          isPrivate: data.settings?.isPrivate || false,
-          maxMembers: data.settings?.isPrivate ? 50 : 200,
-        },
-        location: data.location || null,
-        creator: {
-          id: 'current_user',
-          nickname: '테스트유저',
-        },
-        company: null,
-        isUserMember: true,
-        expiresAt: data.type === GroupType.INSTANCE ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) : null, // 7일 후
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      
-      console.log('[GroupAPI] Mock 그룹 생성 완료:', mockGroup);
-      
-      // AsyncStorage에 저장
-      await saveCreatedGroup(mockGroup);
-      
-      return mockGroup;
-    }
     
     const response = await apiClient.post<{ success: boolean; data: Group }>('/groups', data);
     if (response.success && response.data) {
