@@ -332,7 +332,27 @@ cd server && npx prisma migrate dev  # Run development migrations
 - **Error Handling:** Comprehensive try-catch with user feedback
 - **Testing:** 80%+ coverage for business logic
 - **Security:** Input validation, rate limiting, encryption
-- **Git Commits:** NEVER commit changes unless the user explicitly asks. Only commit when user specifically requests "커밋해줘" or similar commands
+### 🚨 중요: Git Commit 정책
+
+**절대 금지 사항:**
+- Claude Code가 임의로 커밋하는 것은 **절대 금지**입니다
+- 사용자의 명시적 요청 없이는 어떤 경우에도 커밋하지 마세요
+
+**커밋 허용 조건:**
+사용자가 다음과 같은 **명시적 요청**을 할 때만 커밋 가능:
+- "커밋해줘" 
+- "git commit 해줘"
+- "변경사항 커밋해줘"
+- "지금 커밋하고 싶어"
+- "commit please"
+
+**작업 완료 후 권장사항:**
+- 작업 완료 시 커밋하지 말고 단순히 완료 보고만 할것
+- 사용자가 원한다면 직접 커밋 요청을 할 것
+- 이는 사용자의 프로젝트 관리 주도권을 보장하기 위함
+
+**예외 상황:**
+- 보안상 치명적인 문제 발견 시에만 사용자에게 즉시 커밋 필요성을 알리되, 직접 커밋하지는 않음
 
 ## External Service Integrations
 
