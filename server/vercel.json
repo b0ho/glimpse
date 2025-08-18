@@ -1,8 +1,21 @@
 {
-  "buildCommand": "echo 'Skipping build for serverless functions'",
-  "outputDirectory": "public",
-  "installCommand": "npm install",
-  "rewrites": [
-    { "source": "/api/v1/(.*)", "destination": "/api/$1" }
-  ]
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }

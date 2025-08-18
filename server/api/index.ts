@@ -1,57 +1,61 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { NestFactory } from '@nestjs/core';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { AppModule } from '../src/app.module';
+import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter';
+import express from 'express';
+import { initI18n, getI18nMiddleware } from '../src/i18n/i18n.config';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  try {
-    // 기본 라우팅
-    const { url, method } = req;
-    
-    // Health check
-    if (url === '/' || url === '/health') {
-      return res.status(200).json({
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development',
-        message: 'Glimpse API is running on Vercel',
-        version: '1.0.0',
-        endpoints: {
-          health: '/api/health',
-          docs: '/api/docs',
-          api: '/api/v1',
-        },
-      });
-    }
+const server = express();
 
-    // API 문서 간단 버전
-    if (url === '/docs') {
-      return res.status(200).json({
-        title: 'Glimpse API',
-        version: '1.0.0',
-        description: 'Privacy-focused Korean dating app API',
-        endpoints: {
-          health: 'GET /api/health',
-          users: 'GET /api/v1/users',
-          groups: 'GET /api/v1/groups',
-          matches: 'GET /api/v1/matches',
-        },
-        status: 'Under Development - NestJS migration in progress',
-      });
-    }
+export default async (req: any, res: any) => {
+  if (!global.nestApp) {
+    const app = await NestFactory.create(
+      AppModule,
+      new ExpressAdapter(server),
+      {
+        logger: ['error', 'warn', 'log'],
+      }
+    );
 
-    // 404 for other routes
-    return res.status(404).json({
-      statusCode: 404,
-      message: 'Not Found',
-      error: `Route ${method} ${url} not found`,
-      timestamp: new Date().toISOString(),
+    const configService = app.get(ConfigService);
+
+    // Initialize i18n
+    await initI18n();
+    app.use(getI18nMiddleware());
+
+    // CORS 설정
+    app.enableCors({
+      origin: true,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-dev-auth'],
     });
 
-  } catch (error) {
-    console.error('API handler error:', error);
-    return res.status(500).json({
-      statusCode: 500,
-      message: 'Internal server error',
-      error: error.message || 'Unknown error',
-      timestamp: new Date().toISOString(),
+    // 전역 파이프
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+        transformOptions: {
+          enableImplicitConversion: true,
+        },
+      }),
+    );
+
+    // 전역 예외 필터
+    app.useGlobalFilters(new HttpExceptionFilter());
+
+    // API 프리픽스 설정
+    app.setGlobalPrefix('api/v1', {
+      exclude: ['health', 'docs'],
     });
+
+    await app.init();
+    global.nestApp = app;
   }
-}
+
+  server(req, res);
+};

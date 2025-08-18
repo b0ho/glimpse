@@ -19,7 +19,7 @@ async function bootstrap() {
   });
 
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('PORT', 3000);
+  const port = process.env.PORT || configService.get<number>('PORT', 3000);
 
   // 보안 헤더 설정
   app.use(
