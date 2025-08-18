@@ -694,4 +694,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
+  personaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.SM,
+    paddingHorizontal: SPACING.MD,
+    borderRadius: 20,
+    marginTop: SPACING.SM,
+    gap: SPACING.XS,
+  },
+  personaButtonText: {
+    color: 'white',
+    fontSize: FONT_SIZES.SM,
+    fontWeight: '600',
+  },
 });

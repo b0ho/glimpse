@@ -26,5 +26,8 @@
   },
   "fab": {
     "createPost": "새 게시물 작성"
+  },
+  "persona": {
+    "setupButton": "내 페르소나 설정하기"
   }
 }

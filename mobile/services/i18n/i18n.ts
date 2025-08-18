@@ -22,8 +22,8 @@ const SUPPORTED_LANGUAGES = {
 };
 
 // Import translations - with fallbacks for missing files
-let koCommon, koAuth, koGroup, koMatching, koChat, koPayment, koProfile, koSettings, koMatches, koPremium, koLocation, koNavigation, koCall, koStory, koDev;
-let enCommon, enAuth, enGroup, enProfile, enMatching, enSettings, enMatches, enChat, enPremium, enLocation, enNavigation, enCall, enStory, enDev;
+let koCommon, koAuth, koGroup, koMatching, koChat, koPayment, koProfile, koSettings, koMatches, koPremium, koLocation, koNavigation, koCall, koStory, koDev, koPersona;
+let enCommon, enAuth, enGroup, enProfile, enMatching, enSettings, enMatches, enChat, enPremium, enLocation, enNavigation, enCall, enStory, enDev, enPersona;
 
 try {
   koCommon = require('../../locales/ko/common.json');
@@ -41,6 +41,7 @@ try {
   koCall = require('../../locales/ko/call.json');
   koStory = require('../../locales/ko/story.json');
   koDev = require('../../locales/ko/dev.json');
+  koPersona = require('../../locales/ko/persona.json');
   
   enCommon = require('../../locales/en/common.json');
   enAuth = require('../../locales/en/auth.json');
@@ -56,6 +57,7 @@ try {
   enCall = require('../../locales/en/call.json');
   enStory = require('../../locales/en/story.json');
   enDev = require('../../locales/en/dev.json');
+  enPersona = require('../../locales/en/persona.json');
 } catch (error) {
   console.warn('Some translation files are missing, using defaults');
   // Default fallbacks
@@ -74,6 +76,7 @@ try {
   koCall = koCall || {};
   koStory = koStory || {};
   koDev = koDev || {};
+  koPersona = koPersona || {};
   
   enCommon = enCommon || { app: { name: 'Glimpse' } };
   enAuth = enAuth || {};
@@ -89,6 +92,7 @@ try {
   enCall = enCall || {};
   enStory = enStory || {};
   enDev = enDev || {};
+  enPersona = enPersona || {};
 }
 
 // Translation resources
@@ -110,6 +114,7 @@ const resources = {
     call: koCall,
     story: koStory,
     dev: koDev,
+    persona: koPersona,
   },
   en: {
     common: enCommon,
@@ -128,6 +133,7 @@ const resources = {
     call: enCall,
     story: enStory,
     dev: enDev,
+    persona: enPersona,
   },
   // Other languages with safe fallbacks
   ja: {
@@ -288,7 +294,7 @@ export const initI18n = async () => {
       lng: detectedLanguage,
       fallbackLng: FALLBACK_LANGUAGE,
       defaultNS: 'common',
-      ns: ['common', 'auth', 'group', 'matching', 'chat', 'payment', 'profile', 'settings', 'home', 'matches', 'premium', 'location', 'navigation', 'call', 'story', 'dev'],
+      ns: ['common', 'auth', 'group', 'matching', 'chat', 'payment', 'profile', 'settings', 'home', 'matches', 'premium', 'location', 'navigation', 'call', 'story', 'dev', 'persona'],
       
       interpolation: {
         escapeValue: false, // React Native already escapes values
