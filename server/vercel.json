@@ -1,5 +1,8 @@
 {
   "buildCommand": "echo 'Skipping build for serverless functions'",
   "outputDirectory": "public",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "rewrites": [
+    { "source": "/api/v1/(.*)", "destination": "/api/$1" }
+  ]
 }
