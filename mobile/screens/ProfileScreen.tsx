@@ -21,6 +21,7 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { EditNicknameModal } from '@/components/modals/EditNicknameModal';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { ThemeSelector } from '@/components/settings/ThemeSelector';
+import { LetterFromFounder } from '@/components/profile/LetterFromFounder';
 import { useTheme } from '@/hooks/useTheme';
 import { AppMode, MODE_TEXTS } from '../shared/types';
 import apiClient from '@/services/api/config';
@@ -443,6 +444,9 @@ export const ProfileScreen = () => {
           <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
         </TouchableOpacity>
       </View>
+      
+      {/* 운영자의 편지 */}
+      <LetterFromFounder />
     </View>
   );
 

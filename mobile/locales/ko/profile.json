@@ -86,6 +86,8 @@
     "terms": "서비스 이용약관",
     "support": "고객지원"
   },
+  "letterFromFounder": "운영자의 편지",
+  "letterSubtitle": "진심 어린 마음을 전합니다",
   "footer": {
     "version": "Glimpse v0.1.0",
     "tagline": "익명 데이팅의 새로운 시작"

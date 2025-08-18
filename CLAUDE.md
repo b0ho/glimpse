@@ -442,6 +442,51 @@ cd server && npx prisma migrate dev  # Run development migrations
 
 **Prevention**: When modifying authentication or security middleware, always update both server AND client configurations simultaneously
 
+### Common React Native Development Issues
+
+**1. Missing Package Imports**
+**Problem**: TypeScript errors like "Cannot find module 'expo-blur'"
+**Solution**: Always check and install required packages before using them
+```bash
+npm install expo-blur --legacy-peer-deps
+```
+
+**2. Icon Name Errors**
+**Problem**: MaterialCommunityIcons icon names not found (e.g., "email-heart-outline")
+**Solution**: Use valid icon names from the icon library. Check the icon directory or use simpler alternatives:
+- ❌ `email-heart-outline` → ✅ `email-outline`
+- Always verify icon names at: https://icons.expo.fyi/
+
+**3. i18n Translation Key Format**
+**Problem**: Translation keys not working correctly
+**Solution**: Use namespace separator correctly:
+- ❌ `t('common.language')` → ✅ `t('common:language')`
+- Format: `t('namespace:key')` not `t('namespace.key')`
+
+**4. Blank Screen Issues**
+**Common Causes**:
+- TypeScript compilation errors
+- Missing package dependencies  
+- Incorrect import paths
+- Runtime errors in components
+
+**Debug Steps**:
+1. Check TypeScript errors: `npm run typecheck:real`
+2. Clear Metro cache: `npx expo start --clear`
+3. Check console logs in terminal
+4. Verify all dependencies are installed
+5. Kill existing processes on conflicting ports
+
+**5. Port Conflicts**
+**Problem**: "Error: listen EADDRINUSE: address already in use"
+**Solution**:
+```bash
+# Find process using port
+lsof -i :3001
+# Kill the process
+kill -9 [PID]
+```
+
 ## Next Development Priorities
 
 ### Phase 4 Options (Choose Based on Business Needs):
