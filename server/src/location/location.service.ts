@@ -340,7 +340,7 @@ export class LocationService {
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: {
-        persona: personaData,
+        personaSettings: personaData,
       },
     });
 

@@ -48,8 +48,14 @@ model User {
   
   // Location Profile Settings
   locationProfileMode String? // 'real' or 'persona'
-  personaProfile Json? // 페르소나 프로필 정보
-  persona Json? // 근처 사용자 페르소나 설정
+  personaProfile Json? // 페르소나 프로필 정보 (deprecated - use Persona model)
+  personaSettings Json? // 근처 사용자 페르소나 설정 (deprecated - use Persona model)
+  
+  // Location tracking
+  lastLatitude  Float?
+  lastLongitude Float?
+  lastLocationUpdateAt DateTime?
+  locationSharingEnabled Boolean @default(false)
 
   // Relations
   deviceTokens       UserDeviceToken[]
@@ -95,6 +101,9 @@ model User {
   // Interest Search relations
   interestSearches       InterestSearch[] @relation("UserInterests")
   matchedInterests       InterestSearch[] @relation("MatchedInterests")
+  
+  // Persona relation
+  persona                Persona?
 
   @@map("users")
 }
@@ -103,6 +112,28 @@ enum Gender {
   MALE
   FEMALE
   OTHER
+}
+
+// Persona for location-based profiles
+model Persona {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  nickname    String   // Different from user's main nickname
+  age         Int?
+  bio         String?  @db.Text
+  interests   String[]
+  occupation  String?
+  height      Int?
+  mbti        String?
+  drinking    String?
+  smoking     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("personas")
 }
 
 // Device & Authentication
