@@ -101,13 +101,14 @@ export class FileService {
     );
     const awsBucket = this.configService.get<string>('AWS_S3_BUCKET');
 
-    // 개발 환경에서는 AWS 설정이 없어도 동작하도록 함
+    // AWS 설정이 없어도 서비스가 시작되도록 함 (파일 업로드 기능만 비활성화)
     const isDevelopment =
       this.configService.get<string>('NODE_ENV') === 'development';
 
-    if (!isDevelopment && (!awsAccessKeyId || !awsSecretKey || !awsBucket)) {
-      throw new Error(
-        'AWS credentials and S3 bucket are required for file service in production',
+    // Production에서도 AWS 없이 동작 가능하도록 수정
+    if (!awsAccessKeyId || !awsSecretKey || !awsBucket) {
+      console.warn(
+        '[FileService] AWS credentials not configured. File upload features will be disabled.',
       );
     }
 
