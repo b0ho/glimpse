@@ -38,7 +38,7 @@ export class HealthController {
   @ApiResponse({ status: 200, description: 'Database is healthy' })
   async checkDatabase() {
     try {
-      const result = await this.prisma.$queryRaw`
+      const result = await this.prisma.$queryRaw<any[]>`
         SELECT 
           current_database() as database,
           current_user as user,
