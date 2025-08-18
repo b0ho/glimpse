@@ -14,7 +14,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Check environment variables
     const envStatus = {
       DATABASE_URL: !!process.env.DATABASE_URL,
-      DATABASE_URL_preview: process.env.DATABASE_URL?.includes('supabase') ? 'Supabase detected' : 'Not Supabase',
+      DATABASE_URL_provider: process.env.DATABASE_URL?.includes('railway.app') ? 'Railway PostgreSQL' : 
+                             process.env.DATABASE_URL?.includes('localhost') ? 'Local PostgreSQL' : 
+                             process.env.DATABASE_URL?.includes('supabase') ? 'Supabase (Legacy)' :
+                             'Other PostgreSQL',
       NODE_ENV: process.env.NODE_ENV,
       JWT_SECRET: !!process.env.JWT_SECRET,
       ENCRYPTION_KEY: !!process.env.ENCRYPTION_KEY,
@@ -56,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       prismaStudio: {
         info: 'Prisma Studio is not available in Vercel serverless environment',
-        alternative: 'Use Supabase Dashboard: https://supabase.com/dashboard',
+        alternative: 'Use Railway Dashboard: https://railway.app/dashboard',
         localAccess: 'Run "npx prisma studio" in local development',
       },
       migration: {
