@@ -24,6 +24,7 @@ model User {
   isVerified    Boolean  @default(false)
   credits       Int      @default(1)
   isPremium     Boolean  @default(false)
+  premiumLevel  PremiumLevel @default(FREE)
   premiumUntil  DateTime?
   lastActive    DateTime @default(now())
   lastOnline    DateTime?
@@ -112,6 +113,12 @@ enum Gender {
   MALE
   FEMALE
   OTHER
+}
+
+enum PremiumLevel {
+  FREE
+  BASIC
+  UPPER
 }
 
 // Persona for location-based profiles

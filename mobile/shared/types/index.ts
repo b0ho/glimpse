@@ -10,6 +10,19 @@ export enum AppMode {
 }
 
 /**
+ * 프리미엄 레벨 열거형
+ * @enum {string}
+ */
+export enum PremiumLevel {
+  /** 무료 사용자 */
+  FREE = 'FREE',
+  /** 프리미엄 베이직 */
+  BASIC = 'BASIC',
+  /** 프리미엄 상위 */
+  UPPER = 'UPPER'
+}
+
+/**
  * 사용자 인터페이스 - 모든 사용자 정보를 포함하는 기본 타입
  * @interface User
  */
@@ -29,6 +42,7 @@ export interface User {
   isVerified: boolean;
   credits: number;
   isPremium: boolean;
+  premiumLevel?: PremiumLevel; // 프리미엄 레벨
   premiumUntil?: Date;
   isAdmin?: boolean; // Admin user flag
   currentMode?: AppMode; // Current app mode (dating or friendship)

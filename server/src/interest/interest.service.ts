@@ -51,19 +51,50 @@ export class InterestService {
       throw new BadRequestException('이미 동일한 검색이 등록되어 있습니다');
     }
 
-    // 일일 등록 제한 확인 (프리미엄: 20개, 일반: 5개)
-    const todaySearchCount = await this.prisma.interestSearch.count({
+    // 프리미엄 레벨별 유형당 등록 제한 확인
+    const activeSearchCount = await this.prisma.interestSearch.count({
       where: {
         userId,
-        createdAt: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0)),
-        },
+        type: dto.type,
+        status: SearchStatus.ACTIVE,
       },
     });
 
-    const maxSearches = user.isPremium ? 20 : 5;
-    if (todaySearchCount >= maxSearches) {
-      throw new BadRequestException(`일일 등록 제한(${maxSearches}개)을 초과했습니다`);
+    // 프리미엄 레벨에 따른 제한
+    const premiumLevel = (user as any).premiumLevel || 'FREE';
+    let maxSearchesPerType: number;
+    let expirationDays: number | null;
+    
+    switch (premiumLevel) {
+      case 'UPPER':
+        maxSearchesPerType = 999; // 무제한
+        expirationDays = null; // 무제한
+        break;
+      case 'BASIC':
+        maxSearchesPerType = 3;
+        expirationDays = 30;
+        break;
+      case 'FREE':
+      default:
+        maxSearchesPerType = 1;
+        expirationDays = 7;
+        break;
+    }
+
+    if (activeSearchCount >= maxSearchesPerType) {
+      const message = premiumLevel === 'FREE'
+        ? `무료 사용자는 ${dto.type} 유형으로 최대 ${maxSearchesPerType}개까지만 등록 가능합니다. 프리미엄 업그레이드를 통해 더 많은 관심상대를 등록하세요.`
+        : `현재 프리미엄 레벨에서는 ${dto.type} 유형으로 최대 ${maxSearchesPerType}개까지만 등록 가능합니다.`;
+      throw new BadRequestException(message);
+    }
+
+    // 유효기간 설정
+    let expiresAt: Date | null = null;
+    if (expirationDays && !dto.expiresAt) {
+      expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + expirationDays);
+    } else if (dto.expiresAt) {
+      expiresAt = new Date(dto.expiresAt);
     }
 
     // 민감 정보 암호화
@@ -78,7 +109,7 @@ export class InterestService {
         type: dto.type,
         value: this.normalizeValue(dto.type, encryptedValue),
         metadata: dto.metadata,
-        expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
+        expiresAt,
         status: SearchStatus.ACTIVE,
       },
       include: {
