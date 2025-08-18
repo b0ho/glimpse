@@ -30,7 +30,7 @@
     "seed:all": "npm run seed:domains && npm run seed:english",
     "seed:test": "npx tsx prisma/seed-test.ts",
     "seed:extended": "npx tsx prisma/seed-extended.ts",
-    "seed:local": "npx tsx prisma/seed-local.ts",
+    "seed:local": "npx tsx prisma/seed-local-unified.ts",
     "seed:railway": "npx tsx prisma/seed-railway.ts",
     "seed:railway:quick": "npx tsx prisma/seed-railway-quick.ts",
     "db:generate": "npx prisma generate",
