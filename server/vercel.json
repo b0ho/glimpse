@@ -7,9 +7,33 @@
       "config": {
         "maxLambdaSize": "50mb"
       }
+    },
+    {
+      "src": "api/minimal.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/health.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/debug.ts",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
+    {
+      "src": "/minimal",
+      "dest": "/api/minimal"
+    },
+    {
+      "src": "/health",
+      "dest": "/api/health"
+    },
+    {
+      "src": "/debug",
+      "dest": "/api/debug"
+    },
     {
       "src": "/(.*)",
       "dest": "/api/index"
