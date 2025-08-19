@@ -1,27 +1,33 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "50mb"
-      }
+  "functions": {
+    "api/index.ts": {
+      "runtime": "@vercel/node@18.x",
+      "maxDuration": 30
     },
-    {
-      "src": "api/minimal.ts",
-      "use": "@vercel/node"
+    "api/minimal.ts": {
+      "runtime": "@vercel/node@18.x"
     },
-    {
-      "src": "api/health.ts",
-      "use": "@vercel/node"
+    "api/health.ts": {
+      "runtime": "@vercel/node@18.x"
     },
-    {
-      "src": "api/debug.ts",
-      "use": "@vercel/node"
+    "api/debug.ts": {
+      "runtime": "@vercel/node@18.x"
     }
-  ],
+  },
   "routes": [
+    {
+      "src": "/api/minimal",
+      "dest": "/api/minimal"
+    },
+    {
+      "src": "/api/health",
+      "dest": "/api/health"
+    },
+    {
+      "src": "/api/debug",
+      "dest": "/api/debug"
+    },
     {
       "src": "/minimal",
       "dest": "/api/minimal"
