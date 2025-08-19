@@ -54,59 +54,80 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
   ) {
-    const redisUrl =
-      this.configService.get('REDIS_URL') ||
-      `redis://${this.configService.get('REDIS_HOST', 'localhost')}:${this.configService.get('REDIS_PORT', 6379)}`;
-
-    const redisConfig = {
-      url: redisUrl,
-      password: this.configService.get('REDIS_PASSWORD'),
-      database: parseInt(this.configService.get('REDIS_DB', '0')),
-    };
-
-    this.publisher = createClient(redisConfig);
-    this.subscriber = createClient(redisConfig);
+    // Redis will be initialized in setupEventHandlers if configured
   }
 
   /**
    * 모듈 초기화
    */
   async onModuleInit() {
-    await this.setupEventHandlers();
+    const redisUrl = this.configService.get('REDIS_URL');
+    console.log('Redis URL from config:', redisUrl ? 'Found' : 'Not found');
+    
+    if (redisUrl) {
+      await this.setupEventHandlers();
+    } else {
+      console.log('Redis not configured, MessageQueue service disabled');
+    }
   }
 
   /**
    * 모듈 종료
    */
   async onModuleDestroy() {
-    await this.disconnect();
+    if (this.isConnected) {
+      await this.disconnect();
+    }
   }
 
   /**
    * 이벤트 핸들러 설정
    */
   private async setupEventHandlers() {
-    // Connect to Redis
-    await this.publisher.connect();
-    await this.subscriber.connect();
+    try {
+      const redisUrl = this.configService.get('REDIS_URL');
+      
+      if (!redisUrl) {
+        console.log('REDIS_URL not configured, skipping Redis connection');
+        return;
+      }
 
-    this.publisher.on('connect', () => {
-      console.log('Message queue publisher connected');
+      // Use only REDIS_URL for all Redis configuration
+      const redisConfig = {
+        url: redisUrl,
+      };
+
+      this.publisher = createClient(redisConfig);
+      this.subscriber = createClient(redisConfig);
+
+      // Connect to Redis
+      await this.publisher.connect();
+      await this.subscriber.connect();
+
+      this.publisher.on('connect', () => {
+        console.log('Message queue publisher connected');
+        this.isConnected = true;
+      });
+
+      this.subscriber.on('connect', () => {
+        console.log('Message queue subscriber connected');
+      });
+
+      this.publisher.on('error', (error) => {
+        console.error('Message queue publisher error:', error);
+        this.isConnected = false;
+      });
+
+      this.subscriber.on('error', (error) => {
+        console.error('Message queue subscriber error:', error);
+      });
+
+      console.log('Redis connected successfully');
       this.isConnected = true;
-    });
-
-    this.subscriber.on('connect', () => {
-      console.log('Message queue subscriber connected');
-    });
-
-    this.publisher.on('error', (error) => {
-      console.error('Message queue publisher error:', error);
+    } catch (error) {
+      console.error('Failed to connect to Redis:', error);
       this.isConnected = false;
-    });
-
-    this.subscriber.on('error', (error) => {
-      console.error('Message queue subscriber error:', error);
-    });
+    }
   }
 
   /**
@@ -339,7 +360,13 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
    * 서비스 종료
    */
   async disconnect(): Promise<void> {
-    await Promise.all([this.publisher.quit(), this.subscriber.quit()]);
+    if (this.publisher && this.subscriber) {
+      try {
+        await Promise.all([this.publisher.quit(), this.subscriber.quit()]);
+      } catch (error) {
+        console.error('Error disconnecting from Redis:', error);
+      }
+    }
     this.isConnected = false;
   }
 
