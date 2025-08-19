@@ -67,6 +67,41 @@ module.exports = async (req, res) => {
       });
       return;
     }
+    
+    if (query.api === 'contents') {
+      res.status(200).json({
+        success: true,
+        message: 'Contents API working via simple endpoint!',
+        data: {
+          stories: [
+            {
+              id: 'story-1',
+              userId: 'user-1',
+              nickname: 'Demo User',
+              imageUrl: 'https://picsum.photos/400/600?random=1',
+              caption: 'Beautiful sunset today! 🌅',
+              createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+              expiresAt: new Date(Date.now() + 22 * 60 * 60 * 1000).toISOString(),
+              viewCount: 15,
+              isViewed: false
+            }
+          ],
+          feeds: [
+            {
+              id: 'feed-1',
+              type: 'GROUP_ACTIVITY',
+              title: '새로운 그룹 멤버가 가입했습니다',
+              content: '카카오 그룹에 5명의 새로운 멤버가 가입했습니다.',
+              timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+              isRead: false
+            }
+          ],
+          pagination: { page: 1, limit: 20, total: 2, hasNext: false }
+        },
+        timestamp: new Date().toISOString()
+      });
+      return;
+    }
 
     // 기본 simple 응답 (DB 연결 테스트 포함)
     let dbTest = 'not-tested';
@@ -84,7 +119,8 @@ module.exports = async (req, res) => {
       availableAPIs: {
         users: '/api/simple?api=users',
         matching: '/api/simple?api=matching',
-        chat: '/api/simple?api=chat'
+        chat: '/api/simple?api=chat',
+        contents: '/api/simple?api=contents'
       },
       timestamp: new Date().toISOString(),
       environment: {
