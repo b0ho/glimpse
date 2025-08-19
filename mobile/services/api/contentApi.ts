@@ -39,42 +39,12 @@ export const contentApi = {
    * @returns {Promise<Content>} 생성된 콘텐츠
    */
   async createContent(content: Partial<Content>): Promise<Content> {
-    // 로컬 개발 환경에서만 mock 데이터 사용 (Vercel 배포에서는 실제 API 사용)
-    if (__DEV__ && (typeof window === 'undefined' || window.location?.hostname === 'localhost')) {
-      console.log('[ContentAPI] Mock 콘텐츠 생성:', content);
-      console.log('[ContentAPI] 전달받은 authorNickname:', content.authorNickname);
-      
-      // 실제 API 호출 시뮬레이션을 위한 딜레이
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockContent: Content = {
-        id: `mock_content_${Date.now()}`,
-        userId: content.userId || 'current_user',
-        authorId: content.authorId || 'current_user',
-        authorNickname: content.authorNickname || '테스트유저', // 기본값을 테스트유저로 통일
-        type: content.type || 'text',
-        text: content.text || '',
-        imageUrls: content.imageUrls || [],
-        groupId: content.groupId,
-        likes: 0,
-        likeCount: 0,
-        views: 0,
-        isPublic: true,
-        isLikedByUser: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      
-      console.log('[ContentAPI] Mock 콘텐츠 생성 완료:', mockContent);
-      
-      // AsyncStorage에 저장
-      await saveCreatedContent(mockContent);
-      
-      return mockContent;
-    }
+    // 실제 API 호출 - 개발 환경에서도 실제 서버 사용
+    console.log('[ContentAPI] 콘텐츠 생성 API 호출:', content);
     
     const response = await apiClient.post<{ success: boolean; data: Content }>('/contents', content);
     if (response.success && response.data) {
+      console.log('[ContentAPI] 콘텐츠 생성 완료:', response.data);
       return response.data;
     }
     throw new Error('콘텐츠 생성 실패');

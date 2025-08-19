@@ -42,21 +42,27 @@ export class EnvConfig {
     }
 
     // 2. Load environment-specific .env file
-    const envSpecificPath = path.join(rootDir, `.env.${nodeEnv}`);
+    let envSpecificFile: string;
+    if (nodeEnv === 'production') {
+      envSpecificFile = '.env.production';
+    } else if (nodeEnv === 'development' || nodeEnv === 'local') {
+      envSpecificFile = '.env.local';
+    } else if (nodeEnv === 'test') {
+      envSpecificFile = '.env.test';
+    } else {
+      envSpecificFile = `.env.${nodeEnv}`;
+    }
+    
+    const envSpecificPath = path.join(rootDir, envSpecificFile);
     if (fs.existsSync(envSpecificPath)) {
       dotenv.config({ path: envSpecificPath });
-      console.log(`✅ Loaded configuration from .env.${nodeEnv}`);
+      console.log(`✅ Loaded configuration from ${envSpecificFile}`);
+    } else {
+      console.warn(`⚠️  ${envSpecificFile} not found`);
     }
 
-    // 3. Load secrets file (sensitive credentials)
-    const secretsPath = path.join(rootDir, '.env.secrets');
-    if (fs.existsSync(secretsPath)) {
-      dotenv.config({ path: secretsPath });
-      console.log(`✅ Loaded secrets from .env.secrets`);
-    } else if (nodeEnv === 'production') {
-      console.warn(`⚠️  Warning: .env.secrets not found in production mode`);
-      console.warn(`   Ensure environment variables are set via deployment platform`);
-    }
+    // 3. Environment-specific files now contain all configuration including secrets
+    // No separate .env.secrets file needed
 
     // 4. Validate required environment variables
     this.validateRequiredVars();

@@ -18,6 +18,9 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
+    const databaseUrl = process.env.DATABASE_URL || 'postgresql://b0ho:@localhost:5432/glimpse_test?schema=public';
+    console.log('[PrismaService] Connecting to database:', databaseUrl.replace(/\/\/[^:]+:[^@]*@/, '//***:***@'));
+    
     super({
       log:
         process.env.NODE_ENV === 'production'
@@ -25,7 +28,7 @@ export class PrismaService
           : (['query', 'info', 'warn', 'error'] as any),
       datasources: {
         db: {
-          url: process.env.DATABASE_URL,
+          url: databaseUrl,
         },
       },
     });

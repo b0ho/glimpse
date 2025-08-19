@@ -462,6 +462,26 @@ cd server && npx prisma migrate dev  # Run development migrations
 
 **Prevention**: When modifying authentication or security middleware, always update both server AND client configurations simultaneously
 
+### CRITICAL: Real API Integration Requirement (2025-01-19)
+**NEVER USE MOCK DATA IN PRODUCTION CODE**
+
+After extensive debugging, we learned that ALL features must use real API integration:
+1. **No Mock Data**: Never return hardcoded data in API services
+2. **Real Database**: Always ensure database is properly seeded with test data
+3. **Authentication**: Use real auth tokens with proper user sessions
+4. **Error Handling**: Implement proper error handling for API failures
+
+**Database Requirements**:
+- Ensure test users exist in the database (e.g., `cmeh8afwr000i1mb7ikv3lq1a`)
+- Verify foreign key constraints are satisfied
+- Use proper group IDs that exist in the database
+
+**Testing Approach**:
+1. Always test with real API calls: `curl -H "x-dev-auth: true" http://localhost:3001/api/v1/...`
+2. Check database state: `psql -U postgres -d glimpse_dev -c "SELECT * FROM table_name"`
+3. Monitor server logs for errors
+4. Verify response data structure matches TypeScript interfaces
+
 ### Common React Native Development Issues
 
 **1. Missing Package Imports**

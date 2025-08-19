@@ -12,10 +12,13 @@ import { clerkClient } from '@clerk/clerk-sdk-node';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
-    const useDevAuth = configService.get<string>('USE_DEV_AUTH') === 'true';
-    const secretKey = useDevAuth
-      ? configService.get('JWT_SECRET', 'development_jwt_secret_key_12345')
-      : configService.get('CLERK_PUBLISHABLE_KEY', 'dummy-key');
+    // Always use JWT_SECRET for token validation
+    // Clerk uses its own validation mechanism, not this strategy
+    const secretKey = configService.get('JWT_SECRET');
+    
+    if (!secretKey) {
+      throw new Error('JWT_SECRET is not configured');
+    }
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

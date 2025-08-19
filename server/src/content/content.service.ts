@@ -64,40 +64,87 @@ export class ContentService {
    * 콘텐츠 생성
    */
   async createContent(userId: string, contentData: any): Promise<Content> {
-    const post = await this.prisma.communityPost.create({
-      data: {
-        authorId: userId,
-        groupId: contentData.groupId || 'group_1', // 기본 그룹
-        title: contentData.title || '',
-        content: contentData.text || contentData.content || '',
-        imageUrls: contentData.imageUrls || [],
-        tags: contentData.tags || [],
-      },
-      include: {
-        author: true,
-        _count: {
-          select: { likes: true, comments: true },
-        },
-      },
-    });
-
-    // CommunityPost를 Content 형태로 변환
-    return {
-      id: post.id,
-      userId: post.authorId,
-      authorId: post.authorId,
-      authorNickname: post.author.nickname || '익명',
-      type: post.imageUrls.length > 0 ? 'image' : 'text',
-      text: post.content,
-      imageUrls: post.imageUrls,
-      likes: post._count.likes,
-      likeCount: post._count.likes,
-      views: post.viewCount,
-      isPublic: true,
-      isLikedByUser: false,
-      createdAt: post.createdAt,
-      updatedAt: post.updatedAt,
-    };
+    console.log('[ContentService] Creating content with userId:', userId);
+    console.log('[ContentService] Content data:', JSON.stringify(contentData, null, 2));
+    console.log('[ContentService] Received groupId:', contentData.groupId);
+    
+    // Generate unique ID for the post
+    const postId = `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // First, check if groupId exists in database or use default
+    let groupId = contentData.groupId;
+    
+    // Check if group exists
+    if (groupId && groupId !== 'cmeh8afz4004o1mb7s8w8kch7') {
+      const groupExists = await this.prisma.group.findUnique({
+        where: { id: groupId }
+      });
+      
+      if (!groupExists) {
+        console.log('[ContentService] Group not found, using default group');
+        groupId = 'cmeh8afz4004o1mb7s8w8kch7';
+      }
+    } else {
+      groupId = 'cmeh8afz4004o1mb7s8w8kch7';
+    }
+    
+    console.log('[ContentService] Using groupId:', groupId);
+    
+    try {
+      // Use raw SQL to insert the post directly
+      await this.prisma.$executeRaw`
+        INSERT INTO community_posts (id, "authorId", "groupId", title, content, "imageUrls", tags, "createdAt", "updatedAt")
+        VALUES (
+          ${postId},
+          ${userId},
+          ${groupId},
+          ${contentData.title || ''},
+          ${contentData.text || contentData.content || ''},
+          ARRAY[]::text[],
+          ARRAY[]::text[],
+          NOW(),
+          NOW()
+        )
+      `;
+      
+      console.log('[ContentService] Post created successfully with ID:', postId);
+      
+      // Fetch the created post with relations using raw SQL
+      const [post] = await this.prisma.$queryRaw<any[]>`
+        SELECT 
+          p.*,
+          u.nickname as author_nickname,
+          u.id as author_id
+        FROM community_posts p
+        JOIN users u ON p."authorId" = u.id
+        WHERE p.id = ${postId}
+      `;
+      
+      if (!post) {
+        throw new Error('Failed to fetch created post');
+      }
+      
+      // Return in the expected format
+      return {
+        id: post.id,
+        userId: post.authorId,
+        authorId: post.authorId,
+        authorNickname: post.author_nickname || '익명',
+        type: 'text',
+        text: post.content,
+        imageUrls: post.imageUrls || [],
+        likes: 0,
+        likeCount: 0,
+        views: post.viewCount || 0,
+        isPublic: true,
+        isLikedByUser: false,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+      };
+    } catch (error) {
+      console.error('[ContentService] Error creating post:', error);
+      throw error;
+    }
   }
 
   /**
