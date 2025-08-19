@@ -10,7 +10,7 @@ const isProduction = process.env.NODE_ENV === 'production' ||
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 
   process.env.API_URL || 
   (isProduction
-    ? 'https://glimpse-server-psi.vercel.app/api/v1' 
+    ? 'https://glimpse-server.up.railway.app/api/v1' 
     : 'http://localhost:3001/api/v1');
 
 // 디버깅용 로그
@@ -29,7 +29,7 @@ console.log('[API Config] Environment Detection:', {
 export const SOCKET_URL = process.env.EXPO_PUBLIC_WEBSOCKET_URL || 
   process.env.WEBSOCKET_URL || 
   (isProduction
-    ? 'wss://glimpse-server-psi.vercel.app'
+    ? 'wss://glimpse-server.up.railway.app'
     : 'ws://localhost:3002');
 
 /**
