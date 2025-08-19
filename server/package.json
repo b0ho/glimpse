@@ -44,6 +44,7 @@
     "db:setup:railway:quick": "npm run db:migrate:railway && npm run seed:railway:quick"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.864.0",
     "@clerk/clerk-sdk-node": "^5.1.6",
     "@nestjs-modules/mailer": "^1.11.2",
     "@nestjs/cache-manager": "^3.0.1",
