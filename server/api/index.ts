@@ -63,9 +63,25 @@ export default async (req: any, res: any) => {
     return server(req, res);
   } catch (error) {
     console.error('Request handler error:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Environment check:', {
+      NODE_ENV: process.env.NODE_ENV,
+      hasDatabase: !!process.env.DATABASE_URL,
+      hasEncryption: !!process.env.ENCRYPTION_KEY,
+      hasJWT: !!process.env.JWT_SECRET
+    });
+    
     res.status(500).json({ 
       error: 'Internal Server Error',
-      message: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? {
+        stack: error.stack,
+        env: {
+          NODE_ENV: process.env.NODE_ENV,
+          hasDatabase: !!process.env.DATABASE_URL,
+          hasEncryption: !!process.env.ENCRYPTION_KEY
+        }
+      } : undefined
     });
   }
 };
