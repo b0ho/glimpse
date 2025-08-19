@@ -1,48 +1,9 @@
 {
   "version": 2,
-  "functions": {
-    "api/index.ts": {
-      "runtime": "@vercel/node@18.x",
-      "maxDuration": 30
-    },
-    "api/minimal.ts": {
-      "runtime": "@vercel/node@18.x"
-    },
-    "api/health.ts": {
-      "runtime": "@vercel/node@18.x"
-    },
-    "api/debug.ts": {
-      "runtime": "@vercel/node@18.x"
-    }
-  },
-  "routes": [
+  "builds": [
     {
-      "src": "/api/minimal",
-      "dest": "/api/minimal"
-    },
-    {
-      "src": "/api/health",
-      "dest": "/api/health"
-    },
-    {
-      "src": "/api/debug",
-      "dest": "/api/debug"
-    },
-    {
-      "src": "/minimal",
-      "dest": "/api/minimal"
-    },
-    {
-      "src": "/health",
-      "dest": "/api/health"
-    },
-    {
-      "src": "/debug",
-      "dest": "/api/debug"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/index"
+      "src": "api/**/*.ts",
+      "use": "@vercel/node"
     }
   ],
   "env": {
