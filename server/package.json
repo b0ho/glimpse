@@ -5,9 +5,12 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
     "build": "node scripts/load-env.js 'prisma generate && nest build'",
-    "vercel-build": "prisma generate && nest build",
+    "vercel-build": "echo 'Vercel build starting...' && prisma generate && nest build",
     "deploy:db": "node scripts/deploy-db.js",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node scripts/load-env.js 'nest start'",
