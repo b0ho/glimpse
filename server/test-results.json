@@ -94,21 +94,21 @@
   },
   "suites": [
     {
-      "title": "network-diagnosis.spec.ts",
-      "file": "network-diagnosis.spec.ts",
+      "title": "final-production-test.spec.ts",
+      "file": "final-production-test.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Production Network Diagnosis",
-          "file": "network-diagnosis.spec.ts",
+          "title": "프로덕션 API 최종 테스트",
+          "file": "final-production-test.spec.ts",
           "line": 5,
           "column": 6,
           "specs": [
             {
-              "title": "comprehensive production server analysis",
-              "ok": false,
+              "title": "작동하는 엔드포인트들 확인",
+              "ok": true,
               "tags": [],
               "tests": [
                 {
@@ -121,204 +121,421 @@
                     {
                       "workerIndex": 0,
                       "parallelIndex": 0,
-                      "status": "timedOut",
-                      "duration": 31473,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                      },
-                      "errors": [
-                        {
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                        }
-                      ],
+                      "status": "passed",
+                      "duration": 813,
+                      "errors": [],
                       "stdout": [
                         {
-                          "text": "🔍 Starting comprehensive production analysis...\n"
+                          "text": "=== 작동하는 엔드포인트 테스트 ===\n"
                         },
                         {
-                          "text": "📡 Testing direct API endpoints...\n"
+                          "text": "Hello status: \u001b[33m200\u001b[39m\n"
                         },
                         {
-                          "text": "Testing endpoint: /\n"
+                          "text": "Hello response: { hello: \u001b[32m'world'\u001b[39m, timestamp: \u001b[32m'2025-08-19T11:55:29.069Z'\u001b[39m }\n"
                         },
                         {
-                          "text": "/ - Status: 500\n"
+                          "text": "Simple status: \u001b[33m200\u001b[39m\n"
                         },
                         {
-                          "text": "/ - Content-Type: text/plain; charset=utf-8\n"
-                        },
-                        {
-                          "text": "/ - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::79nsn-1755602114001-ab342fd6a77f\n\n"
-                        },
-                        {
-                          "text": "Testing endpoint: /health\n"
-                        },
-                        {
-                          "text": "/health - Status: 500\n"
-                        },
-                        {
-                          "text": "/health - Content-Type: text/plain; charset=utf-8\n"
-                        },
-                        {
-                          "text": "/health - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::r4p7q-1755602118052-c393688e0564\n\n"
-                        },
-                        {
-                          "text": "Testing endpoint: /api/health\n"
-                        },
-                        {
-                          "text": "/api/health - Status: 500\n"
-                        },
-                        {
-                          "text": "/api/health - Content-Type: text/plain; charset=utf-8\n"
-                        },
-                        {
-                          "text": "/api/health - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::65mwv-1755602122238-e91546379c2b\n\n"
-                        },
-                        {
-                          "text": "Testing endpoint: /api/v1/health\n"
-                        },
-                        {
-                          "text": "/api/v1/health - Status: 500\n"
-                        },
-                        {
-                          "text": "/api/v1/health - Content-Type: text/plain; charset=utf-8\n"
-                        },
-                        {
-                          "text": "/api/v1/health - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::m7vsp-1755602126017-e3db1624d905\n\n"
-                        },
-                        {
-                          "text": "Testing endpoint: /simple-test\n"
-                        },
-                        {
-                          "text": "/simple-test - Status: 500\n"
-                        },
-                        {
-                          "text": "/simple-test - Content-Type: text/plain; charset=utf-8\n"
-                        },
-                        {
-                          "text": "/simple-test - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::4hnfg-1755602129802-e6d4f4e5e21b\n\n"
-                        },
-                        {
-                          "text": "Testing endpoint: /api/v1/groups\n"
-                        },
-                        {
-                          "text": "/api/v1/groups - Status: 500\n"
-                        },
-                        {
-                          "text": "/api/v1/groups - Content-Type: text/plain; charset=utf-8\n"
-                        },
-                        {
-                          "text": "/api/v1/groups - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::m7vsp-1755602133494-6753890caa37\n\n"
-                        },
-                        {
-                          "text": "Testing endpoint: /api/v1/contents\n"
-                        },
-                        {
-                          "text": "/api/v1/contents - Status: 500\n"
-                        },
-                        {
-                          "text": "/api/v1/contents - Content-Type: text/plain; charset=utf-8\n"
-                        },
-                        {
-                          "text": "/api/v1/contents - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::4hnfg-1755602137288-d28fb3a0eaf4\n\n"
-                        },
-                        {
-                          "text": "🌐 Testing page navigation...\n"
-                        },
-                        {
-                          "text": "Page navigation error: page.goto: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://glimpse-server-psi.vercel.app/\", waiting until \"networkidle\"\u001b[22m\n\n"
-                        },
-                        {
-                          "text": "⏱️ Analyzing network timing...\n"
-                        },
-                        {
-                          "text": "Timing analysis error: apiRequestContext.get: Target page, context or browser has been closed\n"
-                        },
-                        {
-                          "text": "📋 Analyzing response headers...\n"
-                        },
-                        {
-                          "text": "Headers analysis error: apiRequestContext.get: Target page, context or browser has been closed\n"
-                        },
-                        {
-                          "text": "🔄 Testing different HTTP methods...\n"
-                        },
-                        {
-                          "text": "Testing GET method...\n"
-                        },
-                        {
-                          "text": "GET error: apiRequestContext.fetch: Target page, context or browser has been closed\n"
-                        },
-                        {
-                          "text": "Testing POST method...\n"
-                        },
-                        {
-                          "text": "POST error: apiRequestContext.fetch: Target page, context or browser has been closed\n"
-                        },
-                        {
-                          "text": "Testing OPTIONS method...\n"
-                        },
-                        {
-                          "text": "OPTIONS error: apiRequestContext.fetch: Target page, context or browser has been closed\n"
-                        },
-                        {
-                          "text": "🌍 Testing CORS configuration...\n"
-                        },
-                        {
-                          "text": "CORS test error: apiRequestContext.fetch: Target page, context or browser has been closed\n"
-                        },
-                        {
-                          "text": "📱 Testing mobile app connectivity...\n"
-                        },
-                        {
-                          "text": "Mobile app test error: page.goto: Target page, context or browser has been closed\n"
-                        },
-                        {
-                          "text": "📊 Network Summary:\n"
-                        },
-                        {
-                          "text": "Total requests: 1\n"
-                        },
-                        {
-                          "text": "Total responses: 1\n"
-                        },
-                        {
-                          "text": "Failed requests: 1\n"
-                        },
-                        {
-                          "text": "  ❌ https://glimpse-server-psi.vercel.app/ - 500 \n"
+                          "text": "Simple response: {\n  status: \u001b[32m'success'\u001b[39m,\n  message: \u001b[32m'Simple Express endpoint working!'\u001b[39m,\n  timestamp: \u001b[32m'2025-08-19T11:55:29.300Z'\u001b[39m,\n  environment: {\n    NODE_ENV: \u001b[32m'production'\u001b[39m,\n    hasDatabase: \u001b[33mtrue\u001b[39m,\n    hasEncryption: \u001b[33mtrue\u001b[39m,\n    platform: \u001b[32m'vercel-serverless'\u001b[39m\n  }\n}\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-08-19T11:15:11.500Z",
+                      "startTime": "2025-08-19T11:55:28.661Z",
                       "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "/Users/b0ho/git/glimpse/server/test-results/network-diagnosis-Producti-39776--production-server-analysis-chromium/test-failed-1.png"
-                        },
-                        {
-                          "name": "video",
-                          "contentType": "video/webm",
-                          "path": "/Users/b0ho/git/glimpse/server/test-results/network-diagnosis-Producti-39776--production-server-analysis-chromium/video.webm"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "/Users/b0ho/git/glimpse/server/test-results/network-diagnosis-Producti-39776--production-server-analysis-chromium/error-context.md"
-                        }
-                      ]
+                      "attachments": []
                     }
                   ],
-                  "status": "unexpected"
+                  "status": "expected"
                 }
               ],
-              "id": "cfff4521c763e2aabb34-e850cbabf119b8db7c88",
-              "file": "network-diagnosis.spec.ts",
+              "id": "50035cbd0364003a548f-66589c98a6cd16551796",
+              "file": "final-production-test.spec.ts",
               "line": 6,
+              "column": 7
+            },
+            {
+              "title": "v1 API 경로 테스트",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 31,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "=== v1 API 경로 테스트 ===\n"
+                        },
+                        {
+                          "text": "V1 Health status: \u001b[33m404\u001b[39m\n"
+                        },
+                        {
+                          "text": "V1 Health error: The page could not be found\n\nNOT_FOUND\n\nicn1::t9d7j-1755604529488-3fbf43020784\n\n"
+                        },
+                        {
+                          "text": "V1 Groups status: \u001b[33m404\u001b[39m\n"
+                        },
+                        {
+                          "text": "V1 Groups error: The page could not be found\n\nNOT_FOUND\n\nicn1::t9d7j-1755604529503-e0e63f7a687e\n\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-19T11:55:29.477Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "50035cbd0364003a548f-3d67028974bf72dd8e31",
+              "file": "final-production-test.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "CORS OPTIONS 요청 테스트",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 17,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "=== CORS OPTIONS 테스트 ===\n"
+                        },
+                        {
+                          "text": "OPTIONS status: \u001b[33m404\u001b[39m\n"
+                        },
+                        {
+                          "text": "OPTIONS headers: {\n  \u001b[32m'cache-control'\u001b[39m: \u001b[32m'public, max-age=0, must-revalidate'\u001b[39m,\n  \u001b[32m'content-length'\u001b[39m: \u001b[32m'79'\u001b[39m,\n  \u001b[32m'content-type'\u001b[39m: \u001b[32m'text/plain; charset=utf-8'\u001b[39m,\n  date: \u001b[32m'Tue, 19 Aug 2025 11:55:29 GMT'\u001b[39m,\n  server: \u001b[32m'Vercel'\u001b[39m,\n  \u001b[32m'strict-transport-security'\u001b[39m: \u001b[32m'max-age=63072000; includeSubDomains; preload'\u001b[39m,\n  \u001b[32m'x-vercel-error'\u001b[39m: \u001b[32m'NOT_FOUND'\u001b[39m,\n  \u001b[32m'x-vercel-id'\u001b[39m: \u001b[32m'icn1::t9d7j-1755604529522-b3084b07157a'\u001b[39m\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-19T11:55:29.510Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "50035cbd0364003a548f-ebdf7728c41d401267ac",
+              "file": "final-production-test.spec.ts",
+              "line": 66,
+              "column": 7
+            },
+            {
+              "title": "작동하는 엔드포인트들 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 855,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "=== 작동하는 엔드포인트 테스트 ===\n"
+                        },
+                        {
+                          "text": "Hello status: \u001b[33m200\u001b[39m\n"
+                        },
+                        {
+                          "text": "Hello response: { hello: \u001b[32m'world'\u001b[39m, timestamp: \u001b[32m'2025-08-19T11:55:30.159Z'\u001b[39m }\n"
+                        },
+                        {
+                          "text": "Simple status: \u001b[33m200\u001b[39m\n"
+                        },
+                        {
+                          "text": "Simple response: {\n  status: \u001b[32m'success'\u001b[39m,\n  message: \u001b[32m'Simple Express endpoint working!'\u001b[39m,\n  timestamp: \u001b[32m'2025-08-19T11:55:30.395Z'\u001b[39m,\n  environment: {\n    NODE_ENV: \u001b[32m'production'\u001b[39m,\n    hasDatabase: \u001b[33mtrue\u001b[39m,\n    hasEncryption: \u001b[33mtrue\u001b[39m,\n    platform: \u001b[32m'vercel-serverless'\u001b[39m\n  }\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-19T11:55:29.746Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "50035cbd0364003a548f-38f744c635ab55e9f28a",
+              "file": "final-production-test.spec.ts",
+              "line": 6,
+              "column": 7
+            },
+            {
+              "title": "v1 API 경로 테스트",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 33,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "=== v1 API 경로 테스트 ===\n"
+                        },
+                        {
+                          "text": "V1 Health status: \u001b[33m404\u001b[39m\n"
+                        },
+                        {
+                          "text": "V1 Health error: The page could not be found\n\nNOT_FOUND\n\nicn1::9dk7h-1755604530627-420ab87ef4aa\n\n"
+                        },
+                        {
+                          "text": "V1 Groups status: \u001b[33m404\u001b[39m\n"
+                        },
+                        {
+                          "text": "V1 Groups error: The page could not be found\n\nNOT_FOUND\n\nicn1::9dk7h-1755604530638-19affcbf5aa0\n\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-19T11:55:30.604Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "50035cbd0364003a548f-f5fc9f3b008736b48051",
+              "file": "final-production-test.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "CORS OPTIONS 요청 테스트",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 229,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "=== CORS OPTIONS 테스트 ===\n"
+                        },
+                        {
+                          "text": "OPTIONS status: \u001b[33m404\u001b[39m\n"
+                        },
+                        {
+                          "text": "OPTIONS headers: {\n  \u001b[32m'cache-control'\u001b[39m: \u001b[32m'public, max-age=0, must-revalidate'\u001b[39m,\n  \u001b[32m'content-length'\u001b[39m: \u001b[32m'79'\u001b[39m,\n  \u001b[32m'content-type'\u001b[39m: \u001b[32m'text/plain; charset=utf-8'\u001b[39m,\n  date: \u001b[32m'Tue, 19 Aug 2025 11:55:30 GMT'\u001b[39m,\n  server: \u001b[32m'Vercel'\u001b[39m,\n  \u001b[32m'strict-transport-security'\u001b[39m: \u001b[32m'max-age=63072000; includeSubDomains; preload'\u001b[39m,\n  \u001b[32m'x-vercel-error'\u001b[39m: \u001b[32m'NOT_FOUND'\u001b[39m,\n  \u001b[32m'x-vercel-id'\u001b[39m: \u001b[32m'icn1::lgpvb-1755604530649-57e6a5d9bafa'\u001b[39m\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-19T11:55:30.639Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "50035cbd0364003a548f-f1eec124fd2df8c9ba86",
+              "file": "final-production-test.spec.ts",
+              "line": 66,
+              "column": 7
+            },
+            {
+              "title": "작동하는 엔드포인트들 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 476,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "=== 작동하는 엔드포인트 테스트 ===\n"
+                        },
+                        {
+                          "text": "Hello status: \u001b[33m200\u001b[39m\n"
+                        },
+                        {
+                          "text": "Hello response: { hello: \u001b[32m'world'\u001b[39m, timestamp: \u001b[32m'2025-08-19T11:55:31.271Z'\u001b[39m }\n"
+                        },
+                        {
+                          "text": "Simple status: \u001b[33m200\u001b[39m\n"
+                        },
+                        {
+                          "text": "Simple response: {\n  status: \u001b[32m'success'\u001b[39m,\n  message: \u001b[32m'Simple Express endpoint working!'\u001b[39m,\n  timestamp: \u001b[32m'2025-08-19T11:55:31.487Z'\u001b[39m,\n  environment: {\n    NODE_ENV: \u001b[32m'production'\u001b[39m,\n    hasDatabase: \u001b[33mtrue\u001b[39m,\n    hasEncryption: \u001b[33mtrue\u001b[39m,\n    platform: \u001b[32m'vercel-serverless'\u001b[39m\n  }\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-19T11:55:31.098Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "50035cbd0364003a548f-bf09cad79b8b11c775aa",
+              "file": "final-production-test.spec.ts",
+              "line": 6,
+              "column": 7
+            },
+            {
+              "title": "v1 API 경로 테스트",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 22,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "=== v1 API 경로 테스트 ===\n"
+                        },
+                        {
+                          "text": "V1 Health status: \u001b[33m404\u001b[39m\n"
+                        },
+                        {
+                          "text": "V1 Health error: The page could not be found\n\nNOT_FOUND\n\nicn1::9dk7h-1755604531588-516670c25465\n\n"
+                        },
+                        {
+                          "text": "V1 Groups status: \u001b[33m404\u001b[39m\n"
+                        },
+                        {
+                          "text": "V1 Groups error: The page could not be found\n\nNOT_FOUND\n\nicn1::9dk7h-1755604531598-b5265e01d737\n\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-19T11:55:31.577Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "50035cbd0364003a548f-466169b7d88a06135172",
+              "file": "final-production-test.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "CORS OPTIONS 요청 테스트",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 11,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "=== CORS OPTIONS 테스트 ===\n"
+                        },
+                        {
+                          "text": "OPTIONS status: \u001b[33m404\u001b[39m\n"
+                        },
+                        {
+                          "text": "OPTIONS headers: {\n  \u001b[32m'cache-control'\u001b[39m: \u001b[32m'public, max-age=0, must-revalidate'\u001b[39m,\n  \u001b[32m'content-length'\u001b[39m: \u001b[32m'79'\u001b[39m,\n  \u001b[32m'content-type'\u001b[39m: \u001b[32m'text/plain; charset=utf-8'\u001b[39m,\n  date: \u001b[32m'Tue, 19 Aug 2025 11:55:31 GMT'\u001b[39m,\n  server: \u001b[32m'Vercel'\u001b[39m,\n  \u001b[32m'strict-transport-security'\u001b[39m: \u001b[32m'max-age=63072000; includeSubDomains; preload'\u001b[39m,\n  \u001b[32m'x-vercel-error'\u001b[39m: \u001b[32m'NOT_FOUND'\u001b[39m,\n  \u001b[32m'x-vercel-id'\u001b[39m: \u001b[32m'icn1::9dk7h-1755604531610-1ad3f95a25f6'\u001b[39m\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-19T11:55:31.600Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "50035cbd0364003a548f-87a92a8cfbad4563a59f",
+              "file": "final-production-test.spec.ts",
+              "line": 66,
               "column": 7
             }
           ]
@@ -328,11 +545,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-08-19T11:15:11.237Z",
-    "duration": 31934.465,
-    "expected": 0,
+    "startTime": "2025-08-19T11:55:28.381Z",
+    "duration": 3237.344,
+    "expected": 9,
     "skipped": 0,
-    "unexpected": 1,
+    "unexpected": 0,
     "flaky": 0
   }
 }
