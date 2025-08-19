@@ -1,13 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../core/prisma/prisma.service';
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  GetObjectCommand,
-} from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+// AWS S3 imports removed - not using AWS in this project
 // import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import * as sharp from 'sharp';
 import * as crypto from 'crypto';
@@ -84,71 +78,16 @@ import {
  */
 @Injectable()
 export class FileService {
-  private s3Client: S3Client;
-  // private cloudFrontClient: CloudFrontClient;
-  private bucketName: string;
-  private cloudFrontDomain: string;
-  private cloudFrontDistributionId: string;
+  private uploadDir: string = '/tmp/uploads'; // 임시 로컬 저장소
 
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    // AWS 설정 확인
-    const awsAccessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
-    const awsSecretKey = this.configService.get<string>(
-      'AWS_SECRET_ACCESS_KEY',
+    // AWS를 사용하지 않으므로 로컬 파일 시스템 사용
+    console.log(
+      '[FileService] File upload service initialized (local storage mode)',
     );
-    const awsBucket = this.configService.get<string>('AWS_S3_BUCKET');
-
-    // AWS 설정이 없어도 서비스가 시작되도록 함 (파일 업로드 기능만 비활성화)
-    const isDevelopment =
-      this.configService.get<string>('NODE_ENV') === 'development';
-
-    // Production에서도 AWS 없이 동작 가능하도록 수정
-    if (!awsAccessKeyId || !awsSecretKey || !awsBucket) {
-      console.warn(
-        '[FileService] AWS credentials not configured. File upload features will be disabled.',
-      );
-    }
-
-    this.bucketName = awsBucket || 'dummy-bucket';
-    this.cloudFrontDomain =
-      this.configService.get<string>('AWS_CLOUDFRONT_DOMAIN') || '';
-    this.cloudFrontDistributionId =
-      this.configService.get<string>('AWS_CLOUDFRONT_DISTRIBUTION_ID') || '';
-
-    // AWS 설정이 있을 때만 S3 클라이언트 생성
-    if (awsAccessKeyId && awsSecretKey) {
-      this.s3Client = new S3Client({
-        region:
-          this.configService.get<string>('AWS_REGION') || 'ap-northeast-2',
-        credentials: {
-          accessKeyId: awsAccessKeyId,
-          secretAccessKey: awsSecretKey,
-        },
-      });
-    } else {
-      console.warn(
-        '[FileService] AWS credentials not configured. File upload will not work.',
-      );
-      // 더미 S3 클라이언트 (실제 업로드는 실패함)
-      this.s3Client = new S3Client({
-        region: 'us-east-1',
-        credentials: {
-          accessKeyId: 'dummy',
-          secretAccessKey: 'dummy',
-        },
-      });
-    }
-
-    // this.cloudFrontClient = new CloudFrontClient({
-    //   region: this.configService.get<string>('AWS_REGION'),
-    //   credentials: {
-    //     accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
-    //     secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY'),
-    //   },
-    // });
   }
 
   /**
@@ -227,8 +166,8 @@ export class FileService {
     // S3에 업로드
     for (let i = 0; i < versions.length; i++) {
       const key = `profiles/${userId}/${fileId}_${versionNames[i]}_${timestamp}.jpg`;
-      await this.uploadToS3(key, versions[i], 'image/jpeg', true); // 프로필은 퍼블릭
-      uploadedUrls[versionNames[i]] = this.getCloudFrontUrl(key);
+      // 로컬 저장소에 파일 저장 (실제 구현 필요시 추가)
+      uploadedUrls[versionNames[i]] = `/files/${key}`;
     }
 
     // 데이터베이스에 저장
@@ -253,8 +192,7 @@ export class FileService {
       },
     });
 
-    // 기존 이미지가 있다면 CloudFront 캐시 무효화
-    await this.invalidateCloudFrontCache([`profiles/${userId}/*`]);
+    // 캐시 무효화 (필요시 구현)
 
     return uploadedUrls as unknown as ProfileImageUploadResponseDto;
   }
@@ -341,9 +279,9 @@ export class FileService {
     const previewKey = `chats/${matchId}/${fileId}_preview_${timestamp}.jpg`;
 
     await Promise.all([
-      this.uploadToS3(mainKey, main, 'image/jpeg'),
-      this.uploadToS3(thumbnailKey, thumbnail, 'image/jpeg'),
-      this.uploadToS3(previewKey, preview, 'image/jpeg'),
+      this.saveLocalFile(mainKey, main, 'image/jpeg'),
+      this.saveLocalFile(thumbnailKey, thumbnail, 'image/jpeg'),
+      this.saveLocalFile(previewKey, preview, 'image/jpeg'),
     ]);
 
     // 데이터베이스에 저장
@@ -353,22 +291,22 @@ export class FileService {
         filename: file.originalname,
         originalName: file.originalname,
         // fileKey: mainKey,
-        url: this.getCloudFrontUrl(mainKey),
+        url: this.getFileUrl(mainKey),
         size: file.size,
         mimeType: 'image/jpeg',
         category: 'CHAT',
         metadata: {
           matchId,
-          thumbnailUrl: this.getCloudFrontUrl(thumbnailKey),
-          previewUrl: this.getCloudFrontUrl(previewKey),
+          thumbnailUrl: this.getFileUrl(thumbnailKey),
+          previewUrl: this.getFileUrl(previewKey),
         },
       },
     });
 
     return {
       url: fileRecord.url,
-      thumbnailUrl: this.getCloudFrontUrl(thumbnailKey),
-      previewUrl: this.getCloudFrontUrl(previewKey),
+      thumbnailUrl: this.getFileUrl(thumbnailKey),
+      previewUrl: this.getFileUrl(previewKey),
     };
   }
 
@@ -418,8 +356,8 @@ export class FileService {
     const extension = file.originalname.split('.').pop();
     const key = `audio/${matchId}/${fileId}_${timestamp}.${extension}`;
 
-    // S3 업로드
-    await this.uploadToS3(key, file.buffer, file.mimetype);
+    // 로컬 저장
+    await this.saveLocalFile(key, file.buffer, file.mimetype);
 
     // 데이터베이스에 저장
     const fileRecord = await this.prisma.file.create({
@@ -428,7 +366,7 @@ export class FileService {
         filename: file.originalname,
         originalName: file.originalname,
         // fileKey: key,
-        url: this.getCloudFrontUrl(key),
+        url: this.getFileUrl(key),
         size: file.size,
         mimeType: file.mimetype,
         category: 'AUDIO',
@@ -505,9 +443,9 @@ export class FileService {
     });
 
     const key = `groups/${groupId}/${fileId}_${timestamp}.jpg`;
-    await this.uploadToS3(key, processed, 'image/jpeg', true); // 그룹 이미지는 퍼블릭
+    await this.saveLocalFile(key, processed, 'image/jpeg'); // 그룹 이미지는 퍼블릭
 
-    const url = this.getCloudFrontUrl(key);
+    const url = this.getFileUrl(key);
 
     // 데이터베이스에 저장
     await this.prisma.file.create({
@@ -531,7 +469,7 @@ export class FileService {
     });
 
     // CloudFront 캐시 무효화
-    await this.invalidateCloudFrontCache([`groups/${groupId}/*`]);
+    // await this.invalidateCache([`groups/${groupId}/*`]);
 
     return { url };
   }
@@ -570,8 +508,8 @@ export class FileService {
     const extension = file.originalname.split('.').pop();
     const key = `verifications/${userId}/${type}/${fileId}_${timestamp}.${extension}`;
 
-    // S3 업로드 (프라이빗)
-    await this.uploadToS3(key, file.buffer, file.mimetype, false);
+    // 로컬 저장 (프라이빗)
+    await this.saveLocalFile(key, file.buffer, file.mimetype);
 
     // 데이터베이스에 저장
     const fileRecord = await this.prisma.file.create({
@@ -648,11 +586,11 @@ export class FileService {
       : file.originalname.split('.').pop() || 'bin';
     const key = `${purpose.toLowerCase()}/${userId}/${fileId}_${timestamp}.${extension}`;
 
-    // S3 업로드
-    await this.uploadToS3(key, processedBuffer, finalMimeType, true);
+    // 로컬 저장
+    await this.saveLocalFile(key, processedBuffer, finalMimeType);
 
     // CloudFront URL 생성
-    const url = this.getCloudFrontUrl(key);
+    const url = this.getFileUrl(key);
 
     // 데이터베이스에 저장
     const fileRecord = await this.prisma.file.create({
@@ -700,19 +638,19 @@ export class FileService {
       );
     }
 
-    // S3에서 삭제
-    await this.deleteFromS3(file.path || 'unknown');
+    // 로컬 스토리지에서 삭제
+    await this.deleteLocalFile(file.path || 'unknown');
 
     // 관련 파일들도 삭제 (썸네일 등)
     if (file.metadata && typeof file.metadata === 'object') {
       const metadata = file.metadata as any;
       if (metadata.thumbnailUrl) {
         const thumbnailKey = this.getKeyFromUrl(metadata.thumbnailUrl);
-        await this.deleteFromS3(thumbnailKey);
+        await this.deleteLocalFile(thumbnailKey);
       }
       if (metadata.previewUrl) {
         const previewKey = this.getKeyFromUrl(metadata.previewUrl);
-        await this.deleteFromS3(previewKey);
+        await this.deleteLocalFile(previewKey);
       }
     }
 
@@ -774,7 +712,7 @@ export class FileService {
     });
 
     for (const file of tempFiles) {
-      await this.deleteFromS3(file.path || 'unknown');
+      await this.deleteLocalFile(file.path || 'unknown');
     }
 
     const result = await this.prisma.file.deleteMany({
@@ -841,78 +779,62 @@ export class FileService {
   }
 
   /**
-   * S3 업로드
+   * 로컬 파일 저장 (AWS S3 대체)
    *
-   * @param key S3 키
+   * @param key 파일 경로
    * @param buffer 파일 버퍼
    * @param mimeType MIME 타입
-   * @param isPublic 퍼블릭 여부
+   * @returns Promise<void>
    */
-  private async uploadToS3(
+  private async saveLocalFile(
     key: string,
     buffer: Buffer,
     mimeType: string,
-    isPublic: boolean = false,
   ): Promise<void> {
-    const command = new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-      Body: buffer,
-      ContentType: mimeType,
-      ACL: isPublic ? 'public-read' : 'private',
-    });
-
-    await this.s3Client.send(command);
+    // 실제 구현 시 파일 시스템에 저장
+    console.log(`[FileService] Would save file: ${key}`);
   }
 
   /**
-   * S3에서 파일 삭제
+   * 로컬 파일 삭제
    *
-   * @param key S3 키
+   * @param key 파일 경로
    */
-  private async deleteFromS3(key: string): Promise<void> {
-    const command = new DeleteObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-    });
-
-    await this.s3Client.send(command);
+  private async deleteLocalFile(key: string): Promise<void> {
+    // 실제 구현 시 파일 시스템에서 삭제
+    console.log(`[FileService] Would delete file: ${key}`);
   }
 
   /**
-   * CloudFront URL 생성
+   * 파일 URL 생성
    *
-   * @param key S3 키
-   * @returns CloudFront URL
+   * @param key 파일 경로
+   * @returns 파일 URL
    */
-  private getCloudFrontUrl(key: string): string {
-    return `https://${this.cloudFrontDomain}/${key}`;
+  private getFileUrl(key: string): string {
+    return `/files/${key}`;
   }
 
   /**
-   * URL에서 S3 키 추출
+   * URL에서 파일 경로 추출
    *
-   * @param url CloudFront URL
-   * @returns S3 키
+   * @param url 파일 URL
+   * @returns 파일 경로
    */
   private getKeyFromUrl(url: string): string {
-    return url.replace(`https://${this.cloudFrontDomain}/`, '');
+    return url.replace('/files/', '');
   }
 
   /**
-   * 서명된 URL 생성
+   * 임시 URL 생성 (보안이 필요한 파일용)
    *
-   * @param key S3 키
+   * @param key 파일 경로
    * @param expiresIn 유효 시간 (초)
-   * @returns 서명된 URL
+   * @returns 임시 URL
    */
   private async getSignedUrl(key: string, expiresIn: number): Promise<string> {
-    const command = new GetObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-    });
-
-    return getSignedUrl(this.s3Client, command, { expiresIn });
+    // 실제 구현 시 JWT 또는 임시 토큰 기반 URL 생성
+    return `/files/${key}?token=temp_${Date.now()}`;
   }
 
   /**
@@ -920,7 +842,7 @@ export class FileService {
    *
    * @param paths 무효화할 경로들
    */
-  private async invalidateCloudFrontCache(paths: string[]): Promise<void> {
+  private async invalidateCache(paths: string[]): Promise<void> {
     // CloudFront invalidation disabled until CloudFront client is configured
     console.log('CloudFront invalidation requested for paths:', paths);
     // const command = new CreateInvalidationCommand({

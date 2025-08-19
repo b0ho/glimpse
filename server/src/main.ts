@@ -7,6 +7,11 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import helmet from 'helmet';
 import compression from 'compression';
 import { initI18n, getI18nMiddleware } from './i18n/i18n.config';
+import { EnvConfig } from './config/env.config';
+
+// Load environment configuration (including secrets)
+const envConfig = EnvConfig.getInstance();
+envConfig.load();
 
 /**
  * NestJS 애플리케이션 부트스트랩

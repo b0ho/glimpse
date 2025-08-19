@@ -10,7 +10,9 @@ build/
 .env.local
 .env.development
 .env.production
+.env.secrets
 secrets.env
+*.secrets
 
 # Database
 *.sqlite
