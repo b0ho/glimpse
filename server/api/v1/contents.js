@@ -1,4 +1,4 @@
-// v1 API 컨텐츠 엔드포인트 (스토리, 프로필 이미지 등)
+// v1 API 경로의 컨텐츠 엔드포인트 (groups.js를 복사해서 수정)
 module.exports = async (req, res) => {
   // CORS 헤더 설정
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,85 +12,65 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { url, method } = req;
-    
-    if (method === 'GET') {
-      // 컨텐츠 목록 조회
-      res.status(200).json({
-        success: true,
-        data: {
-          stories: [
-            {
-              id: 'story-1',
-              userId: 'user-1',
-              nickname: 'Demo User',
-              imageUrl: 'https://picsum.photos/400/600?random=1',
-              caption: 'Beautiful sunset today! 🌅',
-              createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2시간 전
-              expiresAt: new Date(Date.now() + 22 * 60 * 60 * 1000).toISOString(), // 22시간 후
-              viewCount: 15,
-              isViewed: false
-            },
-            {
-              id: 'story-2',
-              userId: 'user-2',
-              nickname: 'Coffee Lover',
-              imageUrl: 'https://picsum.photos/400/600?random=2',
-              caption: 'Perfect coffee morning ☕',
-              createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4시간 전
-              expiresAt: new Date(Date.now() + 20 * 60 * 60 * 1000).toISOString(), // 20시간 후
-              viewCount: 8,
-              isViewed: true
-            }
-          ],
-          feeds: [
-            {
-              id: 'feed-1',
-              type: 'GROUP_ACTIVITY',
-              title: '새로운 그룹 멤버가 가입했습니다',
-              content: '카카오 그룹에 5명의 새로운 멤버가 가입했습니다.',
-              timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1시간 전
-              isRead: false
-            },
-            {
-              id: 'feed-2',
-              type: 'MATCH_UPDATE',
-              title: '새로운 매치가 생겼습니다',
-              content: '축하합니다! 새로운 매치가 생성되었습니다.',
-              timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3시간 전
-              isRead: true
-            }
-          ],
-          pagination: {
-            page: 1,
-            limit: 20,
-            total: 4,
-            hasNext: false
+    res.status(200).json({
+      success: true,
+      message: 'Contents API working! (copied from groups)',
+      data: {
+        stories: [
+          {
+            id: 'story-1',
+            userId: 'user-1',
+            nickname: 'Demo User',
+            imageUrl: 'https://picsum.photos/400/600?random=1',
+            caption: 'Beautiful sunset today! 🌅',
+            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            expiresAt: new Date(Date.now() + 22 * 60 * 60 * 1000).toISOString(),
+            viewCount: 15,
+            isViewed: false
+          },
+          {
+            id: 'story-2',
+            userId: 'user-2',
+            nickname: 'Coffee Lover',
+            imageUrl: 'https://picsum.photos/400/600?random=2',
+            caption: 'Perfect coffee morning ☕',
+            createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+            expiresAt: new Date(Date.now() + 20 * 60 * 60 * 1000).toISOString(),
+            viewCount: 8,
+            isViewed: true
           }
-        },
-        timestamp: new Date().toISOString()
-      });
-    } else if (method === 'POST') {
-      // 새 컨텐츠 업로드
-      res.status(200).json({
-        success: true,
-        message: 'Content uploaded successfully',
-        data: {
-          id: 'content-' + Date.now(),
-          uploadedAt: new Date().toISOString()
+        ],
+        feeds: [
+          {
+            id: 'feed-1',
+            type: 'GROUP_ACTIVITY',
+            title: '새로운 그룹 멤버가 가입했습니다',
+            content: '카카오 그룹에 5명의 새로운 멤버가 가입했습니다.',
+            timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+            isRead: false
+          },
+          {
+            id: 'feed-2',
+            type: 'MATCH_UPDATE',
+            title: '새로운 매치가 생겼습니다',
+            content: '축하합니다! 새로운 매치가 생성되었습니다.',
+            timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+            isRead: true
+          }
+        ],
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: 4,
+          hasNext: false
         }
-      });
-    } else {
-      res.status(200).json({
-        success: true,
-        message: 'Contents API working!',
-        timestamp: new Date().toISOString(),
-        environment: {
-          NODE_ENV: process.env.NODE_ENV,
-          hasDatabase: !!process.env.DATABASE_URL
-        }
-      });
-    }
+      },
+      timestamp: new Date().toISOString(),
+      environment: {
+        NODE_ENV: process.env.NODE_ENV,
+        hasDatabase: !!process.env.DATABASE_URL
+      }
+    });
   } catch (error) {
     console.error('Contents API error:', error);
     res.status(500).json({
