@@ -1,11 +1,11 @@
-// 작동하는 엔드포인트에 DB 연결 테스트 추가
+// 다중 API 라우터로 확장된 엔드포인트
 const express = require('express');
 
 module.exports = async (req, res) => {
-  console.log('Simple endpoint called:', {
+  console.log('Multi API endpoint called:', {
     method: req.method,
     url: req.url,
-    headers: req.headers
+    query: req.query
   });
 
   // CORS 헤더 설정
@@ -20,30 +20,90 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // 실제 DB 연결 테스트 시도
-  let dbTest = 'not-tested';
   try {
-    if (process.env.DATABASE_URL) {
-      // 간단한 DB 연결 테스트 (실제 쿼리는 아직 안함)
-      dbTest = 'connection-string-exists';
+    const { url, method } = req;
+    const query = req.query || {};
+    
+    // API 타입 파라미터로 라우팅 처리
+    if (query.api === 'users') {
+      res.status(200).json({
+        success: true,
+        message: 'Users API working via simple endpoint!',
+        data: {
+          id: 'demo-user-' + Date.now(),
+          nickname: 'Demo User',
+          isVerified: true,
+          isPremium: false,
+          credits: 5
+        },
+        timestamp: new Date().toISOString()
+      });
+      return;
     }
-  } catch (error) {
-    dbTest = 'connection-failed: ' + error.message;
-  }
+    
+    if (query.api === 'matching') {
+      res.status(200).json({
+        success: true,
+        message: 'Matching API working via simple endpoint!',
+        data: {
+          likes: [],
+          matches: [],
+          recommendations: []
+        },
+        timestamp: new Date().toISOString()
+      });
+      return;
+    }
+    
+    if (query.api === 'chat') {
+      res.status(200).json({
+        success: true,
+        message: 'Chat API working via simple endpoint!',
+        data: {
+          rooms: [],
+          unreadCount: 0
+        },
+        timestamp: new Date().toISOString()
+      });
+      return;
+    }
 
-  res.status(200);
-  res.end(JSON.stringify({
-    status: 'success',
-    message: 'Simple Express endpoint working with DB test!',
-    timestamp: new Date().toISOString(),
-    environment: {
-      NODE_ENV: process.env.NODE_ENV,
-      hasDatabase: !!process.env.DATABASE_URL,
-      hasEncryption: !!process.env.ENCRYPTION_KEY,
-      hasJWT: !!process.env.JWT_SECRET,
-      platform: 'vercel-serverless'
-    },
-    dbTest: dbTest,
-    cors: 'enabled'
-  }, null, 2));
+    // 기본 simple 응답 (DB 연결 테스트 포함)
+    let dbTest = 'not-tested';
+    try {
+      if (process.env.DATABASE_URL) {
+        dbTest = 'connection-string-exists';
+      }
+    } catch (error) {
+      dbTest = 'connection-failed: ' + error.message;
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Multi API Simple endpoint working!',
+      availableAPIs: {
+        users: '/api/simple?api=users',
+        matching: '/api/simple?api=matching',
+        chat: '/api/simple?api=chat'
+      },
+      timestamp: new Date().toISOString(),
+      environment: {
+        NODE_ENV: process.env.NODE_ENV,
+        hasDatabase: !!process.env.DATABASE_URL,
+        hasEncryption: !!process.env.ENCRYPTION_KEY,
+        hasJWT: !!process.env.JWT_SECRET,
+        platform: 'vercel-serverless'
+      },
+      dbTest: dbTest,
+      cors: 'enabled'
+    });
+
+  } catch (error) {
+    console.error('Multi API error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 };
