@@ -1,0 +1,338 @@
+{
+  "config": {
+    "configFile": "/Users/b0ho/git/glimpse/server/playwright.config.ts",
+    "rootDir": "/Users/b0ho/git/glimpse/server/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/b0ho/git/glimpse/server/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/b0ho/git/glimpse/server/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/b0ho/git/glimpse/server/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/Users/b0ho/git/glimpse/server/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/b0ho/git/glimpse/server/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/Users/b0ho/git/glimpse/server/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.54.2",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "network-diagnosis.spec.ts",
+      "file": "network-diagnosis.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Production Network Diagnosis",
+          "file": "network-diagnosis.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "comprehensive production server analysis",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 31473,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🔍 Starting comprehensive production analysis...\n"
+                        },
+                        {
+                          "text": "📡 Testing direct API endpoints...\n"
+                        },
+                        {
+                          "text": "Testing endpoint: /\n"
+                        },
+                        {
+                          "text": "/ - Status: 500\n"
+                        },
+                        {
+                          "text": "/ - Content-Type: text/plain; charset=utf-8\n"
+                        },
+                        {
+                          "text": "/ - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::79nsn-1755602114001-ab342fd6a77f\n\n"
+                        },
+                        {
+                          "text": "Testing endpoint: /health\n"
+                        },
+                        {
+                          "text": "/health - Status: 500\n"
+                        },
+                        {
+                          "text": "/health - Content-Type: text/plain; charset=utf-8\n"
+                        },
+                        {
+                          "text": "/health - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::r4p7q-1755602118052-c393688e0564\n\n"
+                        },
+                        {
+                          "text": "Testing endpoint: /api/health\n"
+                        },
+                        {
+                          "text": "/api/health - Status: 500\n"
+                        },
+                        {
+                          "text": "/api/health - Content-Type: text/plain; charset=utf-8\n"
+                        },
+                        {
+                          "text": "/api/health - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::65mwv-1755602122238-e91546379c2b\n\n"
+                        },
+                        {
+                          "text": "Testing endpoint: /api/v1/health\n"
+                        },
+                        {
+                          "text": "/api/v1/health - Status: 500\n"
+                        },
+                        {
+                          "text": "/api/v1/health - Content-Type: text/plain; charset=utf-8\n"
+                        },
+                        {
+                          "text": "/api/v1/health - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::m7vsp-1755602126017-e3db1624d905\n\n"
+                        },
+                        {
+                          "text": "Testing endpoint: /simple-test\n"
+                        },
+                        {
+                          "text": "/simple-test - Status: 500\n"
+                        },
+                        {
+                          "text": "/simple-test - Content-Type: text/plain; charset=utf-8\n"
+                        },
+                        {
+                          "text": "/simple-test - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::4hnfg-1755602129802-e6d4f4e5e21b\n\n"
+                        },
+                        {
+                          "text": "Testing endpoint: /api/v1/groups\n"
+                        },
+                        {
+                          "text": "/api/v1/groups - Status: 500\n"
+                        },
+                        {
+                          "text": "/api/v1/groups - Content-Type: text/plain; charset=utf-8\n"
+                        },
+                        {
+                          "text": "/api/v1/groups - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::m7vsp-1755602133494-6753890caa37\n\n"
+                        },
+                        {
+                          "text": "Testing endpoint: /api/v1/contents\n"
+                        },
+                        {
+                          "text": "/api/v1/contents - Status: 500\n"
+                        },
+                        {
+                          "text": "/api/v1/contents - Content-Type: text/plain; charset=utf-8\n"
+                        },
+                        {
+                          "text": "/api/v1/contents - Error Body: A server error has occurred\n\nFUNCTION_INVOCATION_FAILED\n\nicn1::4hnfg-1755602137288-d28fb3a0eaf4\n\n"
+                        },
+                        {
+                          "text": "🌐 Testing page navigation...\n"
+                        },
+                        {
+                          "text": "Page navigation error: page.goto: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://glimpse-server-psi.vercel.app/\", waiting until \"networkidle\"\u001b[22m\n\n"
+                        },
+                        {
+                          "text": "⏱️ Analyzing network timing...\n"
+                        },
+                        {
+                          "text": "Timing analysis error: apiRequestContext.get: Target page, context or browser has been closed\n"
+                        },
+                        {
+                          "text": "📋 Analyzing response headers...\n"
+                        },
+                        {
+                          "text": "Headers analysis error: apiRequestContext.get: Target page, context or browser has been closed\n"
+                        },
+                        {
+                          "text": "🔄 Testing different HTTP methods...\n"
+                        },
+                        {
+                          "text": "Testing GET method...\n"
+                        },
+                        {
+                          "text": "GET error: apiRequestContext.fetch: Target page, context or browser has been closed\n"
+                        },
+                        {
+                          "text": "Testing POST method...\n"
+                        },
+                        {
+                          "text": "POST error: apiRequestContext.fetch: Target page, context or browser has been closed\n"
+                        },
+                        {
+                          "text": "Testing OPTIONS method...\n"
+                        },
+                        {
+                          "text": "OPTIONS error: apiRequestContext.fetch: Target page, context or browser has been closed\n"
+                        },
+                        {
+                          "text": "🌍 Testing CORS configuration...\n"
+                        },
+                        {
+                          "text": "CORS test error: apiRequestContext.fetch: Target page, context or browser has been closed\n"
+                        },
+                        {
+                          "text": "📱 Testing mobile app connectivity...\n"
+                        },
+                        {
+                          "text": "Mobile app test error: page.goto: Target page, context or browser has been closed\n"
+                        },
+                        {
+                          "text": "📊 Network Summary:\n"
+                        },
+                        {
+                          "text": "Total requests: 1\n"
+                        },
+                        {
+                          "text": "Total responses: 1\n"
+                        },
+                        {
+                          "text": "Failed requests: 1\n"
+                        },
+                        {
+                          "text": "  ❌ https://glimpse-server-psi.vercel.app/ - 500 \n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-19T11:15:11.500Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/b0ho/git/glimpse/server/test-results/network-diagnosis-Producti-39776--production-server-analysis-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/b0ho/git/glimpse/server/test-results/network-diagnosis-Producti-39776--production-server-analysis-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/b0ho/git/glimpse/server/test-results/network-diagnosis-Producti-39776--production-server-analysis-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "cfff4521c763e2aabb34-e850cbabf119b8db7c88",
+              "file": "network-diagnosis.spec.ts",
+              "line": 6,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-08-19T11:15:11.237Z",
+    "duration": 31934.465,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}
