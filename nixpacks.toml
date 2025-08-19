@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "npm-9_x"]
+
+[phases.build]
+cmds = [
+    "cd server",
+    "npm ci --production=false",
+    "npm run build:railway"
+]
+
+[start]
+cmd = "cd server && npm run start:railway"
+
+[variables]
+NODE_ENV = "production"
+NODE_OPTIONS = "--max-old-space-size=1024"

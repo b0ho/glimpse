@@ -2,14 +2,14 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "cd server && npm install && npm run build",
+    "buildCommand": "cd server && npm install && npm run build:railway",
     "watchPatterns": [
       "server/**",
       "shared/**"
     ]
   },
   "deploy": {
-    "startCommand": "cd server && npm run start:prod",
+    "startCommand": "cd server && npm run start:railway",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10,
     "healthcheckPath": "/health",
