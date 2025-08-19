@@ -32,6 +32,15 @@ export class EnvConfig {
     }
 
     const nodeEnv = process.env.NODE_ENV || 'development';
+    
+    // Skip file loading in Railway/production environment
+    if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID) {
+      console.log('🚂 Running on Railway - using environment variables');
+      this.validateRequiredVars();
+      this.loaded = true;
+      return;
+    }
+
     const rootDir = path.resolve(process.cwd());
 
     // 1. Load base .env file (non-sensitive config)
