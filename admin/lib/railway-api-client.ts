@@ -21,24 +21,44 @@ interface PaginatedResponse<T> {
 export class RailwayApiClient {
   private baseURL: string;
   private adminToken: string;
+  private isDevelopment: boolean;
 
   constructor() {
-    // Railway에서 배포된 서버 URL
-    this.baseURL = process.env.NEXT_PUBLIC_RAILWAY_API_URL || 'https://glimpse-server.railway.app';
+    // 환경 감지
+    this.isDevelopment = process.env.NODE_ENV === 'development' || 
+                         (typeof window !== 'undefined' && window.location.hostname === 'localhost');
+    
+    // Railway에서 배포된 서버 URL (올바른 URL로 수정)
+    this.baseURL = process.env.NEXT_PUBLIC_RAILWAY_API_URL || 
+                   (this.isDevelopment 
+                     ? 'http://localhost:3001' 
+                     : 'https://glimpse-server.up.railway.app');
+    
     this.adminToken = process.env.NEXT_PUBLIC_ADMIN_API_TOKEN || '';
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'X-Admin-Access': 'true',
+      ...options.headers as Record<string, string>,
+    };
+
+    // 개발 환경에서 x-dev-auth 헤더 추가
+    if (this.isDevelopment) {
+      headers['x-dev-auth'] = 'true';
+    }
+
+    // 토큰이 있을 경우에만 Authorization 헤더 추가
+    if (this.adminToken) {
+      headers['Authorization'] = `Bearer ${this.adminToken}`;
+    }
+    
     const response = await fetch(url, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.adminToken}`,
-        'X-Admin-Access': 'true',
-        ...options.headers,
-      },
+      headers,
     });
 
     if (!response.ok) {

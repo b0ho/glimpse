@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   
+  // 환경 변수 설정
+  env: {
+    NEXT_PUBLIC_RAILWAY_API_URL: process.env.NEXT_PUBLIC_RAILWAY_API_URL || 'https://glimpse-server.up.railway.app',
+    NEXT_PUBLIC_ADMIN_API_TOKEN: process.env.NEXT_PUBLIC_ADMIN_API_TOKEN || '',
+  },
+  
   // 이미지 최적화
   images: {
     formats: ['image/webp', 'image/avif'],

@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,9 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { contentApi } from '@/services/api/contentApi';
 import { ACTION_ICONS } from '@/utils/icons';
 import { ApiTestComponent } from '@/components/ApiTestComponent';
+import { SuccessStoryCard } from '@/components/successStory/SuccessStoryCard';
+import { SuccessStory } from '@/types/successStory';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * 홈 스크린 컴포넌트 - 메인 피드 및 스토리 표시
@@ -46,6 +50,10 @@ export const HomeScreen = () => {
   const [storiesLoading, setStoriesLoading] = useState(true);
   const [showStoryViewer, setShowStoryViewer] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
+  
+  // Success Story states
+  const [successStories, setSuccessStories] = useState<SuccessStory[]>([]);
+  const [celebratedStories, setCelebratedStories] = useState<Set<string>>(new Set());
   
   const navigation = useNavigation() as any;
   const authStore = useAuthStore();
@@ -152,6 +160,65 @@ export const HomeScreen = () => {
       setStoriesLoading(false);
     }
   }, [authStore.user]);
+
+  /**
+   * 성공 스토리 목록 로드
+   * @returns {Promise<void>}
+   * @description 매칭 성공 스토리를 가져오는 함수
+   */
+  const loadSuccessStories = useCallback(async () => {
+    try {
+      const storiesStr = await AsyncStorage.getItem('success-stories');
+      if (storiesStr) {
+        const stories = JSON.parse(storiesStr);
+        // 최근 일주일 이내 스토리만 필터링
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        const recentStories = stories.filter((story: SuccessStory) => {
+          const storyDate = new Date(story.createdAt);
+          return storyDate > oneWeekAgo;
+        });
+        
+        setSuccessStories(recentStories);
+      }
+      
+      // 축하한 스토리 목록 로드
+      const celebratedStr = await AsyncStorage.getItem('celebrated-stories');
+      if (celebratedStr) {
+        setCelebratedStories(new Set(JSON.parse(celebratedStr)));
+      }
+    } catch (error) {
+      console.error('[HomeScreen] Failed to load success stories:', error);
+    }
+  }, []);
+
+  /**
+   * 스토리 축하하기
+   * @param {string} storyId - 스토리 ID
+   * @returns {Promise<void>}
+   */
+  const handleCelebrate = useCallback(async (storyId: string) => {
+    try {
+      const newCelebrated = new Set(celebratedStories);
+      newCelebrated.add(storyId);
+      setCelebratedStories(newCelebrated);
+      
+      // AsyncStorage에 저장
+      await AsyncStorage.setItem('celebrated-stories', JSON.stringify(Array.from(newCelebrated)));
+      
+      // 스토리 카운트 업데이트
+      setSuccessStories(prev => 
+        prev.map(story => 
+          story.id === storyId 
+            ? { ...story, celebrationCount: story.celebrationCount + 1 }
+            : story
+        )
+      );
+    } catch (error) {
+      console.error('[HomeScreen] Failed to celebrate story:', error);
+    }
+  }, [celebratedStories]);
 
   /**
    * 스토리 선택 핸들러
@@ -398,6 +465,8 @@ export const HomeScreen = () => {
     
     // 스토리 로드
     loadStories();
+    // 성공 스토리 로드
+    loadSuccessStories();
   }, []); // 빈 배열로 변경하여 마운트 시 한 번만 실행
 
   // 화면에 포커스될 때마다 콘텐츠 새로고침 (스토리 작성 후 등)
@@ -408,12 +477,55 @@ export const HomeScreen = () => {
       if (!isLoading && contents.length > 0) {
         loadContents(true);
         loadStories();
+        loadSuccessStories();
       }
       return () => {
         // cleanup
       };
     }, []) // 빈 배열로 변경
   );
+
+  /**
+   * 성공 스토리 섹션 렌더링
+   * @returns {JSX.Element | null} 성공 스토리 섹션 UI
+   */
+  const renderSuccessStories = () => {
+    if (successStories.length === 0) return null;
+    
+    return (
+      <View style={[styles.successStoriesSection, { backgroundColor: colors.SURFACE }]}>
+        <View style={styles.successStoriesHeader}>
+          <View style={styles.successStoriesTitle}>
+            <Text style={styles.celebrationEmoji}>💑</Text>
+            <Text style={[styles.successStoriesTitleText, { color: colors.TEXT.PRIMARY }]}>
+              매칭 성공 스토리
+            </Text>
+          </View>
+          <TouchableOpacity onPress={() => navigation.navigate('InterestSearch' as never)}>
+            <Text style={[styles.viewAllText, { color: colors.PRIMARY }]}>
+              전체보기
+            </Text>
+          </TouchableOpacity>
+        </View>
+        
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.successStoriesScroll}
+        >
+          {successStories.map((story) => (
+            <View key={story.id} style={styles.successStoryWrapper}>
+              <SuccessStoryCard
+                story={story}
+                onCelebrate={handleCelebrate}
+                hasCelebrated={celebratedStories.has(story.id)}
+              />
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  };
 
   /**
    * 헤더 렌더링
@@ -554,6 +666,8 @@ export const HomeScreen = () => {
               refreshing={false}
             />
             {renderHeader()}
+            {/* 성공 스토리 섹션 */}
+            {renderSuccessStories()}
           </>
         }
         ListEmptyComponent={renderEmptyState}
@@ -564,6 +678,7 @@ export const HomeScreen = () => {
             onRefresh={() => {
               loadContents(true);
               loadStories();
+              loadSuccessStories();
             }}
             colors={[colors.PRIMARY]}
             tintColor={colors.PRIMARY}
@@ -712,5 +827,41 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: FONT_SIZES.SM,
     fontWeight: '600',
+  },
+  // 성공 스토리 스타일
+  successStoriesSection: {
+    marginTop: SPACING.MD,
+    paddingTop: SPACING.LG,
+    paddingBottom: SPACING.SM,
+  },
+  successStoriesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.LG,
+    marginBottom: SPACING.MD,
+  },
+  successStoriesTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  celebrationEmoji: {
+    fontSize: 20,
+    marginRight: SPACING.XS,
+  },
+  successStoriesTitleText: {
+    fontSize: FONT_SIZES.LG,
+    fontWeight: '700',
+  },
+  viewAllText: {
+    fontSize: FONT_SIZES.SM,
+    fontWeight: '600',
+  },
+  successStoriesScroll: {
+    paddingHorizontal: SPACING.SM,
+  },
+  successStoryWrapper: {
+    width: 320,
+    marginHorizontal: SPACING.XS,
   },
 });

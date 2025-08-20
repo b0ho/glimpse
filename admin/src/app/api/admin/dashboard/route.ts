@@ -15,19 +15,21 @@ export async function GET() {
     }
 
     // 개발 모드 확인
-    const useDevAuth = process.env.USE_DEV_AUTH === 'true' || process.env.NODE_ENV === 'development';
+    const isDevelopment = process.env.NODE_ENV === 'development';
     
     const headers: HeadersInit = {
       'Authorization': `Bearer ${adminToken.value}`,
+      'Content-Type': 'application/json',
     };
     
-    if (useDevAuth) {
-      headers['X-Dev-Auth'] = 'true';
+    if (isDevelopment) {
+      headers['x-dev-auth'] = 'true';
     }
 
-    // 백엔드 API로 요청 전달
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-    const response = await fetch(`${backendUrl}/admin/dashboard`, {
+    // Railway 백엔드 API로 요청 전달
+    const backendUrl = process.env.NEXT_PUBLIC_RAILWAY_API_URL || 
+                      (isDevelopment ? 'http://localhost:3001' : 'https://glimpse-server.up.railway.app');
+    const response = await fetch(`${backendUrl}/api/v1/admin/dashboard`, {
       headers,
     });
 

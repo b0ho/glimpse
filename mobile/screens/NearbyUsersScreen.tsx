@@ -22,6 +22,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { usePersonaStore } from '@/store/slices/personaSlice';
+import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
 import { PersonaSettingsModal } from '@/components/persona/PersonaSettingsModal';
 import { locationTracker } from '@/services/locationTracker';
 import { useChatStore } from '@/store/slices/chatSlice';
@@ -41,8 +42,11 @@ export const NearbyUsersScreen = React.memo(() => {
   const navigation = useNavigation();
   const { t } = useTranslation('location');
   const { colors } = useTheme();
-  const { user } = useAuthStore();
-  const { sendLike, sentLikes } = useLikeStore();
+  const { user, getSubscriptionTier, getSubscriptionFeatures } = useAuthStore();
+  const { sendLike, sentLikes, getRemainingFreeLikes } = useLikeStore();
+  
+  const subscriptionTier = getSubscriptionTier();
+  const features = getSubscriptionFeatures();
   
   const [currentLocation, setCurrentLocation] = useState<LocationData | null>(null);
   const [nearbyUsers, setNearbyUsers] = useState<NearbyUser[]>([]);
@@ -460,14 +464,31 @@ export const NearbyUsersScreen = React.memo(() => {
         return;
       }
 
-      // 크레딧 확인
-      if (!user.isPremium && (user.credits || 0) <= 0) {
+      // 구독 티어별 좋아요 제한 확인
+      const remainingLikes = getRemainingFreeLikes();
+      
+      if (remainingLikes <= 0) {
+        let message = '';
+        let upgradeText = '';
+        
+        if (subscriptionTier === SubscriptionTier.BASIC) {
+          message = '오늘의 무료 좋아요(1개)를 모두 사용했습니다.\n고급 구독으로 하루 3개까지 좋아요를 보낼 수 있습니다!';
+          upgradeText = '고급 구독하기';
+        } else if (subscriptionTier === SubscriptionTier.ADVANCED) {
+          message = '오늘의 좋아요(3개)를 모두 사용했습니다.\n프리미엄으로 업그레이드하여 무제한 좋아요를 즐기세요!';
+          upgradeText = '프리미엄 업그레이드';
+        }
+        
         Alert.alert(
-          t('matching.creditError.title'),
-          t('matching.creditError.message'),
+          '좋아요 제한',
+          message,
           [
-            { text: t('matching.creditError.later'), style: 'cancel' },
-            { text: t('matching.creditError.buyCredits'), onPress: () => navigation.navigate('Premium' as never) },
+            { text: '확인', style: 'cancel' },
+            { 
+              text: upgradeText, 
+              onPress: () => navigation.navigate('Premium' as never),
+              style: 'default'
+            },
           ]
         );
         return;
@@ -788,6 +809,40 @@ export const NearbyUsersScreen = React.memo(() => {
         >
           <Icon name="refresh" size={20} color={colors.TEXT.SECONDARY} />
         </TouchableOpacity>
+      </View>
+
+      {/* 좋아요 제한 표시 */}
+      <View style={[styles.likeStatusBar, { backgroundColor: colors.SURFACE }]}>
+        <View style={styles.likeStatusContent}>
+          <Icon 
+            name={
+              subscriptionTier === SubscriptionTier.PREMIUM ? "heart" :
+              subscriptionTier === SubscriptionTier.ADVANCED ? "heart-outline" :
+              "heart-dislike-outline"
+            } 
+            size={20} 
+            color={
+              subscriptionTier === SubscriptionTier.PREMIUM ? colors.SUCCESS :
+              subscriptionTier === SubscriptionTier.ADVANCED ? colors.PRIMARY :
+              colors.TEXT.SECONDARY
+            } 
+          />
+          <Text style={[styles.likeStatusText, { color: colors.TEXT.PRIMARY }]}>
+            {subscriptionTier === SubscriptionTier.PREMIUM 
+              ? '무제한 좋아요' 
+              : `오늘 남은 좋아요: ${getRemainingFreeLikes()}개`}
+          </Text>
+          {subscriptionTier !== SubscriptionTier.PREMIUM && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Premium' as never)}
+              style={[styles.upgradeChip, { backgroundColor: colors.PRIMARY + '20' }]}
+            >
+              <Text style={[styles.upgradeChipText, { color: colors.PRIMARY }]}>
+                {subscriptionTier === SubscriptionTier.BASIC ? '업그레이드' : '프리미엄'}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* 페르소나 설정 버튼 */}
