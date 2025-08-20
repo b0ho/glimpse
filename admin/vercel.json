@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run vercel-build",
   "outputDirectory": ".next",
-  "installCommand": "npm install --legacy-peer-deps && npx prisma generate",
+  "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs"
 }
