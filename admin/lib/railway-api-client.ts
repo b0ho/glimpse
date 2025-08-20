@@ -1,7 +1,7 @@
 // Admin → Server API 연동 클라이언트
 
 // API Response 타입 정의
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
   success?: boolean;
   data?: T;
   message?: string;
