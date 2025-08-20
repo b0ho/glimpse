@@ -36,11 +36,11 @@ export class AuthGuard implements CanActivate {
       );
     }
 
-    // 개발 환경에서만 개발 모드 허용
-    if (nodeEnv === 'development' && useDevAuth) {
+    // 개발 환경에서만 개발 모드 허용 (토큰이 없을 때만)
+    if (nodeEnv === 'development' && useDevAuth && !token) {
       const devAuth = request.headers['x-dev-auth'];
       if (devAuth === 'true') {
-        console.log('[AuthGuard] Dev mode auth in development environment');
+        console.log('[AuthGuard] Dev mode auth in development environment (no token)');
         // 기본 사용자 설정 - 실제 DB의 첫 번째 사용자 사용
         request['user'] = {
           id: 'cmeh8afwr000i1mb7ikv3lq1a',
@@ -67,6 +67,7 @@ export class AuthGuard implements CanActivate {
       // 개발 모드에서 관리자 토큰 처리
       const devAuthHeader = request.headers['x-dev-auth'];
       if (useDevAuth && devAuthHeader === 'true' && payload.role === 'admin') {
+        console.log('[AuthGuard] Admin token verified in dev mode:', payload.email);
         request['user'] = {
           id: payload.sub,
           email: payload.email,

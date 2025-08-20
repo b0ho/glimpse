@@ -41,13 +41,27 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const useDevAuth =
       this.configService.get<string>('USE_DEV_AUTH') === 'true';
 
-    // 개발 모드에서는 payload를 그대로 반환
-    if (useDevAuth && payload.userId) {
-      return {
-        userId: payload.userId,
-        phoneNumber: payload.phoneNumber,
-        isVerified: payload.isVerified,
-      };
+    // 개발 모드에서는 payload를 그대로 반환 (admin 토큰 지원)
+    if (useDevAuth) {
+      // Admin 토큰인 경우 (sub 필드와 role 필드가 있는 경우)
+      if (payload.sub && payload.role) {
+        return {
+          id: payload.sub,
+          userId: payload.sub,
+          email: payload.email,
+          role: payload.role,
+          isVerified: true,
+        };
+      }
+      
+      // 일반 사용자 토큰인 경우
+      if (payload.userId) {
+        return {
+          userId: payload.userId,
+          phoneNumber: payload.phoneNumber,
+          isVerified: payload.isVerified,
+        };
+      }
     }
 
     // Production mode - Clerk validation
