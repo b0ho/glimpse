@@ -75,45 +75,40 @@ export default function AdminDashboard() {
     try {
       setIsLoading(true);
 
-      // API 호출
-      const response = await fetch('/api/admin/dashboard');
+      // Railway API 클라이언트를 통해 실제 서버 데이터 호출
+      const { railwayApi } = await import('../../../lib/railway-api-client');
+      const data = await railwayApi.getDashboardStats();
       
-      if (response.ok) {
-        const data = await response.json();
-        
-        // 데이터 매핑
-        const dashboardStats: DashboardStats = {
-          totalUsers: data.totalUsers || 0,
-          activeUsers: data.activeUsers || 0,
-          totalMatches: data.totalMatches || 0,
-          totalMessages: data.totalMessages || 0,
-          revenue: data.revenue || 0,
-          premiumUsers: data.premiumUsers || 0,
-          reportedUsers: data.reportedUsers || 0,
-          onlineUsers: data.onlineUsers || 0,
-        };
-        
-        setStats(dashboardStats);
-        
-        // 나머지 데이터는 아직 더미 사용
-      } else if (response.status === 401) {
-        // 인증 오류 시 로그인 페이지로
-        window.location.href = '/admin/login';
-        return;
-      } else {
-        // 에러 발생 시 더미 데이터 사용
-        const mockStats: DashboardStats = {
-          totalUsers: 15847,
-          activeUsers: 8932,
-          totalMatches: 3421,
-          totalMessages: 28954,
-          revenue: 2450000,
-          premiumUsers: 1247,
-          reportedUsers: 23,
-          onlineUsers: 342,
-        };
-        setStats(mockStats);
-      }
+      // 데이터 매핑
+      const dashboardStats: DashboardStats = {
+        totalUsers: data.totalUsers || 0,
+        activeUsers: data.activeUsers || 0,
+        totalMatches: data.totalMatches || 0,
+        totalMessages: data.totalMessages || 0,
+        revenue: data.revenue || 0,
+        premiumUsers: data.premiumUsers || 0,
+        reportedUsers: data.reportedUsers || 0,
+        onlineUsers: data.onlineUsers || 0,
+      };
+      
+      setStats(dashboardStats);
+      console.log('[AdminDashboard] Real data loaded:', dashboardStats);
+    } catch (error) {
+      console.error('[AdminDashboard] Failed to load dashboard data:', error);
+      
+      // 에러 발생 시 더미 데이터 사용
+      const mockStats: DashboardStats = {
+        totalUsers: 15847,
+        activeUsers: 8932,
+        totalMatches: 3421,
+        totalMessages: 28954,
+        revenue: 2450000,
+        premiumUsers: 1247,
+        reportedUsers: 23,
+        onlineUsers: 342,
+      };
+      setStats(mockStats);
+    }
 
       // 최근 활동 (더미 데이터)
       const mockActivity: RecentActivity[] = [
