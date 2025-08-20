@@ -108,8 +108,7 @@ export default function AdminDashboard() {
         onlineUsers: 342,
       };
       setStats(mockStats);
-    }
-
+    } finally {
       // 최근 활동 (더미 데이터)
       const mockActivity: RecentActivity[] = [
         {
@@ -177,12 +176,8 @@ export default function AdminDashboard() {
         },
       ];
 
-      // Already set above
       setRecentActivity(mockActivity);
       setUserReports(mockReports);
-    } catch (error) {
-      console.error('Dashboard data loading error:', error);
-    } finally {
       setIsLoading(false);
     }
   };

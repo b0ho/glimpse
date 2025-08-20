@@ -82,15 +82,20 @@ export class RailwayApiClient {
   private isDevelopment: boolean;
 
   constructor() {
-    // 환경 감지
+    // 환경 감지 (mobile 앱과 동일한 패턴 적용)
     this.isDevelopment = process.env.NODE_ENV === 'development' || 
-                         (typeof window !== 'undefined' && window.location.hostname === 'localhost');
+                         (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) ||
+                         (typeof window !== 'undefined' && window.location.hostname.includes('127.0.0.1')) ||
+                         (typeof window !== 'undefined' && window.location.hostname.includes('.local'));
     
-    // Server API URL
-    this.baseURL = process.env.NEXT_PUBLIC_RAILWAY_API_URL || 
+    // Server API URL - 로컬에서는 로컬 서버로, 운영에서는 Railway 서버로
+    this.baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 
+                   process.env.API_URL || 
                    (this.isDevelopment 
-                     ? 'http://localhost:3001' 
-                     : 'https://glimpse-server.up.railway.app');
+                     ? 'http://localhost:3001'  // 로컬 서버
+                     : 'https://glimpse-server.up.railway.app');  // Railway 서버
+    
+    console.log('[API Client] Environment:', { isDevelopment: this.isDevelopment, baseURL: this.baseURL });
   }
 
   private async request<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {

@@ -34,18 +34,24 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      // 백엔드 API 호출
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      // Railway API 클라이언트를 통한 실제 서버 API 호출
+      console.log('[AdminLogin] Attempting login with Railway API client');
+      const { railwayApi } = await import('../../../../lib/railway-api-client');
+      
+      console.log('[AdminLogin] Calling railwayApi.login with:', {
+        email: formData.email,
+        passwordLength: formData.password.length
+      });
+      
+      const data = await railwayApi.login(formData.email, formData.password);
+      
+      console.log('[AdminLogin] Login successful, received data:', {
+        hasAccessToken: !!data.access_token,
+        hasUser: !!data.user,
+        userEmail: data.user?.email
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (data.access_token && data.user) {
         // JWT 토큰과 사용자 정보 저장
         localStorage.setItem('admin_token', data.access_token);
         localStorage.setItem('admin_user', JSON.stringify(data.user));
@@ -53,14 +59,21 @@ export default function AdminLogin() {
         // 쿠키에도 저장 (미들웨어에서 확인)
         document.cookie = `admin_token=${data.access_token}; path=/; max-age=${7 * 24 * 60 * 60}`;
         
+        console.log('[AdminLogin] Tokens stored, redirecting to admin dashboard');
+        
         // 관리자 대시보드로 리다이렉트
         router.push('/admin');
       } else {
-        setError(data.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
+        console.error('[AdminLogin] Invalid response structure:', data);
+        setError('로그인 응답이 올바르지 않습니다.');
       }
     } catch (error) {
-      console.error('Admin login error:', error);
-      setError('로그인 중 오류가 발생했습니다.');
+      console.error('[AdminLogin] Login error:', error);
+      if (error instanceof Error) {
+        setError(error.message || '로그인 중 오류가 발생했습니다.');
+      } else {
+        setError('로그인 중 알 수 없는 오류가 발생했습니다.');
+      }
     } finally {
       setIsLoading(false);
     }
