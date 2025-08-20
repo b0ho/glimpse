@@ -15,6 +15,7 @@ if (Platform.OS === 'web') {
   SecureStore = require('expo-secure-store');
 }
 import { User, AuthState, AppMode } from '../../shared/types';
+import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
 
 /**
  * 인증 스토어 인터페이스
@@ -26,6 +27,8 @@ interface AuthStore extends AuthState {
   // State
   /** 현재 앱 모드 (데이팅/친구) */
   currentMode: AppMode;
+  /** 사용자 구독 티어 */
+  subscriptionTier: SubscriptionTier;
   
   // Actions
   /** 사용자 정보 설정 */
@@ -46,6 +49,12 @@ interface AuthStore extends AuthState {
   setAppMode: (mode: AppMode) => void;
   /** 앱 모드 토글 */
   toggleAppMode: () => void;
+  /** 구독 티어 가져오기 */
+  getSubscriptionTier: () => SubscriptionTier;
+  /** 구독 기능 확인 */
+  getSubscriptionFeatures: () => typeof SUBSCRIPTION_FEATURES[SubscriptionTier];
+  /** 구독 티어 업데이트 */
+  updateSubscriptionTier: (tier: SubscriptionTier) => void;
 }
 
 /**
@@ -120,6 +129,8 @@ const createAuthStore = (set: any, get: any) => ({
   error: null,
   /** 현재 앱 모드 (기본값: 데이팅) */
   currentMode: AppMode.DATING,
+  /** 구독 티어 (기본값: BASIC) */
+  subscriptionTier: SubscriptionTier.BASIC,
 
   // Actions
   /**
@@ -227,6 +238,58 @@ const createAuthStore = (set: any, get: any) => ({
     const currentMode = get().currentMode;
     const newMode = currentMode === AppMode.DATING ? AppMode.FRIENDSHIP : AppMode.DATING;
     get().setAppMode(newMode);
+  },
+  
+  /**
+   * 구독 티어 가져오기
+   * @returns {SubscriptionTier} 현재 사용자의 구독 티어
+   */
+  getSubscriptionTier: () => {
+    const user = get().user;
+    if (!user) return SubscriptionTier.BASIC;
+    
+    // 프리미엄 레벨에 따라 구독 티어 결정
+    if (user.premiumLevel === 'UPPER') return SubscriptionTier.PREMIUM;
+    if (user.premiumLevel === 'BASIC') return SubscriptionTier.ADVANCED;
+    return SubscriptionTier.BASIC;
+  },
+  
+  /**
+   * 구독 기능 가져오기
+   * @returns {SubscriptionFeatures} 현재 티어의 기능 목록
+   */
+  getSubscriptionFeatures: () => {
+    const tier = get().getSubscriptionTier();
+    return SUBSCRIPTION_FEATURES[tier];
+  },
+  
+  /**
+   * 구독 티어 업데이트
+   * @param {SubscriptionTier} tier - 새로운 구독 티어
+   */
+  updateSubscriptionTier: (tier: SubscriptionTier) => {
+    const currentUser = get().user;
+    if (currentUser) {
+      let premiumLevel = 'FREE';
+      let isPremium = false;
+      
+      if (tier === SubscriptionTier.ADVANCED) {
+        premiumLevel = 'BASIC';
+        isPremium = true;
+      } else if (tier === SubscriptionTier.PREMIUM) {
+        premiumLevel = 'UPPER';
+        isPremium = true;
+      }
+      
+      set({
+        subscriptionTier: tier,
+        user: { 
+          ...currentUser, 
+          premiumLevel: premiumLevel as any,
+          isPremium 
+        },
+      });
+    }
   },
 });
 

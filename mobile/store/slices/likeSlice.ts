@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import { Like, Match } from '@/types';
 import { LIKE_SYSTEM } from '@/utils/constants';
 import { useAuthStore } from './authSlice';
+import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
 import apiClient from '@/services/api/config';
 
 /**
@@ -721,7 +722,18 @@ export const useLikeStore = create<LikeStore>()(
        */
       getRemainingFreeLikes: () => {
         const state = get();
-        return Math.max(0, LIKE_SYSTEM.DAILY_FREE_LIKES - state.dailyLikesUsed);
+        const authState = useAuthStore.getState();
+        const tier = authState.getSubscriptionTier();
+        const features = SUBSCRIPTION_FEATURES[tier];
+        
+        // 프리미엄은 무제한
+        if (features.dailyLikeLimit === 'unlimited') {
+          return 999; // 실질적으로 무제한
+        }
+        
+        // 티어별 일일 한도
+        const dailyLimit = features.dailyLikeLimit as number;
+        return Math.max(0, dailyLimit - state.dailyLikesUsed);
       },
 
       /**

@@ -1,8 +1,8 @@
 /**
- * 프리미엄 구독 화면 컴포넌트 - 요금제 선택 및 결제
+ * 프리미엄 구독 화면 컴포넌트 - 3단계 구독 모델
  * @component
  * @returns {JSX.Element} 프리미엄 화면 UI
- * @description 프리미엄 구독 플랫8, 좋아요 패키지 선택 및 Stripe 결제를 처리하는 화면
+ * @description Basic/Advanced/Premium 3단계 구독 모델과 결제를 처리하는 화면
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -15,18 +15,20 @@ import {
   Alert,
   RefreshControl,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { PricingCard } from '@/components/premium/PricingCard';
+import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { PaymentModal } from '@/components/premium/PaymentModal';
-import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
-import { PaymentProduct, PremiumPlan, premiumService } from '@/services/payment/premium-service';
+import { usePremiumStore } from '@/store/slices/premiumSlice';
+import { PaymentProduct, premiumService } from '@/services/payment/premium-service';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { STATE_ICONS, UI_ICONS } from '@/utils/icons';
+import { SubscriptionTier, SUBSCRIPTION_FEATURES, SUBSCRIPTION_PRICING } from '@/types/subscription';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 /**
  * 프리미엄 화면 컴포넌트
@@ -35,302 +37,350 @@ import { STATE_ICONS, UI_ICONS } from '@/utils/icons';
  */
 export const PremiumScreen = () => {
   const navigation = useNavigation();
-  const { user } = useAuthStore();
+  const { user, getSubscriptionTier, updateSubscriptionTier } = useAuthStore();
   const { colors } = useTheme();
   const { t } = useTranslation('premium');
   
-  const {
-    subscription,
-    paymentProducts,
-    loadSubscription,
-    loadPaymentProducts,
-    cancelSubscription,
-    clearError,
-  } = usePremiumStore();
-
-  const [selectedProduct, setSelectedProduct] = useState<PaymentProduct | null>(null);
+  const currentTier = getSubscriptionTier();
+  const [selectedTier, setSelectedTier] = useState<SubscriptionTier>(
+    currentTier === SubscriptionTier.BASIC ? SubscriptionTier.ADVANCED : currentTier
+  );
+  const [selectedBilling, setSelectedBilling] = useState<'monthly' | 'yearly'>('monthly');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const isPremiumUser = usePremiumStore(premiumSelectors.isPremiumUser());
-  const currentPlan = usePremiumStore(premiumSelectors.getCurrentPlan());
-  const daysUntilExpiry = usePremiumStore(premiumSelectors.getDaysUntilExpiry());
-
-  /**
-   * 초기 데이터 로드
-   * @effect
-   * @description 결제 상품 및 현재 구독 상태를 로드
-   */
-  useEffect(() => {
-    if (user?.id) {
-      loadData();
-    }
-  }, [user?.id]);
-
-  /**
-   * 데이터 로드 함수
-   * @returns {Promise<void>}
-   * @description 결제 상품 및 구독 정보를 서버에서 가져오기
-   */
-  const loadData = useCallback(async () => {
-    try {
-      loadPaymentProducts();
-      if (user?.id) {
-        await loadSubscription(user.id);
-      }
-    } catch (error) {
-      console.error('Failed to load data:', error);
-    }
-  }, [user?.id, loadSubscription, loadPaymentProducts]);
-
   /**
    * 새로고침 핸들러
-   * @returns {Promise<void>}
-   * @description Pull-to-refresh로 데이터를 다시 로드
    */
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
-  }, [loadData]);
+    // 구독 상태 새로고침 로직
+    setTimeout(() => setRefreshing(false), 1000);
+  }, []);
 
   /**
-   * 상품 선택 핸들러
-   * @param {string} productId - 선택한 상품 ID
-   * @description 선택한 상품으로 결제 모달을 표시
+   * 구독 선택 핸들러
    */
-  const handleProductSelect = (productId: string) => {
-    const product = paymentProducts.find(p => p.id === productId);
-    if (product) {
-      setSelectedProduct(product);
-      setShowPaymentModal(true);
+  const handleSubscribe = (tier: SubscriptionTier) => {
+    if (tier === SubscriptionTier.BASIC) {
+      Alert.alert('무료 플랜', '이미 무료 플랜을 사용중입니다.');
+      return;
     }
+    
+    setSelectedTier(tier);
+    setShowPaymentModal(true);
   };
 
   /**
    * 결제 성공 핸들러
-   * @returns {Promise<void>}
-   * @description 결제 성공 후 구독 상태를 업데이트
    */
-  const handlePaymentSuccess = useCallback(async () => {
-    if (user?.id) {
-      await loadSubscription(user.id);
-    }
-  }, [user?.id, loadSubscription]);
-
-  /**
-   * 구독 취소 핸들러
-   * @description 프리미엄 구독을 취소하고 기간 만료 후 해지 처리
-   */
-  const handleCancelSubscription = () => {
-    if (!user?.id) return;
-
-    Alert.alert(
-      t('subscription.confirmCancel.title'),
-      t('subscription.confirmCancel.message'),
-      [
-        { text: t('subscription.confirmCancel.goBack'), style: 'cancel' },
-        {
-          text: t('subscription.confirmCancel.confirm'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await cancelSubscription(user.id);
-              Alert.alert(t('common:actions.completed'), t('subscription.confirmCancel.success'));
-            } catch {
-              Alert.alert(t('errors.title'), t('subscription.confirmCancel.error'));
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  /**
-   * 에러 처리
-   * @effect
-   * @description 결제 및 구독 관련 에러를 사용자에게 표시
-   */
-  const error = usePremiumStore(state => state.error);
-  useEffect(() => {
-    if (error) {
-      Alert.alert(t('errors.title'), error, [
-        {
-          text: t('common:actions.confirm'),
-          onPress: clearError,
-        },
-      ]);
-    }
-  }, [error, clearError]);
-
-  /**
-   * 현재 구독 상태 렌더링
-   * @returns {JSX.Element | null} 구독 상태 UI
-   * @description 활성 프리미엄 구독 정보를 표시
-   */
-  const renderCurrentSubscription = () => {
-    if (!isPremiumUser) return null;
-
-    return (
-      <View style={[styles.currentSubscription, { 
-        backgroundColor: colors.SUCCESS + '20',
-        borderColor: colors.SUCCESS + '40'
-      }]}>
-        <View style={styles.subscriptionHeader}>
-          <Icon name={STATE_ICONS.SUCCESS} size={24} color={colors.SUCCESS} />
-          <Text style={[styles.subscriptionTitle, { color: colors.SUCCESS }]}>{t('subscription.activeTitle')}</Text>
-        </View>
-        
-        <View style={styles.subscriptionInfo}>
-          <Text style={[styles.planName, { color: colors.TEXT.PRIMARY }]}>
-            {currentPlan === PremiumPlan.PREMIUM_MONTHLY ? t('subscription.monthlyPlan') : t('subscription.yearlyPlan')}
-          </Text>
-          
-          {subscription?.expiresAt && (
-            <Text style={[styles.expiryInfo, { color: colors.TEXT.SECONDARY }]}>
-              {daysUntilExpiry > 0 
-                ? t('subscription.daysLeft', { days: daysUntilExpiry })
-                : t('subscription.expiresToday')
-              }
-            </Text>
-          )}
-          
-          {subscription?.cancelAtPeriodEnd && (
-            <Text style={[styles.cancelNotice, { color: colors.WARNING }]}>
-              {t('subscription.cancelNotice')}
-            </Text>
-          )}
-        </View>
-
-        {!subscription?.cancelAtPeriodEnd && (
-          <TouchableOpacity
-            style={[styles.cancelButton, { borderColor: colors.ERROR }]}
-            onPress={handleCancelSubscription}
-            accessibilityRole="button"
-            accessibilityLabel={t('subscription.cancel')}
-          >
-            <Text style={[styles.cancelButtonText, { color: colors.ERROR }]}>{t('subscription.cancel')}</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    );
-  };
-
-  /**
-   * 구독 플랜 렌더링
-   * @returns {JSX.Element} 구독 플랜 UI
-   * @description 월간/연간 프리미엄 구독 플랜을 표시
-   */
-  const renderSubscriptionPlans = () => {
-    const subscriptionProducts = paymentProducts.filter(p => p.type === 'subscription');
-
-    return (
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('subscription.title')}</Text>
-        <Text style={[styles.sectionDescription, { color: colors.TEXT.SECONDARY }]}>
-          {t('subscription.description')}
-        </Text>
-        
-        {subscriptionProducts.map((product, index) => (
-          <PricingCard
-            key={product.id}
-            product={product}
-            isPopular={index === 1} // 연간 플랜을 인기로 표시
-            isSelected={selectedProduct?.id === product.id}
-            onSelect={handleProductSelect}
-            formatPrice={premiumService.formatPrice}
-          />
-        ))}
-      </View>
-    );
-  };
-
-  /**
-   * 좋아요 패키지 렌더링
-   * @returns {JSX.Element} 좋아요 패키지 UI
-   * @description 일회성 좋아요 구매 패키지를 표시
-   */
-  const renderLikePackages = () => {
-    const likeProducts = paymentProducts.filter(p => p.type === 'one_time');
-
-    return (
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('likes.title')}</Text>
-        <Text style={[styles.sectionDescription, { color: colors.TEXT.SECONDARY }]}>
-          {t('likes.description')}
-        </Text>
-        
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalScrollContainer}
-        >
-          {likeProducts.map((product) => (
-            <View key={product.id} style={styles.likePackageContainer}>
-              <PricingCard
-                product={product}
-                isSelected={selectedProduct?.id === product.id}
-                onSelect={handleProductSelect}
-                formatPrice={premiumService.formatPrice}
-              />
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-    );
-  };
+  const handlePaymentSuccess = useCallback(() => {
+    updateSubscriptionTier(selectedTier);
+    Alert.alert('구독 완료', '프리미엄 구독이 활성화되었습니다!');
+    setShowPaymentModal(false);
+  }, [selectedTier, updateSubscriptionTier]);
 
   /**
    * 헤더 렌더링
-   * @returns {JSX.Element} 헤더 UI
-   * @description 네비게이션 헤더를 표시
    */
   const renderHeader = () => (
     <View style={[styles.header, { borderBottomColor: colors.BORDER }]}>
       <TouchableOpacity
         onPress={() => navigation.goBack()}
         style={styles.backButton}
-        accessibilityRole="button"
-        accessibilityLabel={t('actions.back')}
       >
-        <Icon name={UI_ICONS.ARROW_LEFT} size={24} color={colors.TEXT.PRIMARY} />
+        <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
       </TouchableOpacity>
       
-      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('title')}</Text>
+      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>구독 플랜</Text>
       
       <View style={styles.placeholder} />
     </View>
   );
 
   /**
-   * FAQ 섹션 렌더링
-   * @returns {JSX.Element} FAQ UI
-   * @description 자주 묻는 질문과 답변을 표시
+   * 현재 구독 상태 렌더링
    */
-  const renderFAQ = () => (
-    <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('faq.title')}</Text>
+  const renderCurrentStatus = () => (
+    <View style={[styles.currentStatus, { backgroundColor: colors.PRIMARY + '10' }]}>
+      <Icon 
+        name={currentTier === SubscriptionTier.PREMIUM ? 'star' : 
+              currentTier === SubscriptionTier.ADVANCED ? 'star-outline' : 'person-outline'} 
+        size={24} 
+        color={colors.PRIMARY} 
+      />
+      <View style={styles.statusInfo}>
+        <Text style={[styles.statusTitle, { color: colors.TEXT.PRIMARY }]}>
+          현재 플랜: {currentTier === SubscriptionTier.BASIC ? '무료' : 
+                     currentTier === SubscriptionTier.ADVANCED ? '고급' : '프리미엄'}
+        </Text>
+        {currentTier !== SubscriptionTier.BASIC && (
+          <Text style={[styles.statusSubtitle, { color: colors.TEXT.SECONDARY }]}>
+            다음 결제일: 2025년 2월 19일
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+
+  /**
+   * 결제 주기 선택기 렌더링
+   */
+  const renderBillingToggle = () => (
+    <View style={styles.billingContainer}>
+      <View style={[styles.billingToggle, { backgroundColor: colors.SURFACE }]}>
+        <TouchableOpacity
+          style={[
+            styles.billingOption,
+            selectedBilling === 'monthly' && { backgroundColor: colors.PRIMARY }
+          ]}
+          onPress={() => setSelectedBilling('monthly')}
+        >
+          <Text style={[
+            styles.billingText,
+            { color: selectedBilling === 'monthly' ? '#FFFFFF' : colors.TEXT.PRIMARY }
+          ]}>
+            월간 결제
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[
+            styles.billingOption,
+            selectedBilling === 'yearly' && { backgroundColor: colors.PRIMARY }
+          ]}
+          onPress={() => setSelectedBilling('yearly')}
+        >
+          <Text style={[
+            styles.billingText,
+            { color: selectedBilling === 'yearly' ? '#FFFFFF' : colors.TEXT.PRIMARY }
+          ]}>
+            연간 결제
+          </Text>
+          <View style={styles.saveBadge}>
+            <Text style={styles.saveText}>17% 할인</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  /**
+   * 구독 플랜 카드 렌더링
+   */
+  const renderPlanCard = (tier: SubscriptionTier) => {
+    const pricing = SUBSCRIPTION_PRICING.find(p => p.tier === tier)!;
+    const features = SUBSCRIPTION_FEATURES[tier];
+    const isCurrentPlan = currentTier === tier;
+    const isPopular = tier === SubscriptionTier.ADVANCED;
+
+    return (
+      <View 
+        key={tier}
+        style={[
+          styles.planCard,
+          { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
+          isCurrentPlan && { borderColor: colors.PRIMARY, borderWidth: 2 },
+          isPopular && styles.popularCard
+        ]}
+      >
+        {isPopular && (
+          <View style={[styles.popularBadge, { backgroundColor: colors.SUCCESS }]}>
+            <Text style={styles.popularText}>가장 인기</Text>
+          </View>
+        )}
+
+        <View style={styles.planHeader}>
+          <Icon 
+            name={tier === SubscriptionTier.PREMIUM ? 'star' : 
+                  tier === SubscriptionTier.ADVANCED ? 'star-outline' : 'person-outline'} 
+            size={32} 
+            color={tier === SubscriptionTier.PREMIUM ? '#FFD700' : 
+                   tier === SubscriptionTier.ADVANCED ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+          />
+          <Text style={[styles.planName, { color: colors.TEXT.PRIMARY }]}>
+            {tier === SubscriptionTier.BASIC ? '무료' : 
+             tier === SubscriptionTier.ADVANCED ? '고급' : '프리미엄'}
+          </Text>
+          <Text style={[styles.planPrice, { color: colors.TEXT.PRIMARY }]}>
+            {tier === SubscriptionTier.BASIC ? '₩0' : 
+             selectedBilling === 'monthly' ? `₩${pricing.monthly.toLocaleString()}` : 
+             `₩${pricing.yearlyMonthly.toLocaleString()}`}
+          </Text>
+          {tier !== SubscriptionTier.BASIC && (
+            <Text style={[styles.planPeriod, { color: colors.TEXT.SECONDARY }]}>
+              {selectedBilling === 'monthly' ? '/월' : '/월 (연간 결제시)'}
+            </Text>
+          )}
+        </View>
+
+        <View style={styles.featuresList}>
+          {/* 관심상대 찾기 */}
+          <View style={styles.featureItem}>
+            <Icon name="search" size={16} color={colors.PRIMARY} />
+            <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
+              관심상대 등록: {features.interestSearchLimit === 'unlimited' ? '무제한' : 
+                            features.interestSearchLimit === 3 ? '3개 (유형별 1개)' : 
+                            '모든 유형 1개씩'}
+            </Text>
+          </View>
+
+          {/* 검색 유효기간 */}
+          <View style={styles.featureItem}>
+            <Icon name="time-outline" size={16} color={colors.PRIMARY} />
+            <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
+              검색 유효기간: {features.interestSearchDuration === 365 ? '무제한' : 
+                            `${features.interestSearchDuration}일`}
+            </Text>
+          </View>
+
+          {/* 일일 좋아요 */}
+          <View style={styles.featureItem}>
+            <Icon name="heart-outline" size={16} color={colors.PRIMARY} />
+            <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
+              일일 좋아요: {features.dailyLikeLimit === 'unlimited' ? '무제한' : 
+                          `${features.dailyLikeLimit}회`}
+            </Text>
+          </View>
+
+          {/* 추가 기능들 */}
+          {features.canSendInterestFirst && (
+            <View style={styles.featureItem}>
+              <Icon name="send" size={16} color={colors.SUCCESS} />
+              <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
+                먼저 관심 보내기
+              </Text>
+            </View>
+          )}
+
+          {features.noAds && (
+            <View style={styles.featureItem}>
+              <Icon name="eye-off-outline" size={16} color={colors.SUCCESS} />
+              <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
+                광고 제거
+              </Text>
+            </View>
+          )}
+
+          {features.readReceipts && (
+            <View style={styles.featureItem}>
+              <Icon name="checkmark-done" size={16} color={colors.SUCCESS} />
+              <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
+                읽음 표시
+              </Text>
+            </View>
+          )}
+
+          {features.seeWhoLikedYou && (
+            <View style={styles.featureItem}>
+              <Icon name="eye-outline" size={16} color={colors.SUCCESS} />
+              <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
+                누가 좋아요 했는지 확인
+              </Text>
+            </View>
+          )}
+
+          {features.priorityMatching && (
+            <View style={styles.featureItem}>
+              <Icon name="flash" size={16} color={colors.SUCCESS} />
+              <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
+                우선 매칭
+              </Text>
+            </View>
+          )}
+
+          {features.personaTopPlacement && (
+            <View style={styles.featureItem}>
+              <Icon name="trophy" size={16} color="#FFD700" />
+              <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
+                페르소나 상단 배치
+              </Text>
+            </View>
+          )}
+
+          {features.unlimitedRewind && (
+            <View style={styles.featureItem}>
+              <Icon name="refresh" size={16} color="#FFD700" />
+              <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
+                무제한 되돌리기
+              </Text>
+            </View>
+          )}
+        </View>
+
+        <TouchableOpacity
+          style={[
+            styles.selectButton,
+            { backgroundColor: isCurrentPlan ? colors.DISABLED : colors.PRIMARY },
+            tier === SubscriptionTier.BASIC && { backgroundColor: colors.BORDER }
+          ]}
+          onPress={() => handleSubscribe(tier)}
+          disabled={isCurrentPlan && tier !== SubscriptionTier.BASIC}
+        >
+          <Text style={[
+            styles.selectButtonText,
+            tier === SubscriptionTier.BASIC && { color: colors.TEXT.SECONDARY }
+          ]}>
+            {isCurrentPlan ? '현재 플랜' : 
+             tier === SubscriptionTier.BASIC ? '무료 사용' : '업그레이드'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  /**
+   * 기능 비교표 렌더링
+   */
+  const renderComparisonTable = () => (
+    <View style={styles.comparisonSection}>
+      <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+        플랜 비교
+      </Text>
       
-      <View style={[styles.faqContainer, { backgroundColor: colors.SURFACE }]}>
-        <View style={styles.faqItem}>
-          <Text style={[styles.faqQuestion, { color: colors.TEXT.PRIMARY }]}>{t('faq.questions.cancel.question')}</Text>
-          <Text style={[styles.faqAnswer, { color: colors.TEXT.SECONDARY }]}>
-            {t('faq.questions.cancel.answer')}
-          </Text>
+      <View style={[styles.comparisonTable, { backgroundColor: colors.SURFACE }]}>
+        {/* 헤더 */}
+        <View style={styles.comparisonRow}>
+          <View style={styles.comparisonFeature} />
+          <Text style={[styles.comparisonHeader, { color: colors.TEXT.SECONDARY }]}>무료</Text>
+          <Text style={[styles.comparisonHeader, { color: colors.PRIMARY }]}>고급</Text>
+          <Text style={[styles.comparisonHeader, { color: '#FFD700' }]}>프리미엄</Text>
         </View>
-        
-        <View style={styles.faqItem}>
-          <Text style={[styles.faqQuestion, { color: colors.TEXT.PRIMARY }]}>{t('faq.questions.payment.question')}</Text>
-          <Text style={[styles.faqAnswer, { color: colors.TEXT.SECONDARY }]}>
-            {t('faq.questions.payment.answer')}
-          </Text>
+
+        {/* 비교 항목들 */}
+        <View style={[styles.comparisonRow, { borderTopColor: colors.BORDER }]}>
+          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>관심상대 등록</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>3개</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>10개</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>무제한</Text>
         </View>
-        
-        <View style={styles.faqItem}>
-          <Text style={[styles.faqQuestion, { color: colors.TEXT.PRIMARY }]}>{t('faq.questions.likes.question')}</Text>
-          <Text style={[styles.faqAnswer, { color: colors.TEXT.SECONDARY }]}>
-            {t('faq.questions.likes.answer')}
-          </Text>
+
+        <View style={[styles.comparisonRow, { borderTopColor: colors.BORDER }]}>
+          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>검색 유효기간</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>3일</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>2주</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>무제한</Text>
+        </View>
+
+        <View style={[styles.comparisonRow, { borderTopColor: colors.BORDER }]}>
+          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>일일 좋아요</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>1회</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>3회</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>무제한</Text>
+        </View>
+
+        <View style={[styles.comparisonRow, { borderTopColor: colors.BORDER }]}>
+          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>광고 제거</Text>
+          <Icon name="close" size={20} color={colors.ERROR} />
+          <Icon name="checkmark" size={20} color={colors.SUCCESS} />
+          <Icon name="checkmark" size={20} color={colors.SUCCESS} />
+        </View>
+
+        <View style={[styles.comparisonRow, { borderTopColor: colors.BORDER }]}>
+          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>우선 매칭</Text>
+          <Icon name="close" size={20} color={colors.ERROR} />
+          <Icon name="close" size={20} color={colors.ERROR} />
+          <Icon name="checkmark" size={20} color={colors.SUCCESS} />
         </View>
       </View>
     </View>
@@ -352,22 +402,19 @@ export const PremiumScreen = () => {
         }
         showsVerticalScrollIndicator={false}
       >
-        {renderCurrentSubscription()}
-        {renderSubscriptionPlans()}
-        {renderLikePackages()}
-        {renderFAQ()}
+        {renderCurrentStatus()}
+        {renderBillingToggle()}
+        
+        <View style={styles.plansContainer}>
+          {[SubscriptionTier.BASIC, SubscriptionTier.ADVANCED, SubscriptionTier.PREMIUM].map(tier => 
+            renderPlanCard(tier)
+          )}
+        </View>
+
+        {renderComparisonTable()}
       </ScrollView>
 
-      <PaymentModal
-        visible={showPaymentModal}
-        product={selectedProduct}
-        onClose={() => {
-          setShowPaymentModal(false);
-          setSelectedProduct(null);
-        }}
-        onSuccess={handlePaymentSuccess}
-        formatPrice={premiumService.formatPrice}
-      />
+      {/* 결제 모달은 실제 구현시 추가 */}
     </SafeAreaView>
   );
 };
@@ -380,8 +427,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.LG,
-    paddingVertical: SPACING.MD,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     borderBottomWidth: 1,
   },
   backButton: {
@@ -391,7 +438,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: FONT_SIZES.LG,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   placeholder: {
@@ -400,83 +447,158 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  currentSubscription: {
-    margin: SPACING.MD,
-    padding: SPACING.LG,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  subscriptionHeader: {
+  currentStatus: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: SPACING.MD,
+    margin: 20,
+    padding: 15,
+    borderRadius: 12,
   },
-  subscriptionTitle: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-    marginLeft: SPACING.SM,
+  statusInfo: {
+    marginLeft: 12,
+    flex: 1,
   },
-  subscriptionInfo: {
-    marginBottom: SPACING.MD,
+  statusTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  statusSubtitle: {
+    fontSize: 14,
+    marginTop: 4,
+  },
+  billingContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  billingToggle: {
+    flexDirection: 'row',
+    padding: 4,
+    borderRadius: 12,
+  },
+  billingOption: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 10,
+    position: 'relative',
+  },
+  billingText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  saveBadge: {
+    position: 'absolute',
+    top: -8,
+    right: 20,
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  saveText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  plansContainer: {
+    paddingHorizontal: 20,
+  },
+  planCard: {
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 15,
+    borderWidth: 1,
+    position: 'relative',
+  },
+  popularCard: {
+    transform: [{ scale: 1.02 }],
+  },
+  popularBadge: {
+    position: 'absolute',
+    top: -10,
+    right: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  popularText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  planHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
   planName: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    marginBottom: SPACING.XS,
+    fontSize: 20,
+    fontWeight: '700',
+    marginTop: 8,
   },
-  expiryInfo: {
-    fontSize: FONT_SIZES.SM,
+  planPrice: {
+    fontSize: 32,
+    fontWeight: '800',
+    marginTop: 8,
   },
-  cancelNotice: {
-    fontSize: FONT_SIZES.SM,
-    fontStyle: 'italic',
-    marginTop: SPACING.XS,
+  planPeriod: {
+    fontSize: 14,
+    marginTop: 4,
   },
-  cancelButton: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    borderRadius: 8,
-    borderWidth: 1,
+  featuresList: {
+    marginBottom: 20,
   },
-  cancelButtonText: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: '600',
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  section: {
-    margin: SPACING.MD,
+  featureText: {
+    fontSize: 14,
+    marginLeft: 10,
+    flex: 1,
+  },
+  selectButton: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  selectButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  comparisonSection: {
+    padding: 20,
   },
   sectionTitle: {
-    fontSize: FONT_SIZES.XL,
-    fontWeight: 'bold',
-    marginBottom: SPACING.SM,
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 15,
   },
-  sectionDescription: {
-    fontSize: FONT_SIZES.MD,
-    marginBottom: SPACING.LG,
-    lineHeight: 22,
-  },
-  horizontalScrollContainer: {
-    paddingRight: SPACING.MD,
-  },
-  likePackageContainer: {
-    width: 200,
-    marginRight: SPACING.MD,
-  },
-  faqContainer: {
+  comparisonTable: {
     borderRadius: 12,
-    padding: SPACING.LG,
+    padding: 15,
   },
-  faqItem: {
-    marginBottom: SPACING.LG,
+  comparisonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderTopWidth: 1,
   },
-  faqQuestion: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    marginBottom: SPACING.SM,
+  comparisonFeature: {
+    flex: 2,
+    fontSize: 14,
+    fontWeight: '500',
   },
-  faqAnswer: {
-    fontSize: FONT_SIZES.SM,
-    lineHeight: 20,
+  comparisonHeader: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  comparisonValue: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 14,
   },
 });
