@@ -6,6 +6,7 @@ export enum InterestType {
   PHONE = 'PHONE',
   EMAIL = 'EMAIL',
   SOCIAL_ID = 'SOCIAL_ID',
+  NAME = 'NAME',  // 이름으로 찾기
   GROUP = 'GROUP',
   LOCATION = 'LOCATION',
   APPEARANCE = 'APPEARANCE',

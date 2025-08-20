@@ -37,7 +37,7 @@ export class AuthGuard implements CanActivate {
     }
 
     // 개발 환경에서만 개발 모드 허용
-    if (nodeEnv === 'development' && !token && useDevAuth) {
+    if (nodeEnv === 'development' && useDevAuth) {
       const devAuth = request.headers['x-dev-auth'];
       if (devAuth === 'true') {
         console.log('[AuthGuard] Dev mode auth in development environment');

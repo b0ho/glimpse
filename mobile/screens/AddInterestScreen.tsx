@@ -17,6 +17,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useInterestStore } from '@/store/slices/interestSlice';
 import { InterestType } from '@/types/interest';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
 // import DateTimePicker from '@react-native-community/datetimepicker';
 // import * as Contacts from 'expo-contacts';
 
@@ -26,38 +27,125 @@ import { useAuthStore } from '@/store/slices/authSlice';
 export const AddInterestScreen: React.FC = () => {
   const navigation = useNavigation();
   const { colors } = useTheme();
-  const { createSearch } = useInterestStore();
-  const { user } = useAuthStore();
+  const { createSearch, searches } = useInterestStore();
+  const { user, getSubscriptionTier, getSubscriptionFeatures } = useAuthStore();
+  
+  const subscriptionTier = getSubscriptionTier();
+  const features = getSubscriptionFeatures();
 
   const [selectedType, setSelectedType] = useState<InterestType | null>(null);
   const [value, setValue] = useState('');
   const [name, setName] = useState(''); // 이름 필드 추가
   const [metadata, setMetadata] = useState<any>({});
+  const [birthdate, setBirthdate] = useState<string>(''); // 생일 (YYYY-MM-DD)
+  const [showBirthdateOption, setShowBirthdateOption] = useState(false);
+  const [companyName, setCompanyName] = useState(''); // 회사/학교에서 사용할 이름
+  const [department, setDepartment] = useState(''); // 부서/학과명
+  const [showAdditionalOptions, setShowAdditionalOptions] = useState(false);
   
-  // 기본 만료일을 2주로 설정
+  // 구독 티어에 따른 기본 만료일 설정
   const getDefaultExpiryDate = () => {
     const date = new Date();
-    date.setDate(date.getDate() + 14); // 2주 후
+    const days = features.interestSearchDuration || 3;
+    date.setDate(date.getDate() + days);
     return date;
   };
   
   const [expiresAt, setExpiresAt] = useState<Date>(getDefaultExpiryDate());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState<'1week' | '2weeks' | '1month' | 'custom'>('2weeks');
+  const [selectedDuration, setSelectedDuration] = useState<'3days' | '2weeks' | 'unlimited'>(() => {
+    if (subscriptionTier === SubscriptionTier.BASIC) return '3days';
+    if (subscriptionTier === SubscriptionTier.ADVANCED) return '2weeks';
+    return 'unlimited';
+  });
 
   const interestTypes = [
     { type: InterestType.PHONE, label: '전화번호', icon: 'call-outline', color: '#4CAF50' },
     { type: InterestType.EMAIL, label: '이메일', icon: 'mail-outline', color: '#2196F3' },
     { type: InterestType.SOCIAL_ID, label: '소셜 계정', icon: 'logo-instagram', color: '#E91E63' },
+    { type: InterestType.NAME, label: '이름', icon: 'person-outline', color: '#9C27B0' },
     { type: InterestType.GROUP, label: '특정 그룹', icon: 'people-outline', color: '#9C27B0' },
     { type: InterestType.LOCATION, label: '장소', icon: 'location-outline', color: '#FF9800' },
-    { type: InterestType.APPEARANCE, label: '인상착의', icon: 'person-outline', color: '#795548' },
+    { type: InterestType.APPEARANCE, label: '인상착의', icon: 'body-outline', color: '#795548' },
     { type: InterestType.NICKNAME, label: '닉네임', icon: 'at-outline', color: '#607D8B' },
     { type: InterestType.COMPANY, label: '회사', icon: 'business-outline', color: '#3F51B5' },
     { type: InterestType.SCHOOL, label: '학교', icon: 'school-outline', color: '#00BCD4' },
     { type: InterestType.HOBBY, label: '취미/관심사', icon: 'heart-outline', color: '#F44336' },
   ];
+
+  // 구독 티어에 따른 제한 확인
+  const checkSubscriptionLimits = (type: InterestType): boolean => {
+    // 프리미엄은 무제한
+    if (subscriptionTier === SubscriptionTier.PREMIUM) return true;
+    
+    // 고급은 모든 유형 1개씩
+    if (subscriptionTier === SubscriptionTier.ADVANCED) {
+      const sameTypeSearches = searches.filter(s => s.type === type);
+      if (sameTypeSearches.length >= 1) {
+        Alert.alert(
+          '등록 제한',
+          '고급 구독자는 각 유형별로 1개씩만 등록 가능합니다.\n프리미엄으로 업그레이드하여 무제한 등록하세요!',
+          [
+            { text: '확인', style: 'cancel' },
+            { text: '업그레이드', onPress: () => navigation.navigate('Premium' as never) }
+          ]
+        );
+        return false;
+      }
+      return true;
+    }
+    
+    // 일반은 총 3개, 모든 유형 허용 (테스트를 위해 임시로 제한 해제)
+    const allowedTypes = [
+      InterestType.PHONE, 
+      InterestType.EMAIL, 
+      InterestType.SOCIAL_ID, 
+      InterestType.NAME,
+      InterestType.GROUP,
+      InterestType.LOCATION,
+      InterestType.APPEARANCE,
+      InterestType.NICKNAME,
+      InterestType.COMPANY,
+      InterestType.SCHOOL,
+      InterestType.HOBBY
+    ];
+    if (!allowedTypes.includes(type)) {
+      Alert.alert(
+        '등록 제한',
+        '일반 사용자는 전화번호, 이메일, 소셜계정만 등록 가능합니다.\n더 많은 유형을 사용하려면 구독하세요!',
+        [
+          { text: '확인', style: 'cancel' },
+          { text: '구독하기', onPress: () => navigation.navigate('Premium' as never) }
+        ]
+      );
+      return false;
+    }
+    
+    if (searches.length >= 3) {
+      Alert.alert(
+        '등록 제한',
+        '일반 사용자는 최대 3개까지만 등록 가능합니다.\n더 많이 등록하려면 구독하세요!',
+        [
+          { text: '확인', style: 'cancel' },
+          { text: '구독하기', onPress: () => navigation.navigate('Premium' as never) }
+        ]
+      );
+      return false;
+    }
+    
+    const sameTypeSearches = searches.filter(s => s.type === type);
+    if (sameTypeSearches.length >= 1) {
+      Alert.alert(
+        '등록 제한',
+        '일반 사용자는 각 유형별로 1개씩만 등록 가능합니다.',
+        [{ text: '확인', style: 'cancel' }]
+      );
+      return false;
+    }
+    
+    return true;
+  };
 
   const handleSelectContact = async () => {
     // 연락처 기능은 추후 구현
@@ -89,15 +177,45 @@ export const AddInterestScreen: React.FC = () => {
       return;
     }
 
+    // 소셜 계정 타입일 때 플랫폼 필수 검증
+    if (selectedType === InterestType.SOCIAL_ID && !metadata.platform) {
+      Alert.alert('오류', '소셜 플랫폼을 선택해주세요');
+      return;
+    }
+
     setLoading(true);
     try {
+      // metadata 구성
+      const searchMetadata = { ...metadata };
+      
+      // NAME 타입일 때 생일 정보 추가
+      if (selectedType === InterestType.NAME && birthdate) {
+        searchMetadata.birthdate = birthdate;
+      }
+      
+      // COMPANY 타입일 때 추가 정보
+      if (selectedType === InterestType.COMPANY && showAdditionalOptions) {
+        if (companyName.trim()) searchMetadata.employeeName = companyName.trim();
+        if (department.trim()) searchMetadata.department = department.trim();
+        if (birthdate) searchMetadata.birthdate = birthdate;
+      }
+      
+      // SCHOOL 타입일 때 추가 정보
+      if (selectedType === InterestType.SCHOOL && showAdditionalOptions) {
+        if (companyName.trim()) searchMetadata.studentName = companyName.trim();
+        if (department.trim()) searchMetadata.major = department.trim();
+        if (birthdate) searchMetadata.birthdate = birthdate;
+      }
+      
+      // 공통 이름 필드
+      if (name.trim()) {
+        searchMetadata.name = name.trim();
+      }
+
       await createSearch({
         type: selectedType,
         value: value.trim(),
-        metadata: {
-          ...metadata,
-          name: name.trim() || undefined, // 이름이 입력된 경우에만 포함
-        },
+        metadata: searchMetadata,
         expiresAt: expiresAt?.toISOString(),
       });
 
@@ -154,34 +272,183 @@ export const AddInterestScreen: React.FC = () => {
       case InterestType.SOCIAL_ID:
         return (
           <View style={styles.inputContainer}>
+            {/* 소셜 플랫폼 드롭다운 (필수) */}
+            <View style={styles.dropdownContainer}>
+              <Text style={[styles.inputLabel, { color: colors.TEXT.PRIMARY }]}>
+                소셜 플랫폼 선택 <Text style={{ color: colors.ERROR }}>*</Text>
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.dropdown,
+                  { 
+                    borderColor: !metadata.platform ? colors.ERROR : colors.BORDER,
+                    backgroundColor: colors.SURFACE 
+                  },
+                  metadata.showPlatformPicker && { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }
+                ]}
+                onPress={() => setMetadata({ ...metadata, showPlatformPicker: !metadata.showPlatformPicker })}
+              >
+                <View style={styles.dropdownContent}>
+                  {metadata.platform ? (
+                    <View style={styles.selectedPlatform}>
+                      <Icon 
+                        name={
+                          metadata.platform === 'instagram' ? 'logo-instagram' :
+                          metadata.platform === 'kakao' ? 'chatbubble-ellipses-outline' :
+                          metadata.platform === 'facebook' ? 'logo-facebook' :
+                          metadata.platform === 'twitter' ? 'logo-twitter' :
+                          metadata.platform === 'tiktok' ? 'logo-tiktok' :
+                          'at-outline'
+                        }
+                        size={20}
+                        color={colors.PRIMARY}
+                      />
+                      <Text style={[styles.dropdownText, { color: colors.TEXT.PRIMARY }]}>
+                        {metadata.platform === 'instagram' ? 'Instagram' :
+                         metadata.platform === 'kakao' ? 'KakaoTalk' :
+                         metadata.platform === 'facebook' ? 'Facebook' :
+                         metadata.platform === 'twitter' ? 'Twitter (X)' :
+                         metadata.platform === 'tiktok' ? 'TikTok' :
+                         metadata.platform}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text style={[styles.dropdownPlaceholder, { color: colors.TEXT.TERTIARY }]}>
+                      소셜 플랫폼을 선택하세요
+                    </Text>
+                  )}
+                  <Icon 
+                    name={metadata.showPlatformPicker ? "chevron-up" : "chevron-down"} 
+                    size={20} 
+                    color={colors.TEXT.SECONDARY} 
+                  />
+                </View>
+              </TouchableOpacity>
+              
+              {/* 드롭다운 옵션 - 상대 위치로 변경 */}
+              {metadata.showPlatformPicker && (
+                <View style={[
+                  styles.dropdownOptionsRelative, 
+                  { 
+                    backgroundColor: colors.SURFACE, 
+                    borderColor: colors.BORDER,
+                    borderTopWidth: 0,
+                    borderTopLeftRadius: 0,
+                    borderTopRightRadius: 0,
+                    marginTop: -1, // 경계선 겹침 제거
+                  }
+                ]}>
+                  {[
+                    { id: 'instagram', name: 'Instagram', icon: 'logo-instagram' },
+                    { id: 'kakao', name: 'KakaoTalk', icon: 'chatbubble-ellipses-outline' },
+                    { id: 'facebook', name: 'Facebook', icon: 'logo-facebook' },
+                    { id: 'twitter', name: 'Twitter (X)', icon: 'logo-twitter' },
+                    { id: 'tiktok', name: 'TikTok', icon: 'logo-tiktok' },
+                  ].map((platform) => (
+                    <TouchableOpacity
+                      key={platform.id}
+                      style={[
+                        styles.dropdownOption,
+                        metadata.platform === platform.id && { backgroundColor: colors.PRIMARY + '10' }
+                      ]}
+                      onPress={() => setMetadata({ ...metadata, platform: platform.id, showPlatformPicker: false })}
+                    >
+                      <Icon name={platform.icon} size={20} color={colors.PRIMARY} />
+                      <Text style={[styles.dropdownOptionText, { color: colors.TEXT.PRIMARY }]}>
+                        {platform.name}
+                      </Text>
+                      {metadata.platform === platform.id && (
+                        <Icon name="checkmark" size={20} color={colors.PRIMARY} />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+
+            {/* 소셜 계정 ID 입력 */}
             <TextInput
-              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-              placeholder="소셜 계정 ID를 입력하세요 (@제외)"
+              style={[
+                styles.input, 
+                { 
+                  color: colors.TEXT.PRIMARY, 
+                  borderColor: colors.BORDER, 
+                  marginTop: metadata.showPlatformPicker ? 8 : 12  // 드롭다운 열렸을 때 간격 조정
+                }
+              ]}
+              placeholder={
+                metadata.platform === 'kakao' ? "카카오톡 ID를 입력하세요" :
+                "소셜 계정 ID를 입력하세요 (@제외)"
+              }
               placeholderTextColor={colors.TEXT.TERTIARY}
               value={value}
               onChangeText={setValue}
               autoCapitalize="none"
             />
-            <View style={styles.socialOptions}>
-              <TouchableOpacity
-                style={[styles.socialOption, metadata.platform === 'instagram' && styles.socialOptionActive]}
-                onPress={() => setMetadata({ ...metadata, platform: 'instagram' })}
-              >
-                <Icon name="logo-instagram" size={20} color={metadata.platform === 'instagram' ? colors.PRIMARY : colors.TEXT.SECONDARY} />
-                <Text style={[styles.socialOptionText, { color: metadata.platform === 'instagram' ? colors.PRIMARY : colors.TEXT.SECONDARY }]}>
-                  Instagram
+            
+            {!metadata.platform && (
+              <Text style={[styles.errorText, { color: colors.ERROR }]}>
+                소셜 플랫폼을 먼저 선택해주세요
+              </Text>
+            )}
+          </View>
+        );
+
+      case InterestType.NAME:
+        return (
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              placeholder="이름을 입력하세요 (성명)"
+              placeholderTextColor={colors.TEXT.TERTIARY}
+              value={value}
+              onChangeText={setValue}
+            />
+            
+            {/* 생일 추가 옵션 */}
+            <TouchableOpacity
+              style={[styles.optionRow, { backgroundColor: colors.SURFACE, marginTop: 12 }]}
+              onPress={() => setShowBirthdateOption(!showBirthdateOption)}
+            >
+              <Icon name="calendar-outline" size={20} color={colors.PRIMARY} />
+              <Text style={[styles.optionLabel, { color: colors.TEXT.PRIMARY }]}>
+                생일 추가 (동명이인 구분)
+              </Text>
+              <Icon 
+                name={showBirthdateOption ? "chevron-up" : "chevron-down"} 
+                size={20} 
+                color={colors.TEXT.SECONDARY} 
+              />
+            </TouchableOpacity>
+            
+            {showBirthdateOption && (
+              <View style={styles.birthdateContainer}>
+                <Text style={[styles.birthdateLabel, { color: colors.TEXT.SECONDARY }]}>
+                  생년월일 (선택)
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.socialOption, metadata.platform === 'kakao' && styles.socialOptionActive]}
-                onPress={() => setMetadata({ ...metadata, platform: 'kakao' })}
-              >
-                <Icon name="chatbubble-ellipses-outline" size={20} color={metadata.platform === 'kakao' ? colors.PRIMARY : colors.TEXT.SECONDARY} />
-                <Text style={[styles.socialOptionText, { color: metadata.platform === 'kakao' ? colors.PRIMARY : colors.TEXT.SECONDARY }]}>
-                  KakaoTalk
+                <TextInput
+                  style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+                  placeholder="YYYY-MM-DD (예: 1995-03-15)"
+                  placeholderTextColor={colors.TEXT.TERTIARY}
+                  value={birthdate}
+                  onChangeText={(text) => {
+                    // 자동 하이픈 추가
+                    let cleaned = text.replace(/[^0-9]/g, '');
+                    if (cleaned.length >= 5 && cleaned.length <= 6) {
+                      cleaned = cleaned.slice(0, 4) + '-' + cleaned.slice(4);
+                    } else if (cleaned.length >= 7) {
+                      cleaned = cleaned.slice(0, 4) + '-' + cleaned.slice(4, 6) + '-' + cleaned.slice(6, 8);
+                    }
+                    setBirthdate(cleaned);
+                  }}
+                  keyboardType="numeric"
+                  maxLength={10}
+                />
+                <Text style={[styles.birthdateHint, { color: colors.TEXT.TERTIARY }]}>
+                  동명이인이 많은 경우 정확한 매칭을 위해 사용됩니다
                 </Text>
-              </TouchableOpacity>
-            </View>
+              </View>
+            )}
           </View>
         );
 
@@ -198,6 +465,162 @@ export const AddInterestScreen: React.FC = () => {
               numberOfLines={4}
               textAlignVertical="top"
             />
+          </View>
+        );
+
+      case InterestType.COMPANY:
+        return (
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              placeholder="회사명을 입력하세요"
+              placeholderTextColor={colors.TEXT.TERTIARY}
+              value={value}
+              onChangeText={setValue}
+            />
+            
+            {/* 추가 옵션 토글 */}
+            <TouchableOpacity
+              style={[styles.optionRow, { backgroundColor: colors.SURFACE, marginTop: 12 }]}
+              onPress={() => setShowAdditionalOptions(!showAdditionalOptions)}
+            >
+              <Icon name="person-add-outline" size={20} color={colors.PRIMARY} />
+              <Text style={[styles.optionLabel, { color: colors.TEXT.PRIMARY }]}>
+                상세 정보 추가 (이름, 부서, 생일)
+              </Text>
+              <Icon 
+                name={showAdditionalOptions ? "chevron-up" : "chevron-down"} 
+                size={20} 
+                color={colors.TEXT.SECONDARY} 
+              />
+            </TouchableOpacity>
+            
+            {showAdditionalOptions && (
+              <View style={styles.additionalOptionsContainer}>
+                <Text style={[styles.optionSectionLabel, { color: colors.TEXT.SECONDARY }]}>
+                  직원 정보 (선택)
+                </Text>
+                
+                {/* 이름 */}
+                <TextInput
+                  style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+                  placeholder="이름 (예: 김민수)"
+                  placeholderTextColor={colors.TEXT.TERTIARY}
+                  value={companyName}
+                  onChangeText={setCompanyName}
+                />
+                
+                {/* 부서 */}
+                <TextInput
+                  style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER, marginTop: 8 }]}
+                  placeholder="부서명 (예: 마케팅팀, 개발1팀)"
+                  placeholderTextColor={colors.TEXT.TERTIARY}
+                  value={department}
+                  onChangeText={setDepartment}
+                />
+                
+                {/* 생일 */}
+                <TextInput
+                  style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER, marginTop: 8 }]}
+                  placeholder="생년월일 YYYY-MM-DD (예: 1995-03-15)"
+                  placeholderTextColor={colors.TEXT.TERTIARY}
+                  value={birthdate}
+                  onChangeText={(text) => {
+                    let cleaned = text.replace(/[^0-9]/g, '');
+                    if (cleaned.length >= 5 && cleaned.length <= 6) {
+                      cleaned = cleaned.slice(0, 4) + '-' + cleaned.slice(4);
+                    } else if (cleaned.length >= 7) {
+                      cleaned = cleaned.slice(0, 4) + '-' + cleaned.slice(4, 6) + '-' + cleaned.slice(6, 8);
+                    }
+                    setBirthdate(cleaned);
+                  }}
+                  keyboardType="numeric"
+                  maxLength={10}
+                />
+                
+                <Text style={[styles.additionalOptionsHint, { color: colors.TEXT.TERTIARY }]}>
+                  더 정확한 매칭을 위해 사용되며, 모든 정보는 익명으로 보호됩니다
+                </Text>
+              </View>
+            )}
+          </View>
+        );
+
+      case InterestType.SCHOOL:
+        return (
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              placeholder="학교명을 입력하세요"
+              placeholderTextColor={colors.TEXT.TERTIARY}
+              value={value}
+              onChangeText={setValue}
+            />
+            
+            {/* 추가 옵션 토글 */}
+            <TouchableOpacity
+              style={[styles.optionRow, { backgroundColor: colors.SURFACE, marginTop: 12 }]}
+              onPress={() => setShowAdditionalOptions(!showAdditionalOptions)}
+            >
+              <Icon name="person-add-outline" size={20} color={colors.PRIMARY} />
+              <Text style={[styles.optionLabel, { color: colors.TEXT.PRIMARY }]}>
+                상세 정보 추가 (이름, 학과, 생일)
+              </Text>
+              <Icon 
+                name={showAdditionalOptions ? "chevron-up" : "chevron-down"} 
+                size={20} 
+                color={colors.TEXT.SECONDARY} 
+              />
+            </TouchableOpacity>
+            
+            {showAdditionalOptions && (
+              <View style={styles.additionalOptionsContainer}>
+                <Text style={[styles.optionSectionLabel, { color: colors.TEXT.SECONDARY }]}>
+                  학생 정보 (선택)
+                </Text>
+                
+                {/* 이름 */}
+                <TextInput
+                  style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+                  placeholder="이름 (예: 이지은)"
+                  placeholderTextColor={colors.TEXT.TERTIARY}
+                  value={companyName}
+                  onChangeText={setCompanyName}
+                />
+                
+                {/* 학과 */}
+                <TextInput
+                  style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER, marginTop: 8 }]}
+                  placeholder="학과명 (예: 컴퓨터공학과, 경영학과)"
+                  placeholderTextColor={colors.TEXT.TERTIARY}
+                  value={department}
+                  onChangeText={setDepartment}
+                />
+                
+                {/* 생일 */}
+                <TextInput
+                  style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER, marginTop: 8 }]}
+                  placeholder="생년월일 YYYY-MM-DD (예: 2000-05-20)"
+                  placeholderTextColor={colors.TEXT.TERTIARY}
+                  value={birthdate}
+                  onChangeText={(text) => {
+                    let cleaned = text.replace(/[^0-9]/g, '');
+                    if (cleaned.length >= 5 && cleaned.length <= 6) {
+                      cleaned = cleaned.slice(0, 4) + '-' + cleaned.slice(4);
+                    } else if (cleaned.length >= 7) {
+                      cleaned = cleaned.slice(0, 4) + '-' + cleaned.slice(4, 6) + '-' + cleaned.slice(6, 8);
+                    }
+                    setBirthdate(cleaned);
+                  }}
+                  keyboardType="numeric"
+                  maxLength={10}
+                />
+                
+                <Text style={[styles.additionalOptionsHint, { color: colors.TEXT.TERTIARY }]}>
+                  더 정확한 매칭을 위해 사용되며, 모든 정보는 익명으로 보호됩니다
+                </Text>
+              </View>
+            )}
           </View>
         );
 
@@ -218,6 +641,54 @@ export const AddInterestScreen: React.FC = () => {
               <Icon name="map-outline" size={20} color="#FFFFFF" />
               <Text style={styles.contactButtonText}>지도에서 선택</Text>
             </TouchableOpacity>
+          </View>
+        );
+
+      case InterestType.GROUP:
+        return (
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              placeholder="그룹 ID 또는 이름을 입력하세요"
+              placeholderTextColor={colors.TEXT.TERTIARY}
+              value={value}
+              onChangeText={setValue}
+            />
+            <Text style={[styles.inputHint, { color: colors.TEXT.TERTIARY }]}>
+              같은 그룹에 있는 사람끼리 매칭됩니다
+            </Text>
+          </View>
+        );
+
+      case InterestType.NICKNAME:
+        return (
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              placeholder="닉네임 일부를 입력하세요"
+              placeholderTextColor={colors.TEXT.TERTIARY}
+              value={value}
+              onChangeText={setValue}
+            />
+            <Text style={[styles.inputHint, { color: colors.TEXT.TERTIARY }]}>
+              최소 2글자 이상 입력하세요
+            </Text>
+          </View>
+        );
+
+      case InterestType.HOBBY:
+        return (
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              placeholder="취미/관심사를 입력하세요 (예: 등산, 독서, 요리)"
+              placeholderTextColor={colors.TEXT.TERTIARY}
+              value={value}
+              onChangeText={setValue}
+            />
+            <Text style={[styles.inputHint, { color: colors.TEXT.TERTIARY }]}>
+              콤마로 구분하여 여러 개 입력 가능합니다
+            </Text>
           </View>
         );
 
@@ -268,7 +739,11 @@ export const AddInterestScreen: React.FC = () => {
                     { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
                     selectedType === item.type && { borderColor: item.color, borderWidth: 2 },
                   ]}
-                  onPress={() => setSelectedType(item.type)}
+                  onPress={() => {
+                    if (checkSubscriptionLimits(item.type)) {
+                      setSelectedType(item.type);
+                    }
+                  }}
                 >
                   <View style={[styles.typeIcon, { backgroundColor: item.color + '20' }]}>
                     <Icon name={item.icon} size={24} color={item.color} />
@@ -313,75 +788,85 @@ export const AddInterestScreen: React.FC = () => {
             <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
               검색 유효 기간
             </Text>
+            <View style={styles.subscriptionInfo}>
+              <Icon 
+                name={
+                  subscriptionTier === SubscriptionTier.PREMIUM ? "star" :
+                  subscriptionTier === SubscriptionTier.ADVANCED ? "star-outline" :
+                  "information-circle-outline"
+                } 
+                size={20} 
+                color={
+                  subscriptionTier === SubscriptionTier.PREMIUM ? "#FFD700" :
+                  subscriptionTier === SubscriptionTier.ADVANCED ? colors.PRIMARY :
+                  colors.TEXT.SECONDARY
+                } 
+              />
+              <Text style={[styles.subscriptionInfoText, { color: colors.TEXT.SECONDARY }]}>
+                {subscriptionTier === SubscriptionTier.BASIC && '일반: 3일'}
+                {subscriptionTier === SubscriptionTier.ADVANCED && '고급: 2주'}
+                {subscriptionTier === SubscriptionTier.PREMIUM && '프리미엄: 무제한'}
+              </Text>
+            </View>
             <View style={styles.durationOptions}>
-              <TouchableOpacity
-                style={[
-                  styles.durationOption,
-                  { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
-                  selectedDuration === '1week' && { borderColor: colors.PRIMARY, borderWidth: 2 },
-                ]}
-                onPress={() => {
-                  setSelectedDuration('1week');
-                  const date = new Date();
-                  date.setDate(date.getDate() + 7);
-                  setExpiresAt(date);
-                }}
-              >
-                <Text style={[styles.durationText, { color: selectedDuration === '1week' ? colors.PRIMARY : colors.TEXT.PRIMARY }]}>
-                  1주일
-                </Text>
-              </TouchableOpacity>
+              {subscriptionTier === SubscriptionTier.BASIC && (
+                <TouchableOpacity
+                  style={[
+                    styles.durationOption,
+                    { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY, borderWidth: 2 },
+                  ]}
+                  disabled
+                >
+                  <Text style={[styles.durationText, { color: colors.PRIMARY }]}>
+                    3일
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.upgradeButton}
+                    onPress={() => navigation.navigate('Premium' as never)}
+                  >
+                    <Text style={styles.upgradeButtonText}>업그레이드</Text>
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )}
               
-              <TouchableOpacity
-                style={[
-                  styles.durationOption,
-                  { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
-                  selectedDuration === '2weeks' && { borderColor: colors.PRIMARY, borderWidth: 2 },
-                ]}
-                onPress={() => {
-                  setSelectedDuration('2weeks');
-                  const date = new Date();
-                  date.setDate(date.getDate() + 14);
-                  setExpiresAt(date);
-                }}
-              >
-                <Text style={[styles.durationText, { color: selectedDuration === '2weeks' ? colors.PRIMARY : colors.TEXT.PRIMARY }]}>
-                  2주일
-                </Text>
-                <View style={[styles.recommendBadge, { backgroundColor: colors.PRIMARY }]}>
-                  <Text style={styles.recommendText}>기본</Text>
-                </View>
-              </TouchableOpacity>
+              {subscriptionTier === SubscriptionTier.ADVANCED && (
+                <TouchableOpacity
+                  style={[
+                    styles.durationOption,
+                    { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY, borderWidth: 2 },
+                  ]}
+                  disabled
+                >
+                  <Text style={[styles.durationText, { color: colors.PRIMARY }]}>
+                    2주
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.upgradeButton}
+                    onPress={() => navigation.navigate('Premium' as never)}
+                  >
+                    <Text style={styles.upgradeButtonText}>프리미엄</Text>
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )}
               
-              <TouchableOpacity
-                style={[
-                  styles.durationOption,
-                  { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
-                  selectedDuration === '1month' && { borderColor: colors.PRIMARY, borderWidth: 2 },
-                  !user?.isPremium && styles.disabledOption,
-                ]}
-                onPress={() => {
-                  if (!user?.isPremium) {
-                    Alert.alert('프리미엄 기능', '1개월 이상 설정은 프리미엄 회원만 가능합니다.');
-                    return;
-                  }
-                  setSelectedDuration('1month');
-                  const date = new Date();
-                  date.setMonth(date.getMonth() + 1);
-                  setExpiresAt(date);
-                }}
-                disabled={!user?.isPremium}
-              >
-                <Text style={[styles.durationText, { color: selectedDuration === '1month' ? colors.PRIMARY : colors.TEXT.PRIMARY }]}>
-                  1개월
-                </Text>
-                {!user?.isPremium && (
+              {subscriptionTier === SubscriptionTier.PREMIUM && (
+                <TouchableOpacity
+                  style={[
+                    styles.durationOption,
+                    { backgroundColor: colors.PRIMARY + '10', borderColor: colors.PRIMARY, borderWidth: 2 },
+                  ]}
+                  disabled
+                >
+                  <Icon name="infinity" size={20} color={colors.PRIMARY} />
+                  <Text style={[styles.durationText, { color: colors.PRIMARY, marginLeft: 8 }]}>
+                    무제한
+                  </Text>
                   <View style={[styles.premiumBadge, { backgroundColor: '#FFD700' }]}>
                     <Icon name="star" size={12} color="#FFFFFF" />
                     <Text style={styles.premiumText}>프리미엄</Text>
                   </View>
-                )}
-              </TouchableOpacity>
+                </TouchableOpacity>
+              )}
             </View>
             
             <View style={[styles.dateDisplay, { backgroundColor: colors.SURFACE }]}>
@@ -525,6 +1010,75 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  // 드롭다운 스타일
+  dropdownContainer: {
+    marginBottom: 8,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  dropdown: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+  },
+  dropdownContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  selectedPlatform: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dropdownText: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 10,
+  },
+  dropdownPlaceholder: {
+    fontSize: 16,
+  },
+  dropdownOptions: {
+    marginTop: 4,
+    borderWidth: 1,
+    borderRadius: 12,
+    elevation: 999,  // Android에서 높은 우선순위
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    zIndex: 9999,  // iOS에서 높은 우선순위
+  },
+  dropdownOptionsRelative: {
+    borderWidth: 1,
+    borderRadius: 12,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    maxHeight: 250,  // 최대 높이 제한
+  },
+  dropdownOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+  },
+  dropdownOptionText: {
+    flex: 1,
+    fontSize: 15,
+    marginLeft: 10,
+  },
+  errorText: {
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
   },
   socialOptions: {
     flexDirection: 'row',
@@ -670,6 +1224,70 @@ const styles = StyleSheet.create({
   nameHint: {
     fontSize: 12,
     marginTop: 5,
+    fontStyle: 'italic',
+  },
+  subscriptionInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(0,0,0,0.03)',
+    borderRadius: 8,
+  },
+  subscriptionInfoText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  upgradeButton: {
+    position: 'absolute',
+    top: -8,
+    right: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: '#4CAF50',
+    borderRadius: 10,
+  },
+  upgradeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  birthdateContainer: {
+    marginTop: 12,
+  },
+  birthdateLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  birthdateHint: {
+    fontSize: 12,
+    marginTop: 5,
+    fontStyle: 'italic',
+  },
+  additionalOptionsContainer: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: 'rgba(0,0,0,0.02)',
+    borderRadius: 8,
+  },
+  optionSectionLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  additionalOptionsHint: {
+    fontSize: 12,
+    marginTop: 12,
+    fontStyle: 'italic',
+    lineHeight: 18,
+  },
+  inputHint: {
+    fontSize: 12,
+    marginTop: 5,
+    marginLeft: 4,
     fontStyle: 'italic',
   },
 });

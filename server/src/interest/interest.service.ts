@@ -15,7 +15,22 @@ import {
   InterestSearchResponseDto,
   InterestMatchResponseDto,
 } from './dto/interest.dto';
-import { InterestType, SearchStatus, Prisma } from '@prisma/client';
+import { SearchStatus, Prisma } from '@prisma/client';
+
+// InterestType enum 정의 (Prisma 스키마와 동기화)
+enum InterestType {
+  PHONE = 'PHONE',
+  EMAIL = 'EMAIL',
+  SOCIAL_ID = 'SOCIAL_ID',
+  NAME = 'NAME',
+  GROUP = 'GROUP',
+  LOCATION = 'LOCATION',
+  APPEARANCE = 'APPEARANCE',
+  NICKNAME = 'NICKNAME',
+  COMPANY = 'COMPANY',
+  SCHOOL = 'SCHOOL',
+  HOBBY = 'HOBBY',
+}
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -47,7 +62,7 @@ export class InterestService {
       where: {
         userId,
         type: dto.type,
-        value: this.normalizeValue(dto.type, dto.value),
+        value: this.normalizeValue(dto.type as any, dto.value),
         status: SearchStatus.ACTIVE,
       },
     });
@@ -104,7 +119,7 @@ export class InterestService {
     }
 
     // 민감 정보 암호화
-    const encryptedValue = this.shouldEncrypt(dto.type)
+    const encryptedValue = this.shouldEncrypt(dto.type as any)
       ? this.encryptionService.encrypt(dto.value)
       : dto.value;
 
@@ -113,7 +128,7 @@ export class InterestService {
       data: {
         userId,
         type: dto.type,
-        value: this.normalizeValue(dto.type, encryptedValue),
+        value: this.normalizeValue(dto.type as any, encryptedValue),
         metadata: dto.metadata,
         expiresAt,
         status: SearchStatus.ACTIVE,
@@ -261,7 +276,7 @@ export class InterestService {
         profileImage: match.matchedWith!.profileImage || undefined,
       },
       matchType: match.type,
-      matchValue: this.shouldEncrypt(match.type) ? '***' : match.value,
+      matchValue: this.shouldEncrypt(match.type as any) ? '***' : match.value,
       matchedAt: match.matchedAt!,
     }));
   }
@@ -273,7 +288,7 @@ export class InterestService {
     userId: string,
     dto: CheckMatchDto,
   ): Promise<InterestMatchResponseDto | null> {
-    const normalizedValue = this.normalizeValue(dto.type, dto.value);
+    const normalizedValue = this.normalizeValue(dto.type as any, dto.value);
 
     // 양방향 매칭 확인
     const potentialMatch = await this.prisma.interestSearch.findFirst({
@@ -324,7 +339,7 @@ export class InterestService {
         profileImage: potentialMatch.user.profileImage || undefined,
       },
       matchType: dto.type,
-      matchValue: this.shouldEncrypt(dto.type) ? '***' : normalizedValue,
+      matchValue: this.shouldEncrypt(dto.type as any) ? '***' : normalizedValue,
       matchedAt: new Date(),
     };
   }
@@ -335,24 +350,69 @@ export class InterestService {
   private async checkForMatches(search: any): Promise<void> {
     const normalizedValue = search.value;
 
-    // 같은 타입, 같은 값으로 검색하는 다른 사용자 찾기
-    const potentialMatches = await this.prisma.interestSearch.findMany({
-      where: {
-        type: search.type,
-        value: normalizedValue,
-        status: SearchStatus.ACTIVE,
-        userId: { not: search.userId },
-      },
-      include: {
-        user: true,
-      },
-    });
+    // 타입별 특수 매칭 로직
+    switch (search.type) {
+      case InterestType.NAME:
+        // 이름 매칭 - 생일 정보도 함께 고려
+        await this.checkNameMatches(search);
+        break;
+      
+      case InterestType.COMPANY:
+        // 회사 매칭 - 직원 이름, 부서 정보 고려
+        await this.checkCompanyMatches(search);
+        break;
+      
+      case InterestType.SCHOOL:
+        // 학교 매칭 - 학생 이름, 학과 정보 고려
+        await this.checkSchoolMatches(search);
+        break;
+      
+      case InterestType.GROUP:
+        // 그룹 매칭 - 그룹 멤버십 확인
+        await this.checkGroupMatches(search);
+        break;
+      
+      case InterestType.LOCATION:
+        // 장소 매칭 - 위치 정보 확인
+        await this.checkLocationMatches(search);
+        break;
+        
+      case InterestType.APPEARANCE:
+        // 인상착의 매칭 - 설명 텍스트 매칭
+        await this.checkAppearanceMatches(search);
+        break;
+        
+      case InterestType.NICKNAME:
+        // 닉네임 매칭 - 부분 일치 지원
+        await this.checkNicknameMatches(search);
+        break;
+        
+      case InterestType.HOBBY:
+        // 취미/관심사 매칭
+        await this.checkHobbyMatches(search);
+        break;
+        
+      default:
+        // 기본 매칭 (PHONE, EMAIL, SOCIAL_ID)
+        const potentialMatches = await this.prisma.interestSearch.findMany({
+          where: {
+            type: search.type,
+            value: normalizedValue,
+            status: SearchStatus.ACTIVE,
+            userId: { not: search.userId },
+          },
+          include: {
+            user: true,
+          },
+        });
 
-    for (const potentialMatch of potentialMatches) {
-      // 양방향 매칭 확인
-      if (await this.isBidirectionalMatch(search, potentialMatch)) {
-        await this.createMatch(search, potentialMatch);
-      }
+        for (const potentialMatch of potentialMatches) {
+          // 양방향 매칭 확인
+          if (await this.isBidirectionalMatch(search, potentialMatch)) {
+            await this.createMatch(search, potentialMatch);
+          }
+        }
+        break;
     }
   }
 
@@ -460,7 +520,7 @@ export class InterestService {
   /**
    * 값 정규화
    */
-  private normalizeValue(type: InterestType, value: string): string {
+  private normalizeValue(type: InterestType | string, value: string): string {
     switch (type) {
       case InterestType.PHONE:
         // 전화번호 정규화 (하이픈 제거, 국가 코드 처리)
@@ -471,6 +531,19 @@ export class InterestService {
       case InterestType.SOCIAL_ID:
         // 소셜 ID 정규화
         return value.toLowerCase().trim().replace('@', '');
+      case InterestType.NAME:
+        // 이름 정규화 (공백 제거)
+        return value.replace(/\s+/g, '').trim();
+      case InterestType.COMPANY:
+      case InterestType.SCHOOL:
+        // 회사/학교명 정규화
+        return value.replace(/\s+/g, ' ').trim().toLowerCase();
+      case InterestType.NICKNAME:
+        // 닉네임 정규화
+        return value.trim().toLowerCase();
+      case InterestType.HOBBY:
+        // 취미 정규화 (콤마로 구분, 공백 제거)
+        return value.split(',').map(h => h.trim().toLowerCase()).join(',');
       default:
         return value.trim();
     }
@@ -479,7 +552,7 @@ export class InterestService {
   /**
    * 암호화 필요 여부 확인
    */
-  private shouldEncrypt(type: InterestType): boolean {
+  private shouldEncrypt(type: InterestType | string): boolean {
     return type === InterestType.PHONE || type === InterestType.EMAIL;
   }
 
@@ -524,7 +597,7 @@ export class InterestService {
   /**
    * 민감한 값 마스킹
    */
-  private maskSensitiveValue(type: InterestType, value: string): string {
+  private maskSensitiveValue(type: InterestType | string, value: string): string {
     switch (type) {
       case InterestType.PHONE:
         // 010-****-5678 형태로 마스킹
@@ -542,6 +615,303 @@ export class InterestService {
       }
       default:
         return value;
+    }
+  }
+
+  /**
+   * 이름 매칭 확인
+   */
+  private async checkNameMatches(search: any): Promise<void> {
+    const whereCondition: any = {
+      type: InterestType.NAME,
+      value: search.value,
+      status: SearchStatus.ACTIVE,
+      userId: { not: search.userId },
+    };
+
+    // 생일 정보가 있으면 메타데이터에서도 확인
+    if (search.metadata?.birthdate) {
+      whereCondition.metadata = {
+        path: ['birthdate'],
+        equals: search.metadata.birthdate,
+      };
+    }
+
+    const potentialMatches = await this.prisma.interestSearch.findMany({
+      where: whereCondition,
+      include: {
+        user: true,
+      },
+    });
+
+    for (const potentialMatch of potentialMatches) {
+      await this.createMatch(search, potentialMatch);
+    }
+  }
+
+  /**
+   * 회사 매칭 확인
+   */
+  private async checkCompanyMatches(search: any): Promise<void> {
+    const whereCondition: any = {
+      type: InterestType.COMPANY,
+      value: search.value, // 회사명
+      status: SearchStatus.ACTIVE,
+      userId: { not: search.userId },
+    };
+
+    // 추가 필터링 조건
+    const potentialMatches = await this.prisma.interestSearch.findMany({
+      where: whereCondition,
+      include: {
+        user: true,
+      },
+    });
+
+    for (const potentialMatch of potentialMatches) {
+      let shouldMatch = true;
+
+      // metadata를 any 타입으로 캐스팅하여 타입 오류 회피
+      const searchMeta = search.metadata as any;
+      const matchMeta = potentialMatch.metadata as any;
+      
+      // 직원 이름 확인
+      if (searchMeta?.employeeName && matchMeta?.employeeName) {
+        if (searchMeta.employeeName !== matchMeta.employeeName) {
+          shouldMatch = false;
+        }
+      }
+
+      // 부서 확인
+      if (searchMeta?.department && matchMeta?.department) {
+        if (searchMeta.department !== matchMeta.department) {
+          shouldMatch = false;
+        }
+      }
+
+      // 생일 확인
+      if (searchMeta?.birthdate && matchMeta?.birthdate) {
+        if (searchMeta.birthdate !== matchMeta.birthdate) {
+          shouldMatch = false;
+        }
+      }
+
+      if (shouldMatch) {
+        await this.createMatch(search, potentialMatch);
+      }
+    }
+  }
+
+  /**
+   * 학교 매칭 확인
+   */
+  private async checkSchoolMatches(search: any): Promise<void> {
+    const whereCondition: any = {
+      type: InterestType.SCHOOL,
+      value: search.value, // 학교명
+      status: SearchStatus.ACTIVE,
+      userId: { not: search.userId },
+    };
+
+    const potentialMatches = await this.prisma.interestSearch.findMany({
+      where: whereCondition,
+      include: {
+        user: true,
+      },
+    });
+
+    for (const potentialMatch of potentialMatches) {
+      let shouldMatch = true;
+
+      // metadata를 any 타입으로 캐스팅하여 타입 오류 회피
+      const searchMeta = search.metadata as any;
+      const matchMeta = potentialMatch.metadata as any;
+      
+      // 학생 이름 확인
+      if (searchMeta?.studentName && matchMeta?.studentName) {
+        if (searchMeta.studentName !== matchMeta.studentName) {
+          shouldMatch = false;
+        }
+      }
+
+      // 학과 확인
+      if (searchMeta?.major && matchMeta?.major) {
+        if (searchMeta.major !== matchMeta.major) {
+          shouldMatch = false;
+        }
+      }
+
+      // 생일 확인
+      if (searchMeta?.birthdate && matchMeta?.birthdate) {
+        if (searchMeta.birthdate !== matchMeta.birthdate) {
+          shouldMatch = false;
+        }
+      }
+
+      if (shouldMatch) {
+        await this.createMatch(search, potentialMatch);
+      }
+    }
+  }
+
+  /**
+   * 그룹 매칭 확인
+   */
+  private async checkGroupMatches(search: any): Promise<void> {
+    // 같은 그룹에 속한 사용자들끼리 매칭
+    const groupMembers = await this.prisma.groupMember.findMany({
+      where: {
+        groupId: search.value,
+        status: 'ACTIVE',
+        userId: { not: search.userId },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    for (const member of groupMembers) {
+      // 상대방도 그룹 기반 관심을 등록했는지 확인
+      const reverseSearch = await this.prisma.interestSearch.findFirst({
+        where: {
+          userId: member.userId,
+          type: InterestType.GROUP,
+          value: search.value,
+          status: SearchStatus.ACTIVE,
+        },
+      });
+
+      if (reverseSearch) {
+        await this.createMatch(search, reverseSearch);
+      }
+    }
+  }
+
+  /**
+   * 위치 매칭 확인
+   */
+  private async checkLocationMatches(search: any): Promise<void> {
+    // 위치 기반 매칭 - 같은 장소를 등록한 사용자들
+    const potentialMatches = await this.prisma.interestSearch.findMany({
+      where: {
+        type: InterestType.LOCATION,
+        value: search.value, // 장소명 또는 위치 코드
+        status: SearchStatus.ACTIVE,
+        userId: { not: search.userId },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    for (const potentialMatch of potentialMatches) {
+      await this.createMatch(search, potentialMatch);
+    }
+  }
+
+  /**
+   * 인상착의 매칭 확인
+   */
+  private async checkAppearanceMatches(search: any): Promise<void> {
+    // 인상착의 설명이 유사한 사용자 찾기
+    const allAppearanceSearches = await this.prisma.interestSearch.findMany({
+      where: {
+        type: InterestType.APPEARANCE,
+        status: SearchStatus.ACTIVE,
+        userId: { not: search.userId },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    for (const potentialMatch of allAppearanceSearches) {
+      // 간단한 텍스트 유사도 확인 (키워드 포함 여부)
+      const searchKeywords = search.value.toLowerCase().split(' ');
+      const matchKeywords = potentialMatch.value.toLowerCase().split(' ');
+      
+      const commonKeywords = searchKeywords.filter((keyword: string) => 
+        matchKeywords.some(mk => mk.includes(keyword) || keyword.includes(mk))
+      );
+      
+      // 키워드가 50% 이상 일치하면 매칭
+      if (commonKeywords.length >= searchKeywords.length * 0.5) {
+        await this.createMatch(search, potentialMatch);
+      }
+    }
+  }
+
+  /**
+   * 닉네임 매칭 확인
+   */
+  private async checkNicknameMatches(search: any): Promise<void> {
+    // 실제 사용자의 닉네임과 비교
+    const users = await this.prisma.user.findMany({
+      where: {
+        nickname: {
+          contains: search.value,
+          mode: 'insensitive',
+        },
+        id: { not: search.userId },
+      },
+    });
+
+    for (const user of users) {
+      // 해당 사용자가 역으로 닉네임 검색을 등록했는지 확인
+      const reverseSearch = await this.prisma.interestSearch.findFirst({
+        where: {
+          userId: user.id,
+          type: InterestType.NICKNAME,
+          status: SearchStatus.ACTIVE,
+        },
+      });
+
+      if (reverseSearch) {
+        // 역방향 검색의 닉네임도 현재 사용자와 일치하는지 확인
+        const currentUser = await this.prisma.user.findUnique({
+          where: { id: search.userId },
+        });
+        
+        if (currentUser?.nickname?.toLowerCase().includes(reverseSearch.value.toLowerCase())) {
+          await this.createMatch(search, reverseSearch);
+        }
+      }
+    }
+  }
+
+  /**
+   * 취미/관심사 매칭 확인
+   */
+  private async checkHobbyMatches(search: any): Promise<void> {
+    // 같은 취미/관심사를 등록한 사용자들
+    const potentialMatches = await this.prisma.interestSearch.findMany({
+      where: {
+        type: InterestType.HOBBY,
+        value: {
+          contains: search.value,
+          mode: 'insensitive',
+        },
+        status: SearchStatus.ACTIVE,
+        userId: { not: search.userId },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    for (const potentialMatch of potentialMatches) {
+      // 취미가 유사하면 매칭
+      const searchHobbies = search.value.toLowerCase().split(',').map((h: string) => h.trim());
+      const matchHobbies = potentialMatch.value.toLowerCase().split(',').map((h: string) => h.trim());
+      
+      const commonHobbies = searchHobbies.filter((hobby: string) => 
+        matchHobbies.some(mh => mh.includes(hobby) || hobby.includes(mh))
+      );
+      
+      // 공통 취미가 있으면 매칭
+      if (commonHobbies.length > 0) {
+        await this.createMatch(search, potentialMatch);
+      }
     }
   }
 

@@ -917,6 +917,7 @@ enum InterestType {
   PHONE           // 전화번호
   EMAIL           // 이메일
   SOCIAL_ID       // 소셜 계정 ID
+  NAME            // 이름으로 찾기
   GROUP           // 특정 그룹
   LOCATION        // 장소
   APPEARANCE      // 인상착의
