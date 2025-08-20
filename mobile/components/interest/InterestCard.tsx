@@ -50,6 +50,11 @@ export const InterestCard: React.FC<InterestCardProps> = ({
         color: '#E91E63',
         gradient: ['#E91E63', '#C2185B'],
       },
+      [InterestType.NAME]: {
+        icon: 'person-outline',
+        color: '#9C27B0',
+        gradient: ['#9C27B0', '#7B1FA2'],
+      },
       [InterestType.GROUP]: {
         icon: 'people-outline',
         color: '#9C27B0',
@@ -61,7 +66,7 @@ export const InterestCard: React.FC<InterestCardProps> = ({
         gradient: ['#FF9800', '#F57C00'],
       },
       [InterestType.APPEARANCE]: {
-        icon: 'person-outline',
+        icon: 'body-outline',
         color: '#795548',
         gradient: ['#795548', '#5D4037'],
       },
@@ -161,6 +166,63 @@ export const InterestCard: React.FC<InterestCardProps> = ({
             </View>
           )}
 
+          {item.metadata?.birthdate && (
+            <View style={styles.metadata}>
+              <Icon
+                name="calendar-outline"
+                size={14}
+                color={colors.TEXT.SECONDARY}
+              />
+              <Text style={[styles.metadataText, { color: colors.TEXT.SECONDARY }]}>
+                생일: {item.metadata.birthdate}
+              </Text>
+            </View>
+          )}
+
+          {/* 회사 추가 정보 */}
+          {(item.type === InterestType.COMPANY || item.matchType === InterestType.COMPANY) && (
+            <>
+              {item.metadata?.employeeName && (
+                <View style={styles.metadata}>
+                  <Icon name="person-outline" size={14} color={colors.TEXT.SECONDARY} />
+                  <Text style={[styles.metadataText, { color: colors.TEXT.SECONDARY }]}>
+                    {item.metadata.employeeName}
+                  </Text>
+                </View>
+              )}
+              {item.metadata?.department && (
+                <View style={styles.metadata}>
+                  <Icon name="briefcase-outline" size={14} color={colors.TEXT.SECONDARY} />
+                  <Text style={[styles.metadataText, { color: colors.TEXT.SECONDARY }]}>
+                    {item.metadata.department}
+                  </Text>
+                </View>
+              )}
+            </>
+          )}
+
+          {/* 학교 추가 정보 */}
+          {(item.type === InterestType.SCHOOL || item.matchType === InterestType.SCHOOL) && (
+            <>
+              {item.metadata?.studentName && (
+                <View style={styles.metadata}>
+                  <Icon name="person-outline" size={14} color={colors.TEXT.SECONDARY} />
+                  <Text style={[styles.metadataText, { color: colors.TEXT.SECONDARY }]}>
+                    {item.metadata.studentName}
+                  </Text>
+                </View>
+              )}
+              {item.metadata?.major && (
+                <View style={styles.metadata}>
+                  <Icon name="book-outline" size={14} color={colors.TEXT.SECONDARY} />
+                  <Text style={[styles.metadataText, { color: colors.TEXT.SECONDARY }]}>
+                    {item.metadata.major}
+                  </Text>
+                </View>
+              )}
+            </>
+          )}
+
           {isMatched && item.matchedUser && (
             <View style={styles.matchInfo}>
               <View style={[styles.avatar, { backgroundColor: typeConfig.color + '20' }]}>
@@ -222,6 +284,7 @@ function getTypeLabel(type: InterestType): string {
     [InterestType.PHONE]: '전화번호',
     [InterestType.EMAIL]: '이메일',
     [InterestType.SOCIAL_ID]: '소셜 계정',
+    [InterestType.NAME]: '이름',
     [InterestType.GROUP]: '특정 그룹',
     [InterestType.LOCATION]: '장소',
     [InterestType.APPEARANCE]: '인상착의',

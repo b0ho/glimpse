@@ -20,6 +20,8 @@ import { InterestEmptyState } from '@/components/interest/InterestEmptyState';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CreateStoryModal } from '@/components/successStory/CreateStoryModal';
+import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
 
 /**
  * 관심상대 찾기 메인 화면
@@ -27,7 +29,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const InterestSearchScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { colors, isDark } = useTheme();
-  const { user } = useAuthStore();
+  const { user, getSubscriptionTier, getSubscriptionFeatures } = useAuthStore();
   const {
     searches,
     matches,
@@ -38,6 +40,11 @@ export const InterestSearchScreen: React.FC = () => {
   } = useInterestStore();
 
   const [refreshing, setRefreshing] = useState(false);
+  const [storyModalVisible, setStoryModalVisible] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<any>(null);
+  
+  const subscriptionTier = getSubscriptionTier();
+  const features = getSubscriptionFeatures();
 
   useEffect(() => {
     loadData();
@@ -117,6 +124,7 @@ export const InterestSearchScreen: React.FC = () => {
         PHONE: '전화번호',
         EMAIL: '이메일',
         SOCIAL_ID: '소셜계정',
+        NAME: '이름',
         GROUP: '특정 그룹',
         LOCATION: '장소',
         APPEARANCE: '인상착의',
@@ -153,6 +161,44 @@ export const InterestSearchScreen: React.FC = () => {
       type: typeLabels[search.type] || search.type,
       value: search.value,
     };
+  };
+
+  const handleShareStory = (match: any) => {
+    setSelectedMatch(match);
+    setStoryModalVisible(true);
+  };
+
+  const handleSubmitStory = async (story: string, tags: string[], isAnonymous: boolean) => {
+    try {
+      // 성공 스토리를 AsyncStorage에 저장 (실제로는 API 호출)
+      const existingStoriesStr = await AsyncStorage.getItem('success-stories');
+      const existingStories = existingStoriesStr ? JSON.parse(existingStoriesStr) : [];
+      
+      const newStory = {
+        id: `story-${Date.now()}`,
+        matchId: selectedMatch.id,
+        userId: user?.id,
+        partnerId: selectedMatch.matchedUserId || selectedMatch.matchedUser?.id,
+        userNickname: user?.nickname || '나',
+        partnerNickname: selectedMatch.matchedUser?.nickname || '익명',
+        story,
+        tags,
+        celebrationCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isAnonymous,
+        matchType: getSearchInfo(selectedMatch)?.type,
+      };
+      
+      existingStories.unshift(newStory);
+      await AsyncStorage.setItem('success-stories', JSON.stringify(existingStories));
+      
+      setStoryModalVisible(false);
+      setSelectedMatch(null);
+    } catch (error) {
+      console.error('Failed to save success story:', error);
+      throw error;
+    }
   };
 
   const handleDeleteMatch = (matchId: string) => {
@@ -224,8 +270,15 @@ export const InterestSearchScreen: React.FC = () => {
               style={[styles.chatButton, { backgroundColor: colors.PRIMARY }]}
               onPress={() => handleChatPress(item)}
             >
-              <Icon name="chatbubble" size={18} color="#FFFFFF" />
-              <Text style={styles.chatButtonText}>채팅하기</Text>
+              <Icon name="chatbubble" size={16} color="#FFFFFF" />
+              <Text style={styles.chatButtonText}>채팅</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.storyButton, { backgroundColor: colors.SUCCESS }]}
+              onPress={() => handleShareStory(item)}
+            >
+              <Icon name="heart" size={16} color="#FFFFFF" />
+              <Text style={styles.storyButtonText}>스토리</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.moreButton}
@@ -343,27 +396,68 @@ export const InterestSearchScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      {/* 프리미엄 프로모션 (일반 사용자) */}
-      {!user?.isPremium && searches.length >= 3 && (
+      {/* 구독 혜택 안내 배너 */}
+      {subscriptionTier !== SubscriptionTier.PREMIUM && (
+        <View style={[styles.subscriptionBanner, { backgroundColor: colors.PRIMARY + '10' }]}>
+          <View style={styles.bannerContent}>
+            <View style={styles.bannerLeft}>
+              <Icon 
+                name={subscriptionTier === SubscriptionTier.ADVANCED ? 'star-outline' : 'information-circle-outline'} 
+                size={24} 
+                color={colors.PRIMARY} 
+              />
+              <View style={styles.bannerTextContainer}>
+                <Text style={[styles.bannerTitle, { color: colors.TEXT.PRIMARY }]}>
+                  {subscriptionTier === SubscriptionTier.BASIC ? '무료 플랜 이용 중' : '고급 플랜 이용 중'}
+                </Text>
+                <Text style={[styles.bannerSubtitle, { color: colors.TEXT.SECONDARY }]}>
+                  {subscriptionTier === SubscriptionTier.BASIC 
+                    ? `등록 가능: ${3 - searches.length}개 남음 • 유효기간: 3일`
+                    : `등록 가능: ${10 - searches.length}개 남음 • 유효기간: 2주`}
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={[styles.upgradeChip, { backgroundColor: colors.PRIMARY }]}
+              onPress={() => navigation.navigate('Premium')}
+            >
+              <Text style={styles.upgradeChipText}>업그레이드</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* 프리미엄 사용자 혜택 표시 */}
+      {subscriptionTier === SubscriptionTier.PREMIUM && (
         <LinearGradient
           colors={['#FFD700', '#FFA500']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.premiumBanner}
+          style={styles.premiumStatusBanner}
         >
-          <View style={styles.premiumContent}>
+          <View style={styles.premiumStatusContent}>
             <Icon name="star" size={20} color="#FFFFFF" />
-            <Text style={styles.premiumText}>
-              프리미엄으로 더 많은 검색을 등록하세요!
+            <Text style={styles.premiumStatusText}>
+              프리미엄 • 무제한 등록 • 무제한 유효기간
             </Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Premium')}
-              style={styles.premiumButton}
-            >
-              <Text style={styles.premiumButtonText}>업그레이드</Text>
-            </TouchableOpacity>
           </View>
         </LinearGradient>
+      )}
+
+      {/* 성공 스토리 작성 모달 */}
+      {selectedMatch && (
+        <CreateStoryModal
+          visible={storyModalVisible}
+          onClose={() => {
+            setStoryModalVisible(false);
+            setSelectedMatch(null);
+          }}
+          onSubmit={handleSubmitStory}
+          matchInfo={{
+            partnerNickname: selectedMatch.matchedUser?.nickname || '익명',
+            matchId: selectedMatch.id,
+          }}
+        />
       )}
     </SafeAreaView>
   );
@@ -495,15 +589,29 @@ const styles = StyleSheet.create({
   chatButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 18,
+    marginRight: 6,
   },
   chatButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    marginLeft: 6,
+    marginLeft: 4,
+  },
+  storyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 18,
+  },
+  storyButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   loadingContainer: {
     paddingVertical: 40,
@@ -540,5 +648,58 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '700',
+  },
+  subscriptionBanner: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.1)',
+  },
+  bannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  bannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  bannerTextContainer: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  bannerTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  bannerSubtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  upgradeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  upgradeChipText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  premiumStatusBanner: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  premiumStatusContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  premiumStatusText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 });
