@@ -29,6 +29,7 @@ const navigation = [
   { name: '스토리 관리', href: '/admin/stories', icon: Camera },
   { name: '그룹 관리', href: '/admin/groups', icon: Groups },
   { name: '신고 관리', href: '/admin/reports', icon: Shield },
+  { name: '미스매치 모니터링', href: '/admin/mismatch', icon: AlertTriangle },
   { name: '채팅 모니터링', href: '/admin/chat', icon: MessageSquare },
   { name: '시스템 모니터', href: '/admin/monitor', icon: Activity },
   { name: '분석 대시보드', href: '/admin/analytics', icon: BarChart3 },
