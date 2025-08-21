@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -91,6 +92,51 @@ export const MatchesScreen = React.memo(() => {
     });
   };
 
+  /**
+   * 미스매치 신고 핸들러
+   * @param {string} matchId - 매칭 ID
+   * @param {string} nickname - 상대방 닉네임
+   * @description 잘못된 매칭을 신고하고 다시 대기 상태로 전환
+   */
+  const handleReportMismatch = (matchId: string, nickname: string) => {
+    Alert.alert(
+      '미스매치 신고',
+      `${nickname}님과의 매칭이 잘못되었나요?\n\n미스매치를 신고하면 매칭이 취소되고 다시 대기 상태로 돌아갑니다.`,
+      [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '미스매치 신고',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // API 호출하여 미스매치 신고
+              await matchApi.reportMismatch(matchId, '사용자가 미스매치를 신고했습니다.');
+              
+              // 매칭 목록에서 제거
+              setMatches(prevMatches => prevMatches.filter(m => m.id !== matchId));
+              
+              Alert.alert(
+                '신고 완료',
+                '미스매치가 신고되었습니다. 다시 매칭을 기다려주세요.',
+                [{ text: '확인' }]
+              );
+            } catch (error) {
+              console.error('[MatchesScreen] Failed to report mismatch:', error);
+              Alert.alert(
+                '오류',
+                '미스매치 신고 중 오류가 발생했습니다. 다시 시도해주세요.',
+                [{ text: '확인' }]
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
 
   /**
    * 매칭 아이템 렌더링
@@ -124,12 +170,21 @@ export const MatchesScreen = React.memo(() => {
             </View>
           </View>
           
-          <TouchableOpacity
-            style={[styles.chatButton, { backgroundColor: colors.PRIMARY }]}
-            onPress={() => handleStartChat(item.id, displayName)}
-          >
-            <Text style={[styles.chatButtonText, { color: colors.TEXT.WHITE }]}>{t('actions.startChat')}</Text>
-          </TouchableOpacity>
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.chatButton, { backgroundColor: colors.PRIMARY }]}
+              onPress={() => handleStartChat(item.id, displayName)}
+            >
+              <Text style={[styles.chatButtonText, { color: colors.TEXT.WHITE }]}>{t('actions.startChat')}</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.mismatchButton, { backgroundColor: colors.ERROR }]}
+              onPress={() => handleReportMismatch(item.id, displayName)}
+            >
+              <Text style={[styles.mismatchButtonText, { color: colors.TEXT.WHITE }]}>⚠️</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         
         <Text style={[styles.matchDescription, { color: colors.TEXT.SECONDARY }]}>
@@ -278,6 +333,11 @@ const styles = StyleSheet.create({
   matchTime: {
     fontSize: FONT_SIZES.SM,
   },
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.SM,
+  },
   chatButton: {
     paddingHorizontal: SPACING.MD,
     paddingVertical: SPACING.SM,
@@ -286,6 +346,16 @@ const styles = StyleSheet.create({
   chatButtonText: {
     fontSize: FONT_SIZES.SM,
     fontWeight: '600',
+  },
+  mismatchButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mismatchButtonText: {
+    fontSize: FONT_SIZES.MD,
   },
   matchDescription: {
     fontSize: FONT_SIZES.SM,

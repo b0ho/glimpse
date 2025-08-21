@@ -19,6 +19,7 @@ interface InterestCardProps {
   item: any;
   onPress: () => void;
   onDelete?: () => void;
+  onMismatch?: () => void;
   isMatch?: boolean;
 }
 
@@ -29,6 +30,7 @@ export const InterestCard: React.FC<InterestCardProps> = ({
   item,
   onPress,
   onDelete,
+  onMismatch,
   isMatch = false,
 }) => {
   const { colors, isDark } = useTheme();
@@ -252,6 +254,18 @@ export const InterestCard: React.FC<InterestCardProps> = ({
                 </Text>
               )}
             </View>
+            {isMatched && onMismatch && (
+              <View style={styles.footerRight}>
+                <TouchableOpacity 
+                  style={[styles.mismatchButton, { backgroundColor: colors.WARNING + '20' }]}
+                  onPress={onMismatch}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Icon name="warning-outline" size={20} color={colors.WARNING} />
+                  <Text style={[styles.mismatchText, { color: colors.WARNING }]}>미스매치</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
       </TouchableOpacity>
@@ -457,5 +471,20 @@ const styles = StyleSheet.create({
     right: 10,
     bottom: 10,
     padding: 5,
+  },
+  footerRight: {
+    marginLeft: 'auto',
+  },
+  mismatchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+  },
+  mismatchText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
   },
 });

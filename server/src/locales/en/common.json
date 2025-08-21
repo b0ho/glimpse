@@ -1,0 +1,138 @@
+{
+  "app": {
+    "name": "Glimpse",
+    "tagline": "Start of Anonymous Dating",
+    "description": "Safe and trusted anonymous dating platform"
+  },
+  "navigation": {
+    "home": "Home",
+    "groups": "Groups",
+    "matches": "Matches",
+    "chat": "Chat",
+    "profile": "Profile"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "refresh": "Refresh",
+    "more": "More",
+    "less": "Less",
+    "yes": "Yes",
+    "no": "No",
+    "all": "All",
+    "none": "None",
+    "select": "Select",
+    "selected": "Selected",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "update": "Update",
+    "upload": "Upload",
+    "download": "Download",
+    "share": "Share",
+    "copy": "Copy",
+    "copied": "Copied",
+    "language": "Language"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "signup": "Sign Up",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Reset Password",
+    "phoneNumber": "Phone Number",
+    "verificationCode": "Verification Code",
+    "sendCode": "Send Code",
+    "resendCode": "Resend Code",
+    "verify": "Verify"
+  },
+  "profile": {
+    "nickname": "Nickname",
+    "age": "Age",
+    "location": "Location",
+    "bio": "Bio",
+    "interests": "Interests",
+    "photos": "Photos",
+    "settings": "Settings",
+    "editProfile": "Edit Profile",
+    "viewProfile": "View Profile",
+    "premium": "Premium",
+    "credits": "Credits",
+    "subscription": "Subscription"
+  },
+  "group": {
+    "createGroup": "Create Group",
+    "joinGroup": "Join Group",
+    "leaveGroup": "Leave Group",
+    "groupName": "Group Name",
+    "groupDescription": "Group Description",
+    "members": "Members",
+    "memberCount": "{{count}} members",
+    "official": "Official Group",
+    "created": "Created Group",
+    "location": "Location Group",
+    "instance": "Instance Group"
+  },
+  "match": {
+    "like": "Like",
+    "superLike": "Super Like",
+    "pass": "Pass",
+    "match": "Match",
+    "newMatch": "New Match!",
+    "itsAMatch": "It's a Match!",
+    "startChat": "Start Chat",
+    "unmatch": "Unmatch"
+  },
+  "chat": {
+    "sendMessage": "Send Message",
+    "typeMessage": "Type a message",
+    "online": "Online",
+    "offline": "Offline",
+    "typing": "Typing...",
+    "seen": "Seen",
+    "delivered": "Delivered",
+    "sent": "Sent",
+    "messageDeleted": "Message deleted"
+  },
+  "premium": {
+    "upgradeToPremium": "Upgrade to Premium",
+    "unlimitedLikes": "Unlimited Likes",
+    "seeWhoLikesYou": "See Who Likes You",
+    "rewind": "Rewind",
+    "boosts": "Boosts",
+    "readReceipts": "Read Receipts",
+    "advancedFilters": "Advanced Filters",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "price": "${{amount}}"
+  },
+  "notification": {
+    "newLike": "Someone likes you",
+    "newMatch": "You have a new match",
+    "newMessage": "You have a new message",
+    "groupInvite": "You've been invited to a group"
+  },
+  "error": {
+    "network": "Network error",
+    "server": "Server error",
+    "unknown": "Unknown error",
+    "tryAgain": "Please try again"
+  },
+  "success": {
+    "saved": "Saved",
+    "updated": "Updated",
+    "deleted": "Deleted",
+    "sent": "Sent"
+  }
+}

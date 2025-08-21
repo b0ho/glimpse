@@ -21,14 +21,23 @@ export const matchApi = {
    */
   async getMatches(page: number = 1, limit: number = 20): Promise<Match[]> {
 
-    const response = await apiClient.get<{ success: boolean; data: Match[] }>('/matching/matches', {
+    const response = await apiClient.get<Match[]>('/matching/matches', {
       page,
       limit
     });
-    if (response.success && response.data) {
-      return response.data;
+    
+    // 서버에서 직접 배열을 반환하는 경우
+    if (Array.isArray(response)) {
+      return response;
     }
-    throw new Error('매칭 목록 조회 실패');
+    
+    // 서버에서 success 구조로 반환하는 경우
+    if (response && typeof response === 'object' && 'data' in response) {
+      return (response as any).data || [];
+    }
+    
+    // 빈 배열 반환
+    return [];
   },
 
   /**
@@ -76,5 +85,23 @@ export const matchApi = {
       return response.data;
     }
     throw new Error('추천 목록 조회 실패');
+  },
+
+  /**
+   * 미스매치 신고
+   * @async
+   * @param {string} matchId - 매칭 ID
+   * @param {string} [reason] - 신고 사유
+   * @returns {Promise<void>}
+   * @description 잘못된 매칭을 신고하고 다시 대기 상태로 전환
+   */
+  async reportMismatch(matchId: string, reason?: string): Promise<void> {
+    const response = await apiClient.post<{ success: boolean; message: string }>(
+      `/matching/matches/${matchId}/mismatch`,
+      { reason }
+    );
+    if (!response.success) {
+      throw new Error(response.message || '미스매치 신고 실패');
+    }
   }
 };

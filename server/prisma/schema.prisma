@@ -375,6 +375,11 @@ model Match {
   lastMessageAt DateTime?
   isActive      Boolean     @default(true)
   createdAt     DateTime    @default(now())
+  
+  // Mismatch tracking fields
+  mismatchedBy     String?     // User ID who reported the mismatch
+  mismatchedAt     DateTime?   // When the mismatch was reported
+  mismatchReason   String?     // Reason for mismatch (for admin monitoring)
 
   user1     User        @relation("User1Matches", fields: [user1Id], references: [id], onDelete: Cascade)
   user2     User        @relation("User2Matches", fields: [user2Id], references: [id], onDelete: Cascade)
@@ -389,6 +394,7 @@ enum MatchStatus {
   ACTIVE
   EXPIRED
   DELETED
+  MISMATCH  // New status for mismatched pairs
 }
 
 // Chat

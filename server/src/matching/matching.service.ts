@@ -433,7 +433,7 @@ export class MatchingService {
   ) {
     const where: Prisma.MatchWhereInput = {
       OR: [{ user1Id: userId }, { user2Id: userId }],
-      status: 'ACTIVE',
+      status: 'ACTIVE', // MISMATCH 상태는 제외
     };
 
     if (groupId) {
@@ -574,6 +574,101 @@ export class MatchingService {
   }
 
   /**
+   * 미스매치 신고
+   * 잘못된 매칭을 신고하고 다시 대기 상태로 전환
+   *
+   * @param matchId 매치 ID
+   * @param userId 신고자 ID
+   * @param reason 신고 사유
+   */
+  async reportMismatch(matchId: string, userId: string, reason?: string) {
+    const match = await this.prisma.match.findUnique({
+      where: { id: matchId },
+      include: {
+        user1: true,
+        user2: true,
+      },
+    });
+
+    if (!match) {
+      throw new HttpException('매치를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+    }
+
+    if (match.user1Id !== userId && match.user2Id !== userId) {
+      throw new HttpException(
+        '미스매치 신고 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    if (match.status !== 'ACTIVE') {
+      throw new HttpException(
+        '활성 매치만 미스매치 신고가 가능합니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // 트랜잭션으로 미스매치 처리
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 매치 상태를 MISMATCH로 업데이트
+      const updatedMatch = await tx.match.update({
+        where: { id: matchId },
+        data: {
+          status: 'MISMATCH',
+          mismatchedBy: userId,
+          mismatchedAt: new Date(),
+          mismatchReason: reason || '사용자가 미스매치를 신고했습니다.',
+        },
+      });
+
+      // 양쪽 사용자의 좋아요 상태를 매치되지 않은 상태로 되돌림
+      await tx.userLike.updateMany({
+        where: {
+          OR: [
+            { fromUserId: match.user1Id, toUserId: match.user2Id },
+            { fromUserId: match.user2Id, toUserId: match.user1Id },
+          ],
+          groupId: match.groupId,
+        },
+        data: {
+          isMatch: false,
+        },
+      });
+
+      // 알림 전송 - 신고자
+      await this.notificationService.sendNotification({
+        userId: userId,
+        type: 'MISMATCH_REPORTED',
+        content: '미스매치가 신고되었습니다. 다시 매칭을 기다려주세요.',
+        data: { matchId, reason },
+      });
+
+      // 알림 전송 - 상대방
+      const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
+      await this.notificationService.sendNotification({
+        userId: otherUserId,
+        type: 'MATCH_ENDED',
+        content: '매칭이 종료되었습니다.',
+        data: { matchId },
+      });
+
+      return updatedMatch;
+    });
+
+    // 캐시 무효화
+    await Promise.all([
+      this.cacheService.invalidateUserCache(match.user1Id),
+      this.cacheService.invalidateUserCache(match.user2Id),
+    ]);
+
+    return {
+      success: true,
+      message: '미스매치가 신고되었습니다.',
+      matchId: result.id,
+    };
+  }
+
+  /**
    * 매칭 추천 목록 조회
    *
    * @param userId 사용자 ID
@@ -586,35 +681,55 @@ export class MatchingService {
     groupId: string,
     count: number = 10,
   ) {
-    // 사용자 정보 조회
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        gender: true,
-        interests: true,
-        // preferredGender: true,
-        // ageRange: true,
-        location: true,
-      },
-    });
+    try {
+      // 사용자 정보 조회
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          gender: true,
+          interests: true,
+          // preferredGender: true,
+          // ageRange: true,
+          location: true,
+        },
+      });
 
-    if (!user) {
-      throw new HttpException(
-        '사용자를 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
-    }
+      if (!user) {
+        throw new HttpException(
+          '사용자를 찾을 수 없습니다.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
-    // 그룹 멤버십 확인
-    const membership = await this.prisma.groupMember.findUnique({
-      where: {
-        userId_groupId: { userId, groupId },
-      },
-    });
+      // groupId가 없으면 사용자가 속한 모든 그룹에서 추천
+      if (!groupId) {
+        const userGroups = await this.prisma.groupMember.findMany({
+          where: {
+            userId,
+            status: 'ACTIVE',
+          },
+          select: { groupId: true },
+        });
 
-    if (!membership || membership.status !== 'ACTIVE') {
-      throw new HttpException('그룹 멤버가 아닙니다.', HttpStatus.FORBIDDEN);
-    }
+        if (userGroups.length === 0) {
+          return []; // 속한 그룹이 없으면 빈 배열 반환
+        }
+
+        // 첫 번째 활성 그룹 사용
+        groupId = userGroups[0].groupId;
+      } else {
+        // 그룹 멤버십 확인
+        const membership = await this.prisma.groupMember.findUnique({
+          where: {
+            userId_groupId: { userId, groupId },
+          },
+        });
+
+        if (!membership || membership.status !== 'ACTIVE') {
+          // 그룹 멤버가 아니어도 빈 배열 반환 (에러 대신)
+          return [];
+        }
+      }
 
     // 이미 좋아요를 보낸 사용자 제외
     const sentLikes = await this.prisma.userLike.findMany({
@@ -674,6 +789,11 @@ export class MatchingService {
     return scoredRecommendations
       .sort((a, b) => b.score - a.score)
       .slice(0, count);
+    } catch (error) {
+      console.error('Error getting matching recommendations:', error);
+      // 에러 발생 시 빈 배열 반환
+      return [];
+    }
   }
 
   /**
@@ -810,6 +930,7 @@ export class MatchingService {
   ) {
     const where: Prisma.MatchWhereInput = {
       OR: [{ user1Id: userId }, { user2Id: userId }],
+      status: { not: 'MISMATCH' }, // MISMATCH 상태는 이력에서 제외
     };
 
     if (groupId) {
@@ -950,5 +1071,60 @@ export class MatchingService {
     });
 
     return { cleaned: expiredMatches.count };
+  }
+
+  /**
+   * 미스매치 목록 조회 (어드민용)
+   * 어드민 패널에서 미스매치된 케이스를 모니터링하기 위한 메서드
+   *
+   * @param page 페이지 번호
+   * @param limit 페이지당 항목 수
+   * @returns 미스매치 목록
+   */
+  async getMismatchedList(page: number = 1, limit: number = 20) {
+    const mismatches = await this.prisma.match.findMany({
+      where: {
+        status: 'MISMATCH',
+      },
+      include: {
+        user1: {
+          select: {
+            id: true,
+            nickname: true,
+            phoneNumber: true,
+          },
+        },
+        user2: {
+          select: {
+            id: true,
+            nickname: true,
+            phoneNumber: true,
+          },
+        },
+        group: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: { mismatchedAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    const total = await this.prisma.match.count({
+      where: { status: 'MISMATCH' },
+    });
+
+    return {
+      data: mismatches,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 }

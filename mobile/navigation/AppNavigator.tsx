@@ -25,7 +25,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { AuthScreen } from '@/screens/auth/AuthScreen';
 import { HomeScreen } from '@/screens/HomeScreen';
 import { GroupsScreen } from '@/screens/GroupsScreen';
-import { MatchChatListScreen } from '@/screens/MatchChatListScreen';
+import { MatchesScreen } from '@/screens/MatchesScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { CreateContentScreen } from '@/screens/CreateContentScreen';
 import { CreateStoryScreen } from '@/screens/CreateStoryScreen';
@@ -406,7 +406,7 @@ function MatchesStackNavigator() {
     >
       <MatchesStack.Screen 
         name="MatchesTab" 
-        component={MatchChatListScreen} 
+        component={MatchesScreen} 
         options={{ headerShown: false }}
       />
       <MatchesStack.Screen 

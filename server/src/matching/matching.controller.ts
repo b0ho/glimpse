@@ -127,6 +127,19 @@ export class MatchingController {
   }
 
   /**
+   * 미스매치 신고
+   * 잘못된 매칭을 신고하고 다시 대기 상태로 전환
+   */
+  @Post('matches/:matchId/mismatch')
+  async reportMismatch(
+    @Param('matchId') matchId: string,
+    @CurrentUserId() userId: string,
+    @Body() body: { reason?: string },
+  ) {
+    return this.matchingService.reportMismatch(matchId, userId, body.reason);
+  }
+
+  /**
    * 매칭 추천 목록 조회
    */
   @Get('recommendations')
@@ -192,5 +205,19 @@ export class MatchingController {
   @Post('likes/rewind')
   async rewindLastLike(@CurrentUserId() userId: string) {
     return this.matchingService.rewindLastLike(userId);
+  }
+
+  /**
+   * 미스매치 목록 조회 (어드민용)
+   * 어드민 패널에서 미스매치된 케이스를 모니터링
+   */
+  @Get('admin/mismatches')
+  async getMismatchedList(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = parseInt(page || '1', 10);
+    const limitNum = parseInt(limit || '20', 10);
+    return this.matchingService.getMismatchedList(pageNum, limitNum);
   }
 }

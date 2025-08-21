@@ -22,6 +22,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CreateStoryModal } from '@/components/successStory/CreateStoryModal';
 import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
+import { InterestType } from '@/types/interest';
 
 /**
  * 관심상대 찾기 메인 화면
@@ -48,7 +49,49 @@ export const InterestSearchScreen: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    // 개발 모드에서 테스트 데이터 생성
+    if (__DEV__) {
+      createTestMatches();
+    }
   }, []);
+
+  const createTestMatches = async () => {
+    try {
+      const testMatches = [
+        {
+          id: 'test-match-1',
+          matchType: InterestType.PHONE,
+          matchValue: '010-1234-5678',
+          status: 'MATCHED',
+          matchedUser: {
+            id: 'user-1',
+            nickname: '김민수',
+            profileImage: null,
+          },
+          matchedAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: 'test-match-2',
+          matchType: InterestType.COMPANY,
+          matchValue: '삼성전자',
+          status: 'MATCHED',
+          matchedUser: {
+            id: 'user-2',
+            nickname: '이서연',
+            profileImage: null,
+          },
+          matchedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+        },
+      ];
+      
+      await AsyncStorage.setItem('interest-matches', JSON.stringify(testMatches));
+      await fetchMatches();
+    } catch (error) {
+      console.error('Failed to create test matches:', error);
+    }
+  };
 
   const loadData = async () => {
     await Promise.all([
@@ -82,6 +125,41 @@ export const InterestSearchScreen: React.FC = () => {
     );
   };
 
+  const handleReportMismatch = (item: any) => {
+    const nickname = item.matchedUser?.nickname || '익명';
+    Alert.alert(
+      '미스매치 신고',
+      `${nickname}님과의 매칭이 잘못되었나요?\n\n미스매치를 신고하면 매칭이 취소되고 다시 대기 상태로 돌아갑니다.`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '신고',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // API 호출 또는 로컬 처리
+              const storedMatches = await AsyncStorage.getItem('interest-matches');
+              if (storedMatches) {
+                const matches = JSON.parse(storedMatches);
+                const updatedMatches = matches.map((m: any) => 
+                  m.id === item.id 
+                    ? { ...m, status: 'MISMATCH', mismatchedAt: new Date().toISOString() }
+                    : m
+                );
+                await AsyncStorage.setItem('interest-matches', JSON.stringify(updatedMatches));
+                await fetchMatches(); // 목록 새로고침
+                Alert.alert('완료', '미스매치 신고가 접수되었습니다.');
+              }
+            } catch (error) {
+              console.error('Failed to report mismatch:', error);
+              Alert.alert('오류', '미스매치 신고 중 오류가 발생했습니다.');
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const handleChatPress = async (item: any) => {
     // 채팅방 정보를 채팅 목록에 추가
     const newChatRoom = {
@@ -100,67 +178,21 @@ export const InterestSearchScreen: React.FC = () => {
       const existingRooms = existingRoomsStr ? JSON.parse(existingRoomsStr) : [];
       
       // 중복 체크
-      const roomExists = existingRooms.some((room: any) => room.id === newChatRoom.id);
-      if (!roomExists) {
+      const existingRoom = existingRooms.find((room: any) => room.id === newChatRoom.id);
+      if (!existingRoom) {
         existingRooms.push(newChatRoom);
         await AsyncStorage.setItem('chat-rooms', JSON.stringify(existingRooms));
       }
+      
+      // 채팅 화면으로 이동
+      navigation.navigate('Chat', {
+        roomId: newChatRoom.id,
+        matchId: newChatRoom.matchId,
+        otherUserNickname: newChatRoom.otherUserNickname,
+      });
     } catch (error) {
       console.error('Failed to save chat room:', error);
     }
-    
-    // 매칭된 상대와 채팅 시작
-    navigation.navigate('Chat', {
-      roomId: newChatRoom.id,
-      matchId: item.matchedUserId || item.matchedUser?.id,
-      otherUserNickname: item.matchedUser?.nickname || '익명',
-    });
-  };
-
-  const getSearchInfo = (match: any) => {
-    // 매칭 데이터에 직접 포함된 정보 사용
-    if (match.matchType && match.matchValue) {
-      const typeLabels = {
-        PHONE: '전화번호',
-        EMAIL: '이메일',
-        SOCIAL_ID: '소셜계정',
-        NAME: '이름',
-        GROUP: '특정 그룹',
-        LOCATION: '장소',
-        APPEARANCE: '인상착의',
-        NICKNAME: '닉네임',
-        COMPANY: '회사',
-        SCHOOL: '학교',
-        HOBBY: '취미/관심사',
-      };
-
-      return {
-        type: typeLabels[match.matchType] || match.matchType,
-        value: match.matchValue,
-      };
-    }
-
-    // 매칭과 연결된 검색 정보 찾기 (fallback)
-    const search = searches.find(s => s.id === match.searchId);
-    if (!search) return null;
-
-    const typeLabels = {
-      PHONE: '전화번호',
-      EMAIL: '이메일',
-      SOCIAL_ID: '소셜계정',
-      GROUP: '특정 그룹',
-      LOCATION: '장소',
-      APPEARANCE: '인상착의',
-      NICKNAME: '닉네임',
-      COMPANY: '회사',
-      SCHOOL: '학교',
-      HOBBY: '취미/관심사',
-    };
-
-    return {
-      type: typeLabels[search.type] || search.type,
-      value: search.value,
-    };
   };
 
   const handleShareStory = (match: any) => {
@@ -168,15 +200,40 @@ export const InterestSearchScreen: React.FC = () => {
     setStoryModalVisible(true);
   };
 
-  const handleSubmitStory = async (story: string, tags: string[], isAnonymous: boolean) => {
+  const getSearchInfo = (match: any) => {
+    if (match.matchType && match.matchValue) {
+      return {
+        type: getTypeLabel(match.matchType),
+        value: match.matchValue,
+      };
+    }
+    return null;
+  };
+
+  const getTypeLabel = (type: InterestType): string => {
+    const labels: Record<InterestType, string> = {
+      [InterestType.PHONE]: '전화번호',
+      [InterestType.EMAIL]: '이메일',
+      [InterestType.SOCIAL_ID]: '소셜 계정',
+      [InterestType.NAME]: '이름',
+      [InterestType.GROUP]: '특정 그룹',
+      [InterestType.LOCATION]: '장소',
+      [InterestType.APPEARANCE]: '인상착의',
+      [InterestType.NICKNAME]: '닉네임',
+      [InterestType.COMPANY]: '회사',
+      [InterestType.SCHOOL]: '학교',
+      [InterestType.HOBBY]: '취미/관심사',
+    };
+    return labels[type] || '기타';
+  };
+
+  const handleSaveSuccessStory = async (story: string, tags: string[], isAnonymous: boolean) => {
     try {
-      // 성공 스토리를 AsyncStorage에 저장 (실제로는 API 호출)
       const existingStoriesStr = await AsyncStorage.getItem('success-stories');
       const existingStories = existingStoriesStr ? JSON.parse(existingStoriesStr) : [];
       
       const newStory = {
         id: `story-${Date.now()}`,
-        matchId: selectedMatch.id,
         userId: user?.id,
         partnerId: selectedMatch.matchedUserId || selectedMatch.matchedUser?.id,
         userNickname: user?.nickname || '나',
@@ -233,120 +290,129 @@ export const InterestSearchScreen: React.FC = () => {
             );
           },
         },
+        {
+          text: '성공 스토리 공유',
+          onPress: () => {
+            const match = matches.find(m => m.id === matchId);
+            if (match) handleShareStory(match);
+          },
+        },
         { text: '취소', style: 'cancel' },
       ],
     );
   };
 
   const renderMatchItem = ({ item }: { item: any }) => {
-    const searchInfo = getSearchInfo(item);
-    
     return (
-      <View style={[styles.matchCard, { backgroundColor: colors.SUCCESS + '10', borderColor: colors.SUCCESS }]}>
-        <View style={styles.matchCardContent}>
-          <View style={styles.matchInfo}>
-            <Icon name="heart" size={24} color={colors.SUCCESS} />
-            <View style={styles.matchTextContainer}>
-              <Text style={[styles.matchTitle, { color: colors.TEXT.PRIMARY }]}>
-                매칭 성공!
-              </Text>
-              <Text style={[styles.matchSubtitle, { color: colors.TEXT.SECONDARY }]}>
-                {item.matchedUser?.nickname || '익명'} 님과 매칭되었습니다
-              </Text>
-              {searchInfo && (
-                <View style={styles.matchSearchInfoContainer}>
-                  <Text style={[styles.matchSearchLabel, { color: colors.TEXT.SECONDARY }]}>
-                    {searchInfo.type}:
-                  </Text>
-                  <Text style={[styles.matchSearchValue, { color: colors.TEXT.PRIMARY }]}>
-                    {searchInfo.value}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </View>
-          <View style={styles.matchActions}>
-            <TouchableOpacity
-              style={[styles.chatButton, { backgroundColor: colors.PRIMARY }]}
-              onPress={() => handleChatPress(item)}
-            >
-              <Icon name="chatbubble" size={16} color="#FFFFFF" />
-              <Text style={styles.chatButtonText}>채팅</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.storyButton, { backgroundColor: colors.SUCCESS }]}
-              onPress={() => handleShareStory(item)}
-            >
-              <Icon name="heart" size={16} color="#FFFFFF" />
-              <Text style={styles.storyButtonText}>스토리</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.moreButton}
-              onPress={() => handleDeleteMatch(item.id)}
-            >
-              <Icon name="ellipsis-vertical" size={20} color={colors.TEXT.SECONDARY} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+      <InterestCard
+        item={item}
+        isMatch={true}
+        onPress={() => handleChatPress(item)}
+        onMismatch={() => handleReportMismatch(item)}
+      />
     );
   };
 
   const renderSearchItem = ({ item }: { item: any }) => (
     <InterestCard
       item={item}
-      onPress={() => {}}
+      onPress={() => navigation.navigate('AddInterest', { editItem: item })}
       onDelete={() => handleDeleteSearch(item.id)}
-      isMatch={false}
     />
+  );
+
+  const renderEmptySection = (title: string, description: string, type: 'search' | 'match') => (
+    <View style={[styles.emptySection, { backgroundColor: colors.SURFACE }]}>
+      <Icon
+        name={type === 'search' ? 'search-outline' : 'heart-outline'}
+        size={48}
+        color={colors.TEXT.TERTIARY}
+      />
+      <Text style={[styles.emptyTitle, { color: colors.TEXT.PRIMARY }]}>
+        {title}
+      </Text>
+      <Text style={[styles.emptyDescription, { color: colors.TEXT.SECONDARY }]}>
+        {description}
+      </Text>
+      {type === 'search' && (
+        <TouchableOpacity
+          style={[styles.addButton, { backgroundColor: colors.PRIMARY }]}
+          onPress={handleAddInterest}
+        >
+          <Icon name="add-circle-outline" size={20} color="#FFFFFF" />
+          <Text style={styles.addButtonText}>첫 검색 등록하기</Text>
+        </TouchableOpacity>
+      )}
+      {type === 'search' && (
+        <View style={styles.tipContainer}>
+          <Text style={[styles.tipTitle, { color: colors.TEXT.PRIMARY }]}>
+            💡 검색 팁
+          </Text>
+          <View style={styles.tipList}>
+            <View style={styles.tipItem}>
+              <Icon name="call-outline" size={16} color={colors.TEXT.SECONDARY} />
+              <Text style={[styles.tipText, { color: colors.TEXT.SECONDARY }]}>
+                연락처의 전화번호로 아는 사람 찾기
+              </Text>
+            </View>
+            <View style={styles.tipItem}>
+              <Icon name="location-outline" size={16} color={colors.TEXT.SECONDARY} />
+              <Text style={[styles.tipText, { color: colors.TEXT.SECONDARY }]}>
+                특정 장소에서 만난 사람 찾기
+              </Text>
+            </View>
+            <View style={styles.tipItem}>
+              <Icon name="people-outline" size={16} color={colors.TEXT.SECONDARY} />
+              <Text style={[styles.tipText, { color: colors.TEXT.SECONDARY }]}>
+                같은 그룹에 있는 사람 찾기
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
+    </View>
   );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      {/* 헤더 */}
       <View style={[styles.header, { backgroundColor: colors.SURFACE }]}>
-        <View style={styles.headerTop}>
-          <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>
-            관심상대 찾기
-          </Text>
+        <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>
+          관심상대 찾기
+        </Text>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => navigation.navigate('MyInfo')}
+          >
+            <Icon name="person-circle-outline" size={24} color={colors.PRIMARY} />
+            <Text style={[styles.headerButtonText, { color: colors.PRIMARY }]}>
+              내 정보 등록하기
+            </Text>
+            <Icon name="chevron-forward" size={20} color={colors.PRIMARY} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.headerButton, { marginTop: 8 }]}
+            onPress={handleAddInterest}
+          >
+            <Icon name="add-circle-outline" size={24} color={colors.SUCCESS} />
+            <Text style={[styles.headerButtonText, { color: colors.SUCCESS }]}>
+              새로운 관심상대 등록하기
+            </Text>
+            <Icon name="chevron-forward" size={20} color={colors.SUCCESS} />
+          </TouchableOpacity>
         </View>
-        
-        {/* 내 정보 등록 버튼 */}
-        <TouchableOpacity
-          style={[styles.myInfoButton, { backgroundColor: colors.BACKGROUND, borderColor: colors.PRIMARY }]}
-          onPress={() => navigation.navigate('MyInfo')}
-        >
-          <Icon name="person-circle-outline" size={20} color={colors.PRIMARY} />
-          <Text style={[styles.myInfoButtonText, { color: colors.PRIMARY }]}>
-            내 정보 등록하기
-          </Text>
-          <Icon name="chevron-forward" size={16} color={colors.PRIMARY} />
-        </TouchableOpacity>
-        
-        {/* 관심상대 등록 버튼 - 홈 화면과 비슷한 스타일 */}
-        <TouchableOpacity
-          style={[styles.registerButton, { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY + '20' }]}
-          onPress={handleAddInterest}
-        >
-          <Icon name="search" size={20} color={colors.PRIMARY} />
-          <Text style={[styles.registerButtonText, { color: colors.TEXT.PRIMARY }]}>
-            새로운 관심상대 등록하기
-          </Text>
-          <Icon name="chevron-forward" size={16} color={colors.TEXT.SECONDARY} />
-        </TouchableOpacity>
       </View>
 
-      {/* 콘텐츠 */}
       <ScrollView
-        style={styles.scrollView}
+        style={styles.content}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
             colors={[colors.PRIMARY]}
+            tintColor={colors.PRIMARY}
           />
         }
-        showsVerticalScrollIndicator={false}
       >
         {/* 매칭된 항목 섹션 */}
         {matches.length > 0 && (
@@ -354,20 +420,20 @@ export const InterestSearchScreen: React.FC = () => {
             <View style={styles.sectionHeader}>
               <Icon name="heart" size={20} color={colors.SUCCESS} />
               <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-                매칭 성공! ({matches.length})
+                매칭된 관심상대 ({matches.length})
               </Text>
             </View>
             <FlatList
               data={matches}
               renderItem={renderMatchItem}
-              keyExtractor={(item) => item.id || item.searchId}
+              keyExtractor={item => item.id}
               scrollEnabled={false}
-              ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+              contentContainerStyle={styles.listContent}
             />
           </View>
         )}
 
-        {/* 등록된 검색 섹션 */}
+        {/* 검색 중 섹션 */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Icon name="search" size={20} color={colors.PRIMARY} />
@@ -375,76 +441,54 @@ export const InterestSearchScreen: React.FC = () => {
               등록된 검색 ({searches.length})
             </Text>
           </View>
-          {loading && searches.length === 0 ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={colors.PRIMARY} />
-            </View>
-          ) : searches.length === 0 ? (
-            <InterestEmptyState
-              type="searches"
-              onAddPress={handleAddInterest}
-            />
-          ) : (
+          {searches.length > 0 ? (
             <FlatList
               data={searches}
               renderItem={renderSearchItem}
-              keyExtractor={(item) => item.id}
+              keyExtractor={item => item.id}
               scrollEnabled={false}
-              ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+              contentContainerStyle={styles.listContent}
             />
+          ) : (
+            renderEmptySection(
+              '등록된 검색이 없습니다',
+              '관심있는 사람을 찾기 위해 다양한 조건으로 검색을 등록해보세요',
+              'search'
+            )
+          )}
+        </View>
+
+        {/* 플랜 정보 */}
+        <View style={[styles.planInfo, { backgroundColor: colors.SURFACE }]}>
+          <View style={styles.planHeader}>
+            <Icon name="sparkles" size={20} color={colors.WARNING} />
+            <View style={styles.planTextContainer}>
+              <Text style={[styles.planTitle, { color: colors.TEXT.PRIMARY }]}>
+                {subscriptionTier === SubscriptionTier.FREE ? '무료 플랜' : '프리미엄'} 이용 중
+              </Text>
+              <Text style={[styles.planDescription, { color: colors.TEXT.SECONDARY }]}>
+                등록 가능: {features.maxInterestSearches - searches.length}개 남음 • 
+                유효기간: {features.interestSearchDuration}일
+              </Text>
+            </View>
+          </View>
+          {subscriptionTier === SubscriptionTier.FREE && (
+            <TouchableOpacity
+              style={[styles.upgradeButton, { backgroundColor: colors.PRIMARY }]}
+              onPress={() => navigation.navigate('Premium')}
+            >
+              <Text style={styles.upgradeButtonText}>업그레이드</Text>
+            </TouchableOpacity>
           )}
         </View>
       </ScrollView>
 
-      {/* 구독 혜택 안내 배너 */}
-      {subscriptionTier !== SubscriptionTier.PREMIUM && (
-        <View style={[styles.subscriptionBanner, { backgroundColor: colors.PRIMARY + '10' }]}>
-          <View style={styles.bannerContent}>
-            <View style={styles.bannerLeft}>
-              <Icon 
-                name={subscriptionTier === SubscriptionTier.ADVANCED ? 'star-outline' : 'information-circle-outline'} 
-                size={24} 
-                color={colors.PRIMARY} 
-              />
-              <View style={styles.bannerTextContainer}>
-                <Text style={[styles.bannerTitle, { color: colors.TEXT.PRIMARY }]}>
-                  {subscriptionTier === SubscriptionTier.BASIC ? '무료 플랜 이용 중' : '고급 플랜 이용 중'}
-                </Text>
-                <Text style={[styles.bannerSubtitle, { color: colors.TEXT.SECONDARY }]}>
-                  {subscriptionTier === SubscriptionTier.BASIC 
-                    ? `등록 가능: ${3 - searches.length}개 남음 • 유효기간: 3일`
-                    : `등록 가능: ${10 - searches.length}개 남음 • 유효기간: 2주`}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={[styles.upgradeChip, { backgroundColor: colors.PRIMARY }]}
-              onPress={() => navigation.navigate('Premium')}
-            >
-              <Text style={styles.upgradeChipText}>업그레이드</Text>
-            </TouchableOpacity>
-          </View>
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
         </View>
       )}
 
-      {/* 프리미엄 사용자 혜택 표시 */}
-      {subscriptionTier === SubscriptionTier.PREMIUM && (
-        <LinearGradient
-          colors={['#FFD700', '#FFA500']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.premiumStatusBanner}
-        >
-          <View style={styles.premiumStatusContent}>
-            <Icon name="star" size={20} color="#FFFFFF" />
-            <Text style={styles.premiumStatusText}>
-              프리미엄 • 무제한 등록 • 무제한 유효기간
-            </Text>
-          </View>
-        </LinearGradient>
-      )}
-
-      {/* 성공 스토리 작성 모달 */}
       {selectedMatch && (
         <CreateStoryModal
           visible={storyModalVisible}
@@ -452,10 +496,10 @@ export const InterestSearchScreen: React.FC = () => {
             setStoryModalVisible(false);
             setSelectedMatch(null);
           }}
-          onSubmit={handleSubmitStory}
+          onSave={handleSaveSuccessStory}
           matchInfo={{
             partnerNickname: selectedMatch.matchedUser?.nickname || '익명',
-            matchId: selectedMatch.id,
+            matchType: getSearchInfo(selectedMatch)?.type,
           }}
         />
       )}
@@ -468,238 +512,219 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
+    marginBottom: 12,
   },
-  myInfoButton: {
+  headerActions: {
+    marginTop: 8,
+  },
+  headerButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 12,
-    padding: 12,
-    borderWidth: 2,
-    marginBottom: 10,
+    backgroundColor: 'rgba(0,0,0,0.02)',
   },
-  myInfoButtonText: {
+  headerButtonText: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
-    marginLeft: 10,
+    marginLeft: 12,
   },
-  registerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    padding: 15,
-    borderWidth: 1,
-  },
-  registerButtonText: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '500',
-    marginLeft: 10,
-  },
-  scrollView: {
+  content: {
     flex: 1,
   },
   section: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
     marginLeft: 8,
   },
+  listContent: {
+    paddingHorizontal: 16,
+  },
   matchCard: {
-    borderRadius: 16,
-    padding: 18,
-    borderWidth: 2,
-    minHeight: 120,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    marginBottom: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    overflow: 'hidden',
   },
   matchCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    padding: 16,
   },
   matchInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    marginBottom: 12,
   },
   matchTextContainer: {
-    marginLeft: 12,
     flex: 1,
+    marginLeft: 12,
   },
   matchTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
-    marginBottom: 2,
   },
   matchSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
+    marginTop: 2,
   },
   matchSearchInfoContainer: {
     flexDirection: 'row',
-    marginTop: 4,
     alignItems: 'center',
+    marginTop: 4,
   },
   matchSearchLabel: {
     fontSize: 12,
     fontWeight: '600',
-    marginRight: 4,
   },
   matchSearchValue: {
     fontSize: 12,
-    fontWeight: '700',
+    marginLeft: 4,
   },
   matchActions: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  moreButton: {
-    marginLeft: 10,
-    padding: 5,
+    gap: 8,
   },
   chatButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 18,
-    marginRight: 6,
+    borderRadius: 20,
   },
   chatButtonText: {
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '600',
-    marginLeft: 4,
+    marginLeft: 6,
   },
   storyButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 18,
+    borderRadius: 20,
   },
   storyButtonText: {
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '600',
-    marginLeft: 4,
+    marginLeft: 6,
   },
-  loadingContainer: {
-    paddingVertical: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+  moreButton: {
+    padding: 4,
+    marginLeft: 'auto',
   },
-  premiumBanner: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-  },
-  premiumContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  premiumText: {
-    flex: 1,
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 10,
-  },
-  premiumButton: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    paddingHorizontal: 15,
-    paddingVertical: 6,
-    borderRadius: 15,
-  },
-  premiumButtonText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  subscriptionBanner: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
-  },
-  bannerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  bannerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  bannerTextContainer: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  bannerTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  bannerSubtitle: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  upgradeChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+  emptySection: {
+    margin: 16,
+    padding: 24,
     borderRadius: 12,
+    alignItems: 'center',
   },
-  upgradeChipText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 16,
   },
-  premiumStatusBanner: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+  emptyDescription: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 8,
+    lineHeight: 20,
   },
-  premiumStatusContent: {
+  addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    marginTop: 20,
   },
-  premiumStatusText: {
+  addButtonText: {
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  tipContainer: {
+    marginTop: 24,
+    width: '100%',
+  },
+  tipTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  tipList: {
+    gap: 8,
+  },
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  tipText: {
+    fontSize: 13,
+    marginLeft: 8,
+    flex: 1,
+  },
+  planInfo: {
+    margin: 16,
+    padding: 16,
+    borderRadius: 12,
+  },
+  planHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  planTextContainer: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  planTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  planDescription: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  upgradeButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    marginTop: 12,
+    alignSelf: 'flex-start',
+  },
+  upgradeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
