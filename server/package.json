@@ -9,7 +9,8 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "node scripts/load-env.js 'prisma generate && nest build'",
+    "build": "node scripts/load-env.js 'prisma generate && nest build && node scripts/copy-locales.js'",
+    "postbuild": "node scripts/copy-locales.js",
     "build:railway": "prisma generate && nest build",
     "vercel-build": "echo 'Vercel build starting...' && prisma generate && nest build",
     "deploy:db": "node scripts/deploy-db.js",

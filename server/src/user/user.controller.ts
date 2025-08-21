@@ -157,6 +157,31 @@ export class UserController {
   }
 
   /**
+   * 사용자 통계 조회
+   *
+   * @param userId 현재 사용자 ID
+   * @returns 사용자 통계
+   */
+  @Get('stats')
+  async getUserStats(@CurrentUserId() userId: string) {
+    try {
+      const stats = await this.userService.getUserStats(userId);
+      return {
+        success: true,
+        data: stats,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message || '통계 조회에 실패했습니다.',
+        },
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
    * 다른 사용자 프로필 조회
    *
    * @param userId 현재 사용자 ID
@@ -214,31 +239,6 @@ export class UserController {
         {
           success: false,
           message: error.message || '사용자 조회에 실패했습니다.',
-        },
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  /**
-   * 사용자 통계 조회
-   *
-   * @param userId 현재 사용자 ID
-   * @returns 사용자 통계
-   */
-  @Get('stats')
-  async getUserStats(@CurrentUserId() userId: string) {
-    try {
-      const stats = await this.userService.getUserStats(userId);
-      return {
-        success: true,
-        data: stats,
-      };
-    } catch (error) {
-      throw new HttpException(
-        {
-          success: false,
-          message: error.message || '통계 조회에 실패했습니다.',
         },
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );

@@ -26,7 +26,7 @@ import {
  * 채팅 관련 API 엔드포인트를 제공합니다.
  * 메시지 송수신, 읽음 처리, 타이핑 상태 등을 관리합니다.
  */
-@Controller('chat')
+@Controller('chats')
 @UseGuards(AuthGuard)
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
@@ -39,6 +39,30 @@ export class ChatController {
     return {
       success: true,
       data: [],
+    };
+  }
+
+  /**
+   * 매치된 채팅 목록 조회
+   */
+  @Get('matches')
+  async getChatMatches(
+    @CurrentUserId() userId: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = parseInt(page || '1', 10);
+    const limitNum = parseInt(limit || '20', 10);
+
+    // 임시 데이터 반환 (실제 구현 시 ChatService 메서드 호출)
+    return {
+      success: true,
+      data: [],
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: 0,
+      },
     };
   }
 

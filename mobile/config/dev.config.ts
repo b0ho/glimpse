@@ -78,10 +78,10 @@ export const SUPER_ACCOUNTS: Record<string, User> = {
   
   // 관리자 계정
   'admin-user': {
-    id: 'admin-user-001',
+    id: 'cmektu1y80000xtcgr1a1whj3',
     anonymousId: 'anon-admin-001',
     phoneNumber: '010-0000-0000',
-    nickname: '관리자',
+    nickname: '즐거운여우264',
     profileImage: 'https://via.placeholder.com/150',
     isVerified: true,
     isPremium: true,

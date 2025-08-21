@@ -347,39 +347,72 @@ export class UserService {
    * 사용자 통계 조회
    */
   async getUserStats(userId: string) {
-    const [
-      sentLikesCount,
-      receivedLikesCount,
-      matchesCount,
-      groupsCount,
-      user,
-    ] = await Promise.all([
-      this.prismaService.userLike.count({ where: { fromUserId: userId } }),
-      this.prismaService.userLike.count({ where: { toUserId: userId } }),
-      this.prismaService.match.count({
-        where: {
-          OR: [{ user1Id: userId }, { user2Id: userId }],
-          status: 'ACTIVE',
-        },
-      }),
-      this.prismaService.groupMember.count({
-        where: { userId, status: 'ACTIVE' },
-      }),
-      this.findById(userId),
-    ]);
+    try {
+      const [
+        sentLikesCount,
+        receivedLikesCount,
+        matchesCount,
+        groupsCount,
+        user,
+      ] = await Promise.all([
+        this.prismaService.userLike.count({ where: { fromUserId: userId } }),
+        this.prismaService.userLike.count({ where: { toUserId: userId } }),
+        this.prismaService.match.count({
+          where: {
+            OR: [{ user1Id: userId }, { user2Id: userId }],
+            status: 'ACTIVE',
+          },
+        }),
+        this.prismaService.groupMember.count({
+          where: { userId, status: 'ACTIVE' },
+        }),
+        this.prismaService.user.findUnique({ where: { id: userId } }),
+      ]);
 
-    return {
-      sentLikes: sentLikesCount,
-      receivedLikes: receivedLikesCount,
-      matches: matchesCount,
-      groups: groupsCount,
-      totalLikes: receivedLikesCount,
-      totalMatches: matchesCount,
-      activeGroups: groupsCount,
-      memberSince: user.createdAt,
-      isPremium: user.isPremium,
-      credits: user.credits,
-    };
+      if (!user) {
+        // 사용자가 없으면 기본값 반환
+        return {
+          sentLikes: 0,
+          receivedLikes: 0,
+          matches: 0,
+          groups: 0,
+          totalLikes: 0,
+          totalMatches: 0,
+          activeGroups: 0,
+          memberSince: new Date(),
+          isPremium: false,
+          credits: 0,
+        };
+      }
+
+      return {
+        sentLikes: sentLikesCount,
+        receivedLikes: receivedLikesCount,
+        matches: matchesCount,
+        groups: groupsCount,
+        totalLikes: receivedLikesCount,
+        totalMatches: matchesCount,
+        activeGroups: groupsCount,
+        memberSince: user.createdAt,
+        isPremium: user.isPremium,
+        credits: user.credits,
+      };
+    } catch (error) {
+      console.error('Error getting user stats:', error);
+      // 에러 발생 시 기본값 반환
+      return {
+        sentLikes: 0,
+        receivedLikes: 0,
+        matches: 0,
+        groups: 0,
+        totalLikes: 0,
+        totalMatches: 0,
+        activeGroups: 0,
+        memberSince: new Date(),
+        isPremium: false,
+        credits: 0,
+      };
+    }
   }
 
   /**
