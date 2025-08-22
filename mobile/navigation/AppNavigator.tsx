@@ -757,21 +757,24 @@ function MainTabNavigator() {
  */
 function AppNavigator() {
   const { isSignedIn, isLoaded, getToken } = useAuth();
-  const { currentMode } = useAuthStore();
+  const { currentMode, user } = useAuthStore();
   const { colors } = useTheme();
   const [hasSelectedMode, setHasSelectedMode] = React.useState(false);
+  
+  // 개발 모드에서는 Zustand 스토어의 user 상태도 확인
+  const isAuthenticated = __DEV__ ? (isSignedIn || !!user) : isSignedIn;
 
   useEffect(() => {
     // Check if user has selected a mode
-    if (isSignedIn && currentMode) {
+    if (isAuthenticated && currentMode) {
       setHasSelectedMode(true);
     }
-  }, [isSignedIn, currentMode]);
+  }, [isAuthenticated, currentMode]);
 
   useEffect(() => {
     // Clerk 토큰을 API 클라이언트에 설정
     const setupToken = async () => {
-      if (isSignedIn && getToken) {
+      if (isAuthenticated && getToken) {
         try {
           const token = await getToken();
           if (token) {
@@ -787,7 +790,7 @@ function AppNavigator() {
     };
     
     setupToken();
-  }, [isSignedIn, getToken]);
+  }, [isAuthenticated, getToken]);
 
   if (!isLoaded) {
     return null; // 로딩 화면은 App.tsx에서 처리
@@ -803,7 +806,7 @@ function AppNavigator() {
         },
       }}
     >
-      {isSignedIn ? (
+      {isAuthenticated ? (
         <>
           {!hasSelectedMode ? (
             <Stack.Screen 

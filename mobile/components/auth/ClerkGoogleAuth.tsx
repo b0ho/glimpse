@@ -33,6 +33,40 @@ export const ClerkGoogleAuth: React.FC<ClerkGoogleAuthProps> = ({ onSuccess }) =
    * Google OAuth 시작
    */
   const handleGoogleOAuth = async () => {
+    // 개발 환경에서는 OAuth 우회하고 바로 성공 처리
+    if (__DEV__) {
+      console.log('🔧 개발 모드 감지 - OAuth 우회하고 바로 성공 처리');
+      setIsLoading(true);
+      
+      // 개발용 사용자 정보 설정
+      const devUser = {
+        id: 'dev_user_' + Date.now(),
+        email: 'dev@glimpse.app',
+        nickname: '개발 테스트 사용자',
+        anonymousId: 'anon_dev_' + Date.now(),
+        phoneNumber: '',
+        isVerified: true,
+        profileImageUrl: undefined,
+        credits: 100,
+        isPremium: true,
+        lastActive: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        currentMode: 'DATING' as any,
+      };
+      
+      setUser(devUser as any);
+      console.log('✅ 개발 모드 로그인 성공');
+      
+      // 짧은 지연 후 성공 콜백 호출
+      setTimeout(() => {
+        setIsLoading(false);
+        onSuccess();
+      }, 500);
+      
+      return;
+    }
+    
     setIsLoading(true);
     console.log('🚀 Clerk Google OAuth 시작 (개선된 버전)');
 
@@ -56,18 +90,25 @@ export const ClerkGoogleAuth: React.FC<ClerkGoogleAuthProps> = ({ onSuccess }) =
         // 사용자 정보 설정
         const userInfo = signIn || signUp;
         if (userInfo) {
+          // signUp과 signIn의 타입이 다르므로 any로 캐스팅
+          const userResource = userInfo as any;
           const userData = {
             id: userInfo.id,
-            email: userInfo.emailAddress || '',
-            nickname: `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() || '사용자',
+            email: userResource.emailAddress || userResource.identifier || '',
+            nickname: `${userResource.firstName || ''} ${userResource.lastName || ''}`.trim() || '사용자',
+            anonymousId: `anon_${userInfo.id}`,
+            phoneNumber: '',
             isVerified: true,
-            profileImageUrl: userInfo.imageUrl,
+            profileImageUrl: userResource.imageUrl || undefined,
+            credits: 0,
+            isPremium: false,
+            lastActive: new Date(),
             createdAt: new Date(),
             updatedAt: new Date(),
             currentMode: 'DATING' as any,
           };
           
-          setUser(userData);
+          setUser(userData as any);
           console.log('✅ 사용자 정보 저장 완료');
         }
         

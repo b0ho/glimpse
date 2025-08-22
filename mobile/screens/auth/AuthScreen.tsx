@@ -6,7 +6,7 @@ import { NicknameSetupScreen } from './NicknameSetupScreen';
 import { CompanyVerificationScreen } from './CompanyVerificationScreen';
 import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { useSignUp } from '@clerk/clerk-expo';
+import { useSignUp, useOAuth, useAuth } from '@clerk/clerk-expo';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTranslation } from 'react-i18next';
 import { ClerkGoogleAuth } from '@/components/auth/ClerkGoogleAuth';
@@ -37,9 +37,11 @@ export const AuthScreen= ({ onAuthCompleted }) => {
   const [currentStep, setCurrentStep] = useState<AuthStep>('welcome');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { colors } = useTheme();
   const { t } = useTranslation('auth');
   const { signUp, setActive } = useSignUp();
+  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
   const { setUser, setToken } = useAuthStore();
 
   /**
@@ -99,6 +101,13 @@ export const AuthScreen= ({ onAuthCompleted }) => {
    */
   const handleGoogleLogin = async (): Promise<void> => {
     console.log('🟡 구글 로그인 버튼 클릭 (Clerk OAuth)');
+    
+    // 개발 환경에서는 OAuth 우회하고 바로 로그인
+    if (__DEV__) {
+      console.log('🔧 개발 모드 감지 - OAuth 우회하고 직접 로그인');
+      return handleDevLogin();
+    }
+    
     setIsGoogleLoading(true);
     
     try {
@@ -142,8 +151,13 @@ export const AuthScreen= ({ onAuthCompleted }) => {
             id: userInfo.id || 'temp_user_id',
             email: userInfo.emailAddress || '',
             nickname: `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() || '구글 사용자',
+            anonymousId: `anon_${userInfo.id || 'temp'}`,
+            phoneNumber: '',
             isVerified: true,
             profileImageUrl: userInfo.imageUrl || undefined,
+            credits: 0,
+            isPremium: false,
+            lastActive: new Date(),
             createdAt: new Date(),
             updatedAt: new Date(),
             currentMode: 'DATING' as any,
@@ -169,7 +183,12 @@ export const AuthScreen= ({ onAuthCompleted }) => {
             id: createdSessionId,
             email: 'user@example.com',
             nickname: '구글 사용자',
+            anonymousId: `anon_${createdSessionId}`,
+            phoneNumber: '',
             isVerified: true,
+            credits: 0,
+            isPremium: false,
+            lastActive: new Date(),
             createdAt: new Date(),
             updatedAt: new Date(),
             currentMode: 'DATING' as any,
@@ -220,7 +239,12 @@ export const AuthScreen= ({ onAuthCompleted }) => {
             id: 'fallback_google_user',
             email: 'fallback.user@gmail.com',
             nickname: 'Fallback 사용자',
+            anonymousId: 'anon_fallback_google',
+            phoneNumber: '',
             isVerified: true,
+            credits: 0,
+            isPremium: false,
+            lastActive: new Date(),
             createdAt: new Date(),
             updatedAt: new Date(),
             currentMode: 'DATING' as any,
@@ -287,7 +311,12 @@ export const AuthScreen= ({ onAuthCompleted }) => {
             id: sessionResponse.createdUserId || 'dev_user_direct',
             email: devEmail,
             nickname: '개발자',
+            anonymousId: `anon_${sessionResponse.createdUserId || 'dev'}`,
+            phoneNumber: '',
             isVerified: true,
+            credits: 0,
+            isPremium: false,
+            lastActive: new Date(),
             createdAt: new Date(),
             updatedAt: new Date(),
             currentMode: 'DATING' as any,
@@ -306,7 +335,12 @@ export const AuthScreen= ({ onAuthCompleted }) => {
         id: 'dev_user_fallback',
         email: 'developer@glimpse.app',
         nickname: '개발자 (Fallback)',
+        anonymousId: 'anon_dev_fallback',
+        phoneNumber: '',
         isVerified: true,
+        credits: 0,
+        isPremium: false,
+        lastActive: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
         currentMode: 'DATING' as any,
