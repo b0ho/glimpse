@@ -118,18 +118,25 @@ export default function App() {
                        hostname.includes('172.') ||
                        hostname.includes('10.');
     
-    // 로컬 개발 환경 또는 개발 모드
-    if (isLocalhost || isDevelopment) {
-      // 로컬에서는 개발 키 사용
+    // Vercel 도메인 체크 (임시 - Clerk Dashboard에서 도메인 추가 전까지)
+    const isVercelDomain = hostname.includes('vercel.app');
+    
+    // 로컬 개발 환경, 개발 모드, 또는 Vercel 도메인
+    if (isLocalhost || isDevelopment || isVercelDomain) {
+      // 로컬과 Vercel에서는 개발 키 사용
       clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
       clerkFrontendApi = undefined; // 개발 키는 커스텀 도메인 불필요
-      console.log('🔧 Using development Clerk key for local environment');
+      
+      if (isVercelDomain) {
+        console.log('⚠️ Using development Clerk key for Vercel domain (temporary until domain is added to Clerk Dashboard)');
+      } else {
+        console.log('🔧 Using development Clerk key for local environment');
+      }
     } 
-    // 운영 환경 (Vercel, glimpse.contact 등)
+    // 운영 환경 (glimpse.contact)
     else {
-      // 운영 환경에서는 환경변수에 설정된 프로덕션 키 사용
-      // Vercel 환경변수 또는 프로덕션 빌드 시 설정된 값 사용
-      console.log('🚀 Using production Clerk key for production environment');
+      // glimpse.contact에서만 프로덕션 키 사용
+      console.log('🚀 Using production Clerk key for production environment (glimpse.contact)');
     }
   } else if (isDevelopment) {
     // 모바일 앱 개발 환경
