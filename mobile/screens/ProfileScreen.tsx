@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-// import { useAuth } from '@clerk/clerk-expo';
-import { useAuth } from '@/hooks/useDevAuth';
+import { useAuth } from '@/hooks/useAuth'; // 통합 인증 훅 - 환경에 따라 Clerk/DevAuth 자동 선택
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
@@ -92,18 +91,16 @@ export const ProfileScreen = () => {
           onPress: async () => {
             setIsLoggingOut(true);
             try {
-              await signOut();
+              // 스토어 초기화를 먼저 수행
               authStore.clearAuth();
-              // 다른 스토어들도 초기화
               likeStore.clearLikes();
               groupStore.clearGroups();
               
-              // 로그인 화면으로 명시적 리다이렉트
-              // React Navigation이 자동으로 처리하지만 명시적으로 설정
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Auth' as never }],
-              });
+              // Clerk/DevAuth 로그아웃 수행
+              await signOut();
+              
+              // 로그아웃 후 자동으로 Auth 화면으로 이동합니다.
+              // AppNavigator의 조건부 렌더링이 처리합니다.
             } catch (error) {
               console.error('Sign out error:', error);
               Alert.alert(t('common:status.error'), t('profile:settings.logoutError'));

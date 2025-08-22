@@ -17,6 +17,7 @@ import apiClient from '@/services/api/config';
 export function useDevAuth() {
   const { setUser, setToken, user } = useAuthStore();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   
   const superAccount = getCurrentSuperAccount();
 
@@ -43,14 +44,17 @@ export function useDevAuth() {
               credits: response.data.credits,
             };
             setUser(updatedUser);
+            setIsSignedIn(true);
           } else {
             // API 실패 시 기본 superAccount 사용
             setUser(superAccount);
+            setIsSignedIn(true);
           }
         } catch (error) {
           console.error('[DevAuth] Failed to fetch user profile:', error);
           // 에러 시 기본 superAccount 사용
           setUser(superAccount);
+          setIsSignedIn(true);
         }
         
         setToken(DEV_CONFIG.devToken);
@@ -66,13 +70,15 @@ export function useDevAuth() {
 
   return {
     isLoaded,
-    isSignedIn: !!superAccount,
-    user: superAccount,
-    userId: superAccount?.id || null,
+    isSignedIn,
+    user: user || superAccount,
+    userId: (user || superAccount)?.id || null,
     sessionId: DEV_CONFIG.devSessionId,
     signOut: async () => {
       console.log('[DevAuth] Signing out');
+      setIsSignedIn(false);
       useAuthStore.getState().clearAuth();
+      setAuthToken(null);
     },
     // 개발 모드 전용 메서드
     switchAccount: (accountType: string) => {
@@ -86,22 +92,5 @@ export function useDevAuth() {
   };
 }
 
-/**
- * Clerk useAuth를 대체하는 훅
- * @description 개발 환경에서는 useDevAuth, 프로덕션에서는 실제 Clerk 사용
- */
-export function useAuth() {
-  if (isAuthBypassEnabled) {
-    return useDevAuth();
-  }
-  
-  // 프로덕션에서는 실제 Clerk 사용
-  try {
-    const { useAuth: useClerkAuth } = require('@clerk/clerk-expo');
-    return useClerkAuth();
-  } catch (error) {
-    console.error('[Auth] Failed to load Clerk:', error);
-    // Clerk가 없는 경우에도 개발 모드로 폴백
-    return useDevAuth();
-  }
-}
+// useAuth 훅은 hooks/useAuth.ts에서 통합 관리
+// 이 파일은 개발 환경 \uc804용 useDevAuth만 제공

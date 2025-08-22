@@ -14,7 +14,7 @@ import {
   Alert,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/hooks/useDevAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { SUPER_ACCOUNTS, isAuthBypassEnabled, DEV_CONFIG } from '@/config/dev.config';
 import { SPACING, FONT_SIZES } from '@/utils/constants';
 import { useTheme } from '@/hooks/useTheme';
