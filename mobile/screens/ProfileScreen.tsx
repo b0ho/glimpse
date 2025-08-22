@@ -94,7 +94,16 @@ export const ProfileScreen = () => {
             try {
               await signOut();
               authStore.clearAuth();
-              // 다른 스토어들도 초기화할 수 있음
+              // 다른 스토어들도 초기화
+              likeStore.clearLikes();
+              groupStore.clearGroups();
+              
+              // 로그인 화면으로 명시적 리다이렉트
+              // React Navigation이 자동으로 처리하지만 명시적으로 설정
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Auth' as never }],
+              });
             } catch (error) {
               console.error('Sign out error:', error);
               Alert.alert(t('common:status.error'), t('profile:settings.logoutError'));
@@ -458,13 +467,28 @@ export const ProfileScreen = () => {
   const renderDangerSection = () => (
     <View style={styles.section}>
       <TouchableOpacity
-        style={styles.logoutButton}
+        style={[
+          styles.logoutButton,
+          { 
+            backgroundColor: isLoggingOut ? colors.BORDER : colors.WARNING,
+            opacity: isLoggingOut ? 0.6 : 1 
+          }
+        ]}
         onPress={handleSignOut}
         disabled={isLoggingOut}
+        activeOpacity={0.8}
       >
-        <Text style={styles.logoutButtonText}>
-          {isLoggingOut ? t('profile:settings.loggingOut') : t('profile:settings.logout')}
-        </Text>
+        <View style={styles.logoutButtonContent}>
+          <Ionicons 
+            name="log-out-outline" 
+            size={20} 
+            color={colors.TEXT.WHITE} 
+            style={{ marginRight: SPACING.XS }}
+          />
+          <Text style={[styles.logoutButtonText, { color: colors.TEXT.WHITE }]}>
+            {isLoggingOut ? t('profile:settings.loggingOut') : t('profile:settings.logout')}
+          </Text>
+        </View>
       </TouchableOpacity>
       
       <TouchableOpacity
@@ -741,10 +765,20 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     backgroundColor: COLORS.WARNING,
-    borderRadius: 8,
+    borderRadius: 12,
     paddingVertical: SPACING.MD,
     alignItems: 'center',
     marginBottom: SPACING.MD,
+    elevation: 2,
+    shadowColor: COLORS.SHADOW,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  logoutButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoutButtonText: {
     color: COLORS.TEXT.WHITE,

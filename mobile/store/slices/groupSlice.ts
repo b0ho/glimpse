@@ -613,6 +613,32 @@ export const useGroupStore = create<GroupStore>()(
   isUserInGroup: (groupId: string) => {
     return get().joinedGroups.some((group) => group.id === groupId);
   },
+
+  /**
+   * 그룹 데이터 초기화 (로그아웃 시 사용)
+   * @returns {void}
+   * @description 모든 그룹 관련 데이터를 초기 상태로 리셋
+   */
+  clearGroups: (): void => {
+    set({
+      groups: [],
+      joinedGroups: [],
+      nearbyGroups: [],
+      officialGroups: [],
+      createdGroups: [],
+      locationGroups: [],
+      instantGroups: [],
+      likedGroupIds: [],
+      groupInviteCodes: {},
+      searchTerm: '',
+      selectedGroupType: null,
+      sortBy: 'memberCount',
+      categoryFilter: null,
+      locationFilter: null,
+      isLoading: false,
+      error: null,
+    });
+  },
     }),
     {
       name: 'group-storage',

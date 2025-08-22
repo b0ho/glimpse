@@ -650,6 +650,27 @@ export const useLikeStore = create<LikeStore>()(
       },
 
       /**
+       * 좋아요 데이터 초기화 (로그아웃 시 사용)
+       * @returns {void}
+       * @description 모든 좋아요 관련 데이터를 초기 상태로 리셋
+       */
+      clearLikes: (): void => {
+        set({
+          sentLikes: [],
+          receivedLikes: [],
+          matches: [],
+          dailyLikesUsed: 0,
+          lastResetDate: new Date().toISOString().split('T')[0],
+          hasPremium: false,
+          premiumLikesRemaining: 0,
+          superLikesUsed: 0,
+          dailySuperLikesLimit: 0,
+          isLoading: false,
+          error: null,
+        });
+      },
+
+      /**
        * 프리미엄 좋아요 구매
        * @param {number} count - 구매할 좋아요 수
        * @description 추가 좋아요를 프리미엄 잔액에 추가
