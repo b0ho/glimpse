@@ -223,6 +223,8 @@ export const InterestSearchScreen: React.FC = () => {
       [InterestType.COMPANY]: '회사',
       [InterestType.SCHOOL]: '학교',
       [InterestType.HOBBY]: '취미/관심사',
+      [InterestType.PLATFORM]: '플랫폼',
+      [InterestType.GAME_ID]: '게임 아이디',
     };
     return labels[type] || '기타';
   };

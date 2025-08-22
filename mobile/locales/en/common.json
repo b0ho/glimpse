@@ -212,5 +212,39 @@
       "title": "Post Created! 🎉",
       "message": "Your post has been successfully published to \"{{groupName}}\" group."
     }
+  },
+  "interest": {
+    "types": {
+      "PHONE": "Phone Number",
+      "EMAIL": "Email",
+      "SOCIAL_ID": "Social Account",
+      "NAME": "Name",
+      "GROUP": "Specific Group",
+      "LOCATION": "Location",
+      "APPEARANCE": "Appearance",
+      "NICKNAME": "Nickname",
+      "COMPANY": "Company",
+      "SCHOOL": "School",
+      "HOBBY": "Hobbies/Interests",
+      "PLATFORM": "Platform",
+      "GAME_ID": "Game ID"
+    },
+    "platforms": {
+      "gaming": {
+        "steam": "Steam",
+        "battlenet": "Battle.net",
+        "playstation": "PlayStation",
+        "xbox": "Xbox",
+        "nintendo": "Nintendo Switch",
+        "mobile": "Mobile Games"
+      },
+      "social": {
+        "instagram": "Instagram",
+        "kakao": "KakaoTalk", 
+        "facebook": "Facebook",
+        "twitter": "Twitter (X)",
+        "tiktok": "TikTok"
+      }
+    }
   }
 }

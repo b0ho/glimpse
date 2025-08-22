@@ -931,6 +931,8 @@ enum InterestType {
   COMPANY         // 회사명
   SCHOOL          // 학교명
   HOBBY           // 취미/관심사
+  PLATFORM        // 플랫폼 (SNS, 메신저, 앱 등)
+  GAME_ID         // 게임 아이디
 }
 
 enum SearchStatus {

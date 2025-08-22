@@ -207,5 +207,39 @@
       "title": "게시물 작성 완료! 🎉",
       "message": "\"{{groupName}}\" 그룹에 게시물이 성공적으로 작성되었습니다."
     }
+  },
+  "interest": {
+    "types": {
+      "PHONE": "전화번호",
+      "EMAIL": "이메일",
+      "SOCIAL_ID": "소셜 계정",
+      "NAME": "이름",
+      "GROUP": "특정 그룹",
+      "LOCATION": "장소",
+      "APPEARANCE": "인상착의",
+      "NICKNAME": "닉네임",
+      "COMPANY": "회사",
+      "SCHOOL": "학교",
+      "HOBBY": "취미/관심사",
+      "PLATFORM": "플랫폼",
+      "GAME_ID": "게임 아이디"
+    },
+    "platforms": {
+      "gaming": {
+        "steam": "Steam",
+        "battlenet": "Battle.net",
+        "playstation": "PlayStation",
+        "xbox": "Xbox",
+        "nintendo": "Nintendo Switch",
+        "mobile": "모바일 게임"
+      },
+      "social": {
+        "instagram": "Instagram",
+        "kakao": "KakaoTalk", 
+        "facebook": "Facebook",
+        "twitter": "Twitter (X)",
+        "tiktok": "TikTok"
+      }
+    }
   }
 }
