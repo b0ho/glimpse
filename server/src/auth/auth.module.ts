@@ -7,6 +7,8 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthGuard } from './guards/auth.guard';
 import { WsAuthGuard } from './guards/ws-auth.guard';
+import { ClerkAuthGuard } from './guards/clerk-auth.guard';
+import { AdminAuthGuard } from './guards/admin-auth.guard';
 import { PrismaModule } from '../core/prisma/prisma.module';
 
 /**
@@ -32,7 +34,7 @@ import { PrismaModule } from '../core/prisma/prisma.module';
     PrismaModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, AuthGuard, WsAuthGuard],
-  exports: [AuthService, PassportModule, AuthGuard, WsAuthGuard],
+  providers: [AuthService, JwtStrategy, AuthGuard, WsAuthGuard, ClerkAuthGuard, AdminAuthGuard],
+  exports: [AuthService, PassportModule, AuthGuard, WsAuthGuard, ClerkAuthGuard, AdminAuthGuard],
 })
 export class AuthModule {}

@@ -2,12 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ClerkProvider } from '@clerk/clerk-expo';
-import { Platform, ActivityIndicator, View } from 'react-native';
+import { Platform, ActivityIndicator, View, Text } from 'react-native';
 import RootNavigator from './navigation/AppNavigator';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { DevModePanel } from './components/DevModePanel';
 import { CallProvider } from './providers/CallProvider';
-import { isAuthBypassEnabled } from './config/dev.config';
 import { initI18n } from './services/i18n/i18n';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './services/i18n/i18n';
@@ -92,7 +90,6 @@ export default function App() {
   // 웹 환경 체크
   if (Platform.OS === 'web') {
     console.log('Glimpse app is running on web');
-    console.log('Dev mode auth bypass:', isAuthBypassEnabled);
   }
 
   // Show loading screen while i18n is initializing
@@ -104,8 +101,9 @@ export default function App() {
     );
   }
 
-  // Clerk publishable key - 실제 환경에서는 환경 변수로 관리
-  const clerkPublishableKey = 'pk_test_xxx';
+  // Clerk publishable key - 환경 변수에서 가져오기
+  const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkFrontendApi = process.env.EXPO_PUBLIC_CLERK_FRONTEND_API;
   
   // 앱 컨텐츠
   const AppContent = () => {
@@ -119,7 +117,6 @@ export default function App() {
           <View style={{ flex: 1, backgroundColor: colors.BACKGROUND }}>
             <CallProvider>
               <RootNavigator />
-              {isAuthBypassEnabled && Platform.OS !== 'web' && <DevModePanel />}
             </CallProvider>
           </View>
         </SafeAreaProvider>
@@ -127,21 +124,31 @@ export default function App() {
     );
   };
 
-  // Clerk 키가 유효하지 않거나 개발 모드 인증 우회가 활성화된 경우
-  if (isAuthBypassEnabled || clerkPublishableKey === 'pk_test_xxx' || Platform.OS === 'web') {
+  // Clerk 키가 없으면 에러 표시
+  if (!clerkPublishableKey) {
     return (
-      <ErrorBoundary>
-        <AppContent />
-      </ErrorBoundary>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000' }}>
+        <Text style={{ color: '#FF8A8A', fontSize: 18, textAlign: 'center', paddingHorizontal: 20 }}>
+          Clerk 설정이 필요합니다.{'\n'}
+          환경 변수를 확인해주세요.
+        </Text>
+      </View>
     );
+  }
+
+  // frontendApi가 설정되어 있으면 사용 (Production 환경)
+  const clerkProviderProps: any = {
+    publishableKey: clerkPublishableKey,
+    tokenCache: tokenCache,
+  };
+  
+  if (clerkFrontendApi) {
+    clerkProviderProps.frontendApi = clerkFrontendApi;
   }
 
   return (
     <ErrorBoundary>
-      <ClerkProvider 
-        publishableKey={clerkPublishableKey!} 
-        tokenCache={tokenCache}
-      >
+      <ClerkProvider {...clerkProviderProps}>
         <AppContent />
       </ClerkProvider>
     </ErrorBoundary>

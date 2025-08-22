@@ -10,6 +10,8 @@ import { ApiResponse } from '@/types';
 export interface AuthService {
   /** 전화번호로 로그인 시작 */
   signInWithPhone: (phoneNumber: string) => Promise<ApiResponse<{ verificationId: string }>>;
+  /** 전화번호로 회원가입 시작 */
+  signUpWithPhone: (phoneNumber: string) => Promise<ApiResponse<{ verificationId: string }>>;
   /** 인증 코드 확인 */
   verifyPhoneCode: (code: string) => Promise<ApiResponse<{ user: object }>>;
   /** 로그아웃 */
@@ -33,11 +35,11 @@ export const useAuthService = (): AuthService => {
   const { signUp, isLoaded: signUpLoaded } = useSignUp();
 
   /**
-   * 전화번호로 로그인 시작
+   * 전화번호로 로그인 시작 (기존 사용자만)
    * @async
    * @param {string} phoneNumber - 사용자 전화번호
    * @returns {Promise<ApiResponse<{ verificationId: string }>>} 인증 ID를 포함한 응답
-   * @description 전화번호로 SMS 인증 코드를 전송하고 인증 프로세스 시작
+   * @description 기존 사용자의 전화번호로 SMS 인증 코드를 전송
    */
   const signInWithPhone = async (phoneNumber: string): Promise<ApiResponse<{ verificationId: string }>> => {
     try {
@@ -52,7 +54,7 @@ export const useAuthService = (): AuthService => {
 
       const formattedPhone = formatPhoneNumber(phoneNumber);
 
-      if (!signInLoaded || !signUpLoaded) {
+      if (!signInLoaded) {
         return {
           success: false,
           error: {
@@ -61,34 +63,79 @@ export const useAuthService = (): AuthService => {
         };
       }
 
-      // 먼저 기존 사용자 로그인 시도
-      try {
-        const signInAttempt = await signIn?.create({
-          identifier: formattedPhone,
-        });
+      const signInAttempt = await signIn?.create({
+        identifier: formattedPhone,
+      });
 
-        if (signInAttempt?.status === 'needs_first_factor') {
-          const phoneCodeFactor = signInAttempt.supportedFirstFactors?.find(
-            factor => factor.strategy === 'phone_code'
-          );
+      if (signInAttempt?.status === 'needs_first_factor') {
+        const phoneCodeFactor = signInAttempt.supportedFirstFactors?.find(
+          factor => factor.strategy === 'phone_code'
+        );
 
-          if (phoneCodeFactor) {
-            await signIn?.prepareFirstFactor({
-              strategy: 'phone_code',
-              phoneNumberId: phoneCodeFactor.phoneNumberId,
-            });
+        if (phoneCodeFactor) {
+          await signIn?.prepareFirstFactor({
+            strategy: 'phone_code',
+            phoneNumberId: phoneCodeFactor.phoneNumberId,
+          });
 
-            return {
-              success: true,
-              data: { verificationId: phoneCodeFactor.phoneNumberId || '' },
-            };
-          }
+          return {
+            success: true,
+            data: { verificationId: phoneCodeFactor.phoneNumberId || '' },
+          };
         }
-      } catch (signInError) {
-        console.log('Sign in failed, trying sign up:', signInError);
       }
 
-      // 새 사용자 등록
+      return {
+        success: false,
+        error: {
+          message: 'User not found or unable to sign in',
+        },
+      };
+    } catch (error) {
+      console.error('Phone sign in error:', error);
+      return {
+        success: false,
+        error: {
+          message: 'Failed to sign in with phone number',
+        },
+      };
+    }
+  };
+
+  /**
+   * 전화번호로 회원가입 시작 (새 사용자만)
+   * @async
+   * @param {string} phoneNumber - 사용자 전화번호
+   * @returns {Promise<ApiResponse<{ verificationId: string }>>} 인증 ID를 포함한 응답
+   * @description 새 사용자의 전화번호로 SMS 인증 코드를 전송
+   */
+  const signUpWithPhone = async (phoneNumber: string): Promise<ApiResponse<{ verificationId: string }>> => {
+    try {
+      console.log('📞 Input phone number:', phoneNumber);
+      console.log('🔍 Validating phone number...');
+      
+      if (!validatePhoneNumber(phoneNumber)) {
+        console.log('❌ Phone validation failed for:', phoneNumber);
+        return {
+          success: false,
+          error: {
+            message: 'Invalid phone number format',
+          },
+        };
+      }
+
+      const formattedPhone = formatPhoneNumber(phoneNumber);
+      console.log('📱 Formatted phone:', formattedPhone);
+
+      if (!signUpLoaded) {
+        return {
+          success: false,
+          error: {
+            message: 'Authentication service not ready',
+          },
+        };
+      }
+
       const signUpAttempt = await signUp?.create({
         phoneNumber: formattedPhone,
       });
@@ -107,15 +154,15 @@ export const useAuthService = (): AuthService => {
       return {
         success: false,
         error: {
-          message: 'Unexpected authentication state',
+          message: 'Unable to create account',
         },
       };
     } catch (error) {
-      console.error('Phone authentication error:', error);
+      console.error('Phone sign up error:', error);
       return {
         success: false,
         error: {
-          message: 'Failed to send verification code',
+          message: 'Failed to create account with phone number',
         },
       };
     }
@@ -221,6 +268,7 @@ export const useAuthService = (): AuthService => {
 
   return {
     signInWithPhone,
+    signUpWithPhone,
     verifyPhoneCode,
     signOut,
     getCurrentUser,

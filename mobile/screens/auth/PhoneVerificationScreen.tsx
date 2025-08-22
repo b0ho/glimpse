@@ -9,18 +9,24 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuthService } from '@/services/auth/auth-service';
 import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { validatePhoneNumber as validatePhone } from '@/services/auth/clerk-config';
 
 interface PhoneVerificationScreenProps {
   onVerificationSent: (phoneNumber: string) => void;
+  authMode?: 'signin' | 'signup';
+  onBack?: () => void;
 }
 
 export const PhoneVerificationScreen = ({
   onVerificationSent,
+  authMode = 'signin',
+  onBack,
 }: PhoneVerificationScreenProps) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,32 +44,47 @@ export const PhoneVerificationScreen = ({
     return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
   };
 
-  const validatePhoneNumber = (phone: string): boolean => {
-    const numbers = phone.replace(/\D/g, '');
-    return numbers.length === 11 && numbers.startsWith('010');
-  };
 
   const handleSendVerification = async (): Promise<void> => {
+    console.log('🔍 handleSendVerification called');
+    console.log('📱 Phone number:', phoneNumber);
+    console.log('🎯 Auth mode:', authMode);
+    
     if (!phoneNumber.trim()) {
+      console.log('❌ Phone number is empty');
       Alert.alert(t('common:errors.error'), t('phoneVerification.errors.phoneRequired'));
       return;
     }
 
     const rawNumbers = phoneNumber.replace(/\D/g, '');
-    if (!validatePhoneNumber(rawNumbers)) {
+    console.log('📞 Raw numbers:', rawNumbers);
+    
+    if (!validatePhone(rawNumbers)) {
+      console.log('❌ Phone validation failed');
       Alert.alert(t('common:errors.error'), t('phoneVerification.errors.invalidPhone'));
       return;
     }
 
+    console.log('⏳ Starting verification process');
     setIsLoading(true);
 
     try {
-      const result = await authService.signInWithPhone(rawNumbers);
+      console.log('🚀 Calling auth service, mode:', authMode);
+      // authMode에 따라 다른 서비스 메소드 호출
+      const result = authMode === 'signup' 
+        ? await authService.signUpWithPhone(rawNumbers)
+        : await authService.signInWithPhone(rawNumbers);
+      
+      console.log('📨 Auth service result:', result);
       
       if (result.success) {
+        const titleKey = authMode === 'signup' ? 'phoneVerification.signup.success.title' : 'phoneVerification.success.title';
+        const messageKey = authMode === 'signup' ? 'phoneVerification.signup.success.message' : 'phoneVerification.success.message';
+        
+        console.log('✅ Success, showing alert');
         Alert.alert(
-          t('phoneVerification.success.title'),
-          t('phoneVerification.success.message'),
+          t(titleKey),
+          t(messageKey),
           [
             {
               text: t('common:actions.confirm'),
@@ -72,12 +93,14 @@ export const PhoneVerificationScreen = ({
           ]
         );
       } else {
+        console.log('❌ Auth service failed:', result.error);
         Alert.alert(t('common:errors.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('phoneVerification.errors.sendFailed'));
       }
     } catch (error) {
-      console.error('Phone verification error:', error);
+      console.error('🔥 Phone verification error:', error);
       Alert.alert(t('common:errors.error'), t('phoneVerification.errors.networkError'));
     } finally {
+      console.log('🏁 Verification process finished');
       setIsLoading(false);
     }
   };
@@ -94,9 +117,24 @@ export const PhoneVerificationScreen = ({
       style={[styles.container, { backgroundColor: colors.BACKGROUND }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {onBack && (
+        <View style={styles.header}>
+          <Pressable
+            style={[styles.backButton, { backgroundColor: colors.SURFACE }]}
+            onPress={onBack}
+          >
+            <Text style={[styles.backButtonText, { color: colors.TEXT.PRIMARY }]}>← 뒤로가기</Text>
+          </Pressable>
+        </View>
+      )}
+      
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.PRIMARY }]}>{t('phoneVerification.title')}</Text>
-        <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>{t('phoneVerification.subtitle')}</Text>
+        <Text style={[styles.title, { color: colors.PRIMARY }]}>
+          {authMode === 'signup' ? t('phoneVerification.signup.title') : t('phoneVerification.title')}
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
+          {authMode === 'signup' ? t('phoneVerification.signup.subtitle') : t('phoneVerification.subtitle')}
+        </Text>
         
         <View style={styles.form}>
           <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>{t('phoneVerification.phoneLabel')}</Text>
@@ -119,7 +157,7 @@ export const PhoneVerificationScreen = ({
             autoFocus
           />
           
-          <TouchableOpacity
+          <Pressable
             style={[
               styles.button,
               { backgroundColor: colors.PRIMARY },
@@ -132,13 +170,15 @@ export const PhoneVerificationScreen = ({
               <View style={styles.buttonContent}>
                 <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
                 <Text style={[styles.buttonText, { color: colors.TEXT.WHITE, marginLeft: SPACING.SM }]}>
-                  {t('phoneVerification.sendingButton')}
+                  {authMode === 'signup' ? t('phoneVerification.signup.sendingButton') : t('phoneVerification.sendingButton')}
                 </Text>
               </View>
             ) : (
-              <Text style={[styles.buttonText, { color: colors.TEXT.WHITE }]}>{t('phoneVerification.sendButton')}</Text>
+              <Text style={[styles.buttonText, { color: colors.TEXT.WHITE }]}>
+                {authMode === 'signup' ? t('phoneVerification.signup.sendButton') : t('phoneVerification.sendButton')}
+              </Text>
             )}
-          </TouchableOpacity>
+          </Pressable>
         </View>
         
         <Text style={[styles.privacy, { color: colors.TEXT.LIGHT }]}>
@@ -153,6 +193,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.BACKGROUND,
+  },
+  header: {
+    paddingHorizontal: SPACING.LG,
+    paddingVertical: SPACING.MD,
+    paddingTop: SPACING.XL, // Safe area 고려
+  },
+  backButton: {
+    paddingVertical: SPACING.SM,
+    paddingHorizontal: SPACING.MD,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  backButtonText: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '500',
+    color: COLORS.TEXT.PRIMARY,
   },
   content: {
     flex: 1,

@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AdminService } from './admin.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
 import { AdminGuard } from './guards/admin.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 import { JwtService } from '@nestjs/jwt';
@@ -113,7 +113,7 @@ export class AdminController {
    * 대시보드 통계 조회
    */
   @Get('dashboard')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminAuthGuard, AdminGuard)
   async getDashboardStats() {
     return this.adminService.getDashboardStats();
   }
@@ -122,7 +122,7 @@ export class AdminController {
    * 사용자 목록 조회
    */
   @Get('users')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminAuthGuard, AdminGuard)
   async getUsers(@Query() query: GetUsersQueryDto) {
     return this.adminService.getUsers(query);
   }
@@ -131,7 +131,7 @@ export class AdminController {
    * 사용자 상세 정보 조회
    */
   @Get('users/:userId')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminAuthGuard, AdminGuard)
   async getUserDetail(@Param('userId') userId: string) {
     return this.adminService.getUserDetail(userId);
   }
@@ -140,7 +140,7 @@ export class AdminController {
    * 사용자 차단
    */
   @Post('users/:userId/ban')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminAuthGuard, AdminGuard)
   @HttpCode(HttpStatus.OK)
   async banUser(
     @Param('userId') userId: string,
@@ -155,7 +155,7 @@ export class AdminController {
    * 사용자 차단 해제
    */
   @Post('users/:userId/unban')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminAuthGuard, AdminGuard)
   @HttpCode(HttpStatus.OK)
   async unbanUser(
     @Param('userId') userId: string,
@@ -169,7 +169,7 @@ export class AdminController {
    * 신고 목록 조회 (알림으로 대체)
    */
   @Get('reports')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminAuthGuard, AdminGuard)
   async getReports(
     @Query('status') status?: string,
     @Query('page') page: number = 1,
@@ -194,7 +194,7 @@ export class AdminController {
    * 신고 처리
    */
   @Post('reports/:reportId/handle')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminAuthGuard, AdminGuard)
   @HttpCode(HttpStatus.OK)
   async handleReport(
     @Param('reportId') reportId: string,
@@ -211,7 +211,7 @@ export class AdminController {
    * 그룹 목록 조회
    */
   @Get('groups')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminAuthGuard, AdminGuard)
   async getGroups(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
@@ -229,7 +229,7 @@ export class AdminController {
    * 그룹 승인/거절
    */
   @Post('groups/:groupId/moderate')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminAuthGuard, AdminGuard)
   @HttpCode(HttpStatus.OK)
   async moderateGroup(
     @Param('groupId') groupId: string,
@@ -252,7 +252,7 @@ export class AdminController {
    * 공지사항 생성
    */
   @Post('announcements')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminAuthGuard, AdminGuard)
   @HttpCode(HttpStatus.CREATED)
   async createAnnouncement(
     @CurrentUserId() adminId: string,
@@ -271,7 +271,7 @@ export class AdminController {
    * 시스템 통계 조회
    */
   @Get('stats')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminAuthGuard, AdminGuard)
   async getSystemStats(@Query() query: GetStatsQueryDto) {
     // 대시보드 통계로 대체
     return this.adminService.getDashboardStats();

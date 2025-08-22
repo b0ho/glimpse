@@ -9,14 +9,14 @@ import { Platform } from 'react-native';
 import { NavigationContainer, NavigationContainerRef, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-// import { useAuth } from '@clerk/clerk-expo';
-import { useAuth } from '@/hooks/useDevAuth';
+import { useAuth } from '@clerk/clerk-expo';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { NAVIGATION_ICONS } from '@/utils/icons';
 // import { CallProvider } from '@/providers/CallProvider';
 import { navigationService } from '@/services/navigation/navigationService';
 import { initializeFCM, cleanupFCM } from '@/services/notifications/initializeFCM';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { setAuthToken } from '@/services/api/config';
 import { AppMode, MODE_TEXTS } from '../shared/types';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
@@ -756,7 +756,7 @@ function MainTabNavigator() {
  * @description 인증 상태와 모드 선택에 따른 화면 라우팅
  */
 function AppNavigator() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded, getToken } = useAuth();
   const { currentMode } = useAuthStore();
   const { colors } = useTheme();
   const [hasSelectedMode, setHasSelectedMode] = React.useState(false);
@@ -767,6 +767,27 @@ function AppNavigator() {
       setHasSelectedMode(true);
     }
   }, [isSignedIn, currentMode]);
+
+  useEffect(() => {
+    // Clerk 토큰을 API 클라이언트에 설정
+    const setupToken = async () => {
+      if (isSignedIn && getToken) {
+        try {
+          const token = await getToken();
+          if (token) {
+            setAuthToken(token);
+            console.log('[Auth] Clerk token set for API client');
+          }
+        } catch (error) {
+          console.error('[Auth] Failed to get Clerk token:', error);
+        }
+      } else {
+        setAuthToken(null);
+      }
+    };
+    
+    setupToken();
+  }, [isSignedIn, getToken]);
 
   if (!isLoaded) {
     return null; // 로딩 화면은 App.tsx에서 처리
@@ -835,16 +856,7 @@ export default function RootNavigator() {
     },
   };
 
-  // 웹 환경에서는 간단한 네비게이션 구조 사용
-  if (Platform.OS === 'web') {
-    return (
-      <NavigationContainer theme={customTheme}>
-        <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Main" component={MainTabNavigator} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    );
-  }
+  // 웹과 네이티브 모두 동일한 인증 플로우 사용
 
   // 네이티브 환경에서는 기존 구조 사용
   return (

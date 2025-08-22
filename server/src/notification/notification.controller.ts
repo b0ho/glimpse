@@ -10,12 +10,12 @@ import {
   HttpCode,
   HttpStatus 
 } from '@nestjs/common';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 import { NotificationService } from './notification.service';
 
 @Controller('notifications')
-@UseGuards(AuthGuard)
+@UseGuards(ClerkAuthGuard)
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 

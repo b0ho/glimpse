@@ -10,7 +10,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 import {
   SendMessageDto,
@@ -27,7 +27,7 @@ import {
  * 메시지 송수신, 읽음 처리, 타이핑 상태 등을 관리합니다.
  */
 @Controller('chats')
-@UseGuards(AuthGuard)
+@UseGuards(ClerkAuthGuard)
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 

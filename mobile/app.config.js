@@ -91,6 +91,9 @@ export default {
       websocketUrl: apiConfig.websocketURL,
       environment: process.env.NODE_ENV || 'development',
       clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
+      googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+      googleIosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+      googleAndroidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
       
       // 기능 플래그
       enableAnalytics: isProduction,

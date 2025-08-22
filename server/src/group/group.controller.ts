@@ -18,7 +18,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { GroupService } from './group.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 import {
   CreateGroupDto,
@@ -32,7 +32,7 @@ import {
  */
 @ApiTags('groups')
 @Controller('groups')
-@UseGuards(AuthGuard)
+@UseGuards(ClerkAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}

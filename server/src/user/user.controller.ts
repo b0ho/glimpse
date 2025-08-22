@@ -12,7 +12,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 import { I18n, UserLang } from '../i18n/i18n.decorator';
 import {
@@ -27,7 +27,7 @@ import { SupportedLanguage } from '../i18n/i18n.config';
  * 사용자 프로필, 추천, 크레딧 관련 API를 제공합니다.
  */
 @Controller('users')
-@UseGuards(AuthGuard)
+@UseGuards(ClerkAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

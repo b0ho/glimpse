@@ -11,7 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { MatchingService } from './matching.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 import {
   CreateLikeDto,
@@ -26,7 +26,7 @@ import {
  * 좋아요, 매칭, 추천 관련 API를 제공합니다.
  */
 @Controller('matching')
-@UseGuards(AuthGuard)
+@UseGuards(ClerkAuthGuard)
 export class MatchingController {
   constructor(private readonly matchingService: MatchingService) {}
 

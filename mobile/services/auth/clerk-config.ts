@@ -87,14 +87,27 @@ export const CLERK_CONFIG = {
  * formatPhoneNumber('821012345678') // '+821012345678'
  */
 export const formatPhoneNumber = (phone: string): string => {
-  // 한국 전화번호 형식으로 포맷팅
   const cleaned = phone.replace(/\D/g, '');
+  
+  // 이미 국가 코드가 있는 경우
   if (cleaned.startsWith('82')) {
     return `+${cleaned}`;
   }
+  if (cleaned.startsWith('1') && cleaned.length === 11) {
+    return `+${cleaned}`;
+  }
+  
+  // 한국 전화번호 (0으로 시작)
   if (cleaned.startsWith('0')) {
     return `+82${cleaned.slice(1)}`;
   }
+  
+  // 미국 전화번호로 추정 (10자리)
+  if (cleaned.length === 10) {
+    return `+1${cleaned}`;
+  }
+  
+  // 한국 전화번호로 기본 처리
   return `+82${cleaned}`;
 };
 
@@ -110,7 +123,30 @@ export const formatPhoneNumber = (phone: string): string => {
  * validatePhoneNumber('12345') // false
  */
 export const validatePhoneNumber = (phone: string): boolean => {
-  const phoneRegex = /^(\+82|82)?[1-9]\d{7,8}$/;
   const cleaned = phone.replace(/\D/g, '');
-  return phoneRegex.test(cleaned);
+  
+  // 한국 전화번호 패턴: 010, 011, 016, 017, 018, 019로 시작하는 11자리
+  if (cleaned.startsWith('010') || cleaned.startsWith('011') || 
+      cleaned.startsWith('016') || cleaned.startsWith('017') || 
+      cleaned.startsWith('018') || cleaned.startsWith('019')) {
+    return cleaned.length === 11;
+  }
+  
+  // +82로 시작하는 국제 형식: +821012345678 (13자리)
+  if (cleaned.startsWith('82')) {
+    const withoutCountryCode = cleaned.slice(2);
+    return withoutCountryCode.startsWith('10') && cleaned.length === 13;
+  }
+  
+  // 미국 전화번호 패턴: +1로 시작하는 11자리 (1-555-123-4567)
+  if (cleaned.startsWith('1')) {
+    return cleaned.length === 11;
+  }
+  
+  // 테스트용 일반 전화번호 (10자리)
+  if (cleaned.length === 10) {
+    return true;
+  }
+  
+  return false;
 };

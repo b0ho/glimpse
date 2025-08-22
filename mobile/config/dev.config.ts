@@ -14,7 +14,7 @@ export const isDevelopment = true;
 /**
  * 개발 모드 인증 우회 활성화 여부
  */
-export const isAuthBypassEnabled = true;
+export const isAuthBypassEnabled = false;
 
 /**
  * 슈퍼 계정 정의

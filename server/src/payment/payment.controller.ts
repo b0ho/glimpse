@@ -12,7 +12,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 import {
   CreatePaymentDto,
@@ -36,7 +36,7 @@ export class PaymentController {
    * 결제 플랜 조회 (테스트용)
    */
   @Get('plans')
-  @UseGuards(AuthGuard)
+  @UseGuards(ClerkAuthGuard)
   async getPaymentPlans() {
     return {
       success: true,
@@ -51,7 +51,7 @@ export class PaymentController {
    * 결제 생성
    */
   @Post()
-  @UseGuards(AuthGuard)
+  @UseGuards(ClerkAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createPayment(
     @CurrentUserId() userId: string,
@@ -64,7 +64,7 @@ export class PaymentController {
    * 결제 처리
    */
   @Post(':id/process')
-  @UseGuards(AuthGuard)
+  @UseGuards(ClerkAuthGuard)
   @HttpCode(HttpStatus.OK)
   async processPayment(
     @Param('id') paymentId: string,
@@ -82,7 +82,7 @@ export class PaymentController {
    * 결제 검증
    */
   @Get(':id/verify')
-  @UseGuards(AuthGuard)
+  @UseGuards(ClerkAuthGuard)
   async verifyPayment(@Param('id') paymentId: string) {
     return this.paymentService.verifyPayment(paymentId);
   }
@@ -91,7 +91,7 @@ export class PaymentController {
    * 결제 환불
    */
   @Post(':id/refund')
-  @UseGuards(AuthGuard)
+  @UseGuards(ClerkAuthGuard)
   @HttpCode(HttpStatus.OK)
   async refundPayment(
     @Param('id') paymentId: string,
@@ -107,7 +107,7 @@ export class PaymentController {
    * 크레딧 구매
    */
   @Post('credits')
-  @UseGuards(AuthGuard)
+  @UseGuards(ClerkAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createCreditPurchase(
     @CurrentUserId() userId: string,
@@ -123,7 +123,7 @@ export class PaymentController {
    * 프리미엄 구독 생성
    */
   @Post('subscription')
-  @UseGuards(AuthGuard)
+  @UseGuards(ClerkAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createSubscription(
     @CurrentUserId() userId: string,
@@ -139,7 +139,7 @@ export class PaymentController {
    * 구독 취소
    */
   @Post('subscription/cancel')
-  @UseGuards(AuthGuard)
+  @UseGuards(ClerkAuthGuard)
   @HttpCode(HttpStatus.OK)
   async cancelSubscription(@CurrentUserId() userId: string) {
     return this.paymentService.cancelSubscription(userId);
@@ -149,7 +149,7 @@ export class PaymentController {
    * 활성 구독 조회
    */
   @Get('subscription/active')
-  @UseGuards(AuthGuard)
+  @UseGuards(ClerkAuthGuard)
   async getActiveSubscription(@CurrentUserId() userId: string) {
     return this.paymentService.getActiveSubscription(userId);
   }
@@ -158,7 +158,7 @@ export class PaymentController {
    * 사용자 결제 내역
    */
   @Get('history')
-  @UseGuards(AuthGuard)
+  @UseGuards(ClerkAuthGuard)
   async getUserPayments(
     @CurrentUserId() userId: string,
     @Query('page') page?: string,

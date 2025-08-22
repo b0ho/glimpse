@@ -13,7 +13,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Express } from 'express';
 import { FileService } from './file.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
 
 /**
@@ -22,7 +22,7 @@ import { CurrentUserId } from '../auth/decorators/current-user.decorator';
  * 프로필, 채팅, 그룹 이미지 및 문서 업로드를 처리합니다.
  */
 @Controller('files')
-@UseGuards(AuthGuard)
+@UseGuards(ClerkAuthGuard)
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
