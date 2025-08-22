@@ -41,7 +41,9 @@ export class ClerkAuthGuard implements CanActivate {
     if (nodeEnv === 'development' && useDevAuth && !token) {
       const devAuth = request.headers['x-dev-auth'];
       if (devAuth === 'true') {
-        console.log('[ClerkAuthGuard] Dev mode auth in development environment (no token)');
+        console.log(
+          '[ClerkAuthGuard] Dev mode auth in development environment (no token)',
+        );
         // 기본 사용자 설정 - 실제 DB의 첫 번째 사용자 사용
         request['user'] = {
           id: 'cmeh8afwr000i1mb7ikv3lq1a',
@@ -79,9 +81,7 @@ export class ClerkAuthGuard implements CanActivate {
 
       if (!user) {
         // Create user if not exists
-        const newUser = await this.authService.createOrUpdateUser(
-          payload.sub,
-        );
+        const newUser = await this.authService.createOrUpdateUser(payload.sub);
         request['user'] = newUser;
         (request as any)['userId'] = newUser.id;
       } else {

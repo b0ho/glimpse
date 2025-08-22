@@ -356,42 +356,42 @@ export class InterestService {
         // 이름 매칭 - 생일 정보도 함께 고려
         await this.checkNameMatches(search);
         break;
-      
+
       case InterestType.COMPANY:
         // 회사 매칭 - 직원 이름, 부서 정보 고려
         await this.checkCompanyMatches(search);
         break;
-      
+
       case InterestType.SCHOOL:
         // 학교 매칭 - 학생 이름, 학과 정보 고려
         await this.checkSchoolMatches(search);
         break;
-      
+
       case InterestType.GROUP:
         // 그룹 매칭 - 그룹 멤버십 확인
         await this.checkGroupMatches(search);
         break;
-      
+
       case InterestType.LOCATION:
         // 장소 매칭 - 위치 정보 확인
         await this.checkLocationMatches(search);
         break;
-        
+
       case InterestType.APPEARANCE:
         // 인상착의 매칭 - 설명 텍스트 매칭
         await this.checkAppearanceMatches(search);
         break;
-        
+
       case InterestType.NICKNAME:
         // 닉네임 매칭 - 부분 일치 지원
         await this.checkNicknameMatches(search);
         break;
-        
+
       case InterestType.HOBBY:
         // 취미/관심사 매칭
         await this.checkHobbyMatches(search);
         break;
-        
+
       default:
         // 기본 매칭 (PHONE, EMAIL, SOCIAL_ID)
         const potentialMatches = await this.prisma.interestSearch.findMany({
@@ -543,7 +543,10 @@ export class InterestService {
         return value.trim().toLowerCase();
       case InterestType.HOBBY:
         // 취미 정규화 (콤마로 구분, 공백 제거)
-        return value.split(',').map(h => h.trim().toLowerCase()).join(',');
+        return value
+          .split(',')
+          .map((h) => h.trim().toLowerCase())
+          .join(',');
       default:
         return value.trim();
     }
@@ -597,7 +600,10 @@ export class InterestService {
   /**
    * 민감한 값 마스킹
    */
-  private maskSensitiveValue(type: InterestType | string, value: string): string {
+  private maskSensitiveValue(
+    type: InterestType | string,
+    value: string,
+  ): string {
     switch (type) {
       case InterestType.PHONE:
         // 010-****-5678 형태로 마스킹
@@ -672,9 +678,9 @@ export class InterestService {
       let shouldMatch = true;
 
       // metadata를 any 타입으로 캐스팅하여 타입 오류 회피
-      const searchMeta = search.metadata as any;
+      const searchMeta = search.metadata;
       const matchMeta = potentialMatch.metadata as any;
-      
+
       // 직원 이름 확인
       if (searchMeta?.employeeName && matchMeta?.employeeName) {
         if (searchMeta.employeeName !== matchMeta.employeeName) {
@@ -724,9 +730,9 @@ export class InterestService {
       let shouldMatch = true;
 
       // metadata를 any 타입으로 캐스팅하여 타입 오류 회피
-      const searchMeta = search.metadata as any;
+      const searchMeta = search.metadata;
       const matchMeta = potentialMatch.metadata as any;
-      
+
       // 학생 이름 확인
       if (searchMeta?.studentName && matchMeta?.studentName) {
         if (searchMeta.studentName !== matchMeta.studentName) {
@@ -829,11 +835,13 @@ export class InterestService {
       // 간단한 텍스트 유사도 확인 (키워드 포함 여부)
       const searchKeywords = search.value.toLowerCase().split(' ');
       const matchKeywords = potentialMatch.value.toLowerCase().split(' ');
-      
-      const commonKeywords = searchKeywords.filter((keyword: string) => 
-        matchKeywords.some(mk => mk.includes(keyword) || keyword.includes(mk))
+
+      const commonKeywords = searchKeywords.filter((keyword: string) =>
+        matchKeywords.some(
+          (mk) => mk.includes(keyword) || keyword.includes(mk),
+        ),
       );
-      
+
       // 키워드가 50% 이상 일치하면 매칭
       if (commonKeywords.length >= searchKeywords.length * 0.5) {
         await this.createMatch(search, potentialMatch);
@@ -871,8 +879,12 @@ export class InterestService {
         const currentUser = await this.prisma.user.findUnique({
           where: { id: search.userId },
         });
-        
-        if (currentUser?.nickname?.toLowerCase().includes(reverseSearch.value.toLowerCase())) {
+
+        if (
+          currentUser?.nickname
+            ?.toLowerCase()
+            .includes(reverseSearch.value.toLowerCase())
+        ) {
           await this.createMatch(search, reverseSearch);
         }
       }
@@ -901,13 +913,19 @@ export class InterestService {
 
     for (const potentialMatch of potentialMatches) {
       // 취미가 유사하면 매칭
-      const searchHobbies = search.value.toLowerCase().split(',').map((h: string) => h.trim());
-      const matchHobbies = potentialMatch.value.toLowerCase().split(',').map((h: string) => h.trim());
-      
-      const commonHobbies = searchHobbies.filter((hobby: string) => 
-        matchHobbies.some(mh => mh.includes(hobby) || hobby.includes(mh))
+      const searchHobbies = search.value
+        .toLowerCase()
+        .split(',')
+        .map((h: string) => h.trim());
+      const matchHobbies = potentialMatch.value
+        .toLowerCase()
+        .split(',')
+        .map((h: string) => h.trim());
+
+      const commonHobbies = searchHobbies.filter((hobby: string) =>
+        matchHobbies.some((mh) => mh.includes(hobby) || hobby.includes(mh)),
       );
-      
+
       // 공통 취미가 있으면 매칭
       if (commonHobbies.length > 0) {
         await this.createMatch(search, potentialMatch);

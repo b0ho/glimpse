@@ -63,7 +63,7 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
     const redisUrl = this.configService.get('REDIS_URL');
     console.log('Redis URL from config:', redisUrl ? 'Found' : 'Not found');
-    
+
     if (redisUrl) {
       await this.setupEventHandlers();
     } else {
@@ -86,7 +86,7 @@ export class MessageQueueService implements OnModuleInit, OnModuleDestroy {
   private async setupEventHandlers() {
     try {
       const redisUrl = this.configService.get('REDIS_URL');
-      
+
       if (!redisUrl) {
         console.log('REDIS_URL not configured, skipping Redis connection');
         return;

@@ -644,7 +644,8 @@ export class MatchingService {
       });
 
       // 알림 전송 - 상대방
-      const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
+      const otherUserId =
+        match.user1Id === userId ? match.user2Id : match.user1Id;
       await this.notificationService.sendNotification({
         userId: otherUserId,
         type: 'MATCH_ENDED',
@@ -731,64 +732,67 @@ export class MatchingService {
         }
       }
 
-    // 이미 좋아요를 보낸 사용자 제외
-    const sentLikes = await this.prisma.userLike.findMany({
-      where: {
-        fromUserId: userId,
-        groupId,
-      },
-      select: { toUserId: true },
-    });
+      // 이미 좋아요를 보낸 사용자 제외
+      const sentLikes = await this.prisma.userLike.findMany({
+        where: {
+          fromUserId: userId,
+          groupId,
+        },
+        select: { toUserId: true },
+      });
 
-    const excludeUserIds = [userId, ...sentLikes.map((like) => like.toUserId)];
+      const excludeUserIds = [
+        userId,
+        ...sentLikes.map((like) => like.toUserId),
+      ];
 
-    // 추천 대상 조회
-    const recommendations = await this.prisma.user.findMany({
-      where: {
-        id: { notIn: excludeUserIds },
-        // gender: user.preferredGender || undefined,
-        groupMemberships: {
-          some: {
-            groupId,
-            status: 'ACTIVE',
+      // 추천 대상 조회
+      const recommendations = await this.prisma.user.findMany({
+        where: {
+          id: { notIn: excludeUserIds },
+          // gender: user.preferredGender || undefined,
+          groupMemberships: {
+            some: {
+              groupId,
+              status: 'ACTIVE',
+            },
           },
         },
-      },
-      select: {
-        id: true,
-        nickname: true,
-        profileImage: true,
-        bio: true,
-        interests: true,
-        location: true,
-      },
-      take: count * 2, // 스코어링을 위해 더 많이 조회
-    });
+        select: {
+          id: true,
+          nickname: true,
+          profileImage: true,
+          bio: true,
+          interests: true,
+          location: true,
+        },
+        take: count * 2, // 스코어링을 위해 더 많이 조회
+      });
 
-    // 호환성 스코어 계산 및 정렬
-    const scoredRecommendations = recommendations.map((candidate) => {
-      let score = 0;
+      // 호환성 스코어 계산 및 정렬
+      const scoredRecommendations = recommendations.map((candidate) => {
+        let score = 0;
 
-      // 관심사 매칭
-      const commonInterests = candidate.interests.filter((interest) =>
-        user.interests.includes(interest),
-      );
-      score += commonInterests.length * 10;
+        // 관심사 매칭
+        const commonInterests = candidate.interests.filter((interest) =>
+          user.interests.includes(interest),
+        );
+        score += commonInterests.length * 10;
 
-      // 위치 근접성 (간단한 예시)
-      // if (user.location && candidate.location) {
-      //   if (user.location.city === candidate.location.city) {
-      //     score += 5;
-      //   }
-      // }
+        // 위치 근접성 (간단한 예시)
+        // if (user.location && candidate.location) {
+        //   if (user.location.city === candidate.location.city) {
+        //     score += 5;
+        //   }
+        // }
 
-      return { ...candidate, score };
-    });
+        return { ...candidate, score };
+      });
 
-    // 스코어 기준 정렬 및 상위 N개 반환
-    return scoredRecommendations
-      .sort((a, b) => b.score - a.score)
-      .slice(0, count);
+      // 스코어 기준 정렬 및 상위 N개 반환
+      return scoredRecommendations
+        .sort((a, b) => b.score - a.score)
+        .slice(0, count);
     } catch (error) {
       console.error('Error getting matching recommendations:', error);
       // 에러 발생 시 빈 배열 반환

@@ -65,21 +65,24 @@ export class ContentService {
    */
   async createContent(userId: string, contentData: any): Promise<Content> {
     console.log('[ContentService] Creating content with userId:', userId);
-    console.log('[ContentService] Content data:', JSON.stringify(contentData, null, 2));
+    console.log(
+      '[ContentService] Content data:',
+      JSON.stringify(contentData, null, 2),
+    );
     console.log('[ContentService] Received groupId:', contentData.groupId);
-    
+
     // Generate unique ID for the post
     const postId = `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // First, check if groupId exists in database or use default
     let groupId = contentData.groupId;
-    
+
     // Check if group exists
     if (groupId && groupId !== 'cmeh8afz4004o1mb7s8w8kch7') {
       const groupExists = await this.prisma.group.findUnique({
-        where: { id: groupId }
+        where: { id: groupId },
       });
-      
+
       if (!groupExists) {
         console.log('[ContentService] Group not found, using default group');
         groupId = 'cmeh8afz4004o1mb7s8w8kch7';
@@ -87,9 +90,9 @@ export class ContentService {
     } else {
       groupId = 'cmeh8afz4004o1mb7s8w8kch7';
     }
-    
+
     console.log('[ContentService] Using groupId:', groupId);
-    
+
     try {
       // Use raw SQL to insert the post directly
       await this.prisma.$executeRaw`
@@ -106,9 +109,12 @@ export class ContentService {
           NOW()
         )
       `;
-      
-      console.log('[ContentService] Post created successfully with ID:', postId);
-      
+
+      console.log(
+        '[ContentService] Post created successfully with ID:',
+        postId,
+      );
+
       // Fetch the created post with relations using raw SQL
       const [post] = await this.prisma.$queryRaw<any[]>`
         SELECT 
@@ -119,11 +125,11 @@ export class ContentService {
         JOIN users u ON p."authorId" = u.id
         WHERE p.id = ${postId}
       `;
-      
+
       if (!post) {
         throw new Error('Failed to fetch created post');
       }
-      
+
       // Return in the expected format
       return {
         id: post.id,

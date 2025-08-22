@@ -4,7 +4,7 @@ import * as path from 'path';
 
 /**
  * Environment Configuration Loader
- * 
+ *
  * Loads environment variables from multiple sources:
  * 1. .env - General configuration (committed to git)
  * 2. .env.secrets - Sensitive credentials (never committed)
@@ -32,7 +32,7 @@ export class EnvConfig {
     }
 
     const nodeEnv = process.env.NODE_ENV || 'development';
-    
+
     // Skip file loading in Railway/production environment
     if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID) {
       console.log('🚂 Running on Railway - using environment variables');
@@ -61,7 +61,7 @@ export class EnvConfig {
     } else {
       envSpecificFile = `.env.${nodeEnv}`;
     }
-    
+
     const envSpecificPath = path.join(rootDir, envSpecificFile);
     if (fs.existsSync(envSpecificPath)) {
       dotenv.config({ path: envSpecificPath });
@@ -83,22 +83,22 @@ export class EnvConfig {
    * Validate that required environment variables are set
    */
   private validateRequiredVars(): void {
-    const required = [
-      'DATABASE_URL',
-      'JWT_SECRET',
-      'ENCRYPTION_KEY',
-    ];
+    const required = ['DATABASE_URL', 'JWT_SECRET', 'ENCRYPTION_KEY'];
 
-    const missing = required.filter(key => !process.env[key]);
+    const missing = required.filter((key) => !process.env[key]);
 
     if (missing.length > 0) {
       console.error(`❌ Missing required environment variables:`);
-      missing.forEach(key => console.error(`   - ${key}`));
-      
+      missing.forEach((key) => console.error(`   - ${key}`));
+
       if (process.env.NODE_ENV === 'production') {
-        throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+        throw new Error(
+          `Missing required environment variables: ${missing.join(', ')}`,
+        );
       } else {
-        console.warn(`⚠️  Continuing in development mode with missing variables`);
+        console.warn(
+          `⚠️  Continuing in development mode with missing variables`,
+        );
       }
     }
   }
@@ -113,7 +113,7 @@ export class EnvConfig {
     }
 
     const value = process.env[key];
-    
+
     if (value === undefined) {
       if (defaultValue !== undefined) {
         return defaultValue;
@@ -125,7 +125,7 @@ export class EnvConfig {
     if (typeof defaultValue === 'boolean') {
       return (value === 'true' || value === '1') as unknown as T;
     }
-    
+
     if (typeof defaultValue === 'number') {
       return Number(value) as unknown as T;
     }
@@ -167,9 +167,9 @@ export class EnvConfig {
     ];
 
     const config: Record<string, any> = {};
-    
-    Object.keys(process.env).forEach(key => {
-      if (!sensitive.some(s => key.includes(s))) {
+
+    Object.keys(process.env).forEach((key) => {
+      if (!sensitive.some((s) => key.includes(s))) {
         config[key] = process.env[key];
       }
     });

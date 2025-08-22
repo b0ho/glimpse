@@ -34,7 +34,21 @@ import { PrismaModule } from '../core/prisma/prisma.module';
     PrismaModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, AuthGuard, WsAuthGuard, ClerkAuthGuard, AdminAuthGuard],
-  exports: [AuthService, PassportModule, AuthGuard, WsAuthGuard, ClerkAuthGuard, AdminAuthGuard],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    AuthGuard,
+    WsAuthGuard,
+    ClerkAuthGuard,
+    AdminAuthGuard,
+  ],
+  exports: [
+    AuthService,
+    PassportModule,
+    AuthGuard,
+    WsAuthGuard,
+    ClerkAuthGuard,
+    AdminAuthGuard,
+  ],
 })
 export class AuthModule {}

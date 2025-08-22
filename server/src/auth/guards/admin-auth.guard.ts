@@ -63,7 +63,7 @@ export class AdminAuthGuard implements CanActivate {
 
       // JWT 토큰 검증 (Clerk가 아닌 직접 발급한 JWT만)
       let payload: any;
-      
+
       try {
         // 자체 JWT 토큰 검증
         const secret = this.configService.get<string>(
@@ -82,7 +82,9 @@ export class AdminAuthGuard implements CanActivate {
 
       // Clerk 토큰 거부 (sub 필드가 있으면 Clerk 토큰)
       if (payload.sub && !payload.sub.startsWith('admin')) {
-        throw new UnauthorizedException('Clerk 토큰은 관리자 인증에 사용할 수 없습니다.');
+        throw new UnauthorizedException(
+          'Clerk 토큰은 관리자 인증에 사용할 수 없습니다.',
+        );
       }
 
       request['user'] = {

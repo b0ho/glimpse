@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // Always use JWT_SECRET for token validation
     // Clerk uses its own validation mechanism, not this strategy
     const secretKey = configService.get('JWT_SECRET');
-    
+
     if (!secretKey) {
       throw new Error('JWT_SECRET is not configured');
     }
@@ -53,7 +53,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           isVerified: true,
         };
       }
-      
+
       // 일반 사용자 토큰인 경우
       if (payload.userId) {
         return {
