@@ -101,9 +101,42 @@ export default function App() {
     );
   }
 
-  // Clerk publishable key - 환경 변수에서 가져오기
-  const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const clerkFrontendApi = process.env.EXPO_PUBLIC_CLERK_FRONTEND_API;
+  // Clerk publishable key - 환경에 따라 적절한 키 선택
+  let clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  let clerkFrontendApi = process.env.EXPO_PUBLIC_CLERK_FRONTEND_API;
+  
+  // 환경별 Clerk 설정
+  const isDevelopment = __DEV__ || process.env.NODE_ENV === 'development';
+  
+  if (typeof window !== 'undefined') {
+    const hostname = window.location?.hostname || '';
+    
+    // 로컬 개발 환경 체크
+    const isLocalhost = hostname === 'localhost' || 
+                       hostname.includes('127.0.0.1') || 
+                       hostname.includes('192.168') || 
+                       hostname.includes('172.') ||
+                       hostname.includes('10.');
+    
+    // 로컬 개발 환경 또는 개발 모드
+    if (isLocalhost || isDevelopment) {
+      // 로컬에서는 개발 키 사용
+      clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
+      clerkFrontendApi = undefined; // 개발 키는 커스텀 도메인 불필요
+      console.log('🔧 Using development Clerk key for local environment');
+    } 
+    // 운영 환경 (Vercel, glimpse.contact 등)
+    else {
+      // 운영 환경에서는 환경변수에 설정된 프로덕션 키 사용
+      // Vercel 환경변수 또는 프로덕션 빌드 시 설정된 값 사용
+      console.log('🚀 Using production Clerk key for production environment');
+    }
+  } else if (isDevelopment) {
+    // 모바일 앱 개발 환경
+    clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
+    clerkFrontendApi = undefined;
+    console.log('📱 Using development Clerk key for mobile development');
+  }
   
   // 앱 컨텐츠
   const AppContent = () => {
