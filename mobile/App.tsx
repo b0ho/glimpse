@@ -102,15 +102,8 @@ export default function App() {
   }
 
   // Clerk publishable key - 환경 변수에서 가져오기
-  let clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  let clerkFrontendApi = process.env.EXPO_PUBLIC_CLERK_FRONTEND_API;
-  
-  // Vercel 도메인에서는 개발 키 사용 (Production 키가 glimpse.contact 전용)
-  // TODO: Clerk Dashboard에서 Allowed Origins에 vercel.app 추가 후 제거
-  if (typeof window !== 'undefined' && window.location?.hostname?.includes('vercel.app')) {
-    clerkPublishableKey = 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
-    clerkFrontendApi = undefined; // 개발 키는 커스텀 도메인 불필요
-  }
+  const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkFrontendApi = process.env.EXPO_PUBLIC_CLERK_FRONTEND_API;
   
   // 앱 컨텐츠
   const AppContent = () => {
