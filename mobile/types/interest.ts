@@ -14,6 +14,8 @@ export enum InterestType {
   COMPANY = 'COMPANY',
   SCHOOL = 'SCHOOL',
   HOBBY = 'HOBBY',
+  PLATFORM = 'PLATFORM',  // 기타 플랫폼 (Discord, Slack 등)
+  GAME_ID = 'GAME_ID',    // 게임 아이디
 }
 
 export enum SearchStatus {

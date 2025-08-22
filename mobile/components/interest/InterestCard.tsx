@@ -92,6 +92,16 @@ export const InterestCard: React.FC<InterestCardProps> = ({
         color: '#F44336',
         gradient: ['#F44336', '#D32F2F'],
       },
+      [InterestType.PLATFORM]: {
+        icon: 'globe-outline',
+        color: '#9C27B0',
+        gradient: ['#9C27B0', '#7B1FA2'],
+      },
+      [InterestType.GAME_ID]: {
+        icon: 'game-controller-outline',
+        color: '#673AB7',
+        gradient: ['#673AB7', '#512DA8'],
+      },
     };
     return configs[type] || configs[InterestType.HOBBY];
   };
@@ -306,6 +316,8 @@ function getTypeLabel(type: InterestType): string {
     [InterestType.COMPANY]: '회사',
     [InterestType.SCHOOL]: '학교',
     [InterestType.HOBBY]: '취미/관심사',
+    [InterestType.PLATFORM]: '기타 플랫폼',
+    [InterestType.GAME_ID]: '게임',
   };
   return labels[type] || '기타';
 }

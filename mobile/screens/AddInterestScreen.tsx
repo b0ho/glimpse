@@ -72,8 +72,8 @@ export const AddInterestScreen: React.FC = () => {
     { type: InterestType.COMPANY, label: '회사', icon: 'business-outline', color: '#3F51B5' },
     { type: InterestType.SCHOOL, label: '학교', icon: 'school-outline', color: '#00BCD4' },
     { type: InterestType.HOBBY, label: '취미/관심사', icon: 'heart-outline', color: '#F44336' },
-    { type: InterestType.PLATFORM, label: '게임 플랫폼', icon: 'game-controller-outline', color: '#9C27B0' },
-    { type: InterestType.GAME_ID, label: '게임 아이디', icon: 'gamepad-variant-outline', color: '#673AB7' },
+    { type: InterestType.PLATFORM, label: '기타 플랫폼', icon: 'globe-outline', color: '#9C27B0' },
+    { type: InterestType.GAME_ID, label: '게임', icon: 'game-controller-outline', color: '#673AB7' },
   ];
 
   // 구독 티어에 따른 제한 확인
@@ -187,9 +187,15 @@ export const AddInterestScreen: React.FC = () => {
       return;
     }
 
-    // 게임 플랫폼 타입일 때 플랫폼 필수 검증
-    if (selectedType === InterestType.PLATFORM && !metadata.platform) {
-      Alert.alert('오류', '게임 플랫폼을 선택해주세요');
+    // 기타 플랫폼 타입일 때 플랫폼명 필수 검증
+    if (selectedType === InterestType.PLATFORM && !metadata.platformName) {
+      Alert.alert('오류', '플랫폼명을 입력해주세요');
+      return;
+    }
+    
+    // 게임 타입일 때 게임명 필수 검증
+    if (selectedType === InterestType.GAME_ID && !metadata.gameName) {
+      Alert.alert('오류', '게임명을 입력해주세요');
       return;
     }
 
@@ -705,124 +711,65 @@ export const AddInterestScreen: React.FC = () => {
       case InterestType.PLATFORM:
         return (
           <View style={styles.inputContainer}>
-            {/* 게임 플랫폼 드롭다운 */}
-            <View style={styles.dropdownContainer}>
-              <Text style={[styles.inputLabel, { color: colors.TEXT.PRIMARY }]}>
-                게임 플랫폼 선택 <Text style={{ color: colors.ERROR }}>*</Text>
-              </Text>
-              <TouchableOpacity
-                style={[
-                  styles.dropdown,
-                  { 
-                    borderColor: !metadata.platform ? colors.ERROR : colors.BORDER,
-                    backgroundColor: colors.SURFACE 
-                  },
-                  metadata.showPlatformPicker && { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }
-                ]}
-                onPress={() => setMetadata({ ...metadata, showPlatformPicker: !metadata.showPlatformPicker })}
-              >
-                <View style={styles.dropdownContent}>
-                  {metadata.platform ? (
-                    <View style={styles.selectedPlatform}>
-                      <Icon 
-                        name={
-                          metadata.platform === 'steam' ? 'logo-steam' :
-                          metadata.platform === 'battlenet' ? 'game-controller-outline' :
-                          metadata.platform === 'playstation' ? 'logo-playstation' :
-                          metadata.platform === 'xbox' ? 'logo-xbox' :
-                          metadata.platform === 'nintendo' ? 'game-controller-outline' :
-                          metadata.platform === 'mobile' ? 'phone-portrait-outline' :
-                          'game-controller-outline'
-                        }
-                        size={20}
-                        color={colors.PRIMARY}
-                      />
-                      <Text style={[styles.dropdownText, { color: colors.TEXT.PRIMARY }]}>
-                        {metadata.platform === 'steam' ? 'Steam' :
-                         metadata.platform === 'battlenet' ? 'Battle.net' :
-                         metadata.platform === 'playstation' ? 'PlayStation' :
-                         metadata.platform === 'xbox' ? 'Xbox' :
-                         metadata.platform === 'nintendo' ? 'Nintendo Switch' :
-                         metadata.platform === 'mobile' ? '모바일 게임' :
-                         metadata.platform}
-                      </Text>
-                    </View>
-                  ) : (
-                    <Text style={[styles.dropdownPlaceholder, { color: colors.TEXT.TERTIARY }]}>
-                      게임 플랫폼을 선택하세요
-                    </Text>
-                  )}
-                  <Icon 
-                    name={metadata.showPlatformPicker ? "chevron-up" : "chevron-down"} 
-                    size={20} 
-                    color={colors.TEXT.SECONDARY} 
-                  />
-                </View>
-              </TouchableOpacity>
-              
-              {/* 플랫폼 드롭다운 옵션 */}
-              {metadata.showPlatformPicker && (
-                <View style={[
-                  styles.dropdownOptionsRelative, 
-                  { 
-                    backgroundColor: colors.SURFACE, 
-                    borderColor: colors.BORDER,
-                    borderTopWidth: 0,
-                    borderTopLeftRadius: 0,
-                    borderTopRightRadius: 0,
-                    marginTop: -1,
-                  }
-                ]}>
-                  {[
-                    { id: 'steam', name: 'Steam', icon: 'logo-steam' },
-                    { id: 'battlenet', name: 'Battle.net', icon: 'game-controller-outline' },
-                    { id: 'playstation', name: 'PlayStation', icon: 'logo-playstation' },
-                    { id: 'xbox', name: 'Xbox', icon: 'logo-xbox' },
-                    { id: 'nintendo', name: 'Nintendo Switch', icon: 'game-controller-outline' },
-                    { id: 'mobile', name: '모바일 게임', icon: 'phone-portrait-outline' },
-                  ].map((platform) => (
-                    <TouchableOpacity
-                      key={platform.id}
-                      style={[
-                        styles.dropdownOption,
-                        metadata.platform === platform.id && { backgroundColor: colors.PRIMARY + '10' }
-                      ]}
-                      onPress={() => setMetadata({ ...metadata, platform: platform.id, showPlatformPicker: false })}
-                    >
-                      <Icon name={platform.icon} size={20} color={colors.PRIMARY} />
-                      <Text style={[styles.dropdownOptionText, { color: colors.TEXT.PRIMARY }]}>
-                        {platform.name}
-                      </Text>
-                      {metadata.platform === platform.id && (
-                        <Icon name="checkmark" size={20} color={colors.PRIMARY} />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </View>
-
-            {!metadata.platform && (
-              <Text style={[styles.errorText, { color: colors.ERROR }]}>
-                게임 플랫폼을 먼저 선택해주세요
-              </Text>
-            )}
-          </View>
-        );
-
-      case InterestType.GAME_ID:
-        return (
-          <View style={styles.inputContainer}>
+            {/* 기타 플랫폼 입력 */}
+            <Text style={[styles.inputLabel, { color: colors.TEXT.PRIMARY }]}>
+              플랫폼명 <Text style={{ color: colors.ERROR }}>*</Text>
+            </Text>
             <TextInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-              placeholder="게임 아이디를 입력하세요 (예: PlayerName123)"
+              placeholder="플랫폼명을 입력하세요 (예: Discord, Slack, LinkedIn)"
+              placeholderTextColor={colors.TEXT.TERTIARY}
+              value={metadata.platformName || ''}
+              onChangeText={(text) => setMetadata({ ...metadata, platformName: text })}
+            />
+            
+            <Text style={[styles.inputLabel, { color: colors.TEXT.PRIMARY, marginTop: 12 }]}>
+              플랫폼 아이디 <Text style={{ color: colors.ERROR }}>*</Text>
+            </Text>
+            <TextInput
+              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              placeholder="플랫폼에서 사용하는 아이디를 입력하세요"
               placeholderTextColor={colors.TEXT.TERTIARY}
               value={value}
               onChangeText={setValue}
               autoCapitalize="none"
             />
+            
             <Text style={[styles.inputHint, { color: colors.TEXT.TERTIARY }]}>
-              특수문자 및 공백 없이 입력해주세요
+              Discord, Slack, LinkedIn 등 다양한 플랫폼 정보를 등록할 수 있습니다
+            </Text>
+          </View>
+        );
+
+
+      case InterestType.GAME_ID:
+        return (
+          <View style={styles.inputContainer}>
+            <Text style={[styles.inputLabel, { color: colors.TEXT.PRIMARY }]}>
+              게임명 <Text style={{ color: colors.ERROR }}>*</Text>
+            </Text>
+            <TextInput
+              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              placeholder="게임명을 입력하세요 (예: 리그 오브 레전드, 배틀그라운드)"
+              placeholderTextColor={colors.TEXT.TERTIARY}
+              value={metadata.gameName || ''}
+              onChangeText={(text) => setMetadata({ ...metadata, gameName: text })}
+            />
+            
+            <Text style={[styles.inputLabel, { color: colors.TEXT.PRIMARY, marginTop: 12 }]}>
+              게임 아이디 <Text style={{ color: colors.ERROR }}>*</Text>
+            </Text>
+            <TextInput
+              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              placeholder="게임 내 아이디를 입력하세요"
+              placeholderTextColor={colors.TEXT.TERTIARY}
+              value={value}
+              onChangeText={setValue}
+              autoCapitalize="none"
+            />
+            
+            <Text style={[styles.inputHint, { color: colors.TEXT.TERTIARY }]}>
+              게임 내에서 사용하는 닉네임이나 아이디를 입력해주세요
             </Text>
           </View>
         );
