@@ -43,7 +43,10 @@ export const HomeScreen = () => {
   const [contents, setContents] = useState<Content[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
   const [hasMoreData, setHasMoreData] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   
   // Story states
   const [stories, setStories] = useState<StoryUser[]>([]);
@@ -285,10 +288,24 @@ export const HomeScreen = () => {
    * @returns {Promise<void>}
    * @description 피드에 표시할 콘텐츠 목록을 가져오는 함수
    */
-  const loadContents = useCallback(async (refresh = false) => {
-    console.log('[HomeScreen] loadContents called, refresh:', refresh);
+  const loadContents = useCallback(async (refresh = false, page = 1) => {
+    console.log('[HomeScreen] loadContents called, refresh:', refresh, 'page:', page);
+    
+    // 인스타그램 스타일: 너무 빠른 연속 새로고침 방지 (2초 이내)
+    if (refresh && lastRefreshTime) {
+      const timeSinceLastRefresh = Date.now() - lastRefreshTime.getTime();
+      if (timeSinceLastRefresh < 2000) {
+        console.log('[HomeScreen] 새로고침 제한: 너무 빠른 연속 새로고침');
+        return;
+      }
+    }
+    
     if (refresh) {
       setIsRefreshing(true);
+      setLastRefreshTime(new Date());
+      setCurrentPage(1);
+    } else if (page > 1) {
+      setIsLoadingMore(true);
     } else {
       setIsLoading(true);
     }
@@ -296,7 +313,7 @@ export const HomeScreen = () => {
     try {
       // 실제 API 호출로 콘텐츠 가져오기
       console.log('[HomeScreen] Calling API...');
-      const apiContents = await contentApi.getContents(undefined, 1, 20);
+      const apiContents = await contentApi.getContents(undefined, page, 10);
       console.log('[HomeScreen] API response:', apiContents);
       
       // API 응답이 없거나 에러인 경우 테스트 데이터 사용
@@ -406,8 +423,24 @@ export const HomeScreen = () => {
       }
       
       console.log('[HomeScreen] Setting real contents:', apiContents.length);
-      setContents(apiContents);
-      setHasMoreData(apiContents.length >= 20);
+      
+      if (refresh || page === 1) {
+        // 새로고침이거나 첫 페이지인 경우 기존 데이터 교체
+        setContents(apiContents);
+        setCurrentPage(1);
+      } else {
+        // 다음 페이지 데이터를 기존 데이터에 추가 (무한 스크롤)
+        setContents(prevContents => [...prevContents, ...apiContents]);
+        setCurrentPage(page);
+      }
+      
+      // 더 이상 로드할 데이터가 있는지 확인 (10개 미만이면 마지막 페이지)
+      setHasMoreData(apiContents.length >= 10);
+      
+      // 새로고침 완료 시 부드러운 피드백 제공
+      if (refresh) {
+        console.log('[HomeScreen] 새로고침 완료: 최신 데이터 로드됨');
+      }
     } catch (error) {
       console.error('[HomeScreen] Content load failed:', error);
       Alert.alert(t('common:status.error'), t('home:errors.loadError'));
@@ -439,7 +472,7 @@ export const HomeScreen = () => {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [t]);
+  }, [t, lastRefreshTime]);
 
   /**
    * 추가 콘텐츠 로드 (무한 스크롤)
@@ -447,17 +480,22 @@ export const HomeScreen = () => {
    * @description 스크롤 끝에 도달했을 때 추가 콘텐츠를 로드하는 함수
    */
   const loadMoreContents = useCallback(async () => {
-    if (!hasMoreData || isLoading) return;
+    if (!hasMoreData || isLoading || isLoadingMore) return;
 
     try {
-      // 실제로는 다음 페이지 API 호출
-      console.log('Loading more contents...');
-      // 임시로 더 이상 로드할 데이터가 없다고 설정
-      setHasMoreData(false);
+      setIsLoadingMore(true);
+      console.log('[HomeScreen] 무한 스크롤: 다음 페이지 로드 중...', { currentPage: currentPage + 1 });
+      
+      // 다음 페이지 로드
+      await loadContents(false, currentPage + 1);
+      
     } catch (error) {
-      console.error('Failed to load more contents:', error);
+      console.error('[HomeScreen] 무한 스크롤 로드 실패:', error);
+      Alert.alert(t('common:status.error'), t('home:errors.loadError'));
+    } finally {
+      setIsLoadingMore(false);
     }
-  }, [hasMoreData, isLoading]);
+  }, [hasMoreData, isLoading, isLoadingMore, currentPage, loadContents, t]);
 
   useEffect(() => {
     // 컴포넌트 마운트 시 콘텐츠 로드
@@ -675,14 +713,12 @@ export const HomeScreen = () => {
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            onRefresh={() => {
-              loadContents(true);
-              loadStories();
-              loadSuccessStories();
-            }}
+            onRefresh={handlePullToRefresh}
             colors={[colors.PRIMARY]}
             tintColor={colors.PRIMARY}
             backgroundColor={colors.SURFACE}
+            title={t('home:refreshing')}
+            titleColor={colors.TEXT.SECONDARY}
           />
         }
         onEndReached={loadMoreContents}
