@@ -475,6 +475,20 @@ export const HomeScreen = () => {
   }, [t, lastRefreshTime]);
 
   /**
+   * Pull-to-refresh 핸들러
+   * @returns {Promise<void>}
+   * @description 인스타그램 스타일의 pull-to-refresh 동작을 처리하는 함수
+   */
+  const handlePullToRefresh = useCallback(async () => {
+    console.log('[HomeScreen] Pull-to-refresh triggered - 인스타그램 스타일 새로고침');
+    await Promise.all([
+      loadContents(true),
+      loadStories(),
+      loadSuccessStories()
+    ]);
+  }, [loadContents, loadStories, loadSuccessStories]);
+
+  /**
    * 추가 콘텐츠 로드 (무한 스크롤)
    * @returns {Promise<void>}
    * @description 스크롤 끝에 도달했을 때 추가 콘텐츠를 로드하는 함수
