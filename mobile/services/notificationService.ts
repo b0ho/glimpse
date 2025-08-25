@@ -340,46 +340,6 @@ class NotificationService {
     }
   }
 
-  /**
-   * 통화 알림 표시
-   * @async
-   * @param {string} callerName - 발신자 이름
-   * @param {'video' | 'audio'} callType - 통화 유형
-   * @returns {Promise<void>}
-   * @description 수신 통화 알림을 로컬로 표시
-   */
-  async showCallNotification(callerName: string, callType: 'video' | 'audio') {
-    try {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: `${callerName}님의 ${callType === 'video' ? '영상' : '음성'} 통화`,
-          body: '탭하여 통화에 응답하세요',
-          sound: 'default',
-          priority: Notifications.AndroidNotificationPriority.MAX,
-          categoryIdentifier: 'call',
-          data: { type: 'incoming_call', callType },
-        },
-        trigger: null,
-        identifier: 'incoming-call',
-      });
-    } catch (error) {
-      console.error('Failed to show call notification:', error);
-    }
-  }
-
-  /**
-   * 통화 알림 제거
-   * @async
-   * @returns {Promise<void>}
-   * @description 표시된 통화 알림을 제거
-   */
-  async clearCallNotification() {
-    try {
-      await Notifications.dismissNotificationAsync('incoming-call');
-    } catch (error) {
-      console.error('Failed to clear call notification:', error);
-    }
-  }
 
   /**
    * 미읽은 알림 개수 조회

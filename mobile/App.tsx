@@ -4,7 +4,6 @@ import { ClerkProvider } from '@clerk/clerk-expo';
 import { Platform, ActivityIndicator, View, Text } from 'react-native';
 import RootNavigator from './navigation/AppNavigator';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { CallProvider } from './providers/CallProvider';
 import { initI18n } from './services/i18n/i18n';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './services/i18n/i18n';
@@ -163,9 +162,7 @@ export default function App() {
         <SafeAreaProvider>
           <StatusBar style={isDark ? "light" : "dark"} backgroundColor={colors.BACKGROUND} />
           <View style={{ flex: 1, backgroundColor: colors.BACKGROUND }}>
-            <CallProvider>
-              <RootNavigator />
-            </CallProvider>
+            <RootNavigator />
           </View>
         </SafeAreaProvider>
       </I18nextProvider>
