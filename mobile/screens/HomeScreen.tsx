@@ -28,7 +28,6 @@ import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { contentApi } from '@/services/api/contentApi';
 import { ACTION_ICONS } from '@/utils/icons';
-import { ApiTestComponent } from '@/components/ApiTestComponent';
 import { SuccessStoryCard } from '@/components/successStory/SuccessStoryCard';
 import { SuccessStory } from '@/types/successStory';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -705,9 +704,6 @@ export const HomeScreen = () => {
         renderItem={renderContentItem}
         ListHeaderComponent={
           <>
-            {/* API 연결 테스트 컴포넌트 */}
-            <ApiTestComponent />
-            
             {/* Stories */}
             <StoryList
               stories={stories}
