@@ -1,15 +1,22 @@
 import { useEffect, useRef } from 'react';
-import * as Notifications from 'expo-notifications';
 import { useNotificationStore } from '@/store/slices/notificationSlice';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { RootNavigationParamList } from '@/navigation/AppNavigator';
 
+// 조건부로 expo-notifications import (Expo Go 호환성)
+let Notifications: any = null;
+try {
+  Notifications = require('expo-notifications');
+} catch (error) {
+  console.warn('Notifications not available in useNotifications hook');
+}
+
 export function useNotifications() {
   const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
-  const notificationListener = useRef<Notifications.Subscription | null>(null);
-  const responseListener = useRef<Notifications.Subscription | null>(null);
+  const notificationListener = useRef<any>(null);
+  const responseListener = useRef<any>(null);
   
   const initializeNotifications = useNotificationStore(state => state.initializeNotifications);
   const isInitialized = useNotificationStore(state => state.isInitialized);
@@ -27,7 +34,7 @@ export function useNotifications() {
   }, [isSignedIn, isInitialized]);
 
   useEffect(() => {
-    if (!isInitialized || !settings.pushEnabled) {
+    if (!isInitialized || !settings.pushEnabled || !Notifications) {
       return;
     }
 

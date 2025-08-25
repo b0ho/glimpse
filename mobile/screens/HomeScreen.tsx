@@ -418,7 +418,8 @@ export const HomeScreen = () => {
         
         console.log('[HomeScreen] Using test contents');
         setContents(testContents);
-        setHasMoreData(false);
+        // 테스트 콘텐츠 사용 시에도 더 보기 가능하도록 설정
+        setHasMoreData(true);
         return;
       }
       

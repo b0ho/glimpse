@@ -26,13 +26,17 @@ import { SPACING, FONT_SIZES } from '@/utils/constants';
 import { useTheme } from '@/hooks/useTheme';
 import { chatService } from '@/services/chat/chatService';
 
-type ChatScreenRouteProp = {
-  params: {
+import type { RouteProp } from '@react-navigation/native';
+
+type RootStackParamList = {
+  ChatScreenSimple: {
     roomId: string;
     matchId: string;
     otherUserNickname: string;
   };
 };
+
+type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreenSimple'>;
 
 export const ChatScreenSimple = () => {
   const route = useRoute<ChatScreenRouteProp>();

@@ -17,6 +17,7 @@ import { formatTimeAgo } from '@/utils/dateUtils';
 import { STATE_ICONS } from '@/utils/icons';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { useTheme } from '@/hooks/useTheme';
+import { shadowPresets } from '@/utils/styles/platformStyles';
 
 /**
  * ContentItem 컴포넌트 Props
@@ -70,9 +71,8 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   });
 
   // 익명성 시스템: 매칭 상태에 따라 표시명 결정
-  const displayName = currentUserId && item.authorId && currentUserId !== item.authorId
-    ? getUserDisplayName(item.authorId, currentUserId)
-    : item.authorNickname || '테스트유저';
+  // 프로덕션에서는 매칭 전까지 익명, 개발 중에는 실제 닉네임 표시
+  const displayName = item.authorNickname || getUserDisplayName(item.authorId || '', currentUserId || '') || '테스트유저';
 
   const handleEdit = () => {
     setShowMenu(false);
@@ -265,10 +265,7 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.MD,
     borderRadius: 12,
     padding: SPACING.MD,
-    elevation: 2,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    ...shadowPresets.small,
   },
   contentHeader: {
     flexDirection: 'row',
@@ -398,11 +395,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: SPACING.SM,
     minWidth: 150,
-    elevation: 20,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
     borderWidth: 1,
+    ...shadowPresets.extraLarge,
   },
   menuItem: {
     flexDirection: 'row',

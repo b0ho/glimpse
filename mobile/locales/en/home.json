@@ -20,6 +20,7 @@
     "content": "Loading content...",
     "moreContent": "Loading more content..."
   },
+  "refreshing": "Refreshing...",
   "empty": {
     "title": "No content yet",
     "subtitle": "Join a group or create your first post!"

@@ -1,13 +1,25 @@
-import { 
-  MediaStream,
-  MediaStreamTrack,
-  RTCPeerConnection,
-  RTCSessionDescription,
-  RTCIceCandidate,
-  mediaDevices
-} from 'react-native-webrtc';
 import { io } from '../services/chat/socketService';
 import { createError } from '../utils/error';
+
+// 조건부로 react-native-webrtc import (Expo Go 호환성)
+let MediaStream: any = null;
+let MediaStreamTrack: any = null;
+let RTCPeerConnection: any = null;
+let RTCSessionDescription: any = null;
+let RTCIceCandidate: any = null;
+let mediaDevices: any = null;
+
+try {
+  const webrtcModule = require('react-native-webrtc');
+  MediaStream = webrtcModule.MediaStream;
+  MediaStreamTrack = webrtcModule.MediaStreamTrack;
+  RTCPeerConnection = webrtcModule.RTCPeerConnection;
+  RTCSessionDescription = webrtcModule.RTCSessionDescription;
+  RTCIceCandidate = webrtcModule.RTCIceCandidate;
+  mediaDevices = webrtcModule.mediaDevices;
+} catch (error) {
+  console.warn('WebRTC not available in this environment');
+}
 
 /**
  * WebRTC 설정 인터페이스

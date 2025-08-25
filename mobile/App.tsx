@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ClerkProvider } from '@clerk/clerk-expo';
 import { Platform, ActivityIndicator, View, Text } from 'react-native';
 import RootNavigator from './navigation/AppNavigator';
@@ -10,6 +9,15 @@ import { initI18n } from './services/i18n/i18n';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './services/i18n/i18n';
 import { useIsDark, useColors } from './hooks/useTheme';
+
+// SafeAreaProvider는 네이티브 플랫폼에서만 필요
+let SafeAreaProvider: any;
+if (Platform.OS !== 'web') {
+  SafeAreaProvider = require('react-native-safe-area-context').SafeAreaProvider;
+} else {
+  // 웹에서는 단순 wrapper 사용
+  SafeAreaProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+}
 
 // SecureStore polyfill for web
 let SecureStore: any;

@@ -1,7 +1,14 @@
 import { io } from './chat/socketService';
-import { webRTCService } from './webrtcService';
 import { notificationService } from './notificationService';
 import { Alert } from 'react-native';
+
+// 조건부로 webRTCService import (Expo Go 호환성)
+let webRTCService: any = null;
+try {
+  webRTCService = require('./webrtcService').webRTCService;
+} catch (error) {
+  console.warn('WebRTC service not available in this environment');
+}
 
 /**
  * 통화 초대 인터페이스
@@ -134,7 +141,7 @@ class CallService {
 
       // Set timeout for call invite (30 seconds)
       setTimeout(() => {
-        if (this.callState.activeCall?.callId === callId && !webRTCService.getCallStatus()) {
+        if (this.callState.activeCall?.callId === callId && webRTCService && !webRTCService.getCallStatus()) {
           this.cancelCall();
           Alert.alert('통화 연결 실패', '응답이 없어 통화가 취소되었습니다.');
         }

@@ -1,23 +1,35 @@
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 import { Platform } from 'react-native';
-import Constants from 'expo-constants';
 import { API_BASE_URL } from './api/config';
 // import { authService } from './auth/auth-service'; // TODO: Implement token handling
 
-/**
- * 알림 핸들러 설정
- * @description 알림이 수신될 때의 기본 동작 설정
- */
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// 조건부로 expo-notifications import (Expo Go 호환성)
+let Notifications: any = null;
+let Device: any = null;
+let Constants: any = null;
+
+try {
+  Notifications = require('expo-notifications');
+  Device = require('expo-device');
+  Constants = require('expo-constants');
+  
+  /**
+   * 알림 핸들러 설정
+   * @description 알림이 수신될 때의 기본 동작 설정
+   */
+  if (Notifications && Notifications.setNotificationHandler) {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+  }
+} catch (error) {
+  console.warn('Notifications not available in this environment');
+}
 
 /**
  * 알림 데이터 인터페이스
@@ -61,6 +73,12 @@ class NotificationService {
    * @description 디바이스에 푸시 알림을 등록하고 토큰을 서버에 전송
    */
   async registerForPushNotifications(): Promise<string | null> {
+    // Notifications 모듈이 없으면 null 반환
+    if (!Notifications || !Device || !Constants) {
+      console.log('알림 기능이 이 환경에서 지원되지 않습니다.');
+      return null;
+    }
+
     if (!Device.isDevice) {
       console.log('물리적 디바이스가 아니면 푸시 알림을 사용할 수 없습니다.');
       return null;
@@ -171,9 +189,15 @@ class NotificationService {
    * @description 알림 수신 및 사용자 응답 리스너 설정
    */
   setupNotificationListeners(
-    onNotificationReceived?: (notification: Notifications.Notification) => void,
-    onNotificationResponse?: (response: Notifications.NotificationResponse) => void
+    onNotificationReceived?: (notification: any) => void,
+    onNotificationResponse?: (response: any) => void
   ): void {
+    // Notifications 모듈이 없으면 리턴
+    if (!Notifications) {
+      console.log('알림 리스너를 설정할 수 없습니다.');
+      return;
+    }
+
     // 알림 수신 리스너
     this.notificationListener = Notifications.addNotificationReceivedListener(notification => {
       console.log('알림 수신:', notification);
@@ -196,6 +220,10 @@ class NotificationService {
    * @description 등록된 알림 리스너를 모두 제거
    */
   removeNotificationListeners(): void {
+    if (!Notifications) {
+      return;
+    }
+    
     if (this.notificationListener) {
       Notifications.removeNotificationSubscription(this.notificationListener);
     }

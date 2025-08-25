@@ -2,9 +2,19 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { callService } from '../services/callService';
-import { webRTCService } from '../services/webrtcService';
-import { VideoCallScreen } from '../components/call/VideoCallScreen';
-import { IncomingCallModal } from '../components/call/IncomingCallModal';
+
+// 조건부로 WebRTC 관련 모듈 import (Expo Go 호환성)
+let webRTCService: any = null;
+let VideoCallScreen: any = null;
+let IncomingCallModal: any = null;
+
+try {
+  webRTCService = require('../services/webrtcService').webRTCService;
+  VideoCallScreen = require('../components/call/VideoCallScreen').VideoCallScreen;
+  IncomingCallModal = require('../components/call/IncomingCallModal').IncomingCallModal;
+} catch (error) {
+  console.warn('WebRTC components not available in this environment');
+}
 
 interface CallContextType {
   initiateCall: (userId: string, userName: string, callType: 'video' | 'audio') => Promise<void>;

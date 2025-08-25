@@ -1,11 +1,13 @@
+import { Platform } from 'react-native';
+
 /**
  * API 기본 URL
  * @constant {string}
  */
 // 환경 감지: Vercel 환경에서는 production으로 간주
 const isProduction = process.env.NODE_ENV === 'production' || 
-                     typeof window !== 'undefined' && window.location.hostname.includes('.vercel.app') ||
-                     typeof window !== 'undefined' && !window.location.hostname.includes('localhost');
+                     (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.hostname?.includes('.vercel.app')) ||
+                     (Platform.OS === 'web' && typeof window !== 'undefined' && !window.location?.hostname?.includes('localhost'));
 
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 
   process.env.API_URL || 
@@ -16,7 +18,8 @@ export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ||
 // 디버깅용 로그
 console.log('[API Config] Environment Detection:', {
   isProduction,
-  hostname: typeof window !== 'undefined' ? window.location.hostname : 'server-side',
+  platform: Platform.OS,
+  hostname: Platform.OS === 'web' && typeof window !== 'undefined' ? window.location?.hostname : 'native-app',
   NODE_ENV: process.env.NODE_ENV,
   API_BASE_URL,
   EXPO_PUBLIC_API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL

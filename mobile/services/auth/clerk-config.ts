@@ -1,5 +1,5 @@
 // import { ClerkProvider } from '@clerk/clerk-expo';
-import * as SecureStore from 'expo-secure-store';
+import { secureStorage } from '@/utils/storage';
 
 /**
  * Clerk 토큰 캐시 인터페이스
@@ -27,7 +27,7 @@ const tokenCache: TokenCache = {
    */
   async getToken(key: string) {
     try {
-      return SecureStore.getItemAsync(key);
+      return await secureStorage.getItem(key);
     } catch (err) {
       console.error('Error getting token from secure store:', err);
       return null;
@@ -42,7 +42,7 @@ const tokenCache: TokenCache = {
    */
   async saveToken(key: string, value: string) {
     try {
-      return SecureStore.setItemAsync(key, value);
+      return await secureStorage.setItem(key, value);
     } catch (err) {
       console.error('Error saving token to secure store:', err);
     }
@@ -55,7 +55,7 @@ const tokenCache: TokenCache = {
    */
   async deleteToken(key: string) {
     try {
-      return SecureStore.deleteItemAsync(key);
+      return await secureStorage.removeItem(key);
     } catch (err) {
       console.error('Error deleting token from secure store:', err);
     }

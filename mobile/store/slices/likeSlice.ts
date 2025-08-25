@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import * as SecureStore from 'expo-secure-store';
+import { secureStorage } from '@/utils/storage';
 import { Like, Match } from '@/types';
 import { LIKE_SYSTEM } from '@/utils/constants';
 import { useAuthStore } from './authSlice';
@@ -144,10 +144,10 @@ interface LikeStore extends LikeState {
 
 /**
  * SecureStore를 위한 커스텀 스토리지 어댑터
- * @constant secureStorage
+ * @constant secureStorageAdapter
  * @description Expo SecureStore를 Zustand persist 미들웨어와 호환되도록 래핑
  */
-const secureStorage = {
+const secureStorageAdapter = {
   /**
    * 안전한 저장소에서 값 가져오기
    * @async
@@ -156,7 +156,7 @@ const secureStorage = {
    */
   getItem: async (name: string): Promise<string | null> => {
     try {
-      return await SecureStore.getItemAsync(name);
+      return await secureStorage.getItem(name);
     } catch (error) {
       console.error('SecureStore getItem error:', error);
       return null;
@@ -171,7 +171,7 @@ const secureStorage = {
    */
   setItem: async (name: string, value: string): Promise<void> => {
     try {
-      await SecureStore.setItemAsync(name, value);
+      await secureStorage.setItem(name, value);
     } catch (error) {
       console.error('SecureStore setItem error:', error);
     }
@@ -184,7 +184,7 @@ const secureStorage = {
    */
   removeItem: async (name: string): Promise<void> => {
     try {
-      await SecureStore.deleteItemAsync(name);
+      await secureStorage.removeItem(name);
     } catch (error) {
       console.error('SecureStore removeItem error:', error);
     }
@@ -1118,7 +1118,7 @@ export const useLikeStore = create<LikeStore>()(
       /** 저장소 키 이름 */
       name: 'like-storage',
       /** SecureStore를 사용하는 커스텀 저장소 */
-      storage: createJSONStorage(() => secureStorage),
+      storage: createJSONStorage(() => secureStorageAdapter),
       /**
        * 영속화할 상태 선택
        * @description 일일 한도, 프리미엄 상태 등 민감하지 않은 데이터만 저장

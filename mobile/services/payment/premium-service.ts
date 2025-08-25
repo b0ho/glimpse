@@ -4,7 +4,7 @@
  * @description Clerk + Stripe 통합을 통한 프리미엄 기능 및 결제 관리
  */
 
-import * as SecureStore from 'expo-secure-store';
+import { secureStorage } from '@/utils/storage';
 
 // React Native global fetch
 declare const fetch: typeof globalThis.fetch;
@@ -470,7 +470,7 @@ class PremiumService {
    */
   private async getAuthToken(): Promise<string> {
     try {
-      const token = await SecureStore.getItemAsync('clerk_token');
+      const token = await secureStorage.getItem('clerk_token');
       if (!token) {
         throw new Error('No auth token found');
       }

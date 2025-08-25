@@ -16,7 +16,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+// BarCodeScanner를 조건부로 import (Expo Go 호환성)
+let BarCodeScanner: any = null;
+try {
+  const barcodeScannerModule = require('expo-barcode-scanner');
+  BarCodeScanner = barcodeScannerModule.BarCodeScanner;
+} catch (error) {
+  console.warn('BarCodeScanner not available in this environment');
+}
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 import { locationService } from '../services/locationService';
 // ContentItem 대신 직접 렌더링
@@ -89,9 +96,11 @@ const LocationGroupScreen = () => {
       }
 
       // 카메라 권한 확인 (QR 스캔용)
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      if (status !== 'granted') {
-        console.log(t('permissions.cameraRequired'));
+      if (BarCodeScanner) {
+        const { status } = await BarCodeScanner.requestPermissionsAsync();
+        if (status !== 'granted') {
+          console.log(t('permissions.cameraRequired'));
+        }
       }
     } catch (error) {
       console.error(t('errors.permissionError'), error);
@@ -333,15 +342,25 @@ const LocationGroupScreen = () => {
             <View style={{ width: 28 }} />
           </View>
           
-          <BarCodeScanner
-            onBarCodeScanned={scanning ? handleBarCodeScanned : undefined}
-            style={StyleSheet.absoluteFillObject}
-          />
-          
-          <View style={styles.scanOverlay}>
-            <View style={styles.scanFrame} />
-            <Text style={[styles.scanText, { color: colors.TEXT.WHITE }]}>{t('qr.instruction')}</Text>
-          </View>
+          {BarCodeScanner ? (
+            <>
+              <BarCodeScanner
+                onBarCodeScanned={scanning ? handleBarCodeScanned : undefined}
+                style={StyleSheet.absoluteFillObject}
+              />
+              
+              <View style={styles.scanOverlay}>
+                <View style={styles.scanFrame} />
+                <Text style={[styles.scanText, { color: colors.TEXT.WHITE }]}>{t('qr.instruction')}</Text>
+              </View>
+            </>
+          ) : (
+            <View style={styles.scanOverlay}>
+              <Text style={[styles.scanText, { color: colors.TEXT.WHITE }]}>
+                카메라를 사용할 수 없습니다
+              </Text>
+            </View>
+          )}
         </View>
       </Modal>
 

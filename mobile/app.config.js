@@ -114,5 +114,8 @@ export default {
     experiments: {
       typedRoutes: true,
     },
+    
+    // New Architecture 설정 (Expo Go와 호환성을 위해 명시적으로 활성화)
+    newArchEnabled: true,
   },
 };

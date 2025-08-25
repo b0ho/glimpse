@@ -90,6 +90,71 @@ glimpse/
 | **Korean Services** | Kakao Maps, Naver OCR |
 | **Independent Packages** | Each package has own types & utilities |
 
+## 🌍 Cross-Platform Compatibility (CRITICAL)
+
+### Platform Requirements
+**MANDATORY**: All features MUST work on Web, iOS, and Android platforms without exceptions.
+
+### Core Principles
+1. **Universal Functionality**: Every feature must be implemented for all three platforms
+2. **Platform Detection**: Always use `Platform.OS` or `Platform.select()` for platform-specific code
+3. **Graceful Degradation**: If a native feature isn't available on web, provide alternative implementation
+4. **No Platform Exclusivity**: Never implement features that only work on one platform
+
+### Platform-Specific Implementations
+
+#### Storage
+```javascript
+// ❌ WRONG - Breaks on web
+import * as SecureStore from 'expo-secure-store';
+await SecureStore.setItemAsync('key', 'value');
+
+// ✅ CORRECT - Works everywhere
+import { secureStorage } from '@/utils/storage';
+await secureStorage.setItem('key', 'value');
+```
+
+#### Styling
+```javascript
+// ❌ WRONG - Platform-specific shadows
+shadowColor: '#000',
+shadowOffset: { width: 0, height: 2 }
+
+// ✅ CORRECT - Cross-platform shadows
+...Platform.select({
+  ios: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 }
+  },
+  android: {
+    elevation: 4
+  },
+  web: {
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.1)'
+  }
+})
+```
+
+#### Native APIs
+- **Camera**: Web uses file input, native uses expo-camera
+- **Location**: Web uses Geolocation API, native uses expo-location
+- **Notifications**: Web uses Web Push API, native uses expo-notifications
+- **Storage**: Web uses localStorage/sessionStorage, native uses AsyncStorage/SecureStore
+
+### Testing Requirements
+Before ANY commit:
+1. Test on Web (Chrome/Safari/Firefox)
+2. Test on iOS Simulator
+3. Test on Android Emulator
+4. Verify no platform-specific errors in console
+
+### Common Pitfalls to Avoid
+- Using SecureStore directly without web fallback
+- Platform-specific styling without fallbacks
+- Native-only navigation patterns
+- File system operations without web alternatives
+- Assuming native capabilities on web
+
 ## 💰 Business Model
 
 ### Pricing (Korean Market)

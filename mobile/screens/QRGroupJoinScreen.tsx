@@ -10,7 +10,14 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+// BarCodeScanner를 조건부로 import (Expo Go 호환성)
+let BarCodeScanner: any = null;
+try {
+  const barcodeScannerModule = require('expo-barcode-scanner');
+  BarCodeScanner = barcodeScannerModule.BarCodeScanner;
+} catch (error) {
+  console.warn('BarCodeScanner not available in this environment');
+}
 import Icon from 'react-native-vector-icons/Ionicons';
 import QRCode from 'react-native-qrcode-svg';
 import { useGroupStore } from '@/store/slices/groupSlice';
@@ -44,8 +51,12 @@ export const QRGroupJoinScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
+      if (BarCodeScanner) {
+        const { status } = await BarCodeScanner.requestPermissionsAsync();
+        setHasPermission(status === 'granted');
+      } else {
+        setHasPermission(false);
+      }
     })();
 
     // 그룹 ID가 있으면 생성 모드로 시작
@@ -225,16 +236,27 @@ export const QRGroupJoinScreen = () => {
           </Text>
 
           <View style={styles.cameraContainer}>
-            <BarCodeScanner
-              onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-              style={styles.camera}
-            />
-            <View style={styles.scanOverlay}>
-              <View style={styles.scanFrame} />
-              <Text style={styles.scanText}>
-                QR 코드를 프레임 안에 맞춰주세요
-              </Text>
-            </View>
+            {BarCodeScanner ? (
+              <>
+                <BarCodeScanner
+                  onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+                  style={styles.camera}
+                />
+                <View style={styles.scanOverlay}>
+                  <View style={styles.scanFrame} />
+                  <Text style={styles.scanText}>
+                    QR 코드를 프레임 안에 맞춰주세요
+                  </Text>
+                </View>
+              </>
+            ) : (
+              <View style={styles.unavailableContainer}>
+                <Icon name="camera-off" size={48} color={COLORS.TEXT.SECONDARY} />
+                <Text style={styles.unavailableText}>
+                  카메라를 사용할 수 없습니다
+                </Text>
+              </View>
+            )}
           </View>
 
           {scanned && (
