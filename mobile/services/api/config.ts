@@ -6,14 +6,24 @@ import { Platform } from 'react-native';
  */
 // 환경 감지: Vercel 환경에서는 production으로 간주
 const isProduction = process.env.NODE_ENV === 'production' || 
-                     (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.hostname?.includes('.vercel.app')) ||
-                     (Platform.OS === 'web' && typeof window !== 'undefined' && !window.location?.hostname?.includes('localhost'));
+                     (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.hostname?.includes('.vercel.app'));
 
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 
-  process.env.API_URL || 
-  (isProduction
-    ? 'https://glimpse-server.up.railway.app/api/v1' 
-    : 'http://localhost:3001/api/v1');
+// Web에서는 localhost 사용, Native에서는 IP 주소 사용
+const getBaseURL = () => {
+  if (isProduction) {
+    return 'https://glimpse-server.up.railway.app/api/v1';
+  }
+  
+  // Web 환경에서는 항상 localhost 사용
+  if (Platform.OS === 'web') {
+    return 'http://localhost:3001/api/v1';
+  }
+  
+  // Native 환경에서는 .env 설정 사용
+  return process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3001/api/v1';
+};
+
+export const API_BASE_URL = getBaseURL();
 
 // 디버깅용 로그
 console.log('[API Config] Environment Detection:', {
@@ -29,11 +39,21 @@ console.log('[API Config] Environment Detection:', {
  * WebSocket URL
  * @constant {string}
  */
-export const SOCKET_URL = process.env.EXPO_PUBLIC_WEBSOCKET_URL || 
-  process.env.WEBSOCKET_URL || 
-  (isProduction
-    ? 'wss://glimpse-server.up.railway.app'
-    : 'ws://localhost:3002');
+const getSocketURL = () => {
+  if (isProduction) {
+    return 'wss://glimpse-server.up.railway.app';
+  }
+  
+  // Web 환경에서는 항상 localhost 사용
+  if (Platform.OS === 'web') {
+    return 'ws://localhost:3001';
+  }
+  
+  // Native 환경에서는 .env 설정 사용
+  return process.env.EXPO_PUBLIC_WEBSOCKET_URL || 'ws://localhost:3001';
+};
+
+export const SOCKET_URL = getSocketURL();
 
 /**
  * Development Auth Token

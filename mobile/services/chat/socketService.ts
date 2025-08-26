@@ -325,7 +325,7 @@ class SocketService {
     // Send heartbeat every 30 seconds
     this.heartbeatInterval = setInterval(() => {
       if (this.socket?.connected) {
-        this.socket.emit('ping');
+        this.socket.emit('common:ping');
         
         // Check if we haven't received a pong in 60 seconds
         if (Date.now() - this.connectionState.lastHeartbeat > 60000) {

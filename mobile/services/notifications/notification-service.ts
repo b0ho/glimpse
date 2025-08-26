@@ -3,6 +3,7 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { NOTIFICATION_CONFIG } from '@/utils/constants/index';
+import i18n from '../i18n';
 
 /**
  * 알림 데이터 인터페이스
@@ -210,8 +211,8 @@ class NotificationService {
     await this.schedulePushNotification({
       type: 'new_match',
       matchId,
-      title: '🎉 새로운 매치!',
-      body: `${userName}님과 서로 좋아요를 눌렀어요! 지금 대화를 시작해보세요.`,
+      title: i18n.t('notification:match.new.title'),
+      body: i18n.t('notification:match.new.body', { userName }),
     });
   }
 
@@ -247,8 +248,8 @@ class NotificationService {
     await this.schedulePushNotification({
       type: 'like_received',
       userId,
-      title: '💖 누군가 당신을 좋아해요!',
-      body: '프로필을 확인하고 매치를 만들어보세요.',
+      title: i18n.t('notification:like.received.title'),
+      body: i18n.t('notification:like.received.body'),
     });
   }
 
@@ -264,8 +265,8 @@ class NotificationService {
     await this.schedulePushNotification({
       type: 'super_like',
       userId,
-      title: '⭐ 슈퍼 좋아요!',
-      body: `${userName}님이 당신에게 슈퍼 좋아요를 보냈어요!`,
+      title: i18n.t('notification:superLike.sent.title'),
+      body: i18n.t('notification:superLike.sent.body', { userName }),
     });
   }
 
@@ -281,8 +282,8 @@ class NotificationService {
     await this.schedulePushNotification({
       type: 'super_like',
       userId: likeId,
-      title: '⭐ 슈퍼 좋아요!',
-      body: `${userName}님이 당신에게 슈퍼 좋아요를 보냈어요! 즉시 확인해보세요.`,
+      title: i18n.t('notification:superLike.received.title'),
+      body: i18n.t('notification:superLike.received.body', { userName }),
     });
   }
 
@@ -298,8 +299,8 @@ class NotificationService {
     await this.schedulePushNotification({
       type: 'new_match',
       matchId,
-      title: '🌟 슈퍼 매치!',
-      body: `⭐ ${userName}님과 슈퍼 매치가 성사되었어요! 특별한 대화를 시작해보세요.`,
+      title: i18n.t('notification:match.super.title'),
+      body: i18n.t('notification:match.super.body', { userName }),
     });
   }
 
@@ -315,8 +316,8 @@ class NotificationService {
     await this.schedulePushNotification({
       type: 'group_invite',
       groupId,
-      title: '👥 그룹 초대',
-      body: `${groupName} 그룹에 초대되었습니다.`,
+      title: i18n.t('notification:group.invite.title'),
+      body: i18n.t('notification:group.invite.body', { groupName }),
     });
   }
 

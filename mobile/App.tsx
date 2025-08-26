@@ -4,7 +4,7 @@ import { ClerkProvider } from '@clerk/clerk-expo';
 import { Platform, ActivityIndicator, View, Text } from 'react-native';
 import RootNavigator from './navigation/AppNavigator';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { initI18n } from './services/i18n/i18n';
+import { initI18n, ensureI18nReady } from './services/i18n/i18n';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './services/i18n/i18n';
 import { useIsDark, useColors } from './hooks/useTheme';
@@ -80,19 +80,52 @@ const tokenCache = {
 
 export default function App() {
   const [isI18nInitialized, setIsI18nInitialized] = useState(false);
+  const [initAttempts, setInitAttempts] = useState(0);
 
   useEffect(() => {
-    // Initialize i18n
-    initI18n()
-      .then(() => {
+    // Android-specific: More robust i18n initialization
+    const initializeI18n = async () => {
+      try {
+        console.log(`[App] Initializing i18n... (Platform: ${Platform.OS})`);
+        
+        // Initialize i18n with retry logic for Android
+        await initI18n();
+        
+        // Android-specific: Ensure i18n is fully ready
+        if (Platform.OS === 'android') {
+          await ensureI18nReady();
+          
+          // Force a longer delay on Android to ensure translations are loaded
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          // Verify i18n is working
+          const testTranslation = i18n.t('navigation:tabs.home');
+          console.log('[App] Android i18n test:', testTranslation);
+          
+          if (testTranslation === 'navigation:tabs.home' || testTranslation === 'tabs.home') {
+            console.warn('[App] Android i18n not fully ready, waiting more...');
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
+        
+        console.log('[App] i18n initialized successfully');
         setIsI18nInitialized(true);
-      })
-      .catch((error) => {
-        console.error('Failed to initialize i18n:', error);
-        // Even if i18n fails, continue loading the app
-        setIsI18nInitialized(true);
-      });
-  }, []);
+      } catch (error) {
+        console.error('[App] Failed to initialize i18n:', error);
+        
+        // Android-specific: Retry initialization
+        if (Platform.OS === 'android' && initAttempts < 5) {
+          setInitAttempts(prev => prev + 1);
+          setTimeout(() => initializeI18n(), 1000);
+        } else {
+          // Even if i18n fails, continue loading the app with fallbacks
+          setIsI18nInitialized(true);
+        }
+      }
+    };
+    
+    initializeI18n();
+  }, [initAttempts]);
 
   // 웹 환경 체크
   if (Platform.OS === 'web') {

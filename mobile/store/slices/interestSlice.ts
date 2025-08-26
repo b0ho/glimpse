@@ -66,16 +66,27 @@ export const useInterestStore = create<InterestState>()(
             `/interest/searches${params.toString() ? `?${params.toString()}` : ''}`
           );
 
-          if (response.success) {
+          console.log('[interestSlice] fetchSearches response:', response);
+
+          // API 응답 형식 체크
+          if (Array.isArray(response)) {
+            console.log('[interestSlice] Response is array, setting searches:', response);
+            set({ searches: response, loading: false });
+          } else if (response && response.success) {
+            set({ searches: response.data || [], loading: false });
+          } else if (response && response.data) {
             set({ searches: response.data, loading: false });
           } else {
-            throw new Error(response.message || '검색 목록을 불러오는데 실패했습니다');
+            console.warn('Unexpected response format:', response);
+            set({ searches: [], loading: false });
           }
         } catch (error: any) {
-          console.error('Failed to fetch searches:', error);
+          console.error('[interestSlice] Failed to fetch searches:', error);
+          // 에러를 state에 저장하지 않고 빈 배열로 처리
           set({
-            error: error.response?.data?.message || error.message || '검색 목록 조회 실패',
+            searches: [],
             loading: false,
+            error: null,
           });
         }
       },
@@ -89,16 +100,27 @@ export const useInterestStore = create<InterestState>()(
 
           const response = await apiClient.get('/interest/matches');
 
-          if (response.success) {
+          console.log('[interestSlice] fetchMatches response:', response);
+
+          // API 응답 형식 체크
+          if (Array.isArray(response)) {
+            console.log('[interestSlice] Response is array, setting matches:', response);
+            set({ matches: response, loading: false });
+          } else if (response && response.success) {
+            set({ matches: response.data || [], loading: false });
+          } else if (response && response.data) {
             set({ matches: response.data, loading: false });
           } else {
-            throw new Error(response.message || '매칭 목록을 불러오는데 실패했습니다');
+            console.warn('Unexpected matches response format:', response);
+            set({ matches: [], loading: false });
           }
         } catch (error: any) {
-          console.error('Failed to fetch matches:', error);
+          console.error('[interestSlice] Failed to fetch matches:', error);
+          // 에러를 state에 저장하지 않고 빈 배열로 처리
           set({
-            error: error.response?.data?.message || error.message || '매칭 목록 조회 실패',
+            matches: [],
             loading: false,
+            error: null,
           });
         }
       },
