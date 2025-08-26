@@ -1,0 +1,121 @@
+{
+  "title": "관심상대 등록",
+  "selectType": "검색 유형 선택",
+  "inputInfo": "검색 정보 입력",
+  "validDuration": "검색 유효 기간",
+  "types": {
+    "phone": "전화번호",
+    "email": "이메일", 
+    "socialId": "소셜 계정",
+    "name": "이름",
+    "group": "특정 그룹",
+    "location": "장소",
+    "appearance": "인상착의",
+    "nickname": "닉네임",
+    "company": "회사",
+    "school": "학교",
+    "hobby": "취미/관심사",
+    "platform": "기타 플랫폼",
+    "gameId": "게임"
+  },
+  "placeholders": {
+    "phone": "전화번호를 입력하세요 (예: 010-1234-5678)",
+    "email": "이메일을 입력하세요",
+    "socialPlatform": "소셜 플랫폼을 선택하세요",
+    "socialId": "소셜 계정 ID를 입력하세요 (@제외)",
+    "kakaoId": "카카오톡 ID를 입력하세요",
+    "name": "이름을 입력하세요 (성명)",
+    "appearance": "인상착의를 자세히 설명해주세요\n예: 검은색 코트, 빨간 가방, 안경 착용",
+    "company": "회사명을 입력하세요",
+    "school": "학교명을 입력하세요",
+    "location": "장소를 입력하세요 (예: 강남역 스타벅스)",
+    "group": "그룹 ID 또는 이름을 입력하세요",
+    "nickname": "닉네임 일부를 입력하세요",
+    "hobby": "취미/관심사를 입력하세요 (예: 등산, 독서, 요리)",
+    "platformName": "플랫폼명을 입력하세요 (예: Discord, Slack, LinkedIn)",
+    "platformId": "플랫폼에서 사용하는 아이디를 입력하세요",
+    "gameName": "게임명을 입력하세요 (예: 리그 오브 레전드, 배틀그라운드)",
+    "gameId": "게임 내 아이디를 입력하세요",
+    "nameOptional": "이름을 입력하세요 (선택사항)",
+    "employeeName": "이름 (예: 김민수)",
+    "department": "부서명 (예: 마케팅팀, 개발1팀)",
+    "studentName": "이름 (예: 이지은)",
+    "major": "학과명 (예: 컴퓨터공학과, 경영학과)",
+    "birthdate": "YYYY-MM-DD (예: 1995-03-15)",
+    "birthdateCompany": "생년월일 YYYY-MM-DD (예: 1995-03-15)",
+    "birthdateSchool": "생년월일 YYYY-MM-DD (예: 2000-05-20)",
+    "personaNickname": "페르소나 닉네임",
+    "personaAge": "나이 (선택)",
+    "personaBio": "페르소나 자기소개 (선택)"
+  },
+  "buttons": {
+    "selectFromContacts": "연락처에서 선택",
+    "selectFromMap": "지도에서 선택",
+    "register": "관심상대 등록",
+    "registering": "등록 중...",
+    "cancel": "취소",
+    "save": "저장",
+    "edit": "편집",
+    "upgrade": "업그레이드"
+  },
+  "labels": {
+    "socialPlatform": "소셜 플랫폼 선택",
+    "required": "*",
+    "platformName": "플랫폼명",
+    "platformId": "플랫폼 아이디",
+    "gameName": "게임명",
+    "gameId": "게임 아이디",
+    "nameOptional": "이름 (선택)",
+    "birthdateOptional": "생년월일 (선택)",
+    "employeeInfo": "직원 정보 (선택)",
+    "studentInfo": "학생 정보 (선택)"
+  },
+  "options": {
+    "addBirthdate": "생일 추가 (동명이인 구분)",
+    "addDetails": "상세 정보 추가 (이름, 부서, 생일)",
+    "addDetailsSchool": "상세 정보 추가 (이름, 학과, 생일)"
+  },
+  "hints": {
+    "groupMatch": "같은 그룹에 있는 사람끼리 매칭됩니다",
+    "nicknameLength": "최소 2글자 이상 입력하세요",
+    "hobbyComma": "콤마로 구분하여 여러 개 입력 가능합니다",
+    "platformDescription": "Discord, Slack, LinkedIn 등 다양한 플랫폼 정보를 등록할 수 있습니다",
+    "gameDescription": "게임 내에서 사용하는 닉네임이나 아이디를 입력해주세요",
+    "nameDescription": "매칭 시 상대방이 확인할 수 있는 이름입니다",
+    "birthdateDescription": "동명이인이 많은 경우 정확한 매칭을 위해 사용됩니다",
+    "employeeDescription": "더 정확한 매칭을 위해 사용되며, 모든 정보는 익명으로 보호됩니다",
+    "studentDescription": "더 정확한 매칭을 위해 사용되며, 모든 정보는 익명으로 보호됩니다"
+  },
+  "errors": {
+    "selectType": "검색 유형을 선택해주세요",
+    "enterValue": "검색 값을 입력해주세요",
+    "selectPlatform": "소셜 플랫폼을 먼저 선택해주세요",
+    "enterPlatformName": "플랫폼명을 입력해주세요",
+    "enterGameName": "게임명을 입력해주세요",
+    "registrationError": "등록 중 오류가 발생했습니다"
+  },
+  "alerts": {
+    "contactsNotReady": "연락처 연동 기능은 준비 중입니다.",
+    "limitTitle": "등록 제한",
+    "basicLimitMessage": "일반 사용자는 전화번호, 이메일, 소셜계정만 등록 가능합니다.\n더 많은 유형을 사용하려면 구독하세요!",
+    "basicCountMessage": "일반 사용자는 최대 3개까지만 등록 가능합니다.\n더 많이 등록하려면 구독하세요!",
+    "basicTypeMessage": "일반 사용자는 각 유형별로 1개씩만 등록 가능합니다.",
+    "advancedLimitMessage": "고급 구독자는 각 유형별로 1개씩만 등록 가능합니다.\n프리미엄으로 업그레이드하여 무제한 등록하세요!",
+    "subscribeButton": "구독하기",
+    "upgradeButton": "업그레이드",
+    "confirm": "확인"
+  },
+  "subscription": {
+    "basic": "일반: 3일",
+    "advanced": "고급: 2주", 
+    "premium": "프리미엄: 무제한",
+    "duration3Days": "3일",
+    "duration2Weeks": "2주",
+    "durationUnlimited": "무제한"
+  },
+  "expiryDate": "만료일: {{date}}",
+  "info": {
+    "title": "매칭률을 높이는 방법",
+    "content": "• 정확한 정보를 입력해주세요\n• 특히 전화번호, 이메일은 정확해야 매칭됩니다\n• 등록한 조건과 일치하는 사용자가 있으면 자동 매칭됩니다\n• 매칭 전까지 모든 정보는 익명으로 보호됩니다"
+  }
+}

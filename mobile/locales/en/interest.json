@@ -1,0 +1,121 @@
+{
+  "title": "Register Person of Interest",
+  "selectType": "Select Search Type",
+  "inputInfo": "Enter Search Information",
+  "validDuration": "Search Valid Period",
+  "types": {
+    "phone": "Phone Number",
+    "email": "Email", 
+    "socialId": "Social Account",
+    "name": "Name",
+    "group": "Specific Group",
+    "location": "Location",
+    "appearance": "Appearance",
+    "nickname": "Nickname",
+    "company": "Company",
+    "school": "School",
+    "hobby": "Hobbies/Interests",
+    "platform": "Other Platform",
+    "gameId": "Game"
+  },
+  "placeholders": {
+    "phone": "Enter phone number (e.g., 010-1234-5678)",
+    "email": "Enter email address",
+    "socialPlatform": "Select social platform",
+    "socialId": "Enter social account ID (without @)",
+    "kakaoId": "Enter KakaoTalk ID",
+    "name": "Enter full name",
+    "appearance": "Describe appearance in detail\ne.g., Black coat, red bag, wearing glasses",
+    "company": "Enter company name",
+    "school": "Enter school name",
+    "location": "Enter location (e.g., Gangnam Station Starbucks)",
+    "group": "Enter group ID or name",
+    "nickname": "Enter part of nickname",
+    "hobby": "Enter hobbies/interests (e.g., hiking, reading, cooking)",
+    "platformName": "Enter platform name (e.g., Discord, Slack, LinkedIn)",
+    "platformId": "Enter platform ID",
+    "gameName": "Enter game name (e.g., League of Legends, PUBG)",
+    "gameId": "Enter in-game ID",
+    "nameOptional": "Enter name (optional)",
+    "employeeName": "Name (e.g., John Smith)",
+    "department": "Department (e.g., Marketing Team, Dev Team 1)",
+    "studentName": "Name (e.g., Jane Doe)",
+    "major": "Major (e.g., Computer Science, Business)",
+    "birthdate": "YYYY-MM-DD (e.g., 1995-03-15)",
+    "birthdateCompany": "Birthdate YYYY-MM-DD (e.g., 1995-03-15)",
+    "birthdateSchool": "Birthdate YYYY-MM-DD (e.g., 2000-05-20)",
+    "personaNickname": "Persona nickname",
+    "personaAge": "Age (optional)",
+    "personaBio": "Persona bio (optional)"
+  },
+  "buttons": {
+    "selectFromContacts": "Select from Contacts",
+    "selectFromMap": "Select from Map",
+    "register": "Register Person of Interest",
+    "registering": "Registering...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "upgrade": "Upgrade"
+  },
+  "labels": {
+    "socialPlatform": "Select Social Platform",
+    "required": "*",
+    "platformName": "Platform Name",
+    "platformId": "Platform ID",
+    "gameName": "Game Name",
+    "gameId": "Game ID",
+    "nameOptional": "Name (Optional)",
+    "birthdateOptional": "Birthdate (Optional)",
+    "employeeInfo": "Employee Info (Optional)",
+    "studentInfo": "Student Info (Optional)"
+  },
+  "options": {
+    "addBirthdate": "Add birthdate (distinguish same names)",
+    "addDetails": "Add details (name, department, birthdate)",
+    "addDetailsSchool": "Add details (name, major, birthdate)"
+  },
+  "hints": {
+    "groupMatch": "People in the same group will be matched",
+    "nicknameLength": "Enter at least 2 characters",
+    "hobbyComma": "Multiple entries can be separated by commas",
+    "platformDescription": "You can register various platform information like Discord, Slack, LinkedIn",
+    "gameDescription": "Enter the nickname or ID used in the game",
+    "nameDescription": "This is the name that will be visible to the other party when matched",
+    "birthdateDescription": "Used for accurate matching when there are many people with the same name",
+    "employeeDescription": "Used for more accurate matching, all information is protected anonymously",
+    "studentDescription": "Used for more accurate matching, all information is protected anonymously"
+  },
+  "errors": {
+    "selectType": "Please select a search type",
+    "enterValue": "Please enter a search value",
+    "selectPlatform": "Please select a social platform first",
+    "enterPlatformName": "Please enter platform name",
+    "enterGameName": "Please enter game name",
+    "registrationError": "An error occurred during registration"
+  },
+  "alerts": {
+    "contactsNotReady": "Contact integration feature is in preparation.",
+    "limitTitle": "Registration Limit",
+    "basicLimitMessage": "Basic users can only register phone numbers, emails, and social accounts.\nSubscribe to use more types!",
+    "basicCountMessage": "Basic users can register up to 3 items.\nSubscribe to register more!",
+    "basicTypeMessage": "Basic users can register only one item per type.",
+    "advancedLimitMessage": "Advanced subscribers can register only one item per type.\nUpgrade to Premium for unlimited registration!",
+    "subscribeButton": "Subscribe",
+    "upgradeButton": "Upgrade",
+    "confirm": "OK"
+  },
+  "subscription": {
+    "basic": "Basic: 3 days",
+    "advanced": "Advanced: 2 weeks", 
+    "premium": "Premium: Unlimited",
+    "duration3Days": "3 days",
+    "duration2Weeks": "2 weeks",
+    "durationUnlimited": "Unlimited"
+  },
+  "expiryDate": "Expires: {{date}}",
+  "info": {
+    "title": "How to Increase Matching Rate",
+    "content": "• Enter accurate information\n• Phone numbers and emails especially need to be accurate for matching\n• Automatic matching occurs when users matching your criteria are found\n• All information is protected anonymously until matching"
+  }
+}

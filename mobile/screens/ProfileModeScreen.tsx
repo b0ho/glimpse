@@ -17,6 +17,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { API_BASE_URL } from '@/services/api/config';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface PersonaProfile {
   nickname?: string;
@@ -29,6 +30,7 @@ export const ProfileModeScreen = React.memo(() => {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { user, updateUser } = useAuthStore();
+  const { t } = useAndroidSafeTranslation();
   
   const [profileMode, setProfileMode] = useState<'real' | 'persona'>('real');
   const [personaProfile, setPersonaProfile] = useState<PersonaProfile>({});
@@ -96,15 +98,15 @@ export const ProfileModeScreen = React.memo(() => {
       if (response.ok) {
         setProfileMode(mode);
         Alert.alert(
-          '프로필 모드 변경',
+          t('profilemode:alerts.modeChanged'),
           mode === 'real' 
-            ? '실제 프로필로 변경되었습니다.' 
-            : '페르소나 프로필로 변경되었습니다.'
+            ? t('profilemode:alerts.realModeMessage')
+            : t('profilemode:alerts.personaModeMessage')
         );
       }
     } catch (error) {
       console.error('Change profile mode error:', error);
-      Alert.alert('오류', '프로필 모드 변경에 실패했습니다.');
+      Alert.alert(t('profilemode:alerts.error'), t('profilemode:alerts.modeChangeError'));
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +114,7 @@ export const ProfileModeScreen = React.memo(() => {
 
   const handleSavePersona = async () => {
     if (!personaProfile.nickname) {
-      Alert.alert('알림', '페르소나 닉네임을 입력해주세요.');
+      Alert.alert(t('profilemode:alerts.enterNickname'), t('profilemode:alerts.enterNickname'));
       return;
     }
 
@@ -135,11 +137,11 @@ export const ProfileModeScreen = React.memo(() => {
 
       if (response.ok) {
         setIsEditing(false);
-        Alert.alert('성공', '페르소나 프로필이 저장되었습니다.');
+        Alert.alert(t('profilemode:alerts.success'), t('profilemode:alerts.personaSaved'));
       }
     } catch (error) {
       console.error('Save persona error:', error);
-      Alert.alert('오류', '페르소나 프로필 저장에 실패했습니다.');
+      Alert.alert(t('profilemode:alerts.error'), t('profilemode:alerts.personaSaveError'));
     } finally {
       setIsLoading(false);
     }
@@ -164,7 +166,7 @@ export const ProfileModeScreen = React.memo(() => {
         >
           <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>프로필 모드 설정</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('profilemode:title')}</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -173,10 +175,10 @@ export const ProfileModeScreen = React.memo(() => {
           {/* 모드 선택 섹션 */}
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-              프로필 표시 모드
+              {t('profilemode:profileDisplayMode')}
             </Text>
             <Text style={[styles.sectionDescription, { color: colors.TEXT.SECONDARY }]}>
-              근처 사용자에게 표시될 프로필을 선택하세요
+              {t('profilemode:selectProfileDescription')}
             </Text>
 
             <TouchableOpacity
@@ -199,10 +201,10 @@ export const ProfileModeScreen = React.memo(() => {
                 />
                 <View style={styles.modeCardInfo}>
                   <Text style={[styles.modeCardTitle, { color: colors.TEXT.PRIMARY }]}>
-                    실제 프로필
+                    {t('profilemode:realProfile.title')}
                   </Text>
                   <Text style={[styles.modeCardDescription, { color: colors.TEXT.SECONDARY }]}>
-                    내 실제 정보를 표시합니다
+                    {t('profilemode:realProfile.description')}
                   </Text>
                 </View>
               </View>
@@ -233,10 +235,10 @@ export const ProfileModeScreen = React.memo(() => {
                 />
                 <View style={styles.modeCardInfo}>
                   <Text style={[styles.modeCardTitle, { color: colors.TEXT.PRIMARY }]}>
-                    페르소나 프로필
+                    {t('profilemode:personaProfile.title')}
                   </Text>
                   <Text style={[styles.modeCardDescription, { color: colors.TEXT.SECONDARY }]}>
-                    가상의 프로필을 표시합니다
+                    {t('profilemode:personaProfile.description')}
                   </Text>
                 </View>
               </View>
@@ -253,7 +255,7 @@ export const ProfileModeScreen = React.memo(() => {
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-                  페르소나 프로필
+                  {t('profilemode:personaProfile.title')}
                 </Text>
                 {!isEditing && (
                   <TouchableOpacity
@@ -262,7 +264,7 @@ export const ProfileModeScreen = React.memo(() => {
                   >
                     <Icon name="pencil" size={16} color={colors.TEXT.WHITE} />
                     <Text style={[styles.editButtonText, { color: colors.TEXT.WHITE }]}>
-                      편집
+                      {t('profilemode:buttons.edit')}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -273,7 +275,7 @@ export const ProfileModeScreen = React.memo(() => {
                   <>
                     <View style={styles.inputGroup}>
                       <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
-                        닉네임
+                        {t('profilemode:labels.nickname')}
                       </Text>
                       <TextInput
                         style={[
@@ -286,14 +288,14 @@ export const ProfileModeScreen = React.memo(() => {
                         ]}
                         value={personaProfile.nickname}
                         onChangeText={(text) => setPersonaProfile({ ...personaProfile, nickname: text })}
-                        placeholder="페르소나 닉네임"
+                        placeholder={t('profilemode:placeholders.nickname')}
                         placeholderTextColor={colors.TEXT.LIGHT}
                       />
                     </View>
 
                     <View style={styles.inputGroup}>
                       <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
-                        나이
+                        {t('profilemode:labels.age')}
                       </Text>
                       <TextInput
                         style={[
@@ -306,7 +308,7 @@ export const ProfileModeScreen = React.memo(() => {
                         ]}
                         value={personaProfile.age?.toString()}
                         onChangeText={(text) => setPersonaProfile({ ...personaProfile, age: parseInt(text) || undefined })}
-                        placeholder="나이 (선택)"
+                        placeholder={t('profilemode:placeholders.age')}
                         placeholderTextColor={colors.TEXT.LIGHT}
                         keyboardType="numeric"
                       />
@@ -314,7 +316,7 @@ export const ProfileModeScreen = React.memo(() => {
 
                     <View style={styles.inputGroup}>
                       <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
-                        자기소개
+                        {t('profilemode:labels.bio')}
                       </Text>
                       <TextInput
                         style={[
@@ -328,7 +330,7 @@ export const ProfileModeScreen = React.memo(() => {
                         ]}
                         value={personaProfile.bio}
                         onChangeText={(text) => setPersonaProfile({ ...personaProfile, bio: text })}
-                        placeholder="페르소나 자기소개 (선택)"
+                        placeholder={t('profilemode:placeholders.bio')}
                         placeholderTextColor={colors.TEXT.LIGHT}
                         multiline
                         numberOfLines={3}
@@ -344,7 +346,7 @@ export const ProfileModeScreen = React.memo(() => {
                         }}
                       >
                         <Text style={[styles.cancelButtonText, { color: colors.TEXT.SECONDARY }]}>
-                          취소
+                          {t('profilemode:buttons.cancel')}
                         </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -356,7 +358,7 @@ export const ProfileModeScreen = React.memo(() => {
                           <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
                         ) : (
                           <Text style={[styles.saveButtonText, { color: colors.TEXT.WHITE }]}>
-                            저장
+                            {t('profilemode:buttons.save')}
                           </Text>
                         )}
                       </TouchableOpacity>
@@ -368,11 +370,11 @@ export const ProfileModeScreen = React.memo(() => {
                       <Icon name="mask" size={32} color={colors.TEXT.WHITE} />
                     </View>
                     <Text style={[styles.personaNickname, { color: colors.TEXT.PRIMARY }]}>
-                      {personaProfile.nickname || '페르소나 미설정'}
+                      {personaProfile.nickname || t('profilemode:personaProfile.notSet')}
                     </Text>
                     {personaProfile.age && (
                       <Text style={[styles.personaAge, { color: colors.TEXT.SECONDARY }]}>
-                        {personaProfile.age}세
+                        {t('profilemode:age', { age: personaProfile.age })}
                       </Text>
                     )}
                     {personaProfile.bio && (
@@ -390,8 +392,7 @@ export const ProfileModeScreen = React.memo(() => {
           <View style={[styles.infoCard, { backgroundColor: colors.INFO + '10' }]}>
             <Icon name="information-circle" size={20} color={colors.INFO} />
             <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
-              프로필 모드는 근처 사용자 기능에서만 적용됩니다. 
-              일반 그룹 활동에서는 항상 실제 프로필이 사용됩니다.
+              {t('profilemode:info.description')}
             </Text>
           </View>
         </View>

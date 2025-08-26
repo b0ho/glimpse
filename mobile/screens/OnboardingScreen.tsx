@@ -11,29 +11,30 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width, height } = Dimensions.get('window');
 
-const onboardingData = [
+const getOnboardingData = (t: any) => [
   {
     id: 1,
-    title: '당신의 이상형을 찾아보세요',
-    description: '익명으로 관심을 표현하고\n서로의 마음이 통할 때만 연결됩니다',
+    title: t('onboarding:steps.0.title'),
+    description: t('onboarding:steps.0.description'),
     icon: 'heart-outline',
     color: '#FF6B6B',
   },
   {
     id: 2,
-    title: '안전한 만남',
-    description: '회사, 학교, 취미 그룹 인증으로\n신뢰할 수 있는 사람들과 만나세요',
+    title: t('onboarding:steps.1.title'),
+    description: t('onboarding:steps.1.description'),
     icon: 'shield-checkmark-outline',
     color: '#4ECDC4',
   },
   {
     id: 3,
-    title: '프라이버시 보호',
-    description: '매칭될 때까지 완벽한 익명성\n당신의 정보는 안전하게 보호됩니다',
+    title: t('onboarding:steps.2.title'),
+    description: t('onboarding:steps.2.description'),
     icon: 'lock-closed-outline',
     color: '#95E1D3',
   },
@@ -42,6 +43,7 @@ const onboardingData = [
 export const OnboardingScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const navigation = useNavigation() as any;
+  const { t } = useAndroidSafeTranslation();
 
   const handleNext = () => {
     if (currentIndex < onboardingData.length - 1) {
@@ -67,13 +69,14 @@ export const OnboardingScreen = () => {
     }
   };
 
+  const onboardingData = getOnboardingData(t);
   const currentData = onboardingData[currentIndex];
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleSkip}>
-          <Text style={styles.skipText}>건너뛰기</Text>
+          <Text style={styles.skipText}>{t('onboarding:skip')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -101,7 +104,7 @@ export const OnboardingScreen = () => {
 
         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
           <Text style={styles.nextButtonText}>
-            {currentIndex === onboardingData.length - 1 ? '시작하기' : '다음'}
+            {currentIndex === onboardingData.length - 1 ? t('onboarding:start') : t('onboarding:next')}
           </Text>
         </TouchableOpacity>
       </View>

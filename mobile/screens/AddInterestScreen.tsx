@@ -18,6 +18,7 @@ import { useInterestStore } from '@/store/slices/interestSlice';
 import { InterestType } from '@/types/interest';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 // import DateTimePicker from '@react-native-community/datetimepicker';
 // import * as Contacts from 'expo-contacts';
 
@@ -29,6 +30,7 @@ export const AddInterestScreen: React.FC = () => {
   const { colors } = useTheme();
   const { createSearch, searches } = useInterestStore();
   const { user, getSubscriptionTier, getSubscriptionFeatures } = useAuthStore();
+  const { t } = useAndroidSafeTranslation();
   
   const subscriptionTier = getSubscriptionTier();
   const features = getSubscriptionFeatures();
@@ -60,21 +62,23 @@ export const AddInterestScreen: React.FC = () => {
     return 'unlimited';
   });
 
-  const interestTypes = [
-    { type: InterestType.PHONE, label: '전화번호', icon: 'call-outline', color: '#4CAF50' },
-    { type: InterestType.EMAIL, label: '이메일', icon: 'mail-outline', color: '#2196F3' },
-    { type: InterestType.SOCIAL_ID, label: '소셜 계정', icon: 'logo-instagram', color: '#E91E63' },
-    { type: InterestType.NAME, label: '이름', icon: 'person-outline', color: '#9C27B0' },
-    { type: InterestType.GROUP, label: '특정 그룹', icon: 'people-outline', color: '#9C27B0' },
-    { type: InterestType.LOCATION, label: '장소', icon: 'location-outline', color: '#FF9800' },
-    { type: InterestType.APPEARANCE, label: '인상착의', icon: 'body-outline', color: '#795548' },
-    { type: InterestType.NICKNAME, label: '닉네임', icon: 'at-outline', color: '#607D8B' },
-    { type: InterestType.COMPANY, label: '회사', icon: 'business-outline', color: '#3F51B5' },
-    { type: InterestType.SCHOOL, label: '학교', icon: 'school-outline', color: '#00BCD4' },
-    { type: InterestType.HOBBY, label: '취미/관심사', icon: 'heart-outline', color: '#F44336' },
-    { type: InterestType.PLATFORM, label: '기타 플랫폼', icon: 'globe-outline', color: '#9C27B0' },
-    { type: InterestType.GAME_ID, label: '게임', icon: 'game-controller-outline', color: '#673AB7' },
+  const getInterestTypes = () => [
+    { type: InterestType.PHONE, label: t('interest:types.phone'), icon: 'call-outline', color: '#4CAF50' },
+    { type: InterestType.EMAIL, label: t('interest:types.email'), icon: 'mail-outline', color: '#2196F3' },
+    { type: InterestType.SOCIAL_ID, label: t('interest:types.socialId'), icon: 'logo-instagram', color: '#E91E63' },
+    { type: InterestType.NAME, label: t('interest:types.name'), icon: 'person-outline', color: '#9C27B0' },
+    { type: InterestType.GROUP, label: t('interest:types.group'), icon: 'people-outline', color: '#9C27B0' },
+    { type: InterestType.LOCATION, label: t('interest:types.location'), icon: 'location-outline', color: '#FF9800' },
+    { type: InterestType.APPEARANCE, label: t('interest:types.appearance'), icon: 'body-outline', color: '#795548' },
+    { type: InterestType.NICKNAME, label: t('interest:types.nickname'), icon: 'at-outline', color: '#607D8B' },
+    { type: InterestType.COMPANY, label: t('interest:types.company'), icon: 'business-outline', color: '#3F51B5' },
+    { type: InterestType.SCHOOL, label: t('interest:types.school'), icon: 'school-outline', color: '#00BCD4' },
+    { type: InterestType.HOBBY, label: t('interest:types.hobby'), icon: 'heart-outline', color: '#F44336' },
+    { type: InterestType.PLATFORM, label: t('interest:types.platform'), icon: 'globe-outline', color: '#9C27B0' },
+    { type: InterestType.GAME_ID, label: t('interest:types.gameId'), icon: 'game-controller-outline', color: '#673AB7' },
   ];
+
+  const interestTypes = getInterestTypes();
 
   // 구독 티어에 따른 제한 확인
   const checkSubscriptionLimits = (type: InterestType): boolean => {
@@ -86,11 +90,11 @@ export const AddInterestScreen: React.FC = () => {
       const sameTypeSearches = searches.filter(s => s.type === type);
       if (sameTypeSearches.length >= 1) {
         Alert.alert(
-          '등록 제한',
-          '고급 구독자는 각 유형별로 1개씩만 등록 가능합니다.\n프리미엄으로 업그레이드하여 무제한 등록하세요!',
+          t('interest:alerts.limitTitle'),
+          t('interest:alerts.advancedLimitMessage'),
           [
-            { text: '확인', style: 'cancel' },
-            { text: '업그레이드', onPress: () => navigation.navigate('Premium' as never) }
+            { text: t('interest:alerts.confirm'), style: 'cancel' },
+            { text: t('interest:alerts.upgradeButton'), onPress: () => navigation.navigate('Premium' as never) }
           ]
         );
         return false;
@@ -116,11 +120,11 @@ export const AddInterestScreen: React.FC = () => {
     ];
     if (!allowedTypes.includes(type)) {
       Alert.alert(
-        '등록 제한',
-        '일반 사용자는 전화번호, 이메일, 소셜계정만 등록 가능합니다.\n더 많은 유형을 사용하려면 구독하세요!',
+        t('interest:alerts.limitTitle'),
+        t('interest:alerts.basicLimitMessage'),
         [
-          { text: '확인', style: 'cancel' },
-          { text: '구독하기', onPress: () => navigation.navigate('Premium' as never) }
+          { text: t('interest:alerts.confirm'), style: 'cancel' },
+          { text: t('interest:alerts.subscribeButton'), onPress: () => navigation.navigate('Premium' as never) }
         ]
       );
       return false;
@@ -128,11 +132,11 @@ export const AddInterestScreen: React.FC = () => {
     
     if (searches.length >= 3) {
       Alert.alert(
-        '등록 제한',
-        '일반 사용자는 최대 3개까지만 등록 가능합니다.\n더 많이 등록하려면 구독하세요!',
+        t('interest:alerts.limitTitle'),
+        t('interest:alerts.basicCountMessage'),
         [
-          { text: '확인', style: 'cancel' },
-          { text: '구독하기', onPress: () => navigation.navigate('Premium' as never) }
+          { text: t('interest:alerts.confirm'), style: 'cancel' },
+          { text: t('interest:alerts.subscribeButton'), onPress: () => navigation.navigate('Premium' as never) }
         ]
       );
       return false;
@@ -141,9 +145,9 @@ export const AddInterestScreen: React.FC = () => {
     const sameTypeSearches = searches.filter(s => s.type === type);
     if (sameTypeSearches.length >= 1) {
       Alert.alert(
-        '등록 제한',
-        '일반 사용자는 각 유형별로 1개씩만 등록 가능합니다.',
-        [{ text: '확인', style: 'cancel' }]
+        t('interest:alerts.limitTitle'),
+        t('interest:alerts.basicTypeMessage'),
+        [{ text: t('interest:alerts.confirm'), style: 'cancel' }]
       );
       return false;
     }
@@ -153,7 +157,7 @@ export const AddInterestScreen: React.FC = () => {
 
   const handleSelectContact = async () => {
     // 연락처 기능은 추후 구현
-    Alert.alert('알림', '연락처 연동 기능은 준비 중입니다.');
+    Alert.alert(t('interest:alerts.limitTitle'), t('interest:alerts.contactsNotReady'));
     // const { status } = await Contacts.requestPermissionsAsync();
     // if (status === 'granted') {
     //   const { data } = await Contacts.getContactsAsync({
@@ -172,30 +176,30 @@ export const AddInterestScreen: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!selectedType) {
-      Alert.alert('오류', '검색 유형을 선택해주세요');
+      Alert.alert(t('interest:errors.selectType'), t('interest:errors.selectType'));
       return;
     }
 
     if (!value.trim()) {
-      Alert.alert('오류', '검색 값을 입력해주세요');
+      Alert.alert(t('interest:errors.enterValue'), t('interest:errors.enterValue'));
       return;
     }
 
     // 소셜 계정 타입일 때 플랫폼 필수 검증
     if (selectedType === InterestType.SOCIAL_ID && !metadata.platform) {
-      Alert.alert('오류', '소셜 플랫폼을 선택해주세요');
+      Alert.alert(t('interest:errors.selectPlatform'), t('interest:errors.selectPlatform'));
       return;
     }
 
     // 기타 플랫폼 타입일 때 플랫폼명 필수 검증
     if (selectedType === InterestType.PLATFORM && !metadata.platformName) {
-      Alert.alert('오류', '플랫폼명을 입력해주세요');
+      Alert.alert(t('interest:errors.enterPlatformName'), t('interest:errors.enterPlatformName'));
       return;
     }
     
     // 게임 타입일 때 게임명 필수 검증
     if (selectedType === InterestType.GAME_ID && !metadata.gameName) {
-      Alert.alert('오류', '게임명을 입력해주세요');
+      Alert.alert(t('interest:errors.enterGameName'), t('interest:errors.enterGameName'));
       return;
     }
 
@@ -239,7 +243,7 @@ export const AddInterestScreen: React.FC = () => {
       // Alert 대신 바로 뒤로 이동
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert('오류', error.message || '등록 중 오류가 발생했습니다');
+      Alert.alert(t('interest:errors.registrationError'), error.message || t('interest:errors.registrationError'));
     } finally {
       setLoading(false);
     }
@@ -254,7 +258,7 @@ export const AddInterestScreen: React.FC = () => {
           <View style={styles.inputContainer}>
             <TextInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-              placeholder="전화번호를 입력하세요 (예: 010-1234-5678)"
+              placeholder={t('interest:placeholders.phone')}
               placeholderTextColor={colors.TEXT.TERTIARY}
               value={value}
               onChangeText={setValue}
@@ -265,7 +269,7 @@ export const AddInterestScreen: React.FC = () => {
               onPress={handleSelectContact}
             >
               <Icon name="person-add-outline" size={20} color="#FFFFFF" />
-              <Text style={styles.contactButtonText}>연락처에서 선택</Text>
+              <Text style={styles.contactButtonText}>{t('interest:buttons.selectFromContacts')}</Text>
             </TouchableOpacity>
           </View>
         );
@@ -275,7 +279,7 @@ export const AddInterestScreen: React.FC = () => {
           <View style={styles.inputContainer}>
             <TextInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-              placeholder="이메일을 입력하세요"
+              placeholder={t('interest:placeholders.email')}
               placeholderTextColor={colors.TEXT.TERTIARY}
               value={value}
               onChangeText={setValue}
@@ -802,7 +806,7 @@ export const AddInterestScreen: React.FC = () => {
               <Icon name="arrow-back" size={28} color={colors.TEXT.PRIMARY} />
             </TouchableOpacity>
             <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>
-              관심상대 등록
+              {t('interest:title')}
             </Text>
             <View style={{ width: 28 }} />
           </View>
@@ -810,7 +814,7 @@ export const AddInterestScreen: React.FC = () => {
           {/* 검색 유형 선택 */}
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-              검색 유형 선택
+              {t('interest:selectType')}
             </Text>
             <View style={styles.typeGrid}>
               {interestTypes.map((item) => (
@@ -842,7 +846,7 @@ export const AddInterestScreen: React.FC = () => {
           {selectedType && (
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-                검색 정보 입력
+                {t('interest:inputInfo')}
               </Text>
               {renderInputField()}
               
@@ -868,7 +872,7 @@ export const AddInterestScreen: React.FC = () => {
           {/* 만료일 설정 */}
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-              검색 유효 기간
+              {t('interest:validDuration')}
             </Text>
             <View style={styles.subscriptionInfo}>
               <Icon 
@@ -885,9 +889,9 @@ export const AddInterestScreen: React.FC = () => {
                 } 
               />
               <Text style={[styles.subscriptionInfoText, { color: colors.TEXT.SECONDARY }]}>
-                {subscriptionTier === SubscriptionTier.BASIC && '일반: 3일'}
-                {subscriptionTier === SubscriptionTier.ADVANCED && '고급: 2주'}
-                {subscriptionTier === SubscriptionTier.PREMIUM && '프리미엄: 무제한'}
+                {subscriptionTier === SubscriptionTier.BASIC && t('interest:subscription.basic')}
+                {subscriptionTier === SubscriptionTier.ADVANCED && t('interest:subscription.advanced')}
+                {subscriptionTier === SubscriptionTier.PREMIUM && t('interest:subscription.premium')}
               </Text>
             </View>
             <View style={styles.durationOptions}>
@@ -900,13 +904,13 @@ export const AddInterestScreen: React.FC = () => {
                   disabled
                 >
                   <Text style={[styles.durationText, { color: colors.PRIMARY }]}>
-                    3일
+                    {t('interest:subscription.duration3Days')}
                   </Text>
                   <TouchableOpacity
                     style={styles.upgradeButton}
                     onPress={() => navigation.navigate('Premium' as never)}
                   >
-                    <Text style={styles.upgradeButtonText}>업그레이드</Text>
+                    <Text style={styles.upgradeButtonText}>{t('interest:buttons.upgrade')}</Text>
                   </TouchableOpacity>
                 </TouchableOpacity>
               )}
@@ -970,7 +974,7 @@ export const AddInterestScreen: React.FC = () => {
             disabled={!selectedType || !value.trim() || loading}
           >
             <Text style={styles.submitButtonText}>
-              {loading ? '등록 중...' : '관심상대 등록'}
+              {loading ? t('interest:buttons.registering') : t('interest:buttons.register')}
             </Text>
           </TouchableOpacity>
 
@@ -979,13 +983,10 @@ export const AddInterestScreen: React.FC = () => {
             <Icon name="information-circle-outline" size={20} color={colors.INFO} />
             <View style={{ flex: 1 }}>
               <Text style={[styles.infoTitle, { color: colors.TEXT.PRIMARY }]}>
-                매칭률을 높이는 방법
+                {t('interest:info.title')}
               </Text>
               <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
-                • 정확한 정보를 입력해주세요{'\n'}
-                • 특히 전화번호, 이메일은 정확해야 매칭됩니다{'\n'}
-                • 등록한 조건과 일치하는 사용자가 있으면 자동 매칭됩니다{'\n'}
-                • 매칭 전까지 모든 정보는 익명으로 보호됩니다
+                {t('interest:info.content')}
               </Text>
             </View>
           </View>

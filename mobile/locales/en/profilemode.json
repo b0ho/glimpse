@@ -1,0 +1,44 @@
+{
+  "title": "Profile Mode Settings",
+  "profileDisplayMode": "Profile Display Mode",
+  "selectProfileDescription": "Select the profile to display to nearby users",
+  "realProfile": {
+    "title": "Real Profile",
+    "description": "Display your actual information"
+  },
+  "personaProfile": {
+    "title": "Persona Profile", 
+    "description": "Display a virtual profile",
+    "notSet": "Persona Not Set"
+  },
+  "labels": {
+    "nickname": "Nickname",
+    "age": "Age",
+    "bio": "Bio"
+  },
+  "placeholders": {
+    "nickname": "Persona nickname",
+    "age": "Age (optional)",
+    "bio": "Persona bio (optional)"
+  },
+  "buttons": {
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "alerts": {
+    "modeChanged": "Profile Mode Changed",
+    "realModeMessage": "Changed to real profile.",
+    "personaModeMessage": "Changed to persona profile.",
+    "enterNickname": "Please enter persona nickname.",
+    "success": "Success",
+    "personaSaved": "Persona profile has been saved.",
+    "error": "Error",
+    "modeChangeError": "Failed to change profile mode.",
+    "personaSaveError": "Failed to save persona profile."
+  },
+  "info": {
+    "description": "Profile mode only applies to nearby users feature. Real profile is always used in regular group activities."
+  },
+  "age": "{{age}} years old"
+}

@@ -1,0 +1,44 @@
+{
+  "title": "프로필 모드 설정",
+  "profileDisplayMode": "프로필 표시 모드",
+  "selectProfileDescription": "근처 사용자에게 표시될 프로필을 선택하세요",
+  "realProfile": {
+    "title": "실제 프로필",
+    "description": "내 실제 정보를 표시합니다"
+  },
+  "personaProfile": {
+    "title": "페르소나 프로필", 
+    "description": "가상의 프로필을 표시합니다",
+    "notSet": "페르소나 미설정"
+  },
+  "labels": {
+    "nickname": "닉네임",
+    "age": "나이",
+    "bio": "자기소개"
+  },
+  "placeholders": {
+    "nickname": "페르소나 닉네임",
+    "age": "나이 (선택)",
+    "bio": "페르소나 자기소개 (선택)"
+  },
+  "buttons": {
+    "edit": "편집",
+    "cancel": "취소",
+    "save": "저장"
+  },
+  "alerts": {
+    "modeChanged": "프로필 모드 변경",
+    "realModeMessage": "실제 프로필로 변경되었습니다.",
+    "personaModeMessage": "페르소나 프로필로 변경되었습니다.",
+    "enterNickname": "페르소나 닉네임을 입력해주세요.",
+    "success": "성공",
+    "personaSaved": "페르소나 프로필이 저장되었습니다.",
+    "error": "오류",
+    "modeChangeError": "프로필 모드 변경에 실패했습니다.",
+    "personaSaveError": "페르소나 프로필 저장에 실패했습니다."
+  },
+  "info": {
+    "description": "프로필 모드는 근처 사용자 기능에서만 적용됩니다. 일반 그룹 활동에서는 항상 실제 프로필이 사용됩니다."
+  },
+  "age": "{{age}}세"
+}
