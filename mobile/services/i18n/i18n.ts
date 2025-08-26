@@ -23,8 +23,8 @@ const SUPPORTED_LANGUAGES = {
 };
 
 // Import translations - with fallbacks for missing files
-let koCommon, koAuth, koGroup, koMatching, koChat, koPayment, koProfile, koSettings, koMatches, koPremium, koLocation, koNavigation, koCall, koStory, koDev, koPersona, koNotification, koNearbyGroups;
-let enCommon, enAuth, enGroup, enProfile, enMatching, enSettings, enMatches, enChat, enPremium, enLocation, enNavigation, enCall, enStory, enDev, enPersona, enNotification, enNearbyGroups;
+let koCommon, koAuth, koGroup, koMatching, koChat, koPayment, koProfile, koSettings, koMatches, koPremium, koLocation, koNavigation, koCall, koStory, koDev, koPersona, koNotification, koNearbyGroups, koHome, koPost, koCommunity, koGroupChat, koInstant, koInterest, koMap, koMyInfo, koNearbyUsers, koNotifications, koOnboarding, koProfileMode, koPrivacy, koSupport, koTerms;
+let enCommon, enAuth, enGroup, enProfile, enMatching, enSettings, enMatches, enChat, enPremium, enLocation, enNavigation, enCall, enStory, enDev, enPersona, enNotification, enNearbyGroups, enHome, enPost, enCommunity, enGroupChat, enInstant, enInterest, enMap, enMyInfo, enNearbyUsers, enNotifications, enOnboarding, enProfileMode, enPrivacy, enSupport, enTerms;
 
 try {
   koCommon = require('../../locales/ko/common.json');
@@ -45,6 +45,21 @@ try {
   koPersona = require('../../locales/ko/persona.json');
   koNotification = require('../../locales/ko/notification.json');
   koNearbyGroups = require('../../locales/ko/nearbygroups.json');
+  koHome = require('../../locales/ko/home.json');
+  koPost = require('../../locales/ko/post.json');
+  koCommunity = require('../../locales/ko/community.json');
+  koGroupChat = require('../../locales/ko/groupchat.json');
+  koInstant = require('../../locales/ko/instant.json');
+  koInterest = require('../../locales/ko/interest.json');
+  koMap = require('../../locales/ko/map.json');
+  koMyInfo = require('../../locales/ko/myinfo.json');
+  koNearbyUsers = require('../../locales/ko/nearbyusers.json');
+  koNotifications = require('../../locales/ko/notifications.json');
+  koOnboarding = require('../../locales/ko/onboarding.json');
+  koProfileMode = require('../../locales/ko/profilemode.json');
+  koPrivacy = require('../../locales/ko/privacy.json');
+  koSupport = require('../../locales/ko/support.json');
+  koTerms = require('../../locales/ko/terms.json');
   
   enCommon = require('../../locales/en/common.json');
   enAuth = require('../../locales/en/auth.json');
@@ -63,7 +78,23 @@ try {
   enPersona = require('../../locales/en/persona.json');
   enNotification = require('../../locales/en/notification.json');
   enNearbyGroups = require('../../locales/en/nearbygroups.json');
+  enHome = require('../../locales/en/home.json');
+  enPost = require('../../locales/en/post.json');
+  enCommunity = require('../../locales/en/community.json');
+  enGroupChat = require('../../locales/en/groupchat.json');
+  enInstant = require('../../locales/en/instant.json');
+  enInterest = require('../../locales/en/interest.json');
+  enMap = require('../../locales/en/map.json');
+  enMyInfo = require('../../locales/en/myinfo.json');
+  enNearbyUsers = require('../../locales/en/nearbyusers.json');
+  enNotifications = require('../../locales/en/notifications.json');
+  enOnboarding = require('../../locales/en/onboarding.json');
+  enProfileMode = require('../../locales/en/profilemode.json');
+  enPrivacy = require('../../locales/en/privacy.json');
+  enSupport = require('../../locales/en/support.json');
+  enTerms = require('../../locales/en/terms.json');
 } catch (error) {
+  console.warn('Error loading translation files:', error);
   console.warn('Some translation files are missing, using defaults');
   // Default fallbacks
   koCommon = koCommon || { app: { name: 'Glimpse' } };
@@ -84,6 +115,21 @@ try {
   koPersona = koPersona || {};
   koNotification = koNotification || {};
   koNearbyGroups = koNearbyGroups || {};
+  koHome = koHome || {};
+  koPost = koPost || {};
+  koCommunity = koCommunity || {};
+  koGroupChat = koGroupChat || {};
+  koInstant = koInstant || {};
+  koInterest = koInterest || {};
+  koMap = koMap || {};
+  koMyInfo = koMyInfo || {};
+  koNearbyUsers = koNearbyUsers || {};
+  koNotifications = koNotifications || {};
+  koOnboarding = koOnboarding || {};
+  koProfileMode = koProfileMode || {};
+  koPrivacy = koPrivacy || {};
+  koSupport = koSupport || {};
+  koTerms = koTerms || {};
   
   enCommon = enCommon || { app: { name: 'Glimpse' } };
   enAuth = enAuth || {};
@@ -102,9 +148,25 @@ try {
   enPersona = enPersona || {};
   enNotification = enNotification || {};
   enNearbyGroups = enNearbyGroups || {};
+  enHome = enHome || {};
+  enPost = enPost || {};
+  enCommunity = enCommunity || {};
+  enGroupChat = enGroupChat || {};
+  enInstant = enInstant || {};
+  enInterest = enInterest || {};
+  enMap = enMap || {};
+  enMyInfo = enMyInfo || {};
+  enNearbyUsers = enNearbyUsers || {};
+  enNotifications = enNotifications || {};
+  enOnboarding = enOnboarding || {};
+  enProfileMode = enProfileMode || {};
+  enPrivacy = enPrivacy || {};
+  enSupport = enSupport || {};
+  enTerms = enTerms || {};
 }
 
-// Translation resources
+// Translation resources - Updated at ${new Date().toISOString()}
+console.log('[i18n] Initializing with languages:', Object.keys({ ko: {}, en: {} }));
 const resources = {
   ko: {
     common: koCommon,
@@ -119,13 +181,27 @@ const resources = {
     premium: koPremium,
     location: koLocation,
     navigation: koNavigation,
-    home: (() => { try { return require('../../locales/ko/home.json'); } catch { return {}; } })(),
+    home: koHome,
     call: koCall,
     story: koStory,
     dev: koDev,
     persona: koPersona,
     notification: koNotification,
     nearbygroups: koNearbyGroups,
+    post: koPost,
+    community: koCommunity,
+    groupchat: koGroupChat,
+    instant: koInstant,
+    interest: koInterest,
+    map: koMap,
+    myinfo: koMyInfo,
+    nearbyusers: koNearbyUsers,
+    notifications: koNotifications,
+    onboarding: koOnboarding,
+    profilemode: koProfileMode,
+    privacy: koPrivacy,
+    support: koSupport,
+    terms: koTerms,
   },
   en: {
     common: enCommon,
@@ -139,7 +215,7 @@ const resources = {
     premium: enPremium,
     location: enLocation,
     navigation: enNavigation,
-    home: (() => { try { return require('../../locales/en/home.json'); } catch { return {}; } })(),
+    home: enHome,
     payment: {},
     call: enCall,
     story: enStory,
@@ -147,6 +223,20 @@ const resources = {
     persona: enPersona,
     notification: enNotification,
     nearbygroups: enNearbyGroups,
+    post: enPost,
+    community: enCommunity,
+    groupchat: enGroupChat,
+    instant: enInstant,
+    interest: enInterest,
+    map: enMap,
+    myinfo: enMyInfo,
+    nearbyusers: enNearbyUsers,
+    notifications: enNotifications,
+    onboarding: enOnboarding,
+    profilemode: enProfileMode,
+    privacy: enPrivacy,
+    support: enSupport,
+    terms: enTerms,
   },
   // Other languages with safe fallbacks
   ja: {
@@ -332,6 +422,11 @@ export const initI18n = async () => {
     I18nManager.forceRTL(isRTL);
   }
 
+  // Debug: Log what resources are available
+  console.log('[i18n] Available namespaces for en:', Object.keys(resources.en));
+  console.log('[i18n] Home namespace exists?', !!resources.en.home);
+  console.log('[i18n] Navigation namespace exists?', !!resources.en.navigation);
+  
   await i18n
     .use(initReactI18next)
     .init({
@@ -339,7 +434,14 @@ export const initI18n = async () => {
       lng: detectedLanguage,
       fallbackLng: FALLBACK_LANGUAGE,
       defaultNS: 'common',
-      ns: ['common', 'auth', 'group', 'matching', 'chat', 'payment', 'profile', 'settings', 'home', 'matches', 'premium', 'location', 'navigation', 'call', 'story', 'dev', 'persona', 'notification', 'nearbygroups'],
+      ns: [
+        'common', 'auth', 'group', 'matching', 'chat', 'payment', 'profile', 
+        'settings', 'home', 'matches', 'premium', 'location', 'navigation', 
+        'call', 'story', 'dev', 'persona', 'notification', 'nearbygroups',
+        'post', 'community', 'groupchat', 'instant', 'interest', 'map', 
+        'myinfo', 'nearbyusers', 'notifications', 'onboarding', 'profilemode', 
+        'privacy', 'support', 'terms'
+      ],
       
       interpolation: {
         escapeValue: false, // React Native already escapes values
