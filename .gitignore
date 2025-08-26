@@ -148,6 +148,7 @@ coverage/
 jest-results/
 test-results/
 playwright-report/
+.playwright-mcp
 
 # =====================================================
 # FRAMEWORKS & TOOLS
