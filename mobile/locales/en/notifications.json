@@ -1,0 +1,6 @@
+{
+  "notifications": {
+    "typing": "{{name}} is typing...",
+    "typingDefault": "Someone is typing..."
+  }
+}

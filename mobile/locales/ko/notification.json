@@ -1,0 +1,57 @@
+{
+  "match": {
+    "new": {
+      "title": "🎉 새로운 매치!",
+      "body": "{{userName}}님과 서로 좋아요를 눌렀어요! 지금 대화를 시작해보세요."
+    },
+    "super": {
+      "title": "🌟 슈퍼 매치!",
+      "body": "⭐ {{userName}}님과 슈퍼 매치가 성사되었어요! 특별한 대화를 시작해보세요."
+    }
+  },
+  "like": {
+    "received": {
+      "title": "💖 누군가 당신을 좋아해요!",
+      "body": "프로필을 확인하고 매치를 만들어보세요."
+    }
+  },
+  "superLike": {
+    "sent": {
+      "title": "⭐ 슈퍼 좋아요!",
+      "body": "{{userName}}님이 당신에게 슈퍼 좋아요를 보냈어요!"
+    },
+    "received": {
+      "title": "⭐ 슈퍼 좋아요!",
+      "body": "{{userName}}님이 당신에게 슈퍼 좋아요를 보냈어요! 즉시 확인해보세요."
+    }
+  },
+  "group": {
+    "invite": {
+      "title": "👥 그룹 초대",
+      "body": "{{groupName}} 그룹에 초대되었습니다."
+    },
+    "new": {
+      "title": "🎊 새 그룹 활동",
+      "body": "{{groupName}} 그룹에 새로운 활동이 있습니다."
+    }
+  },
+  "message": {
+    "new": {
+      "title": "💬 {{senderName}}",
+      "body": "{{preview}}"
+    }
+  },
+  "test": {
+    "title": "🧪 테스트 알림",
+    "body": "Glimpse 알림이 정상적으로 작동하고 있습니다!"
+  },
+  "settings": {
+    "enabled": "알림 켜짐",
+    "disabled": "알림 꺼짐",
+    "permission": {
+      "title": "알림 권한",
+      "denied": "알림 권한이 거부되었습니다",
+      "granted": "알림 권한이 허용되었습니다"
+    }
+  }
+}

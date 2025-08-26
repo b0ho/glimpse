@@ -1,0 +1,27 @@
+{
+  "alerts": {
+    "valueRequired": "Please enter a value",
+    "alreadyRegistered": "This value is already registered"
+  },
+  "fields": {
+    "phone": "Phone Number",
+    "email": "Email",
+    "nickname": "Nickname",
+    "nicknamePlaceholder": "Alias or nickname",
+    "company": "Company",
+    "companyPlaceholder": "Company name",
+    "school": "School",
+    "schoolPlaceholder": "School name",
+    "hobby": "Hobbies/Interests",
+    "hobbyPlaceholder": "Hobbies or interests",
+    "realName": "Real Name",
+    "realNamePlaceholder": "Enter your real name",
+    "realNamePrompt": "Please enter your real name",
+    "profileNickname": "Profile Nickname",
+    "profileNicknamePlaceholder": "Enter profile nickname",
+    "profileNicknamePrompt": "Please enter profile nickname"
+  },
+  "common": {
+    "notification": "Notification"
+  }
+}

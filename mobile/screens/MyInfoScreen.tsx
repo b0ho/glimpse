@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface MyInfo {
@@ -35,6 +36,7 @@ export const MyInfoScreen: React.FC = () => {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { user } = useAuthStore();
+  const { t } = useAndroidSafeTranslation('myinfo');
   
   const [myInfo, setMyInfo] = useState<MyInfo>({
     realName: user?.realName || '',
@@ -101,7 +103,7 @@ export const MyInfoScreen: React.FC = () => {
   const addItem = async (key: keyof MyInfo) => {
     const value = currentInputs[key].trim();
     if (!value) {
-      Alert.alert('알림', '값을 입력해주세요');
+      Alert.alert(t('common.notification'), t('alerts.valueRequired'));
       return;
     }
     
@@ -122,7 +124,7 @@ export const MyInfoScreen: React.FC = () => {
     } else {
       // 중복 체크
       if ((myInfo[key] as string[]).includes(value)) {
-        Alert.alert('알림', '이미 등록된 값입니다');
+        Alert.alert(t('common.notification'), t('alerts.alreadyRegistered'));
         return;
       }
       
@@ -162,7 +164,7 @@ export const MyInfoScreen: React.FC = () => {
   const infoFields = [
     {
       key: 'phone',
-      label: '전화번호',
+      label: t('fields.phone'),
       icon: 'call-outline',
       placeholder: '010-0000-0000',
       keyboardType: 'phone-pad' as const,
@@ -170,7 +172,7 @@ export const MyInfoScreen: React.FC = () => {
     },
     {
       key: 'email',
-      label: '이메일',
+      label: t('fields.email'),
       icon: 'mail-outline',
       placeholder: 'example@gmail.com',
       keyboardType: 'email-address' as const,
@@ -178,33 +180,33 @@ export const MyInfoScreen: React.FC = () => {
     },
     {
       key: 'nickname',
-      label: '닉네임',
+      label: t('fields.nickname'),
       icon: 'at-outline',
-      placeholder: '별명이나 닉네임',
+      placeholder: t('fields.nicknamePlaceholder'),
       keyboardType: 'default' as const,
       color: '#607D8B',
     },
     {
       key: 'company',
-      label: '회사',
+      label: t('fields.company'),
       icon: 'business-outline',
-      placeholder: '회사명',
+      placeholder: t('fields.companyPlaceholder'),
       keyboardType: 'default' as const,
       color: '#3F51B5',
     },
     {
       key: 'school',
-      label: '학교',
+      label: t('fields.school'),
       icon: 'school-outline',
-      placeholder: '학교명',
+      placeholder: t('fields.schoolPlaceholder'),
       keyboardType: 'default' as const,
       color: '#00BCD4',
     },
     {
       key: 'hobby',
-      label: '취미/관심사',
+      label: t('fields.hobby'),
       icon: 'heart-outline',
-      placeholder: '취미나 관심사',
+      placeholder: t('fields.hobbyPlaceholder'),
       keyboardType: 'default' as const,
       color: '#F44336',
     },
@@ -279,7 +281,7 @@ export const MyInfoScreen: React.FC = () => {
                         flex: 1,
                       },
                     ]}
-                    placeholder="본명을 입력하세요"
+                    placeholder={t('fields.realNamePlaceholder')}
                     placeholderTextColor={colors.TEXT.TERTIARY}
                     value={currentInputs.realName || ''}
                     onChangeText={(text) => setCurrentInputs({ ...currentInputs, realName: text })}
@@ -304,7 +306,7 @@ export const MyInfoScreen: React.FC = () => {
               ) : (
                 <View style={[styles.realNameField, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
                   <Text style={[styles.realNameText, { color: myInfo.realName ? colors.TEXT.PRIMARY : colors.TEXT.TERTIARY }]}>
-                    {myInfo.realName || '본명을 입력해주세요'}
+                    {myInfo.realName || t('fields.realNamePrompt')}
                   </Text>
                 </View>
               )}
@@ -346,7 +348,7 @@ export const MyInfoScreen: React.FC = () => {
                         flex: 1,
                       },
                     ]}
-                    placeholder="프로필 닉네임을 입력하세요"
+                    placeholder={t('fields.profileNicknamePlaceholder')}
                     placeholderTextColor={colors.TEXT.TERTIARY}
                     value={currentInputs.profileNickname || ''}
                     onChangeText={(text) => setCurrentInputs({ ...currentInputs, profileNickname: text })}
@@ -371,7 +373,7 @@ export const MyInfoScreen: React.FC = () => {
               ) : (
                 <View style={[styles.realNameField, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
                   <Text style={[styles.realNameText, { color: myInfo.profileNickname ? colors.TEXT.PRIMARY : colors.TEXT.TERTIARY }]}>
-                    {myInfo.profileNickname || '프로필 닉네임을 입력해주세요'}
+                    {myInfo.profileNickname || t('fields.profileNicknamePrompt')}
                   </Text>
                 </View>
               )}

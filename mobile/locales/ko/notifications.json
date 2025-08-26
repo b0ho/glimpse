@@ -1,0 +1,6 @@
+{
+  "notifications": {
+    "typing": "{{name}}님이 입력 중...",
+    "typingDefault": "상대방이 입력 중..."
+  }
+}

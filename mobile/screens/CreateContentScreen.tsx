@@ -12,7 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
@@ -23,7 +23,7 @@ import { groupApi } from '@/services/api/groupApi';
 import { contentApi } from '@/services/api/contentApi';
 
 export const CreateContentScreen = ({ route }: any) => {
-  const { t } = useTranslation(['common', 'group']);
+  const { t } = useAndroidSafeTranslation(['common', 'post']);
   const { colors } = useTheme();
   const editingContent = route?.params?.editingContent as Content | undefined;
   const isEditMode = !!editingContent;
@@ -90,7 +90,7 @@ export const CreateContentScreen = ({ route }: any) => {
       console.log('[CreateContentScreen] 권한 상태:', status);
       
       if (status !== 'granted') {
-        Alert.alert('권한 필요', '갤러리 접근 권한이 필요합니다.');
+        Alert.alert(t('post:errors.permissionDenied'), t('post:errors.permissionMessage'));
         return;
       }
 
@@ -122,7 +122,7 @@ export const CreateContentScreen = ({ route }: any) => {
       }
     } catch (error) {
       console.error('[CreateContentScreen] 이미지 선택 에러:', error);
-      Alert.alert('오류', '이미지 선택 중 오류가 발생했습니다.');
+      Alert.alert(t('post:errors.imageError'), t('post:errors.imageErrorMessage'));
     }
   };
 
@@ -197,7 +197,7 @@ export const CreateContentScreen = ({ route }: any) => {
             }
           } else {
             console.warn('[CreateContentScreen] 서버 응답 실패:', userResponse.status);
-            userNickname = '테스트유저';
+            userNickname = t('post:create.defaultUserName');
             userId = 'current_user';
           }
         } catch (error) {
@@ -278,7 +278,7 @@ export const CreateContentScreen = ({ route }: any) => {
             ) : (
               <View style={styles.emptyGroupContainer}>
                 <Text style={[styles.emptyGroupText, { color: colors.TEXT.SECONDARY }]}>
-                  {__DEV__ ? '그룹을 불러오는 중...' : '참여한 그룹이 없습니다.'}
+                  {__DEV__ ? t('post:create.loading') : t('post:create.noGroups')}
                 </Text>
               </View>
             )}
@@ -329,7 +329,7 @@ export const CreateContentScreen = ({ route }: any) => {
           <Text style={[styles.headerButtonText, { color: colors.TEXT.SECONDARY }]}>{t('common:content.create.cancel')}</Text>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>
-          {isEditMode ? '스토리 수정' : t('common:content.create.title')}
+          {isEditMode ? t('post:create.editStory') : t('common:content.create.title')}
         </Text>
         <TouchableOpacity
           style={[
@@ -345,7 +345,7 @@ export const CreateContentScreen = ({ route }: any) => {
             <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
           ) : (
             <Text style={[styles.submitButtonText, { color: colors.TEXT.WHITE }]}>
-              {isEditMode ? '수정 완료' : t('common:content.create.publish')}
+              {isEditMode ? t('post:create.updateComplete') : t('common:content.create.publish')}
             </Text>
           )}
         </TouchableOpacity>

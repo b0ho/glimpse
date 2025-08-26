@@ -1,0 +1,6 @@
+{
+  "alerts": {
+    "groupJoined": "Successfully joined {{groupName}} group!",
+    "likeSent": "Anonymous like sent to {{nickname}}! 💕"
+  }
+}

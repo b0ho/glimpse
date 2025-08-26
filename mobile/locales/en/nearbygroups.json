@@ -1,0 +1,29 @@
+{
+  "nearbyGroups": {
+    "title": "Nearby Groups"
+  },
+  "alerts": {
+    "permission": {
+      "title": "Location Permission Required",
+      "message": "Location permission is required to find nearby groups.",
+      "later": "Later",
+      "requestError": "An error occurred while requesting location permission."
+    },
+    "location": {
+      "error": "Unable to get location information.",
+      "required": "Location information is required."
+    },
+    "group": {
+      "joinTitle": "Join Group",
+      "joinMessage": "Do you want to join the {{groupName}} group?",
+      "join": "Join",
+      "joinSuccess": "Successfully joined the group.",
+      "joinError": "An error occurred while joining the group.",
+      "createSuccess": "Group has been created successfully.",
+      "createError": "An error occurred while creating the group."
+    },
+    "validation": {
+      "allFields": "Please fill in all fields."
+    }
+  }
+}

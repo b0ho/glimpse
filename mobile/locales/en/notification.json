@@ -1,0 +1,57 @@
+{
+  "match": {
+    "new": {
+      "title": "🎉 New Match!",
+      "body": "You and {{userName}} liked each other! Start chatting now."
+    },
+    "super": {
+      "title": "🌟 Super Match!",
+      "body": "⭐ You have a super match with {{userName}}! Start a special conversation."
+    }
+  },
+  "like": {
+    "received": {
+      "title": "💖 Someone likes you!",
+      "body": "Check their profile and make a match."
+    }
+  },
+  "superLike": {
+    "sent": {
+      "title": "⭐ Super Like!",
+      "body": "{{userName}} sent you a Super Like!"
+    },
+    "received": {
+      "title": "⭐ Super Like!",
+      "body": "{{userName}} sent you a Super Like! Check it now."
+    }
+  },
+  "group": {
+    "invite": {
+      "title": "👥 Group Invitation",
+      "body": "You've been invited to {{groupName}} group."
+    },
+    "new": {
+      "title": "🎊 New Group Activity",
+      "body": "New activity in {{groupName}} group."
+    }
+  },
+  "message": {
+    "new": {
+      "title": "💬 {{senderName}}",
+      "body": "{{preview}}"
+    }
+  },
+  "test": {
+    "title": "🧪 Test Notification",
+    "body": "Glimpse notifications are working properly!"
+  },
+  "settings": {
+    "enabled": "Notifications On",
+    "disabled": "Notifications Off",
+    "permission": {
+      "title": "Notification Permission",
+      "denied": "Notification permission denied",
+      "granted": "Notification permission granted"
+    }
+  }
+}

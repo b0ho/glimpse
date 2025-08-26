@@ -80,8 +80,10 @@
     "terms": "Terms of Service",
     "support": "Support"
   },
-  "letterFromFounder": "Letter from Founder",
-  "letterSubtitle": "A heartfelt message to you",
+  "profile": {
+    "letterFromFounder": "Letter from Founder",
+    "letterSubtitle": "A heartfelt message to you"
+  },
   "footer": {
     "version": "Glimpse v0.1.0",
     "tagline": "A new beginning for anonymous dating"

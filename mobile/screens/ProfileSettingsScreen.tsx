@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useProfileStore } from '@/store/slices/profileSlice';
@@ -31,7 +31,7 @@ interface SettingItem {
 }
 
 const ProfileSettingsScreen = () => {
-  const { t } = useTranslation(['settings', 'common']);
+  const { t } = useAndroidSafeTranslation('settings');
   const navigation = useNavigation();
   const { userProfile } = useProfileStore();
   

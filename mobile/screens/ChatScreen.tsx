@@ -19,7 +19,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useChatStore, chatSelectors } from '@/store/slices/chatSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
@@ -57,7 +57,7 @@ export const ChatScreen = () => {
   const { roomId, matchId, otherUserNickname } = route.params;
   const { initiateCall, isInCall } = useCall();
   const { colors } = useTheme();
-  const { t } = useTranslation('chat');
+  const { t } = useAndroidSafeTranslation('chat');
 
   // Store states
   const authStore = useAuthStore();
@@ -98,7 +98,7 @@ export const ChatScreen = () => {
     
     const initChat = async () => {
       if (!authStore.user?.id || !authStore.token) {
-        Alert.alert(t('errors.error'), t('errors.loginRequired'));
+        Alert.alert(t('chat:errors.error'), t('chat:errors.loginRequired'));
         navigation.goBack();
         return;
       }
@@ -120,7 +120,7 @@ export const ChatScreen = () => {
       } catch (error) {
         if (mounted) {
           console.error('Chat initialization failed:', error);
-          Alert.alert(t('errors.error'), t('errors.chatLoadFailed'));
+          Alert.alert(t('chat:errors.error'), t('chat:errors.chatLoadFailed'));
         }
       }
     };
@@ -221,16 +221,16 @@ export const ChatScreen = () => {
    */
   const handleMessageLongPress = useCallback((message: Message) => {
     Alert.alert(
-      t('errors.messageOptions'),
-      t('errors.copyConfirm'),
+      t('chat:errors.messageOptions'),
+      t('chat:errors.copyConfirm'),
       [
-        { text: t('errors.cancel'), style: 'cancel' },
+        { text: t('chat:errors.cancel'), style: 'cancel' },
         {
-          text: t('errors.copy'),
+          text: t('chat:errors.copy'),
           onPress: () => {
             // 실제 구현에서는 Clipboard API 사용
             console.log('Copy message:', message.content);
-            Alert.alert(t('common:actions.completed'), t('errors.copySuccess'));
+            Alert.alert(t('common:buttons.done'), t('chat:errors.copySuccess'));
           },
         },
       ]
@@ -321,7 +321,7 @@ export const ChatScreen = () => {
     return (
       <View style={styles.loadingMore}>
         <ActivityIndicator size="small" color={colors.PRIMARY} />
-        <Text style={[styles.loadingMoreText, { color: colors.TEXT.SECONDARY }]}>{t('loading.previousMessages')}</Text>
+        <Text style={[styles.loadingMoreText, { color: colors.TEXT.SECONDARY }]}>{t('chat:loading.previousMessages')}</Text>
       </View>
     );
   };
@@ -348,9 +348,9 @@ export const ChatScreen = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>💬</Text>
-      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>{t('emptyState.title')}</Text>
+      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>{t('chat:emptyState.title')}</Text>
       <Text style={[styles.emptyStateSubtitle, { color: colors.TEXT.SECONDARY }]}>
-        {t('emptyState.subtitle', { name: otherUserNickname })}
+        {t('emptyState:emptyState.subtitle', { name: otherUserNickname })}
       </Text>
     </View>
   );
@@ -362,7 +362,7 @@ export const ChatScreen = () => {
    */
   useEffect(() => {
     if (error) {
-      Alert.alert(t('errors.error'), error, [
+      Alert.alert(t('common:errors.error'), error, [
         {
           text: t('common:actions.confirm'),
           onPress: () => clearError(),
@@ -376,7 +376,7 @@ export const ChatScreen = () => {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.PRIMARY} />
-          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('loading.text')}</Text>
+          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('common:loading.text')}</Text>
         </View>
       </SafeAreaView>
     );

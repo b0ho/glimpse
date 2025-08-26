@@ -19,6 +19,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface Feedback {
   id: string;
@@ -31,6 +32,7 @@ interface Feedback {
 export const SupportScreen = () => {
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { t } = useAndroidSafeTranslation('support');
   
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -121,7 +123,7 @@ export const SupportScreen = () => {
 
   const handleSubmitFeedback = async () => {
     if (!newFeedback.trim()) {
-      Alert.alert('알림', '내용을 입력해주세요');
+      Alert.alert(t('support:alerts.emailTitle'), t('support:alerts.contentRequired'));
       return;
     }
 
@@ -139,7 +141,7 @@ export const SupportScreen = () => {
     
     setNewFeedback('');
     setShowCreateModal(false);
-    Alert.alert('완료', '소중한 의견 감사합니다!');
+    Alert.alert(t('support:alerts.emailTitle'), t('support:alerts.thankYou'));
   };
 
   const getFilteredAndSortedFeedbacks = () => {
@@ -168,7 +170,7 @@ export const SupportScreen = () => {
             <Text style={[styles.rankText, { 
               color: index < 3 ? '#FFFFFF' : colors.TEXT.SECONDARY 
             }]}>
-              {index + 1}위
+              {t('support:feedback.rank', { rank: index + 1 })}
             </Text>
           </View>
         )}
@@ -211,7 +213,7 @@ export const SupportScreen = () => {
         >
           <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>고객지원</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('support:title')}</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -221,11 +223,10 @@ export const SupportScreen = () => {
           <Icon name="information-circle" size={24} color={colors.INFO} />
           <View style={styles.infoContent}>
             <Text style={[styles.infoTitle, { color: colors.TEXT.PRIMARY }]}>
-              개선 요청사항을 공유해주세요
+              {t('support:info.title')}
             </Text>
             <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
-              다른 사용자들의 의견에 '원해요'를 눌러 공감을 표현할 수 있습니다.
-              {'\n'}개인적인 문의는 이메일로 연락주세요.
+              {t('support:info.description')}
             </Text>
           </View>
         </View>
@@ -233,15 +234,15 @@ export const SupportScreen = () => {
         {/* 이메일 문의 */}
         <TouchableOpacity 
           style={[styles.emailSection, { backgroundColor: colors.SURFACE }]}
-          onPress={() => Alert.alert('이메일', 'glimpse@gmail.com으로 문의해주세요')}
+          onPress={() => Alert.alert(t('support:alerts.emailTitle'), t('support:alerts.emailMessage'))}
         >
           <Icon name="mail-outline" size={24} color={colors.PRIMARY} />
           <View style={styles.emailContent}>
             <Text style={[styles.emailTitle, { color: colors.TEXT.PRIMARY }]}>
-              개인 문의하기
+              {t('support:contact.title')}
             </Text>
             <Text style={[styles.emailAddress, { color: colors.PRIMARY }]}>
-              glimpse@gmail.com
+              {t('support:contact.email')}
             </Text>
           </View>
           <Icon name="chevron-forward" size={20} color={colors.TEXT.SECONDARY} />
@@ -256,7 +257,7 @@ export const SupportScreen = () => {
             <Icon name="search" size={20} color={colors.TEXT.SECONDARY} />
             <TextInput
               style={[styles.searchInput, { color: colors.TEXT.PRIMARY }]}
-              placeholder="요청사항 검색"
+              placeholder={t('support:search.placeholder')}
               placeholderTextColor={colors.TEXT.SECONDARY}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -273,7 +274,7 @@ export const SupportScreen = () => {
               <Text style={[styles.sortButtonText, { 
                 color: sortBy === 'popular' ? '#FFFFFF' : colors.TEXT.SECONDARY 
               }]}>
-                인기순
+                {t('support:sort.popular')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -285,7 +286,7 @@ export const SupportScreen = () => {
               <Text style={[styles.sortButtonText, { 
                 color: sortBy === 'recent' ? '#FFFFFF' : colors.TEXT.SECONDARY 
               }]}>
-                최신순
+                {t('support:sort.recent')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -294,7 +295,7 @@ export const SupportScreen = () => {
         {/* 피드백 목록 */}
         <View style={styles.feedbackSection}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            개선 요청사항
+            {t('support:feedback.sectionTitle')}
           </Text>
           
           {isLoading ? (
@@ -307,7 +308,7 @@ export const SupportScreen = () => {
               scrollEnabled={false}
               ListEmptyComponent={
                 <Text style={[styles.emptyText, { color: colors.TEXT.SECONDARY }]}>
-                  아직 요청사항이 없습니다
+                  {t('support:feedback.emptyState')}
                 </Text>
               }
             />
@@ -336,7 +337,7 @@ export const SupportScreen = () => {
           <View style={[styles.modalContent, { backgroundColor: colors.SURFACE }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.TEXT.PRIMARY }]}>
-                개선 요청사항 작성
+                {t('support:modal.title')}
               </Text>
               <TouchableOpacity onPress={() => setShowCreateModal(false)}>
                 <Icon name="close" size={24} color={colors.TEXT.PRIMARY} />
@@ -349,7 +350,7 @@ export const SupportScreen = () => {
                 color: colors.TEXT.PRIMARY,
                 borderColor: colors.BORDER,
               }]}
-              placeholder="어떤 기능이 필요하신가요?"
+              placeholder={t('support:modal.placeholder')}
               placeholderTextColor={colors.TEXT.SECONDARY}
               value={newFeedback}
               onChangeText={setNewFeedback}
@@ -359,7 +360,7 @@ export const SupportScreen = () => {
             />
             
             <Text style={[styles.charCount, { color: colors.TEXT.SECONDARY }]}>
-              {newFeedback.length}/200
+              {t('support:modal.charCount', { count: newFeedback.length })}
             </Text>
             
             <View style={styles.modalButtons}>
@@ -368,7 +369,7 @@ export const SupportScreen = () => {
                 onPress={() => setShowCreateModal(false)}
               >
                 <Text style={[styles.modalButtonText, { color: colors.TEXT.PRIMARY }]}>
-                  취소
+                  {t('support:modal.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -376,7 +377,7 @@ export const SupportScreen = () => {
                 onPress={handleSubmitFeedback}
               >
                 <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>
-                  제출
+                  {t('support:modal.submit')}
                 </Text>
               </TouchableOpacity>
             </View>

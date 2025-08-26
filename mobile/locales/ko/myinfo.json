@@ -1,0 +1,27 @@
+{
+  "alerts": {
+    "valueRequired": "값을 입력해주세요",
+    "alreadyRegistered": "이미 등록된 값입니다"
+  },
+  "fields": {
+    "phone": "전화번호",
+    "email": "이메일",
+    "nickname": "닉네임",
+    "nicknamePlaceholder": "별명이나 닉네임",
+    "company": "회사",
+    "companyPlaceholder": "회사명",
+    "school": "학교",
+    "schoolPlaceholder": "학교명",
+    "hobby": "취미/관심사",
+    "hobbyPlaceholder": "취미나 관심사",
+    "realName": "본명",
+    "realNamePlaceholder": "본명을 입력하세요",
+    "realNamePrompt": "본명을 입력해주세요",
+    "profileNickname": "프로필 닉네임",
+    "profileNicknamePlaceholder": "프로필 닉네임을 입력하세요",
+    "profileNicknamePrompt": "프로필 닉네임을 입력해주세요"
+  },
+  "common": {
+    "notification": "알림"
+  }
+}

@@ -15,7 +15,7 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as Location from 'expo-location';
 import { useTheme } from '@/hooks/useTheme';
@@ -40,7 +40,7 @@ interface LocationData {
 
 export const NearbyUsersScreen = React.memo(() => {
   const navigation = useNavigation();
-  const { t } = useTranslation('location');
+  const { t } = useAndroidSafeTranslation('location');
   const { colors } = useTheme();
   const { user, getSubscriptionTier, getSubscriptionFeatures } = useAuthStore();
   const { sendLike, sentLikes, getRemainingFreeLikes } = useLikeStore();
@@ -102,9 +102,9 @@ export const NearbyUsersScreen = React.memo(() => {
         
         if (status !== 'granted') {
           Alert.alert(
-            t('permissions.requestTitle'),
-            t('permissions.requestMessage'),
-            [{ text: t('permissions.later'), style: 'cancel' }]
+            t('common:permissions.requestTitle'),
+            t('location:permissions.requestMessage'),
+            [{ text: t('common:permissions.later'), style: 'cancel' }]
           );
           setIsLoading(false);
           return;
@@ -158,7 +158,7 @@ export const NearbyUsersScreen = React.memo(() => {
       setCurrentLocation(locationData);
     } catch (error) {
       console.error('Get current location error:', error);
-      Alert.alert(t('errors.title'), t('permissions.locationError'));
+      Alert.alert(t('common:errors.title'), t('location:permissions.locationError'));
     }
   };
 
@@ -455,7 +455,7 @@ export const NearbyUsersScreen = React.memo(() => {
                   });
                   Alert.alert(t('common:success'), '좋아요가 취소되었습니다.');
                 } catch (error) {
-                  Alert.alert(t('errors.title'), '좋아요 취소에 실패했습니다.');
+                  Alert.alert(t('common:errors.title'), '좋아요 취소에 실패했습니다.');
                 }
               },
             },
@@ -495,15 +495,15 @@ export const NearbyUsersScreen = React.memo(() => {
       }
 
       Alert.alert(
-        t('matching.sendLike'),
-        t('matching.sendLikeMessage', {
+        t('nearbyusers:matching.sendLike'),
+        t('matching:matching.sendLikeMessage', {
           nickname: targetUser.nickname,
-          premium: user.isPremium ? t('matching.premiumUnlimited') : t('matching.creditCost')
+          premium: user.isPremium ? t('nearbyusers:matching.premiumUnlimited') : t('nearbyusers:matching.creditCost')
         }),
         [
-          { text: t('matching.cancel'), style: 'cancel' },
+          { text: t('nearbyusers:matching.cancel'), style: 'cancel' },
           {
-            text: t('matching.send'),
+            text: t('nearbyusers:matching.send'),
             onPress: async () => {
               try {
                 await sendLike(
@@ -511,9 +511,9 @@ export const NearbyUsersScreen = React.memo(() => {
                   targetUser.commonGroups[0] || 'location_group'
                 );
                 setLikedUsers(prev => new Set(prev).add(targetUser.id));
-                Alert.alert(t('common:success'), t('matching.success'));
+                Alert.alert(t('common:success'), t('nearbyusers:matching.success'));
               } catch (error) {
-                Alert.alert(t('errors.title'), t('matching.error'));
+                Alert.alert(t('common:errors.title'), t('matching:errors.error'));
               }
             },
           },
@@ -521,7 +521,7 @@ export const NearbyUsersScreen = React.memo(() => {
       );
     } catch (error) {
       console.error('Send like error:', error);
-      Alert.alert(t('errors.title'), t('matching.error'));
+      Alert.alert(t('common:errors.title'), t('matching:errors.error'));
     }
   };
 
@@ -539,7 +539,7 @@ export const NearbyUsersScreen = React.memo(() => {
               await chatStore.createOrGetChat(targetUser.id, targetUser.nickname);
               navigation.navigate('Chat' as never, { userId: targetUser.id, userName: targetUser.nickname } as never);
             } catch (error) {
-              Alert.alert(t('errors.title'), '채팅을 시작할 수 없습니다.');
+              Alert.alert(t('common:errors.title'), '채팅을 시작할 수 없습니다.');
             }
           },
         },
@@ -617,7 +617,7 @@ export const NearbyUsersScreen = React.memo(() => {
             <View style={styles.userInfo}>
               <View style={styles.userNameRow}>
                 <Text style={[styles.userName, { color: colors.TEXT.PRIMARY }]}>{item.nickname}</Text>
-                <Text style={[styles.userAge, { color: colors.TEXT.SECONDARY }]}>{item.age || 25}{t('nearbyUsers.ageUnit')}</Text>
+                <Text style={[styles.userAge, { color: colors.TEXT.SECONDARY }]}>{item.age || 25}{t('nearbyusers:nearbyUsers.ageUnit')}</Text>
                 {item.isVerified && (
                   <Icon name="checkmark-circle" size={16} color={colors.SUCCESS} />
                 )}
@@ -671,7 +671,7 @@ export const NearbyUsersScreen = React.memo(() => {
 
           {item.commonGroups.length > 0 && (
             <View style={styles.commonGroups}>
-              <Text style={[styles.commonGroupsTitle, { color: colors.TEXT.LIGHT }]}>{t('nearbyUsers.commonGroups')}</Text>
+              <Text style={[styles.commonGroupsTitle, { color: colors.TEXT.LIGHT }]}>{t('nearbyusers:nearbyUsers.commonGroups')}</Text>
               <View style={styles.groupTags}>
                 {item.commonGroups.slice(0, 2).map((group, index) => (
                   <View key={index} style={[styles.groupTag, { backgroundColor: colors.PRIMARY + '10' }]}>
@@ -679,7 +679,7 @@ export const NearbyUsersScreen = React.memo(() => {
                   </View>
                 ))}
                 {item.commonGroups.length > 2 && (
-                  <Text style={[styles.moreGroups, { color: colors.TEXT.LIGHT }]}>{t('nearbyUsers.moreGroups', { count: item.commonGroups.length - 2 })}</Text>
+                  <Text style={[styles.moreGroups, { color: colors.TEXT.LIGHT }]}>{t('nearbyUsers:nearbyUsers.moreGroups', { count: item.commonGroups.length - 2 })}</Text>
                 )}
               </View>
             </View>
@@ -715,7 +715,7 @@ export const NearbyUsersScreen = React.memo(() => {
 
   const renderRadiusSelector = () => (
     <View style={[styles.radiusSelector, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER }]}>
-      <Text style={[styles.radiusSelectorTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.searchRadius')}</Text>
+      <Text style={[styles.radiusSelectorTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyusers:nearbyUsers.searchRadius')}</Text>
       <View style={styles.radiusOptions}>
         {radiusOptions.map(radius => (
           <TouchableOpacity
@@ -750,13 +750,13 @@ export const NearbyUsersScreen = React.memo(() => {
           >
             <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.title')}</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyusers:nearbyUsers.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.PRIMARY} />
-          <Text style={[styles.loadingText, { color: colors.TEXT.SECONDARY }]}>{t('nearbyUsers.loading')}</Text>
+          <Text style={[styles.loadingText, { color: colors.TEXT.SECONDARY }]}>{t('nearbyusers:nearbyUsers.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -772,21 +772,21 @@ export const NearbyUsersScreen = React.memo(() => {
           >
             <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.title')}</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyusers:nearbyUsers.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         
         <View style={styles.permissionContainer}>
           <Icon name="people-outline" size={64} color={colors.TEXT.LIGHT} />
-          <Text style={[styles.permissionTitle, { color: colors.TEXT.PRIMARY }]}>{t('permissions.required')}</Text>
+          <Text style={[styles.permissionTitle, { color: colors.TEXT.PRIMARY }]}>{t('common:permissions.required')}</Text>
           <Text style={[styles.permissionDescription, { color: colors.TEXT.SECONDARY }]}>
-            {t('permissions.description')}
+            {t('common:permissions.description')}
           </Text>
           <TouchableOpacity
             style={[styles.permissionButton, { backgroundColor: colors.PRIMARY }]}
             onPress={requestLocationPermission}
           >
-            <Text style={[styles.permissionButtonText, { color: colors.TEXT.WHITE }]}>{t('permissions.requestButton')}</Text>
+            <Text style={[styles.permissionButtonText, { color: colors.TEXT.WHITE }]}>{t('common:permissions.requestButton')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -802,7 +802,7 @@ export const NearbyUsersScreen = React.memo(() => {
         >
           <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.title')}</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyusers:nearbyUsers.title')}</Text>
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={handleRefresh}
@@ -870,9 +870,9 @@ export const NearbyUsersScreen = React.memo(() => {
               <View style={[styles.currentLocationCard, { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY + '20' }]}>
                 <Icon name="location" size={20} color={colors.PRIMARY} />
                 <View style={styles.currentLocationInfo}>
-                  <Text style={[styles.currentLocationTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.currentLocation')}</Text>
+                  <Text style={[styles.currentLocationTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyusers:nearbyUsers.currentLocation')}</Text>
                   <Text style={[styles.currentLocationAddress, { color: colors.TEXT.SECONDARY }]}>
-                    {currentLocation.address || t('nearbyUsers.loadingLocation')}
+                    {currentLocation.address || t('nearbyusers:nearbyUsers.loadingLocation')}
                   </Text>
                 </View>
               </View>
@@ -927,10 +927,10 @@ export const NearbyUsersScreen = React.memo(() => {
 
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-                {t('nearbyUsers.userCount', { count: filteredUsers.length })}
+                {t('nearbyUsers:nearbyUsers.userCount', { count: filteredUsers.length })}
               </Text>
               <Text style={[styles.sectionSubtitle, { color: colors.TEXT.SECONDARY }]}>
-                {t('nearbyUsers.radiusDistance', { radius: selectedRadius })}
+                {t('nearbyUsers:nearbyUsers.radiusDistance', { radius: selectedRadius })}
               </Text>
             </View>
             {filteredUsers.length > 0 && renderSwipeHint()}
@@ -939,9 +939,9 @@ export const NearbyUsersScreen = React.memo(() => {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Icon name="people-outline" size={64} color={colors.TEXT.LIGHT} />
-            <Text style={[styles.emptyTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyUsers.emptyState.title')}</Text>
+            <Text style={[styles.emptyTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyusers:nearbyUsers.emptyState.title')}</Text>
             <Text style={[styles.emptyDescription, { color: colors.TEXT.SECONDARY }]}>
-              {t('nearbyUsers.emptyState.subtitle')}
+              {t('nearbyusers:nearbyUsers.emptyState.subtitle')}
             </Text>
           </View>
         }

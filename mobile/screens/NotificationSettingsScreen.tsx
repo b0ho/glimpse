@@ -19,7 +19,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants/index';
 import { fcmService } from '@/services/notifications/fcmService';
 import { AppMode, MODE_TEXTS } from '../shared/types';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface SettingItemProps {
   title: string;
@@ -41,7 +41,7 @@ function SettingItem({
   const isPremium = usePremiumStore(premiumSelectors.isPremiumUser());
   const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
   const { colors } = useTheme();
-  const { t } = useTranslation(['settings', 'common']);
+  const { t } = useAndroidSafeTranslation('settings');
 
   const handleToggle = () => {
     if (isPremiumFeature && !isPremium) {
@@ -101,7 +101,7 @@ export function NotificationSettingsScreen() {
   const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
   const { currentMode } = useAuthStore();
   const { colors } = useTheme();
-  const { t } = useTranslation(['settings', 'common']);
+  const { t } = useAndroidSafeTranslation('settings');
   const {
     settings,
     isInitialized,

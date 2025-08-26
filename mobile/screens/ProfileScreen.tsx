@@ -9,7 +9,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuth } from '@/hooks/useAuth'; // 통합 인증 훅 - 환경에 따라 Clerk/DevAuth 자동 선택
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -36,7 +36,7 @@ export const ProfileScreen = () => {
   const [isNicknameModalVisible, setIsNicknameModalVisible] = useState(false);
   
   const navigation = useNavigation();
-  const { t } = useTranslation(['profile', 'common', 'settings']);
+  const { t } = useAndroidSafeTranslation('profile');
   const { signOut } = useAuth();
   const { colors } = useTheme();
   const authStore = useAuthStore();

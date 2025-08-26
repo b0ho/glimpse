@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { format } from 'date-fns';
 import { ko, enUS } from 'date-fns/locale';
@@ -23,7 +23,7 @@ import { Like, AppMode, MODE_TEXTS } from '../shared/types';
 
 export const LikeHistoryScreen = () => {
   const navigation = useNavigation();
-  const { t, i18n } = useTranslation(['matching', 'common']);
+  const { t, i18n } = useAndroidSafeTranslation('matching');
   const { colors } = useTheme();
   const { currentMode } = useAuthStore();
   const {

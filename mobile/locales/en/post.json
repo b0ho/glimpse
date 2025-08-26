@@ -1,0 +1,43 @@
+{
+  "errors": {
+    "loadFailed": "Unable to load the post.",
+    "commentFailed": "Failed to post comment.",
+    "permissionDenied": "Permission Required",
+    "permissionMessage": "Gallery access permission is required.",
+    "imageError": "Error",
+    "imageErrorMessage": "An error occurred while selecting images."
+  },
+  "alerts": {
+    "commentRequired": "Please enter comment content.",
+    "commentSuccess": "Comment has been posted.",
+    "commentDeleted": "Comment has been deleted."
+  },
+  "create": {
+    "loading": "Loading groups...",
+    "noGroups": "No groups joined.",
+    "editStory": "Edit Story",
+    "updateComplete": "Update Complete",
+    "defaultUserName": "TestUser"
+  },
+  "detail": {
+    "loadError": "Unable to load the post.",
+    "commentPlaceholder": "Enter your comment...",
+    "deleteTitle": "Delete Comment",
+    "deleteConfirm": "Are you sure you want to delete this comment?",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleteSuccess": "Comment has been deleted.",
+    "justNow": "Just now",
+    "me": "Me"
+  },
+  "sample": {
+    "title": "Study Group Recruitment",
+    "content": "Hello! We're starting a new study group.\n\nWe plan to meet every Saturday at 2 PM at a cafe near Gangnam Station. We're looking for people who want to grow together.\n\nIf you're interested, please let us know in the comments!",
+    "author": "Study Leader",
+    "group": "Sogang University",
+    "comment1": "I'm interested! I'd like to participate",
+    "comment2": "I'd also like to join. What topic will the study focus on?",
+    "comment3": "Great opportunity! I really want to participate",
+    "anonymousName": "Anonymous"
+  }
+}

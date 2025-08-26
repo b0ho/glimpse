@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -31,7 +31,7 @@ interface LikeInfo {
 }
 
 export const WhoLikesYouScreen = () => {
-  const { t } = useTranslation('premium');
+  const { t } = useAndroidSafeTranslation('premium');
   const navigation = useNavigation();
   const { user } = useAuthStore();
   const { colors } = useTheme();
@@ -59,7 +59,7 @@ export const WhoLikesYouScreen = () => {
           id: like.fromUserId,
           anonymousId: `anon_${like.fromUserId}`,
           phoneNumber: '',
-          nickname: t('whoLikesYou.anonymousUser'),
+          nickname: t('wholikesyou:whoLikesYou.anonymousUser'),
           isVerified: true,
           credits: 0,
           isPremium: false,
@@ -68,7 +68,7 @@ export const WhoLikesYouScreen = () => {
           updatedAt: new Date(like.createdAt),
         },
         groupId: like.groupId || 'unknown',
-        groupName: t('whoLikesYou.group'),
+        groupName: t('wholikesyou:whoLikesYou.group'),
         likedAt: new Date(like.createdAt),
         isSuper: like.isSuper || false,
       }));
@@ -76,7 +76,7 @@ export const WhoLikesYouScreen = () => {
       setLikesReceived(likeInfos);
     } catch (error: any) {
       console.error('[WhoLikesYouScreen] 받은 좋아요 로드 실패:', error);
-      Alert.alert(t('whoLikesYou.error'), t('whoLikesYou.loadError'));
+      Alert.alert(t('wholikesyou:whoLikesYou.error'), t('whoLikesYou:whoLikesYou.loadError'));
       setLikesReceived([]);
     }
   }, [user?.id, isPremiumUser]);
@@ -94,12 +94,12 @@ export const WhoLikesYouScreen = () => {
   const handleLikeBack = useCallback(async (likeInfo: LikeInfo) => {
     try {
       Alert.alert(
-        t('whoLikesYou.sendLike.title'),
-        t('whoLikesYou.sendLike.message', { nickname: likeInfo.fromUser.nickname }),
+        t('wholikesyou:whoLikesYou.sendLike.title'),
+        t('whoLikesYou:whoLikesYou.sendLike.message', { nickname: likeInfo.fromUser.nickname }),
         [
-          { text: t('whoLikesYou.sendLike.cancel'), style: 'cancel' },
+          { text: t('wholikesyou:whoLikesYou.sendLike.cancel'), style: 'cancel' },
           {
-            text: t('whoLikesYou.sendLike.confirm'),
+            text: t('wholikesyou:whoLikesYou.sendLike.confirm'),
             onPress: async () => {
               const success = await sendLike(
                 likeInfo.fromUser.id,
@@ -108,11 +108,11 @@ export const WhoLikesYouScreen = () => {
 
               if (success) {
                 Alert.alert(
-                  t('whoLikesYou.matchSuccess.title'),
-                  t('whoLikesYou.matchSuccess.message', { nickname: likeInfo.fromUser.nickname }),
+                  t('wholikesyou:whoLikesYou.matchSuccess.title'),
+                  t('whoLikesYou:whoLikesYou.matchSuccess.message', { nickname: likeInfo.fromUser.nickname }),
                   [
                     {
-                      text: t('whoLikesYou.matchSuccess.startChat'),
+                      text: t('wholikesyou:whoLikesYou.matchSuccess.startChat'),
                       onPress: () => {
                         // TODO: 실제 채팅 화면으로 이동 로직 구현 (Gemini 피드백 반영)
                         // navigation.navigate('Chat', { matchId: newMatchId, roomId: roomId });
@@ -122,7 +122,7 @@ export const WhoLikesYouScreen = () => {
                   ]
                 );
               } else {
-                Alert.alert(t('common:error'), t('whoLikesYou.errors.sendLikeFailed'));
+                Alert.alert(t('common:error'), t('wholikesyou:whoLikesYou.errors.sendLikeFailed'));
               }
             },
           },
@@ -130,7 +130,7 @@ export const WhoLikesYouScreen = () => {
       );
     } catch (error) {
       console.error('Error sending like back:', error);
-      Alert.alert(t('common:error'), t('whoLikesYou.errors.sendLikeError'));
+      Alert.alert(t('common:error'), t('wholikesyou:whoLikesYou.errors.sendLikeError'));
     }
   }, [sendLike]);
 
@@ -139,12 +139,12 @@ export const WhoLikesYouScreen = () => {
       // 프리미엄 사용자가 아닌 경우 체크
       if (!isPremiumUser) {
         Alert.alert(
-          t('whoLikesYou.premiumFeature.title'),
-          t('whoLikesYou.premiumFeature.message'),
+          t('wholikesyou:whoLikesYou.premiumFeature.title'),
+          t('whoLikesYou:whoLikesYou.premiumFeature.message'),
           [
             { text: t('common:buttons.cancel'), style: 'cancel' },
             {
-              text: t('whoLikesYou.premiumFeature.subscribe'),
+              text: t('wholikesyou:whoLikesYou.premiumFeature.subscribe'),
               onPress: () => navigation.navigate('Premium' as never),
             },
           ]
@@ -156,8 +156,8 @@ export const WhoLikesYouScreen = () => {
       if (!canSendSuperLike()) {
         const remaining = getRemainingSuperLikes();
         Alert.alert(
-          t('whoLikesYou.superLike.limitExceeded'),
-          t('whoLikesYou.superLike.limitExceededMessage', { remaining }),
+          t('wholikesyou:whoLikesYou.superLike.limitExceeded'),
+          t('whoLikesYou:whoLikesYou.superLike.limitExceededMessage', { remaining }),
           [{ text: t('common:buttons.confirm') }]
         );
         return;
@@ -165,12 +165,12 @@ export const WhoLikesYouScreen = () => {
 
       const remainingSuperLikes = getRemainingSuperLikes();
       Alert.alert(
-        t('whoLikesYou.superLike.sendTitle'),
-        t('whoLikesYou.superLike.sendMessage', { nickname: likeInfo.fromUser.nickname, remaining: remainingSuperLikes - 1 }),
+        t('wholikesyou:whoLikesYou.superLike.sendTitle'),
+        t('whoLikesYou:whoLikesYou.superLike.sendMessage', { nickname: likeInfo.fromUser.nickname, remaining: remainingSuperLikes - 1 }),
         [
           { text: t('common:buttons.cancel'), style: 'cancel' },
           {
-            text: t('whoLikesYou.superLike.sendButton'),
+            text: t('wholikesyou:whoLikesYou.superLike.sendButton'),
             style: 'default',
             onPress: async () => {
               const success = await sendSuperLike(
@@ -180,11 +180,11 @@ export const WhoLikesYouScreen = () => {
 
               if (success) {
                 Alert.alert(
-                  t('whoLikesYou.superLike.matchSuccess'),
-                  t('whoLikesYou.superLike.matchSuccessMessage', { nickname: likeInfo.fromUser.nickname }),
+                  t('wholikesyou:whoLikesYou.superLike.matchSuccess'),
+                  t('whoLikesYou:whoLikesYou.superLike.matchSuccessMessage', { nickname: likeInfo.fromUser.nickname }),
                   [
                     {
-                      text: t('whoLikesYou.superLike.startChat'),
+                      text: t('wholikesyou:whoLikesYou.superLike.startChat'),
                       onPress: () => {
                         // TODO: 실제 채팅 화면으로 이동 로직 구현 (Gemini 피드백 반영)
                         // navigation.navigate('Chat', { matchId: newMatchId, roomId: roomId });
@@ -194,7 +194,7 @@ export const WhoLikesYouScreen = () => {
                   ]
                 );
               } else {
-                Alert.alert(t('common:status.error'), t('whoLikesYou.superLike.sendFailed'));
+                Alert.alert(t('common:status.error'), t('wholikesyou:whoLikesYou.superLike.sendFailed'));
               }
             },
           },
@@ -202,7 +202,7 @@ export const WhoLikesYouScreen = () => {
       );
     } catch (error) {
       console.error('Error sending super like back:', error);
-      Alert.alert(t('common:status.error'), t('whoLikesYou.superLike.sendError'));
+      Alert.alert(t('common:status.error'), t('wholikesyou:whoLikesYou.superLike.sendError'));
     }
   }, [sendSuperLike, isPremiumUser, canSendSuperLike, getRemainingSuperLikes, navigation]);
 
@@ -245,7 +245,7 @@ export const WhoLikesYouScreen = () => {
           onPress={() => handleLikeBack(item)}
         >
           <Icon name="heart" size={20} color={colors.TEXT.WHITE} />
-          <Text style={[styles.likeButtonText, { color: colors.TEXT.WHITE }]}>{t('whoLikesYou.sendLikeButton')}</Text>
+          <Text style={[styles.likeButtonText, { color: colors.TEXT.WHITE }]}>{t('wholikesyou:whoLikesYou.sendLikeButton')}</Text>
         </TouchableOpacity>
         
         {isPremiumUser && canSendSuperLike() && (
@@ -255,7 +255,7 @@ export const WhoLikesYouScreen = () => {
           >
             <Icon name="star" size={20} color={colors.TEXT.WHITE} />
             <Text style={[styles.superLikeButtonText, { color: colors.TEXT.WHITE }]}>
-              {t('whoLikesYou.superLikeButton')} ({getRemainingSuperLikes()})
+              {t('wholikesyou:whoLikesYou.superLikeButton')} ({getRemainingSuperLikes()})
             </Text>
           </TouchableOpacity>
         )}
@@ -266,7 +266,7 @@ export const WhoLikesYouScreen = () => {
             disabled={true}
           >
             <Icon name="star-outline" size={20} color={colors.TEXT.LIGHT} />
-            <Text style={[styles.superLikeButtonDisabledText, { color: colors.TEXT.LIGHT }]}>{t('whoLikesYou.limitExceeded')}</Text>
+            <Text style={[styles.superLikeButtonDisabledText, { color: colors.TEXT.LIGHT }]}>{t('wholikesyou:whoLikesYou.limitExceeded')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -276,9 +276,9 @@ export const WhoLikesYouScreen = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Icon name="heart-outline" size={64} color={colors.TEXT.LIGHT} />
-      <Text style={[styles.emptyTitle, { color: colors.TEXT.PRIMARY }]}>{t('whoLikesYou.noLikes')}</Text>
+      <Text style={[styles.emptyTitle, { color: colors.TEXT.PRIMARY }]}>{t('wholikesyou:whoLikesYou.noLikes')}</Text>
       <Text style={[styles.emptyDescription, { color: colors.TEXT.SECONDARY }]}>
-        {t('whoLikesYou.noLikesFullDescription')}
+        {t('wholikesyou:whoLikesYou.noLikesFullDescription')}
       </Text>
     </View>
   );
@@ -288,15 +288,15 @@ export const WhoLikesYouScreen = () => {
       <View style={styles.premiumIcon}>
         <Icon name="diamond-outline" size={48} color={colors.PRIMARY} />
       </View>
-      <Text style={[styles.premiumTitle, { color: colors.TEXT.PRIMARY }]}>{t('whoLikesYou.premiumRequired')}</Text>
+      <Text style={[styles.premiumTitle, { color: colors.TEXT.PRIMARY }]}>{t('wholikesyou:whoLikesYou.premiumRequired')}</Text>
       <Text style={[styles.premiumDescription, { color: colors.TEXT.SECONDARY }]}>
-        {t('whoLikesYou.premiumDescription')}
+        {t('wholikesyou:whoLikesYou.premiumDescription')}
       </Text>
       <TouchableOpacity
         style={[styles.premiumButton, { backgroundColor: colors.PRIMARY }]}
         onPress={() => navigation.navigate('Premium' as never)}
       >
-        <Text style={[styles.premiumButtonText, { color: colors.TEXT.WHITE }]}>{t('whoLikesYou.upgradeToPremium')}</Text>
+        <Text style={[styles.premiumButtonText, { color: colors.TEXT.WHITE }]}>{t('wholikesyou:whoLikesYou.upgradeToPremium')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -311,7 +311,7 @@ export const WhoLikesYouScreen = () => {
           >
             <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('whoLikesYou.title')}</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('wholikesyou:whoLikesYou.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         
@@ -330,7 +330,7 @@ export const WhoLikesYouScreen = () => {
           >
             <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('whoLikesYou.title')}</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('wholikesyou:whoLikesYou.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         

@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 // import { useAuth } from '@clerk/clerk-expo';
 import { useAuth } from '@/hooks/useDevAuth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -24,7 +24,7 @@ export const DeleteAccountScreen = () => {
   const navigation = useNavigation();
   const { signOut } = useAuth();
   const { user, clearAuth } = useAuthStore();
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation();
   const { colors } = useTheme();
   
   const [deleteReason, setDeleteReason] = useState('');

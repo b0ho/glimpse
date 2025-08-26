@@ -2,7 +2,9 @@
   "tabs": {
     "home": "Home",
     "groups": "Groups",
+    "interest": "Interest",
     "matches": "Matches",
+    "chat": "Chat",
     "profile": "Profile",
     "community": "Community",
     "groupChat": "Group Chat",
@@ -14,6 +16,7 @@
     "createGroup": "Create New Group",
     "locationGroup": "Location-based Group",
     "nearbyUsers": "Nearby Users",
+    "nearbyGroups": "Nearby Groups",
     "map": "Map",
     "groupInvite": "Group Invite",
     "joinGroup": "Join Group",

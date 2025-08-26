@@ -1,0 +1,29 @@
+{
+  "nearbyGroups": {
+    "title": "근처 그룹"
+  },
+  "alerts": {
+    "permission": {
+      "title": "위치 권한 필요",
+      "message": "근처 그룹을 찾기 위해 위치 권한이 필요합니다.",
+      "later": "나중에",
+      "requestError": "위치 권한 요청 중 오류가 발생했습니다."
+    },
+    "location": {
+      "error": "위치 정보를 가져올 수 없습니다.",
+      "required": "위치 정보가 필요합니다."
+    },
+    "group": {
+      "joinTitle": "그룹 가입",
+      "joinMessage": "{{groupName}} 그룹에 가입하시겠습니까?",
+      "join": "가입",
+      "joinSuccess": "그룹에 성공적으로 가입했습니다.",
+      "joinError": "그룹 가입 중 오류가 발생했습니다.",
+      "createSuccess": "그룹이 성공적으로 생성되었습니다.",
+      "createError": "그룹 생성 중 오류가 발생했습니다."
+    },
+    "validation": {
+      "allFields": "모든 필드를 입력해주세요."
+    }
+  }
+}
