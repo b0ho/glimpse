@@ -54,9 +54,12 @@
     "startChatting": "매칭된 사람과 대화를 시작해보세요",
     "noMessages": "메시지가 없습니다",
     "sayHello": "인사를 건네보세요!",
-    "title": "대화를 시작하세요!",
-    "subtitle": "{{name}}님과 첫 메시지를 보내세요.\n서로를 알아가는 시간을 가져보세요."
+    "title": "아직 채팅이 없습니다",
+    "subtitle": "매칭된 상대와 대화를 시작해보세요!",
+    "findInterest": "관심상대 찾기",
+    "findGroups": "그룹 찾기"
   },
+  "subtitle": "매칭된 상대와의 대화",
   "encryption": {
     "encrypted": "종단간 암호화됨",
     "secureChat": "안전한 채팅"
@@ -101,5 +104,12 @@
     "viewImage": "이미지 보기",
     "viewImageHint": "탭하면 이미지를 크게 볼 수 있습니다",
     "messageOptions": "길게 누르면 메시지 옵션을 볼 수 있습니다"
+  },
+  "leave": {
+    "title": "채팅 나가기",
+    "confirmMessage": "이 채팅방을 나가시겠습니까?\n대화 내용이 모두 삭제됩니다.",
+    "cancel": "취소",
+    "confirm": "나가기",
+    "error": "채팅 나가기에 실패했습니다."
   }
 }

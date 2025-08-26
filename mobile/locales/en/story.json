@@ -29,5 +29,32 @@
     "title": "Story Preview",
     "share": "Share",
     "captionPlaceholder": "Add caption..."
+  },
+  "create": {
+    "title": "Create Story",
+    "share": "Share",
+    "photoRequired": {
+      "title": "Photo Required",
+      "message": "Please select a photo for your story."
+    },
+    "uploadSuccess": {
+      "title": "Story Uploaded",
+      "message": "Your story has been uploaded successfully!"
+    },
+    "imageError": {
+      "title": "Error",
+      "message": "An error occurred while selecting image."
+    },
+    "uploadError": {
+      "title": "Error", 
+      "message": "Failed to upload story."
+    },
+    "addPhoto": "Add Photo",
+    "addPhotoSubtext": "Select a photo to share in your story",
+    "changePhoto": "Change Photo",
+    "guidelines": {
+      "title": "📖 Story Guidelines",
+      "text": "• Stories disappear after 24 hours\n• Share your moments naturally\n• Inappropriate content may be reported\n• Respect others' privacy"
+    }
   }
 }

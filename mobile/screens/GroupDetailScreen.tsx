@@ -16,6 +16,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { useGroupStore } from '@/store/slices/groupSlice';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface GroupDetailScreenProps {
@@ -32,6 +33,7 @@ interface GroupDetailScreenProps {
 export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) => {
   const navigation = useNavigation<any>();
   const { colors } = useTheme();
+  const { t } = useAndroidSafeTranslation('group');
   const { groupId } = route.params;
   const { groups, joinGroup, leaveGroup, getOrCreateInviteCode, isUserInGroup } = useGroupStore();
   
@@ -79,12 +81,12 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
   const handleJoinLeave = async () => {
     if (isJoined) {
       Alert.alert(
-        '그룹 나가기',
-        '정말 이 그룹을 나가시겠습니까?\n그룹 채팅방에서도 함께 나가게 됩니다.',
+        t('detail.alerts.leaveConfirm.title'),
+        t('detail.alerts.leaveConfirm.message'),
         [
-          { text: '취소', style: 'cancel' },
+          { text: t('detail.alerts.leaveConfirm.cancel'), style: 'cancel' },
           {
-            text: '나가기',
+            text: t('detail.alerts.leaveConfirm.confirm'),
             style: 'destructive',
             onPress: async () => {
               try {
@@ -93,10 +95,10 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
                 setIsJoined(false);
                 // 그룹 정보 업데이트
                 setGroup({ ...group, memberCount: group.memberCount - 1 });
-                Alert.alert('알림', '그룹을 나갔습니다.');
+                Alert.alert(t('detail.alerts.leaveSuccess.title'), t('detail.alerts.leaveSuccess.message'));
                 navigation.goBack();
               } catch (error) {
-                Alert.alert('오류', '그룹 나가기에 실패했습니다.');
+                Alert.alert(t('detail.alerts.leaveError.title'), t('detail.alerts.leaveError.message'));
               }
             },
           },
@@ -109,16 +111,16 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
         setIsJoined(true);
         // 그룹 정보 업데이트
         setGroup({ ...group, memberCount: group.memberCount + 1 });
-        Alert.alert('알림', '그룹에 참여했습니다.');
+        Alert.alert(t('detail.alerts.joinSuccess.title'), t('detail.alerts.joinSuccess.message'));
       } catch (error) {
-        Alert.alert('오류', '그룹 참여에 실패했습니다.');
+        Alert.alert(t('detail.alerts.joinError.title'), t('detail.alerts.joinError.message'));
       }
     }
   };
 
   const handleInviteCode = async () => {
     if (!isJoined) {
-      Alert.alert('알림', '그룹에 참여한 후 초대코드를 생성할 수 있습니다.');
+      Alert.alert(t('detail.alerts.inviteCodeRequiresJoin.title'), t('detail.alerts.inviteCodeRequiresJoin.message'));
       return;
     }
     
@@ -127,17 +129,17 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
       setInviteCode(code);
       setShowInviteModal(true);
     } catch (error) {
-      Alert.alert('오류', '초대코드 생성에 실패했습니다.');
+      Alert.alert(t('detail.alerts.inviteCodeError.title'), t('detail.alerts.inviteCodeError.message'));
     }
   };
 
   const handleShareInviteCode = async () => {
     try {
-      const message = `${group.name} 그룹에 초대합니다!\n\n초대코드: ${inviteCode}\n\nGlimpse 앱에서 초대코드를 입력하여 그룹에 참여하세요!`;
+      const message = t('detail.shareInviteMessage', { groupName: group.name, inviteCode });
       
       await Share.share({
         message,
-        title: '그룹 초대',
+        title: t('detail.shareInviteTitle'),
       });
     } catch (error) {
       console.error('Share failed:', error);
@@ -146,13 +148,13 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
 
   const handleGroupChat = () => {
     if (!isJoined) {
-      Alert.alert('알림', '그룹에 참여한 후 채팅에 참여할 수 있습니다.');
+      Alert.alert(t('detail.alerts.chatRequiresJoin.title'), t('detail.alerts.chatRequiresJoin.message'));
       return;
     }
     navigation.navigate('Chat', {
       roomId: `group-${groupId}`,
       matchId: groupId,
-      otherUserNickname: group?.name || '그룹 채팅',
+      otherUserNickname: group?.name || t('detail.chatButton'),
       isGroupChat: true,
     });
   };
@@ -169,7 +171,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
     return (
       <View style={[styles.errorContainer, { backgroundColor: colors.BACKGROUND }]}>
         <Text style={[styles.errorText, { color: colors.TEXT.PRIMARY }]}>
-          그룹을 찾을 수 없습니다.
+          {t('detail.notFound')}
         </Text>
       </View>
     );
@@ -184,7 +186,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
             <Icon name="arrow-back" size={28} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>
-            그룹 상세
+            {t('detail.title')}
           </Text>
           <View style={{ width: 28 }} />
         </View>
@@ -204,7 +206,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
               </Text>
             </View>
             <Text style={[styles.memberCount, { color: colors.TEXT.SECONDARY }]}>
-              멤버 {group.memberCount}명
+              {t('detail.memberCount', { count: group.memberCount })}
             </Text>
           </View>
           <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
@@ -227,7 +229,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
               color="#FFFFFF" 
             />
             <Text style={styles.mainButtonText}>
-              {isJoined ? '그룹 나가기' : '그룹 참여하기'}
+              {isJoined ? t('detail.leaveButton') : t('detail.joinButton')}
             </Text>
           </TouchableOpacity>
 
@@ -238,7 +240,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
                 onPress={handleGroupChat}
               >
                 <Icon name="chatbubbles" size={20} color="#FFFFFF" />
-                <Text style={styles.secondaryButtonText}>그룹 채팅 참여</Text>
+                <Text style={styles.secondaryButtonText}>{t('detail.chatButton')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
@@ -246,7 +248,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
                 onPress={handleInviteCode}
               >
                 <Icon name="share-social" size={20} color={colors.PRIMARY} />
-                <Text style={[styles.secondaryButtonText, { color: colors.PRIMARY }]}>초대코드 공유</Text>
+                <Text style={[styles.secondaryButtonText, { color: colors.PRIMARY }]}>{t('detail.inviteButton')}</Text>
               </TouchableOpacity>
             </>
           )}
@@ -255,7 +257,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
         {/* 멤버 섹션 */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            활동 중인 멤버
+            {t('detail.activeMembersTitle')}
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {group.members.map((member: any) => (
@@ -272,7 +274,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
         {/* 최근 게시물 */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            최근 게시물
+            {t('detail.recentPostsTitle')}
           </Text>
           {group.recentPosts.map((post: any) => (
             <TouchableOpacity
@@ -318,7 +320,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
             </TouchableOpacity>
             
             <Text style={[styles.modalTitle, { color: colors.TEXT.PRIMARY }]}>
-              그룹 초대코드
+              {t('detail.inviteCodeTitle')}
             </Text>
             
             <View style={[styles.inviteCodeBox, { backgroundColor: colors.BACKGROUND }]}>
@@ -328,7 +330,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
             </View>
             
             <Text style={[styles.modalDescription, { color: colors.TEXT.SECONDARY }]}>
-              이 코드를 친구와 공유하여 그룹에 초대하세요
+              {t('detail.inviteCodeDescription')}
             </Text>
             
             <TouchableOpacity
@@ -336,7 +338,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
               onPress={handleShareInviteCode}
             >
               <Icon name="share-social" size={20} color="#FFFFFF" />
-              <Text style={styles.shareButtonText}>SNS로 공유하기</Text>
+              <Text style={styles.shareButtonText}>{t('detail.shareToSNS')}</Text>
             </TouchableOpacity>
           </View>
         </View>

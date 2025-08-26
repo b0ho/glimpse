@@ -54,8 +54,10 @@
     "startChatting": "Start chatting with matched people",
     "noMessages": "No messages",
     "sayHello": "Say hello!",
-    "title": "Start a conversation!",
-    "subtitle": "Send your first message to {{name}}.\nTake time to get to know each other."
+    "title": "No chats yet",
+    "subtitle": "Start chatting with matched people!",
+    "findInterest": "Find Interest",
+    "findGroups": "Find Groups"
   },
   "encryption": {
     "encrypted": "End-to-end encrypted",
@@ -101,5 +103,12 @@
     "viewImage": "View image",
     "viewImageHint": "Tap to view image in full screen",
     "messageOptions": "Long press to see message options"
+  },
+  "leave": {
+    "title": "Leave Chat",
+    "confirmMessage": "Are you sure you want to leave this chat?\nAll conversation history will be deleted.",
+    "cancel": "Cancel",
+    "confirm": "Leave",
+    "error": "Failed to leave chat."
   }
 }

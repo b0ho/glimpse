@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useChatStore } from '@/store/slices/chatSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -42,7 +42,7 @@ export const ChatScreenSimple = () => {
   const route = useRoute<ChatScreenRouteProp>();
   const navigation = useNavigation();
   const { roomId, matchId, otherUserNickname } = route.params;
-  const { t } = useTranslation('chat');
+  const { t } = useAndroidSafeTranslation('chat');
   const { colors } = useTheme();
 
   // Local states
@@ -116,12 +116,12 @@ export const ChatScreenSimple = () => {
   // Handle leave chat
   const handleLeaveChat = () => {
     Alert.alert(
-      '채팅 나가기',
-      '이 채팅방을 나가시겠습니까?\n대화 내용이 모두 삭제됩니다.',
+      t('leave.title'),
+      t('leave.confirmMessage'),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('leave.cancel'), style: 'cancel' },
         {
-          text: '나가기',
+          text: t('leave.confirm'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -143,7 +143,7 @@ export const ChatScreenSimple = () => {
               navigation.goBack();
             } catch (error) {
               console.error('[ChatScreenSimple] 채팅 나가기 실패:', error);
-              Alert.alert('오류', '채팅 나가기에 실패했습니다.');
+              Alert.alert(t('errors.error'), t('leave.error'));
             }
           },
         },
@@ -225,7 +225,7 @@ export const ChatScreenSimple = () => {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.PRIMARY} />
-          <Text style={[styles.loadingText, { color: colors.TEXT.SECONDARY }]}>채팅을 불러오는 중...</Text>
+          <Text style={[styles.loadingText, { color: colors.TEXT.SECONDARY }]}>{t('loading.text')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -254,7 +254,7 @@ export const ChatScreenSimple = () => {
           ]}
           value={inputText}
           onChangeText={setInputText}
-          placeholder="메시지를 입력하세요..."
+          placeholder={t('input.placeholder')}
           placeholderTextColor={colors.TEXT.SECONDARY}
           multiline
           maxLength={500}
@@ -267,7 +267,7 @@ export const ChatScreenSimple = () => {
           onPress={handleSendMessage}
           disabled={!inputText.trim()}
         >
-          <Text style={[styles.sendButtonText, { color: colors.TEXT.WHITE }]}>전송</Text>
+          <Text style={[styles.sendButtonText, { color: colors.TEXT.WHITE }]}>{t('messageInput.send')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

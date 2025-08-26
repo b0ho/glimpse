@@ -1,0 +1,19 @@
+{
+  "skip": "Skip",
+  "next": "Next",
+  "start": "Get Started",
+  "steps": [
+    {
+      "title": "Find Your Ideal Match",
+      "description": "Express interest anonymously\nConnect only when feelings are mutual"
+    },
+    {
+      "title": "Safe Connections",
+      "description": "Meet trusted people through\ncompany, school, and hobby group verification"
+    },
+    {
+      "title": "Privacy Protected", 
+      "description": "Complete anonymity until matched\nYour information is safely protected"
+    }
+  ]
+}

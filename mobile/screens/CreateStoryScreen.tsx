@@ -11,7 +11,7 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -20,7 +20,7 @@ import { saveStory } from '@/utils/storyData';
 import { useTheme } from '@/hooks/useTheme';
 
 export const CreateStoryScreen = () => {
-  const { t } = useTranslation(['common', 'story']);
+  const { t } = useAndroidSafeTranslation('story');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -36,7 +36,7 @@ export const CreateStoryScreen = () => {
       console.log('[CreateStoryScreen] 권한 상태:', status);
       
       if (status !== 'granted') {
-        Alert.alert('권한 필요', '갤러리 접근 권한이 필요합니다.');
+        Alert.alert(t('permissions.required'), t('permissions.mediaLibrary'));
         return;
       }
 
@@ -62,13 +62,13 @@ export const CreateStoryScreen = () => {
       }
     } catch (error) {
       console.error('[CreateStoryScreen] 이미지 선택 에러:', error);
-      Alert.alert('오류', '이미지 선택 중 오류가 발생했습니다.');
+      Alert.alert(t('create.imageError.title'), t('create.imageError.message'));
     }
   };
 
   const handleSubmit = async () => {
     if (!selectedImage) {
-      Alert.alert('사진 필요', '스토리에 올릴 사진을 선택해주세요.');
+      Alert.alert(t('create.photoRequired.title'), t('create.photoRequired.message'));
       return;
     }
 
@@ -128,10 +128,10 @@ export const CreateStoryScreen = () => {
       // 성공 시 홈화면으로 이동
       navigation.navigate('HomeTab' as never);
       
-      Alert.alert('스토리 업로드 완료', '스토리가 성공적으로 업로드되었습니다!');
+      Alert.alert(t('create.uploadSuccess.title'), t('create.uploadSuccess.message'));
     } catch (error: any) {
       console.error('[CreateStoryScreen] 스토리 생성 실패:', error);
-      Alert.alert('오류', '스토리 업로드에 실패했습니다.');
+      Alert.alert(t('create.uploadError.title'), t('create.uploadError.message'));
     } finally {
       setIsSubmitting(false);
     }
@@ -146,7 +146,7 @@ export const CreateStoryScreen = () => {
         >
           <Icon name="close" size={24} color={colors.TEXT.SECONDARY} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>스토리 만들기</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('create.title')}</Text>
         <TouchableOpacity
           style={[
             styles.headerButton,
@@ -160,7 +160,7 @@ export const CreateStoryScreen = () => {
           {isSubmitting ? (
             <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
           ) : (
-            <Text style={[styles.submitButtonText, { color: colors.TEXT.WHITE }]}>공유</Text>
+            <Text style={[styles.submitButtonText, { color: colors.TEXT.WHITE }]}>{t('create.share')}</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -174,7 +174,7 @@ export const CreateStoryScreen = () => {
               onPress={handleImagePicker}
             >
               <Icon name="camera" size={20} color={colors.TEXT.WHITE} />
-              <Text style={[styles.changeImageText, { color: colors.TEXT.WHITE }]}>사진 바꾸기</Text>
+              <Text style={[styles.changeImageText, { color: colors.TEXT.WHITE }]}>{t('create.changePhoto')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -184,21 +184,18 @@ export const CreateStoryScreen = () => {
               onPress={handleImagePicker}
             >
               <Icon name="camera" size={48} color={colors.PRIMARY} />
-              <Text style={[styles.addPhotoText, { color: colors.TEXT.PRIMARY }]}>사진 추가</Text>
+              <Text style={[styles.addPhotoText, { color: colors.TEXT.PRIMARY }]}>{t('create.addPhoto')}</Text>
               <Text style={[styles.addPhotoSubtext, { color: colors.TEXT.SECONDARY }]}>
-                스토리에 공유할 사진을 선택해주세요
+                {t('create.addPhotoSubtext')}
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
         <View style={[styles.guidelines, { backgroundColor: colors.SURFACE }]}>
-          <Text style={[styles.guidelinesTitle, { color: colors.TEXT.PRIMARY }]}>📖 스토리 가이드라인</Text>
+          <Text style={[styles.guidelinesTitle, { color: colors.TEXT.PRIMARY }]}>{t('create.guidelines.title')}</Text>
           <Text style={[styles.guidelinesText, { color: colors.TEXT.SECONDARY }]}>
-            • 스토리는 24시간 후 자동으로 사라집니다{'\n'}
-            • 본인만의 순간을 자연스럽게 공유해보세요{'\n'}
-            • 부적절한 내용은 신고될 수 있습니다{'\n'}
-            • 타인의 프라이버시를 존중해주세요
+            {t('create.guidelines.text')}
           </Text>
         </View>
       </ScrollView>

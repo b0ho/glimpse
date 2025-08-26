@@ -177,6 +177,68 @@
       "content": "• Create groups with positive and constructive purposes\n• Discriminatory or inappropriate content is prohibited\n• Write clear and easy-to-understand names and descriptions\n• Matching will be activated automatically when minimum members are reached\n• Group admins can moderate inappropriate members"
     }
   },
+  "detail": {
+    "title": "Group Details",
+    "memberList": "Member List",
+    "groupSettings": "Group Settings",
+    "inviteMembers": "Invite Members",
+    "groupCode": "Group Code",
+    "shareCode": "Share Code",
+    "qrCode": "QR Code",
+    "location": "Location",
+    "radius": "Radius {{radius}}m",
+    "checkIn": "Check In",
+    "expiresAt": "Expires: {{time}}",
+    "notFound": "Group not found.",
+    "memberCount": "{{count}} members",
+    "joinButton": "Join Group",
+    "leaveButton": "Leave Group",
+    "chatButton": "Join Group Chat",
+    "inviteButton": "Share Invite Code",
+    "activeMembersTitle": "Active Members",
+    "recentPostsTitle": "Recent Posts",
+    "inviteCodeTitle": "Group Invite Code",
+    "inviteCodeDescription": "Share this code with friends to invite them to the group",
+    "shareToSNS": "Share on Social Media",
+    "shareInviteMessage": "Join the {{groupName}} group!\n\nInvite Code: {{inviteCode}}\n\nEnter the invite code in the Glimpse app to join the group!",
+    "shareInviteTitle": "Group Invitation",
+    "alerts": {
+      "leaveConfirm": {
+        "title": "Leave Group",
+        "message": "Are you sure you want to leave this group?\nYou will also be removed from the group chat.",
+        "cancel": "Cancel",
+        "confirm": "Leave"
+      },
+      "leaveSuccess": {
+        "title": "Notice",
+        "message": "You have left the group."
+      },
+      "leaveError": {
+        "title": "Error",
+        "message": "Failed to leave the group."
+      },
+      "joinSuccess": {
+        "title": "Notice",
+        "message": "You have joined the group."
+      },
+      "joinError": {
+        "title": "Error",
+        "message": "Failed to join the group."
+      },
+      "inviteCodeError": {
+        "title": "Error",
+        "message": "Failed to generate invite code."
+      },
+      "inviteCodeRequiresJoin": {
+        "title": "Notice",
+        "message": "You need to join the group first to generate an invite code."
+      },
+      "chatRequiresJoin": {
+        "title": "Notice",
+        "message": "You need to join the group first to participate in the chat."
+      }
+    }
+  },
   "qrJoin": {
     "title": "QR Code Group",
     "checkingPermission": "Checking camera permission...",
