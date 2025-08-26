@@ -1,0 +1,36 @@
+{
+  "title": "그룹 채팅",
+  "search": {
+    "placeholder": "채팅방 검색"
+  },
+  "actions": {
+    "browsePublic": "공개 채팅방 둘러보기",
+    "createChat": "채팅방 만들기"
+  },
+  "chat": {
+    "defaultDescription": "그룹 채팅방입니다",
+    "memberCount": "{{count}}명",
+    "unreadBadge": "{{count}}+",
+    "joinChat": "채팅방 입장"
+  },
+  "empty": {
+    "title": "참여 중인 채팅방이 없습니다",
+    "subtitle": "새로운 채팅방을 만들거나 공개 채팅방에 참여해보세요!"
+  },
+  "dummyData": {
+    "freeChat": "자유 수다방",
+    "freeChatDesc": "편하게 대화나누는 공간입니다",
+    "exerciseChat": "운동 메이트 구하기",
+    "exerciseChatDesc": "같이 운동하실 분들 모여요!",
+    "foodChat": "맛집 공유방",
+    "foodChatDesc": "맛있는 음식점 정보 공유해요",
+    "nicknames": {
+      "kind": "친절한이웃",
+      "fitness": "헬스왕"
+    },
+    "messages": {
+      "greeting": "안녕하세요! 반갑습니다~",
+      "meetup": "내일 저녁 7시 헬스장에서 만나요!"
+    }
+  }
+}

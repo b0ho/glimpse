@@ -1,0 +1,27 @@
+{
+  "title": "커뮤니티",
+  "categories": {
+    "all": "전체",
+    "popular": "인기", 
+    "recent": "최신",
+    "my": "내 글"
+  },
+  "post": {
+    "anonymous": "익명",
+    "moreImages": "+{{count}}",
+    "create": "글쓰기"
+  },
+  "empty": {
+    "title": "아직 게시글이 없습니다",
+    "subtitle": "첫 번째 글을 작성해보세요!"
+  },
+  "stats": {
+    "views": "조회수",
+    "likes": "좋아요", 
+    "comments": "댓글"
+  },
+  "actions": {
+    "refresh": "새로고침",
+    "createPost": "게시글 작성하기"
+  }
+}

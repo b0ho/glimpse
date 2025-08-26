@@ -1,0 +1,117 @@
+{
+  "title": "Privacy Policy",
+  "effectiveDate": "Effective Date: {{date}}",
+  "sections": {
+    "purpose": {
+      "title": "1. Purpose of Personal Information Collection and Use",
+      "description": "Glimpse (hereinafter \"the Company\") collects and uses personal information for the following purposes to provide anonymous matching services:",
+      "items": {
+        "registration": "Member registration and management: Identity verification, identification for membership services",
+        "matching": "Anonymous matching service provision: Group-based interest expression and mutual matching",
+        "payment": "Payment and settlement: Payment for premium service fees, purchases and billing",
+        "improvement": "Service improvement: New service development and customized service provision",
+        "security": "Prevention of fraudulent use: Prevention of identity theft and fraudulent transactions"
+      }
+    },
+    "collection": {
+      "title": "2. Personal Information Items Collected",
+      "required": {
+        "title": "Required Items:",
+        "items": {
+          "phone": "Mobile phone number (for SMS verification)",
+          "nickname": "Nickname",
+          "age": "Age",
+          "gender": "Gender"
+        }
+      },
+      "optional": {
+        "title": "Optional Items:",
+        "items": {
+          "photo": "Profile photo",
+          "introduction": "Self-introduction",
+          "company": "Company name (for company verification)",
+          "email": "Email (for company verification)",
+          "location": "Location information (when using location-based services)"
+        }
+      },
+      "automatic": {
+        "title": "Automatically Collected Items:",
+        "items": {
+          "usage": "Service usage records",
+          "logs": "Access logs",
+          "cookies": "Cookies",
+          "ip": "Access IP information",
+          "device": "Device information (OS, app version, etc.)"
+        }
+      }
+    },
+    "retention": {
+      "title": "3. Personal Information Retention and Use Period",
+      "description": "The Company processes and retains personal information within the personal information retention and use period according to laws or the personal information retention and use period agreed upon when collecting personal information from the data subject.",
+      "items": {
+        "member": "Member information: Until membership withdrawal",
+        "payment": "Payment information: 5 years according to E-Commerce Act",
+        "verification": "Identity verification information: 6 months according to Information and Communication Network Act",
+        "abuse": "Service abuse records: 1 year"
+      }
+    },
+    "thirdParty": {
+      "title": "4. Provision of Personal Information to Third Parties",
+      "description": "The Company does not provide users' personal information to external parties in principle. However, exceptions are made in the following cases:",
+      "items": {
+        "consent": "When users have given prior consent",
+        "legal": "When required by law or by investigative agencies according to procedures and methods specified by law for investigative purposes",
+        "payment": "When necessary for payment processing (PG companies: Toss Payments, Kakao Pay)"
+      }
+    },
+    "anonymity": {
+      "title": "5. Anonymity Guarantee",
+      "description": "Glimpse's core value is anonymity:",
+      "items": {
+        "realName": "Real names not disclosed until mutual matching",
+        "nickname": "Nickname-based activities",
+        "photo": "Optional profile photo disclosure",
+        "company": "Company verification information used only for verification purposes",
+        "location": "Location information used only for finding nearby groups, no personal location tracking"
+      }
+    },
+    "destruction": {
+      "title": "6. Destruction of Personal Information",
+      "description": "The Company destroys personal information without delay when it becomes unnecessary due to the expiration of the personal information retention period or achievement of processing purposes.",
+      "methods": {
+        "electronic": "Electronic file format: Permanently deleted in an irrecoverable manner",
+        "paper": "Paper documents: Shredded with a shredder or incinerated"
+      }
+    },
+    "rights": {
+      "title": "7. Rights of Users",
+      "description": "Users can exercise the following rights at any time:",
+      "items": {
+        "view": "Request to view personal information",
+        "correction": "Request correction if there are errors",
+        "deletion": "Request deletion",
+        "processing": "Request suspension of processing"
+      },
+      "exerciseNote": "Rights can be exercised through the settings menu in the app or customer service."
+    },
+    "officer": {
+      "title": "8. Personal Information Protection Officer",
+      "contact": {
+        "title": "Personal Information Protection Officer",
+        "email": "Email: privacy@glimpse.com"
+      },
+      "reports": {
+        "title": "If you need to report or consult about other personal information infringement:",
+        "items": {
+          "kisa": "Personal Information Protection Center (privacy.kisa.or.kr / 118)",
+          "prosecutor": "Supreme Prosecutors' Office Cyber Investigation Department (www.spo.go.kr / 1301)",
+          "police": "National Police Agency Cyber Safety Bureau (cyberbureau.police.go.kr / 182)"
+        }
+      }
+    },
+    "changes": {
+      "title": "9. Changes to Privacy Policy",
+      "description": "This privacy policy is effective from January 1, 2025, and if there are additions, deletions, and corrections to changes according to laws and policies, they will be announced through notices 7 days before the implementation of changes."
+    }
+  }
+}

@@ -11,10 +11,12 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 export const PrivacyPolicyScreen = () => {
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { t } = useAndroidSafeTranslation();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
@@ -25,7 +27,7 @@ export const PrivacyPolicyScreen = () => {
         >
           <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>개인정보 처리방침</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('privacy:title')}</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -35,143 +37,143 @@ export const PrivacyPolicyScreen = () => {
       >
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
           <Text style={[styles.updateDate, { color: colors.TEXT.SECONDARY }]}>
-            시행일: 2025년 1월 1일
+            {t('privacy:effectiveDate', { date: '2025년 1월 1일' })}
           </Text>
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            1. 개인정보의 수집 및 이용 목적
+            {t('privacy:sections.purpose.title')}
           </Text>
           <Text style={[styles.sectionContent, { color: colors.TEXT.SECONDARY }]}>
-            Glimpse(이하 "회사")는 익명 기반의 매칭 서비스를 제공하기 위해 다음과 같은 목적으로 개인정보를 수집·이용합니다:
+            {t('privacy:sections.purpose.description')}
             {'\n\n'}
-            • 회원 가입 및 관리: 본인 확인, 회원제 서비스 이용에 따른 본인 식별
-            {'\n'}• 익명 매칭 서비스 제공: 그룹 기반 관심 표현 및 상호 매칭
-            {'\n'}• 결제 및 정산: 프리미엄 서비스 이용료 결제, 구매 및 요금 결제
-            {'\n'}• 서비스 개선: 신규 서비스 개발 및 맞춤 서비스 제공
-            {'\n'}• 부정 이용 방지: 개인정보 도용 및 부정거래 방지
+            • {t('privacy:sections.purpose.items.registration')}
+            {'\n'}• {t('privacy:sections.purpose.items.matching')}
+            {'\n'}• {t('privacy:sections.purpose.items.payment')}
+            {'\n'}• {t('privacy:sections.purpose.items.improvement')}
+            {'\n'}• {t('privacy:sections.purpose.items.security')}
           </Text>
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            2. 수집하는 개인정보 항목
+            {t('privacy:sections.collection.title')}
           </Text>
           <Text style={[styles.sectionContent, { color: colors.TEXT.SECONDARY }]}>
-            <Text style={styles.bold}>필수 항목:</Text>
-            {'\n'}• 휴대폰 번호 (SMS 인증용)
-            {'\n'}• 닉네임
-            {'\n'}• 나이
-            {'\n'}• 성별
+            <Text style={styles.bold}>{t('privacy:sections.collection.required.title')}</Text>
+            {'\n'}• {t('privacy:sections.collection.required.items.phone')}
+            {'\n'}• {t('privacy:sections.collection.required.items.nickname')}
+            {'\n'}• {t('privacy:sections.collection.required.items.age')}
+            {'\n'}• {t('privacy:sections.collection.required.items.gender')}
             {'\n\n'}
-            <Text style={styles.bold}>선택 항목:</Text>
-            {'\n'}• 프로필 사진
-            {'\n'}• 자기소개
-            {'\n'}• 회사명 (회사 인증 시)
-            {'\n'}• 이메일 (회사 인증 시)
-            {'\n'}• 위치 정보 (위치 기반 서비스 이용 시)
+            <Text style={styles.bold}>{t('privacy:sections.collection.optional.title')}</Text>
+            {'\n'}• {t('privacy:sections.collection.optional.items.photo')}
+            {'\n'}• {t('privacy:sections.collection.optional.items.introduction')}
+            {'\n'}• {t('privacy:sections.collection.optional.items.company')}
+            {'\n'}• {t('privacy:sections.collection.optional.items.email')}
+            {'\n'}• {t('privacy:sections.collection.optional.items.location')}
             {'\n\n'}
-            <Text style={styles.bold}>자동 수집 항목:</Text>
-            {'\n'}• 서비스 이용 기록
-            {'\n'}• 접속 로그
-            {'\n'}• 쿠키
-            {'\n'}• 접속 IP 정보
-            {'\n'}• 기기 정보 (OS, 앱 버전 등)
+            <Text style={styles.bold}>{t('privacy:sections.collection.automatic.title')}</Text>
+            {'\n'}• {t('privacy:sections.collection.automatic.items.usage')}
+            {'\n'}• {t('privacy:sections.collection.automatic.items.logs')}
+            {'\n'}• {t('privacy:sections.collection.automatic.items.cookies')}
+            {'\n'}• {t('privacy:sections.collection.automatic.items.ip')}
+            {'\n'}• {t('privacy:sections.collection.automatic.items.device')}
           </Text>
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            3. 개인정보 보유 및 이용 기간
+            {t('privacy:sections.retention.title')}
           </Text>
           <Text style={[styles.sectionContent, { color: colors.TEXT.SECONDARY }]}>
-            회사는 법령에 따른 개인정보 보유·이용기간 또는 정보주체로부터 개인정보를 수집 시에 동의받은 개인정보 보유·이용기간 내에서 개인정보를 처리·보유합니다.
+            {t('privacy:sections.retention.description')}
             {'\n\n'}
-            • 회원 정보: 회원 탈퇴 시까지
-            {'\n'}• 결제 정보: 전자상거래법에 따라 5년
-            {'\n'}• 본인확인 정보: 정보통신망법에 따라 6개월
-            {'\n'}• 서비스 부정이용 기록: 1년
+            • {t('privacy:sections.retention.items.member')}
+            {'\n'}• {t('privacy:sections.retention.items.payment')}
+            {'\n'}• {t('privacy:sections.retention.items.verification')}
+            {'\n'}• {t('privacy:sections.retention.items.abuse')}
           </Text>
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            4. 개인정보의 제3자 제공
+            {t('privacy:sections.thirdParty.title')}
           </Text>
           <Text style={[styles.sectionContent, { color: colors.TEXT.SECONDARY }]}>
-            회사는 원칙적으로 이용자의 개인정보를 외부에 제공하지 않습니다. 다만, 다음의 경우에는 예외로 합니다:
+            {t('privacy:sections.thirdParty.description')}
             {'\n\n'}
-            • 이용자가 사전에 동의한 경우
-            {'\n'}• 법령의 규정에 의거하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우
-            {'\n'}• 결제 처리를 위해 필요한 경우 (PG사: 토스페이먼츠, 카카오페이)
+            • {t('privacy:sections.thirdParty.items.consent')}
+            {'\n'}• {t('privacy:sections.thirdParty.items.legal')}
+            {'\n'}• {t('privacy:sections.thirdParty.items.payment')}
           </Text>
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            5. 익명성 보장
+            {t('privacy:sections.anonymity.title')}
           </Text>
           <Text style={[styles.sectionContent, { color: colors.TEXT.SECONDARY }]}>
-            <Text style={styles.bold}>Glimpse의 핵심 가치는 익명성입니다:</Text>
+            <Text style={styles.bold}>{t('privacy:sections.anonymity.description')}</Text>
             {'\n\n'}
-            • 상호 매칭 전까지 실명 비공개
-            {'\n'}• 닉네임 기반 활동
-            {'\n'}• 프로필 사진 선택적 공개
-            {'\n'}• 회사 인증 정보는 인증 목적으로만 사용
-            {'\n'}• 위치 정보는 근처 그룹 찾기에만 활용, 개인 위치 추적 불가
+            • {t('privacy:sections.anonymity.items.realName')}
+            {'\n'}• {t('privacy:sections.anonymity.items.nickname')}
+            {'\n'}• {t('privacy:sections.anonymity.items.photo')}
+            {'\n'}• {t('privacy:sections.anonymity.items.company')}
+            {'\n'}• {t('privacy:sections.anonymity.items.location')}
           </Text>
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            6. 개인정보의 파기
+            {t('privacy:sections.destruction.title')}
           </Text>
           <Text style={[styles.sectionContent, { color: colors.TEXT.SECONDARY }]}>
-            회사는 개인정보 보유기간의 경과, 처리목적 달성 등 개인정보가 불필요하게 되었을 때에는 지체없이 해당 개인정보를 파기합니다.
+            {t('privacy:sections.destruction.description')}
             {'\n\n'}
-            • 전자적 파일 형태: 복구 불가능한 방법으로 영구 삭제
-            {'\n'}• 종이 문서: 분쇄기로 분쇄하거나 소각
+            • {t('privacy:sections.destruction.methods.electronic')}
+            {'\n'}• {t('privacy:sections.destruction.methods.paper')}
           </Text>
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            7. 이용자의 권리
+            {t('privacy:sections.rights.title')}
           </Text>
           <Text style={[styles.sectionContent, { color: colors.TEXT.SECONDARY }]}>
-            이용자는 언제든지 다음의 권리를 행사할 수 있습니다:
+            {t('privacy:sections.rights.description')}
             {'\n\n'}
-            • 개인정보 열람 요구
-            {'\n'}• 오류 등이 있을 경우 정정 요구
-            {'\n'}• 삭제 요구
-            {'\n'}• 처리정지 요구
+            • {t('privacy:sections.rights.items.view')}
+            {'\n'}• {t('privacy:sections.rights.items.correction')}
+            {'\n'}• {t('privacy:sections.rights.items.deletion')}
+            {'\n'}• {t('privacy:sections.rights.items.processing')}
             {'\n\n'}
-            권리 행사는 앱 내 설정 메뉴 또는 고객센터를 통해 가능합니다.
+            {t('privacy:sections.rights.exerciseNote')}
           </Text>
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            8. 개인정보 보호책임자
+            {t('privacy:sections.officer.title')}
           </Text>
           <Text style={[styles.sectionContent, { color: colors.TEXT.SECONDARY }]}>
-            개인정보 보호책임자
-            {'\n'}이메일: privacy@glimpse.com
+            {t('privacy:sections.officer.contact.title')}
+            {'\n'}{t('privacy:sections.officer.contact.email')}
             {'\n\n'}
-            기타 개인정보침해에 대한 신고나 상담이 필요하신 경우:
-            {'\n'}• 개인정보침해신고센터 (privacy.kisa.or.kr / 118)
-            {'\n'}• 대검찰청 사이버수사과 (www.spo.go.kr / 1301)
-            {'\n'}• 경찰청 사이버안전국 (cyberbureau.police.go.kr / 182)
+            {t('privacy:sections.officer.reports.title')}
+            {'\n'}• {t('privacy:sections.officer.reports.items.kisa')}
+            {'\n'}• {t('privacy:sections.officer.reports.items.prosecutor')}
+            {'\n'}• {t('privacy:sections.officer.reports.items.police')}
           </Text>
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            9. 개인정보 처리방침 변경
+            {t('privacy:sections.changes.title')}
           </Text>
           <Text style={[styles.sectionContent, { color: colors.TEXT.SECONDARY }]}>
-            이 개인정보 처리방침은 2025년 1월 1일부터 적용되며, 법령 및 방침에 따른 변경내용의 추가, 삭제 및 정정이 있는 경우에는 변경사항의 시행 7일 전부터 공지사항을 통하여 고지할 것입니다.
+            {t('privacy:sections.changes.description')}
           </Text>
         </View>
       </ScrollView>

@@ -1,0 +1,27 @@
+{
+  "title": "Community",
+  "categories": {
+    "all": "All",
+    "popular": "Popular", 
+    "recent": "Recent",
+    "my": "My Posts"
+  },
+  "post": {
+    "anonymous": "Anonymous",
+    "moreImages": "+{{count}}",
+    "create": "Write Post"
+  },
+  "empty": {
+    "title": "No posts yet",
+    "subtitle": "Write the first post!"
+  },
+  "stats": {
+    "views": "Views",
+    "likes": "Likes", 
+    "comments": "Comments"
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "createPost": "Create Post"
+  }
+}

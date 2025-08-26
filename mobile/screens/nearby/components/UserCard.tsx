@@ -9,6 +9,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { NearbyUser } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface UserCardProps {
   user: NearbyUser;
@@ -25,6 +26,7 @@ export const UserCard= ({
   onLike,
   onMessage,
 }) => {
+  const { t } = useAndroidSafeTranslation();
   const isMatch = false; // TODO: Check if user is matched with current user
   const formatDistance = (meters: number) => {
     if (meters < 1000) {
@@ -52,13 +54,13 @@ export const UserCard= ({
         </View>
         
         <View style={styles.details}>
-          <Text style={styles.detailText}>{user.age || '??'}세</Text>
+          <Text style={styles.detailText}>{t('nearbyusers:user.age', { age: user.age || '??' })}</Text>
           <Text style={styles.separator}>•</Text>
           <Text style={styles.detailText}>{formatDistance(user.distance)}</Text>
           {user.commonGroups && user.commonGroups.length > 0 && (
             <>
               <Text style={styles.separator}>•</Text>
-              <Text style={styles.detailText}>공통 그룹 {user.commonGroups.length}개</Text>
+              <Text style={styles.detailText}>{t('nearbyusers:user.commonGroups', { count: user.commonGroups.length })}</Text>
             </>
           )}
         </View>

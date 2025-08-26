@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface LocationHeaderProps {
   address?: string;
@@ -19,12 +20,13 @@ export const LocationHeader= ({
   nearbyCount,
   onRefresh,
 }) => {
+  const { t } = useAndroidSafeTranslation();
   return (
     <View style={styles.locationHeader}>
       <View style={styles.locationInfo}>
         <Icon name="location" size={20} color={COLORS.PRIMARY} />
         <Text style={styles.locationText} numberOfLines={1}>
-          {address || '위치 확인 중...'}
+          {address || t('nearbyusers:location.loading')}
         </Text>
       </View>
       <TouchableOpacity onPress={onRefresh} style={styles.refreshButton}>

@@ -17,6 +17,7 @@ import { useGroupStore } from '@/store/slices/groupSlice';
 import { CommunityPost } from '../../shared/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatDistanceToNow } from '@/utils/dateUtils';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface PostItemProps {
   post: CommunityPost;
@@ -24,6 +25,8 @@ interface PostItemProps {
 }
 
 const PostItem= ({ post, onPress }) => {
+  const { t } = useAndroidSafeTranslation();
+  
   return (
     <TouchableOpacity style={styles.postCard} onPress={onPress} activeOpacity={0.7}>
       {/* Author Info */}
@@ -33,7 +36,7 @@ const PostItem= ({ post, onPress }) => {
           style={styles.authorAvatar}
         />
         <View style={styles.authorInfo}>
-          <Text style={styles.authorName}>{post.author?.nickname || '익명'}</Text>
+          <Text style={styles.authorName}>{post.author?.nickname || t('community:post.anonymous')}</Text>
           <Text style={styles.postTime}>
             {formatDistanceToNow(post.createdAt)} • {post.group?.name}
           </Text>
@@ -55,7 +58,7 @@ const PostItem= ({ post, onPress }) => {
           ))}
           {post.imageUrls.length > 3 && (
             <View style={[styles.postImage, styles.moreImagesOverlay]}>
-              <Text style={styles.moreImagesText}>+{post.imageUrls.length - 3}</Text>
+              <Text style={styles.moreImagesText}>{t('community:post.moreImages', { count: post.imageUrls.length - 3 })}</Text>
             </View>
           )}
         </View>
@@ -84,6 +87,7 @@ export const CommunityScreen = () => {
   const navigation = useNavigation() as any;
   const { user } = useAuthStore();
   const { currentGroup } = useGroupStore();
+  const { t } = useAndroidSafeTranslation();
   
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -91,10 +95,10 @@ export const CommunityScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const categories = [
-    { id: 'all', name: '전체' },
-    { id: 'popular', name: '인기' },
-    { id: 'recent', name: '최신' },
-    { id: 'my', name: '내 글' },
+    { id: 'all', name: t('community:categories.all') },
+    { id: 'popular', name: t('community:categories.popular') },
+    { id: 'recent', name: t('community:categories.recent') },
+    { id: 'my', name: t('community:categories.my') },
   ];
 
   useEffect(() => {
@@ -116,8 +120,8 @@ export const CommunityScreen = () => {
           id: '1',
           authorId: 'user1',
           groupId: currentGroup?.id || 'group1',
-          title: '오늘 점심 같이 드실 분 계신가요?',
-          content: '회사 근처 맛집에서 점심 같이 드실 분 찾습니다. 12시 30분에 1층 로비에서 만나요!',
+          title: 'Anyone want to have lunch together today?',
+          content: 'Looking for someone to have lunch with at a restaurant near the company. Let\'s meet at the lobby on the 1st floor at 12:30!',
           imageUrls: [],
           viewCount: 45,
           likeCount: 12,
@@ -127,7 +131,7 @@ export const CommunityScreen = () => {
           updatedAt: new Date(),
           author: {
             id: 'user1',
-            nickname: '맛집탐험가',
+            nickname: 'Food Explorer',
             profileImage: 'https://via.placeholder.com/100',
           } as any,
         },
@@ -135,8 +139,8 @@ export const CommunityScreen = () => {
           id: '2',
           authorId: 'user2',
           groupId: currentGroup?.id || 'group1',
-          title: '주말 등산 모임 참여하실 분~',
-          content: '이번 주말에 북한산 등산 가실 분 모집합니다. 초보자도 환영해요! 아침 8시 출발 예정입니다.',
+          title: 'Anyone joining the weekend hiking group?',
+          content: 'Recruiting people to go hiking at Bukhansan this weekend. Beginners are welcome! We plan to depart at 8 AM.',
           imageUrls: ['https://via.placeholder.com/300', 'https://via.placeholder.com/300'],
           viewCount: 120,
           likeCount: 25,
@@ -145,7 +149,7 @@ export const CommunityScreen = () => {
           updatedAt: new Date(Date.now() - 3600000),
           author: {
             id: 'user2',
-            nickname: '산을좋아해',
+            nickname: 'Mountain Lover',
             profileImage: 'https://via.placeholder.com/100',
           } as any,
         },
@@ -220,8 +224,8 @@ export const CommunityScreen = () => {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Icon name="newspaper-outline" size={60} color={COLORS.TEXT.MUTED} />
-            <Text style={styles.emptyText}>아직 게시글이 없습니다</Text>
-            <Text style={styles.emptySubtext}>첫 번째 글을 작성해보세요!</Text>
+            <Text style={styles.emptyText}>{t('community:empty.title')}</Text>
+            <Text style={styles.emptySubtext}>{t('community:empty.subtitle')}</Text>
           </View>
         }
         refreshControl={

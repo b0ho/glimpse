@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface RadiusSelectorProps {
   radiusOptions: number[];
@@ -19,9 +20,10 @@ export const RadiusSelector= ({
   selectedRadius,
   onRadiusChange,
 }) => {
+  const { t } = useAndroidSafeTranslation();
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>검색 범위</Text>
+      <Text style={styles.label}>{t('nearbyusers:radius.label')}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.radiusSelector}>
           {radiusOptions.map((radius) => (
@@ -39,7 +41,7 @@ export const RadiusSelector= ({
                   selectedRadius === radius && styles.radiusTextActive,
                 ]}
               >
-                {radius}km
+                {t('nearbyusers:radius.distance', { distance: radius })}
               </Text>
             </TouchableOpacity>
           ))}

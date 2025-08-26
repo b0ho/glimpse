@@ -13,9 +13,11 @@ import { RootNavigationProp } from '@/types/navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useInstantMeetingStore } from '@/store/instantMeetingStore';
 import { COLORS_EXTENDED as COLORS, FONTS, SIZES } from '@/utils/constants';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 export function InstantMeetingScreen() {
   const navigation = useNavigation<RootNavigationProp>();
+  const { t } = useAndroidSafeTranslation();
   const { 
     currentMeeting, 
     participantCount,
@@ -39,12 +41,12 @@ export function InstantMeetingScreen() {
         const diff = expires.getTime() - now.getTime();
         
         if (diff <= 0) {
-          setTimeLeft('만료됨');
+          setTimeLeft(t('instant:meeting.expired'));
           clearInterval(timer);
         } else {
           const hours = Math.floor(diff / (1000 * 60 * 60));
           const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          setTimeLeft(`${hours}시간 ${minutes}분`);
+          setTimeLeft(t('instant:meeting.timeFormat', { hours, minutes }));
         }
       }, 1000);
 
@@ -66,12 +68,12 @@ export function InstantMeetingScreen() {
 
   const handleLeaveMeeting = () => {
     Alert.alert(
-      '모임 나가기',
-      '정말로 모임을 나가시겠습니까?',
+      t('instant:meeting.leaveMeeting.title'),
+      t('instant:meeting.leaveMeeting.message'),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('instant:meeting.leaveMeeting.cancel'), style: 'cancel' },
         { 
-          text: '나가기', 
+          text: t('instant:meeting.leaveMeeting.confirm'), 
           style: 'destructive',
           onPress: async () => {
             await leaveInstantMeeting();
@@ -101,34 +103,34 @@ export function InstantMeetingScreen() {
       <ScrollView style={styles.content}>
         {/* 참가자 현황 */}
         <View style={styles.statsCard}>
-          <Text style={styles.statsTitle}>참가자</Text>
-          <Text style={styles.statsValue}>{participantCount}명</Text>
-          <Text style={styles.timeLeft}>남은 시간: {timeLeft}</Text>
+          <Text style={styles.statsTitle}>{t('instant:meeting.participants')}</Text>
+          <Text style={styles.statsValue}>{t('instant:meeting.participantsCount', { count: participantCount })}</Text>
+          <Text style={styles.timeLeft}>{t('instant:meeting.timeLeft', { time: timeLeft })}</Text>
         </View>
 
         {/* 자동 매칭 상태 */}
         <View style={styles.matchingCard}>
           <Icon name="sync" size={32} color={COLORS.primary} />
-          <Text style={styles.matchingTitle}>자동 매칭 중</Text>
+          <Text style={styles.matchingTitle}>{t('instant:meeting.autoMatching')}</Text>
           <Text style={styles.matchingSubtext}>
-            내 특징과 찾는 사람 특징을 분석하고 있어요
+            {t('instant:meeting.matchingDescription')}
           </Text>
           {myStats.matches === 0 && (
             <TouchableOpacity 
               style={styles.updateButton}
               onPress={handleUpdateFeatures}
             >
-              <Text style={styles.updateButtonText}>특징 수정하기</Text>
+              <Text style={styles.updateButtonText}>{t('instant:meeting.updateFeatures')}</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {/* 내 매칭 현황 */}
         <View style={styles.activityCard}>
-          <Text style={styles.activityTitle}>내 매칭</Text>
+          <Text style={styles.activityTitle}>{t('instant:meeting.myMatches')}</Text>
           <View style={styles.activityStats}>
             <View style={styles.statItem}>
-              <Text style={styles.statLabel}>매칭 수</Text>
+              <Text style={styles.statLabel}>{t('instant:meeting.matchCount')}</Text>
               <Text style={styles.statValue}>{myStats.matches}</Text>
             </View>
           </View>
@@ -141,7 +143,7 @@ export function InstantMeetingScreen() {
             onPress={handleViewMatches}
           >
             <Text style={styles.matchButtonText}>
-              내 매칭 확인 ({myStats.matches})
+              {t('instant:meeting.viewMatches', { count: myStats.matches })}
             </Text>
             <Icon name="chevron-forward" size={20} color={COLORS.primary} />
           </TouchableOpacity>

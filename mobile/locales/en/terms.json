@@ -1,0 +1,128 @@
+{
+  "title": "Terms of Service",
+  "effectiveDate": "Effective Date: {{date}}",
+  "sections": {
+    "purpose": {
+      "title": "Article 1 (Purpose)",
+      "content": "These terms and conditions are intended to stipulate the rights, obligations, and responsibilities between the company and users regarding the use of the anonymous matching service (hereinafter \"Service\") provided by Glimpse (hereinafter \"Company\")."
+    },
+    "definitions": {
+      "title": "Article 2 (Definitions)",
+      "items": {
+        "service": "① \"Service\" refers to the anonymous group matching platform provided by the company.",
+        "member": "② \"Member\" refers to a person who agrees to these terms and has entered into a service usage contract with the company.",
+        "anonymousProfile": "③ \"Anonymous Profile\" refers to a profile that operates with a nickname without revealing the real name.",
+        "matching": "④ \"Matching\" refers to being connected through mutual interest expression.",
+        "group": "⑤ \"Group\" refers to a community formed based on common interests or affiliations.",
+        "premium": "⑥ \"Premium Service\" refers to additional features provided for a fee."
+      }
+    },
+    "validity": {
+      "title": "Article 3 (Validity and Changes of Terms)",
+      "items": {
+        "effectiveness": "① These terms become effective by being posted on the service screen or by notifying members in other ways.",
+        "changes": "② The company may change these terms as necessary within the scope that does not violate related laws.",
+        "notice": "③ Changed terms are announced 7 days before the application date, and in case of changes unfavorable to members, 30 days in advance."
+      }
+    },
+    "membership": {
+      "title": "Article 4 (Membership Registration and Account)",
+      "items": {
+        "registration": "① Membership registration is done through mobile phone number verification.",
+        "accuracy": "② Members must provide accurate information and immediately modify it when changed.",
+        "identity": "③ Service use is restricted if registered using another person's information.",
+        "responsibility": "④ Members are responsible for managing their own accounts and cannot allow third parties to use them."
+      }
+    },
+    "serviceUsage": {
+      "title": "Article 5 (Service Usage)",
+      "items": {
+        "availability": "① The service is provided 24 hours a day, 365 days a year in principle.",
+        "restrictions": "② Service may be restricted in the following cases:",
+        "restrictionReasons": {
+          "maintenance": "• System regular inspection, maintenance, replacement",
+          "force": "• Force majeure such as natural disasters, power outages",
+          "update": "• Updates for service improvement"
+        },
+        "limits": "③ Free members can express interest once a day, while premium members have unlimited access.",
+        "chat": "④ Chatting is only possible with matched partners."
+      }
+    },
+    "prohibited": {
+      "title": "Article 6 (Usage Restrictions)",
+      "description": "The following actions are prohibited, and service use will be restricted upon violation:",
+      "items": {
+        "identity": "• Identity theft of others or registration of false information",
+        "content": "• Posting inappropriate content such as pornography, profanity, slander",
+        "commercial": "• Commercial advertising, promotional activities",
+        "interference": "• Acts that interfere with service operation",
+        "harassment": "• Acts that cause discomfort to other members",
+        "fraud": "• Fraudulent acts such as demanding money after matching",
+        "crime": "• Criminal acts such as stalking, threatening"
+      }
+    },
+    "premium": {
+      "title": "Article 7 (Premium Service)",
+      "pricing": {
+        "title": "① Premium service fees:",
+        "monthly": "• Monthly: ₩9,900",
+        "yearly": "• Annual: ₩99,000 (17% discount)"
+      },
+      "benefits": {
+        "title": "② Premium benefits:",
+        "unlimited": "• Unlimited interest expression",
+        "received": "• View received interests",
+        "priority": "• Priority matching",
+        "undo": "• Undo function",
+        "readReceipt": "• Read confirmation"
+      },
+      "payment": "③ Payment is made through the App Store or Google Play.",
+      "refund": "④ Refunds follow each store's policy."
+    },
+    "content": {
+      "title": "Article 8 (Content and Copyright)",
+      "items": {
+        "ownership": "① Copyright of content posted by members on the service belongs to the members.",
+        "usage": "② The company may use members' content for service operation, promotion, etc.",
+        "infringement": "③ Content that infringes on others' copyrights is immediately deleted."
+      }
+    },
+    "privacy": {
+      "title": "Article 9 (Privacy Protection)",
+      "items": {
+        "protection": "① The company protects members' personal information according to related laws.",
+        "policy": "② Details regarding personal information processing follow the privacy policy.",
+        "anonymity": "③ Anonymity is a core value of the service, with real names not disclosed until mutual matching."
+      }
+    },
+    "liability": {
+      "title": "Article 10 (Limitation of Liability)",
+      "items": {
+        "free": "① The company is not responsible for services provided free of charge unless there are special provisions in related laws.",
+        "dispute": "② The company does not intervene in disputes between members and does not compensate for damages arising therefrom.",
+        "responsibility": "③ If a member causes damage to others while using the service, that member is responsible."
+      }
+    },
+    "withdrawal": {
+      "title": "Article 11 (Member Withdrawal)",
+      "items": {
+        "request": "① Members can request withdrawal at any time.",
+        "deletion": "② Member information is immediately deleted upon withdrawal, but may be retained for a certain period according to related laws.",
+        "restriction": "③ Re-registration is restricted for 30 days after withdrawal to prevent fraudulent use."
+      }
+    },
+    "disputes": {
+      "title": "Article 12 (Dispute Resolution)",
+      "items": {
+        "law": "① Matters not specified in these terms follow related laws and commercial practices.",
+        "jurisdiction": "② Disputes related to service use have Korean courts as the competent court.",
+        "resolution": "③ When disputes arise between members and the company, they are resolved amicably through mutual consultation."
+      }
+    },
+    "appendix": {
+      "title": "Appendix",
+      "effective": "These terms are effective from January 1, 2025.",
+      "contact": "Contact: support@glimpse.com"
+    }
+  }
+}

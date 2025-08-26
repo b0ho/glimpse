@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface LocationPermissionViewProps {
   isLoading: boolean;
@@ -18,11 +19,12 @@ export const LocationPermissionView= ({
   isLoading,
   onRequestPermission,
 }) => {
+  const { t } = useAndroidSafeTranslation();
   if (isLoading) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-        <Text style={styles.loadingText}>위치 권한 확인 중...</Text>
+        <Text style={styles.loadingText}>{t('nearbyusers:permission.loading')}</Text>
       </View>
     );
   }
@@ -30,12 +32,12 @@ export const LocationPermissionView= ({
   return (
     <View style={styles.centerContainer}>
       <Icon name="location-outline" size={80} color={COLORS.PRIMARY} />
-      <Text style={styles.title}>위치 권한이 필요합니다</Text>
+      <Text style={styles.title}>{t('nearbyusers:permission.title')}</Text>
       <Text style={styles.description}>
-        주변 사용자를 찾기 위해{`\n`}위치 정보가 필요합니다
+        {t('nearbyusers:permission.description')}
       </Text>
       <TouchableOpacity style={styles.button} onPress={onRequestPermission}>
-        <Text style={styles.buttonText}>위치 권한 허용하기</Text>
+        <Text style={styles.buttonText}>{t('nearbyusers:permission.allowButton')}</Text>
       </TouchableOpacity>
     </View>
   );

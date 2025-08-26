@@ -1,0 +1,36 @@
+{
+  "title": "Group Chat",
+  "search": {
+    "placeholder": "Search chat rooms"
+  },
+  "actions": {
+    "browsePublic": "Browse public chat rooms",
+    "createChat": "Create chat room"
+  },
+  "chat": {
+    "defaultDescription": "Group chat room",
+    "memberCount": "{{count}} members",
+    "unreadBadge": "{{count}}+",
+    "joinChat": "Join chat room"
+  },
+  "empty": {
+    "title": "No chat rooms joined yet",
+    "subtitle": "Create a new chat room or join a public one!"
+  },
+  "dummyData": {
+    "freeChat": "Free Chat Room",
+    "freeChatDesc": "A space for casual conversation",
+    "exerciseChat": "Find Exercise Buddy",
+    "exerciseChatDesc": "Looking for workout partners!",
+    "foodChat": "Restaurant Sharing",
+    "foodChatDesc": "Share delicious restaurant information",
+    "nicknames": {
+      "kind": "Kind Neighbor",
+      "fitness": "Fitness King"
+    },
+    "messages": {
+      "greeting": "Hello! Nice to meet you~",
+      "meetup": "Let's meet at the gym tomorrow at 7 PM!"
+    }
+  }
+}

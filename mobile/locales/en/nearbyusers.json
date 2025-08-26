@@ -1,0 +1,46 @@
+{
+  "nearbyUsers": {
+    "title": "Nearby Users",
+    "loading": "Finding nearby users...",
+    "searchRadius": "Search Radius",
+    "currentLocation": "Current Location",
+    "loadingLocation": "Getting location info...",
+    "userCount": "Nearby Users ({{count}})",
+    "radiusDistance": "Active users within {{radius}}km radius",
+    "ageUnit": " years old",
+    "commonGroups": "Common Groups:",
+    "moreGroups": "+{{count}}",
+    "emptyState": {
+      "title": "No users nearby",
+      "subtitle": "Try expanding the search radius or\ncheck again at a different time"
+    }
+  },
+  "location": {
+    "loading": "Checking location..."
+  },
+  "permission": {
+    "loading": "Checking location permission...",
+    "title": "Location permission needed",
+    "description": "Location information is needed\nto find nearby users",
+    "allowButton": "Allow location permission"
+  },
+  "radius": {
+    "label": "Search Range",
+    "distance": "{{distance}}km"
+  },
+  "user": {
+    "age": "{{age}} years old",
+    "commonGroups": "{{count}} common groups"
+  },
+  "matching": {
+    "sendLike": "Send Anonymous Like",
+    "sendLikeMessage": "Send an anonymous like to {{nickname}}?\n\n{{premium}}",
+    "premiumUnlimited": "Premium members get unlimited likes!",
+    "creditCost": "This will use 1 credit.",
+    "cancel": "Cancel",
+    "send": "Send",
+    "alreadySent": "You've already liked this user.",
+    "success": "Anonymous like sent! 💕",
+    "error": "Failed to send like."
+  }
+}

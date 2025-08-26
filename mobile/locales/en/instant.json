@@ -1,0 +1,99 @@
+{
+  "meeting": {
+    "title": "Instant Meeting",
+    "expired": "Expired",
+    "timeFormat": "{{hours}}h {{minutes}}m",
+    "participants": "Participants",
+    "participantsCount": "{{count}} people",
+    "timeLeft": "Time left: {{time}}",
+    "autoMatching": "Auto Matching",
+    "matchingDescription": "Analyzing your features and desired person characteristics",
+    "updateFeatures": "Update Features",
+    "myMatches": "My Matches",
+    "matchCount": "Matches",
+    "viewMatches": "View My Matches ({{count}})",
+    "leaveMeeting": {
+      "title": "Leave Meeting",
+      "message": "Are you sure you want to leave the meeting?",
+      "cancel": "Cancel",
+      "confirm": "Leave"
+    }
+  },
+  "join": {
+    "title": "Join Instant Meeting ({{step}}/3)",
+    "selectType": "Please select a meeting type",
+    "types": {
+      "casual": {
+        "title": "Casual Meeting",
+        "description": "Meet new people in a relaxed atmosphere"
+      },
+      "serious": {
+        "title": "Serious Meeting",
+        "description": "Meet people looking for serious relationships"
+      },
+      "activity": {
+        "title": "Activity-Based",
+        "description": "Share common interests and activities together"
+      }
+    },
+    "join": "Join",
+    "loading": "Matching...",
+    "processing": "Processing...",
+    "complete": "Complete",
+    "next": "Next",
+    "notAvailable": "No meetings currently in progress",
+    "step1": {
+      "title": "Instant Meeting Nickname",
+      "description": "Enter a nickname to use in the instant meeting",
+      "placeholder": "Enter nickname"
+    },
+    "step2": {
+      "title": "Enter Your Features",
+      "description": "Enter your features so other participants can find you"
+    },
+    "step3": {
+      "title": "Features You're Looking For",
+      "description": "Enter the characteristics of the person you want to meet"
+    },
+    "clothing": {
+      "upperWear": "Upper Wear",
+      "lowerWear": "Lower Wear",
+      "colors": {
+        "white": "White",
+        "black": "Black",
+        "gray": "Gray",
+        "navy": "Navy",
+        "beige": "Beige",
+        "red": "Red",
+        "blue": "Blue",
+        "other": "Other"
+      },
+      "types": {
+        "jeans": "Jeans",
+        "cotton_pants": "Cotton Pants",
+        "shorts": "Shorts",
+        "skirt": "Skirt",
+        "dress": "Dress",
+        "sportswear": "Sportswear",
+        "other": "Other"
+      }
+    },
+    "glasses": {
+      "title": "Glasses",
+      "wearing": "Wearing",
+      "notWearing": "Not Wearing",
+      "doesntMatter": "Doesn't Matter"
+    },
+    "features": {
+      "title": "Special Features",
+      "myPlaceholder": "e.g. Laptop with dev stickers",
+      "targetPlaceholder": "e.g. Pink tumbler"
+    },
+    "errors": {
+      "enterNickname": "Please enter a nickname",
+      "requiredClothing": "Please enter both upper and lower wear information",
+      "requiredTargetClothing": "Please enter both upper and lower wear information for the person you're looking for",
+      "joinFailed": "Failed to join the meeting. Please try again."
+    }
+  }
+}

@@ -18,6 +18,7 @@ import { useGroupStore } from '@/store/slices/groupSlice';
 import { GroupChat } from '../../shared/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatDistanceToNow } from '@/utils/dateUtils';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface ChatItemProps {
   chat: GroupChat;
@@ -25,6 +26,7 @@ interface ChatItemProps {
 }
 
 const ChatItem = ({ chat, onPress }: ChatItemProps) => {
+  const { t } = useAndroidSafeTranslation();
   const unreadCount = 0; // TODO: 실제 안읽은 메시지 수 계산
 
   return (
@@ -38,12 +40,12 @@ const ChatItem = ({ chat, onPress }: ChatItemProps) => {
         <View style={styles.chatHeader}>
           <Text style={styles.chatName} numberOfLines={1}>{chat.name}</Text>
           <Text style={styles.memberCount}>
-            <Icon name="people-outline" size={14} /> {chat.memberCount}명
+            <Icon name="people-outline" size={14} /> {t('groupchat:chat.memberCount', { count: chat.memberCount })}
           </Text>
         </View>
         
         <Text style={styles.chatDescription} numberOfLines={1}>
-          {chat.description || '그룹 채팅방입니다'}
+          {chat.description || t('groupchat:chat.defaultDescription')}
         </Text>
         
         {chat.lastMessage && (
@@ -60,7 +62,7 @@ const ChatItem = ({ chat, onPress }: ChatItemProps) => {
 
       {unreadCount > 0 && (
         <View style={styles.unreadBadge}>
-          <Text style={styles.unreadText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
+          <Text style={styles.unreadText}>{unreadCount > 99 ? t('groupchat:chat.unreadBadge', { count: 99 }) : unreadCount}</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -71,6 +73,7 @@ export const GroupChatListScreen = () => {
   const navigation = useNavigation() as any;
   const { user } = useAuthStore();
   const { currentGroup } = useGroupStore();
+  const { t } = useAndroidSafeTranslation();
   
   const [chats, setChats] = useState<GroupChat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,8 +97,8 @@ export const GroupChatListScreen = () => {
         {
           id: '1',
           groupId: currentGroup?.id || 'group1',
-          name: '자유 수다방',
-          description: '편하게 대화나누는 공간입니다',
+          name: t('groupchat:dummyData.freeChat'),
+          description: t('groupchat:dummyData.freeChatDesc'),
           imageUrl: 'https://via.placeholder.com/100',
           maxMembers: 50,
           memberCount: 23,
@@ -107,21 +110,21 @@ export const GroupChatListScreen = () => {
             id: 'msg1',
             chatId: '1',
             senderId: 'user1',
-            content: '안녕하세요! 반갑습니다~',
+            content: t('groupchat:dummyData.messages.greeting'),
             type: 'TEXT',
             isEncrypted: true,
             createdAt: new Date(),
             sender: {
               id: 'user1',
-              nickname: '친절한이웃',
+              nickname: t('groupchat:dummyData.nicknames.kind'),
             } as any,
           } as any,
         },
         {
           id: '2',
           groupId: currentGroup?.id || 'group1',
-          name: '운동 메이트 구하기',
-          description: '같이 운동하실 분들 모여요!',
+          name: t('groupchat:dummyData.exerciseChat'),
+          description: t('groupchat:dummyData.exerciseChatDesc'),
           imageUrl: 'https://via.placeholder.com/100',
           maxMembers: 30,
           memberCount: 12,
@@ -133,21 +136,21 @@ export const GroupChatListScreen = () => {
             id: 'msg2',
             chatId: '2',
             senderId: 'user2',
-            content: '내일 저녁 7시 헬스장에서 만나요!',
+            content: t('groupchat:dummyData.messages.meetup'),
             type: 'TEXT',
             isEncrypted: true,
             createdAt: new Date(Date.now() - 3600000),
             sender: {
               id: 'user2',
-              nickname: '헬스왕',
+              nickname: t('groupchat:dummyData.nicknames.fitness'),
             } as any,
           } as any,
         },
         {
           id: '3',
           groupId: currentGroup?.id || 'group1',
-          name: '맛집 공유방',
-          description: '맛있는 음식점 정보 공유해요',
+          name: t('groupchat:dummyData.foodChat'),
+          description: t('groupchat:dummyData.foodChatDesc'),
           imageUrl: 'https://via.placeholder.com/100',
           maxMembers: 100,
           memberCount: 45,
@@ -203,7 +206,7 @@ export const GroupChatListScreen = () => {
         <Icon name="search-outline" size={20} color={COLORS.TEXT.MUTED} />
         <TextInput
           style={styles.searchInput}
-          placeholder="채팅방 검색"
+          placeholder={t('groupchat:search.placeholder')}
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholderTextColor={COLORS.TEXT.MUTED}
@@ -214,7 +217,7 @@ export const GroupChatListScreen = () => {
       <View style={styles.quickActions}>
         <TouchableOpacity style={styles.actionButton} onPress={handleJoinPublicChat}>
           <Icon name="globe-outline" size={20} color={COLORS.PRIMARY} />
-          <Text style={styles.actionText}>공개 채팅방 둘러보기</Text>
+          <Text style={styles.actionText}>{t('groupchat:actions.browsePublic')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -227,8 +230,8 @@ export const GroupChatListScreen = () => {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Icon name="chatbubbles-outline" size={60} color={COLORS.TEXT.MUTED} />
-            <Text style={styles.emptyText}>참여 중인 채팅방이 없습니다</Text>
-            <Text style={styles.emptySubtext}>새로운 채팅방을 만들거나 공개 채팅방에 참여해보세요!</Text>
+            <Text style={styles.emptyText}>{t('groupchat:empty.title')}</Text>
+            <Text style={styles.emptySubtext}>{t('groupchat:empty.subtitle')}</Text>
           </View>
         }
         refreshControl={

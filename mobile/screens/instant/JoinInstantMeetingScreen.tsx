@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { RootNavigationProp, JoinInstantMeetingScreenProps } from '@/types/navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useInstantMeetingStore } from '@/store/instantMeetingStore';
@@ -23,33 +23,36 @@ interface FeatureOption {
   value: string;
 }
 
-const UPPER_WEAR_OPTIONS: FeatureOption[] = [
-  { label: '흰색', value: 'white' },
-  { label: '검은색', value: 'black' },
-  { label: '회색', value: 'gray' },
-  { label: '네이비', value: 'navy' },
-  { label: '베이지', value: 'beige' },
-  { label: '빨간색', value: 'red' },
-  { label: '파란색', value: 'blue' },
-  { label: '기타', value: 'other' },
-];
+// 이 배열들은 컴포넌트 내부에서 번역됩니다.
 
-const LOWER_WEAR_OPTIONS: FeatureOption[] = [
-  { label: '청바지', value: 'jeans' },
-  { label: '면바지', value: 'cotton_pants' },
-  { label: '반바지', value: 'shorts' },
-  { label: '치마', value: 'skirt' },
-  { label: '원피스', value: 'dress' },
-  { label: '운동복', value: 'sportswear' },
-  { label: '기타', value: 'other' },
-];
 
 export function JoinInstantMeetingScreen() {
   const navigation = useNavigation<RootNavigationProp>();
   const route = useRoute<JoinInstantMeetingScreenProps['route']>();
   const { code } = route.params;
   const { joinMeetingWithFeatures } = useInstantMeetingStore();
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation();
+
+  const UPPER_WEAR_OPTIONS: FeatureOption[] = [
+    { label: t('instant:join.clothing.colors.white'), value: 'white' },
+    { label: t('instant:join.clothing.colors.black'), value: 'black' },
+    { label: t('instant:join.clothing.colors.gray'), value: 'gray' },
+    { label: t('instant:join.clothing.colors.navy'), value: 'navy' },
+    { label: t('instant:join.clothing.colors.beige'), value: 'beige' },
+    { label: t('instant:join.clothing.colors.red'), value: 'red' },
+    { label: t('instant:join.clothing.colors.blue'), value: 'blue' },
+    { label: t('instant:join.clothing.colors.other'), value: 'other' },
+  ];
+
+  const LOWER_WEAR_OPTIONS: FeatureOption[] = [
+    { label: t('instant:join.clothing.types.jeans'), value: 'jeans' },
+    { label: t('instant:join.clothing.types.cotton_pants'), value: 'cotton_pants' },
+    { label: t('instant:join.clothing.types.shorts'), value: 'shorts' },
+    { label: t('instant:join.clothing.types.skirt'), value: 'skirt' },
+    { label: t('instant:join.clothing.types.dress'), value: 'dress' },
+    { label: t('instant:join.clothing.types.sportswear'), value: 'sportswear' },
+    { label: t('instant:join.clothing.types.other'), value: 'other' },
+  ];
 
   const [step, setStep] = useState(1);
   const [nickname, setNickname] = useState('');
@@ -70,17 +73,17 @@ export function JoinInstantMeetingScreen() {
 
   const handleNext = () => {
     if (step === 1 && !nickname.trim()) {
-      Alert.alert(t('common:status.notification'), t('instant:join.errors.enterNickname'));
+      Alert.alert(t('common:notification'), t('instant:join.errors.enterNickname'));
       return;
     }
     
     if (step === 2 && (!myUpperWear || !myLowerWear)) {
-      Alert.alert(t('common:status.notification'), t('instant:join.errors.requiredClothing'));
+      Alert.alert(t('common:notification'), t('instant:join.errors.requiredClothing'));
       return;
     }
 
     if (step === 3 && (!lookingUpperWear || !lookingLowerWear)) {
-      Alert.alert(t('common:status.notification'), t('instant:join.errors.requiredTargetClothing'));
+      Alert.alert(t('common:notification'), t('instant:join.errors.requiredTargetClothing'));
       return;
     }
 
@@ -113,7 +116,7 @@ export function JoinInstantMeetingScreen() {
       
       navigation.replace('InstantMeeting');
     } catch (error) {
-      Alert.alert(t('common:status.error'), t('instant:join.errors.joinFailed'));
+      Alert.alert(t('common:error'), t('instant:join.errors.joinFailed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -195,7 +198,7 @@ export function JoinInstantMeetingScreen() {
 
         {/* 안경 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>안경</Text>
+          <Text style={styles.sectionTitle}>{t('instant:join.glasses.title')}</Text>
           <View style={styles.radioGroup}>
             <TouchableOpacity
               style={[
@@ -208,7 +211,7 @@ export function JoinInstantMeetingScreen() {
                 styles.radioText,
                 myGlasses === true && styles.radioTextActive
               ]}>
-                착용
+                {t('instant:join.glasses.wearing')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -222,7 +225,7 @@ export function JoinInstantMeetingScreen() {
                 styles.radioText,
                 myGlasses === false && styles.radioTextActive
               ]}>
-                미착용
+                {t('instant:join.glasses.notWearing')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -230,10 +233,10 @@ export function JoinInstantMeetingScreen() {
 
         {/* 특별한 특징 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>특별한 특징</Text>
+          <Text style={styles.sectionTitle}>{t('instant:join.features.title')}</Text>
           <TextInput
             style={styles.textInput}
-            placeholder="예: 노트북에 개발 스티커"
+            placeholder={t('instant:join.features.myPlaceholder')}
             placeholderTextColor={COLORS.textLight}
             value={mySpecialFeatures}
             onChangeText={setMySpecialFeatures}
@@ -245,9 +248,9 @@ export function JoinInstantMeetingScreen() {
 
   const renderStep3 = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>찾는 사람 특징</Text>
+      <Text style={styles.stepTitle}>{t('instant:join.step3.title')}</Text>
       <Text style={styles.stepDescription}>
-        만나고 싶은 사람의 특징을 입력해주세요
+        {t('instant:join.step3.description')}
       </Text>
 
       <ScrollView style={styles.featureContainer}>
@@ -301,7 +304,7 @@ export function JoinInstantMeetingScreen() {
 
         {/* 안경 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>안경</Text>
+          <Text style={styles.sectionTitle}>{t('instant:join.glasses.title')}</Text>
           <View style={styles.radioGroup}>
             <TouchableOpacity
               style={[
@@ -314,7 +317,7 @@ export function JoinInstantMeetingScreen() {
                 styles.radioText,
                 lookingGlasses === true && styles.radioTextActive
               ]}>
-                착용
+                {t('instant:join.glasses.wearing')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -328,7 +331,7 @@ export function JoinInstantMeetingScreen() {
                 styles.radioText,
                 lookingGlasses === false && styles.radioTextActive
               ]}>
-                미착용
+                {t('instant:join.glasses.notWearing')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -342,7 +345,7 @@ export function JoinInstantMeetingScreen() {
                 styles.radioText,
                 lookingGlasses === null && styles.radioTextActive
               ]}>
-                상관없음
+                {t('instant:join.glasses.doesntMatter')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -350,10 +353,10 @@ export function JoinInstantMeetingScreen() {
 
         {/* 특별한 특징 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>특별한 특징</Text>
+          <Text style={styles.sectionTitle}>{t('instant:join.features.title')}</Text>
           <TextInput
             style={styles.textInput}
-            placeholder="예: 분홍색 텀블러"
+            placeholder={t('instant:join.features.targetPlaceholder')}
             placeholderTextColor={COLORS.textLight}
             value={lookingSpecialFeatures}
             onChangeText={setLookingSpecialFeatures}
@@ -369,7 +372,7 @@ export function JoinInstantMeetingScreen() {
         <TouchableOpacity onPress={() => step > 1 ? setStep(step - 1) : navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>즉석 모임 참가 ({step}/3)</Text>
+        <Text style={styles.headerTitle}>{t('instant:join.title', { step })}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -392,7 +395,7 @@ export function JoinInstantMeetingScreen() {
           disabled={isSubmitting}
         >
           <Text style={styles.nextButtonText}>
-            {isSubmitting ? '처리 중...' : step === 3 ? '완료' : '다음'}
+            {isSubmitting ? t('instant:join.processing') : step === 3 ? t('instant:join.complete') : t('instant:join.next')}
           </Text>
         </TouchableOpacity>
       </View>

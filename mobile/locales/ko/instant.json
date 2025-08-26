@@ -1,0 +1,99 @@
+{
+  "meeting": {
+    "title": "즉석 미팅",
+    "expired": "만료됨",
+    "timeFormat": "{{hours}}시간 {{minutes}}분",
+    "participants": "참가자",
+    "participantsCount": "{{count}}명",
+    "timeLeft": "남은 시간: {{time}}",
+    "autoMatching": "자동 매칭 중",
+    "matchingDescription": "내 특징과 찾는 사람 특징을 분석하고 있어요",
+    "updateFeatures": "특징 수정하기",
+    "myMatches": "내 매칭",
+    "matchCount": "매칭 수",
+    "viewMatches": "내 매칭 확인 ({{count}})",
+    "leaveMeeting": {
+      "title": "모임 나가기",
+      "message": "정말로 모임을 나가시겠습니까?",
+      "cancel": "취소",
+      "confirm": "나가기"
+    }
+  },
+  "join": {
+    "title": "즉석 모임 참가 ({{step}}/3)",
+    "selectType": "미팅 유형을 선택해주세요",
+    "types": {
+      "casual": {
+        "title": "캐주얼 만남",
+        "description": "편안한 분위기에서 새로운 사람들과 만나요"
+      },
+      "serious": {
+        "title": "진지한 만남",
+        "description": "진지한 관계를 찾는 분들과 만나요"
+      },
+      "activity": {
+        "title": "활동 중심",
+        "description": "공통 관심사나 활동을 함께해요"
+      }
+    },
+    "join": "참여하기",
+    "loading": "매칭 중...",
+    "processing": "처리 중...",
+    "complete": "완료",
+    "next": "다음",
+    "notAvailable": "현재 진행 중인 미팅이 없습니다",
+    "step1": {
+      "title": "즉석 모임용 닉네임",
+      "description": "즉석 모임에서 사용할 닉네임을 입력해주세요",
+      "placeholder": "닉네임 입력"
+    },
+    "step2": {
+      "title": "내 특징 입력",
+      "description": "다른 참가자들이 나를 찾을 수 있도록 특징을 입력해주세요"
+    },
+    "step3": {
+      "title": "찾는 사람 특징",
+      "description": "만나고 싶은 사람의 특징을 입력해주세요"
+    },
+    "clothing": {
+      "upperWear": "상의",
+      "lowerWear": "하의",
+      "colors": {
+        "white": "흰색",
+        "black": "검은색",
+        "gray": "회색",
+        "navy": "네이비",
+        "beige": "베이지",
+        "red": "빨간색",
+        "blue": "파란색",
+        "other": "기타"
+      },
+      "types": {
+        "jeans": "청바지",
+        "cotton_pants": "면바지",
+        "shorts": "반바지",
+        "skirt": "치마",
+        "dress": "원피스",
+        "sportswear": "운동복",
+        "other": "기타"
+      }
+    },
+    "glasses": {
+      "title": "안경",
+      "wearing": "착용",
+      "notWearing": "미착용",
+      "doesntMatter": "상관없음"
+    },
+    "features": {
+      "title": "특별한 특징",
+      "myPlaceholder": "예: 노트북에 개발 스티커",
+      "targetPlaceholder": "예: 분홍색 텀블러"
+    },
+    "errors": {
+      "enterNickname": "닉네임을 입력해주세요",
+      "requiredClothing": "상의와 하의 정보를 모두 입력해주세요",
+      "requiredTargetClothing": "찾는 사람의 상의와 하의 정보를 모두 입력해주세요",
+      "joinFailed": "모임 참가에 실패했습니다. 다시 시도해주세요."
+    }
+  }
+}
