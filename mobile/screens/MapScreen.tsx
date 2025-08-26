@@ -15,6 +15,7 @@ import * as Location from 'expo-location';
 import { KakaoMapView } from '@/components/KakaoMapView';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { Group, GroupType, User } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
@@ -41,6 +42,7 @@ interface SelectedMarkerData {
 
 export const MapScreen = React.memo(() => {
   const navigation = useNavigation();
+  const { t } = useAndroidSafeTranslation();
   const { user } = useAuthStore();
   const { groups } = useGroupStore();
   
@@ -232,13 +234,13 @@ export const MapScreen = React.memo(() => {
   const joinGroup = (group: Group) => {
     // 그룹 참여 로직
     console.log('Joining group:', group);
-    Alert.alert('성공', `${group.name} 그룹에 참여했습니다!`);
+    Alert.alert(t('common:alerts.success.title'), t('map:alerts.groupJoined', { groupName: group.name }));
   };
 
   const sendLikeToUser = (userData: any) => {
     // 좋아요 전송 로직
     console.log('Sending like to user:', userData);
-    Alert.alert('성공', `${userData.nickname}님에게 익명 좋아요를 보냈습니다! 💕`);
+    Alert.alert(t('common:alerts.success.title'), t('map:alerts.likeSent', { nickname: userData.nickname }));
   };
 
   const createGroupAtPlace = (placeData: any) => {

@@ -13,7 +13,7 @@ import {
   Keyboard,
   Platform,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -47,7 +47,7 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
   disabled = false,
   placeholder,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation();
   const placeholderText = placeholder || t('chat:input.placeholder');
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -301,8 +301,8 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
           onPress={handleSendMessage}
           disabled={!canSend}
           accessibilityRole="button"
-          accessibilityLabel={t('accessibility.sendMessage')}
-          accessibilityHint={canSend ? t('accessibility.sendHint') : t('accessibility.sendHintDisabled')}
+          accessibilityLabel={t('common:accessibility.sendMessage')}
+          accessibilityHint={canSend ? t('accessibility:accessibility.sendHint') : t('common:accessibility.sendHintDisabled')}
         >
           <Icon
             name={isSending ? 'hourglass' : UI_ICONS.SEND}

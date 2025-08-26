@@ -24,5 +24,129 @@
   "drinking": "Drinking",
   "drinkingPlaceholder": "e.g., Sometimes, Never",
   "smoking": "Smoking",
-  "smokingPlaceholder": "e.g., Never"
+  "smokingPlaceholder": "e.g., Never",
+  "interest": {
+    "title": "Find Interest",
+    "subtitle": "Find someone special by their information",
+    "registerTitle": "Register Interest",
+    "registerSubtitle": "Register people you're interested in and get notified when they match",
+    "availableCount": "Available: {{count}} left",
+    "unlimited": "Unlimited",
+    "searchTypes": {
+      "phone": "Phone Number",
+      "email": "Email",
+      "socialId": "Social Account",
+      "name": "Name",
+      "group": "Specific Group",
+      "location": "Location",
+      "appearance": "Appearance",
+      "nickname": "Nickname",
+      "company": "Company",
+      "school": "School",
+      "hobby": "Hobbies/Interests",
+      "platform": "Other Platform",
+      "gameId": "Game ID"
+    },
+    "placeholder": {
+      "phone": "010-1234-5678",
+      "email": "example@email.com",
+      "socialId": "ID or username",
+      "name": "Full name",
+      "group": "Group name",
+      "location": "Location or address",
+      "appearance": "Physical features",
+      "nickname": "Nickname",
+      "company": "Company name",
+      "school": "School name",
+      "hobby": "Hobby or interest",
+      "platform": "Platform name",
+      "gameId": "Game ID or username",
+      "platformName": "Enter platform name",
+      "gameName": "Enter game name"
+    },
+    "status": {
+      "searching": "Searching",
+      "found": "Found",
+      "matched": "Matched",
+      "expired": "Expired",
+      "cancelled": "Cancelled"
+    },
+    "buttons": {
+      "register": "Register Interest",
+      "addNew": "Add New",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "selectFromContacts": "Select from Contacts",
+      "goToChat": "Go to Chat",
+      "reportMismatch": "Report Mismatch",
+      "successStory": "Success Story"
+    },
+    "alerts": {
+      "deleteTitle": "Delete Confirmation",
+      "deleteMessage": "Do you want to delete this interest search?",
+      "mismatchTitle": "Report Mismatch",
+      "mismatchMessage": "Is the match with {{name}} incorrect?\n\nReporting a mismatch will cancel the match and return to waiting status.",
+      "mismatchReported": "Mismatch report has been submitted.",
+      "registrationLimit": "Registration Limit",
+      "generalUserLimit": "Regular users can register up to 3 interests.\nSubscribe for more!",
+      "typeLimit": "Regular users can register 1 per type.",
+      "advancedTypeLimit": "Advanced subscribers can register 1 per type.\nUpgrade to premium for unlimited registration!",
+      "allowedTypesOnly": "Regular users can only register phone numbers, emails, and social accounts.\nSubscribe to use more types!",
+      "error": "Error",
+      "selectType": "Please select a search type",
+      "enterValue": "Please enter a search value",
+      "selectPlatform": "Please select a social platform",
+      "enterPlatformName": "Please enter platform name",
+      "enterGameName": "Please enter game name",
+      "registrationError": "An error occurred during registration",
+      "mismatchError": "An error occurred while reporting mismatch",
+      "contactsComingSoon": "Contact integration feature is coming soon."
+    },
+    "tabs": {
+      "active": "Active ({{count}})",
+      "matched": "Matched ({{count}})",
+      "story": "Success Stories"
+    },
+    "emptyState": {
+      "title": "No registered interests",
+      "subtitle": "Register people you're interested in\nand get matched when they join!",
+      "matchedTitle": "No matches yet",
+      "matchedSubtitle": "Matches will appear here\nwhen your interests are found!",
+      "storyTitle": "No stories yet",
+      "storySubtitle": "Success stories from matched users\nwill appear here!"
+    },
+    "card": {
+      "searching": "Searching...",
+      "found": "Found match!",
+      "matched": "Matched with {{name}}",
+      "expired": "Search expired",
+      "cancelled": "Search cancelled",
+      "registeredAt": "Registered: {{date}}",
+      "expiresAt": "Expires: {{date}}",
+      "matchedAt": "Matched: {{date}}",
+      "noExpiry": "No expiry"
+    },
+    "successStory": {
+      "title": "Success Story",
+      "subtitle": "Share your success story",
+      "placeholder": "Share your story of meeting through Glimpse...",
+      "submit": "Submit Story",
+      "anonymous": "Anonymous",
+      "postedAt": "Posted {{date}}"
+    },
+    "platforms": {
+      "instagram": "Instagram",
+      "kakao": "KakaoTalk",
+      "facebook": "Facebook",
+      "twitter": "Twitter (X)",
+      "tiktok": "TikTok",
+      "steam": "Steam",
+      "battlenet": "Battle.net",
+      "playstation": "PlayStation",
+      "xbox": "Xbox",
+      "nintendo": "Nintendo Switch",
+      "mobile": "Mobile Games"
+    }
+  }
 }

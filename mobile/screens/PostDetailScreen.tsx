@@ -17,6 +17,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 interface Comment {
@@ -58,6 +59,7 @@ export const PostDetailScreen = () => {
   const route = useRoute();
   const { postId } = route.params as { postId: string };
   const { colors } = useTheme();
+  const { t } = useAndroidSafeTranslation('post');
   const { user } = useAuthStore();
   
   const [post, setPost] = useState<Post | null>(null);
@@ -76,15 +78,15 @@ export const PostDetailScreen = () => {
       // 실제로는 API 호출
       const mockPost: Post = {
         id: postId,
-        title: '스터디 모집합니다',
-        content: '안녕하세요! 이번에 새로운 스터디를 시작하려고 합니다.\n\n매주 토요일 오후 2시에 강남역 근처 카페에서 모일 예정이며, 함께 성장하실 분들을 모집합니다.\n\n관심 있으신 분들은 댓글로 알려주세요!',
+        title: t('sample.title'),
+        content: t('sample.content'),
         author: {
           id: 'author1',
-          nickname: '스터디장',
+          nickname: t('sample.author'),
         },
         group: {
           id: 'group1',
-          name: '서강대학교',
+          name: t('sample.group'),
         },
         createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
         viewCount: 156,
@@ -134,7 +136,7 @@ export const PostDetailScreen = () => {
       setComments(mockComments);
     } catch (error) {
       console.error('Failed to load post detail:', error);
-      Alert.alert('오류', '게시물을 불러올 수 없습니다.');
+      Alert.alert(t('errors.imageError'), t('detail.loadError'));
     } finally {
       setIsLoading(false);
     }
@@ -415,7 +417,7 @@ export const PostDetailScreen = () => {
               color: colors.TEXT.PRIMARY,
               borderColor: colors.BORDER,
             }]}
-            placeholder="댓글을 입력하세요..."
+            placeholder={t('detail.commentPlaceholder')}
             placeholderTextColor={colors.TEXT.TERTIARY}
             value={newComment}
             onChangeText={setNewComment}

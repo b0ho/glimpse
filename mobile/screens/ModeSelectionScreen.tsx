@@ -9,7 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
@@ -20,7 +20,7 @@ const { width } = Dimensions.get('window');
 
 export const ModeSelectionScreen = () => {
   const navigation = useNavigation() as any;
-  const { t } = useTranslation('common');
+  const { t } = useAndroidSafeTranslation('common');
   const { setAppMode } = useAuthStore();
   const { colors } = useTheme();
 
@@ -36,8 +36,8 @@ export const ModeSelectionScreen = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.PRIMARY }]}>{t('app.name')}</Text>
-        <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.title')}</Text>
+        <Text style={[styles.title, { color: colors.PRIMARY }]}>{t('modeselection:app.name')}</Text>
+        <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>{t('modeselection:mode.selection.title')}</Text>
       </View>
 
       <View style={styles.modeContainer}>
@@ -57,14 +57,14 @@ export const ModeSelectionScreen = () => {
           <View style={styles.iconContainer}>
             <Icon name="heart" size={60} color={colors.PRIMARY} />
           </View>
-          <Text style={[styles.modeTitle, { color: colors.TEXT.PRIMARY }]}>{t('mode.selection.dating.title')}</Text>
+          <Text style={[styles.modeTitle, { color: colors.TEXT.PRIMARY }]}>{t('modeselection:mode.selection.dating.title')}</Text>
           <Text style={[styles.modeDescription, { color: colors.TEXT.SECONDARY }]}>
-            {t('mode.selection.dating.description')}
+            {t('modeselection:mode.selection.dating.description')}
           </Text>
           <View style={styles.featureList}>
-            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.dating.features.like')}</Text>
-            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.dating.features.matching')}</Text>
-            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.dating.features.anonymous')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('modeselection:mode.selection.dating.features.like')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('modeselection:mode.selection.dating.features.matching')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('modeselection:mode.selection.dating.features.anonymous')}</Text>
           </View>
         </TouchableOpacity>
 
@@ -84,20 +84,20 @@ export const ModeSelectionScreen = () => {
           <View style={styles.iconContainer}>
             <Icon name="people" size={60} color={colors.SECONDARY || "#4ECDC4"} />
           </View>
-          <Text style={[styles.modeTitle, { color: colors.TEXT.PRIMARY }]}>{t('mode.selection.friendship.title')}</Text>
+          <Text style={[styles.modeTitle, { color: colors.TEXT.PRIMARY }]}>{t('modeselection:mode.selection.friendship.title')}</Text>
           <Text style={[styles.modeDescription, { color: colors.TEXT.SECONDARY }]}>
-            {t('mode.selection.friendship.description')}
+            {t('modeselection:mode.selection.friendship.description')}
           </Text>
           <View style={styles.featureList}>
-            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.friendship.features.community')}</Text>
-            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.friendship.features.groupChat')}</Text>
-            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('mode.selection.friendship.features.events')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('modeselection:mode.selection.friendship.features.community')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('modeselection:mode.selection.friendship.features.groupChat')}</Text>
+            <Text style={[styles.featureItem, { color: colors.TEXT.SECONDARY }]}>{t('modeselection:mode.selection.friendship.features.events')}</Text>
           </View>
         </TouchableOpacity>
       </View>
 
       <Text style={[styles.note, { color: colors.TEXT.MUTED }]}>
-        {t('mode.selection.note')}
+        {t('modeselection:mode.selection.note')}
       </Text>
     </SafeAreaView>
   );

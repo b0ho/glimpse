@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 // BarCodeScanner를 조건부로 import (Expo Go 호환성)
 let BarCodeScanner: any = null;
@@ -66,7 +66,7 @@ const LocationGroupScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const { t } = useTranslation('location');
+  const { t } = useAndroidSafeTranslation('location');
   const { colors } = useTheme();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -99,11 +99,11 @@ const LocationGroupScreen = () => {
       if (BarCodeScanner) {
         const { status } = await BarCodeScanner.requestPermissionsAsync();
         if (status !== 'granted') {
-          console.log(t('permissions.cameraRequired'));
+          console.log(t('common:permissions.cameraRequired'));
         }
       }
     } catch (error) {
-      console.error(t('errors.permissionError'), error);
+      console.error(t('common:errors.permissionError'), error);
     } finally {
       setLoading(false);
     }
@@ -120,7 +120,7 @@ const LocationGroupScreen = () => {
       setNearbyGroups(groups);
     } catch (error) {
       console.error('주변 그룹 로드 오류:', error);
-      Alert.alert(t('errors.title'), t('errors.loadNearbyFailed'));
+      Alert.alert(t('common:errors.title'), t('common:errors.loadNearbyFailed'));
     }
   };
 
@@ -147,13 +147,13 @@ const LocationGroupScreen = () => {
       const result = await locationService.joinLocationGroup(groupId);
       
       if (result.alreadyMember) {
-        Alert.alert(t('common:notifications.info'), t('group.alreadyMember'));
+        Alert.alert(t('common:notifications.info'), t('locationgroup:group.alreadyMember'));
       } else {
-        Alert.alert(t('common:actions.success'), t('group.joinSuccess'));
+        Alert.alert(t('common:actions.success'), t('locationgroup:group.joinSuccess'));
         await loadNearbyGroups();
       }
     } catch (error: any) {
-      Alert.alert(t('errors.title'), error.message || t('group.joinError'));
+      Alert.alert(t('common:errors.title'), error.message || t('group:group.joinError'));
     } finally {
       setLoading(false);
     }
@@ -175,13 +175,13 @@ const LocationGroupScreen = () => {
       const result = await locationService.joinGroupByQRCode(data);
       
       if (result.alreadyMember) {
-        Alert.alert(t('common:notifications.info'), t('group.alreadyMember'));
+        Alert.alert(t('common:notifications.info'), t('locationgroup:group.alreadyMember'));
       } else {
-        Alert.alert(t('common:actions.success'), t('qr.success'));
+        Alert.alert(t('common:actions.success'), t('locationgroup:qr.success'));
         await loadNearbyGroups();
       }
     } catch (error: any) {
-      Alert.alert(t('errors.title'), error.message || t('qr.error'));
+      Alert.alert(t('common:errors.title'), error.message || t('qr:qr.error'));
     } finally {
       setLoading(false);
     }
@@ -194,7 +194,7 @@ const LocationGroupScreen = () => {
    */
   const handleCreateGroup = async () => {
     if (!createForm.name.trim()) {
-      Alert.alert(t('errors.title'), t('form.nameRequired'));
+      Alert.alert(t('common:errors.title'), t('form:form.nameRequired'));
       return;
     }
 
@@ -210,10 +210,10 @@ const LocationGroupScreen = () => {
       // QR 코드 표시
       Alert.alert(
         t('common:actions.completed'),
-        t('group.createSuccess'),
+        t('locationgroup:group.createSuccess'),
         [
           {
-            text: t('group.viewQRCode'),
+            text: t('locationgroup:group.viewQRCode'),
             onPress: () => {
               // QR 코드 모달 표시
               Alert.alert(t('common:actions.completed'), `QR Code: ${group.qrCode}`);
@@ -227,7 +227,7 @@ const LocationGroupScreen = () => {
       setCreateForm({ name: '', description: '', radius: '100', maxMembers: '50' });
       await loadNearbyGroups();
     } catch (error: any) {
-      Alert.alert(t('errors.title'), error.message || t('group.createError'));
+      Alert.alert(t('common:errors.title'), error.message || t('group:group.createError'));
     } finally {
       setLoading(false);
     }
@@ -258,12 +258,12 @@ const LocationGroupScreen = () => {
     return (
       <View style={[styles.centerContainer, { backgroundColor: colors.BACKGROUND }]}>
         <Ionicons name="location-outline" size={60} color={colors.TEXT.LIGHT} />
-        <Text style={[styles.permissionText, { color: colors.TEXT.SECONDARY }]}>{t('permissions.required')}</Text>
+        <Text style={[styles.permissionText, { color: colors.TEXT.SECONDARY }]}>{t('common:permissions.required')}</Text>
         <TouchableOpacity 
           style={[styles.permissionButton, { backgroundColor: colors.PRIMARY }]}
           onPress={checkPermissionsAndLoadGroups}
         >
-          <Text style={[styles.permissionButtonText, { color: colors.TEXT.WHITE }]}>{t('permissions.request')}</Text>
+          <Text style={[styles.permissionButtonText, { color: colors.TEXT.WHITE }]}>{t('common:permissions.request')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -298,8 +298,8 @@ const LocationGroupScreen = () => {
         {nearbyGroups.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Ionicons name="location-outline" size={60} color={colors.TEXT.LIGHT} />
-            <Text style={[styles.emptyText, { color: colors.TEXT.SECONDARY }]}>{t('emptyState.title')}</Text>
-            <Text style={[styles.emptySubText, { color: colors.TEXT.LIGHT }]}>{t('emptyState.subtitle')}</Text>
+            <Text style={[styles.emptyText, { color: colors.TEXT.SECONDARY }]}>{t('locationgroup:emptyState.title')}</Text>
+            <Text style={[styles.emptySubText, { color: colors.TEXT.LIGHT }]}>{t('locationgroup:emptyState.subtitle')}</Text>
           </View>
         ) : (
           nearbyGroups.map((group) => (
@@ -318,7 +318,7 @@ const LocationGroupScreen = () => {
                 <Text style={[styles.distance, { color: colors.PRIMARY }]}>{formatDistance(group.distance)}</Text>
                 <Text style={[styles.memberCount, { color: colors.TEXT.LIGHT }]}>
                   <Ionicons name="people" size={14} color={colors.TEXT.LIGHT} />
-                  {' '}{t('group.memberCount', { count: group._count.members })}
+                  {' '}{t('group:group.memberCount', { count: group._count.members })}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -338,7 +338,7 @@ const LocationGroupScreen = () => {
             <TouchableOpacity onPress={() => setScanning(false)}>
               <Ionicons name="close" size={28} color={colors.TEXT.WHITE} />
             </TouchableOpacity>
-            <Text style={[styles.modalTitle, { color: colors.TEXT.WHITE }]}>{t('qr.title')}</Text>
+            <Text style={[styles.modalTitle, { color: colors.TEXT.WHITE }]}>{t('locationgroup:qr.title')}</Text>
             <View style={{ width: 28 }} />
           </View>
           
@@ -351,7 +351,7 @@ const LocationGroupScreen = () => {
               
               <View style={styles.scanOverlay}>
                 <View style={styles.scanFrame} />
-                <Text style={[styles.scanText, { color: colors.TEXT.WHITE }]}>{t('qr.instruction')}</Text>
+                <Text style={[styles.scanText, { color: colors.TEXT.WHITE }]}>{t('locationgroup:qr.instruction')}</Text>
               </View>
             </>
           ) : (
@@ -373,11 +373,11 @@ const LocationGroupScreen = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.createModalContent, { backgroundColor: colors.SURFACE }]}>
-            <Text style={[styles.createModalTitle, { color: colors.TEXT.PRIMARY }]}>{t('group.create')}</Text>
+            <Text style={[styles.createModalTitle, { color: colors.TEXT.PRIMARY }]}>{t('locationgroup:group.create')}</Text>
             
             <TextInput
               style={[styles.input, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY }]}
-              placeholder={t('form.name')}
+              placeholder={t('locationgroup:form.name')}
               placeholderTextColor={colors.TEXT.LIGHT}
               value={createForm.name}
               onChangeText={(text) => setCreateForm({ ...createForm, name: text })}
@@ -385,7 +385,7 @@ const LocationGroupScreen = () => {
             
             <TextInput
               style={[styles.input, styles.textArea, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY }]}
-              placeholder={t('form.description')}
+              placeholder={t('locationgroup:form.description')}
               placeholderTextColor={colors.TEXT.LIGHT}
               value={createForm.description}
               onChangeText={(text) => setCreateForm({ ...createForm, description: text })}
@@ -395,7 +395,7 @@ const LocationGroupScreen = () => {
             
             <View style={styles.inputRow}>
               <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>{t('form.radius')}</Text>
+                <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>{t('locationgroup:form.radius')}</Text>
                 <TextInput
                   style={[styles.input, styles.smallInput, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY }]}
                   placeholder="100"
@@ -407,7 +407,7 @@ const LocationGroupScreen = () => {
               </View>
               
               <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>{t('form.maxMembers')}</Text>
+                <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>{t('locationgroup:form.maxMembers')}</Text>
                 <TextInput
                   style={[styles.input, styles.smallInput, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER, color: colors.TEXT.PRIMARY }]}
                   placeholder="50"
@@ -424,14 +424,14 @@ const LocationGroupScreen = () => {
                 style={[styles.modalButton, styles.cancelButton, { backgroundColor: colors.TEXT.LIGHT }]}
                 onPress={() => setShowCreateModal(false)}
               >
-                <Text style={[styles.cancelButtonText, { color: colors.TEXT.SECONDARY }]}>{t('form.cancel')}</Text>
+                <Text style={[styles.cancelButtonText, { color: colors.TEXT.SECONDARY }]}>{t('locationgroup:form.cancel')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={[styles.modalButton, styles.createButton, { backgroundColor: colors.PRIMARY }]}
                 onPress={handleCreateGroup}
               >
-                <Text style={[styles.createButtonText, { color: colors.TEXT.WHITE }]}>{t('form.create')}</Text>
+                <Text style={[styles.createButtonText, { color: colors.TEXT.WHITE }]}>{t('locationgroup:form.create')}</Text>
               </TouchableOpacity>
             </View>
           </View>

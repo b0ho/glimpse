@@ -10,7 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, FONT_SIZES, REGEX } from '@/utils/constants';
 import { Gender } from '@/types';
@@ -27,7 +27,7 @@ export const NicknameSetupScreen = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const authStore = useAuthStore();
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation();
 
   const validateNickname = (text: string): boolean => {
     return REGEX.NICKNAME.test(text);

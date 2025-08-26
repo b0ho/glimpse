@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface ChatRoom {
   id: string;
@@ -28,6 +29,7 @@ interface ChatRoom {
 export const MatchChatListScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { colors, isDark } = useTheme();
+  const { t } = useAndroidSafeTranslation();
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -104,9 +106,9 @@ export const MatchChatListScreen: React.FC = () => {
       const minutes = date.getMinutes();
       return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     } else if (days === 1) {
-      return '어제';
+      return t('common:time.yesterday');
     } else if (days < 7) {
-      return `${days}일 전`;
+      return t('common:time.daysAgo', { count: days });
     } else {
       return `${date.getMonth() + 1}/${date.getDate()}`;
     }
@@ -156,10 +158,10 @@ export const MatchChatListScreen: React.FC = () => {
     <View style={styles.emptyContainer}>
       <Icon name="chatbubbles-outline" size={80} color={colors.TEXT.TERTIARY} />
       <Text style={[styles.emptyTitle, { color: colors.TEXT.PRIMARY }]}>
-        아직 채팅이 없습니다
+        {t('chat:emptyState.title')}
       </Text>
       <Text style={[styles.emptySubtitle, { color: colors.TEXT.SECONDARY }]}>
-        매칭된 상대와 대화를 시작해보세요!
+        {t('chat:emptyState.subtitle')}
       </Text>
       <View style={styles.emptyButtonContainer}>
         <TouchableOpacity
@@ -167,14 +169,14 @@ export const MatchChatListScreen: React.FC = () => {
           onPress={() => navigation.navigate('Interest')}
         >
           <Icon name="heart-outline" size={20} color="#FFFFFF" />
-          <Text style={styles.goToSearchText}>관심상대 찾기</Text>
+          <Text style={styles.goToSearchText}>{t('chat:emptyState.findInterest')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.goToSearchButton, { backgroundColor: colors.SUCCESS }]}
           onPress={() => navigation.navigate('Groups')}
         >
           <Icon name="people-outline" size={20} color="#FFFFFF" />
-          <Text style={styles.goToSearchText}>그룹 찾기</Text>
+          <Text style={styles.goToSearchText}>{t('chat:emptyState.findGroups')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -193,9 +195,9 @@ export const MatchChatListScreen: React.FC = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <View style={[styles.header, { backgroundColor: colors.SURFACE }]}>
-        <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>채팅</Text>
+        <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('chat:title')}</Text>
         <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
-          매칭된 상대와의 대화
+          {t('chat:subtitle')}
         </Text>
       </View>
 

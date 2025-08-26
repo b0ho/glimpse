@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
@@ -48,48 +48,48 @@ export const ProfileInfoCards= ({
   drinking,
   smoking,
 }) => {
-  const { t } = useTranslation(['profile']);
+  const { t } = useAndroidSafeTranslation('profile');
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>{t('info.basicInfo')}</Text>
+      <Text style={styles.sectionTitle}>{t('profile:info.basicInfo')}</Text>
       
       <View style={styles.cardsGrid}>
         <View style={styles.infoCard}>
           <MaterialCommunityIcons name="briefcase" size={24} color="#4A90E2" />
-          <Text style={styles.infoCardTitle}>{t('info.company')}</Text>
+          <Text style={styles.infoCardTitle}>{t('profile:info.company')}</Text>
           <Text style={styles.infoCardValue}>
-            {companyName || t('info.notRegistered')}
+            {companyName || t('common:info.notRegistered')}
           </Text>
         </View>
         
         <View style={styles.infoCard}>
           <MaterialCommunityIcons name="school" size={24} color="#4A90E2" />
-          <Text style={styles.infoCardTitle}>{t('info.school')}</Text>
+          <Text style={styles.infoCardTitle}>{t('profile:info.school')}</Text>
           <Text style={styles.infoCardValue}>
-            {education || t('info.notRegistered')}
+            {education || t('common:info.notRegistered')}
           </Text>
         </View>
         
         <View style={styles.infoCard}>
           <MaterialCommunityIcons name="map-marker" size={24} color="#4A90E2" />
-          <Text style={styles.infoCardTitle}>{t('info.location')}</Text>
+          <Text style={styles.infoCardTitle}>{t('profile:info.location')}</Text>
           <Text style={styles.infoCardValue}>
-            {location || t('info.notRegistered')}
+            {location || t('common:info.notRegistered')}
           </Text>
         </View>
         
         <View style={styles.infoCard}>
           <MaterialCommunityIcons name="human-male-height" size={24} color="#4A90E2" />
-          <Text style={styles.infoCardTitle}>{t('info.height')}</Text>
+          <Text style={styles.infoCardTitle}>{t('profile:info.height')}</Text>
           <Text style={styles.infoCardValue}>
-            {height ? `${height}cm` : t('info.notRegistered')}
+            {height ? `${height}cm` : t('common:info.notRegistered')}
           </Text>
         </View>
       </View>
       
       {interests && interests.length > 0 && (
         <View style={styles.interestsSection}>
-          <Text style={styles.interestsTitle}>{t('info.interests')}</Text>
+          <Text style={styles.interestsTitle}>{t('profile:info.interests')}</Text>
           <View style={styles.interestTags}>
             {interests.map((interest, index) => (
               <View key={index} style={styles.interestTag}>
@@ -104,21 +104,21 @@ export const ProfileInfoCards= ({
         {mbti && (
           <View style={styles.additionalItem}>
             <MaterialCommunityIcons name="brain" size={20} color="#9B59B6" />
-            <Text style={styles.additionalText}>{t('info.mbti')}: {mbti}</Text>
+            <Text style={styles.additionalText}>{t('profile:info.mbti')}: {mbti}</Text>
           </View>
         )}
         
         {drinking && (
           <View style={styles.additionalItem}>
             <MaterialCommunityIcons name="glass-wine" size={20} color="#E74C3C" />
-            <Text style={styles.additionalText}>{t('info.drinking')}: {drinking}</Text>
+            <Text style={styles.additionalText}>{t('profile:info.drinking')}: {drinking}</Text>
           </View>
         )}
         
         {smoking && (
           <View style={styles.additionalItem}>
             <MaterialCommunityIcons name="smoking-off" size={20} color="#34495E" />
-            <Text style={styles.additionalText}>{t('info.smoking')}: {smoking}</Text>
+            <Text style={styles.additionalText}>{t('profile:info.smoking')}: {smoking}</Text>
           </View>
         )}
       </View>

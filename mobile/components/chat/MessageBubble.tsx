@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@/hooks/useTheme';
 import { Message } from '@/types';
@@ -52,7 +52,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
   onImagePress,
   onLongPress,
 }) => {
-  const { t } = useTranslation('chat');
+  const { t } = useAndroidSafeTranslation('chat');
   const { colors } = useTheme();
   /**
    * 메시지 컨텐츠 렌더링
@@ -69,7 +69,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
                 color: isOwnMessage ? colors.TEXT.WHITE : colors.TEXT.PRIMARY,
               },
             ]}
-            accessibilityLabel={`${t('accessibility.messageText')} ${message.content}`}
+            accessibilityLabel={`${t('common:accessibility.messageText')} ${message.content}`}
           >
             {message.content}
           </Text>
@@ -80,8 +80,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           <TouchableOpacity
             onPress={() => onImagePress?.(message.content)}
             accessibilityRole="button"
-            accessibilityLabel={t('accessibility.viewImage')}
-            accessibilityHint={t('accessibility.viewImageHint')}
+            accessibilityLabel={t('common:accessibility.viewImage')}
+            accessibilityHint={t('accessibility:accessibility.viewImageHint')}
           >
             <Image
               source={{ uri: message.content }}
@@ -199,7 +199,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           onLongPress={() => onLongPress?.(message)}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityHint={t('accessibility.messageOptions')}
+          accessibilityHint={t('common:accessibility.messageOptions')}
         >
           {renderMessageContent()}
         </TouchableOpacity>

@@ -13,7 +13,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import * as ImagePicker from 'expo-image-picker';
 import { Video, ResizeMode } from 'expo-av';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -23,7 +23,7 @@ import { API_BASE_URL } from '../services/api/config';
 import { useAuthService } from '../services/auth/auth-service';
 
 export const StoryUploadScreen = () => {
-  const { t } = useTranslation('story');
+  const { t } = useAndroidSafeTranslation('story');
   const navigation = useNavigation();
   const authService = useAuthService();
   const { colors } = useTheme();
@@ -35,7 +35,7 @@ export const StoryUploadScreen = () => {
   const requestCameraPermission = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(t('permissions.required'), t('permissions.camera'));
+      Alert.alert(t('common:permissions.required'), t('common:permissions.camera'));
       return false;
     }
     return true;
@@ -45,7 +45,7 @@ export const StoryUploadScreen = () => {
   const requestMediaLibraryPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(t('permissions.required'), t('permissions.mediaLibrary'));
+      Alert.alert(t('common:permissions.required'), t('common:permissions.mediaLibrary'));
       return false;
     }
     return true;
@@ -57,11 +57,11 @@ export const StoryUploadScreen = () => {
     if (!hasPermission) return;
 
     Alert.alert(
-      t('camera.selectTitle'),
-      t('camera.selectMessage'),
+      t('camera:camera.selectTitle'),
+      t('camera:camera.selectMessage'),
       [
         {
-          text: t('camera.photo'),
+          text: t('storyupload:camera.photo'),
           onPress: async () => {
             const result = await ImagePicker.launchCameraAsync({
               mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -76,7 +76,7 @@ export const StoryUploadScreen = () => {
           },
         },
         {
-          text: t('camera.video'),
+          text: t('storyupload:camera.video'),
           onPress: async () => {
             const result = await ImagePicker.launchCameraAsync({
               mediaTypes: ImagePicker.MediaTypeOptions.Videos,
@@ -90,7 +90,7 @@ export const StoryUploadScreen = () => {
             }
           },
         },
-        { text: t('camera.cancel'), style: 'cancel' },
+        { text: t('storyupload:camera.cancel'), style: 'cancel' },
       ]
     );
   };
@@ -118,7 +118,7 @@ export const StoryUploadScreen = () => {
   // Upload story
   const uploadStory = async () => {
     if (!media) {
-      Alert.alert(t('upload.error'), t('upload.selectMedia'));
+      Alert.alert(t('storyupload:upload.error'), t('upload:upload.selectMedia'));
       return;
     }
 
@@ -129,7 +129,7 @@ export const StoryUploadScreen = () => {
       // This needs to be implemented or replaced with proper Clerk token fetching
       const token = ''; // TODO: Get token from Clerk
       if (!token) {
-        throw new Error(t('upload.noToken'));
+        throw new Error(t('storyupload:upload.noToken'));
       }
 
       const formData = new FormData();
@@ -153,18 +153,18 @@ export const StoryUploadScreen = () => {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || t('upload.failed'));
+        throw new Error(error.message || t('storyupload:upload.failed'));
       }
 
-      Alert.alert(t('upload.success'), t('upload.successMessage'), [
+      Alert.alert(t('upload:upload.success'), t('upload:upload.successMessage'), [
         {
-          text: t('upload.confirm'),
+          text: t('storyupload:upload.confirm'),
           onPress: () => navigation.goBack(),
         },
       ]);
     } catch (error: any) {
       console.error('Story upload failed:', error);
-      Alert.alert(t('upload.error'), error.message || t('upload.failed'));
+      Alert.alert(t('storyupload:upload.error'), error.message || t('upload:upload.failed'));
     } finally {
       setIsUploading(false);
     }
@@ -193,7 +193,7 @@ export const StoryUploadScreen = () => {
             <View style={[styles.mediaIconContainer, { backgroundColor: colors.PRIMARY + '20' }]}>
               <Ionicons name="camera" size={40} color={colors.PRIMARY} />
             </View>
-            <Text style={[styles.mediaOptionText, { color: colors.TEXT.PRIMARY }]}>{t('camera.title')}</Text>
+            <Text style={[styles.mediaOptionText, { color: colors.TEXT.PRIMARY }]}>{t('storyupload:camera.title')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.mediaOption} onPress={pickFromGallery}>
@@ -218,7 +218,7 @@ export const StoryUploadScreen = () => {
           <TouchableOpacity onPress={clearMedia}>
             <Ionicons name="arrow-back" size={28} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('preview.title')}</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('storyupload:preview.title')}</Text>
           <TouchableOpacity
             onPress={uploadStory}
             disabled={isUploading}
@@ -227,7 +227,7 @@ export const StoryUploadScreen = () => {
             {isUploading ? (
               <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
             ) : (
-              <Text style={[styles.shareButtonText, { color: colors.TEXT.WHITE }]}>{t('preview.share')}</Text>
+              <Text style={[styles.shareButtonText, { color: colors.TEXT.WHITE }]}>{t('storyupload:preview.share')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -249,7 +249,7 @@ export const StoryUploadScreen = () => {
           <View style={[styles.captionContainer, { backgroundColor: colors.BACKGROUND + 'B3' }]}>
             <TextInput
               style={[styles.captionInput, { color: colors.TEXT.PRIMARY }]}
-              placeholder={t('preview.captionPlaceholder')}
+              placeholder={t('storyupload:preview.captionPlaceholder')}
               placeholderTextColor={colors.TEXT.LIGHT}
               value={caption}
               onChangeText={setCaption}

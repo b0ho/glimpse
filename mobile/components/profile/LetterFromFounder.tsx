@@ -12,7 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -22,7 +22,7 @@ interface LetterFromFounderProps {
 
 export const LetterFromFounder: React.FC<LetterFromFounderProps> = ({ onPress }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation();
 
   const handlePress = () => {
     setIsModalVisible(true);
@@ -75,8 +75,8 @@ export const LetterFromFounder: React.FC<LetterFromFounderProps> = ({ onPress })
           </View>
           
           <View style={styles.textContainer}>
-            <Text style={styles.title}>{t('profile.letterFromFounder')}</Text>
-            <Text style={styles.subtitle}>{t('profile.letterSubtitle')}</Text>
+            <Text style={styles.title}>{t('profile:profile.letterFromFounder')}</Text>
+            <Text style={styles.subtitle}>{t('profile:profile.letterSubtitle')}</Text>
           </View>
           
           <View style={styles.arrowContainer}>
@@ -116,7 +116,7 @@ export const LetterFromFounder: React.FC<LetterFromFounderProps> = ({ onPress })
                         <MaterialCommunityIcons name="heart" size={20} color="#FFFFFF" />
                       </View>
                     </View>
-                    <Text style={styles.letterTitle}>💌 {t('profile.letterFromFounder')}</Text>
+                    <Text style={styles.letterTitle}>💌 {t('profile:profile.letterFromFounder')}</Text>
                     <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
                       <Ionicons name="close" size={24} color="#FFFFFF" />
                     </TouchableOpacity>

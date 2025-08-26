@@ -13,7 +13,7 @@ import {
   Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { usePersonaStore } from '@/store/slices/personaSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -25,7 +25,7 @@ interface PersonaSettingsModalProps {
 }
 
 export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visible, onClose }) => {
-  const { t } = useTranslation('persona');
+  const { t } = useAndroidSafeTranslation('persona');
   const { colors } = useTheme();
   const { 
     myPersona, 

@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 // BarCodeScanner를 조건부로 import (Expo Go 호환성)
 let BarCodeScanner: any = null;
 try {
@@ -35,7 +35,7 @@ interface QRGroupData {
 }
 
 export const QRGroupJoinScreen = () => {
-  const { t } = useTranslation('group');
+  const { t } = useAndroidSafeTranslation('group');
   const navigation = useNavigation();
   const route = useRoute();
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -84,7 +84,7 @@ export const QRGroupJoinScreen = () => {
       const now = Date.now();
       const fiveMinutes = 5 * 60 * 1000;
       if (now - qrData.timestamp > fiveMinutes) {
-        Alert.alert(t('qrJoin.expiredTitle'), t('qrJoin.expiredMessage'));
+        Alert.alert(t('group:qrJoin.expiredTitle'), t('group:qrJoin.expiredMessage'));
         setScanned(false);
         setIsLoading(false);
         return;
@@ -92,11 +92,11 @@ export const QRGroupJoinScreen = () => {
 
       // 그룹 참여 확인
       Alert.alert(
-        t('qrJoin.joinTitle'),
-        t('qrJoin.joinMessage', { groupName: qrData.groupName }),
+        t('group:qrJoin.joinTitle'),
+        t('group:qrJoin.joinMessage', { groupName: qrData.groupName }),
         [
           {
-            text: t('qrJoin.cancel'),
+            text: t('group:qrJoin.cancel'),
             style: 'cancel',
             onPress: () => {
               setScanned(false);
@@ -104,13 +104,13 @@ export const QRGroupJoinScreen = () => {
             },
           },
           {
-            text: t('qrJoin.joinButton'),
+            text: t('group:qrJoin.joinButton'),
             onPress: async () => {
               try {
                 // 그룹 ID로 그룹 정보 찾기
                 const targetGroup = groups.find(g => g.id === qrData.groupId);
                 if (!targetGroup) {
-                  Alert.alert(t('qrJoin.error'), t('qrJoin.groupNotFound'));
+                  Alert.alert(t('group:qrJoin.error'), t('group:qrJoin.groupNotFound'));
                   setScanned(false);
                   setIsLoading(false);
                   return;
@@ -119,11 +119,11 @@ export const QRGroupJoinScreen = () => {
                 await joinGroup(targetGroup);
                 // 참여 성공으로 간주
                 Alert.alert(
-                  t('qrJoin.successTitle'),
-                  t('qrJoin.successMessage', { groupName: qrData.groupName }),
+                  t('group:qrJoin.successTitle'),
+                  t('group:qrJoin.successMessage', { groupName: qrData.groupName }),
                   [
                     {
-                      text: t('qrJoin.confirm'),
+                      text: t('group:qrJoin.confirm'),
                       onPress: () => {
                         navigation.navigate('Groups' as never);
                       },
@@ -132,7 +132,7 @@ export const QRGroupJoinScreen = () => {
                 );
               } catch (error) {
                 console.error('Join group error:', error);
-                Alert.alert(t('qrJoin.error'), t('qrJoin.joinError'));
+                Alert.alert(t('group:qrJoin.error'), t('group:qrJoin.joinError'));
                 setScanned(false);
               } finally {
                 setIsLoading(false);
@@ -143,7 +143,7 @@ export const QRGroupJoinScreen = () => {
       );
     } catch (error) {
       console.error('QR code parse error:', error);
-      Alert.alert(t('qrJoin.invalidTitle'), t('qrJoin.invalidMessage'));
+      Alert.alert(t('group:qrJoin.invalidTitle'), t('group:qrJoin.invalidMessage'));
       setScanned(false);
       setIsLoading(false);
     }
@@ -166,7 +166,7 @@ export const QRGroupJoinScreen = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>{t('qrJoin.checkingPermission')}</Text>
+          <Text style={styles.loadingText}>{t('group:qrJoin.checkingPermission')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -182,15 +182,15 @@ export const QRGroupJoinScreen = () => {
           >
             <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('qrJoin.title')}</Text>
+          <Text style={styles.headerTitle}>{t('group:qrJoin.title')}</Text>
           <View style={styles.headerRight} />
         </View>
 
         <View style={styles.permissionContainer}>
           <Icon name="camera-outline" size={64} color={COLORS.TEXT.LIGHT} />
-          <Text style={styles.permissionTitle}>{t('qrJoin.permissionRequired')}</Text>
+          <Text style={styles.permissionTitle}>{t('group:qrJoin.permissionRequired')}</Text>
           <Text style={styles.permissionDescription}>
-            {t('qrJoin.permissionDescription')}
+            {t('group:qrJoin.permissionDescription')}
           </Text>
           <TouchableOpacity
             style={styles.permissionButton}
@@ -199,7 +199,7 @@ export const QRGroupJoinScreen = () => {
               setHasPermission(status === 'granted');
             }}
           >
-            <Text style={styles.permissionButtonText}>{t('qrJoin.allowPermission')}</Text>
+            <Text style={styles.permissionButtonText}>{t('group:qrJoin.allowPermission')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -215,7 +215,7 @@ export const QRGroupJoinScreen = () => {
         >
           <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('qrJoin.title')}</Text>
+        <Text style={styles.headerTitle}>{t('group:qrJoin.title')}</Text>
         <TouchableOpacity
           style={styles.switchButton}
           onPress={() => setMode(mode === 'scan' ? 'generate' : 'scan')}
@@ -230,9 +230,9 @@ export const QRGroupJoinScreen = () => {
 
       {mode === 'scan' ? (
         <View style={styles.scanContainer}>
-          <Text style={styles.instructionTitle}>{t('qrJoin.scanTitle')}</Text>
+          <Text style={styles.instructionTitle}>{t('group:qrJoin.scanTitle')}</Text>
           <Text style={styles.instructionText}>
-            {t('qrJoin.scanDescription')}
+            {t('group:qrJoin.scanDescription')}
           </Text>
 
           <View style={styles.cameraContainer}>
@@ -279,9 +279,9 @@ export const QRGroupJoinScreen = () => {
         </View>
       ) : (
         <View style={styles.generateContainer}>
-          <Text style={styles.instructionTitle}>{t('qrJoin.generateTitle')}</Text>
+          <Text style={styles.instructionTitle}>{t('group:qrJoin.generateTitle')}</Text>
           <Text style={styles.instructionText}>
-            {t('qrJoin.generateDescription')}
+            {t('group:qrJoin.generateDescription')}
           </Text>
 
           {selectedGroup ? (
@@ -298,10 +298,10 @@ export const QRGroupJoinScreen = () => {
               <View style={styles.groupInfo}>
                 <Text style={styles.groupName}>{selectedGroup.name}</Text>
                 <Text style={styles.groupDetails}>
-                  {t('qrJoin.groupDetails', { memberCount: selectedGroup.memberCount, type: selectedGroup.type })}
+                  {t('group:qrJoin.groupDetails', { memberCount: selectedGroup.memberCount, type: selectedGroup.type })}
                 </Text>
                 <Text style={styles.qrWarning}>
-                  {t('qrJoin.qrExpiry')}
+                  {t('group:qrJoin.qrExpiry')}
                 </Text>
               </View>
 
@@ -313,21 +313,21 @@ export const QRGroupJoinScreen = () => {
                 }}
               >
                 <Icon name="refresh" size={16} color={COLORS.PRIMARY} />
-                <Text style={styles.regenerateButtonText}>{t('qrJoin.regenerate')}</Text>
+                <Text style={styles.regenerateButtonText}>{t('group:qrJoin.regenerate')}</Text>
               </TouchableOpacity>
             </View>  
           ) : (
             <View style={styles.noGroupContainer}>
               <Icon name="people-outline" size={48} color={COLORS.TEXT.LIGHT} />
-              <Text style={styles.noGroupTitle}>{t('qrJoin.noGroupSelected')}</Text>
+              <Text style={styles.noGroupTitle}>{t('group:qrJoin.noGroupSelected')}</Text>
               <Text style={styles.noGroupDescription}>
-                {t('qrJoin.selectGroupDescription')}
+                {t('group:qrJoin.selectGroupDescription')}
               </Text>
               <TouchableOpacity
                 style={styles.selectGroupButton}
                 onPress={() => navigation.navigate('Groups' as never)}
               >
-                <Text style={styles.selectGroupButtonText}>{t('qrJoin.selectGroup')}</Text>
+                <Text style={styles.selectGroupButtonText}>{t('group:qrJoin.selectGroup')}</Text>
               </TouchableOpacity>
             </View>
           )}

@@ -10,14 +10,14 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 
 export const MyGroupsScreen = () => {
-  const { t } = useTranslation('group');
+  const { t } = useAndroidSafeTranslation('group');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'joined' | 'created'>('joined');
   
@@ -28,7 +28,7 @@ export const MyGroupsScreen = () => {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      // 실제로는 API 호출하여 그룹 정보 새로고침
+      // TODO: Call API to refresh group information
       await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
       console.error('Failed to refresh groups:', error);
@@ -39,16 +39,16 @@ export const MyGroupsScreen = () => {
 
   const handleLeaveGroup = useCallback((group: Group) => {
     Alert.alert(
-      t('myGroups.leaveGroup.title'),
-      t('myGroups.leaveGroup.message', { groupName: group.name }),
+      t('mygroups:myGroups.leaveGroup.title'),
+      t('myGroups:myGroups.leaveGroup.message', { groupName: group.name }),
       [
-        { text: t('myGroups.leaveGroup.cancel'), style: 'cancel' },
+        { text: t('mygroups:myGroups.leaveGroup.cancel'), style: 'cancel' },
         {
-          text: t('myGroups.leaveGroup.confirm'),
+          text: t('mygroups:myGroups.leaveGroup.confirm'),
           style: 'destructive',
           onPress: () => {
             groupStore.leaveGroup(group.id);
-            Alert.alert(t('myGroups.leaveGroup.successTitle'), t('myGroups.leaveGroup.successMessage', { groupName: group.name }));
+            Alert.alert(t('mygroups:myGroups.leaveGroup.successTitle'), t('myGroups:myGroups.leaveGroup.successMessage', { groupName: group.name }));
           },
         },
       ]
@@ -57,9 +57,9 @@ export const MyGroupsScreen = () => {
 
   const handleManageGroup = useCallback((_group: Group) => {
     Alert.alert(
-      t('myGroups.manageGroup.title'),
-      t('myGroups.manageGroup.message'),
-      [{ text: t('myGroups.manageGroup.confirm') }]
+      t('mygroups:myGroups.manageGroup.title'),
+      t('myGroups:myGroups.manageGroup.message'),
+      [{ text: t('mygroups:myGroups.manageGroup.confirm') }]
     );
   }, [t]);
 
@@ -79,7 +79,7 @@ export const MyGroupsScreen = () => {
   };
 
   const renderGroupItem = ({ item }: { item: Group }) => {
-    const isCreator = item.creatorId === 'current_user'; // TODO: 실제 사용자 ID와 비교
+    const isCreator = item.creatorId === 'current_user'; // TODO: Compare with actual user ID
 
     return (
       <View style={[styles.groupItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
@@ -91,15 +91,15 @@ export const MyGroupsScreen = () => {
             <View style={styles.groupDetails}>
               <View style={styles.groupTitleRow}>
                 <Text style={[styles.groupName, { color: colors.TEXT.PRIMARY }]}>{item.name}</Text>
-                {isCreator && <Text style={[styles.creatorBadge, { color: colors.TEXT.WHITE, backgroundColor: colors.SUCCESS }]}>{t('myGroups.creatorBadge')}</Text>}
+                {isCreator && <Text style={[styles.creatorBadge, { color: colors.TEXT.WHITE, backgroundColor: colors.SUCCESS }]}>{t('mygroups:myGroups.creatorBadge')}</Text>}
               </View>
               <Text style={[styles.groupDescription, { color: colors.TEXT.SECONDARY }]} numberOfLines={2}>
                 {item.description}
               </Text>
               <Text style={[styles.groupStats, { color: colors.TEXT.LIGHT }]}>
-                {t('myGroups.groupStats', { 
+                {t('myGroups:myGroups.groupStats', { 
                   memberCount: item.memberCount,
-                  matchingStatus: item.isMatchingActive ? t('myGroups.active') : t('myGroups.inactive')
+                  matchingStatus: item.isMatchingActive ? t('mygroups:myGroups.active') : t('mygroups:myGroups.inactive')
                 })}
               </Text>
             </View>
@@ -112,14 +112,14 @@ export const MyGroupsScreen = () => {
               style={[styles.actionButton, styles.manageButton, { backgroundColor: colors.PRIMARY }]}
               onPress={() => handleManageGroup(item)}
             >
-              <Text style={[styles.manageButtonText, { color: colors.TEXT.WHITE }]}>{t('myGroups.manageButton')}</Text>
+              <Text style={[styles.manageButtonText, { color: colors.TEXT.WHITE }]}>{t('mygroups:myGroups.manageButton')}</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               style={[styles.actionButton, styles.leaveButton, { backgroundColor: colors.ERROR }]}
               onPress={() => handleLeaveGroup(item)}
             >
-              <Text style={[styles.leaveButtonText, { color: colors.TEXT.WHITE }]}>{t('myGroups.leaveButton')}</Text>
+              <Text style={[styles.leaveButtonText, { color: colors.TEXT.WHITE }]}>{t('mygroups:myGroups.leaveButton')}</Text>
             </TouchableOpacity>
           )}
           
@@ -127,10 +127,10 @@ export const MyGroupsScreen = () => {
             style={[styles.actionButton, styles.viewButton, { backgroundColor: colors.TEXT.LIGHT }]}
             onPress={() => {
               // TODO: Navigate to group detail page
-              Alert.alert(t('myGroups.viewGroup.title'), t('myGroups.viewGroup.message'));
+              Alert.alert(t('mygroups:myGroups.viewGroup.title'), t('myGroups:myGroups.viewGroup.message'));
             }}
           >
-            <Text style={[styles.viewButtonText, { color: colors.TEXT.PRIMARY }]}>{t('myGroups.viewButton')}</Text>
+            <Text style={[styles.viewButtonText, { color: colors.TEXT.PRIMARY }]}>{t('mygroups:myGroups.viewButton')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -152,7 +152,7 @@ export const MyGroupsScreen = () => {
             selectedTab === 'joined' && [styles.tabButtonTextActive, { color: colors.PRIMARY }],
           ]}
         >
-          {t('myGroups.joinedTab', { count: groupStore.joinedGroups.length })}
+          {t('myGroups:myGroups.joinedTab', { count: groupStore.joinedGroups.length })}
         </Text>
       </TouchableOpacity>
       
@@ -169,7 +169,7 @@ export const MyGroupsScreen = () => {
             selectedTab === 'created' && [styles.tabButtonTextActive, { color: colors.PRIMARY }],
           ]}
         >
-          {t('myGroups.createdTab', { count: groupStore.joinedGroups.filter(g => g.creatorId === 'current_user').length })}
+          {t('myGroups:myGroups.createdTab', { count: groupStore.joinedGroups.filter(g => g.creatorId === 'current_user').length })}
         </Text>
       </TouchableOpacity>
     </View>
@@ -177,9 +177,9 @@ export const MyGroupsScreen = () => {
 
   const renderHeader = () => (
     <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
-      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>{t('myGroups.title')}</Text>
+      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>{t('mygroups:myGroups.title')}</Text>
       <Text style={[styles.headerSubtitle, { color: colors.TEXT.PRIMARY }]}>
-        {t('myGroups.subtitle')}
+        {t('mygroups:myGroups.subtitle')}
       </Text>
     </View>
   );
@@ -191,14 +191,14 @@ export const MyGroupsScreen = () => {
       </Text>
       <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>
         {selectedTab === 'joined' 
-          ? t('myGroups.emptyJoined.title')
-          : t('myGroups.emptyCreated.title')
+          ? t('mygroups:myGroups.emptyJoined.title')
+          : t('mygroups:myGroups.emptyCreated.title')
         }
       </Text>
       <Text style={[styles.emptyStateSubtitle, { color: colors.TEXT.SECONDARY }]}>
         {selectedTab === 'joined'
-          ? t('myGroups.emptyJoined.subtitle')
-          : t('myGroups.emptyCreated.subtitle')
+          ? t('mygroups:myGroups.emptyJoined.subtitle')
+          : t('mygroups:myGroups.emptyCreated.subtitle')
         }
       </Text>
       <TouchableOpacity
@@ -212,7 +212,7 @@ export const MyGroupsScreen = () => {
         }}
       >
         <Text style={[styles.emptyStateButtonText, { color: colors.TEXT.WHITE }]}>
-          {selectedTab === 'joined' ? t('myGroups.emptyJoined.button') : t('myGroups.emptyCreated.button')}
+          {selectedTab === 'joined' ? t('mygroups:myGroups.emptyJoined.button') : t('mygroups:myGroups.emptyCreated.button')}
         </Text>
       </TouchableOpacity>
     </View>

@@ -7,7 +7,7 @@ import {
   Animated,
   Alert,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { audioService } from '../../services/audioService';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
@@ -30,11 +30,11 @@ interface VoiceMessageRecorderProps {
  * @returns {JSX.Element} 음성 녹음 UI
  * @description 음성 녹음, 일시정지, 재개, 취소 및 전송 기능을 제공하는 컴포넌트
  */
-export const VoiceMessageRecorder= ({
+export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
   onSend,
   onCancel,
 }) => {
-  const { t } = useTranslation('chat');
+  const { t } = useAndroidSafeTranslation('chat');
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -101,7 +101,7 @@ export const VoiceMessageRecorder= ({
       setIsRecording(true);
       setRecordingDuration(0);
     } catch (error) {
-      Alert.alert(t('errors.error'), t('voiceRecording.recordingError'));
+      Alert.alert(t('common:errors.error'), t('voiceRecording:voiceRecording.recordingError'));
     }
   };
 
@@ -116,10 +116,10 @@ export const VoiceMessageRecorder= ({
         // 1초 이상 녹음된 경우만 전송
         onSend(result.uri, result.duration);
       } else {
-        Alert.alert(t('status.notification'), t('voiceRecording.tooShort'));
+        Alert.alert(t('common:status.notification'), t('voiceRecording:voiceRecording.tooShort'));
       }
     } catch (error) {
-      Alert.alert(t('errors.error'), t('voiceRecording.saveError'));
+      Alert.alert(t('common:errors.error'), t('voiceRecording:voiceRecording.saveError'));
     } finally {
       setIsRecording(false);
       setIsPaused(false);

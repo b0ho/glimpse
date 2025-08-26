@@ -8,7 +8,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Content } from '@/types';
@@ -59,7 +59,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   const isOwnContent = item.authorId === currentUserId;
   const { getUserDisplayName } = useLikeStore();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation();
   const navigation = useNavigation();
   const [showMenu, setShowMenu] = useState(false);
   

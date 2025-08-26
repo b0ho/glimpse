@@ -10,7 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthService } from '@/services/auth/auth-service';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
@@ -34,7 +34,7 @@ export const SMSVerificationScreen= ({
   const authService = useAuthService();
   const authStore = useAuthStore();
   const inputRef = useRef<TextInput>(null);
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation();
   const { colors } = useTheme();
 
   useEffect(() => {

@@ -10,6 +10,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, SIZES } from '../../constants/theme';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 /**
  * MediaPicker 컴포넌트 Props
@@ -34,6 +35,7 @@ export const MediaPicker= ({
   disabled = false,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const { t } = useAndroidSafeTranslation(['chat', 'common']);
 
   /**
    * 카메라 권한 요청
@@ -60,7 +62,7 @@ export const MediaPicker= ({
   const takePhoto = async () => {
     const hasPermission = await requestCameraPermission();
     if (!hasPermission) {
-      Alert.alert('알림', '카메라 권한이 필요합니다.');
+      Alert.alert(t('common:notifications.info'), t('chat:media.permissions.cameraRequired'));
       return;
     }
 
@@ -78,7 +80,7 @@ export const MediaPicker= ({
       }
     } catch (error) {
       console.error('Failed to take photo:', error);
-      Alert.alert('오류', '사진 촬영에 실패했습니다.');
+      Alert.alert(t('common:alerts.error.title'), t('chat:media.errors.cameraFailed'));
     } finally {
       setIsProcessing(false);
     }
@@ -91,7 +93,7 @@ export const MediaPicker= ({
   const selectFromLibrary = async () => {
     const hasPermission = await requestLibraryPermission();
     if (!hasPermission) {
-      Alert.alert('알림', '사진 라이브러리 권한이 필요합니다.');
+      Alert.alert(t('common:notifications.info'), t('chat:media.permissions.libraryRequired'));
       return;
     }
 
@@ -110,7 +112,7 @@ export const MediaPicker= ({
       }
     } catch (error) {
       console.error('Failed to select media:', error);
-      Alert.alert('오류', '미디어 선택에 실패했습니다.');
+      Alert.alert(t('common:alerts.error.title'), t('chat:media.errors.selectionFailed'));
     } finally {
       setIsProcessing(false);
     }
@@ -125,7 +127,7 @@ export const MediaPicker= ({
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
-          options: ['취소', '사진 촬영', '라이브러리에서 선택'],
+          options: [t('common:buttons.cancel'), t('chat:media.actions.takePhoto'), t('chat:media.actions.selectFromLibrary')],
           cancelButtonIndex: 0,
         },
         (buttonIndex) => {
@@ -138,12 +140,12 @@ export const MediaPicker= ({
       );
     } else {
       Alert.alert(
-        '미디어 선택',
-        '사진이나 동영상을 선택하세요',
+        t('chat:media.title'),
+        t('chat:media.description'),
         [
-          { text: '취소', style: 'cancel' },
-          { text: '사진 촬영', onPress: takePhoto },
-          { text: '라이브러리에서 선택', onPress: selectFromLibrary },
+          { text: t('common:buttons.cancel'), style: 'cancel' },
+          { text: t('chat:media.actions.takePhoto'), onPress: takePhoto },
+          { text: t('chat:media.actions.selectFromLibrary'), onPress: selectFromLibrary },
         ],
         { cancelable: true }
       );

@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   Pressable,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthService } from '@/services/auth/auth-service';
 import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -31,7 +31,7 @@ export const PhoneVerificationScreen = ({
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const authService = useAuthService();
-  const { t } = useTranslation('auth');
+  const { t } = useAndroidSafeTranslation('auth');
   const { colors } = useTheme();
 
   const formatPhoneInput = (input: string): string => {
@@ -52,7 +52,7 @@ export const PhoneVerificationScreen = ({
     
     if (!phoneNumber.trim()) {
       console.log('❌ Phone number is empty');
-      Alert.alert(t('common:errors.error'), t('phoneVerification.errors.phoneRequired'));
+      Alert.alert(t('common:errors.error'), t('auth:phoneVerification.errors.phoneRequired'));
       return;
     }
 
@@ -61,7 +61,7 @@ export const PhoneVerificationScreen = ({
     
     if (!validatePhone(rawNumbers)) {
       console.log('❌ Phone validation failed');
-      Alert.alert(t('common:errors.error'), t('phoneVerification.errors.invalidPhone'));
+      Alert.alert(t('common:errors.error'), t('auth:phoneVerification.errors.invalidPhone'));
       return;
     }
 
@@ -94,11 +94,11 @@ export const PhoneVerificationScreen = ({
         );
       } else {
         console.log('❌ Auth service failed:', result.error);
-        Alert.alert(t('common:errors.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('phoneVerification.errors.sendFailed'));
+        Alert.alert(t('common:errors.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('auth:phoneVerification.errors.sendFailed'));
       }
     } catch (error) {
       console.error('🔥 Phone verification error:', error);
-      Alert.alert(t('common:errors.error'), t('phoneVerification.errors.networkError'));
+      Alert.alert(t('common:errors.error'), t('auth:phoneVerification.errors.networkError'));
     } finally {
       console.log('🏁 Verification process finished');
       setIsLoading(false);
@@ -130,16 +130,16 @@ export const PhoneVerificationScreen = ({
       
       <View style={styles.content}>
         <Text style={[styles.title, { color: colors.PRIMARY }]}>
-          {authMode === 'signup' ? t('phoneVerification.signup.title') : t('phoneVerification.title')}
+          {authMode === 'signup' ? t('auth:phoneVerification.signup.title') : t('auth:phoneVerification.title')}
         </Text>
         <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
-          {authMode === 'signup' ? t('phoneVerification.signup.subtitle') : t('phoneVerification.subtitle')}
+          {authMode === 'signup' ? t('auth:phoneVerification.signup.subtitle') : t('auth:phoneVerification.subtitle')}
         </Text>
         
         <View style={styles.form}>
-          <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>{t('phoneVerification.phoneLabel')}</Text>
+          <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>{t('auth:phoneVerification.phoneLabel')}</Text>
           <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
-            {t('phoneVerification.description')}
+            {t('auth:phoneVerification.description')}
           </Text>
           
           <TextInput
@@ -148,7 +148,7 @@ export const PhoneVerificationScreen = ({
               borderColor: colors.BORDER,
               color: colors.TEXT.PRIMARY
             }]}
-            placeholder={t('phoneVerification.placeholder')}
+            placeholder={t('auth:phoneVerification.placeholder')}
             placeholderTextColor={colors.TEXT.LIGHT}
             value={phoneNumber}
             onChangeText={handlePhoneChange}
@@ -170,19 +170,19 @@ export const PhoneVerificationScreen = ({
               <View style={styles.buttonContent}>
                 <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
                 <Text style={[styles.buttonText, { color: colors.TEXT.WHITE, marginLeft: SPACING.SM }]}>
-                  {authMode === 'signup' ? t('phoneVerification.signup.sendingButton') : t('phoneVerification.sendingButton')}
+                  {authMode === 'signup' ? t('auth:phoneVerification.signup.sendingButton') : t('auth:phoneVerification.sendingButton')}
                 </Text>
               </View>
             ) : (
               <Text style={[styles.buttonText, { color: colors.TEXT.WHITE }]}>
-                {authMode === 'signup' ? t('phoneVerification.signup.sendButton') : t('phoneVerification.sendButton')}
+                {authMode === 'signup' ? t('auth:phoneVerification.signup.sendButton') : t('auth:phoneVerification.sendButton')}
               </Text>
             )}
           </Pressable>
         </View>
         
         <Text style={[styles.privacy, { color: colors.TEXT.LIGHT }]}>
-          {t('phoneVerification.privacyNotice')}
+          {t('auth:phoneVerification.privacyNotice')}
         </Text>
       </View>
     </KeyboardAvoidingView>

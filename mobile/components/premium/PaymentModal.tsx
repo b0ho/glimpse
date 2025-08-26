@@ -23,6 +23,7 @@ import { usePremiumStore } from '@/store/slices/premiumSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { UI_ICONS } from '@/utils/icons';
 import { useTheme } from '@/hooks/useTheme';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 /**
  * PaymentModal 컴포넌트 Props
@@ -59,6 +60,7 @@ export const PaymentModal = ({
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { initiatePurchase, confirmPayment, isProcessingPayment, clearError } = usePremiumStore();
   const { colors } = useTheme();
+  const { t } = useAndroidSafeTranslation(['premium', 'common']);
   
   const [isInitialized, setIsInitialized] = useState(false);
   const [clientSecret, setClientSecret] = useState<string>('');
@@ -118,14 +120,14 @@ export const PaymentModal = ({
       });
 
       if (error) {
-        Alert.alert('오류', error.message);
+        Alert.alert(t('common:alerts.error.title'), error.message);
         return;
       }
 
       setIsInitialized(true);
     } catch (error) {
       console.error('Payment sheet initialization failed:', error);
-      Alert.alert('오류', '결제 준비 중 오류가 발생했습니다.');
+      Alert.alert(t('common:alerts.error.title'), t('premium:alerts.payment.error'));
     }
   };
 
@@ -135,7 +137,7 @@ export const PaymentModal = ({
    */
   const handlePayment = async () => {
     if (!isInitialized || !product || !user || !clientSecret) {
-      Alert.alert('오류', '결제가 준비되지 않았습니다.');
+      Alert.alert(t('common:alerts.error.title'), t('premium:alerts.payment.notReady'));
       return;
     }
 
@@ -145,7 +147,7 @@ export const PaymentModal = ({
 
       if (error) {
         if (error.code !== 'Canceled') {
-          Alert.alert('결제 실패', error.message);
+          Alert.alert(t('premium:alerts.payment.failed'), error.message);
         }
         return;
       }
@@ -154,13 +156,13 @@ export const PaymentModal = ({
       await confirmPayment(user.id, product.id);
 
       Alert.alert(
-        '결제 완료! 🎉',
+        t('premium:alerts.payment.complete'),
         product.type === 'subscription' 
-          ? '프리미엄 구독이 활성화되었습니다.' 
-          : '좋아요가 추가되었습니다.',
+          ? t('premium:alerts.payment.subscriptionActivated')
+          : t('premium:alerts.payment.likesAdded'),
         [
           {
-            text: '확인',
+            text: t('common:buttons.confirm'),
             onPress: () => {
               onSuccess();
               onClose();
@@ -170,7 +172,7 @@ export const PaymentModal = ({
       );
     } catch (error) {
       console.error('Payment failed:', error);
-      Alert.alert('오류', '결제 처리 중 오류가 발생했습니다.');
+      Alert.alert(t('common:alerts.error.title'), t('premium:alerts.payment.processing'));
     }
   };
 

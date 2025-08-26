@@ -18,7 +18,7 @@ import { initializeFCM, cleanupFCM } from '@/services/notifications/initializeFC
 import { useAuthStore } from '@/store/slices/authSlice';
 import { setAuthToken } from '@/services/api/config';
 import { AppMode, MODE_TEXTS } from '../shared/types';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 
 // Screens
@@ -214,7 +214,7 @@ function AuthNavigator() {
  * @description 메인 피드, 컨텐츠 작성, 스토리 업로드
  */
 function HomeStackNavigator() {
-  const { t } = useTranslation('navigation');
+  const { t } = useAndroidSafeTranslation('navigation');
   const { colors } = useTheme();
   
   return (
@@ -257,7 +257,7 @@ function HomeStackNavigator() {
         name="StoryUpload" 
         component={StoryUploadScreen} 
         options={{ 
-          title: t('screens.storyUpload'),
+          title: t('navigation:screens.storyUpload'),
           headerShown: false,
           presentation: 'modal',
         }}
@@ -266,7 +266,7 @@ function HomeStackNavigator() {
         name="NearbyUsers" 
         component={NearbyUsersScreen} 
         options={{ 
-          title: t('screens.nearbyUsers'),
+          title: t('navigation:screens.nearbyUsers'),
           headerShown: false,
         }}
       />
@@ -289,7 +289,7 @@ function HomeStackNavigator() {
  * @description 그룹 목록, 생성, 위치 기반 그룹, 초대 관리
  */
 function GroupsStackNavigator() {
-  const { t } = useTranslation('navigation');
+  const { t } = useAndroidSafeTranslation('navigation');
   const { colors } = useTheme();
   
   return (
@@ -314,7 +314,7 @@ function GroupsStackNavigator() {
         name="CreateGroup" 
         component={CreateGroupScreen} 
         options={{ 
-          title: t('screens.createGroup'),
+          title: t('navigation:screens.createGroup'),
           headerShown: false,
           presentation: 'modal',
         }}
@@ -323,7 +323,7 @@ function GroupsStackNavigator() {
         name="LocationGroup" 
         component={LocationGroupScreen} 
         options={{ 
-          title: t('screens.locationGroup'),
+          title: t('navigation:screens.locationGroup'),
           headerShown: false,
         }}
       />
@@ -331,7 +331,7 @@ function GroupsStackNavigator() {
         name="NearbyUsers" 
         component={NearbyUsersScreen} 
         options={{ 
-          title: t('screens.nearbyUsers'),
+          title: t('navigation:screens.nearbyUsers'),
           headerShown: false,
         }}
       />
@@ -339,7 +339,7 @@ function GroupsStackNavigator() {
         name="Map" 
         component={MapScreen} 
         options={{ 
-          title: t('screens.map'),
+          title: t('navigation:screens.map'),
           headerShown: false,
         }}
       />
@@ -347,7 +347,7 @@ function GroupsStackNavigator() {
         name="GroupInvite" 
         component={GroupInviteScreen} 
         options={{ 
-          title: t('screens.groupInvite'),
+          title: t('navigation:screens.groupInvite'),
           headerShown: false,
           presentation: 'modal',
         }}
@@ -356,7 +356,7 @@ function GroupsStackNavigator() {
         name="JoinGroup" 
         component={JoinGroupScreen} 
         options={{ 
-          title: t('screens.joinGroup'),
+          title: t('navigation:screens.joinGroup'),
           headerShown: false,
           presentation: 'modal',
         }}
@@ -365,7 +365,7 @@ function GroupsStackNavigator() {
         name="GroupManage" 
         component={GroupManageScreen} 
         options={{ 
-          title: t('screens.groupManage'),
+          title: t('navigation:screens.groupManage'),
           headerShown: false,
           presentation: 'modal',
         }}
@@ -428,7 +428,7 @@ function MatchesStackNavigator() {
  */
 function InterestStackNavigator() {
   const { colors } = useTheme();
-  const { t } = useTranslation('navigation');
+  const { t } = useAndroidSafeTranslation('navigation');
   
   return (
     <InterestStack.Navigator 
@@ -588,8 +588,21 @@ function ProfileStackNavigator() {
 function DatingTabNavigator() {
   const { currentMode } = useAuthStore();
   const modeTexts = MODE_TEXTS[currentMode];
-  const { t } = useTranslation('navigation');
+  const { t, ready } = useAndroidSafeTranslation('navigation');
   const { colors } = useTheme();
+  
+  // Android에서 i18n이 준비되지 않았을 때 fallback 제공
+  const getTabTitle = (key: string, fallback: string) => {
+    if (Platform.OS === 'android' && !ready) {
+      return fallback;
+    }
+    const translation = t(key);
+    // 키가 그대로 반환되면 fallback 사용
+    if (translation === key || translation.includes('.')) {
+      return fallback;
+    }
+    return translation;
+  };
   
   return (
     <Tab.Navigator
@@ -614,18 +627,18 @@ function DatingTabNavigator() {
         name="Home" 
         component={HomeStackNavigator}
         options={{
-          title: t('tabs.home'),
+          title: getTabTitle('navigation:tabs.home', '홈'),
           tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.HOME} color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('accessibility.home'),
+          tabBarAccessibilityLabel: t('navigation:accessibility.home'),
         }}
       />
       <Tab.Screen 
         name="Groups" 
         component={GroupsStackNavigator}
         options={{
-          title: t('tabs.groups'),
+          title: getTabTitle('navigation:tabs.groups', '그룹'),
           tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.GROUPS} color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('accessibility.groups'),
+          tabBarAccessibilityLabel: t('navigation:accessibility.groups'),
         }}
       />
       <Tab.Screen 
@@ -650,9 +663,9 @@ function DatingTabNavigator() {
         name="Profile" 
         component={ProfileStackNavigator}
         options={{
-          title: t('tabs.profile'),
+          title: getTabTitle('navigation:tabs.profile', '프로필'),
           tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.PROFILE} color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('accessibility.profile'),
+          tabBarAccessibilityLabel: t('navigation:accessibility.profile'),
         }}
       />
     </Tab.Navigator>
@@ -666,8 +679,21 @@ function DatingTabNavigator() {
  * @description 친구 찾기 목적 사용자를 위한 5개 탭 (홈, 커뮤니티, 단체채팅, 친구목록, 프로필)
  */
 function FriendshipTabNavigator() {
-  const { t } = useTranslation('navigation');
+  const { t, ready } = useAndroidSafeTranslation('navigation');
   const { colors } = useTheme();
+  
+  // Android에서 i18n이 준비되지 않았을 때 fallback 제공
+  const getTabTitle = (key: string, fallback: string) => {
+    if (Platform.OS === 'android' && !ready) {
+      return fallback;
+    }
+    const translation = t(key);
+    // 키가 그대로 반환되면 fallback 사용
+    if (translation === key || translation.includes('.')) {
+      return fallback;
+    }
+    return translation;
+  };
   
   return (
     <Tab.Navigator
@@ -692,18 +718,18 @@ function FriendshipTabNavigator() {
         name="Home" 
         component={HomeStackNavigator}
         options={{
-          title: t('tabs.home'),
+          title: getTabTitle('navigation:tabs.home', '홈'),
           tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.HOME} color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('accessibility.home'),
+          tabBarAccessibilityLabel: t('navigation:accessibility.home'),
         }}
       />
       <Tab.Screen 
         name="Community" 
         component={CommunityScreen}
         options={{
-          title: t('tabs.community'),
+          title: getTabTitle('navigation:tabs.community', '커뮤니티'),
           tabBarIcon: ({ color, size }) => <Icon name="newspaper-outline" color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('accessibility.community'),
+          tabBarAccessibilityLabel: t('navigation:accessibility.community'),
         }}
       />
       <Tab.Screen 
@@ -719,18 +745,18 @@ function FriendshipTabNavigator() {
         name="Friends" 
         component={MatchesStackNavigator}
         options={{
-          title: t('tabs.friends'),
+          title: getTabTitle('navigation:tabs.friends', '친구목록'),
           tabBarIcon: ({ color, size }) => <Icon name="people-outline" color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('accessibility.friends'),
+          tabBarAccessibilityLabel: t('navigation:accessibility.friends'),
         }}
       />
       <Tab.Screen 
         name="Profile" 
         component={ProfileStackNavigator}
         options={{
-          title: t('tabs.profile'),
+          title: getTabTitle('navigation:tabs.profile', '프로필'),
           tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.PROFILE} color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('accessibility.profile'),
+          tabBarAccessibilityLabel: t('navigation:accessibility.profile'),
         }}
       />
     </Tab.Navigator>

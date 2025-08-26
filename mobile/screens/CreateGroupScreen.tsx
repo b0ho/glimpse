@@ -12,7 +12,7 @@ import {
   Switch,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { useTheme } from '@/hooks/useTheme';
@@ -67,7 +67,7 @@ export const CreateGroupScreen = () => {
   const navigation = useNavigation<any>();
   const authStore = useAuthStore();
   const groupStore = useGroupStore();
-  const { t } = useTranslation(['group', 'common']);
+  const { t } = useAndroidSafeTranslation('group');
   const { colors } = useTheme();
 
   /**

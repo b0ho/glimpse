@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useInterestStore } from '@/store/slices/interestSlice';
 import { InterestCard } from '@/components/interest/InterestCard';
 import { InterestEmptyState } from '@/components/interest/InterestEmptyState';
@@ -30,6 +31,7 @@ import { InterestType } from '@/types/interest';
 export const InterestSearchScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { colors, isDark } = useTheme();
+  const { t } = useAndroidSafeTranslation('common');
   const { user, getSubscriptionTier, getSubscriptionFeatures } = useAuthStore();
   const {
     searches,
@@ -94,10 +96,18 @@ export const InterestSearchScreen: React.FC = () => {
   };
 
   const loadData = async () => {
-    await Promise.all([
-      fetchSearches(),
-      fetchMatches(),
-    ]);
+    try {
+      await Promise.all([
+        fetchSearches().catch(err => {
+          console.log('[InterestSearchScreen] fetchSearches error:', err);
+        }),
+        fetchMatches().catch(err => {
+          console.log('[InterestSearchScreen] fetchMatches error:', err);
+        }),
+      ]);
+    } catch (error) {
+      console.error('[InterestSearchScreen] loadData error:', error);
+    }
   };
 
   const handleRefresh = useCallback(async () => {
@@ -466,15 +476,19 @@ export const InterestSearchScreen: React.FC = () => {
             <Icon name="sparkles" size={20} color={colors.WARNING} />
             <View style={styles.planTextContainer}>
               <Text style={[styles.planTitle, { color: colors.TEXT.PRIMARY }]}>
-                {subscriptionTier === SubscriptionTier.FREE ? '무료 플랜' : '프리미엄'} 이용 중
+                {subscriptionTier === SubscriptionTier.BASIC ? '무료 플랜' : '프리미엄'} 이용 중
               </Text>
               <Text style={[styles.planDescription, { color: colors.TEXT.SECONDARY }]}>
-                등록 가능: {features.maxInterestSearches - searches.length}개 남음 • 
+                등록 가능: {
+                  features.interestSearchLimit === 'unlimited' 
+                    ? '무제한' 
+                    : `${features.interestSearchLimit - searches.length}개 남음`
+                } • 
                 유효기간: {features.interestSearchDuration}일
               </Text>
             </View>
           </View>
-          {subscriptionTier === SubscriptionTier.FREE && (
+          {subscriptionTier === SubscriptionTier.BASIC && (
             <TouchableOpacity
               style={[styles.upgradeButton, { backgroundColor: colors.PRIMARY }]}
               onPress={() => navigation.navigate('Premium')}

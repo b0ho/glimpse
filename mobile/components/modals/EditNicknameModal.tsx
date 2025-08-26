@@ -11,7 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -44,7 +44,7 @@ export const EditNicknameModal = ({
   onClose,
   onSuccess,
 }) => {
-  const { t } = useTranslation(['common', 'profile']);
+  const { t } = useAndroidSafeTranslation('common');
   const { user, updateUserProfile } = useAuthStore();
   const { colors } = useTheme();
   const [nickname, setNickname] = useState('');

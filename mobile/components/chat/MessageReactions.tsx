@@ -8,7 +8,7 @@ import {
   FlatList,
   Dimensions,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
 
 /**
@@ -57,14 +57,14 @@ const ALL_REACTIONS = [
  * @returns {JSX.Element} 메시지 리액션 UI
  * @description 메시지에 이모지 리액션을 추가/제거하고 표시하는 컴포넌트
  */
-export const MessageReactions= ({
+export const MessageReactions: React.FC<MessageReactionsProps> = ({
   reactions,
   onAddReaction,
   onRemoveReaction,
   currentUserId,
 }) => {
   const [showAllReactions, setShowAllReactions] = useState(false);
-  const { t } = useTranslation(['chat']);
+  const { t } = useAndroidSafeTranslation('chat');
 
   /**
    * 리액션 터치 핸들러
@@ -142,7 +142,7 @@ export const MessageReactions= ({
         >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('reactions.addReaction')}</Text>
+              <Text style={styles.modalTitle}>{t('common:reactions.addReaction')}</Text>
             </View>
 
             {/* 빠른 선택 */}

@@ -15,7 +15,7 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@/hooks/useTheme';
 import { ThemeMode } from '@/types/theme';
@@ -47,7 +47,7 @@ interface ThemeOption {
 export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [scaleAnim] = useState(new Animated.Value(0));
-  const { t } = useTranslation(['settings', 'common']);
+  const { t } = useAndroidSafeTranslation('settings');
   const { mode, isDark, colors, setTheme } = useTheme();
 
   /**

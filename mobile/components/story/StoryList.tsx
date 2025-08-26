@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { StoryUser as StoryUserType } from '@/utils/storyData';
 import { useTheme } from '@/hooks/useTheme';
@@ -52,7 +52,7 @@ export const StoryList= ({
   onRefresh,
   refreshing = false,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation();
   const { colors } = useTheme();
   
   // Find current user's stories

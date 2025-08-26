@@ -12,7 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 import { groupApi } from '@/services/api/groupApi';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -36,7 +36,7 @@ export const GroupManageScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { groupId } = route.params as { groupId: string };
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation();
   const { colors } = useTheme();
 
   const [pendingMembers, setPendingMembers] = useState<PendingMember[]>([]);

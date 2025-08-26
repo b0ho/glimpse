@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@/hooks/useTheme';
 import { companyVerificationService, CompanyDomain } from '../services/companyVerificationService';
@@ -20,7 +20,7 @@ import { FONTS, SIZES } from '../constants/theme';
 
 export default function CompanyVerificationScreen() {
   const navigation = useNavigation();
-  const { t } = useTranslation('auth');
+  const { t } = useAndroidSafeTranslation('auth');
   const { colors } = useTheme();
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
@@ -68,7 +68,7 @@ export default function CompanyVerificationScreen() {
 
   const sendVerificationEmail = async () => {
     if (!companyVerificationService.validateEmail(email)) {
-      Alert.alert(t('common:errors.error'), t('companyVerification.email.invalidError'));
+      Alert.alert(t('common:errors.error'), t('auth:companyVerification.email.invalidError'));
       return;
     }
 
@@ -77,9 +77,9 @@ export default function CompanyVerificationScreen() {
       const result = await companyVerificationService.sendVerificationEmail(email);
       setStep('code');
       setTimer(1800); // 30분 = 1800초
-      Alert.alert(t('common:status.success'), t('companyVerification.email.success'));
+      Alert.alert(t('common:status.success'), t('auth:companyVerification.email.success'));
     } catch (error: any) {
-      Alert.alert(t('common:errors.error'), error.message || t('companyVerification.email.sendFailed'));
+      Alert.alert(t('common:errors.error'), error.message || t('auth:companyVerification.email.sendFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +87,7 @@ export default function CompanyVerificationScreen() {
 
   const verifyCode = async () => {
     if (!verificationCode || verificationCode.length !== 6) {
-      Alert.alert(t('common:errors.error'), t('companyVerification.code.invalidError'));
+      Alert.alert(t('common:errors.error'), t('auth:companyVerification.code.invalidError'));
       return;
     }
 
@@ -96,13 +96,13 @@ export default function CompanyVerificationScreen() {
       const success = await companyVerificationService.verifyEmailCode(email, verificationCode);
       if (success) {
         Alert.alert(
-          t('companyVerification.code.verifySuccess'),
-          t('companyVerification.code.verifySuccessMessage'),
+          t('auth:companyVerification.code.verifySuccess'),
+          t('auth:companyVerification.code.verifySuccessMessage'),
           [{ text: t('common:buttons.confirm'), onPress: () => navigation.goBack() }]
         );
       }
     } catch (error: any) {
-      Alert.alert(t('common:errors.error'), error.message || t('companyVerification.code.verifyFailed'));
+      Alert.alert(t('common:errors.error'), error.message || t('auth:companyVerification.code.verifyFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +116,7 @@ export default function CompanyVerificationScreen() {
 
   const resendCode = async () => {
     if (timer > 0) {
-      Alert.alert(t('common:status.info'), t('companyVerification.code.resendWait', { time: formatTime(timer) }));
+      Alert.alert(t('common:status.info'), t('companyVerification:companyVerification.code.resendWait', { time: formatTime(timer) }));
       return;
     }
     await sendVerificationEmail();
@@ -132,7 +132,7 @@ export default function CompanyVerificationScreen() {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('companyVerification.title')}</Text>
+          <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('auth:companyVerification.title')}</Text>
         </View>
 
         <View style={styles.content}>
@@ -141,7 +141,7 @@ export default function CompanyVerificationScreen() {
           </View>
 
           <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
-            {t('companyVerification.description')}
+            {t('auth:companyVerification.description')}
           </Text>
 
           {step === 'email' ? (
@@ -153,7 +153,7 @@ export default function CompanyVerificationScreen() {
                     color: colors.TEXT.PRIMARY,
                     borderColor: colors.BORDER 
                   }]}
-                  placeholder={t('companyVerification.email.placeholder')}
+                  placeholder={t('auth:companyVerification.email.placeholder')}
                   placeholderTextColor={colors.TEXT.LIGHT}
                   value={email}
                   onChangeText={handleEmailChange}
@@ -175,7 +175,7 @@ export default function CompanyVerificationScreen() {
                   backgroundColor: colors.SURFACE, 
                   borderColor: colors.BORDER 
                 }]}>
-                  <Text style={[styles.suggestionsTitle, { color: colors.TEXT.SECONDARY }]}>{t('companyVerification.suggestions.title')}</Text>
+                  <Text style={[styles.suggestionsTitle, { color: colors.TEXT.SECONDARY }]}>{t('auth:companyVerification.suggestions.title')}</Text>
                   {suggestions.map((domain) => (
                     <TouchableOpacity
                       key={domain.id}
@@ -206,7 +206,7 @@ export default function CompanyVerificationScreen() {
                 {isLoading ? (
                   <ActivityIndicator color={colors.TEXT.WHITE} />
                 ) : (
-                  <Text style={[styles.buttonText, { color: colors.TEXT.WHITE }]}>{t('companyVerification.email.sendButton')}</Text>
+                  <Text style={[styles.buttonText, { color: colors.TEXT.WHITE }]}>{t('auth:companyVerification.email.sendButton')}</Text>
                 )}
               </TouchableOpacity>
             </>
@@ -215,7 +215,7 @@ export default function CompanyVerificationScreen() {
               <View style={styles.codeSection}>
                 <Text style={[styles.emailText, { color: colors.TEXT.PRIMARY }]}>{email}</Text>
                 <Text style={[styles.codeDescription, { color: colors.TEXT.SECONDARY }]}>
-                  {t('companyVerification.code.description')}
+                  {t('auth:companyVerification.code.description')}
                 </Text>
 
                 <View style={styles.codeInputContainer}>
@@ -225,7 +225,7 @@ export default function CompanyVerificationScreen() {
                       color: colors.TEXT.PRIMARY,
                       borderColor: colors.PRIMARY 
                     }]}
-                    placeholder={t('companyVerification.code.placeholder')}
+                    placeholder={t('auth:companyVerification.code.placeholder')}
                     placeholderTextColor={colors.TEXT.LIGHT}
                     value={verificationCode}
                     onChangeText={setVerificationCode}
@@ -237,7 +237,7 @@ export default function CompanyVerificationScreen() {
 
                 {timer > 0 && (
                   <Text style={[styles.timerText, { color: colors.ERROR }]}>
-                    {t('companyVerification.code.timer', { time: formatTime(timer) })}
+                    {t('companyVerification:companyVerification.code.timer', { time: formatTime(timer) })}
                   </Text>
                 )}
 
@@ -253,7 +253,7 @@ export default function CompanyVerificationScreen() {
                   {isLoading ? (
                     <ActivityIndicator color={colors.TEXT.WHITE} />
                   ) : (
-                    <Text style={[styles.buttonText, { color: colors.TEXT.WHITE }]}>{t('companyVerification.code.verifyButton')}</Text>
+                    <Text style={[styles.buttonText, { color: colors.TEXT.WHITE }]}>{t('auth:companyVerification.code.verifyButton')}</Text>
                   )}
                 </TouchableOpacity>
 
@@ -267,7 +267,7 @@ export default function CompanyVerificationScreen() {
                     { color: colors.PRIMARY },
                     timer > 0 && [styles.resendButtonTextDisabled, { color: colors.TEXT.SECONDARY }]
                   ]}>
-                    {t('companyVerification.code.resendButton')}
+                    {t('auth:companyVerification.code.resendButton')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -277,7 +277,7 @@ export default function CompanyVerificationScreen() {
           <View style={[styles.infoBox, { backgroundColor: colors.INFO + '20' }]}>
             <Ionicons name="information-circle-outline" size={20} color={colors.INFO} />
             <Text style={[styles.infoText, { color: colors.INFO }]}>
-              {t('companyVerification.info.title')}
+              {t('auth:companyVerification.info.title')}
             </Text>
           </View>
         </View>

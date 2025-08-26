@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { StoryUser, Story, markStoryAsViewed } from '@/utils/storyData';
 import { formatTimeAgo } from '@/utils/dateUtils';
@@ -48,7 +48,7 @@ export const StoryFullViewer: React.FC<StoryFullViewerProps> = ({
   onClose,
   onRefresh,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation();
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [userIndex, setUserIndex] = useState(currentUserIndex);
   const [progress, setProgress] = useState(0);

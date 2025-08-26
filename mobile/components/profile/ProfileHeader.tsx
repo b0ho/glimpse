@@ -6,7 +6,7 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { User } from '../../shared/types';
@@ -69,7 +69,7 @@ export const ProfileHeader= ({
   onFriendsPress,
   onGroupsPress,
 }) => {
-  const { t } = useTranslation(['common', 'profile']);
+  const { t } = useAndroidSafeTranslation('common');
   return (
     <View style={styles.container}>
       <View style={styles.profileImageContainer}>

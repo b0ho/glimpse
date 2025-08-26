@@ -13,7 +13,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuth } from '@/hooks/useAuth';
 import { SUPER_ACCOUNTS, isAuthBypassEnabled, DEV_CONFIG } from '@/config/dev.config';
 import { SPACING, FONT_SIZES } from '@/utils/constants';
@@ -21,7 +21,7 @@ import { useTheme } from '@/hooks/useTheme';
 
 export const DevModePanel = () => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { t } = useTranslation(['common', 'dev']);
+  const { t } = useAndroidSafeTranslation('common');
   const auth = useAuth();
   const { colors } = useTheme();
 
@@ -37,9 +37,9 @@ export const DevModePanel = () => {
       t('accountSwitch', { ns: 'dev' }),
       t('switchAccount', { nickname: SUPER_ACCOUNTS[accountType].nickname, ns: 'dev' }),
       [
-        { text: t('actions.cancel', { ns: 'common' }), style: 'cancel' },
+        { text: t('actions:actions.cancel', { ns: 'common' }), style: 'cancel' },
         {
-          text: t('actions.switch', { ns: 'common' }),
+          text: t('actions:actions.switch', { ns: 'common' }),
           onPress: () => {
             // 환경변수를 동적으로 변경할 수 없으므로 로컬 스토리지 사용
             if (typeof window !== 'undefined') {
@@ -110,7 +110,7 @@ export const DevModePanel = () => {
             style={[styles.closeButton, { backgroundColor: colors.ERROR }]}
             onPress={() => setIsExpanded(false)}
           >
-            <Text style={[styles.closeButtonText, { color: colors.TEXT.WHITE }]}>{t('actions.close', { ns: 'common' })}</Text>
+            <Text style={[styles.closeButtonText, { color: colors.TEXT.WHITE }]}>{t('actions:actions.close', { ns: 'common' })}</Text>
           </TouchableOpacity>
         </View>
       )}

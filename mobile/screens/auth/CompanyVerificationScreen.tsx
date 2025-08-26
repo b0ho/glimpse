@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { CompanyVerification, VerificationStatus, VerificationMethod } from '@/types';
 
@@ -29,7 +29,7 @@ export const CompanyVerificationScreen= ({
   const [inviteCode, setInviteCode] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation();
 
   // 이메일 도메인에서 회사명 추출
   const extractCompanyFromEmail = (emailAddress: string): string => {

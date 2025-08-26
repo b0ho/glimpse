@@ -8,7 +8,7 @@ import {
   FlatList,
   Alert,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 // Types from shared - copied for now
@@ -41,7 +41,7 @@ interface LanguageSelectorProps {
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ 
   onLanguageChange 
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useAndroidSafeTranslation();
   const { colors } = useTheme();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(

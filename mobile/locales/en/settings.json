@@ -91,6 +91,29 @@
       "appClosed": "• You may not receive some notifications if the app is completely closed"
     }
   },
+  "language": {
+    "title": "Language",
+    "selectLanguage": "Select Language",
+    "changeSuccess": "Language Changed",
+    "changeSuccessMessage": "Language has been successfully changed",
+    "changeFailed": "Language Change Failed",
+    "changeFailedMessage": "Failed to change language. Please try again."
+  },
+  "theme": {
+    "title": "Theme",
+    "selectTheme": "Select Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System Default",
+    "lightDescription": "Use light theme",
+    "darkDescription": "Use dark theme (battery saving)",
+    "systemDescription": "Automatically change according to device settings",
+    "changeSuccess": "Theme Changed",
+    "changeSuccessMessage": "Changed to {{theme}} mode",
+    "changeFailed": "Theme Change Failed",
+    "changeFailedMessage": "Failed to change theme. Please try again.",
+    "footerNote": "System default follows your device settings"
+  },
   "otherSettings": {
     "title": "Other",
     "terms": "Terms of Service",

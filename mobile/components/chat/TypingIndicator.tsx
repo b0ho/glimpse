@@ -5,7 +5,7 @@ import {
   StyleSheet,
   Animated,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 import { FONTS, SIZES } from '../../constants/theme';
 
@@ -27,11 +27,11 @@ interface TypingIndicatorProps {
  * @returns {JSX.Element | null} 타이핑 표시기 UI
  * @description 세 개의 점이 위아래로 움직이는 애니메이션으로 타이핑 상태 표시
  */
-export const TypingIndicator= ({
+export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
   isTyping,
   userName,
 }) => {
-  const { t } = useTranslation(['chat']);
+  const { t } = useAndroidSafeTranslation('chat');
   const { colors } = useTheme();
   const dot1 = useRef(new Animated.Value(0)).current;
   const dot2 = useRef(new Animated.Value(0)).current;
@@ -105,7 +105,7 @@ export const TypingIndicator= ({
       <View style={styles.bubbleContainer}>
         <View style={[styles.textContainer, { backgroundColor: colors.SURFACE }]}>
           <Text style={[styles.typingText, { color: colors.TEXT.SECONDARY }]}>
-            {userName ? t('notifications.typing', { name: userName }) : t('notifications.typingDefault')}
+            {userName ? t('notifications:notifications.typing', { name: userName }) : t('notification:notifications.typingDefault')}
           </Text>
           <View style={styles.dotsContainer}>
             <Animated.View

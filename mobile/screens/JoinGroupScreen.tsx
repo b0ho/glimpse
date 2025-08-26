@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { groupApi } from '@/services/api/groupApi';
@@ -39,7 +39,7 @@ const CATEGORIES = [
 ];
 
 export const JoinGroupScreen = () => {
-  const { t } = useTranslation('group');
+  const { t } = useAndroidSafeTranslation('group');
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { inviteCode: initialCode } = route.params as { inviteCode: string };

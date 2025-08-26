@@ -123,16 +123,16 @@ const ErrorFallback: React.FC<{
           <Icon name="warning" size={64} color={colors.ERROR} />
         </View>
         
-        <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('errors.errorBoundary.title')}</Text>
+        <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('common:errors.errorBoundary.title')}</Text>
         
         <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
-          {t('errors.errorBoundary.description')}{'\n'}
-          {t('errors.errorBoundary.support')}
+          {t('common:errors.errorBoundary.description')}{'\n'}
+          {t('common:errors.errorBoundary.support')}
         </Text>
         
         {__DEV__ && error && (
           <View style={[styles.errorDetails, { backgroundColor: colors.ERROR + '10' }]}>
-            <Text style={[styles.errorDetailsTitle, { color: colors.ERROR }]}>{t('errors.errorBoundary.developerInfo')}</Text>
+            <Text style={[styles.errorDetailsTitle, { color: colors.ERROR }]}>{t('common:errors.errorBoundary.developerInfo')}</Text>
             <Text style={[styles.errorDetailsText, { color: colors.ERROR }]}>
               {error.toString()}
             </Text>
@@ -149,7 +149,7 @@ const ErrorFallback: React.FC<{
           onPress={onRestart}
         >
           <Icon name="refresh" size={20} color={colors.TEXT.WHITE} />
-          <Text style={[styles.retryButtonText, { color: colors.TEXT.WHITE }]}>{t('buttons.retry')}</Text>
+          <Text style={[styles.retryButtonText, { color: colors.TEXT.WHITE }]}>{t('common:buttons.retry')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
