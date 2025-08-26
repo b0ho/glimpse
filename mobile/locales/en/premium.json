@@ -1,5 +1,74 @@
 {
   "title": "Glimpse Premium",
+  "screen": {
+    "title": "Subscription Plans",
+    "currentPlan": "Current Plan: {{tier}}",
+    "nextPayment": "Next Payment: {{date}}",
+    "planComparison": "Plan Comparison"
+  },
+  "billing": {
+    "monthly": "Monthly Billing",
+    "yearly": "Yearly Billing",
+    "discount": "17% Off"
+  },
+  "plans": {
+    "free": "Free",
+    "advanced": "Advanced",
+    "premium": "Premium",
+    "popular": "Most Popular",
+    "perMonth": "/month",
+    "perMonthYearly": "/month (yearly billing)"
+  },
+  "features": {
+    "interestSearch": "Interest Search: {{limit}}",
+    "interestSearchUnlimited": "Interest Search: Unlimited",
+    "interestSearchThree": "Interest Search: 3 (1 per type)",
+    "interestSearchAllTypes": "Interest Search: 1 per type",
+    "searchDuration": "Search Duration: {{days}} days",
+    "searchDurationUnlimited": "Search Duration: Unlimited",
+    "dailyLikes": "Daily Likes: {{count}} times",
+    "dailyLikesUnlimited": "Daily Likes: Unlimited",
+    "sendInterestFirst": "Send Interest First",
+    "noAds": "Ad-Free",
+    "readReceipts": "Read Receipts",
+    "seeWhoLikedYou": "See Who Liked You",
+    "priorityMatching": "Priority Matching",
+    "personaTopPlacement": "Persona Top Placement",
+    "unlimitedRewind": "Unlimited Rewind"
+  },
+  "buttons": {
+    "currentPlan": "Current Plan",
+    "freeTrial": "Use Free",
+    "upgrade": "Upgrade"
+  },
+  "comparison": {
+    "features": {
+      "interestSearch": "Interest Search",
+      "searchDuration": "Search Duration",
+      "dailyLikes": "Daily Likes",
+      "noAds": "Ad-Free",
+      "priorityMatching": "Priority Matching"
+    },
+    "values": {
+      "three": "3",
+      "ten": "10",
+      "unlimited": "Unlimited",
+      "threeDays": "3 days",
+      "twoWeeks": "2 weeks",
+      "oneTime": "1 time",
+      "threeTimes": "3 times"
+    }
+  },
+  "alerts": {
+    "freePlan": {
+      "title": "Free Plan Notice",
+      "message": "You are already using the free plan."
+    },
+    "subscription": {
+      "complete": "Subscription Complete",
+      "activated": "Premium subscription has been activated."
+    }
+  },
   "subscription": {
     "title": "Premium Subscription",
     "description": "Use all features unlimited",

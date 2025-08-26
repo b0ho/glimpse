@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -29,7 +29,7 @@ import { groupApi } from '@/services/api/groupApi';
  * @description 공식/생성/인스턴트/위치 기반 그룹을 탐색하고 참여할 수 있는 화면
  */
 export const GroupsScreen = () => {
-  const { t } = useTranslation(['group', 'common']);
+  const { t } = useAndroidSafeTranslation('group');
   const { colors } = useTheme();
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -280,16 +280,16 @@ export const GroupsScreen = () => {
             if (isCreator) {
               // 내가 만든 그룹은 나가기 확인
               Alert.alert(
-                '그룹 나가기',
-                '정말로 이 그룹을 나가시겠습니까? 그룹 생성자가 나가면 그룹이 삭제될 수 있습니다.',
+                t('main.leave.title'),
+                t('main.leave.confirmMessage'),
                 [
-                  { text: '취소', style: 'cancel' },
+                  { text: t('main.leave.cancel'), style: 'cancel' },
                   {
-                    text: '나가기',
+                    text: t('main.leave.confirm'),
                     style: 'destructive',
                     onPress: () => {
                       groupStore.leaveGroup(item.id);
-                      Alert.alert('완료', '그룹에서 나갔습니다.');
+                      Alert.alert(t('main.leave.successTitle'), t('main.leave.successMessage'));
                     },
                   },
                 ]
@@ -305,7 +305,7 @@ export const GroupsScreen = () => {
             isCreator && { color: colors.ERROR },
             groupStore.isUserInGroup(item.id) && !isCreator && styles.joinButtonTextDisabled,
           ]}>
-            {isCreator ? '그룹 나가기' : (groupStore.isUserInGroup(item.id) ? '참여중' : '상세보기')}
+            {isCreator ? t('main.actions.leaveGroup') : (groupStore.isUserInGroup(item.id) ? t('main.actions.joined') : t('main.actions.viewDetails'))}
           </Text>
         </TouchableOpacity>
         </View>
@@ -320,9 +320,9 @@ export const GroupsScreen = () => {
    */
   const renderHeader = () => (
     <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
-      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>그룹</Text>
+      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>{t('main.title')}</Text>
       <Text style={[styles.headerSubtitle, { color: colors.TEXT.PRIMARY }]}>
-        내가 참여한 그룹과 만든 그룹을 관리하세요
+        {t('main.subtitle')}
       </Text>
       
       {/* 그룹 생성 및 찾기 버튼 */}
@@ -332,7 +332,7 @@ export const GroupsScreen = () => {
           onPress={() => navigation.navigate('CreateGroup' as never)}
         >
           <Icon name="add-circle-outline" size={20} color="#FFFFFF" />
-          <Text style={styles.actionButtonText}>새 그룹 만들기</Text>
+          <Text style={styles.actionButtonText}>{t('main.actions.createGroup')}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
@@ -340,7 +340,7 @@ export const GroupsScreen = () => {
           onPress={() => navigation.navigate('JoinGroup' as never, { inviteCode: '' } as never)}
         >
           <Icon name="search-outline" size={20} color={colors.PRIMARY} />
-          <Text style={[styles.actionButtonText, { color: colors.PRIMARY }]}>그룹 찾기</Text>
+          <Text style={[styles.actionButtonText, { color: colors.PRIMARY }]}>{t('main.actions.findGroup')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -392,7 +392,7 @@ export const GroupsScreen = () => {
         {groupStore.joinedGroups.filter(g => g.creatorId === authStore.user?.id).length > 0 && (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-              내가 만든 그룹
+              {t('main.sections.myCreatedGroups')}
             </Text>
             {groupStore.joinedGroups
               .filter(g => g.creatorId === authStore.user?.id)
@@ -407,7 +407,7 @@ export const GroupsScreen = () => {
         {/* 내가 참여한 그룹 섹션 */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-            내가 참여한 그룹
+            {t('main.sections.myJoinedGroups')}
           </Text>
           {groupStore.joinedGroups.filter(g => g.creatorId !== authStore.user?.id).length > 0 ? (
             groupStore.joinedGroups
@@ -420,13 +420,13 @@ export const GroupsScreen = () => {
           ) : (
             <View style={styles.emptySection}>
               <Text style={[styles.emptyText, { color: colors.TEXT.SECONDARY }]}>
-                아직 참여한 그룹이 없습니다
+                {t('main.empty.noJoinedGroups')}
               </Text>
               <TouchableOpacity
                 style={[styles.findGroupButton, { backgroundColor: colors.PRIMARY }]}
                 onPress={() => navigation.navigate('JoinGroup' as never, { inviteCode: '' } as never)}
               >
-                <Text style={styles.findGroupButtonText}>그룹 찾아보기</Text>
+                <Text style={styles.findGroupButtonText}>{t('main.actions.findGroupsButton')}</Text>
               </TouchableOpacity>
             </View>
           )}

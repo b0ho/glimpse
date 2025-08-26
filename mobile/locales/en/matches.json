@@ -1,9 +1,15 @@
 {
   "title": "Matches",
   "subtitle": "Chat with people who liked each other",
+  "header": {
+    "title": "Chat",
+    "subtitle": "Start conversations with matched people"
+  },
   "stats": {
-    "totalMatches": "Total matches: {{count}}",
-    "receivedLikes": "Received likes: {{count}}"
+    "totalMatches_one": "{{count}} Match",
+    "totalMatches_other": "{{count}} Matches", 
+    "receivedLikes_one": "{{count}} Like Received",
+    "receivedLikes_other": "{{count}} Likes Received"
   },
   "actions": {
     "startChat": "Start Chat"
@@ -12,13 +18,24 @@
     "matchDescription": "You both liked each other, it's a match! 💕\nYou can now see each other's nicknames."
   },
   "emptyState": {
-    "title": "No matches yet",
-    "subtitle": "Send likes to posts you find interesting\non the home feed!\n\nWhen you both like each other, you'll match."
+    "title": "No chats yet",
+    "subtitle": "Once you match with someone, you can start chatting here"
   },
   "loading": {
     "text": "Loading match information..."
   },
   "user": {
     "anonymous": "Anonymous User"
+  },
+  "mismatch": {
+    "reportTitle": "Report Mismatch",
+    "reportMessage": "Is the match with {{nickname}} incorrect?\n\nReporting a mismatch will cancel the match and return you to waiting status.",
+    "cancel": "Cancel",
+    "report": "Report Mismatch",
+    "reportCompleteTitle": "Report Complete",
+    "reportCompleteMessage": "Mismatch has been reported. Please wait for another match.",
+    "confirm": "OK",
+    "errorTitle": "Error",
+    "errorMessage": "An error occurred while reporting the mismatch. Please try again."
   }
 }

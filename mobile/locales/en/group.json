@@ -21,6 +21,7 @@
     "general": "General Group"
   },
   "members": {
+    "count": "{{count}} members",
     "count_one": "{{count}} member",
     "count_other": "{{count}} members"
   },
@@ -209,5 +210,61 @@
     "joinError": "An error occurred while joining the group.",
     "invalidTitle": "Invalid QR Code",
     "invalidMessage": "This is not a valid Glimpse group QR code."
+  },
+  "main": {
+    "title": "Groups",
+    "subtitle": "Manage the groups you've joined and created",
+    "sections": {
+      "myCreatedGroups": "Groups I Created",
+      "myJoinedGroups": "Groups I Joined"
+    },
+    "actions": {
+      "createGroup": "Create New Group",
+      "findGroup": "Find Groups",
+      "findGroupsButton": "Explore Groups",
+      "leaveGroup": "Leave Group",
+      "joined": "Joined",
+      "viewDetails": "View Details"
+    },
+    "empty": {
+      "noJoinedGroups": "No joined groups yet"
+    },
+    "leave": {
+      "title": "Leave Group",
+      "confirmMessage": "Are you sure you want to leave this group? If the group creator leaves, the group may be deleted.",
+      "cancel": "Cancel",
+      "confirm": "Leave",
+      "successTitle": "Complete",
+      "successMessage": "You have left the group."
+    }
+  },
+  "numberJoin": {
+    "title": "Group Number Join",
+    "subtitle": "Join group using group number",
+    "groupNumber": "Group Number",
+    "placeholder": "Enter 6-digit group number",
+    "join": "Join",
+    "validation": {
+      "required": "Please enter group number",
+      "format": "Group number must be 6 digits",
+      "numeric": "Please enter numbers only"
+    },
+    "errors": {
+      "notFound": "Group not found",
+      "expired": "Group number has expired",
+      "alreadyJoined": "You have already joined this group",
+      "joinFailed": "Failed to join group"
+    },
+    "success": {
+      "title": "Join Complete! 🎉",
+      "message": "Successfully joined \"{{groupName}}\" group",
+      "goToGroup": "Go to Group"
+    },
+    "info": {
+      "title": "How to Use Group Numbers",
+      "description": "Group numbers are temporary 6-digit codes\nthat allow you to easily join groups",
+      "expiry": "Group numbers expire after 24 hours",
+      "privacy": "Only group admins can generate group numbers"
+    }
   }
 }

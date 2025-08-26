@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import i18n from '@/services/i18n/i18n';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -63,13 +63,13 @@ export const HomeScreen = () => {
   // 웹에서 페이지 타이틀 설정
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      document.title = 'Glimpse - 당신의 이상형을 찾아보세요';
+      document.title = t('home:meta.title');
     }
   }, []);
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t } = useAndroidSafeTranslation(['navigation']);
 
   /**
    * 좋아요 토글 핸들러
@@ -252,10 +252,10 @@ export const HomeScreen = () => {
       // 로컬 상태에서 해당 콘텐츠 제거
       setContents(prevContents => prevContents.filter(content => content.id !== contentId));
       
-      Alert.alert('삭제 완료', '게시물이 삭제되었습니다.');
+      Alert.alert(t('home:alerts.deleteComplete'), t('home:alerts.deleteSuccess'));
     } catch (error) {
       console.error('Content delete error:', error);
-      Alert.alert('삭제 실패', '게시물 삭제에 실패했습니다.');
+      Alert.alert(t('home:alerts.deleteFailed'), t('home:alerts.deleteError'));
     }
   }, []);
 
@@ -550,12 +550,12 @@ export const HomeScreen = () => {
           <View style={styles.successStoriesTitle}>
             <Text style={styles.celebrationEmoji}>💑</Text>
             <Text style={[styles.successStoriesTitleText, { color: colors.TEXT.PRIMARY }]}>
-              매칭 성공 스토리
+              {t('home:successStories.title')}
             </Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('InterestSearch' as never)}>
             <Text style={[styles.viewAllText, { color: colors.PRIMARY }]}>
-              전체보기
+              {t('home:successStories.viewAll')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -606,7 +606,7 @@ export const HomeScreen = () => {
           onPress={() => navigation.navigate('NearbyGroups' as never)}
         >
           <Icon name="location-outline" size={20} color={colors.PRIMARY} />
-          <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>근처 그룹</Text>
+          <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>{t('navigation:screens.nearbyGroups')}</Text>
           <Icon name="chevron-forward" size={16} color={colors.TEXT.SECONDARY} />
         </TouchableOpacity>
         
@@ -615,7 +615,7 @@ export const HomeScreen = () => {
           onPress={() => navigation.navigate('NearbyUsers' as never)}
         >
           <Icon name="people-outline" size={20} color={colors.PRIMARY} />
-          <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>근처 사용자</Text>
+          <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>{t('navigation:screens.nearbyUsers')}</Text>
           <Icon name="chevron-forward" size={16} color={colors.TEXT.SECONDARY} />
         </TouchableOpacity>
       </View>

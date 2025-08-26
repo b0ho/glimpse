@@ -337,6 +337,33 @@
     "invalidTitle": "잘못된 QR 코드",
     "invalidMessage": "올바른 Glimpse 그룹 QR 코드가 아닙니다."
   },
+  "main": {
+    "title": "그룹",
+    "subtitle": "내가 참여한 그룹과 만든 그룹을 관리하세요",
+    "sections": {
+      "myCreatedGroups": "내가 만든 그룹",
+      "myJoinedGroups": "내가 참여한 그룹"
+    },
+    "actions": {
+      "createGroup": "새 그룹 만들기",
+      "findGroup": "그룹 찾기",
+      "findGroupsButton": "그룹 찾아보기",
+      "leaveGroup": "그룹 나가기",
+      "joined": "참여중",
+      "viewDetails": "상세보기"
+    },
+    "empty": {
+      "noJoinedGroups": "아직 참여한 그룹이 없습니다"
+    },
+    "leave": {
+      "title": "그룹 나가기",
+      "confirmMessage": "정말로 이 그룹을 나가시겠습니까? 그룹 생성자가 나가면 그룹이 삭제될 수 있습니다.",
+      "cancel": "취소",
+      "confirm": "나가기",
+      "successTitle": "완료",
+      "successMessage": "그룹에서 나갔습니다."
+    }
+  },
   "manage": {
     "title": "가입 대기 멤버",
     "countText": "{{count}}명이 가입 승인을 기다리고 있습니다",

@@ -8,7 +8,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useSignUp, useOAuth, useAuth } from '@clerk/clerk-expo';
 import { useAuthStore } from '@/store/slices/authSlice';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { ClerkGoogleAuth } from '@/components/auth/ClerkGoogleAuth';
 
 /**
@@ -39,7 +39,7 @@ export const AuthScreen= ({ onAuthCompleted }) => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { colors } = useTheme();
-  const { t } = useTranslation('auth');
+  const { t } = useAndroidSafeTranslation('auth');
   const { signUp, setActive } = useSignUp();
   const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
   const { setUser, setToken } = useAuthStore();
@@ -100,7 +100,7 @@ export const AuthScreen= ({ onAuthCompleted }) => {
    * @description Clerk를 통한 구글 OAuth 소셜 로그인 처리
    */
   const handleGoogleLogin = async (): Promise<void> => {
-    console.log('🟡 구글 로그인 버튼 클릭 (Clerk OAuth)');
+    console.log('🟡 Google login button clicked (Clerk OAuth)');
     
     // 개발 환경에서는 OAuth 우회하고 바로 로그인
     if (__DEV__) {
@@ -150,7 +150,7 @@ export const AuthScreen= ({ onAuthCompleted }) => {
           const userData = {
             id: userInfo.id || 'temp_user_id',
             email: userInfo.emailAddress || '',
-            nickname: `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() || '구글 사용자',
+            nickname: `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() || t('fallbackUser.googleUser'),
             anonymousId: `anon_${userInfo.id || 'temp'}`,
             phoneNumber: '',
             isVerified: true,
@@ -166,11 +166,11 @@ export const AuthScreen= ({ onAuthCompleted }) => {
           setUser(userData);
           
           Alert.alert(
-            '로그인 성공',
-            `안녕하세요, ${userData.nickname}님!`,
+            t('alerts.loginSuccess.title'),
+            t('alerts.loginSuccess.messageWithName', { nickname: userData.nickname }),
             [
               {
-                text: '확인',
+                text: t('alerts.loginSuccess.confirm'),
                 onPress: () => onAuthCompleted(),
               }
             ]
@@ -182,7 +182,7 @@ export const AuthScreen= ({ onAuthCompleted }) => {
           const fallbackUser = {
             id: createdSessionId,
             email: 'user@example.com',
-            nickname: '구글 사용자',
+            nickname: t('fallbackUser.googleUser'),
             anonymousId: `anon_${createdSessionId}`,
             phoneNumber: '',
             isVerified: true,
@@ -197,11 +197,11 @@ export const AuthScreen= ({ onAuthCompleted }) => {
           setUser(fallbackUser);
           
           Alert.alert(
-            '로그인 성공',
-            '구글 계정으로 로그인되었습니다!',
+            t('alerts.loginSuccess.title'),
+            t('alerts.loginSuccess.messageDefault'),
             [
               {
-                text: '확인',
+                text: t('alerts.loginSuccess.confirm'),
                 onPress: () => onAuthCompleted(),
               }
             ]
@@ -216,13 +216,11 @@ export const AuthScreen= ({ onAuthCompleted }) => {
         });
         
         Alert.alert(
-          '로그인 실패', 
-          'Google 인증은 완료되었지만 세션 생성에 실패했습니다.\n\n' +
-          '이는 Clerk 개발 환경의 제한사항일 수 있습니다.\n' +
-          'Clerk Dashboard에서 Google OAuth 설정을 확인해주세요.',
+          t('alerts.loginFailure.title'), 
+          t('alerts.loginFailure.messageOauth'),
           [
             {
-              text: '확인',
+              text: t('alerts.loginFailure.confirm'),
             }
           ]
         );
@@ -238,7 +236,7 @@ export const AuthScreen= ({ onAuthCompleted }) => {
           const fallbackUser = {
             id: 'fallback_google_user',
             email: 'fallback.user@gmail.com',
-            nickname: 'Fallback 사용자',
+            nickname: t('fallbackUser.fallbackUser'),
             anonymousId: 'anon_fallback_google',
             phoneNumber: '',
             isVerified: true,
@@ -253,20 +251,20 @@ export const AuthScreen= ({ onAuthCompleted }) => {
           setUser(fallbackUser);
           
           Alert.alert(
-            '개발 환경 우회 로그인',
-            'Cloudflare 제한으로 인해 개발용 계정으로 진입합니다.',
+            t('alerts.devMode.title'),
+            t('alerts.devMode.message'),
             [
               {
-                text: '확인',
+                text: t('alerts.devMode.confirm'),
                 onPress: () => onAuthCompleted(),
               }
             ]
           );
         } else {
-          Alert.alert('네트워크 오류', '인터넷 연결을 확인하고 다시 시도해주세요.');
+          Alert.alert(t('alerts.loginFailure.messageNetwork'), t('alerts.loginFailure.messageNetworkDescription'));
         }
       } else {
-        Alert.alert('로그인 오류', error.message || '구글 로그인 중 오류가 발생했습니다.');
+        Alert.alert(t('alerts.loginFailure.messageGeneral'), error.message || t('alerts.loginFailure.messageGeneralDescription'));
       }
     } finally {
       setIsGoogleLoading(false);
@@ -310,7 +308,7 @@ export const AuthScreen= ({ onAuthCompleted }) => {
           const devUser = {
             id: sessionResponse.createdUserId || 'dev_user_direct',
             email: devEmail,
-            nickname: '개발자',
+            nickname: t('fallbackUser.developer'),
             anonymousId: `anon_${sessionResponse.createdUserId || 'dev'}`,
             phoneNumber: '',
             isVerified: true,
@@ -334,7 +332,7 @@ export const AuthScreen= ({ onAuthCompleted }) => {
       const devUser = {
         id: 'dev_user_fallback',
         email: 'developer@glimpse.app',
-        nickname: '개발자 (Fallback)',
+        nickname: t('fallbackUser.developerFallback'),
         anonymousId: 'anon_dev_fallback',
         phoneNumber: '',
         isVerified: true,
@@ -352,14 +350,14 @@ export const AuthScreen= ({ onAuthCompleted }) => {
       // AppNavigator에서 isSignedIn 상태를 체크하므로, 
       // 실제로는 Clerk 세션 없이는 메인화면으로 이동할 수 없음
       Alert.alert(
-        '개발 환경 알림', 
-        'Clerk 세션이 없어 인증 화면에 머물게 됩니다. Google OAuth 또는 실제 인증을 사용해주세요.',
-        [{ text: '확인' }]
+        t('alerts.devMode.alertTitle'), 
+        t('alerts.devMode.alertMessage'),
+        [{ text: t('alerts.devMode.confirm') }]
       );
       
     } catch (error) {
       console.error('🔥 개발자 로그인 오류:', error);
-      Alert.alert('개발 로그인 실패', '개발자 로그인 중 오류가 발생했습니다.');
+      Alert.alert(t('alerts.devMode.failureTitle'), t('alerts.devMode.failureMessage'));
     }
   };
 
@@ -392,9 +390,9 @@ export const AuthScreen= ({ onAuthCompleted }) => {
     <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       {currentStep === 'welcome' && (
         <View style={styles.welcomeContainer}>
-          <Text style={[styles.welcomeTitle, { color: colors.PRIMARY }]}>🌟 Glimpse</Text>
+          <Text style={[styles.welcomeTitle, { color: colors.PRIMARY }]}>{t('welcome.title')}</Text>
           <Text style={[styles.welcomeSubtitle, { color: colors.TEXT.SECONDARY }]}>
-            익명 데이팅의 새로운 시작
+            {t('welcome.subtitle')}
           </Text>
           
           <View style={styles.buttonContainer}>
@@ -407,13 +405,13 @@ export const AuthScreen= ({ onAuthCompleted }) => {
                 style={[styles.devButton]}
                 onPress={handleDevLogin}
               >
-                <Text style={styles.devButtonText}>🔧 개발자 직접 로그인</Text>
+                <Text style={styles.devButtonText}>{t('welcome.devLogin')}</Text>
               </TouchableOpacity>
             )}
           </View>
 
           <Text style={[styles.termsText, { color: colors.TEXT.LIGHT }]}>
-            로그인 시 개인정보처리방침과{'\n'}서비스 이용약관에 동의하게 됩니다.
+            {t('welcome.termsNotice')}
           </Text>
         </View>
       )}
@@ -421,9 +419,9 @@ export const AuthScreen= ({ onAuthCompleted }) => {
       {currentStep === 'phone' && (
         <View style={{ flex: 1 }}>
           <View style={styles.phoneStepContainer}>
-            <Text style={[styles.phoneStepTitle, { color: colors.PRIMARY }]}>전화번호 인증</Text>
+            <Text style={[styles.phoneStepTitle, { color: colors.PRIMARY }]}>{t('authMode.title')}</Text>
             <Text style={[styles.phoneStepSubtitle, { color: colors.TEXT.SECONDARY }]}>
-              계정이 있나요?
+              {t('authMode.subtitle')}
             </Text>
             
             <View style={styles.authModeContainer}>
@@ -441,7 +439,7 @@ export const AuthScreen= ({ onAuthCompleted }) => {
                   styles.authModeButtonText,
                   { color: authMode === 'signin' ? colors.TEXT.WHITE : colors.PRIMARY }
                 ]}>
-                  기존 계정으로 로그인
+                  {t('authMode.signIn')}
                 </Text>
               </TouchableOpacity>
               
@@ -459,7 +457,7 @@ export const AuthScreen= ({ onAuthCompleted }) => {
                   styles.authModeButtonText,
                   { color: authMode === 'signup' ? colors.TEXT.WHITE : colors.PRIMARY }
                 ]}>
-                  새 계정 만들기
+                  {t('authMode.signUp')}
                 </Text>
               </TouchableOpacity>
             </View>

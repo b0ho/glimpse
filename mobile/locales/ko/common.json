@@ -52,6 +52,19 @@
   },
   "time": {
     "justNow": "방금 전",
+    "minute": "{{count}}분 전",
+    "minute_plural": "{{count}}분 전",
+    "hour": "{{count}}시간 전",
+    "hour_plural": "{{count}}시간 전",
+    "day": "{{count}}일 전",
+    "day_plural": "{{count}}일 전",
+    "week": "{{count}}주 전",
+    "week_plural": "{{count}}주 전",
+    "month": "{{count}}개월 전",
+    "month_plural": "{{count}}개월 전",
+    "year": "{{count}}년 전",
+    "year_plural": "{{count}}년 전",
+    "yesterday": "어제",
     "minutesAgo": "{{count}}분 전",
     "hoursAgo": "{{count}}시간 전",
     "hoursAndMinutesAgo": "{{hours}}시간 {{minutes}}분 전",
@@ -135,6 +148,17 @@
     "success": "성공",
     "error": "오류",
     "warning": "경고"
+  },
+  "alerts": {
+    "success": {
+      "title": "성공"
+    },
+    "error": {
+      "title": "오류"
+    },
+    "warning": {
+      "title": "경고"
+    }
   },
   "user": {
     "defaultName": "사용자",

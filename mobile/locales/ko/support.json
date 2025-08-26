@@ -1,0 +1,36 @@
+{
+  "title": "고객지원",
+  "info": {
+    "title": "개선 요청사항을 공유해주세요",
+    "description": "다른 사용자들의 의견에 '원해요'를 눌러 공감을 표현할 수 있습니다.\n개인적인 문의는 이메일로 연락주세요."
+  },
+  "contact": {
+    "title": "개인 문의하기",
+    "email": "glimpse@gmail.com"
+  },
+  "search": {
+    "placeholder": "요청사항 검색"
+  },
+  "sort": {
+    "popular": "인기순",
+    "recent": "최신순"
+  },
+  "feedback": {
+    "sectionTitle": "개선 요청사항",
+    "rank": "{{rank}}위",
+    "emptyState": "아직 요청사항이 없습니다"
+  },
+  "modal": {
+    "title": "개선 요청사항 작성",
+    "placeholder": "어떤 기능이 필요하신가요?",
+    "cancel": "취소",
+    "submit": "제출",
+    "charCount": "{{count}}/200"
+  },
+  "alerts": {
+    "contentRequired": "내용을 입력해주세요",
+    "thankYou": "소중한 의견 감사합니다!",
+    "emailTitle": "이메일",
+    "emailMessage": "glimpse@gmail.com으로 문의해주세요"
+  }
+}

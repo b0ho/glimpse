@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
@@ -34,7 +34,7 @@ export const MatchesScreen = React.memo(() => {
   const likeStore = useLikeStore();
   const { user } = useAuthStore();
   const { colors } = useTheme();
-  const { t } = useTranslation('matches');
+  const { t } = useAndroidSafeTranslation('matches');
 
   /**
    * 매칭 데이터 로드
@@ -100,15 +100,15 @@ export const MatchesScreen = React.memo(() => {
    */
   const handleReportMismatch = (matchId: string, nickname: string) => {
     Alert.alert(
-      '미스매치 신고',
-      `${nickname}님과의 매칭이 잘못되었나요?\n\n미스매치를 신고하면 매칭이 취소되고 다시 대기 상태로 돌아갑니다.`,
+      t('matches:mismatch.reportTitle'),
+      t('matches:mismatch.reportMessage', { nickname }),
       [
         {
-          text: '취소',
+          text: t('matches:mismatch.cancel'),
           style: 'cancel',
         },
         {
-          text: '미스매치 신고',
+          text: t('matches:mismatch.report'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -119,16 +119,16 @@ export const MatchesScreen = React.memo(() => {
               setMatches(prevMatches => prevMatches.filter(m => m.id !== matchId));
               
               Alert.alert(
-                '신고 완료',
-                '미스매치가 신고되었습니다. 다시 매칭을 기다려주세요.',
-                [{ text: '확인' }]
+                t('matches:mismatch.reportCompleteTitle'),
+                t('matches:mismatch.reportCompleteMessage'),
+                [{ text: t('matches:mismatch.confirm') }]
               );
             } catch (error) {
               console.error('[MatchesScreen] Failed to report mismatch:', error);
               Alert.alert(
-                '오류',
-                '미스매치 신고 중 오류가 발생했습니다. 다시 시도해주세요.',
-                [{ text: '확인' }]
+                t('matches:mismatch.errorTitle'),
+                t('matches:mismatch.errorMessage'),
+                [{ text: t('matches:mismatch.confirm') }]
               );
             }
           },
@@ -151,7 +151,7 @@ export const MatchesScreen = React.memo(() => {
     // 익명성 시스템: 매칭된 상대방이므로 실명 표시
     const displayName = user?.id 
       ? likeStore.getUserDisplayName(otherUserId, user.id)
-      : t('user.anonymous');
+      : t('matches:user.anonymous');
 
     return (
       <View style={[styles.matchItem, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
@@ -175,7 +175,7 @@ export const MatchesScreen = React.memo(() => {
               style={[styles.chatButton, { backgroundColor: colors.PRIMARY }]}
               onPress={() => handleStartChat(item.id, displayName)}
             >
-              <Text style={[styles.chatButtonText, { color: colors.TEXT.WHITE }]}>{t('actions.startChat')}</Text>
+              <Text style={[styles.chatButtonText, { color: colors.TEXT.WHITE }]}>{t('matches:actions.startChat')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
@@ -188,7 +188,7 @@ export const MatchesScreen = React.memo(() => {
         </View>
         
         <Text style={[styles.matchDescription, { color: colors.TEXT.SECONDARY }]}>
-          {t('messages.matchDescription')}
+          {t('matches:messages.matchDescription')}
         </Text>
       </View>
     );
@@ -201,16 +201,16 @@ export const MatchesScreen = React.memo(() => {
    */
   const renderHeader = () => (
     <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
-      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>채팅</Text>
+      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('matches:header.title')}</Text>
       <Text style={[styles.headerSubtitle, { color: colors.TEXT.SECONDARY }]}>
-        매칭된 사람들과 대화를 시작하세요
+        {t('matches:header.subtitle')}
       </Text>
       <View style={styles.statsContainer}>
         <Text style={[styles.statsText, { color: colors.TEXT.PRIMARY }]}>
-          {t('stats.totalMatches', { count: matches.length })}
+          {t('matches:stats.totalMatches', { count: matches.length })}
         </Text>
         <Text style={[styles.statsText, { color: colors.TEXT.PRIMARY }]}>
-          {t('stats.receivedLikes', { count: likeStore.getReceivedLikesCount() })}
+          {t('matches:stats.receivedLikes', { count: likeStore.getReceivedLikesCount() })}
         </Text>
       </View>
     </View>
@@ -224,9 +224,9 @@ export const MatchesScreen = React.memo(() => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>💬</Text>
-      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>아직 채팅이 없습니다</Text>
+      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>{t('matches:emptyState.title')}</Text>
       <Text style={[styles.emptyStateSubtitle, { color: colors.TEXT.SECONDARY }]}>
-        매칭이 되면 여기서 대화를 시작할 수 있어요
+        {t('matches:emptyState.subtitle')}
       </Text>
     </View>
   );
@@ -236,7 +236,7 @@ export const MatchesScreen = React.memo(() => {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.PRIMARY} />
-          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('loading.text')}</Text>
+          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('common:loading.text')}</Text>
         </View>
       </SafeAreaView>
     );

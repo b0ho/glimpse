@@ -1,5 +1,74 @@
 {
   "title": "Glimpse Premium",
+  "screen": {
+    "title": "구독 플랜",
+    "currentPlan": "현재 플랜: {{tier}}",
+    "nextPayment": "다음 결제일: {{date}}",
+    "planComparison": "플랜 비교"
+  },
+  "billing": {
+    "monthly": "월간 결제",
+    "yearly": "연간 결제",
+    "discount": "17% 할인"
+  },
+  "plans": {
+    "free": "무료",
+    "advanced": "고급",
+    "premium": "프리미엄",
+    "popular": "가장 인기",
+    "perMonth": "/월",
+    "perMonthYearly": "/월 (연간 결제시)"
+  },
+  "features": {
+    "interestSearch": "관심상대 등록: {{limit}}",
+    "interestSearchUnlimited": "관심상대 등록: 무제한",
+    "interestSearchThree": "관심상대 등록: 3개 (유형별 1개)",
+    "interestSearchAllTypes": "관심상대 등록: 모든 유형 1개씩",
+    "searchDuration": "검색 유효기간: {{days}}일",
+    "searchDurationUnlimited": "검색 유효기간: 무제한",
+    "dailyLikes": "일일 좋아요: {{count}}회",
+    "dailyLikesUnlimited": "일일 좋아요: 무제한",
+    "sendInterestFirst": "먼저 관심 보내기",
+    "noAds": "광고 제거",
+    "readReceipts": "읽음 표시",
+    "seeWhoLikedYou": "누가 좋아요 했는지 확인",
+    "priorityMatching": "우선 매칭",
+    "personaTopPlacement": "페르소나 상단 배치",
+    "unlimitedRewind": "무제한 되돌리기"
+  },
+  "buttons": {
+    "currentPlan": "현재 플랜",
+    "freeTrial": "무료 사용",
+    "upgrade": "업그레이드"
+  },
+  "comparison": {
+    "features": {
+      "interestSearch": "관심상대 등록",
+      "searchDuration": "검색 유효기간",
+      "dailyLikes": "일일 좋아요",
+      "noAds": "광고 제거",
+      "priorityMatching": "우선 매칭"
+    },
+    "values": {
+      "three": "3개",
+      "ten": "10개",
+      "unlimited": "무제한",
+      "threeDays": "3일",
+      "twoWeeks": "2주",
+      "oneTime": "1회",
+      "threeTimes": "3회"
+    }
+  },
+  "alerts": {
+    "freePlan": {
+      "title": "무료 플랜 알림",
+      "message": "이미 무료 플랜을 사용 중입니다."
+    },
+    "subscription": {
+      "complete": "구독 완료",
+      "activated": "프리미엄 구독이 활성화되었습니다."
+    }
+  },
   "subscription": {
     "title": "프리미엄 구독",
     "description": "모든 기능을 무제한으로 이용하세요",

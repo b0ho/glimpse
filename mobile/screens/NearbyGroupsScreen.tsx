@@ -14,7 +14,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as Location from 'expo-location';
 // import MapView, { Marker, Circle } from 'react-native-maps';
@@ -49,7 +49,7 @@ interface LocationGroup {
 
 export const NearbyGroupsScreen = React.memo(() => {
   const navigation = useNavigation();
-  const { t } = useTranslation('location');
+  const { t } = useAndroidSafeTranslation(['nearbygroups', 'navigation', 'common']);
   const { colors } = useTheme();
   const { user } = useAuthStore();
   const { joinGroup } = useGroupStore();
@@ -94,9 +94,9 @@ export const NearbyGroupsScreen = React.memo(() => {
         
         if (status !== 'granted') {
           Alert.alert(
-            '위치 권한 필요',
-            '근처 그룹을 찾기 위해 위치 권한이 필요합니다.',
-            [{ text: '나중에', style: 'cancel' }]
+            t('nearbygroups:alerts.permission.title'),
+            t('nearbygroups:alerts.permission.message'),
+            [{ text: t('nearbygroups:alerts.permission.later'), style: 'cancel' }]
           );
           setIsLoading(false);
           return;
@@ -107,7 +107,7 @@ export const NearbyGroupsScreen = React.memo(() => {
       await getCurrentLocation();
     } catch (error) {
       console.error('Location permission error:', error);
-      Alert.alert('오류', '위치 권한 요청 중 오류가 발생했습니다.');
+      Alert.alert(t('common:alerts.error.title'), t('nearbygroups:alerts.permission.requestError'));
     } finally {
       setIsLoading(false);
     }
@@ -144,7 +144,7 @@ export const NearbyGroupsScreen = React.memo(() => {
       setCurrentLocation(locationData);
     } catch (error) {
       console.error('Get current location error:', error);
-      Alert.alert('오류', '위치 정보를 가져올 수 없습니다.');
+      Alert.alert(t('common:alerts.error.title'), t('nearbygroups:alerts.location.error'));
     }
   };
 
@@ -319,19 +319,19 @@ export const NearbyGroupsScreen = React.memo(() => {
     if (!user) return;
 
     Alert.alert(
-      '그룹 가입',
-      `${group.name} 그룹에 가입하시겠습니까?`,
+      t('nearbygroups:alerts.group.joinTitle'),
+      t('nearbygroups:alerts.group.joinMessage', { groupName: group.name }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('common:buttons.cancel'), style: 'cancel' },
         {
-          text: '가입',
+          text: t('nearbygroups:alerts.group.join'),
           onPress: async () => {
             try {
               await joinGroup(group.id);
-              Alert.alert('성공', '그룹에 가입했습니다.');
+              Alert.alert(t('common:alerts.success.title'), t('nearbygroups:alerts.group.joinSuccess'));
               loadNearbyGroups(); // 리스트 새로고침
             } catch (error) {
-              Alert.alert('오류', '그룹 가입 중 오류가 발생했습니다.');
+              Alert.alert(t('common:alerts.error.title'), t('nearbygroups:alerts.group.joinError'));
             }
           },
         },
@@ -341,12 +341,12 @@ export const NearbyGroupsScreen = React.memo(() => {
 
   const handleCreateGroup = async () => {
     if (!currentLocation) {
-      Alert.alert('오류', '위치 정보가 필요합니다.');
+      Alert.alert(t('common:alerts.error.title'), t('nearbygroups:alerts.location.required'));
       return;
     }
 
     if (!newGroupName.trim() || !newGroupDescription.trim()) {
-      Alert.alert('오류', '모든 필드를 입력해주세요.');
+      Alert.alert(t('common:alerts.error.title'), t('nearbygroups:alerts.validation.allFields'));
       return;
     }
 
@@ -368,7 +368,7 @@ export const NearbyGroupsScreen = React.memo(() => {
       });
 
       if (response.ok) {
-        Alert.alert('성공', '그룹이 생성되었습니다.');
+        Alert.alert(t('common:alerts.success.title'), t('nearbygroups:alerts.group.createSuccess'));
         setShowCreateModal(false);
         setNewGroupName('');
         setNewGroupDescription('');
@@ -380,7 +380,7 @@ export const NearbyGroupsScreen = React.memo(() => {
       }
     } catch (error) {
       console.error('Create group error:', error);
-      Alert.alert('오류', '그룹 생성 중 오류가 발생했습니다.');
+      Alert.alert(t('common:alerts.error.title'), t('nearbygroups:alerts.group.createError'));
     }
   };
 
@@ -604,7 +604,7 @@ export const NearbyGroupsScreen = React.memo(() => {
         >
           <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('nearbyGroups.title')}</Text>
+        <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('navigation:screens.nearbyGroups')}</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
             style={styles.headerButton}

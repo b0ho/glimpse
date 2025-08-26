@@ -18,7 +18,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
@@ -39,7 +39,7 @@ export const PremiumScreen = () => {
   const navigation = useNavigation();
   const { user, getSubscriptionTier, updateSubscriptionTier } = useAuthStore();
   const { colors } = useTheme();
-  const { t } = useTranslation('premium');
+  const { t } = useAndroidSafeTranslation('premium');
   
   const currentTier = getSubscriptionTier();
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier>(
@@ -63,7 +63,7 @@ export const PremiumScreen = () => {
    */
   const handleSubscribe = (tier: SubscriptionTier) => {
     if (tier === SubscriptionTier.BASIC) {
-      Alert.alert('무료 플랜', '이미 무료 플랜을 사용중입니다.');
+      Alert.alert(t('alerts.freePlan.title'), t('alerts.freePlan.message'));
       return;
     }
     
@@ -76,7 +76,7 @@ export const PremiumScreen = () => {
    */
   const handlePaymentSuccess = useCallback(() => {
     updateSubscriptionTier(selectedTier);
-    Alert.alert('구독 완료', '프리미엄 구독이 활성화되었습니다!');
+    Alert.alert(t('alerts.subscription.complete'), t('alerts.subscription.activated'));
     setShowPaymentModal(false);
   }, [selectedTier, updateSubscriptionTier]);
 
@@ -92,7 +92,7 @@ export const PremiumScreen = () => {
         <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
       </TouchableOpacity>
       
-      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>구독 플랜</Text>
+      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('screen.title')}</Text>
       
       <View style={styles.placeholder} />
     </View>
@@ -111,12 +111,14 @@ export const PremiumScreen = () => {
       />
       <View style={styles.statusInfo}>
         <Text style={[styles.statusTitle, { color: colors.TEXT.PRIMARY }]}>
-          현재 플랜: {currentTier === SubscriptionTier.BASIC ? '무료' : 
-                     currentTier === SubscriptionTier.ADVANCED ? '고급' : '프리미엄'}
+          {t('screen.currentPlan', { 
+            tier: currentTier === SubscriptionTier.BASIC ? t('plans.free') : 
+                  currentTier === SubscriptionTier.ADVANCED ? t('plans.advanced') : t('plans.premium')
+          })}
         </Text>
         {currentTier !== SubscriptionTier.BASIC && (
           <Text style={[styles.statusSubtitle, { color: colors.TEXT.SECONDARY }]}>
-            다음 결제일: 2025년 2월 19일
+            {t('screen.nextPayment', { date: '2025년 2월 19일' })}
           </Text>
         )}
       </View>
@@ -140,7 +142,7 @@ export const PremiumScreen = () => {
             styles.billingText,
             { color: selectedBilling === 'monthly' ? '#FFFFFF' : colors.TEXT.PRIMARY }
           ]}>
-            월간 결제
+            {t('billing.monthly')}
           </Text>
         </TouchableOpacity>
         
@@ -155,10 +157,10 @@ export const PremiumScreen = () => {
             styles.billingText,
             { color: selectedBilling === 'yearly' ? '#FFFFFF' : colors.TEXT.PRIMARY }
           ]}>
-            연간 결제
+            {t('billing.yearly')}
           </Text>
           <View style={styles.saveBadge}>
-            <Text style={styles.saveText}>17% 할인</Text>
+            <Text style={styles.saveText}>{t('billing.discount')}</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -186,7 +188,7 @@ export const PremiumScreen = () => {
       >
         {isPopular && (
           <View style={[styles.popularBadge, { backgroundColor: colors.SUCCESS }]}>
-            <Text style={styles.popularText}>가장 인기</Text>
+            <Text style={styles.popularText}>{t('plans.popular')}</Text>
           </View>
         )}
 
@@ -199,8 +201,8 @@ export const PremiumScreen = () => {
                    tier === SubscriptionTier.ADVANCED ? colors.PRIMARY : colors.TEXT.SECONDARY} 
           />
           <Text style={[styles.planName, { color: colors.TEXT.PRIMARY }]}>
-            {tier === SubscriptionTier.BASIC ? '무료' : 
-             tier === SubscriptionTier.ADVANCED ? '고급' : '프리미엄'}
+            {tier === SubscriptionTier.BASIC ? t('plans.free') : 
+             tier === SubscriptionTier.ADVANCED ? t('plans.advanced') : t('plans.premium')}
           </Text>
           <Text style={[styles.planPrice, { color: colors.TEXT.PRIMARY }]}>
             {tier === SubscriptionTier.BASIC ? '₩0' : 
@@ -209,7 +211,7 @@ export const PremiumScreen = () => {
           </Text>
           {tier !== SubscriptionTier.BASIC && (
             <Text style={[styles.planPeriod, { color: colors.TEXT.SECONDARY }]}>
-              {selectedBilling === 'monthly' ? '/월' : '/월 (연간 결제시)'}
+              {selectedBilling === 'monthly' ? t('plans.perMonth') : t('plans.perMonthYearly')}
             </Text>
           )}
         </View>
@@ -219,9 +221,9 @@ export const PremiumScreen = () => {
           <View style={styles.featureItem}>
             <Icon name="search" size={16} color={colors.PRIMARY} />
             <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
-              관심상대 등록: {features.interestSearchLimit === 'unlimited' ? '무제한' : 
-                            features.interestSearchLimit === 3 ? '3개 (유형별 1개)' : 
-                            '모든 유형 1개씩'}
+              {features.interestSearchLimit === 'unlimited' ? t('features.interestSearchUnlimited') : 
+               features.interestSearchLimit === 3 ? t('features.interestSearchThree') : 
+               t('features.interestSearchAllTypes')}
             </Text>
           </View>
 
@@ -229,8 +231,8 @@ export const PremiumScreen = () => {
           <View style={styles.featureItem}>
             <Icon name="time-outline" size={16} color={colors.PRIMARY} />
             <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
-              검색 유효기간: {features.interestSearchDuration === 365 ? '무제한' : 
-                            `${features.interestSearchDuration}일`}
+              {features.interestSearchDuration === 365 ? t('features.searchDurationUnlimited') : 
+               t('features.searchDuration', { days: features.interestSearchDuration })}
             </Text>
           </View>
 
@@ -238,8 +240,8 @@ export const PremiumScreen = () => {
           <View style={styles.featureItem}>
             <Icon name="heart-outline" size={16} color={colors.PRIMARY} />
             <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
-              일일 좋아요: {features.dailyLikeLimit === 'unlimited' ? '무제한' : 
-                          `${features.dailyLikeLimit}회`}
+              {features.dailyLikeLimit === 'unlimited' ? t('features.dailyLikesUnlimited') : 
+               t('features.dailyLikes', { count: features.dailyLikeLimit })}
             </Text>
           </View>
 
@@ -248,7 +250,7 @@ export const PremiumScreen = () => {
             <View style={styles.featureItem}>
               <Icon name="send" size={16} color={colors.SUCCESS} />
               <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
-                먼저 관심 보내기
+                {t('features.sendInterestFirst')}
               </Text>
             </View>
           )}
@@ -257,7 +259,7 @@ export const PremiumScreen = () => {
             <View style={styles.featureItem}>
               <Icon name="eye-off-outline" size={16} color={colors.SUCCESS} />
               <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
-                광고 제거
+                {t('features.noAds')}
               </Text>
             </View>
           )}
@@ -266,7 +268,7 @@ export const PremiumScreen = () => {
             <View style={styles.featureItem}>
               <Icon name="checkmark-done" size={16} color={colors.SUCCESS} />
               <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
-                읽음 표시
+                {t('features.readReceipts')}
               </Text>
             </View>
           )}
@@ -275,7 +277,7 @@ export const PremiumScreen = () => {
             <View style={styles.featureItem}>
               <Icon name="eye-outline" size={16} color={colors.SUCCESS} />
               <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
-                누가 좋아요 했는지 확인
+                {t('features.seeWhoLikedYou')}
               </Text>
             </View>
           )}
@@ -284,7 +286,7 @@ export const PremiumScreen = () => {
             <View style={styles.featureItem}>
               <Icon name="flash" size={16} color={colors.SUCCESS} />
               <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
-                우선 매칭
+                {t('features.priorityMatching')}
               </Text>
             </View>
           )}
@@ -293,7 +295,7 @@ export const PremiumScreen = () => {
             <View style={styles.featureItem}>
               <Icon name="trophy" size={16} color="#FFD700" />
               <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
-                페르소나 상단 배치
+                {t('features.personaTopPlacement')}
               </Text>
             </View>
           )}
@@ -302,7 +304,7 @@ export const PremiumScreen = () => {
             <View style={styles.featureItem}>
               <Icon name="refresh" size={16} color="#FFD700" />
               <Text style={[styles.featureText, { color: colors.TEXT.PRIMARY }]}>
-                무제한 되돌리기
+                {t('features.unlimitedRewind')}
               </Text>
             </View>
           )}
@@ -321,8 +323,8 @@ export const PremiumScreen = () => {
             styles.selectButtonText,
             tier === SubscriptionTier.BASIC && { color: colors.TEXT.SECONDARY }
           ]}>
-            {isCurrentPlan ? '현재 플랜' : 
-             tier === SubscriptionTier.BASIC ? '무료 사용' : '업그레이드'}
+            {isCurrentPlan ? t('buttons.currentPlan') : 
+             tier === SubscriptionTier.BASIC ? t('buttons.freeTrial') : t('buttons.upgrade')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -335,49 +337,49 @@ export const PremiumScreen = () => {
   const renderComparisonTable = () => (
     <View style={styles.comparisonSection}>
       <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-        플랜 비교
+        {t('screen.planComparison')}
       </Text>
       
       <View style={[styles.comparisonTable, { backgroundColor: colors.SURFACE }]}>
         {/* 헤더 */}
         <View style={styles.comparisonRow}>
           <View style={styles.comparisonFeature} />
-          <Text style={[styles.comparisonHeader, { color: colors.TEXT.SECONDARY }]}>무료</Text>
-          <Text style={[styles.comparisonHeader, { color: colors.PRIMARY }]}>고급</Text>
-          <Text style={[styles.comparisonHeader, { color: '#FFD700' }]}>프리미엄</Text>
+          <Text style={[styles.comparisonHeader, { color: colors.TEXT.SECONDARY }]}>{t('plans.free')}</Text>
+          <Text style={[styles.comparisonHeader, { color: colors.PRIMARY }]}>{t('plans.advanced')}</Text>
+          <Text style={[styles.comparisonHeader, { color: '#FFD700' }]}>{t('plans.premium')}</Text>
         </View>
 
         {/* 비교 항목들 */}
         <View style={[styles.comparisonRow, { borderTopColor: colors.BORDER }]}>
-          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>관심상대 등록</Text>
-          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>3개</Text>
-          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>10개</Text>
-          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>무제한</Text>
+          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>{t('comparison.features.interestSearch')}</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>{t('comparison.values.three')}</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>{t('comparison.values.ten')}</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>{t('comparison.values.unlimited')}</Text>
         </View>
 
         <View style={[styles.comparisonRow, { borderTopColor: colors.BORDER }]}>
-          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>검색 유효기간</Text>
-          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>3일</Text>
-          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>2주</Text>
-          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>무제한</Text>
+          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>{t('comparison.features.searchDuration')}</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>{t('comparison.values.threeDays')}</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>{t('comparison.values.twoWeeks')}</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>{t('comparison.values.unlimited')}</Text>
         </View>
 
         <View style={[styles.comparisonRow, { borderTopColor: colors.BORDER }]}>
-          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>일일 좋아요</Text>
-          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>1회</Text>
-          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>3회</Text>
-          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>무제한</Text>
+          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>{t('comparison.features.dailyLikes')}</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>{t('comparison.values.oneTime')}</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>{t('comparison.values.threeTimes')}</Text>
+          <Text style={[styles.comparisonValue, { color: colors.TEXT.SECONDARY }]}>{t('comparison.values.unlimited')}</Text>
         </View>
 
         <View style={[styles.comparisonRow, { borderTopColor: colors.BORDER }]}>
-          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>광고 제거</Text>
+          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>{t('comparison.features.noAds')}</Text>
           <Icon name="close" size={20} color={colors.ERROR} />
           <Icon name="checkmark" size={20} color={colors.SUCCESS} />
           <Icon name="checkmark" size={20} color={colors.SUCCESS} />
         </View>
 
         <View style={[styles.comparisonRow, { borderTopColor: colors.BORDER }]}>
-          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>우선 매칭</Text>
+          <Text style={[styles.comparisonFeature, { color: colors.TEXT.PRIMARY }]}>{t('comparison.features.priorityMatching')}</Text>
           <Icon name="close" size={20} color={colors.ERROR} />
           <Icon name="close" size={20} color={colors.ERROR} />
           <Icon name="checkmark" size={20} color={colors.SUCCESS} />

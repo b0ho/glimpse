@@ -2,8 +2,10 @@
   "title": "Home",
   "header": {
     "greeting": "Hello, {{name}}! 👋",
-    "receivedLikes": "Received Likes: {{count}}",
-    "remainingLikes": "Remaining Likes: {{count}}"
+    "receivedLikes_one": "Received {{count}} Like",
+    "receivedLikes_other": "Received {{count}} Likes",
+    "remainingLikes_one": "{{count}} Like Left",
+    "remainingLikes_other": "{{count}} Likes Left"
   },
   "location": {
     "nearbyGroups": "Nearby Groups & Users"
@@ -27,5 +29,21 @@
   },
   "fab": {
     "createPost": "Create new post"
+  },
+  "alerts": {
+    "deleteComplete": "Delete Complete",
+    "deleteSuccess": "Post has been deleted.",
+    "deleteFailed": "Delete Failed",
+    "deleteError": "Failed to delete the post."
+  },
+  "successStories": {
+    "title": "Success Stories",
+    "viewAll": "View All"
+  },
+  "meta": {
+    "title": "Glimpse - Find Your Perfect Match"
+  },
+  "persona": {
+    "setupButton": "Setup My Persona"
   }
 }

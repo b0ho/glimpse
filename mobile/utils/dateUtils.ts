@@ -3,6 +3,38 @@
  */
 
 import i18n from '@/services/i18n/i18n';
+import { Platform } from 'react-native';
+
+/**
+ * Android-safe translation helper
+ */
+const safeT = (key: string, options?: any): string => {
+  // Android에서 i18n이 초기화되지 않았을 때 fallback 제공
+  if (!i18n.isInitialized && Platform.OS === 'android') {
+    if (key.includes('justNow')) return '방금 전';
+    if (key.includes('minutesAgo')) return `${options?.count || 1}분 전`;
+    if (key.includes('hoursAgo')) return `${options?.count || 1}시간 전`;
+    if (key.includes('daysAgo')) return `${options?.count || 1}일 전`;
+    if (key.includes('weeksAgo')) return `${options?.count || 1}주 전`;
+    if (key.includes('monthsAgo')) return `${options?.count || 1}개월 전`;
+    if (key.includes('yearsAgo')) return `${options?.count || 1}년 전`;
+  }
+  
+  const translation = i18n.t(key, options);
+  
+  // Android에서 키가 그대로 반환되면 fallback 제공
+  if (Platform.OS === 'android' && translation === key) {
+    if (key.includes('justNow')) return '방금 전';
+    if (key.includes('minutesAgo')) return `${options?.count || 1}분 전`;
+    if (key.includes('hoursAgo')) return `${options?.count || 1}시간 전`;
+    if (key.includes('daysAgo')) return `${options?.count || 1}일 전`;
+    if (key.includes('weeksAgo')) return `${options?.count || 1}주 전`;
+    if (key.includes('monthsAgo')) return `${options?.count || 1}개월 전`;
+    if (key.includes('yearsAgo')) return `${options?.count || 1}년 전`;
+  }
+  
+  return translation as string;
+};
 
 /**
  * 주어진 날짜로부터 현재까지의 시간을 현재 언어로 표현
@@ -14,24 +46,24 @@ export const formatTimeAgo = (date: Date): string => {
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
-    return i18n.t('common:time.justNow');
+    return safeT('common:time.justNow');
   } else if (diffInSeconds < 3600) {
     const minutes = Math.floor(diffInSeconds / 60);
-    return i18n.t('common:time.minutesAgo', { count: minutes });
+    return safeT('common:time.minutesAgo', { count: minutes });
   } else if (diffInSeconds < 86400) {
     const hours = Math.floor(diffInSeconds / 3600);
-    return i18n.t('common:time.hoursAgo', { count: hours });
+    return safeT('common:time.hoursAgo', { count: hours });
   } else if (diffInSeconds < 604800) {
     const days = Math.floor(diffInSeconds / 86400);
-    return i18n.t('common:time.daysAgo', { count: days });
+    return safeT('common:time.daysAgo', { count: days });
   } else if (diffInSeconds < 2592000) { // 30일
     const weeks = Math.floor(diffInSeconds / 604800);
-    return i18n.t('common:time.weeksAgo', { count: weeks });
+    return safeT('common:time.weeksAgo', { count: weeks });
   } else if (diffInSeconds < 31536000) { // 365일
     const months = Math.floor(diffInSeconds / 2592000);
-    return i18n.t('common:time.monthsAgo', { count: months });
+    return safeT('common:time.monthsAgo', { count: months });
   } else {
-    const locale = i18n.language === 'ko' ? 'ko-KR' : 'en-US';
+    const locale = (i18n.language === 'ko' || !i18n.isInitialized) ? 'ko-KR' : 'en-US';
     return date.toLocaleDateString(locale, {
       month: 'short',
       day: 'numeric',
@@ -62,21 +94,21 @@ export const formatDetailedTimeAgo = (date: Date): string => {
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
-    return i18n.t('common:time.justNow');
+    return safeT('common:time.justNow');
   } else if (diffInSeconds < 3600) {
     const minutes = Math.floor(diffInSeconds / 60);
-    return i18n.t('common:time.minutesAgo', { count: minutes });
+    return safeT('common:time.minutesAgo', { count: minutes });
   } else if (diffInSeconds < 86400) {
     const hours = Math.floor(diffInSeconds / 3600);
     const minutes = Math.floor((diffInSeconds % 3600) / 60);
     return minutes > 0 
-      ? i18n.t('common:time.hoursAndMinutesAgo', { hours, minutes })
-      : i18n.t('common:time.hoursAgo', { count: hours });
+      ? safeT('common:time.hoursAndMinutesAgo', { hours, minutes })
+      : safeT('common:time.hoursAgo', { count: hours });
   } else if (diffInSeconds < 604800) {
     const days = Math.floor(diffInSeconds / 86400);
-    return i18n.t('common:time.daysAgo', { count: days });
+    return safeT('common:time.daysAgo', { count: days });
   } else {
-    const locale = i18n.language === 'ko' ? 'ko-KR' : 'en-US';
+    const locale = (i18n.language === 'ko' || !i18n.isInitialized) ? 'ko-KR' : 'en-US';
     return date.toLocaleDateString(locale);
   }
 };

@@ -1,0 +1,36 @@
+{
+  "title": "Support",
+  "info": {
+    "title": "Share your improvement requests",
+    "description": "You can express empathy by pressing 'Want it' on other users' opinions.\nPlease contact us via email for personal inquiries."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "email": "glimpse@gmail.com"
+  },
+  "search": {
+    "placeholder": "Search requests"
+  },
+  "sort": {
+    "popular": "Popular",
+    "recent": "Recent"
+  },
+  "feedback": {
+    "sectionTitle": "Improvement Requests",
+    "rank": "#{{rank}}",
+    "emptyState": "No requests yet"
+  },
+  "modal": {
+    "title": "Write Improvement Request",
+    "placeholder": "What features do you need?",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "charCount": "{{count}}/200"
+  },
+  "alerts": {
+    "contentRequired": "Please enter content",
+    "thankYou": "Thank you for your valuable feedback!",
+    "emailTitle": "Email",
+    "emailMessage": "Please contact us at glimpse@gmail.com"
+  }
+}

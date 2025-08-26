@@ -30,5 +30,18 @@
   },
   "persona": {
     "setupButton": "내 페르소나 설정하기"
+  },
+  "alerts": {
+    "deleteComplete": "삭제 완료",
+    "deleteSuccess": "게시물이 삭제되었습니다.",
+    "deleteFailed": "삭제 실패",
+    "deleteError": "게시물 삭제에 실패했습니다."
+  },
+  "successStories": {
+    "title": "매칭 성공 스토리",
+    "viewAll": "전체보기"
+  },
+  "meta": {
+    "title": "Glimpse - 당신의 이상형을 찾아보세요"
   }
 }

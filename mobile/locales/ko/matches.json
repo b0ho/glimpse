@@ -1,6 +1,10 @@
 {
   "title": "매칭",
   "subtitle": "서로 좋아요를 보낸 사람들과 대화해보세요",
+  "header": {
+    "title": "채팅",
+    "subtitle": "매칭된 사람들과 대화를 시작하세요"
+  },
   "stats": {
     "totalMatches": "총 매칭: {{count}}명",
     "receivedLikes": "받은 좋아요: {{count}}개"
@@ -12,13 +16,24 @@
     "matchDescription": "서로 좋아요를 보내서 매칭되었어요! 💕\n지금부터 서로의 닉네임을 확인할 수 있습니다."
   },
   "emptyState": {
-    "title": "아직 매칭된 사람이 없어요",
-    "subtitle": "홈 피드에서 마음에 드는 게시물에\n좋아요를 보내보세요!\n\n서로 좋아요를 보내면 매칭됩니다."
+    "title": "아직 채팅이 없습니다",
+    "subtitle": "매칭이 되면 여기서 대화를 시작할 수 있어요"
   },
   "loading": {
     "text": "매칭 정보를 불러오는 중..."
   },
   "user": {
     "anonymous": "익명사용자"
+  },
+  "mismatch": {
+    "reportTitle": "미스매치 신고",
+    "reportMessage": "{{nickname}}님과의 매칭이 잘못되었나요?\n\n미스매치를 신고하면 매칭이 취소되고 다시 대기 상태로 돌아갑니다.",
+    "cancel": "취소",
+    "report": "미스매치 신고",
+    "reportCompleteTitle": "신고 완료",
+    "reportCompleteMessage": "미스매치가 신고되었습니다. 다시 매칭을 기다려주세요.",
+    "confirm": "확인",
+    "errorTitle": "오류",
+    "errorMessage": "미스매치 신고 중 오류가 발생했습니다. 다시 시도해주세요."
   }
 }
