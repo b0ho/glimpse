@@ -44,10 +44,10 @@ export class ClerkAuthGuard implements CanActivate {
         console.log(
           '[ClerkAuthGuard] Dev mode auth in development environment (no token)',
         );
-        // 기본 사용자 설정 - 실제 DB의 첫 번째 사용자 사용
+        // 기본 사용자 설정 - 실제 DB의 개발용 사용자 사용
         request['user'] = {
           id: 'cmeh8afwr000i1mb7ikv3lq1a',
-          email: 'user1@example.com',
+          phoneNumber: '01012345678',
           nickname: '북벌레1',
           role: 'user',
         };

@@ -6,12 +6,13 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 시드 데이터 생성 시작...');
 
-  // 기본 사용자 생성
+  // 기본 사용자 생성 - 개발 모드용 기본 사용자 포함
   const users = await Promise.all([
     prisma.user.create({
       data: {
+        id: 'cmeh8afwr000i1mb7ikv3lq1a', // ClerkAuthGuard의 개발 모드 기본 ID
         phoneNumber: '01012345678',
-        nickname: '테스트유저1',
+        nickname: '북벌레1',
         age: 28,
         gender: Gender.MALE,
         bio: '안녕하세요! 개발자입니다.',
