@@ -31,7 +31,7 @@ import { InterestType } from '@/types/interest';
 export const InterestSearchScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { colors, isDark } = useTheme();
-  const { t } = useAndroidSafeTranslation('common');
+  const { t } = useAndroidSafeTranslation('interest');
   const { user, getSubscriptionTier, getSubscriptionFeatures } = useAuthStore();
   const {
     searches,
@@ -122,12 +122,12 @@ export const InterestSearchScreen: React.FC = () => {
 
   const handleDeleteSearch = (searchId: string) => {
     Alert.alert(
-      '삭제 확인',
-      '이 관심상대 검색을 삭제하시겠습니까?',
+      t('search.deleteConfirmTitle'),
+      t('search.deleteConfirmMessage'),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('buttons.cancel'), style: 'cancel' },
         {
-          text: '삭제',
+          text: t('buttons.delete'),
           style: 'destructive',
           onPress: () => deleteSearch(searchId),
         },
@@ -136,14 +136,14 @@ export const InterestSearchScreen: React.FC = () => {
   };
 
   const handleReportMismatch = (item: any) => {
-    const nickname = item.matchedUser?.nickname || '익명';
+    const nickname = item.matchedUser?.nickname || t('search.anonymous');
     Alert.alert(
-      '미스매치 신고',
-      `${nickname}님과의 매칭이 잘못되었나요?\n\n미스매치를 신고하면 매칭이 취소되고 다시 대기 상태로 돌아갑니다.`,
+      t('search.mismatchReportTitle'),
+      t('search.mismatchReportMessage', { nickname }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('buttons.cancel'), style: 'cancel' },
         {
-          text: '신고',
+          text: t('buttons.report'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -158,11 +158,11 @@ export const InterestSearchScreen: React.FC = () => {
                 );
                 await AsyncStorage.setItem('interest-matches', JSON.stringify(updatedMatches));
                 await fetchMatches(); // 목록 새로고침
-                Alert.alert('완료', '미스매치 신고가 접수되었습니다.');
+                Alert.alert(t('buttons.completed'), t('search.mismatchReported'));
               }
             } catch (error) {
               console.error('Failed to report mismatch:', error);
-              Alert.alert('오류', '미스매치 신고 중 오류가 발생했습니다.');
+              Alert.alert(t('errors.error'), t('search.mismatchError'));
             }
           },
         },
@@ -175,7 +175,7 @@ export const InterestSearchScreen: React.FC = () => {
     const newChatRoom = {
       id: `interest-${item.searchId || item.id}`,
       matchId: item.matchedUserId || item.matchedUser?.id,
-      otherUserNickname: item.matchedUser?.nickname || '익명',
+      otherUserNickname: item.matchedUser?.nickname || t('search.anonymous'),
       lastMessage: '채팅을 시작해보세요!',
       lastMessageTime: new Date().toISOString(),
       unreadCount: 0,

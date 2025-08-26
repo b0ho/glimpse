@@ -8,9 +8,13 @@
     "imageErrorMessage": "이미지 선택 중 오류가 발생했습니다."
   },
   "alerts": {
+    "title": "알림",
+    "success": "성공",
+    "error": "오류",
     "commentRequired": "댓글 내용을 입력해주세요.",
     "commentSuccess": "댓글이 작성되었습니다.",
-    "commentDeleted": "댓글이 삭제되었습니다."
+    "commentDeleted": "댓글이 삭제되었습니다.",
+    "commentDeleteFailed": "댓글 작성에 실패했습니다."
   },
   "create": {
     "loading": "그룹을 불러오는 중...",
@@ -30,6 +34,9 @@
     "justNow": "방금 전",
     "me": "나"
   },
+  "deleteConfirmMessage": "이 게시물을 삭제하시겠습니까?",
+  "postOptions": "게시물 옵션",
+  "comment": "댓글",
   "sample": {
     "title": "스터디 모집합니다",
     "content": "안녕하세요! 이번에 새로운 스터디를 시작하려고 합니다.\n\n매주 토요일 오후 2시에 강남역 근처 카페에서 모일 예정이며, 함께 성장하실 분들을 모집합니다.\n\n관심 있으신 분들은 댓글로 알려주세요!",
@@ -39,5 +46,6 @@
     "comment2": "저도 참여하고 싶습니다. 어떤 주제로 스터디하나요?",
     "comment3": "좋은 기회네요! 꼭 참여하고 싶습니다",
     "anonymousName": "익명"
-  }
+  },
+  "title": "게시물"
 }

@@ -54,6 +54,9 @@
     "register": "관심상대 등록",
     "registering": "등록 중...",
     "cancel": "취소",
+    "delete": "삭제",
+    "report": "신고",
+    "completed": "완료",
     "save": "저장",
     "edit": "편집",
     "upgrade": "업그레이드"
@@ -87,6 +90,7 @@
     "studentDescription": "더 정확한 매칭을 위해 사용되며, 모든 정보는 익명으로 보호됩니다"
   },
   "errors": {
+    "error": "오류",
     "selectType": "검색 유형을 선택해주세요",
     "enterValue": "검색 값을 입력해주세요",
     "selectPlatform": "소셜 플랫폼을 먼저 선택해주세요",
@@ -117,5 +121,14 @@
   "info": {
     "title": "매칭률을 높이는 방법",
     "content": "• 정확한 정보를 입력해주세요\n• 특히 전화번호, 이메일은 정확해야 매칭됩니다\n• 등록한 조건과 일치하는 사용자가 있으면 자동 매칭됩니다\n• 매칭 전까지 모든 정보는 익명으로 보호됩니다"
+  },
+  "search": {
+    "deleteConfirmTitle": "삭제 확인",
+    "deleteConfirmMessage": "이 관심상대 검색을 삭제하시겠습니까?",
+    "mismatchReportTitle": "미스매치 신고",
+    "mismatchReportMessage": "{{nickname}}님과의 매칭이 잘못되었나요?\n\n미스매치를 신고하면 매칭이 취소되고 다시 대기 상태로 돌아갑니다.",
+    "mismatchReported": "미스매치 신고가 접수되었습니다.",
+    "mismatchError": "미스매치 신고 중 오류가 발생했습니다.",
+    "anonymous": "익명"
   }
 }

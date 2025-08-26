@@ -9,7 +9,14 @@
     "remainingLikes": "남은 좋아요: {{count}}개",
     "unlimitedLikes": "무제한 좋아요",
     "buyMoreLikes": "좋아요 추가 구매",
-    "cooldownMessage": "{{days}}일 후 다시 좋아요할 수 있습니다"
+    "cooldownMessage": "{{days}}일 후 다시 좋아요할 수 있습니다",
+    "selfLikeNotAllowed": "자기 자신에게는 좋아요를 보낼 수 없습니다",
+    "alreadyLiked": "이미 좋아요를 보냈습니다",
+    "limitExceeded": "좋아요 한도 초과",
+    "dailyLimitMessage": "오늘의 무료 좋아요를 모두 사용했습니다.\n더 많은 좋아요를 구매할 수 있습니다.",
+    "insufficientCredits": "좋아요 크레딧이 부족합니다",
+    "remainingLikes_one": "남은 좋아요: {{count}}개",
+    "remainingLikes_other": "남은 좋아요: {{count}}개"
   },
   "match": {
     "title": "매칭",

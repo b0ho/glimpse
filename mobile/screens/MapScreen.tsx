@@ -42,7 +42,7 @@ interface SelectedMarkerData {
 
 export const MapScreen = React.memo(() => {
   const navigation = useNavigation();
-  const { t } = useAndroidSafeTranslation();
+  const { t } = useAndroidSafeTranslation('map');
   const { user } = useAuthStore();
   const { groups } = useGroupStore();
   
@@ -366,11 +366,11 @@ export const MapScreen = React.memo(() => {
           >
             <Icon name="arrow-back" size={24} color={COLORS.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>지도</Text>
+          <Text style={styles.headerTitle}>{t('title')}</Text>
           <View style={styles.headerRight} />
         </View>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>지도를 로드하는 중...</Text>
+          <Text style={styles.loadingText}>{t('loading')}</Text>
         </View>
       </SafeAreaView>
     );

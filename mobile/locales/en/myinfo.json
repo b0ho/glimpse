@@ -1,4 +1,9 @@
 {
+  "title": "My Info Management",
+  "tips": {
+    "title": "💡 Tips to Increase Matching Rate",
+    "content": "Please enter accurate information\nThe more information you register, the higher your matching probability\nOther users can find you using the information below"
+  },
   "alerts": {
     "valueRequired": "Please enter a value",
     "alreadyRegistered": "This value is already registered"

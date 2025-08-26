@@ -72,7 +72,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
 
   // 익명성 시스템: 매칭 상태에 따라 표시명 결정
   // 프로덕션에서는 매칭 전까지 익명, 개발 중에는 실제 닉네임 표시
-  const displayName = item.authorNickname || getUserDisplayName(item.authorId || '', currentUserId || '') || '테스트유저';
+  const displayName = item.authorNickname || getUserDisplayName(item.authorId || '', currentUserId || '') || t('common:user.defaultName');
 
   const handleEdit = () => {
     setShowMenu(false);
@@ -82,12 +82,12 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   const handleDelete = () => {
     setShowMenu(false);
     Alert.alert(
-      '게시물 삭제',
-      '이 게시물을 삭제하시겠습니까?',
+      t('common:actions.delete'),
+      t('post:deleteConfirmMessage'),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('common:actions.cancel'), style: 'cancel' },
         { 
-          text: '삭제', 
+          text: t('common:actions.delete'), 
           style: 'destructive',
           onPress: () => onDelete?.(item.id)
         }
@@ -133,7 +133,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
             <TouchableOpacity
               style={styles.menuButton}
               onPress={() => setShowMenu(!showMenu)}
-              accessibilityLabel="게시물 옵션"
+              accessibilityLabel={t('post:postOptions')}
               accessibilityRole="button"
             >
               <Icon name="ellipsis-horizontal" size={20} color={colors.TEXT.SECONDARY} />
@@ -194,7 +194,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
                 : item.isLikedByUser
                 ? t('common:accessibility.alreadyLiked')
                 : remainingLikes === 0
-                ? '좋아요 크레딧이 부족합니다'
+                ? t('matching:like.insufficientCredits')
                 : t('common:accessibility.canLike')
             }
             accessibilityRole="button"
@@ -227,7 +227,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
           <TouchableOpacity
             style={styles.commentButtonContainer}
             onPress={handlePostPress}
-            accessibilityLabel="댓글"
+            accessibilityLabel={t('post:comment')}
             accessibilityRole="button"
           >
             <View style={styles.commentButton}>

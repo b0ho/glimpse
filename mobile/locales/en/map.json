@@ -1,4 +1,6 @@
 {
+  "title": "Map",
+  "loading": "Loading map...",
   "alerts": {
     "groupJoined": "Successfully joined {{groupName}} group!",
     "likeSent": "Anonymous like sent to {{nickname}}! 💕"

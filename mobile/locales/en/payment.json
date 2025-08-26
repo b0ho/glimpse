@@ -1,0 +1,70 @@
+{
+  "premium": {
+    "title": "Premium Membership",
+    "benefits": {
+      "unlimitedLikes": "Unlimited Likes",
+      "seeWhoLikesYou": "See who likes you",
+      "priorityMatching": "Priority Matching",
+      "rewindLikes": "Rewind Likes",
+      "superLikes": "5 Super Likes per day",
+      "readReceipts": "Read Receipts",
+      "onlineStatus": "Online Status",
+      "premiumBadge": "Premium Badge",
+      "advancedFilters": "Advanced Filters"
+    },
+    "pricing": {
+      "monthly": "Monthly Membership",
+      "yearly": "Yearly Membership",
+      "monthlyPrice": "₩9,900/month",
+      "yearlyPrice": "₩99,000/year",
+      "yearlySavings": "2 months free!",
+      "discount": "{{percent}}% off"
+    },
+    "subscribe": "Subscribe",
+    "upgrade": "Upgrade to Premium",
+    "manage": "Manage Subscription",
+    "cancel": "Cancel Subscription",
+    "restore": "Restore Purchases"
+  },
+  "credits": {
+    "title": "Like Credits",
+    "balance": "Balance: {{count}}",
+    "packages": {
+      "small": "5 Credits",
+      "medium": "10 Credits",
+      "large": "20 Credits",
+      "xlarge": "50 Credits"
+    },
+    "prices": {
+      "small": "₩2,500",
+      "medium": "₩4,500",
+      "large": "₩8,500",
+      "xlarge": "₩19,000"
+    },
+    "bestValue": "Best Value",
+    "purchase": "Purchase"
+  },
+  "methods": {
+    "card": "Credit/Debit Card",
+    "kakaoPay": "KakaoPay",
+    "tossPay": "TossPay",
+    "naverPay": "NaverPay",
+    "applePay": "Apple Pay",
+    "googlePay": "Google Pay"
+  },
+  "status": {
+    "processing": "Processing payment...",
+    "success": "Payment Complete",
+    "failed": "Payment Failed",
+    "cancelled": "Payment Cancelled",
+    "refunded": "Refunded"
+  },
+  "messages": {
+    "purchaseSuccess": "Purchase completed successfully",
+    "subscriptionActive": "Premium membership activated",
+    "subscriptionCancelled": "Subscription cancelled",
+    "subscriptionExpired": "Premium membership expired",
+    "insufficientCredits": "Insufficient credits",
+    "paymentError": "An error occurred during payment"
+  }
+}

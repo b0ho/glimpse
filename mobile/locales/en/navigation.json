@@ -2,16 +2,17 @@
   "tabs": {
     "home": "Home",
     "groups": "Groups",
-    "interest": "Interest",
-    "matches": "Matches",
-    "chat": "Chat",
+    "interest": "Search",
+    "matches": "Chat",
     "profile": "Profile",
     "community": "Community",
     "groupChat": "Group Chat",
     "friends": "Friends"
   },
   "screens": {
-    "createContent": "New Post",
+    "auth": "Login",
+    "createContent": "Create Post",
+    "createStory": "Create Story",
     "storyUpload": "Add Story",
     "createGroup": "Create New Group",
     "locationGroup": "Location-based Group",
@@ -20,12 +21,17 @@
     "map": "Map",
     "groupInvite": "Group Invite",
     "joinGroup": "Join Group",
-    "groupManage": "Manage Group"
+    "groupManage": "Manage Group",
+    "groupDetail": "Group Details",
+    "myGroups": "My Groups",
+    "addInterest": "Add Interest",
+    "myInfo": "My Info"
   },
   "accessibility": {
     "home": "Navigate to Home screen",
     "groups": "Navigate to Groups screen",
-    "matches": "Navigate to Matches screen",
+    "interest": "Interest search",
+    "matches": "Chat",
     "profile": "Navigate to Profile screen",
     "community": "Navigate to Community screen",
     "groupChat": "Navigate to Group Chat screen",

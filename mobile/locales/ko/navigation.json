@@ -2,14 +2,17 @@
   "tabs": {
     "home": "홈",
     "groups": "그룹",
-    "matches": "매칭 목록",
+    "interest": "찾기",
+    "matches": "채팅",
     "profile": "프로필",
     "community": "커뮤니티",
     "groupChat": "단체채팅",
     "friends": "친구목록"
   },
   "screens": {
-    "createContent": "새 게시물",
+    "auth": "로그인",
+    "createContent": "게시물 작성",
+    "createStory": "스토리 만들기",
     "storyUpload": "스토리 추가",
     "createGroup": "새 그룹 만들기",
     "locationGroup": "위치 기반 그룹",
@@ -18,12 +21,17 @@
     "map": "지도",
     "groupInvite": "그룹 초대",
     "joinGroup": "그룹 가입",
-    "groupManage": "그룹 관리"
+    "groupManage": "그룹 관리",
+    "groupDetail": "그룹 상세",
+    "myGroups": "내 그룹",
+    "addInterest": "관심상대 등록",
+    "myInfo": "내 정보 관리"
   },
   "accessibility": {
     "home": "홈 화면으로 이동",
     "groups": "그룹 화면으로 이동",
-    "matches": "매칭 화면으로 이동",
+    "interest": "관심상대 찾기",
+    "matches": "채팅",
     "profile": "프로필 화면으로 이동",
     "community": "커뮤니티 화면으로 이동",
     "groupChat": "단체채팅 화면으로 이동",

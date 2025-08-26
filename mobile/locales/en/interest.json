@@ -54,6 +54,9 @@
     "register": "Register Person of Interest",
     "registering": "Registering...",
     "cancel": "Cancel",
+    "delete": "Delete",
+    "report": "Report",
+    "completed": "Completed",
     "save": "Save",
     "edit": "Edit",
     "upgrade": "Upgrade"
@@ -87,6 +90,7 @@
     "studentDescription": "Used for more accurate matching, all information is protected anonymously"
   },
   "errors": {
+    "error": "Error",
     "selectType": "Please select a search type",
     "enterValue": "Please enter a search value",
     "selectPlatform": "Please select a social platform first",
@@ -117,5 +121,14 @@
   "info": {
     "title": "How to Increase Matching Rate",
     "content": "• Enter accurate information\n• Phone numbers and emails especially need to be accurate for matching\n• Automatic matching occurs when users matching your criteria are found\n• All information is protected anonymously until matching"
+  },
+  "search": {
+    "deleteConfirmTitle": "Delete Confirmation",
+    "deleteConfirmMessage": "Do you want to delete this person of interest search?",
+    "mismatchReportTitle": "Report Mismatch",
+    "mismatchReportMessage": "Was the match with {{nickname}} incorrect?\n\nReporting a mismatch will cancel the match and return to waiting status.",
+    "mismatchReported": "Mismatch report has been submitted.",
+    "mismatchError": "An error occurred while reporting mismatch.",
+    "anonymous": "Anonymous"
   }
 }

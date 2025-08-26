@@ -196,12 +196,14 @@ const AuthScreenWrapper = () => {
  * @description 로그인하지 않은 사용자를 위한 인증 화면
  */
 function AuthNavigator() {
+  const { t } = useAndroidSafeTranslation('navigation');
+  
   return (
     <AuthStack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
       <AuthStack.Screen 
         name="Auth" 
         component={AuthScreenWrapper}
-        options={{ title: '로그인' }}
+        options={{ title: t('navigation:screens.auth') }}
       />
     </AuthStack.Navigator>
   );
@@ -239,7 +241,7 @@ function HomeStackNavigator() {
         name="CreateContent" 
         component={CreateContentScreen} 
         options={{ 
-          title: '게시물 작성',
+          title: t('navigation:screens.createContent'),
           headerShown: false,
           presentation: 'modal',
         }}
@@ -248,7 +250,7 @@ function HomeStackNavigator() {
         name="CreateStory" 
         component={CreateStoryScreen} 
         options={{ 
-          title: '스토리 만들기',
+          title: t('navigation:screens.createStory'),
           headerShown: false,
           presentation: 'modal',
         }}
@@ -274,7 +276,7 @@ function HomeStackNavigator() {
         name="NearbyGroups" 
         component={NearbyGroupsScreen} 
         options={{ 
-          title: '근처 그룹',
+          title: t('navigation:screens.nearbyGroups'),
           headerShown: false,
         }}
       />
@@ -374,7 +376,7 @@ function GroupsStackNavigator() {
         name="GroupDetail" 
         component={GroupDetailScreen} 
         options={{ 
-          title: '그룹 상세',
+          title: t('navigation:screens.groupDetail'),
           headerShown: false,
         }}
       />
@@ -452,7 +454,7 @@ function InterestStackNavigator() {
         name="AddInterest" 
         component={AddInterestScreen} 
         options={{ 
-          title: '관심상대 등록',
+          title: t('navigation:screens.addInterest'),
           headerShown: false,
           presentation: 'modal',
         }}
@@ -461,7 +463,7 @@ function InterestStackNavigator() {
         name="MyInfo" 
         component={MyInfoScreen} 
         options={{ 
-          title: '내 정보 관리',
+          title: t('navigation:screens.myInfo'),
           headerShown: false,
           presentation: 'modal',
         }}
@@ -492,6 +494,7 @@ function InterestStackNavigator() {
  */
 function ProfileStackNavigator() {
   const { colors } = useTheme();
+  const { t } = useAndroidSafeTranslation('navigation');
   
   return (
     <ProfileStack.Navigator 
@@ -515,7 +518,7 @@ function ProfileStackNavigator() {
         name="MyGroups" 
         component={MyGroupsScreen} 
         options={{ 
-          title: '내 그룹',
+          title: t('navigation:screens.myGroups'),
           headerShown: true,
         }}
       />
@@ -645,18 +648,18 @@ function DatingTabNavigator() {
         name="Interest" 
         component={InterestStackNavigator}
         options={{
-          title: '찾기',
+          title: getTabTitle('navigation:tabs.interest', '찾기'),
           tabBarIcon: ({ color, size }) => <Icon name="search-outline" color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: '관심상대 찾기',
+          tabBarAccessibilityLabel: t('navigation:accessibility.interest'),
         }}
       />
       <Tab.Screen 
         name="Matches" 
         component={MatchesStackNavigator}
         options={{
-          title: '채팅',
+          title: getTabTitle('navigation:tabs.matches', '채팅'),
           tabBarIcon: ({ color, size }) => <Icon name="chatbubbles-outline" color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: '채팅',
+          tabBarAccessibilityLabel: t('navigation:accessibility.matches'),
         }}
       />
       <Tab.Screen 
@@ -736,9 +739,9 @@ function FriendshipTabNavigator() {
         name="Interest" 
         component={InterestStackNavigator}
         options={{
-          title: '찾기',
+          title: getTabTitle('navigation:tabs.interest', '찾기'),
           tabBarIcon: ({ color, size }) => <Icon name="search-outline" color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: '관심상대 찾기',
+          tabBarAccessibilityLabel: t('navigation:accessibility.interest'),
         }}
       />
       <Tab.Screen 

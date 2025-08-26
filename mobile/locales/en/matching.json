@@ -14,7 +14,8 @@
     "selfLikeNotAllowed": "You cannot like yourself",
     "alreadyLiked": "You already liked this user",
     "limitExceeded": "Like Limit Exceeded",
-    "dailyLimitMessage": "You've used all your free likes today.\nYou can purchase more likes."
+    "dailyLimitMessage": "You've used all your free likes today.\nYou can purchase more likes.",
+    "insufficientCredits": "Insufficient like credits"
   },
   "match": {
     "title": "Matches",

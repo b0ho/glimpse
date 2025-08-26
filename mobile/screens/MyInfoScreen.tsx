@@ -225,7 +225,7 @@ export const MyInfoScreen: React.FC = () => {
               <Icon name="arrow-back" size={28} color={colors.TEXT.PRIMARY} />
             </TouchableOpacity>
             <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>
-              내 정보 관리
+              {t('title')}
             </Text>
             <View style={{ width: 28 }} />
           </View>
@@ -234,12 +234,10 @@ export const MyInfoScreen: React.FC = () => {
           <View style={[styles.descriptionBox, { backgroundColor: colors.SUCCESS + '15' }]}>
             <Icon name="information-circle" size={20} color={colors.SUCCESS} />
             <Text style={[styles.descriptionText, { color: colors.TEXT.PRIMARY }]}>
-              💡 매칭 확률을 높이는 팁
+              {t('tips.title')}
             </Text>
             <Text style={[styles.descriptionSubtext, { color: colors.TEXT.SECONDARY }]}>
-              정확한 정보를 입력해주세요{'\n'}
-              많은 정보를 등록할수록 매칭 확률이 올라갑니다{'\n'}
-              다른 사용자가 아래 정보로 나를 찾을 수 있습니다
+              {t('tips.content')}
             </Text>
           </View>
 

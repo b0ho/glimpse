@@ -8,9 +8,13 @@
     "imageErrorMessage": "An error occurred while selecting images."
   },
   "alerts": {
+    "title": "Notification",
+    "success": "Success",
+    "error": "Error",
     "commentRequired": "Please enter comment content.",
     "commentSuccess": "Comment has been posted.",
-    "commentDeleted": "Comment has been deleted."
+    "commentDeleted": "Comment has been deleted.",
+    "commentDeleteFailed": "Failed to post comment."
   },
   "create": {
     "loading": "Loading groups...",
@@ -30,6 +34,9 @@
     "justNow": "Just now",
     "me": "Me"
   },
+  "deleteConfirmMessage": "Are you sure you want to delete this post?",
+  "postOptions": "Post Options",
+  "comment": "Comment",
   "sample": {
     "title": "Study Group Recruitment",
     "content": "Hello! We're starting a new study group.\n\nWe plan to meet every Saturday at 2 PM at a cafe near Gangnam Station. We're looking for people who want to grow together.\n\nIf you're interested, please let us know in the comments!",
@@ -39,5 +46,6 @@
     "comment2": "I'd also like to join. What topic will the study focus on?",
     "comment3": "Great opportunity! I really want to participate",
     "anonymousName": "Anonymous"
-  }
+  },
+  "title": "Post"
 }

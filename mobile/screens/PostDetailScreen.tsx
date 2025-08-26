@@ -167,7 +167,7 @@ export const PostDetailScreen = () => {
 
   const handleSubmitComment = async () => {
     if (!newComment.trim()) {
-      Alert.alert('알림', '댓글 내용을 입력해주세요.');
+      Alert.alert(t('alerts.title'), t('alerts.commentRequired'));
       return;
     }
 
@@ -196,9 +196,9 @@ export const PostDetailScreen = () => {
         });
       }
 
-      Alert.alert('성공', '댓글이 작성되었습니다.');
+      Alert.alert(t('alerts.success'), t('alerts.commentSuccess'));
     } catch (error) {
-      Alert.alert('오류', '댓글 작성에 실패했습니다.');
+      Alert.alert(t('alerts.error'), t('alerts.commentDeleteFailed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -206,12 +206,12 @@ export const PostDetailScreen = () => {
 
   const handleDeleteComment = (commentId: string) => {
     Alert.alert(
-      '댓글 삭제',
-      '정말 이 댓글을 삭제하시겠습니까?',
+      t('detail.deleteTitle'),
+      t('detail.deleteConfirm'),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('detail.cancel'), style: 'cancel' },
         {
-          text: '삭제',
+          text: t('detail.delete'),
           style: 'destructive',
           onPress: () => {
             setComments(comments.filter(c => c.id !== commentId));
@@ -221,7 +221,7 @@ export const PostDetailScreen = () => {
                 commentCount: Math.max(0, post.commentCount - 1),
               });
             }
-            Alert.alert('성공', '댓글이 삭제되었습니다.');
+            Alert.alert(t('alerts.success'), t('alerts.commentDeleted'));
           },
         },
       ]
@@ -325,7 +325,7 @@ export const PostDetailScreen = () => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>게시물</Text>
+          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('title')}</Text>
           <View style={{ width: 24 }} />
         </View>
 
