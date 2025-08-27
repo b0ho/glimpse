@@ -9,6 +9,9 @@ import {
   Dimensions,
   StatusBar,
   Alert,
+  ViewStyle,
+  TextStyle,
+  ImageStyle,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -241,7 +244,31 @@ export const StoryFullViewer: React.FC<StoryFullViewerProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+interface Styles {
+  container: ViewStyle;
+  storyImage: ImageStyle;
+  overlay: ViewStyle;
+  progressContainer: ViewStyle;
+  progressBarBackground: ViewStyle;
+  progressBarFill: ViewStyle;
+  header: ViewStyle;
+  userInfo: ViewStyle;
+  avatar: ViewStyle;
+  avatarText: TextStyle;
+  userDetails: ViewStyle;
+  username: TextStyle;
+  timeText: TextStyle;
+  closeButton: ViewStyle;
+  touchArea: ViewStyle;
+  leftTouch: ViewStyle;
+  centerTouch: ViewStyle;
+  rightTouch: ViewStyle;
+  pausedIndicator: ViewStyle;
+  bottomInfo: ViewStyle;
+  storyCounter: TextStyle;
+}
+
+const styles = StyleSheet.create<Styles>({
   container: {
     flex: 1,
     backgroundColor: 'black',

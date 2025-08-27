@@ -162,7 +162,7 @@ export const useThemeStore = create<ThemeStore>()(
             });
 
             // cleanup은 앱 종료 시 자동으로 처리됨
-            return () => subscription?.remove?.();
+            // Note: subscription cleanup은 별도로 관리됨
           }
         } catch (error) {
           console.error('Theme initialization error:', error);

@@ -33,6 +33,8 @@ export type HomeStackParamList = {
   HomeScreen: undefined;
   CreateContent: undefined;
   StoryUpload: undefined;
+  PostDetail: { postId: string };
+  NearbyGroups: undefined;
 };
 
 // Groups Stack

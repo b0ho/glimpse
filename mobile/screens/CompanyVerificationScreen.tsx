@@ -32,7 +32,7 @@ export default function CompanyVerificationScreen() {
   const [timer, setTimer] = useState(0);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (timer > 0) {
       interval = setInterval(() => {
         setTimer((prev) => prev - 1);
@@ -198,7 +198,7 @@ export default function CompanyVerificationScreen() {
                 style={[
                   styles.button, 
                   { backgroundColor: colors.PRIMARY },
-                  !email && [styles.buttonDisabled, { backgroundColor: colors.DISABLED }]
+                  !email && [styles.buttonDisabled, { backgroundColor: colors.TEXT.TERTIARY }]
                 ]}
                 onPress={sendVerificationEmail}
                 disabled={!email || isLoading}
@@ -245,7 +245,7 @@ export default function CompanyVerificationScreen() {
                   style={[
                     styles.button, 
                     { backgroundColor: colors.PRIMARY },
-                    verificationCode.length !== 6 && [styles.buttonDisabled, { backgroundColor: colors.DISABLED }]
+                    verificationCode.length !== 6 && [styles.buttonDisabled, { backgroundColor: colors.TEXT.TERTIARY }]
                   ]}
                   onPress={verifyCode}
                   disabled={verificationCode.length !== 6 || isLoading}

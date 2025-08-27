@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Animated,
   Dimensions,
+  ColorValue,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
@@ -36,7 +37,7 @@ export const InterestCard: React.FC<InterestCardProps> = ({
   const { colors, isDark } = useTheme();
 
   const getTypeConfig = (type: InterestType) => {
-    const configs: Record<InterestType, { icon: string; color: string; gradient: string[] }> = {
+    const configs: Record<InterestType, { icon: string; color: string; gradient: readonly [ColorValue, ColorValue, ...ColorValue[]] }> = {
       [InterestType.PHONE]: {
         icon: 'call-outline',
         color: '#4CAF50',
@@ -110,7 +111,7 @@ export const InterestCard: React.FC<InterestCardProps> = ({
   const isActive = item.status === SearchStatus.ACTIVE;
   const isMatched = item.status === SearchStatus.MATCHED || isMatch;
 
-  const renderRightActions = (progress: Animated.AnimatedInterpolation) => {
+  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>) => {
     if (!onDelete || isMatch) return null;
 
     const translateX = progress.interpolate({

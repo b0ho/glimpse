@@ -49,7 +49,7 @@ export const CreateContentScreen = ({ route }: any) => {
         // 개발 환경에서는 모든 그룹에 자동으로 참여한 것으로 처리
         if (__DEV__) {
           groups.forEach(group => {
-            groupStore.joinGroup(group);
+            groupStore.joinGroup(group.id);
           });
           console.log('[CreateContentScreen] 개발 모드: 모든 그룹에 자동 참여');
         }

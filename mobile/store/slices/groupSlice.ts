@@ -47,6 +47,12 @@ interface GroupState {
   currentGroup: Group | null;
   /** 참여한 그룹 목록 */
   joinedGroups: Group[];
+  /** 근처 그룹 목록 */
+  nearbyGroups: Group[];
+  /** 공식 그룹 목록 */
+  officialGroups: Group[];
+  /** 생성한 그룹 목록 */
+  createdGroups: Group[];
   /** 좋아요한 그룹 ID 목록 */
   likedGroupIds: string[];
   /** 그룹별 초대코드 저장 */
@@ -150,6 +156,7 @@ const sampleGroups: Group[] = [
     femaleCount: 584,
     creatorId: 'current_user', // 내가 만든 그룹
     isMatchingActive: true,
+    isActive: true,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date(),
   },
@@ -163,6 +170,7 @@ const sampleGroups: Group[] = [
     femaleCount: 44,
     creatorId: 'current_user', // 내가 만든 그룹
     isMatchingActive: true,
+    isActive: true,
     createdAt: new Date('2024-02-15'),
     updatedAt: new Date(),
   },
@@ -176,6 +184,7 @@ const sampleGroups: Group[] = [
     femaleCount: 2178,
     creatorId: 'other_user', // 내가 참여한 그룹
     isMatchingActive: true,
+    isActive: true,
     createdAt: new Date('2023-12-01'),
     updatedAt: new Date(),
   },
@@ -189,6 +198,7 @@ const sampleGroups: Group[] = [
     femaleCount: 25,
     creatorId: 'other_user', // 내가 참여한 그룹
     isMatchingActive: true,
+    isActive: true,
     createdAt: new Date('2024-03-10'),
     updatedAt: new Date(),
   },
@@ -202,7 +212,9 @@ const sampleGroups: Group[] = [
     femaleCount: 11,
     creatorId: 'other_user', // 내가 참여한 그룹
     isMatchingActive: true,
+    isActive: true,
     location: {
+      name: '스타벅스 강남역점',
       latitude: 37.498095,
       longitude: 127.027610,
       address: '서울 강남구 강남대로 390',
@@ -222,6 +234,12 @@ export const useGroupStore = create<GroupStore>()(
   currentGroup: null,
   /** 참여한 그룹 목록 - 샘플 데이터로 초기화 */
   joinedGroups: sampleGroups, // 모든 샘플 그룹에 참여한 상태로 시작
+  /** 근처 그룹 목록 */
+  nearbyGroups: [],
+  /** 공식 그룹 목록 */
+  officialGroups: [],
+  /** 생성한 그룹 목록 */
+  createdGroups: [],
   /** 좋아요한 그룹 ID 목록 */
   likedGroupIds: [],
   /** 그룹별 초대코드 저장 */

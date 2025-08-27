@@ -75,8 +75,11 @@ export default {
       bundler: 'metro',
     },
     
-    // 플러그인 (개발 중 필요한 것만)
+    // 플러그인 (SDK 53 필수)
     plugins: [
+      'expo-localization',
+      'expo-secure-store',
+      'expo-web-browser',
       // 'expo-barcode-scanner', // 패키지 확인 후 활성화
       // 'expo-notifications',   // 패키지 확인 후 활성화
       // 'expo-location',        // 패키지 확인 후 활성화

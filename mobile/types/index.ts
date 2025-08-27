@@ -4,6 +4,14 @@ export * from '../shared/types';
 // Mobile-specific types only
 // Note: NearbyUser and AnonymousUserInfo are already defined in shared/types
 
+// API Response types
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  status?: number;
+}
+
 // Mobile UI specific types
 export interface NavigationParams {
   ChatScreen: { matchId: string };

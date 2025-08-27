@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { HomeStackParamList } from '@/types/navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -60,7 +62,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   const { getUserDisplayName } = useLikeStore();
   const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation();
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<HomeStackParamList>>();
   const [showMenu, setShowMenu] = useState(false);
   
   // 디버깅 로그
@@ -96,7 +98,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   };
 
   const handlePostPress = () => {
-    navigation.navigate('PostDetail' as never, { postId: item.id } as never);
+    navigation.navigate('PostDetail', { postId: item.id });
   };
 
   return (

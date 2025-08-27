@@ -383,9 +383,233 @@ Before any major operation:
 - [ ] Team impact assessed and communicated
 - [ ] Test environment validation completed
 
+## 🐛 Common TypeScript & React Native Issues & Solutions
+
+### 1. Network Connection Errors in React Native
+
+**Problem**: `ERROR API request failed: [TypeError: Network request failed]`
+
+**Root Cause**: React Native native apps cannot connect to `localhost` directly. Simulators/devices must communicate through actual network interfaces.
+
+**Solution**:
+```javascript
+// ❌ Wrong - breaks on native
+return 'http://localhost:3001/api/v1';
+
+// ✅ Correct - platform-aware
+const getBaseURL = () => {
+  if (Platform.OS === 'web') {
+    return 'http://localhost:3001/api/v1';
+  }
+  // Native uses actual IP address
+  return process.env.EXPO_PUBLIC_API_BASE_URL || 'http://192.168.25.45:3001/api/v1';
+};
+```
+
+**Prevention**: 
+- Always use `Platform.OS` checks for network configuration
+- Set `EXPO_PUBLIC_API_BASE_URL` in `.env` files
+- Use IP-based URLs for native development
+
+### 2. Timer Type Errors
+
+**Problem**: `Type 'number' is not assignable to type 'Timeout'`
+
+**Root Cause**: React Native vs Browser environment timer type conflicts
+
+**Solution**:
+```typescript
+// ❌ Environment-specific type
+const timer = useRef<NodeJS.Timeout | null>(null);
+
+// ✅ Cross-platform compatible
+const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+const interval = useRef<ReturnType<typeof setInterval> | null>(null);
+```
+
+**Prevention**: Always use `ReturnType<typeof setTimeout/setInterval>`
+
+### 3. i18n Translation Function Type Errors
+
+**Problem**: `Type 'string | $SpecialObject | TFunctionDetailedResult' is not assignable to parameter of type 'string'`
+
+**Root Cause**: i18next `t()` function returns complex types, but React Native components expect simple strings
+
+**Solution**:
+```typescript
+// ❌ Explicit TFunction type causes issues
+const t: TFunction = (key: string, options?: any) => { ... };
+
+// ✅ Remove explicit typing
+const t = (key: string, options?: any) => { ... };
+
+// ✅ Alternative: Type casting when needed
+title={t('common:save') as string}
+title={String(t('common:save'))}
+```
+
+**Prevention**: 
+- Remove explicit `TFunction` types in custom hooks
+- Use type casting or `String()` conversion when needed
+- Keep TypeScript settings flexible for i18n compatibility
+
+### 4. Zustand Store Type Definition Issues
+
+**Problem**: `Property 'nearbyGroups' does not exist on type 'GroupStore'` / `Property 'isActive' is missing in type`
+
+**Root Cause**: Interface definitions don't match actual implementations or sample data
+
+**Solution**:
+```typescript
+// ✅ Ensure interface completeness
+interface GroupState {
+  groups: Group[];
+  joinedGroups: Group[];
+  nearbyGroups: Group[];     // Add missing properties
+  officialGroups: Group[];
+  createdGroups: Group[];
+}
+
+// ✅ Sync initial state
+const initialState = {
+  groups: sampleGroups,
+  joinedGroups: sampleGroups,
+  nearbyGroups: [],          // Add missing arrays
+  officialGroups: [],
+  createdGroups: [],
+}
+
+// ✅ Complete sample data
+const sampleGroups: Group[] = [
+  {
+    id: 'group-1',
+    name: '서강대학교',
+    // ... existing properties
+    isActive: true,           // Add missing required fields
+  }
+];
+```
+
+**Prevention**:
+- Keep interface ↔ initial state ↔ sample data in sync
+- Update all three when extending store functionality
+- Use TypeScript strict checks for completeness
+
+### 5. Navigation Type Definition Errors
+
+**Problem**: `Type '"NearbyGroups"' is not assignable to type 'keyof HomeStackParamList'`
+
+**Root Cause**: Navigator screens added but not reflected in type definitions
+
+**Solution**:
+```typescript
+// ✅ Include all used screens in type definitions
+export type HomeStackParamList = {
+  HomeScreen: undefined;
+  CreateContent: undefined;
+  PostDetail: { postId: string };
+  NearbyGroups: undefined;    // Add new screens
+};
+```
+
+**Prevention**: 
+- Update stack param lists immediately when adding screens
+- Define types first, then implement navigator
+- Code review navigation type consistency
+
+### 6. Missing Module/Component Errors
+
+**Problem**: `Cannot find module '@/components/call/CallButton'`
+
+**Root Cause**: Importing modules that don't actually exist
+
+**Solution**:
+```typescript
+// ✅ Create basic implementation
+export const CallButton: React.FC<CallButtonProps> = ({ type, onPress, disabled }) => {
+  return (
+    <TouchableOpacity 
+      style={[styles.button, disabled && styles.disabled]} 
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <Text style={styles.text}>{type === 'video' ? '영상통화' : '음성통화'}</Text>
+    </TouchableOpacity>
+  );
+};
+```
+
+**Prevention**:
+- Verify module existence before importing
+- Create placeholder implementations for planned components
+- Keep development plan synchronized with actual implementation
+
+### 7. StyleSheet Type Errors
+
+**Problem**: `Property 'pausedIndicator' does not exist on type 'Styles'`
+
+**Root Cause**: StyleSheet interface missing actual styles used in components
+
+**Solution**:
+```typescript
+// ✅ Define all used styles in interface
+interface Styles {
+  container: ViewStyle;
+  storyImage: ImageStyle;
+  // ... existing styles
+  pausedIndicator: ViewStyle;    // Add missing styles
+  bottomInfo: ViewStyle;
+  storyCounter: TextStyle;
+}
+
+const styles = StyleSheet.create<Styles>({
+  // ... implement all defined styles
+});
+```
+
+**Prevention**: 
+- Update style interfaces when adding new styles
+- Use appropriate ViewStyle/TextStyle/ImageStyle types
+- Leverage `StyleSheet.create<Interface>` generic typing
+
+### Development Checklist
+
+**🔧 Network Configuration**
+- [ ] Use Platform.OS for web/native distinction
+- [ ] Native environments use actual IP addresses
+- [ ] Environment variables configured (.env)
+
+**📝 Type Definitions**
+- [ ] Timers: Use `ReturnType<typeof setTimeout>`
+- [ ] i18n: Remove explicit TFunction types in custom hooks
+- [ ] Stores: Keep interface ↔ initial state ↔ sample data synced
+- [ ] Navigation: Define all screen types
+
+**🎨 Component Development**
+- [ ] StyleSheet interfaces match actual styles
+- [ ] All imported modules exist
+- [ ] Missing components have basic implementations
+- [ ] Props types fully defined
+
+**⚙️ Recommended TypeScript Settings**
+```json
+{
+  "compilerOptions": {
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "skipLibCheck": true,
+    "moduleResolution": "bundler"
+  }
+}
+```
+
+**React Native + Expo development benefits from flexible TypeScript settings that prioritize development velocity while maintaining essential type safety.**
+
 ---
 
 > 💡 **Remember**: This is a privacy-focused Korean dating app with complete full-stack implementation.  
 > Always prioritize user anonymity, payment security, Korean UX, and type safety across the entire stack.
 
-*Last updated: 2025-08-24*
+*Last updated: 2025-08-27*

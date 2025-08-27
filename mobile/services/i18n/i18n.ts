@@ -319,4 +319,11 @@ export const getCurrentLanguage = (): SupportedLanguage => {
   return (i18n.language || DEFAULT_LANGUAGE) as SupportedLanguage;
 };
 
+// Ensure i18n is ready
+export const ensureI18nReady = async (): Promise<void> => {
+  if (!i18n.isInitialized) {
+    await initI18n();
+  }
+};
+
 export default i18n;

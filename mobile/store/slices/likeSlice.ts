@@ -258,7 +258,7 @@ export const useLikeStore = create<LikeStore>()(
             isSuper: false // 일반 좋아요
           });
           
-          const newLike: Like = response.data || {
+          const newLike: Like = (response as any).data || {
             id: `like_${Date.now()}`,
             fromUserId: useAuthStore.getState().user?.id || 'anonymous',
             toUserId,
@@ -365,7 +365,7 @@ export const useLikeStore = create<LikeStore>()(
             isSuper: true // 슈퍼 좋아요
           });
           
-          const newSuperLike: Like = response.data || {
+          const newSuperLike: Like = (response as any).data || {
             id: `super_like_${Date.now()}`,
             fromUserId: useAuthStore.getState().user?.id || 'anonymous',
             toUserId,
@@ -956,9 +956,9 @@ export const useLikeStore = create<LikeStore>()(
         // 비동기로 API 호출하여 사용자 정보 가져오기
         // 즉시 기본값 반환 후 나중에 업데이트
         apiClient.get(`/users/${userId}`).then(response => {
-          if (response.data) {
+          if ((response as any).data) {
             // 실제 데이터로 업데이트 (여기서는 상태 업데이트 안 함)
-            console.log('User info fetched:', response.data);
+            console.log('User info fetched:', (response as any).data);
           }
         }).catch(error => {
           console.error('Failed to fetch user info:', error);

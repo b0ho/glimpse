@@ -40,7 +40,7 @@ export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [amplitude, setAmplitude] = useState(0);
   const animatedValue = useRef(new Animated.Value(1)).current;
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     return () => {

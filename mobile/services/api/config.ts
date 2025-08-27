@@ -19,8 +19,8 @@ const getBaseURL = () => {
     return 'http://localhost:3001/api/v1';
   }
   
-  // Native 환경에서는 .env 설정 사용
-  return process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3001/api/v1';
+  // Native 환경에서는 실제 로컬 IP 주소 사용 (localhost는 시뮬레이터에서 작동하지 않음)
+  return process.env.EXPO_PUBLIC_API_BASE_URL || 'http://192.168.25.45:3001/api/v1';
 };
 
 export const API_BASE_URL = getBaseURL();
@@ -49,8 +49,8 @@ const getSocketURL = () => {
     return 'ws://localhost:3001';
   }
   
-  // Native 환경에서는 .env 설정 사용
-  return process.env.EXPO_PUBLIC_WEBSOCKET_URL || 'ws://localhost:3001';
+  // Native 환경에서는 실제 로컬 IP 주소 사용 (localhost는 시뮬레이터에서 작동하지 않음)
+  return process.env.EXPO_PUBLIC_WEBSOCKET_URL || 'ws://192.168.25.45:3001';
 };
 
 export const SOCKET_URL = getSocketURL();

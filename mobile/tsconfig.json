@@ -2,7 +2,7 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "target": "ESNext",
-    "module": "commonjs",
+    "module": "esnext",
     "lib": [
       "ESNext",
       "DOM"
@@ -10,10 +10,18 @@
     "jsx": "react-jsx",
     "noEmit": true,
     "skipLibCheck": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "strict": false,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "noImplicitThis": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "baseUrl": ".",

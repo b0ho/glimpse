@@ -8,6 +8,7 @@ import {
   CreateInterestSearchDto,
   UpdateInterestSearchDto,
   GetInterestSearchesQuery,
+  // ApiResponse,
   CheckMatchDto,
   InterestType,
 } from '@/types/interest';
@@ -72,10 +73,10 @@ export const useInterestStore = create<InterestState>()(
           if (Array.isArray(response)) {
             console.log('[interestSlice] Response is array, setting searches:', response);
             set({ searches: response, loading: false });
-          } else if (response && response.success) {
-            set({ searches: response.data || [], loading: false });
-          } else if (response && response.data) {
-            set({ searches: response.data, loading: false });
+          } else if (response && (response as any).success) {
+            set({ searches: (response as any).data || [], loading: false });
+          } else if (response && (response as any).data) {
+            set({ searches: (response as any).data, loading: false });
           } else {
             console.warn('Unexpected response format:', response);
             set({ searches: [], loading: false });
@@ -106,10 +107,10 @@ export const useInterestStore = create<InterestState>()(
           if (Array.isArray(response)) {
             console.log('[interestSlice] Response is array, setting matches:', response);
             set({ matches: response, loading: false });
-          } else if (response && response.success) {
-            set({ matches: response.data || [], loading: false });
-          } else if (response && response.data) {
-            set({ matches: response.data, loading: false });
+          } else if (response && (response as any).success) {
+            set({ matches: (response as any).data || [], loading: false });
+          } else if (response && (response as any).data) {
+            set({ matches: (response as any).data, loading: false });
           } else {
             console.warn('Unexpected matches response format:', response);
             set({ matches: [], loading: false });
@@ -201,15 +202,15 @@ export const useInterestStore = create<InterestState>()(
 
           const response = await apiClient.post('/interest/search', dto);
 
-          if (response.success) {
-            const newSearch = response.data;
+          if ((response as any).success) {
+            const newSearch = (response as any).data;
             set((state) => ({
               searches: [newSearch, ...state.searches],
               loading: false,
             }));
             return newSearch;
           } else {
-            throw new Error(response.message || '검색 등록에 실패했습니다');
+            throw new Error((response as any).message || '검색 등록에 실패했습니다');
           }
         } catch (error: any) {
           console.error('Failed to create search:', error);
@@ -227,15 +228,15 @@ export const useInterestStore = create<InterestState>()(
         try {
           const response = await apiClient.put(`/interest/searches/${id}`, dto);
 
-          if (response.success) {
-            const updatedSearch = response.data;
+          if ((response as any).success) {
+            const updatedSearch = (response as any).data;
             set((state) => ({
               searches: state.searches.map((s) => (s.id === id ? updatedSearch : s)),
               loading: false,
             }));
             return updatedSearch;
           } else {
-            throw new Error(response.message || '검색 업데이트에 실패했습니다');
+            throw new Error((response as any).message || '검색 업데이트에 실패했습니다');
           }
         } catch (error: any) {
           console.error('Failed to update search:', error);
@@ -253,13 +254,13 @@ export const useInterestStore = create<InterestState>()(
         try {
           const response = await apiClient.delete(`/interest/searches/${id}`);
 
-          if (response.success || response.status === 204) {
+          if ((response as any).success || (response as any).status === 204) {
             set((state) => ({
               searches: state.searches.filter((s) => s.id !== id),
               loading: false,
             }));
           } else {
-            throw new Error(response.message || '검색 삭제에 실패했습니다');
+            throw new Error((response as any).message || '검색 삭제에 실패했습니다');
           }
         } catch (error: any) {
           console.error('Failed to delete search:', error);
@@ -279,8 +280,8 @@ export const useInterestStore = create<InterestState>()(
 
           const response = await apiClient.post('/interest/check-match', dto);
 
-          if (response.success) {
-            const match = response.data;
+          if ((response as any).success) {
+            const match = (response as any).data;
             if (match) {
               // 매칭이 발견되면 목록에 추가
               set((state) => ({
@@ -295,7 +296,7 @@ export const useInterestStore = create<InterestState>()(
             }
             return match;
           } else {
-            throw new Error(response.message || '매칭 확인에 실패했습니다');
+            throw new Error((response as any).message || '매칭 확인에 실패했습니다');
           }
         } catch (error: any) {
           console.error('Failed to check match:', error);

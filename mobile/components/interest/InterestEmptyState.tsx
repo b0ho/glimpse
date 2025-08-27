@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
-import LottieView from 'lottie-react-native';
+// import LottieView from 'lottie-react-native'; // Not installed yet
 
 const { width } = Dimensions.get('window');
 

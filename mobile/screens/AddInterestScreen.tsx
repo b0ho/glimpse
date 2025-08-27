@@ -237,9 +237,11 @@ export const AddInterestScreen: React.FC = () => {
       await createSearch({
         type: selectedType,
         value: value.trim(),
-        metadata: searchMetadata,
+        metadata: { 
+          ...searchMetadata, 
+          relationshipIntent 
+        },
         expiresAt: expiresAt?.toISOString(),
-        relationshipIntent,
       });
 
       console.log('[AddInterestScreen] 관심상대 등록 성공, 화면 전환');
