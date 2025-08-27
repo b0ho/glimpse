@@ -17,7 +17,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { PersonaService } from './persona.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import {
   CreatePersonaDto,
   UpdatePersonaDto,
@@ -27,7 +27,7 @@ import {
 
 @ApiTags('persona')
 @Controller('persona')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard)
 @ApiBearerAuth()
 export class PersonaController {
   constructor(private readonly personaService: PersonaService) {}

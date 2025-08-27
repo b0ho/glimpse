@@ -845,6 +845,65 @@ export const AddInterestScreen: React.FC = () => {
             </View>
           </View>
 
+          {/* 관계 유형 선택 */}
+          {selectedType && (
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+                관계 유형
+              </Text>
+              <View style={styles.relationshipContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.relationshipOption,
+                    { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
+                    relationshipIntent === RelationshipIntent.FRIEND && { 
+                      borderColor: colors.PRIMARY, 
+                      borderWidth: 2,
+                      backgroundColor: colors.PRIMARY + '10'
+                    },
+                  ]}
+                  onPress={() => setRelationshipIntent(RelationshipIntent.FRIEND)}
+                >
+                  <View style={styles.radioButton}>
+                    {relationshipIntent === RelationshipIntent.FRIEND && (
+                      <View style={[styles.radioButtonInner, { backgroundColor: colors.PRIMARY }]} />
+                    )}
+                  </View>
+                  <Icon name="people-outline" size={24} color={colors.PRIMARY} />
+                  <Text style={[styles.relationshipText, { color: colors.TEXT.PRIMARY }]}>
+                    친구
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.relationshipOption,
+                    { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
+                    relationshipIntent === RelationshipIntent.ROMANTIC && { 
+                      borderColor: colors.ERROR, 
+                      borderWidth: 2,
+                      backgroundColor: colors.ERROR + '10'
+                    },
+                  ]}
+                  onPress={() => setRelationshipIntent(RelationshipIntent.ROMANTIC)}
+                >
+                  <View style={styles.radioButton}>
+                    {relationshipIntent === RelationshipIntent.ROMANTIC && (
+                      <View style={[styles.radioButtonInner, { backgroundColor: colors.ERROR }]} />
+                    )}
+                  </View>
+                  <Icon name="heart-outline" size={24} color={colors.ERROR} />
+                  <Text style={[styles.relationshipText, { color: colors.TEXT.PRIMARY }]}>
+                    호감
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={[styles.relationshipHint, { color: colors.TEXT.TERTIARY }]}>
+                같은 관계 유형끼리만 매칭됩니다
+              </Text>
+            </View>
+          )}
+
           {/* 입력 필드 */}
           {selectedType && (
             <View style={styles.section}>
@@ -1280,6 +1339,47 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
+  },
+  relationshipContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 12,
+  },
+  relationshipOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    marginHorizontal: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  relationshipText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  relationshipHint: {
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#DDD',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  radioButtonInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
   infoBox: {
     flexDirection: 'row',

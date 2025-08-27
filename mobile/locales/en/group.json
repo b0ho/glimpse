@@ -328,5 +328,9 @@
       "expiry": "Group numbers expire after 24 hours",
       "privacy": "Only group admins can generate group numbers"
     }
+  },
+  "picker": {
+    "title": "Select Group",
+    "cancel": "Cancel"
   }
 }

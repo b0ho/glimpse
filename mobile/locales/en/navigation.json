@@ -25,7 +25,10 @@
     "groupDetail": "Group Details",
     "myGroups": "My Groups",
     "addInterest": "Add Interest",
-    "myInfo": "My Info"
+    "myInfo": "My Info",
+    "postDetail": "Post Detail",
+    "premium": "Premium",
+    "chat": "Chat"
   },
   "accessibility": {
     "home": "Navigate to Home screen",

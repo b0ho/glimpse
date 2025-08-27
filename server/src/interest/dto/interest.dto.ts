@@ -19,6 +19,10 @@ export class CreateInterestSearchDto {
   value: string;
 
   @IsOptional()
+  @IsString()
+  relationshipIntent?: string;
+
+  @IsOptional()
   @IsObject()
   metadata?: Record<string, any>;
 

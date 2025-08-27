@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsNumber, Min, Max } from 'class-validator';
+import { IsString, IsOptional, IsNumber, Min, Max, IsEnum } from 'class-validator';
+import { RelationshipIntent } from '@prisma/client';
 
 /**
  * 좋아요 생성 DTO
@@ -9,6 +10,9 @@ export class CreateLikeDto {
 
   @IsString()
   groupId: string;
+
+  @IsEnum(RelationshipIntent)
+  relationshipIntent: RelationshipIntent;
 
   @IsOptional()
   @IsString()

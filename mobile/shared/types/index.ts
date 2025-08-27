@@ -10,6 +10,17 @@ export enum AppMode {
 }
 
 /**
+ * 관계 의도 타입 - 좋아요 보낼 때의 관계 의도를 구분
+ * @enum {string}
+ */
+export enum RelationshipIntent {
+  /** 친구 관계 */
+  FRIEND = 'FRIEND',
+  /** 연애 관계 */
+  ROMANTIC = 'ROMANTIC'
+}
+
+/**
  * 프리미엄 레벨 열거형
  * @enum {string}
  */

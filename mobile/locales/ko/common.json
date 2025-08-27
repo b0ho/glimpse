@@ -50,6 +50,9 @@
     "completed": "완료",
     "failed": "실패"
   },
+  "loading": {
+    "text": "로딩 중..."
+  },
   "time": {
     "justNow": "방금 전",
     "minute": "{{count}}분 전",
@@ -198,6 +201,9 @@
   },
   "permissions": {
     "title": "권한 필요",
+    "required": "권한이 필요합니다",
+    "description": "기능을 사용하기 위해 권한을 허용해주세요",
+    "requestButton": "권한 요청",
     "gallery": "사진을 선택하려면 갤러리 접근 권한이 필요합니다.",
     "camera": "사진을 촬영하려면 카메라 접근 권한이 필요합니다.",
     "location": "위치 서비스를 사용하려면 위치 접근 권한이 필요합니다.",

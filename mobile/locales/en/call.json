@@ -1,0 +1,25 @@
+{
+  "title": "Call",
+  "incoming": {
+    "title": "Incoming Call",
+    "from": "Call from {{name}}",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "outgoing": {
+    "title": "Calling",
+    "to": "Calling {{name}}...",
+    "cancel": "Cancel"
+  },
+  "inCall": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "speaker": "Speaker",
+    "endCall": "End Call"
+  },
+  "errors": {
+    "connectionFailed": "Connection failed",
+    "callFailed": "Call failed",
+    "noPermission": "Microphone permission required"
+  }
+}

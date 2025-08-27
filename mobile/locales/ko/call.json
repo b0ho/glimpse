@@ -1,0 +1,25 @@
+{
+  "title": "통화",
+  "incoming": {
+    "title": "수신 전화",
+    "from": "{{name}}님으로부터 전화",
+    "accept": "수락",
+    "decline": "거절"
+  },
+  "outgoing": {
+    "title": "전화 걸기",
+    "to": "{{name}}님에게 전화 거는 중...",
+    "cancel": "취소"
+  },
+  "inCall": {
+    "mute": "음소거",
+    "unmute": "음소거 해제",
+    "speaker": "스피커",
+    "endCall": "통화 종료"
+  },
+  "errors": {
+    "connectionFailed": "연결 실패",
+    "callFailed": "통화 실패",
+    "noPermission": "마이크 권한이 필요합니다"
+  }
+}

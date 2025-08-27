@@ -492,7 +492,8 @@ export class InterestService {
             user1Id: search1.userId,
             user2Id: search2.userId,
             groupId: 'interest-search', // 특별한 그룹 ID
-            type: 'INTEREST',
+            interestType: 'GROUP',
+            relationshipIntent: 'FRIEND',
             status: 'ACTIVE',
           },
         });

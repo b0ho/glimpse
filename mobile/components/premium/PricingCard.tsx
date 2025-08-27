@@ -14,6 +14,7 @@ import { PaymentProduct } from '@/services/payment/premium-service';
 import { SPACING, FONT_SIZES } from '@/utils/constants';
 import { STATE_ICONS } from '@/utils/icons';
 import { useTheme } from '@/hooks/useTheme';
+import { shadowPresets } from '@/utils/styles/platformStyles';
 
 /**
  * PricingCard 컴포넌트 Props
@@ -170,10 +171,7 @@ const styles = StyleSheet.create({
     padding: SPACING.LG,
     marginVertical: SPACING.SM,
     marginHorizontal: SPACING.MD,
-    elevation: 3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    ...shadowPresets.card,
     borderWidth: 2,
     position: 'relative',
   },

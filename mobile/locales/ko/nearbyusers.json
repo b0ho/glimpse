@@ -6,6 +6,8 @@
     "currentLocation": "현재 위치",
     "loadingLocation": "위치 정보를 가져오는 중...",
     "userCount": "근처 사용자 ({{count}}명)",
+    "userCount_one": "근처 사용자 ({{count}}명)",
+    "userCount_other": "근처 사용자 ({{count}}명)",
     "radiusDistance": "{{radius}}km 반경 내 활성 사용자",
     "ageUnit": "세",
     "commonGroups": "공통 그룹:",

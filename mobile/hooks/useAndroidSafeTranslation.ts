@@ -14,8 +14,8 @@ export function useAndroidSafeTranslation(namespace?: string | string[]) {
 
   // Android 전용 래퍼 함수
   const t: TFunction = (key: string | string[], options?: any) => {
-    // Android가 아니면 원본 함수 그대로 사용
-    if (Platform.OS !== 'android') {
+    // Web이나 iOS에서는 원본 함수 그대로 사용 (Android 로직 스킵)
+    if (Platform.OS === 'web' || Platform.OS === 'ios') {
       return originalT(key, options);
     }
 

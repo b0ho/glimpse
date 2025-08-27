@@ -25,7 +25,10 @@
     "groupDetail": "그룹 상세",
     "myGroups": "내 그룹",
     "addInterest": "관심상대 등록",
-    "myInfo": "내 정보 관리"
+    "myInfo": "내 정보 관리",
+    "postDetail": "게시물 상세",
+    "premium": "프리미엄",
+    "chat": "채팅"
   },
   "accessibility": {
     "home": "홈 화면으로 이동",

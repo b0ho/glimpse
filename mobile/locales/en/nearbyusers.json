@@ -6,6 +6,8 @@
     "currentLocation": "Current Location",
     "loadingLocation": "Getting location info...",
     "userCount": "Nearby Users ({{count}})",
+    "userCount_one": "Nearby User ({{count}})",
+    "userCount_other": "Nearby Users ({{count}})",
     "radiusDistance": "Active users within {{radius}}km radius",
     "ageUnit": " years old",
     "commonGroups": "Common Groups:",

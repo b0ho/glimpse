@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
@@ -27,6 +28,7 @@ import { getStoriesByUser, StoryUser } from '@/utils/storyData';
 import { Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { contentApi } from '@/services/api/contentApi';
+import { shadowPresets } from '@/utils/styles/platformStyles';
 import { ACTION_ICONS } from '@/utils/icons';
 import { SuccessStoryCard } from '@/components/successStory/SuccessStoryCard';
 import { SuccessStory } from '@/types/successStory';
@@ -750,7 +752,7 @@ export const HomeScreen = () => {
       
       {/* Floating Action Button - 게시물 작성 */}
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: colors.PRIMARY, shadowColor: colors.SHADOW }]}
+        style={[styles.fab, { backgroundColor: colors.PRIMARY }]}
         onPress={() => navigation.navigate('CreateContent' as never)}
         activeOpacity={0.8}
         accessibilityLabel="게시물 작성"
@@ -855,10 +857,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 8,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    ...shadowPresets.fab,
   },
   personaButton: {
     flexDirection: 'row',

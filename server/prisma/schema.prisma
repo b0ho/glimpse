@@ -372,6 +372,7 @@ model Match {
   groupId       String
   status        MatchStatus @default(ACTIVE)
   interestType  InterestType  // 관심 유형: FRIEND or ROMANTIC
+  relationshipIntent RelationshipIntent // 관계 의도: FRIEND or ROMANTIC
   lastMessageAt DateTime?
   isActive      Boolean     @default(true)
   createdAt     DateTime    @default(now())
@@ -939,6 +940,7 @@ enum InterestType {
   HOBBY           // 취미/관심사
   PLATFORM        // 플랫폼 (SNS, 메신저, 앱 등)
   GAME_ID         // 게임 아이디
+  LIKE            // 좋아요/매칭
 }
 
 enum SearchStatus {

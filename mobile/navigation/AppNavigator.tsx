@@ -52,6 +52,7 @@ import { InterestSearchScreen } from '@/screens/InterestSearchScreen';
 import { AddInterestScreen } from '@/screens/AddInterestScreen';
 import { MyInfoScreen } from '@/screens/MyInfoScreen';
 import { GroupDetailScreen } from '@/screens/GroupDetailScreen';
+import { PostDetailScreen } from '@/screens/PostDetailScreen';
 import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen';
 import { TermsOfServiceScreen } from '@/screens/TermsOfServiceScreen';
 import { SupportScreen } from '@/screens/SupportScreen';
@@ -73,6 +74,7 @@ type HomeStackParamList = {
   CreateStory: undefined;
   StoryUpload: undefined;
   NearbyUsers: undefined;
+  PostDetail: { postId: string };
 };
 
 type GroupsStackParamList = {
@@ -156,6 +158,7 @@ export type RootNavigationParamList = MainTabParamList & {
   JoinGroup: { inviteCode: string };
   GroupManage: { groupId: string };
   NearbyUsers: undefined;
+  PostDetail: { postId: string };
 };
 
 type AppStackParamList = {
@@ -277,6 +280,14 @@ function HomeStackNavigator() {
         component={NearbyGroupsScreen} 
         options={{ 
           title: t('navigation:screens.nearbyGroups'),
+          headerShown: false,
+        }}
+      />
+      <HomeStack.Screen 
+        name="PostDetail" 
+        component={PostDetailScreen} 
+        options={{ 
+          title: t('navigation:screens.postDetail'),
           headerShown: false,
         }}
       />

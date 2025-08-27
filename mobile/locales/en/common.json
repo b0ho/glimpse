@@ -50,6 +50,9 @@
     "completed": "Completed",
     "failed": "Failed"
   },
+  "loading": {
+    "text": "Loading..."
+  },
   "time": {
     "justNow": "Just now",
     "minutesAgo_one": "{{count}} minute ago",
@@ -192,6 +195,9 @@
   },
   "permissions": {
     "title": "Permission Required",
+    "required": "Permission Required",
+    "description": "Please allow permissions to use this feature",
+    "requestButton": "Request Permission",
     "gallery": "Gallery access permission is required to select photos.",
     "camera": "Camera access permission is required to take photos.",
     "location": "Location access permission is required to use location services.",
