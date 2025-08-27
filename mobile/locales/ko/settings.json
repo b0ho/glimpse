@@ -28,7 +28,8 @@
     "globalSettings": {
       "title": "전체 설정",
       "pushNotifications": "푸시 알림",
-      "pushDescription": "앱에서 보내는 모든 푸시 알림을 활성화합니다"
+      "pushDescription": "앱에서 보내는 모든 푸시 알림을 활성화합니다",
+      "pushNotificationsDescription": "앱에서 보내는 모든 푸시 알림을 활성화합니다"
     },
     "matchSettings": {
       "title": "매치",

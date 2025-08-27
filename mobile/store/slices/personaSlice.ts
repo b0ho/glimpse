@@ -145,9 +145,10 @@ export const usePersonaStore = create<PersonaState>()(
       fetchNearbyPersonas: async (latitude, longitude, radiusKm = 5) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await apiClient.get<{ success: boolean; data: NearbyPersona[] }>('/persona/nearby', {
-            params: { latitude, longitude, radiusKm },
-          });
+          const response = await apiClient.get<{ success: boolean; data: NearbyPersona[] }>(
+            '/persona/nearby',
+            { latitude, longitude, radiusKm }
+          );
           if (response.success && response.data) {
             set({ nearbyPersonas: response.data, isLoading: false });
           }

@@ -18,11 +18,13 @@ export interface ColorPalette {
   SUCCESS: string;
   WARNING: string;
   ERROR: string;
+  INFO: string;
   BACKGROUND: string;
   SURFACE: string;
   TEXT: {
     PRIMARY: string;
     SECONDARY: string;
+    TERTIARY: string;
     LIGHT: string;
     WHITE: string;
     MUTED: string;

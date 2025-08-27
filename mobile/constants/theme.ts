@@ -17,11 +17,13 @@ export const LIGHT_COLORS: ColorPalette = {
   SUCCESS: '#45B7D1',
   WARNING: '#FFA726',
   ERROR: '#EF5350',
+  INFO: '#5BC0DE',
   BACKGROUND: '#F8F9FA',
   SURFACE: '#FFFFFF',
   TEXT: {
     PRIMARY: '#212529',
     SECONDARY: '#6C757D',
+    TERTIARY: '#ADB5BD',
     LIGHT: '#ADB5BD',
     WHITE: '#FFFFFF',
     MUTED: '#ADB5BD',
@@ -56,11 +58,13 @@ export const DARK_COLORS: ColorPalette = {
   SUCCESS: '#4ECDC4', // 성공 색상 더 밝게
   WARNING: '#FFC947', // 경고 색상 더 밝게
   ERROR: '#FF7A7A', // 에러 색상 더 밝게
+  INFO: '#6BC6E0',
   BACKGROUND: '#000000', // 진짜 검은색 (OLED 최적화)
   SURFACE: '#1C1C1E', // 카드/표면 조금 더 밝게
   TEXT: {
     PRIMARY: '#FFFFFF', // 흰색 텍스트
     SECONDARY: '#D1D1D6', // 보조 텍스트 더 밝게
+    TERTIARY: '#A1A1AA',
     LIGHT: '#A1A1AA', // 연한 텍스트 더 밝게
     WHITE: '#FFFFFF',
     MUTED: '#A1A1AA', // 뮤트된 텍스트 더 밝게

@@ -28,7 +28,8 @@
     "globalSettings": {
       "title": "General Settings",
       "pushNotifications": "Push Notifications",
-      "pushDescription": "Enable all push notifications from the app"
+      "pushDescription": "Enable all push notifications from the app",
+      "pushNotificationsDescription": "Enable all push notifications from the app"
     },
     "matchSettings": {
       "title": "Match",

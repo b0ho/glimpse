@@ -90,6 +90,8 @@ import enPrivacy from '../../locales/en/privacy.json';
 import enSupport from '../../locales/en/support.json';
 import enTerms from '../../locales/en/terms.json';
 import enPayment from '../../locales/en/payment.json';
+import koMyGroups from '../../locales/ko/mygroups.json';
+import enMyGroups from '../../locales/en/mygroups.json';
 
 // Translation resources
 console.log('[i18n] Initializing with languages:', Object.keys({ ko: {}, en: {} }));
@@ -128,6 +130,7 @@ const resources = {
     privacy: koPrivacy,
     support: koSupport,
     terms: koTerms,
+    mygroups: koMyGroups,
   },
   en: {
     common: enCommon,
@@ -163,6 +166,7 @@ const resources = {
     privacy: enPrivacy,
     support: enSupport,
     terms: enTerms,
+    mygroups: enMyGroups,
   },
 };
 
@@ -267,7 +271,7 @@ export const initI18n = async () => {
         'call', 'story', 'dev', 'persona', 'notification', 'nearbygroups',
         'post', 'community', 'groupchat', 'instant', 'interest', 'map', 
         'myinfo', 'nearbyusers', 'notifications', 'onboarding', 'profilemode', 
-        'privacy', 'support', 'terms'
+        'privacy', 'support', 'terms', 'mygroups'
       ],
       
       interpolation: {

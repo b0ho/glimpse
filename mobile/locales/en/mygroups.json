@@ -1,0 +1,46 @@
+{
+  "myGroups": {
+    "title": "My Groups",
+    "subtitle": "Manage your joined and created groups",
+    "joinedTab": "Joined Groups ({{count}})",
+    "joinedTab_one": "Joined Group ({{count}})",
+    "joinedTab_other": "Joined Groups ({{count}})",
+    "createdTab": "Created Groups ({{count}})",
+    "createdTab_one": "Created Group ({{count}})",
+    "createdTab_other": "Created Groups ({{count}})",
+    "creatorBadge": "Creator",
+    "active": "Active",
+    "inactive": "Inactive",
+    "groupStats": "{{memberCount}} members • {{matchingStatus}}",
+    "manageButton": "Manage",
+    "leaveButton": "Leave",
+    "viewButton": "View",
+    "leaveGroup": {
+      "title": "Leave Group",
+      "message": "Are you sure you want to leave '{{groupName}}' group?",
+      "cancel": "Cancel",
+      "confirm": "Leave",
+      "successTitle": "Left Group",
+      "successMessage": "You have left '{{groupName}}' group."
+    },
+    "manageGroup": {
+      "title": "Manage Group",
+      "message": "Group management feature is coming soon.",
+      "confirm": "OK"
+    },
+    "viewGroup": {
+      "title": "Group Details",
+      "message": "Group details feature is coming soon."
+    },
+    "emptyJoined": {
+      "title": "No joined groups",
+      "subtitle": "Find and join new groups!",
+      "button": "Find Groups"
+    },
+    "emptyCreated": {
+      "title": "No created groups",
+      "subtitle": "Create your first group!",
+      "button": "Create Group"
+    }
+  }
+}

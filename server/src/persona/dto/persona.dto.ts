@@ -6,6 +6,7 @@ import {
   Min,
   Max,
   IsBoolean,
+  IsNumber,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -81,9 +82,11 @@ export class UpdateLocationDto {
 
 export class GetNearbyPersonasDto {
   @ApiProperty({ description: 'Current latitude' })
+  @IsNumber()
   latitude: number;
 
   @ApiProperty({ description: 'Current longitude' })
+  @IsNumber()
   longitude: number;
 
   @ApiProperty({

@@ -927,10 +927,10 @@ export const NearbyUsersScreen = React.memo(() => {
 
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-                {t('nearbyUsers:nearbyUsers.userCount', { count: filteredUsers.length })}
+                {t('nearbyusers:nearbyUsers.userCount', { count: filteredUsers.length })}
               </Text>
               <Text style={[styles.sectionSubtitle, { color: colors.TEXT.SECONDARY }]}>
-                {t('nearbyUsers:nearbyUsers.radiusDistance', { radius: selectedRadius })}
+                {t('nearbyusers:nearbyUsers.radiusDistance', { radius: selectedRadius })}
               </Text>
             </View>
             {filteredUsers.length > 0 && renderSwipeHint()}

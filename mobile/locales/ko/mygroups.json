@@ -1,0 +1,46 @@
+{
+  "myGroups": {
+    "title": "내 그룹 관리",
+    "subtitle": "가입하거나 생성한 그룹을 관리하세요",
+    "joinedTab": "가입한 그룹 ({{count}}개)",
+    "joinedTab_one": "가입한 그룹 ({{count}}개)",
+    "joinedTab_other": "가입한 그룹 ({{count}}개)",
+    "createdTab": "생성한 그룹 ({{count}}개)",
+    "createdTab_one": "생성한 그룹 ({{count}}개)",
+    "createdTab_other": "생성한 그룹 ({{count}}개)",
+    "creatorBadge": "생성자",
+    "active": "활성",
+    "inactive": "비활성",
+    "groupStats": "멤버 {{memberCount}}명 • {{matchingStatus}}",
+    "manageButton": "관리",
+    "leaveButton": "나가기",
+    "viewButton": "보기",
+    "leaveGroup": {
+      "title": "그룹 나가기",
+      "message": "'{{groupName}}' 그룹에서 나가시겠습니까?",
+      "cancel": "취소",
+      "confirm": "나가기",
+      "successTitle": "그룹 나가기 완료",
+      "successMessage": "'{{groupName}}' 그룹에서 나갔습니다."
+    },
+    "manageGroup": {
+      "title": "그룹 관리",
+      "message": "그룹 관리 기능은 준비 중입니다.",
+      "confirm": "확인"
+    },
+    "viewGroup": {
+      "title": "그룹 상세",
+      "message": "그룹 상세 기능은 준비 중입니다."
+    },
+    "emptyJoined": {
+      "title": "가입한 그룹이 없습니다",
+      "subtitle": "새로운 그룹을 찾아 가입해보세요!",
+      "button": "그룹 찾기"
+    },
+    "emptyCreated": {
+      "title": "생성한 그룹이 없습니다",
+      "subtitle": "새로운 그룹을 생성해보세요!",
+      "button": "그룹 생성하기"
+    }
+  }
+}
