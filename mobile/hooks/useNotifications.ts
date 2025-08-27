@@ -3,7 +3,7 @@ import { useNotificationStore } from '@/store/slices/notificationSlice';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
-import { RootNavigationParamList } from '@/navigation/AppNavigator';
+import { RootStackParamList } from '@/types/navigation';
 
 // 조건부로 expo-notifications import (Expo Go 호환성)
 let Notifications: any = null;
@@ -14,7 +14,7 @@ try {
 }
 
 export function useNotifications() {
-  const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const notificationListener = useRef<any>(null);
   const responseListener = useRef<any>(null);
   

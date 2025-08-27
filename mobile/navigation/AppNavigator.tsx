@@ -17,7 +17,7 @@ import { navigationService } from '@/services/navigation/navigationService';
 import { initializeFCM, cleanupFCM } from '@/services/notifications/initializeFCM';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { setAuthToken } from '@/services/api/config';
-import { AppMode, MODE_TEXTS } from '../shared/types';
+import { AppMode } from '../shared/types';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -44,8 +44,6 @@ import { GroupInviteScreen } from '@/screens/GroupInviteScreen';
 import { JoinGroupScreen } from '@/screens/JoinGroupScreen';
 import { GroupManageScreen } from '@/screens/GroupManageScreen';
 import { ModeSelectionScreen } from '@/screens/ModeSelectionScreen';
-import { CommunityScreen } from '@/screens/community/CommunityScreen';
-import { GroupChatListScreen } from '@/screens/groupchat/GroupChatListScreen';
 import { LikeHistoryScreen } from '@/screens/LikeHistoryScreen';
 import { DeleteAccountScreen } from '@/screens/DeleteAccountScreen';
 import { InterestSearchScreen } from '@/screens/InterestSearchScreen';
@@ -56,116 +54,29 @@ import { PostDetailScreen } from '@/screens/PostDetailScreen';
 import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen';
 import { TermsOfServiceScreen } from '@/screens/TermsOfServiceScreen';
 import { SupportScreen } from '@/screens/SupportScreen';
-// import { RootStackParamList } from '@/types';
+import {
+  RootStackParamList,
+  HomeStackParamList,
+  GroupsStackParamList,
+  MatchesStackParamList,
+  ProfileStackParamList,
+  InterestStackParamList,
+  MainTabParamList,
+  AuthStackParamList
+} from '@/types/navigation';
 
 /**
- * 네비게이션 타입 정의
- * @description 각 스택과 탭에서 사용되는 파라미터 타입
+ * 네비게이션 스택 생성
+ * @description 각 네비게이션 스택을 타입과 함께 생성
  */
 
-/** 인증 스택 파라미터 */
-type AuthStackParamList = {
-  Auth: undefined;
-};
-
-type HomeStackParamList = {
-  HomeTab: undefined;
-  CreateContent: undefined;
-  CreateStory: undefined;
-  StoryUpload: undefined;
-  NearbyUsers: undefined;
-  PostDetail: { postId: string };
-};
-
-type GroupsStackParamList = {
-  GroupsTab: undefined;
-  CreateGroup: undefined;
-  LocationGroup: undefined;
-  NearbyUsers: undefined;
-  Map: undefined;
-  GroupInvite: { groupId: string };
-  JoinGroup: { inviteCode: string };
-  GroupManage: { groupId: string };
-  GroupDetail: { groupId: string };
-};
-
-type ProfileStackParamList = {
-  ProfileTab: undefined;
-  MyGroups: undefined;
-  Premium: undefined;
-  NotificationSettings: undefined;
-  WhoLikesYou: undefined;
-  LikeHistory: undefined;
-  DeleteAccount: undefined;
-  PrivacyPolicy: undefined;
-  TermsOfService: undefined;
-  Support: undefined;
-};
-
-type MatchesStackParamList = {
-  MatchesTab: undefined;
-  Chat: {
-    roomId: string;
-    matchId: string;
-    otherUserNickname: string;
-  };
-};
-
-type InterestStackParamList = {
-  InterestTab: undefined;
-  AddInterest: undefined;
-  MyInfo: undefined;
-  Chat: {
-    roomId: string;
-    matchId: string;
-    otherUserNickname: string;
-  };
-  Premium: undefined;
-};
-
-type MainTabParamList = {
-  Home: undefined;
-  Groups: undefined;
-  Interest: undefined;
-  Matches: undefined;
-  Profile: undefined;
-  Community: undefined;
-  GroupChat: undefined;
-  Friends: undefined;
-};
-
-/**
- * 루트 네비게이션 파라미터 타입
- * @type RootNavigationParamList
- * @description 전역에서 사용할 통합 네비게이션 타입
- */
-export type RootNavigationParamList = MainTabParamList & {
-  Chat: {
-    roomId: string;
-    matchId: string;
-    otherUserNickname: string;
-  };
-  Premium: undefined;
-  NotificationSettings: undefined;
-  MyGroups: undefined;
-  CreateContent: undefined;
-  CreateStory: undefined;
-  CreateGroup: undefined;
-  WhoLikesYou: undefined;
-  LikeHistory: undefined;
-  DeleteAccount: undefined;
-  GroupInvite: { groupId: string };
-  JoinGroup: { inviteCode: string };
-  GroupManage: { groupId: string };
-  NearbyUsers: undefined;
-  PostDetail: { postId: string };
-};
-
+// App-specific stack types
 type AppStackParamList = {
   Auth: undefined;
   ModeSelection: undefined;
   Main: undefined;
 };
+
 
 const Stack = createStackNavigator<AppStackParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
@@ -457,7 +368,7 @@ function InterestStackNavigator() {
       }}
     >
       <InterestStack.Screen 
-        name="InterestTab" 
+        name="InterestSearchScreen" 
         component={InterestSearchScreen} 
         options={{ headerShown: false }}
       />
@@ -594,29 +505,33 @@ function ProfileStackNavigator() {
 }
 
 /**
- * 데이팅 모드 탭 네비게이터
- * @function DatingTabNavigator
- * @returns {JSX.Element} 데이팅 모드 탭 네비게이터
- * @description 연애 목적 사용자를 위한 4개 탭 (홈, 그룹, 매칭, 프로필)
+ * 메인 탭 네비게이터 - 단일 통합 네비게이터
+ * @function MainTabNavigator
+ * @returns {JSX.Element} 통합 탭 네비게이터
+ * @description 모든 모드에서 사용하는 단일 탭 네비게이터 (홈, 그룹, 찾기, 채팅, 프로필)
  */
-function DatingTabNavigator() {
+function MainTabNavigator() {
   const { currentMode } = useAuthStore();
-  const modeTexts = MODE_TEXTS[currentMode];
   const { t, ready } = useAndroidSafeTranslation('navigation');
   const { colors } = useTheme();
   
-  // Android에서 i18n이 준비되지 않았을 때 fallback 제공
+  // 모든 플랫폼에서 i18n이 준비되지 않았을 때 fallback 제공
   const getTabTitle = (key: string, fallback: string) => {
-    if (Platform.OS === 'android' && !ready) {
+    if (!ready) {
       return fallback;
     }
     const translation = t(key);
     // 키가 그대로 반환되면 fallback 사용
-    if (translation === key || translation.includes('.')) {
+    if (typeof translation === 'string' && (translation === key || translation.includes('.'))) {
       return fallback;
     }
-    return translation;
+    return String(translation);
   };
+
+  // 모드별 탭 색상 설정
+  const tabBarActiveTintColor = currentMode === AppMode.DATING 
+    ? colors.PRIMARY 
+    : (colors.SECONDARY || '#4ECDC4');
   
   return (
     <Tab.Navigator
@@ -629,7 +544,7 @@ function DatingTabNavigator() {
           borderTopColor: colors.BORDER,
           height: 60,
         },
-        tabBarActiveTintColor: colors.PRIMARY,
+        tabBarActiveTintColor,
         tabBarInactiveTintColor: colors.TEXT.SECONDARY,
         tabBarLabelStyle: {
           fontSize: 12,
@@ -643,7 +558,7 @@ function DatingTabNavigator() {
         options={{
           title: getTabTitle('navigation:tabs.home', '홈'),
           tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.HOME} color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('navigation:accessibility.home'),
+          tabBarAccessibilityLabel: String(t('navigation:accessibility.home')),
         }}
       />
       <Tab.Screen 
@@ -652,7 +567,7 @@ function DatingTabNavigator() {
         options={{
           title: getTabTitle('navigation:tabs.groups', '그룹'),
           tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.GROUPS} color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('navigation:accessibility.groups'),
+          tabBarAccessibilityLabel: String(t('navigation:accessibility.groups')),
         }}
       />
       <Tab.Screen 
@@ -661,16 +576,26 @@ function DatingTabNavigator() {
         options={{
           title: getTabTitle('navigation:tabs.interest', '찾기'),
           tabBarIcon: ({ color, size }) => <Icon name="search-outline" color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('navigation:accessibility.interest'),
+          tabBarAccessibilityLabel: String(t('navigation:accessibility.interest')),
         }}
       />
       <Tab.Screen 
         name="Matches" 
         component={MatchesStackNavigator}
         options={{
-          title: getTabTitle('navigation:tabs.matches', '채팅'),
-          tabBarIcon: ({ color, size }) => <Icon name="chatbubbles-outline" color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('navigation:accessibility.matches'),
+          title: currentMode === AppMode.DATING 
+            ? getTabTitle('navigation:tabs.matches', '채팅')
+            : getTabTitle('navigation:tabs.friends', '친구목록'),
+          tabBarIcon: ({ color, size }) => (
+            <Icon 
+              name={currentMode === AppMode.DATING ? "chatbubbles-outline" : "people-outline"} 
+              color={color} 
+              size={size || 24} 
+            />
+          ),
+          tabBarAccessibilityLabel: currentMode === AppMode.DATING 
+            ? String(t('navigation:accessibility.matches'))
+            : String(t('navigation:accessibility.friends')),
         }}
       />
       <Tab.Screen 
@@ -679,114 +604,11 @@ function DatingTabNavigator() {
         options={{
           title: getTabTitle('navigation:tabs.profile', '프로필'),
           tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.PROFILE} color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('navigation:accessibility.profile'),
+          tabBarAccessibilityLabel: String(t('navigation:accessibility.profile')),
         }}
       />
     </Tab.Navigator>
   );
-}
-
-/**
- * 친구 모드 탭 네비게이터
- * @function FriendshipTabNavigator
- * @returns {JSX.Element} 친구 모드 탭 네비게이터
- * @description 친구 찾기 목적 사용자를 위한 5개 탭 (홈, 커뮤니티, 단체채팅, 친구목록, 프로필)
- */
-function FriendshipTabNavigator() {
-  const { t, ready } = useAndroidSafeTranslation('navigation');
-  const { colors } = useTheme();
-  
-  // Android에서 i18n이 준비되지 않았을 때 fallback 제공
-  const getTabTitle = (key: string, fallback: string) => {
-    if (Platform.OS === 'android' && !ready) {
-      return fallback;
-    }
-    const translation = t(key);
-    // 키가 그대로 반환되면 fallback 사용
-    if (translation === key || translation.includes('.')) {
-      return fallback;
-    }
-    return translation;
-  };
-  
-  return (
-    <Tab.Navigator
-      id={undefined}
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: colors.BACKGROUND,
-          borderTopWidth: 1,
-          borderTopColor: colors.BORDER,
-          height: 60,
-        },
-        tabBarActiveTintColor: colors.SECONDARY || '#4ECDC4',
-        tabBarInactiveTintColor: colors.TEXT.SECONDARY,
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-        },
-      }}
-    >
-      <Tab.Screen 
-        name="Home" 
-        component={HomeStackNavigator}
-        options={{
-          title: getTabTitle('navigation:tabs.home', '홈'),
-          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.HOME} color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('navigation:accessibility.home'),
-        }}
-      />
-      <Tab.Screen 
-        name="Community" 
-        component={CommunityScreen}
-        options={{
-          title: getTabTitle('navigation:tabs.community', '커뮤니티'),
-          tabBarIcon: ({ color, size }) => <Icon name="newspaper-outline" color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('navigation:accessibility.community'),
-        }}
-      />
-      <Tab.Screen 
-        name="Interest" 
-        component={InterestStackNavigator}
-        options={{
-          title: getTabTitle('navigation:tabs.interest', '찾기'),
-          tabBarIcon: ({ color, size }) => <Icon name="search-outline" color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('navigation:accessibility.interest'),
-        }}
-      />
-      <Tab.Screen 
-        name="Friends" 
-        component={MatchesStackNavigator}
-        options={{
-          title: getTabTitle('navigation:tabs.friends', '친구목록'),
-          tabBarIcon: ({ color, size }) => <Icon name="people-outline" color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('navigation:accessibility.friends'),
-        }}
-      />
-      <Tab.Screen 
-        name="Profile" 
-        component={ProfileStackNavigator}
-        options={{
-          title: getTabTitle('navigation:tabs.profile', '프로필'),
-          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.PROFILE} color={color} size={size || 24} />,
-          tabBarAccessibilityLabel: t('navigation:accessibility.profile'),
-        }}
-      />
-    </Tab.Navigator>
-  );
-}
-
-/**
- * 메인 탭 네비게이터
- * @function MainTabNavigator
- * @returns {JSX.Element} 현재 모드에 따른 탭 네비게이터
- * @description 앱 모드에 따라 데이팅 또는 친구 모드 탭 표시
- */
-function MainTabNavigator() {
-  const { currentMode } = useAuthStore();
-  
-  return currentMode === AppMode.DATING ? <DatingTabNavigator /> : <FriendshipTabNavigator />;
 }
 
 /**
@@ -877,7 +699,7 @@ function AppNavigator() {
  * @description 네비게이션 컨테이너, 호출 제공자, FCM 초기화 포함
  */
 export default function RootNavigator() {
-  const navigationRef = useRef<NavigationContainerRef<RootNavigationParamList>>(null);
+  const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
   const { colors, isDark } = useTheme();
   
   useEffect(() => {

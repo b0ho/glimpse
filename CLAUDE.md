@@ -100,6 +100,7 @@ glimpse/
 2. **Platform Detection**: Always use `Platform.OS` or `Platform.select()` for platform-specific code
 3. **Graceful Degradation**: If a native feature isn't available on web, provide alternative implementation
 4. **No Platform Exclusivity**: Never implement features that only work on one platform
+5. **Consistent User Experience**: All platforms should provide identical functionality and behavior
 
 ### Platform-Specific Implementations
 
@@ -135,11 +136,64 @@ shadowOffset: { width: 0, height: 2 }
 })
 ```
 
+#### i18n Translation
+```javascript
+// ❌ WRONG - Platform-specific fallbacks create inconsistent UX
+if (Platform.OS === 'android' && !i18n.isInitialized) {
+  return '한글 텍스트';  // Only Android gets fallback
+}
+
+// ✅ CORRECT - Universal fallbacks for all platforms
+if (!i18n.isInitialized) {
+  return '한글 텍스트';  // All platforms get same fallback
+}
+```
+
 #### Native APIs
 - **Camera**: Web uses file input, native uses expo-camera
 - **Location**: Web uses Geolocation API, native uses expo-location
 - **Notifications**: Web uses Web Push API, native uses expo-notifications
 - **Storage**: Web uses localStorage/sessionStorage, native uses AsyncStorage/SecureStore
+
+### Cross-Platform Navigation Guidelines
+
+#### Consistent Navigation Experience
+All platforms must provide identical navigation behavior:
+
+1. **Tab Navigation**: Same tabs, same order, same functionality
+2. **Screen Flow**: Identical navigation patterns across platforms
+3. **Loading States**: Same loading behavior and UI
+4. **Error Handling**: Consistent error messages and recovery flows
+
+#### Platform-Specific Technical Differences (Allowed)
+These technical differences are necessary but should not affect user experience:
+
+```javascript
+// ✅ ALLOWED - Technical keyboard behavior differences
+<KeyboardAvoidingView
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+/>
+
+// ✅ ALLOWED - Platform-specific WebView settings
+<WebView
+  scalesPageToFit={Platform.OS === 'android'}
+/>
+```
+
+### Recent Cross-Platform Standardization (2025-08-27)
+
+#### Fixed Issues
+1. **Navigation Loading**: Removed Android-specific i18n initialization delays
+2. **Date Formatting**: Unified fallback behavior across all platforms
+3. **Translation System**: Made `useAndroidSafeTranslation` work identically on all platforms
+4. **Input Handling**: Standardized Enter key behavior for message input
+
+#### Files Modified
+- `navigation/AppNavigator.tsx`: Removed Android-specific loading conditions
+- `utils/dateUtils.ts`: Unified translation fallback logic
+- `hooks/useAndroidSafeTranslation.ts`: Made cross-platform compatible
+- `App.tsx`: Standardized i18n initialization across platforms
+- `components/chat/MessageInput.tsx`: Unified Enter key handling
 
 ### Testing Requirements
 Before ANY commit:
@@ -147,6 +201,7 @@ Before ANY commit:
 2. Test on iOS Simulator
 3. Test on Android Emulator
 4. Verify no platform-specific errors in console
+5. Ensure identical user flows across platforms
 
 ### Common Pitfalls to Avoid
 - Using SecureStore directly without web fallback
@@ -154,6 +209,9 @@ Before ANY commit:
 - Native-only navigation patterns
 - File system operations without web alternatives
 - Assuming native capabilities on web
+- **Android-specific i18n fallbacks that create UX inconsistencies**
+- **Platform-specific navigation loading behavior**
+- **Different Enter key handling across platforms**
 
 ## 💰 Business Model
 

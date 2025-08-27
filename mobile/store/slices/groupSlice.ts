@@ -53,6 +53,10 @@ interface GroupState {
   officialGroups: Group[];
   /** 생성한 그룹 목록 */
   createdGroups: Group[];
+  /** 위치 기반 그룹 목록 */
+  locationGroups: Group[];
+  /** 즉석 미팅 그룹 목록 */
+  instantGroups: Group[];
   /** 좋아요한 그룹 ID 목록 */
   likedGroupIds: string[];
   /** 그룹별 초대코드 저장 */
@@ -65,8 +69,14 @@ interface GroupState {
   // Filters and search
   /** 검색 쿼리 */
   searchQuery: string;
+  /** 검색어 */
+  searchTerm: string;
   /** 선택된 그룹 타입 필터 */
   selectedGroupType: GroupType | null;
+  /** 정렬 기준 */
+  sortBy: string;
+  /** 카테고리 필터 */
+  categoryFilter: string | null;
   /** 위치 기반 필터 */
   locationFilter: {
     /** 위도 */
@@ -240,6 +250,10 @@ export const useGroupStore = create<GroupStore>()(
   officialGroups: [],
   /** 생성한 그룹 목록 */
   createdGroups: [],
+  /** 위치 기반 그룹 목록 */
+  locationGroups: [],
+  /** 즉석 미팅 그룹 목록 */
+  instantGroups: [],
   /** 좋아요한 그룹 ID 목록 */
   likedGroupIds: [],
   /** 그룹별 초대코드 저장 */
@@ -250,8 +264,14 @@ export const useGroupStore = create<GroupStore>()(
   error: null,
   /** 검색 쿼리 */
   searchQuery: '',
+  /** 검색어 */
+  searchTerm: '',
   /** 선택된 그룹 타입 */
   selectedGroupType: null,
+  /** 정렬 기준 */
+  sortBy: 'memberCount',
+  /** 카테고리 필터 */
+  categoryFilter: null,
   /** 위치 필터 */
   locationFilter: null,
 

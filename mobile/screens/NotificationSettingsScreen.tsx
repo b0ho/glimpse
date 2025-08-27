@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootNavigationParamList } from '@/navigation/AppNavigator';
+import { RootStackParamList } from '@/types/navigation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNotificationStore } from '@/store/slices/notificationSlice';
 import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
@@ -39,7 +39,7 @@ function SettingItem({
   isPremiumFeature = false,
 }: SettingItemProps) {
   const isPremium = usePremiumStore(premiumSelectors.isPremiumUser());
-  const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation('settings');
 
@@ -98,7 +98,7 @@ function SettingItem({
 }
 
 export function NotificationSettingsScreen() {
-  const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { currentMode } = useAuthStore();
   const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation('settings');

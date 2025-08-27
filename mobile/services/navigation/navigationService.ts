@@ -1,8 +1,8 @@
 import { NavigationContainerRef } from '@react-navigation/native';
-import { RootNavigationParamList } from '@/navigation/AppNavigator';
+import { RootStackParamList } from '@/types/navigation';
 
 /** 네비게이션 참조 객체 */
-let navigationRef: NavigationContainerRef<RootNavigationParamList> | null = null;
+let navigationRef: NavigationContainerRef<RootStackParamList> | null = null;
 
 /**
  * 네비게이션 서비스 객체
@@ -12,10 +12,10 @@ let navigationRef: NavigationContainerRef<RootNavigationParamList> | null = null
 export const navigationService = {
   /**
    * 네비게이션 참조 설정
-   * @param {NavigationContainerRef<RootNavigationParamList>} ref - 네비게이션 컨테이너 참조
+   * @param {NavigationContainerRef<RootStackParamList>} ref - 네비게이션 컨테이너 참조
    * @description 앱 시작 시 네비게이션 참조를 설정
    */
-  setNavigationRef(ref: NavigationContainerRef<RootNavigationParamList>) {
+  setNavigationRef(ref: NavigationContainerRef<RootStackParamList>) {
     navigationRef = ref;
   },
 
@@ -23,12 +23,12 @@ export const navigationService = {
    * 화면 네비게이션
    * @template RouteName
    * @param {RouteName} name - 이동할 화면 이름
-   * @param {RootNavigationParamList[RouteName]} [params] - 화면 파라미터
+   * @param {RootStackParamList[RouteName]} [params] - 화면 파라미터
    * @description 지정된 화면으로 네비게이션
    */
-  navigate<RouteName extends keyof RootNavigationParamList>(
+  navigate<RouteName extends keyof RootStackParamList>(
     name: RouteName,
-    params?: RootNavigationParamList[RouteName]
+    params?: RootStackParamList[RouteName]
   ) {
     if (navigationRef && navigationRef.isReady()) {
       navigationRef.navigate(name as any, params as any);

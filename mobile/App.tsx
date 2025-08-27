@@ -83,29 +83,27 @@ export default function App() {
   const [initAttempts, setInitAttempts] = useState(0);
 
   useEffect(() => {
-    // Android-specific: More robust i18n initialization
+    // 모든 플랫폼에서 동일한 i18n 초기화
     const initializeI18n = async () => {
       try {
         console.log(`[App] Initializing i18n... (Platform: ${Platform.OS})`);
         
-        // Initialize i18n with retry logic for Android
+        // 모든 플랫폼에서 동일한 초기화 로직
         await initI18n();
         
-        // Android-specific: Ensure i18n is fully ready
-        if (Platform.OS === 'android') {
-          await ensureI18nReady();
-          
-          // Force a longer delay on Android to ensure translations are loaded
-          await new Promise(resolve => setTimeout(resolve, 300));
-          
-          // Verify i18n is working
-          const testTranslation = i18n.t('navigation:tabs.home');
-          console.log('[App] Android i18n test:', testTranslation);
-          
-          if (testTranslation === 'navigation:tabs.home' || testTranslation === 'tabs.home') {
-            console.warn('[App] Android i18n not fully ready, waiting more...');
-            await new Promise(resolve => setTimeout(resolve, 500));
-          }
+        // 모든 플랫폼에서 i18n 준비 확인
+        await ensureI18nReady();
+        
+        // 번역 로딩을 위한 일관된 대기 시간
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // i18n 작동 확인
+        const testTranslation = i18n.t('navigation:tabs.home');
+        console.log('[App] i18n test:', testTranslation);
+        
+        if (testTranslation === 'navigation:tabs.home' || testTranslation === 'tabs.home') {
+          console.warn('[App] i18n not fully ready, waiting more...');
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
         
         console.log('[App] i18n initialized successfully');
@@ -113,12 +111,12 @@ export default function App() {
       } catch (error) {
         console.error('[App] Failed to initialize i18n:', error);
         
-        // Android-specific: Retry initialization
-        if (Platform.OS === 'android' && initAttempts < 5) {
+        // 모든 플랫폼에서 동일한 재시도 로직
+        if (initAttempts < 5) {
           setInitAttempts(prev => prev + 1);
           setTimeout(() => initializeI18n(), 1000);
         } else {
-          // Even if i18n fails, continue loading the app with fallbacks
+          // 초기화 실패 시에도 앱 로드 계속
           setIsI18nInitialized(true);
         }
       }

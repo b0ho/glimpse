@@ -201,21 +201,17 @@ const detectUserLanguage = async (): Promise<SupportedLanguage> => {
     // 2. Device locale detection
     let deviceLocale = 'ko'; // Default to Korean
     
-    if (Platform.OS === 'android') {
-      try {
-        const locales = Localization.getLocales();
-        if (locales && locales.length > 0) {
-          deviceLocale = locales[0]?.languageTag || 'ko';
-        } else {
-          deviceLocale = Localization.locale || 'ko';
-        }
-      } catch (androidError) {
-        console.warn('[i18n] Android locale detection failed, using Korean:', androidError);
-        deviceLocale = 'ko';
-      }
-    } else {
+    try {
       const locales = Localization.getLocales();
-      deviceLocale = locales[0]?.languageTag || Localization.locale || 'ko';
+      if (locales && locales.length > 0) {
+        deviceLocale = locales[0]?.languageTag || 'ko';
+      } else {
+        // Fallback to locale property with type assertion for compatibility
+        deviceLocale = (Localization as any).locale || 'ko';
+      }
+    } catch (localizationError) {
+      console.warn('[i18n] Locale detection failed, using Korean:', localizationError);
+      deviceLocale = 'ko';
     }
     
     console.log('[i18n] Detected device locale:', deviceLocale);
@@ -288,7 +284,7 @@ export const initI18n = async () => {
       
       // Missing key handler
       saveMissing: __DEV__,
-      missingKeyHandler: (lngs, ns, key, fallbackValue) => {
+      missingKeyHandler: (lngs, ns, key, _fallbackValue) => {
         if (__DEV__) {
           console.warn(`[i18n][${Platform.OS}] Missing translation: ${lngs.join(', ')} - ${ns}:${key}`);
         }

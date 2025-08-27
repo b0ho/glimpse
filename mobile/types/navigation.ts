@@ -13,45 +13,58 @@ export type RootStackParamList = {
 
 // Auth Stack
 export type AuthStackParamList = {
-  AuthScreen: undefined;
-  PhoneVerification: undefined;
-  SMSVerification: { phoneNumber: string };
-  NicknameSetup: undefined;
-  CompanyVerification: undefined;
+  Auth: undefined;
+};
+
+// Interest Stack
+export type InterestStackParamList = {
+  InterestSearchScreen: undefined;
+  AddInterest: undefined;
+  MyInfo: undefined;
+  Chat: {
+    roomId: string;
+    matchId: string;
+    otherUserNickname: string;
+  };
+  Premium: undefined;
 };
 
 // Main Tab
 export type MainTabParamList = {
   Home: NavigatorScreenParams<HomeStackParamList>;
   Groups: NavigatorScreenParams<GroupsStackParamList>;
+  Interest: NavigatorScreenParams<InterestStackParamList>;
   Matches: NavigatorScreenParams<MatchesStackParamList>;
   Profile: NavigatorScreenParams<ProfileStackParamList>;
 };
 
 // Home Stack
 export type HomeStackParamList = {
-  HomeScreen: undefined;
+  HomeTab: undefined;
   CreateContent: undefined;
+  CreateStory: undefined;
   StoryUpload: undefined;
   PostDetail: { postId: string };
   NearbyGroups: undefined;
+  NearbyUsers: undefined;
 };
 
 // Groups Stack
 export type GroupsStackParamList = {
-  GroupsScreen: undefined;
-  GroupDetail: { groupId: string };
+  GroupsTab: undefined;
   CreateGroup: undefined;
-  JoinGroup: { inviteCode?: string };
-  GroupInvite: { groupId: string };
-  GroupManage: { groupId: string };
   LocationGroup: undefined;
   NearbyUsers: undefined;
-  MapScreen: undefined;
+  Map: undefined;
+  GroupInvite: { groupId: string };
+  JoinGroup: { inviteCode?: string };
+  GroupManage: { groupId: string };
+  GroupDetail: { groupId: string };
 };
 
 // Matches Stack
 export type MatchesStackParamList = {
+  MatchesTab: undefined;
   MatchesScreen: undefined;
   Chat: {
     roomId: string;
@@ -62,13 +75,16 @@ export type MatchesStackParamList = {
 
 // Profile Stack
 export type ProfileStackParamList = {
-  ProfileScreen: undefined;
-  EditProfile: undefined;
-  Premium: undefined;
+  ProfileTab: undefined;
   MyGroups: undefined;
+  Premium: undefined;
   NotificationSettings: undefined;
   WhoLikesYou: undefined;
-  Settings: undefined;
+  LikeHistory: undefined;
+  DeleteAccount: undefined;
+  PrivacyPolicy: undefined;
+  TermsOfService: undefined;
+  Support: undefined;
 };
 
 // Navigation Props Types

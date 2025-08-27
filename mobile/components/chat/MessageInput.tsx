@@ -213,11 +213,9 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
     Keyboard.dismiss();
   }, [showAttachmentOptions]);
 
-  // Enter 키로 전송 (Android)
+  // Enter 키로 전송 (모든 플랫폼)
   const handleSubmitEditing = useCallback(() => {
-    if (Platform.OS === 'android') {
-      handleSendMessage();
-    }
+    handleSendMessage();
   }, [handleSendMessage]);
 
   /**

@@ -6,11 +6,11 @@ import i18n from '@/services/i18n/i18n';
 import { Platform } from 'react-native';
 
 /**
- * Android-safe translation helper
+ * Cross-platform translation helper
  */
 const safeT = (key: string, options?: any): string => {
-  // Android에서 i18n이 초기화되지 않았을 때 fallback 제공
-  if (!i18n.isInitialized && Platform.OS === 'android') {
+  // 모든 플랫폼에서 i18n이 초기화되지 않았을 때 fallback 제공
+  if (!i18n.isInitialized) {
     if (key.includes('justNow')) return '방금 전';
     if (key.includes('minutesAgo')) return `${options?.count || 1}분 전`;
     if (key.includes('hoursAgo')) return `${options?.count || 1}시간 전`;
@@ -22,8 +22,8 @@ const safeT = (key: string, options?: any): string => {
   
   const translation = i18n.t(key, options);
   
-  // Android에서 키가 그대로 반환되면 fallback 제공
-  if (Platform.OS === 'android' && translation === key) {
+  // 모든 플랫폼에서 키가 그대로 반환되면 fallback 제공
+  if (translation === key) {
     if (key.includes('justNow')) return '방금 전';
     if (key.includes('minutesAgo')) return `${options?.count || 1}분 전`;
     if (key.includes('hoursAgo')) return `${options?.count || 1}시간 전`;

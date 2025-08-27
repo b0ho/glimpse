@@ -6,11 +6,12 @@
 
 module.exports = function (api) {
   api.cache(true);
+  
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      // import.meta 처리
-      'babel-plugin-transform-import-meta',
+      // Transform import.meta for all platforms (safer approach)
+      require('./babel-plugin-transform-import-meta-web'),
       [
         'module-resolver',
         {

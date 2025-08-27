@@ -3,23 +3,19 @@ import { Platform } from 'react-native';
 import { TFunction } from 'i18next';
 
 /**
- * Android-safe translation hook
- * Android에서 점(.) 구분자 문제를 해결하는 커스텀 훅
+ * Cross-platform translation hook
+ * 점(.) 구분자 문제를 해결하는 커스텀 훅
  * 
- * Android는 중첩된 키 구조를 제대로 처리하지 못하는 경우가 있어
+ * 모든 플랫폼에서 일관된 키 구조 처리를 위해
  * 'tabs.home' 같은 키를 'navigation:tabs.home'으로 자동 변환
  */
-export function useAndroidSafeTranslation(namespace?: string | string[]) {
+export function useCrossPlatformTranslation(namespace?: string | string[]) {
   const { t: originalT, i18n, ready } = useTranslation(namespace);
 
-  // Android 전용 래퍼 함수
-  const t = (key: string | string[], options?: any) => {
-    // Web이나 iOS에서는 원본 함수 그대로 사용 (Android 로직 스킵)
-    if (Platform.OS === 'web' || Platform.OS === 'ios') {
-      return originalT(key, options);
-    }
+  // 모든 플랫폼에서 동일한 래퍼 함수 (항상 string 반환)
+  const t = (key: string | string[], options?: any): string => {
 
-    // Android인 경우 키 변환 처리
+    // 모든 플랫폼에서 동일한 키 변환 처리
     const processKey = (k: string): string => {
       // 이미 네임스페이스가 포함된 경우 그대로 반환
       if (k.includes(':')) {
@@ -80,11 +76,11 @@ export function useAndroidSafeTranslation(namespace?: string | string[]) {
         // 네임스페이스 없이 다시 시도
         const fallbackResult = originalT(key, options);
         if (fallbackResult !== key[0]) {
-          return fallbackResult;
+          return String(fallbackResult);
         }
       }
       
-      return result;
+      return String(result);
     }
 
     // 단일 키 처리
@@ -96,21 +92,24 @@ export function useAndroidSafeTranslation(namespace?: string | string[]) {
       // 원본 키로 다시 시도
       const fallbackResult = originalT(key, options);
       if (fallbackResult !== key) {
-        return fallbackResult;
+        return String(fallbackResult);
       }
       
       // 그래도 실패하면 네임스페이스 없이 시도
       const lastFallback = originalT(key.split('.').pop() || key, options);
       if (lastFallback !== key.split('.').pop()) {
-        return lastFallback;
+        return String(lastFallback);
       }
     }
     
-    return result;
+    return String(result);
   };
 
   return { t, i18n, ready };
 }
 
+// 기존 이름으로도 접근 가능 (호환성)
+export const useAndroidSafeTranslation = useCrossPlatformTranslation;
+
 // 기본 export로도 제공
-export default useAndroidSafeTranslation;
+export default useCrossPlatformTranslation;
