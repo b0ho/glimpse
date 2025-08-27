@@ -3,11 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
   Alert,
   ScrollView,
+  Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuth } from '@/hooks/useAuth'; // 통합 인증 훅 - 환경에 따라 Clerk/DevAuth 자동 선택
@@ -498,7 +499,10 @@ export const ProfileScreen = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+    <SafeAreaView 
+      style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
+      edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
+    >
       <ScrollView 
         style={styles.scrollContainer}
         showsVerticalScrollIndicator={false}

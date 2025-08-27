@@ -5,13 +5,13 @@ import {
   FlatList,
   StyleSheet,
   RefreshControl,
-  SafeAreaView,
   ActivityIndicator,
   TouchableOpacity,
   Alert,
   ScrollView,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import i18n from '@/services/i18n/i18n';
@@ -689,7 +689,10 @@ export const HomeScreen = () => {
 
   if (isLoading && contents.length === 0) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <SafeAreaView 
+        style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
+        edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
+      >
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.PRIMARY} />
           <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('home:loading.content')}</Text>
@@ -699,7 +702,10 @@ export const HomeScreen = () => {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+    <SafeAreaView 
+      style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
+      edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
+    >
       <FlatList
         data={contents}
         keyExtractor={(item) => item.id}

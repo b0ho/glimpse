@@ -4,11 +4,12 @@ import {
   Text,
   FlatList,
   StyleSheet,
-  SafeAreaView,
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useLikeStore } from '@/store/slices/likeSlice';
@@ -233,7 +234,10 @@ export const MatchesScreen = React.memo(() => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <SafeAreaView 
+        style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
+        edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
+      >
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.PRIMARY} />
           <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('common:loading.text')}</Text>
@@ -243,7 +247,10 @@ export const MatchesScreen = React.memo(() => {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+    <SafeAreaView 
+      style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
+      edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
+    >
       <FlatList
         data={matches}
         keyExtractor={(item) => item.id}
