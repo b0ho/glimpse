@@ -49,7 +49,7 @@ export class MatchingService {
    * @returns 좋아요 결과
    */
   async createLike(userId: string, data: CreateLikeDto) {
-    const { targetUserId, groupId, reason } = data;
+    const { targetUserId, groupId, relationshipIntent, reason } = data;
 
     // 자기 자신에게 좋아요 불가
     if (userId === targetUserId) {
@@ -154,17 +154,19 @@ export class MatchingService {
           fromUserId: userId,
           toUserId: targetUserId,
           groupId,
+          relationshipIntent: relationshipIntent || 'ROMANTIC',
           // reason,
           isSuper: false,
         },
       });
 
-      // 상대방이 나를 좋아요 했는지 확인
+      // 상대방이 나를 같은 관심 유형으로 좋아요 했는지 확인
       const mutualLike = await tx.userLike.findFirst({
         where: {
           fromUserId: targetUserId,
           toUserId: userId,
           groupId,
+          relationshipIntent,  // 동일한 관심 유형만 매칭
           isMatch: false,
         },
       });
@@ -177,6 +179,8 @@ export class MatchingService {
             user1Id: userId,
             user2Id: targetUserId,
             groupId,
+            relationshipIntent: relationshipIntent || 'ROMANTIC',
+            interestType: 'LIKE', // Default interest type
             status: 'ACTIVE',
             createdAt: new Date(Date.now() + 72 * 60 * 60 * 1000), // 72 hours
           },

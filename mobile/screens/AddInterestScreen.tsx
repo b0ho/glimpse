@@ -16,6 +16,7 @@ import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { useInterestStore } from '@/store/slices/interestSlice';
 import { InterestType } from '@/types/interest';
+import { RelationshipIntent } from '@/shared/types';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
@@ -61,6 +62,7 @@ export const AddInterestScreen: React.FC = () => {
     if (subscriptionTier === SubscriptionTier.ADVANCED) return '2weeks';
     return 'unlimited';
   });
+  const [relationshipIntent, setRelationshipIntent] = useState<RelationshipIntent>(RelationshipIntent.ROMANTIC);
 
   const getInterestTypes = () => [
     { type: InterestType.PHONE, label: t('interest:types.phone'), icon: 'call-outline', color: '#4CAF50' },
@@ -237,6 +239,7 @@ export const AddInterestScreen: React.FC = () => {
         value: value.trim(),
         metadata: searchMetadata,
         expiresAt: expiresAt?.toISOString(),
+        relationshipIntent,
       });
 
       console.log('[AddInterestScreen] 관심상대 등록 성공, 화면 전환');

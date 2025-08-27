@@ -334,7 +334,7 @@ model UserLike {
   toUserId   String
   groupId    String
   isMatch    Boolean  @default(false)
-  mode       String?  // 'DATING' or 'FRIENDSHIP'
+  relationshipIntent RelationshipIntent  // 관심 유형: FRIEND or ROMANTIC
   isSuper    Boolean  @default(false)
   cancelledAt DateTime?
   deletedAt  DateTime?
@@ -371,7 +371,7 @@ model Match {
   user2Id       String
   groupId       String
   status        MatchStatus @default(ACTIVE)
-  type          String?     // 'DATING' or 'FRIENDSHIP'
+  interestType  InterestType  // 관심 유형: FRIEND or ROMANTIC
   lastMessageAt DateTime?
   isActive      Boolean     @default(true)
   createdAt     DateTime    @default(now())
@@ -395,6 +395,12 @@ enum MatchStatus {
   EXPIRED
   DELETED
   MISMATCH  // New status for mismatched pairs
+}
+
+// Relationship Intent for likes and matches
+enum RelationshipIntent {
+  FRIEND      // 친구
+  ROMANTIC    // 호감 (연애)
 }
 
 // Chat
