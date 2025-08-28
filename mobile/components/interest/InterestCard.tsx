@@ -18,10 +18,11 @@ const { width } = Dimensions.get('window');
 
 interface InterestCardProps {
   item: any;
-  onPress: () => void;
+  onPress?: () => void;
   onDelete?: () => void;
   onMismatch?: () => void;
   isMatch?: boolean;
+  onEdit?: () => void;
 }
 
 /**
@@ -33,6 +34,7 @@ export const InterestCard: React.FC<InterestCardProps> = ({
   onDelete,
   onMismatch,
   isMatch = false,
+  onEdit,
 }) => {
   const { colors, isDark } = useTheme();
 
@@ -67,11 +69,6 @@ export const InterestCard: React.FC<InterestCardProps> = ({
         icon: 'location-outline',
         color: '#FF9800',
         gradient: ['#FF9800', '#F57C00'],
-      },
-      [InterestType.APPEARANCE]: {
-        icon: 'body-outline',
-        color: '#795548',
-        gradient: ['#795548', '#5D4037'],
       },
       [InterestType.NICKNAME]: {
         icon: 'at-outline',
@@ -131,11 +128,22 @@ export const InterestCard: React.FC<InterestCardProps> = ({
     );
   };
 
+  // 카드 클릭 핸들러 - 매칭된 카드는 채팅으로, 검색 카드는 삭제 확인으로
+  const handleCardPress = () => {
+    if (isMatch) {
+      // 매칭된 카드는 기존 onPress 실행 (채팅으로 이동)
+      onPress?.();
+    } else {
+      // 검색 카드는 삭제 확인 실행
+      onDelete?.();
+    }
+  };
+
   const content = (
     <View style={[styles.card, { backgroundColor: colors.SURFACE }]}>
       <TouchableOpacity
         style={styles.cardContent}
-        onPress={onPress}
+        onPress={handleCardPress}
         activeOpacity={0.9}
       >
         <LinearGradient
@@ -158,6 +166,12 @@ export const InterestCard: React.FC<InterestCardProps> = ({
               <View style={[styles.badge, { backgroundColor: colors.SUCCESS }]}>
                 <Icon name="checkmark-circle" size={16} color="#FFFFFF" />
                 <Text style={styles.badgeText}>매칭됨</Text>
+              </View>
+            )}
+            {!isMatch && (
+              <View style={[styles.badge, { backgroundColor: colors.ERROR + '20' }]}>
+                <Icon name="trash-outline" size={14} color={colors.ERROR} />
+                <Text style={[styles.badgeText, { color: colors.ERROR }]}>탭하여 삭제</Text>
               </View>
             )}
           </View>
@@ -280,26 +294,8 @@ export const InterestCard: React.FC<InterestCardProps> = ({
           </View>
         </View>
       </TouchableOpacity>
-      
-      {onDelete && (
-        <TouchableOpacity 
-          style={styles.deleteButton}
-          onPress={onDelete}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Icon name="ellipsis-vertical" size={20} color={colors.TEXT.SECONDARY} />
-        </TouchableOpacity>
-      )}
     </View>
   );
-
-  if (onDelete && !isMatch) {
-    return (
-      <Swipeable renderRightActions={renderRightActions}>
-        {content}
-      </Swipeable>
-    );
-  }
 
   return content;
 };
@@ -312,7 +308,6 @@ function getTypeLabel(type: InterestType): string {
     [InterestType.NAME]: '이름',
     [InterestType.GROUP]: '특정 그룹',
     [InterestType.LOCATION]: '장소',
-    [InterestType.APPEARANCE]: '인상착의',
     [InterestType.NICKNAME]: '닉네임',
     [InterestType.COMPANY]: '회사',
     [InterestType.SCHOOL]: '학교',

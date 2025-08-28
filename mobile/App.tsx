@@ -8,6 +8,7 @@ import { initI18n, ensureI18nReady } from './services/i18n/i18n';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './services/i18n/i18n';
 import { useIsDark, useColors } from './hooks/useTheme';
+import Toast from 'react-native-toast-message';
 
 // SafeAreaProvider는 네이티브 플랫폼에서만 필요
 let SafeAreaProvider: any;
@@ -194,6 +195,7 @@ export default function App() {
           <StatusBar style={isDark ? "light" : "dark"} backgroundColor={colors.BACKGROUND} />
           <View style={{ flex: 1, backgroundColor: colors.BACKGROUND }}>
             <RootNavigator />
+            <Toast />
           </View>
         </SafeAreaProvider>
       </I18nextProvider>

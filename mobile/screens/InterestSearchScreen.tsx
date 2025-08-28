@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -24,6 +25,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CreateStoryModal } from '@/components/successStory/CreateStoryModal';
 import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
 import { InterestType } from '@/types/interest';
+import Toast from 'react-native-toast-message';
 
 /**
  * 관심상대 찾기 메인 화면
@@ -45,9 +47,21 @@ export const InterestSearchScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [storyModalVisible, setStoryModalVisible] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
+  const [selectedTab, setSelectedTab] = useState<'interest' | 'friend'>('interest');
   
   const subscriptionTier = getSubscriptionTier();
   const features = getSubscriptionFeatures();
+
+  // 탭에 따라 필터링된 데이터
+  const filteredSearches = searches.filter(search => {
+    const relationshipIntent = search.metadata?.relationshipIntent?.toLowerCase();
+    return relationshipIntent === (selectedTab === 'interest' ? 'romantic' : 'friend');
+  });
+  
+  const filteredMatches = matches.filter(match => {
+    const relationshipIntent = match.metadata?.relationshipIntent?.toLowerCase();
+    return relationshipIntent === (selectedTab === 'interest' ? 'romantic' : 'friend');
+  });
 
   useEffect(() => {
     loadData();
@@ -117,57 +131,164 @@ export const InterestSearchScreen: React.FC = () => {
   }, []);
 
   const handleAddInterest = () => {
-    navigation.navigate('AddInterest');
+    // BASIC (무료) 계정 제한 확인
+    if (subscriptionTier === SubscriptionTier.BASIC) {
+      // 현재 등록된 유형 개수 확인
+      const uniqueTypes = new Set(searches.map(s => s.type));
+      
+      if (uniqueTypes.size >= 3) {
+        Toast.show({
+          type: 'info',
+          text1: '구독 제한',
+          text2: '무료 사용자는 최대 3개 유형까지 등록 가능합니다',
+          position: 'bottom',
+          visibilityTime: 4000,
+        });
+        // 프리미엄 화면으로 자동 이동
+        setTimeout(() => {
+          navigation.navigate('Premium' as never);
+        }, 1000);
+        return;
+      }
+    }
+    
+    // ADVANCED 계정 제한 확인 (유형별 3개)
+    if (subscriptionTier === SubscriptionTier.ADVANCED) {
+      // 각 유형별 개수 확인
+      const typeCounts: Record<string, number> = {};
+      searches.forEach(search => {
+        typeCounts[search.type] = (typeCounts[search.type] || 0) + 1;
+      });
+      
+      // 모든 유형이 3개에 도달했는지 확인
+      const allTypesFull = Object.values(typeCounts).every(count => count >= 3);
+      
+      if (allTypesFull && Object.keys(typeCounts).length >= 3) {
+        Toast.show({
+          type: 'info',
+          text1: '구독 제한',
+          text2: '베이직 사용자는 유형별 최대 3개까지 등록 가능합니다',
+          position: 'bottom',
+          visibilityTime: 4000,
+        });
+        // 프리미엄 화면으로 자동 이동
+        setTimeout(() => {
+          navigation.navigate('Premium' as never);
+        }, 1000);
+        return;
+      }
+    }
+    
+    navigation.navigate('AddInterest', { 
+      relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend' 
+    });
   };
 
-  const handleDeleteSearch = (searchId: string) => {
-    Alert.alert(
-      t('search.deleteConfirmTitle'),
-      t('search.deleteConfirmMessage'),
-      [
-        { text: t('buttons.cancel'), style: 'cancel' },
-        {
-          text: t('buttons.delete'),
-          style: 'destructive',
-          onPress: () => deleteSearch(searchId),
-        },
-      ],
-    );
+  const handleDeleteSearch = async (searchId: string) => {
+    // Toast로 삭제 확인 및 결과 표시
+    const showConfirmToast = (): Promise<boolean> => {
+      return new Promise((resolve) => {
+        if (Platform.OS === 'web') {
+          const confirmed = window.confirm('이 관심상대 검색을 삭제하시겠습니까?\n삭제하면 검색 등록 횟수가 복구됩니다.');
+          resolve(confirmed);
+        } else {
+          Alert.alert(
+            '삭제 확인',
+            '이 관심상대 검색을 삭제하시겠습니까?\n삭제하면 검색 등록 횟수가 복구됩니다.',
+            [
+              { text: '취소', style: 'cancel', onPress: () => resolve(false) },
+              { text: '삭제', style: 'destructive', onPress: () => resolve(true) }
+            ]
+          );
+        }
+      });
+    };
+
+    const confirmed = await showConfirmToast();
+
+    if (confirmed) {
+      try {
+        await deleteSearch(searchId);
+        // 삭제 성공 시 데이터 새로고침
+        await fetchSearches();
+        
+        Toast.show({
+          type: 'success',
+          text1: '삭제 완료',
+          text2: '관심상대 검색이 삭제되었습니다',
+          position: 'bottom',
+          visibilityTime: 3000,
+        });
+      } catch (error) {
+        console.error('Failed to delete search:', error);
+        Toast.show({
+          type: 'error',
+          text1: '삭제 실패',
+          text2: '삭제 중 오류가 발생했습니다. 다시 시도해주세요',
+          position: 'bottom',
+          visibilityTime: 3000,
+        });
+      }
+    }
   };
 
-  const handleReportMismatch = (item: any) => {
+  const handleReportMismatch = async (item: any) => {
     const nickname = item.matchedUser?.nickname || t('search.anonymous');
-    Alert.alert(
-      t('search.mismatchReportTitle'),
-      t('search.mismatchReportMessage', { nickname }),
-      [
-        { text: t('buttons.cancel'), style: 'cancel' },
-        {
-          text: t('buttons.report'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // API 호출 또는 로컬 처리
-              const storedMatches = await AsyncStorage.getItem('interest-matches');
-              if (storedMatches) {
-                const matches = JSON.parse(storedMatches);
-                const updatedMatches = matches.map((m: any) => 
-                  m.id === item.id 
-                    ? { ...m, status: 'MISMATCH', mismatchedAt: new Date().toISOString() }
-                    : m
-                );
-                await AsyncStorage.setItem('interest-matches', JSON.stringify(updatedMatches));
-                await fetchMatches(); // 목록 새로고침
-                Alert.alert(t('buttons.completed'), t('search.mismatchReported'));
-              }
-            } catch (error) {
-              console.error('Failed to report mismatch:', error);
-              Alert.alert(t('errors.error'), t('search.mismatchError'));
-            }
-          },
-        },
-      ],
-    );
+    
+    // Toast로 미스매치 신고 확인
+    const showMismatchConfirmToast = (): Promise<boolean> => {
+      return new Promise((resolve) => {
+        if (Platform.OS === 'web') {
+          const confirmed = window.confirm(`미스매치 신고\n\n${nickname}님과의 매칭이 잘못되었다고 신고하시겠습니까?`);
+          resolve(confirmed);
+        } else {
+          Alert.alert(
+            '미스매치 신고',
+            `${nickname}님과의 매칭이 잘못되었다고 신고하시겠습니까?`,
+            [
+              { text: '취소', style: 'cancel', onPress: () => resolve(false) },
+              { text: '신고', style: 'destructive', onPress: () => resolve(true) }
+            ]
+          );
+        }
+      });
+    };
+
+    const confirmed = await showMismatchConfirmToast();
+    
+    if (confirmed) {
+      try {
+        // API 호출 또는 로컬 처리
+        const storedMatches = await AsyncStorage.getItem('interest-matches');
+        if (storedMatches) {
+          const matches = JSON.parse(storedMatches);
+          const updatedMatches = matches.map((m: any) => 
+            m.id === item.id 
+              ? { ...m, status: 'MISMATCH', mismatchedAt: new Date().toISOString() }
+              : m
+          );
+          await AsyncStorage.setItem('interest-matches', JSON.stringify(updatedMatches));
+          await fetchMatches(); // 목록 새로고침
+          
+          Toast.show({
+            type: 'success',
+            text1: '신고 완료',
+            text2: '미스매치가 신고되었습니다',
+            position: 'bottom',
+            visibilityTime: 3000,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to report mismatch:', error);
+        Toast.show({
+          type: 'error',
+          text1: '신고 실패',
+          text2: '신고 처리 중 오류가 발생했습니다',
+          position: 'bottom',
+          visibilityTime: 3000,
+        });
+      }
+    }
   };
 
   const handleChatPress = async (item: any) => {
@@ -228,7 +349,6 @@ export const InterestSearchScreen: React.FC = () => {
       [InterestType.NAME]: '이름',
       [InterestType.GROUP]: '특정 그룹',
       [InterestType.LOCATION]: '장소',
-      [InterestType.APPEARANCE]: '인상착의',
       [InterestType.NICKNAME]: '닉네임',
       [InterestType.COMPANY]: '회사',
       [InterestType.SCHOOL]: '학교',
@@ -270,48 +390,89 @@ export const InterestSearchScreen: React.FC = () => {
     }
   };
 
-  const handleDeleteMatch = (matchId: string) => {
-    Alert.alert(
-      '선택하세요',
-      '',
-      [
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              '매칭 이력 삭제',
-              '이 매칭 이력을 삭제하시겠습니까?',
-              [
-                { text: '취소', style: 'cancel' },
-                {
-                  text: '삭제',
-                  style: 'destructive',
-                  onPress: async () => {
-                    // AsyncStorage에서 매칭 삭제
-                    const storedMatches = await AsyncStorage.getItem('interest-matches');
-                    if (storedMatches) {
-                      const matches = JSON.parse(storedMatches);
-                      const updatedMatches = matches.filter((m: any) => m.id !== matchId);
-                      await AsyncStorage.setItem('interest-matches', JSON.stringify(updatedMatches));
-                      await fetchMatches(); // 목록 새로고침
-                    }
-                  },
-                },
-              ],
-            );
-          },
-        },
-        {
-          text: '성공 스토리 공유',
-          onPress: () => {
-            const match = matches.find(m => m.id === matchId);
-            if (match) handleShareStory(match);
-          },
-        },
-        { text: '취소', style: 'cancel' },
-      ],
-    );
+  const handleDeleteMatch = async (matchId: string) => {
+    // Toast로 삭제 확인
+    const showDeleteMatchConfirmToast = (): Promise<'delete' | 'story' | 'cancel'> => {
+      return new Promise((resolve) => {
+        if (Platform.OS === 'web') {
+          const action = window.confirm('매칭 이력을 삭제하시겠습니까?\n\n확인: 삭제\n취소: 성공 스토리 공유');
+          resolve(action ? 'delete' : 'story');
+        } else {
+          Alert.alert(
+            '선택하세요',
+            '',
+            [
+              {
+                text: '삭제',
+                style: 'destructive',
+                onPress: () => resolve('delete'),
+              },
+              {
+                text: '성공 스토리 공유',
+                onPress: () => resolve('story'),
+              },
+              { text: '취소', style: 'cancel', onPress: () => resolve('cancel') },
+            ],
+          );
+        }
+      });
+    };
+
+    const showFinalDeleteConfirm = (): Promise<boolean> => {
+      return new Promise((resolve) => {
+        if (Platform.OS === 'web') {
+          const confirmed = window.confirm('매칭 이력 삭제\n\n이 매칭 이력을 삭제하시겠습니까?');
+          resolve(confirmed);
+        } else {
+          Alert.alert(
+            '매칭 이력 삭제',
+            '이 매칭 이력을 삭제하시겠습니까?',
+            [
+              { text: '취소', style: 'cancel', onPress: () => resolve(false) },
+              { text: '삭제', style: 'destructive', onPress: () => resolve(true) }
+            ]
+          );
+        }
+      });
+    };
+
+    const action = await showDeleteMatchConfirmToast();
+    
+    if (action === 'delete') {
+      const finalConfirm = await showFinalDeleteConfirm();
+      if (finalConfirm) {
+        try {
+          // AsyncStorage에서 매칭 삭제
+          const storedMatches = await AsyncStorage.getItem('interest-matches');
+          if (storedMatches) {
+            const matches = JSON.parse(storedMatches);
+            const updatedMatches = matches.filter((m: any) => m.id !== matchId);
+            await AsyncStorage.setItem('interest-matches', JSON.stringify(updatedMatches));
+            await fetchMatches(); // 목록 새로고침
+            
+            Toast.show({
+              type: 'success',
+              text1: '삭제 완료',
+              text2: '매칭 이력이 삭제되었습니다',
+              position: 'bottom',
+              visibilityTime: 3000,
+            });
+          }
+        } catch (error) {
+          console.error('Failed to delete match:', error);
+          Toast.show({
+            type: 'error',
+            text1: '삭제 실패',
+            text2: '삭제 중 오류가 발생했습니다',
+            position: 'bottom',
+            visibilityTime: 3000,
+          });
+        }
+      }
+    } else if (action === 'story') {
+      const match = matches.find(m => m.id === matchId);
+      if (match) handleShareStory(match);
+    }
   };
 
   const renderMatchItem = ({ item }: { item: any }) => {
@@ -328,9 +489,49 @@ export const InterestSearchScreen: React.FC = () => {
   const renderSearchItem = ({ item }: { item: any }) => (
     <InterestCard
       item={item}
-      onPress={() => navigation.navigate('AddInterest', { editItem: item })}
       onDelete={() => handleDeleteSearch(item.id)}
+      onEdit={() => navigation.navigate('AddInterest', { 
+        editItem: item,
+        relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend' 
+      })}
     />
+  );
+
+  const renderTabBar = () => (
+    <View style={[styles.tabBar, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+      <TouchableOpacity
+        style={[
+          styles.tabButton,
+          selectedTab === 'interest' && [styles.tabButtonActive, { borderBottomColor: colors.PRIMARY }],
+        ]}
+        onPress={() => setSelectedTab('interest')}
+      >
+        <Text
+          style={[
+            styles.tabButtonText,
+            selectedTab === 'interest' ? [styles.tabButtonTextActive, { color: colors.PRIMARY }] : { color: colors.TEXT.SECONDARY },
+          ]}
+        >
+          관심상대 찾기
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.tabButton,
+          selectedTab === 'friend' && [styles.tabButtonActive, { borderBottomColor: colors.PRIMARY }],
+        ]}
+        onPress={() => setSelectedTab('friend')}
+      >
+        <Text
+          style={[
+            styles.tabButtonText,
+            selectedTab === 'friend' ? [styles.tabButtonTextActive, { color: colors.PRIMARY }] : { color: colors.TEXT.SECONDARY },
+          ]}
+        >
+          친구 찾기
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 
   const renderEmptySection = (title: string, description: string, type: 'search' | 'match') => (
@@ -389,31 +590,11 @@ export const InterestSearchScreen: React.FC = () => {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <View style={[styles.header, { backgroundColor: colors.SURFACE }]}>
         <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>
-          관심상대 찾기
+          찾기
         </Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => navigation.navigate('MyInfo')}
-          >
-            <Icon name="person-circle-outline" size={24} color={colors.PRIMARY} />
-            <Text style={[styles.headerButtonText, { color: colors.PRIMARY }]}>
-              내 정보 등록하기
-            </Text>
-            <Icon name="chevron-forward" size={20} color={colors.PRIMARY} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.headerButton, { marginTop: 8 }]}
-            onPress={handleAddInterest}
-          >
-            <Icon name="add-circle-outline" size={24} color={colors.SUCCESS} />
-            <Text style={[styles.headerButtonText, { color: colors.SUCCESS }]}>
-              새로운 관심상대 등록하기
-            </Text>
-            <Icon name="chevron-forward" size={20} color={colors.SUCCESS} />
-          </TouchableOpacity>
-        </View>
       </View>
+      
+      {renderTabBar()}
 
       <ScrollView
         style={styles.content}
@@ -426,17 +607,41 @@ export const InterestSearchScreen: React.FC = () => {
           />
         }
       >
+
+          <View style={styles.headerActions}>
+              <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={() => navigation.navigate('MyInfo')}
+              >
+                  <Icon name="person-circle-outline" size={24} color={colors.PRIMARY} />
+                  <Text style={[styles.headerButtonText, { color: colors.PRIMARY }]}>
+                      내 정보 등록하기
+                  </Text>
+                  <Icon name="chevron-forward" size={20} color={colors.PRIMARY} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                  style={[styles.headerButton, { marginTop: 8 }]}
+                  onPress={handleAddInterest}
+              >
+                  <Icon name="add-circle-outline" size={24} color={colors.SUCCESS} />
+                  <Text style={[styles.headerButtonText, { color: colors.SUCCESS }]}>
+                      {selectedTab === 'interest' ? '새로운 관심상대 등록하기' : '새로운 친구 찾기'}
+                  </Text>
+                  <Icon name="chevron-forward" size={20} color={colors.SUCCESS} />
+              </TouchableOpacity>
+          </View>
+          
         {/* 매칭된 항목 섹션 */}
-        {matches.length > 0 && (
+        {filteredMatches.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Icon name="heart" size={20} color={colors.SUCCESS} />
               <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-                매칭된 관심상대 ({matches.length})
+                {selectedTab === 'interest' ? `매칭된 관심상대 (${filteredMatches.length})` : `연결된 친구 (${filteredMatches.length})`}
               </Text>
             </View>
             <FlatList
-              data={matches}
+              data={filteredMatches}
               renderItem={renderMatchItem}
               keyExtractor={item => item.id}
               scrollEnabled={false}
@@ -450,12 +655,12 @@ export const InterestSearchScreen: React.FC = () => {
           <View style={styles.sectionHeader}>
             <Icon name="search" size={20} color={colors.PRIMARY} />
             <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-              등록된 검색 ({searches.length})
+              {selectedTab === 'interest' ? `등록된 검색 (${filteredSearches.length})` : `친구 찾기 목록 (${filteredSearches.length})`}
             </Text>
           </View>
-          {searches.length > 0 ? (
+          {filteredSearches.length > 0 ? (
             <FlatList
-              data={searches}
+              data={filteredSearches}
               renderItem={renderSearchItem}
               keyExtractor={item => item.id}
               scrollEnabled={false}
@@ -482,7 +687,7 @@ export const InterestSearchScreen: React.FC = () => {
                 등록 가능: {
                   features.interestSearchLimit === 'unlimited' 
                     ? '무제한' 
-                    : `${features.interestSearchLimit - searches.length}개 남음`
+                    : `${features.interestSearchLimit - filteredSearches.length}개 남음`
                 } • 
                 유효기간: {features.interestSearchDuration}일
               </Text>
@@ -512,10 +717,10 @@ export const InterestSearchScreen: React.FC = () => {
             setStoryModalVisible(false);
             setSelectedMatch(null);
           }}
-          onSave={handleSaveSuccessStory}
+          onSubmit={handleSaveSuccessStory}
           matchInfo={{
             partnerNickname: selectedMatch.matchedUser?.nickname || '익명',
-            matchType: getSearchInfo(selectedMatch)?.type,
+            matchId: selectedMatch.id,
           }}
         />
       )}
@@ -526,6 +731,29 @@ export const InterestSearchScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabButtonActive: {
+    borderBottomWidth: 2,
+  },
+  tabButtonText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  tabButtonTextActive: {
+    fontWeight: '600',
   },
   header: {
     padding: 16,

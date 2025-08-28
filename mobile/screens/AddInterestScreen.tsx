@@ -4,14 +4,15 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
+import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { useInterestStore } from '@/store/slices/interestSlice';
@@ -27,7 +28,8 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
  * 관심상대 등록 화면
  */
 export const AddInterestScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
   const { colors } = useTheme();
   const { createSearch, searches } = useInterestStore();
   const { user, getSubscriptionTier, getSubscriptionFeatures } = useAuthStore();
@@ -62,7 +64,10 @@ export const AddInterestScreen: React.FC = () => {
     if (subscriptionTier === SubscriptionTier.ADVANCED) return '2weeks';
     return 'unlimited';
   });
-  const [relationshipIntent, setRelationshipIntent] = useState<RelationshipIntent>(RelationshipIntent.ROMANTIC);
+  
+  // route params에서 relationshipType 받기
+  const relationshipType = route.params?.relationshipType || 'romantic';
+  const relationshipIntent = relationshipType === 'romantic' ? RelationshipIntent.ROMANTIC : RelationshipIntent.FRIEND;
 
   const getInterestTypes = () => [
     { type: InterestType.PHONE, label: t('interest:types.phone'), icon: 'call-outline', color: '#4CAF50' },
@@ -71,7 +76,6 @@ export const AddInterestScreen: React.FC = () => {
     { type: InterestType.NAME, label: t('interest:types.name'), icon: 'person-outline', color: '#9C27B0' },
     { type: InterestType.GROUP, label: t('interest:types.group'), icon: 'people-outline', color: '#9C27B0' },
     { type: InterestType.LOCATION, label: t('interest:types.location'), icon: 'location-outline', color: '#FF9800' },
-    { type: InterestType.APPEARANCE, label: t('interest:types.appearance'), icon: 'body-outline', color: '#795548' },
     { type: InterestType.NICKNAME, label: t('interest:types.nickname'), icon: 'at-outline', color: '#607D8B' },
     { type: InterestType.COMPANY, label: t('interest:types.company'), icon: 'business-outline', color: '#3F51B5' },
     { type: InterestType.SCHOOL, label: t('interest:types.school'), icon: 'school-outline', color: '#00BCD4' },
@@ -84,73 +88,65 @@ export const AddInterestScreen: React.FC = () => {
 
   // 구독 티어에 따른 제한 확인
   const checkSubscriptionLimits = (type: InterestType): boolean => {
+    console.log('[AddInterestScreen] checkSubscriptionLimits - type:', type);
+    console.log('[AddInterestScreen] subscriptionTier:', subscriptionTier);
+    console.log('[AddInterestScreen] current searches:', searches.length);
+    
     // 프리미엄은 무제한
     if (subscriptionTier === SubscriptionTier.PREMIUM) return true;
     
-    // 고급은 모든 유형 1개씩
+    // 고급은 모든 유형 3개씩
     if (subscriptionTier === SubscriptionTier.ADVANCED) {
       const sameTypeSearches = searches.filter(s => s.type === type);
-      if (sameTypeSearches.length >= 1) {
-        Alert.alert(
-          t('interest:alerts.limitTitle'),
-          t('interest:alerts.advancedLimitMessage'),
-          [
-            { text: t('interest:alerts.confirm'), style: 'cancel' },
-            { text: t('interest:alerts.upgradeButton'), onPress: () => navigation.navigate('Premium' as never) }
-          ]
-        );
+      if (sameTypeSearches.length >= 3) {
+        Toast.show({
+          type: 'info',
+          text1: '구독 제한',
+          text2: '고급 사용자는 각 유형별로 최대 3개까지 등록할 수 있습니다.',
+          position: 'bottom',
+          visibilityTime: 4000,
+        });
+        setTimeout(() => {
+          navigation.navigate('Premium' as never);
+        }, 1000);
         return false;
       }
       return true;
     }
     
-    // 일반은 총 3개, 모든 유형 허용 (테스트를 위해 임시로 제한 해제)
-    const allowedTypes = [
-      InterestType.PHONE, 
-      InterestType.EMAIL, 
-      InterestType.SOCIAL_ID, 
-      InterestType.NAME,
-      InterestType.GROUP,
-      InterestType.LOCATION,
-      InterestType.APPEARANCE,
-      InterestType.NICKNAME,
-      InterestType.COMPANY,
-      InterestType.SCHOOL,
-      InterestType.HOBBY,
-      InterestType.PLATFORM,
-      InterestType.GAME_ID
-    ];
-    if (!allowedTypes.includes(type)) {
-      Alert.alert(
-        t('interest:alerts.limitTitle'),
-        t('interest:alerts.basicLimitMessage'),
-        [
-          { text: t('interest:alerts.confirm'), style: 'cancel' },
-          { text: t('interest:alerts.subscribeButton'), onPress: () => navigation.navigate('Premium' as never) }
-        ]
-      );
-      return false;
-    }
-    
-    if (searches.length >= 3) {
-      Alert.alert(
-        t('interest:alerts.limitTitle'),
-        t('interest:alerts.basicCountMessage'),
-        [
-          { text: t('interest:alerts.confirm'), style: 'cancel' },
-          { text: t('interest:alerts.subscribeButton'), onPress: () => navigation.navigate('Premium' as never) }
-        ]
-      );
-      return false;
-    }
-    
+    // FREE 티어: 유형별로 1개씩, 최대 3개 유형까지
     const sameTypeSearches = searches.filter(s => s.type === type);
+    
+    // 이미 같은 유형이 있는지 확인
     if (sameTypeSearches.length >= 1) {
-      Alert.alert(
-        t('interest:alerts.limitTitle'),
-        t('interest:alerts.basicTypeMessage'),
-        [{ text: t('interest:alerts.confirm'), style: 'cancel' }]
-      );
+      Toast.show({
+        type: 'info',
+        text1: '구독 제한',
+        text2: `무료 사용자는 ${type} 유형으로 1개까지만 등록할 수 있습니다.`,
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+      setTimeout(() => {
+        navigation.navigate('Premium' as never);
+      }, 1000);
+      return false;
+    }
+    
+    // 등록된 유형 개수 확인
+    const uniqueTypes = new Set(searches.map(s => s.type));
+    
+    // 새로운 유형이고 이미 3개 유형이 등록되어 있으면
+    if (!uniqueTypes.has(type) && uniqueTypes.size >= 3) {
+      Toast.show({
+        type: 'info',
+        text1: '구독 제한',
+        text2: '무료 사용자는 최대 3개 유형까지만 등록할 수 있습니다.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+      setTimeout(() => {
+        navigation.navigate('Premium' as never);
+      }, 1000);
       return false;
     }
     
@@ -159,7 +155,13 @@ export const AddInterestScreen: React.FC = () => {
 
   const handleSelectContact = async () => {
     // 연락처 기능은 추후 구현
-    Alert.alert(t('interest:alerts.limitTitle'), t('interest:alerts.contactsNotReady'));
+    Toast.show({
+      type: 'info',
+      text1: '기능 준비 중',
+      text2: '연락처 가져오기 기능은 추후 구현 예정입니다.',
+      position: 'bottom',
+      visibilityTime: 3000,
+    });
     // const { status } = await Contacts.requestPermissionsAsync();
     // if (status === 'granted') {
     //   const { data } = await Contacts.getContactsAsync({
@@ -178,30 +180,60 @@ export const AddInterestScreen: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!selectedType) {
-      Alert.alert(t('interest:errors.selectType'), t('interest:errors.selectType'));
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '찾기 유형을 선택해주세요',
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
       return;
     }
 
     if (!value.trim()) {
-      Alert.alert(t('interest:errors.enterValue'), t('interest:errors.enterValue'));
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '값을 입력해주세요',
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
       return;
     }
 
     // 소셜 계정 타입일 때 플랫폼 필수 검증
     if (selectedType === InterestType.SOCIAL_ID && !metadata.platform) {
-      Alert.alert(t('interest:errors.selectPlatform'), t('interest:errors.selectPlatform'));
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '소셜 플랫폼을 선택해주세요',
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
       return;
     }
 
     // 기타 플랫폼 타입일 때 플랫폼명 필수 검증
     if (selectedType === InterestType.PLATFORM && !metadata.platformName) {
-      Alert.alert(t('interest:errors.enterPlatformName'), t('interest:errors.enterPlatformName'));
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '플랫폼명을 입력해주세요',
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
       return;
     }
     
     // 게임 타입일 때 게임명 필수 검증
     if (selectedType === InterestType.GAME_ID && !metadata.gameName) {
-      Alert.alert(t('interest:errors.enterGameName'), t('interest:errors.enterGameName'));
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '게임명을 입력해주세요',
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
       return;
     }
 
@@ -245,10 +277,41 @@ export const AddInterestScreen: React.FC = () => {
       });
 
       console.log('[AddInterestScreen] 관심상대 등록 성공, 화면 전환');
-      // Alert 대신 바로 뒤로 이동
-      navigation.goBack();
+      // 성공 메시지 표시 후 뒤로 이동
+      Toast.show({
+        type: 'success',
+        text1: '등록 완료',
+        text2: '관심상대가 성공적으로 등록되었습니다.',
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1000);
     } catch (error: any) {
-      Alert.alert(t('interest:errors.registrationError'), error.message || t('interest:errors.registrationError'));
+      console.error('[AddInterestScreen] 등록 실패:', error);
+      
+      // 구독 제한 관련 에러 메시지 처리
+      if (error.message?.includes('무료 사용자') || error.message?.includes('프리미엄')) {
+        Toast.show({
+          type: 'info',
+          text1: '구독 제한',
+          text2: error.message,
+          position: 'bottom',
+          visibilityTime: 4000,
+        });
+        setTimeout(() => {
+          navigation.navigate('Premium' as never);
+        }, 1000);
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: '등록 실패',
+          text2: error.message || '관심상대 등록에 실패했습니다. 다시 시도해주세요.',
+          position: 'bottom',
+          visibilityTime: 3000,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -261,7 +324,7 @@ export const AddInterestScreen: React.FC = () => {
       case InterestType.PHONE:
         return (
           <View style={styles.inputContainer}>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder={t('interest:placeholders.phone')}
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -282,7 +345,7 @@ export const AddInterestScreen: React.FC = () => {
       case InterestType.EMAIL:
         return (
           <View style={styles.inputContainer}>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder={t('interest:placeholders.email')}
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -392,7 +455,7 @@ export const AddInterestScreen: React.FC = () => {
             </View>
 
             {/* 소셜 계정 ID 입력 */}
-            <TextInput
+            <CrossPlatformInput
               style={[
                 styles.input, 
                 { 
@@ -422,7 +485,7 @@ export const AddInterestScreen: React.FC = () => {
       case InterestType.NAME:
         return (
           <View style={styles.inputContainer}>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="이름을 입력하세요 (성명)"
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -451,7 +514,7 @@ export const AddInterestScreen: React.FC = () => {
                 <Text style={[styles.birthdateLabel, { color: colors.TEXT.SECONDARY }]}>
                   생년월일 (선택)
                 </Text>
-                <TextInput
+                <CrossPlatformInput
                   style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
                   placeholder="YYYY-MM-DD (예: 1995-03-15)"
                   placeholderTextColor={colors.TEXT.TERTIARY}
@@ -477,26 +540,11 @@ export const AddInterestScreen: React.FC = () => {
           </View>
         );
 
-      case InterestType.APPEARANCE:
-        return (
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={[styles.textArea, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-              placeholder="인상착의를 자세히 설명해주세요&#10;예: 검은색 코트, 빨간 가방, 안경 착용"
-              placeholderTextColor={colors.TEXT.TERTIARY}
-              value={value}
-              onChangeText={setValue}
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
-          </View>
-        );
 
       case InterestType.COMPANY:
         return (
           <View style={styles.inputContainer}>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="회사명을 입력하세요"
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -527,7 +575,7 @@ export const AddInterestScreen: React.FC = () => {
                 </Text>
                 
                 {/* 이름 */}
-                <TextInput
+                <CrossPlatformInput
                   style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
                   placeholder="이름 (예: 김민수)"
                   placeholderTextColor={colors.TEXT.TERTIARY}
@@ -536,7 +584,7 @@ export const AddInterestScreen: React.FC = () => {
                 />
                 
                 {/* 부서 */}
-                <TextInput
+                <CrossPlatformInput
                   style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER, marginTop: 8 }]}
                   placeholder="부서명 (예: 마케팅팀, 개발1팀)"
                   placeholderTextColor={colors.TEXT.TERTIARY}
@@ -545,7 +593,7 @@ export const AddInterestScreen: React.FC = () => {
                 />
                 
                 {/* 생일 */}
-                <TextInput
+                <CrossPlatformInput
                   style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER, marginTop: 8 }]}
                   placeholder="생년월일 YYYY-MM-DD (예: 1995-03-15)"
                   placeholderTextColor={colors.TEXT.TERTIARY}
@@ -574,7 +622,7 @@ export const AddInterestScreen: React.FC = () => {
       case InterestType.SCHOOL:
         return (
           <View style={styles.inputContainer}>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="학교명을 입력하세요"
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -605,7 +653,7 @@ export const AddInterestScreen: React.FC = () => {
                 </Text>
                 
                 {/* 이름 */}
-                <TextInput
+                <CrossPlatformInput
                   style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
                   placeholder="이름 (예: 이지은)"
                   placeholderTextColor={colors.TEXT.TERTIARY}
@@ -614,7 +662,7 @@ export const AddInterestScreen: React.FC = () => {
                 />
                 
                 {/* 학과 */}
-                <TextInput
+                <CrossPlatformInput
                   style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER, marginTop: 8 }]}
                   placeholder="학과명 (예: 컴퓨터공학과, 경영학과)"
                   placeholderTextColor={colors.TEXT.TERTIARY}
@@ -623,7 +671,7 @@ export const AddInterestScreen: React.FC = () => {
                 />
                 
                 {/* 생일 */}
-                <TextInput
+                <CrossPlatformInput
                   style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER, marginTop: 8 }]}
                   placeholder="생년월일 YYYY-MM-DD (예: 2000-05-20)"
                   placeholderTextColor={colors.TEXT.TERTIARY}
@@ -652,7 +700,7 @@ export const AddInterestScreen: React.FC = () => {
       case InterestType.LOCATION:
         return (
           <View style={styles.inputContainer}>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="장소를 입력하세요 (예: 강남역 스타벅스)"
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -672,7 +720,7 @@ export const AddInterestScreen: React.FC = () => {
       case InterestType.GROUP:
         return (
           <View style={styles.inputContainer}>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="그룹 ID 또는 이름을 입력하세요"
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -688,7 +736,7 @@ export const AddInterestScreen: React.FC = () => {
       case InterestType.NICKNAME:
         return (
           <View style={styles.inputContainer}>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="닉네임 일부를 입력하세요"
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -704,7 +752,7 @@ export const AddInterestScreen: React.FC = () => {
       case InterestType.HOBBY:
         return (
           <View style={styles.inputContainer}>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="취미/관심사를 입력하세요 (예: 등산, 독서, 요리)"
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -724,7 +772,7 @@ export const AddInterestScreen: React.FC = () => {
             <Text style={[styles.inputLabel, { color: colors.TEXT.PRIMARY }]}>
               플랫폼명 <Text style={{ color: colors.ERROR }}>*</Text>
             </Text>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="플랫폼명을 입력하세요 (예: Discord, Slack, LinkedIn)"
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -735,7 +783,7 @@ export const AddInterestScreen: React.FC = () => {
             <Text style={[styles.inputLabel, { color: colors.TEXT.PRIMARY, marginTop: 12 }]}>
               플랫폼 아이디 <Text style={{ color: colors.ERROR }}>*</Text>
             </Text>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="플랫폼에서 사용하는 아이디를 입력하세요"
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -757,7 +805,7 @@ export const AddInterestScreen: React.FC = () => {
             <Text style={[styles.inputLabel, { color: colors.TEXT.PRIMARY }]}>
               게임명 <Text style={{ color: colors.ERROR }}>*</Text>
             </Text>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="게임명을 입력하세요 (예: 리그 오브 레전드, 배틀그라운드)"
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -768,7 +816,7 @@ export const AddInterestScreen: React.FC = () => {
             <Text style={[styles.inputLabel, { color: colors.TEXT.PRIMARY, marginTop: 12 }]}>
               게임 아이디 <Text style={{ color: colors.ERROR }}>*</Text>
             </Text>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="게임 내 아이디를 입력하세요"
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -786,7 +834,7 @@ export const AddInterestScreen: React.FC = () => {
       default:
         return (
           <View style={styles.inputContainer}>
-            <TextInput
+            <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder={`${interestTypes.find(t => t.type === selectedType)?.label}을(를) 입력하세요`}
               placeholderTextColor={colors.TEXT.TERTIARY}
@@ -811,7 +859,7 @@ export const AddInterestScreen: React.FC = () => {
               <Icon name="arrow-back" size={28} color={colors.TEXT.PRIMARY} />
             </TouchableOpacity>
             <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>
-              {t('interest:title')}
+              {relationshipType === 'friend' ? '친구 찾기' : '관심상대 찾기'}
             </Text>
             <View style={{ width: 28 }} />
           </View>
@@ -819,7 +867,7 @@ export const AddInterestScreen: React.FC = () => {
           {/* 검색 유형 선택 */}
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-              {t('interest:selectType')}
+              {relationshipType === 'friend' ? '친구를 찾을 방법 선택' : '관심상대를 찾을 방법 선택'}
             </Text>
             <View style={styles.typeGrid}>
               {interestTypes.map((item) => (
@@ -831,8 +879,12 @@ export const AddInterestScreen: React.FC = () => {
                     selectedType === item.type && { borderColor: item.color, borderWidth: 2 },
                   ]}
                   onPress={() => {
-                    if (checkSubscriptionLimits(item.type)) {
+                    console.log('[AddInterestScreen] Type clicked:', item.type);
+                    const canProceed = checkSubscriptionLimits(item.type);
+                    console.log('[AddInterestScreen] checkSubscriptionLimits result:', canProceed);
+                    if (canProceed) {
                       setSelectedType(item.type);
+                      console.log('[AddInterestScreen] selectedType set to:', item.type);
                     }
                   }}
                 >
@@ -847,66 +899,9 @@ export const AddInterestScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* 관계 유형 선택 */}
-          {selectedType && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-                관계 유형
-              </Text>
-              <View style={styles.relationshipContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.relationshipOption,
-                    { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
-                    relationshipIntent === RelationshipIntent.FRIEND && { 
-                      borderColor: colors.PRIMARY, 
-                      borderWidth: 2,
-                      backgroundColor: colors.PRIMARY + '10'
-                    },
-                  ]}
-                  onPress={() => setRelationshipIntent(RelationshipIntent.FRIEND)}
-                >
-                  <View style={styles.radioButton}>
-                    {relationshipIntent === RelationshipIntent.FRIEND && (
-                      <View style={[styles.radioButtonInner, { backgroundColor: colors.PRIMARY }]} />
-                    )}
-                  </View>
-                  <Icon name="people-outline" size={24} color={colors.PRIMARY} />
-                  <Text style={[styles.relationshipText, { color: colors.TEXT.PRIMARY }]}>
-                    친구
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.relationshipOption,
-                    { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
-                    relationshipIntent === RelationshipIntent.ROMANTIC && { 
-                      borderColor: colors.ERROR, 
-                      borderWidth: 2,
-                      backgroundColor: colors.ERROR + '10'
-                    },
-                  ]}
-                  onPress={() => setRelationshipIntent(RelationshipIntent.ROMANTIC)}
-                >
-                  <View style={styles.radioButton}>
-                    {relationshipIntent === RelationshipIntent.ROMANTIC && (
-                      <View style={[styles.radioButtonInner, { backgroundColor: colors.ERROR }]} />
-                    )}
-                  </View>
-                  <Icon name="heart-outline" size={24} color={colors.ERROR} />
-                  <Text style={[styles.relationshipText, { color: colors.TEXT.PRIMARY }]}>
-                    호감
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <Text style={[styles.relationshipHint, { color: colors.TEXT.TERTIARY }]}>
-                같은 관계 유형끼리만 매칭됩니다
-              </Text>
-            </View>
-          )}
 
           {/* 입력 필드 */}
+          {console.log('[AddInterestScreen] Rendering input section, selectedType:', selectedType)}
           {selectedType && (
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
@@ -919,7 +914,7 @@ export const AddInterestScreen: React.FC = () => {
                 <Text style={[styles.nameLabel, { color: colors.TEXT.SECONDARY }]}>
                   이름 (선택)
                 </Text>
-                <TextInput
+                <CrossPlatformInput
                   style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
                   placeholder="이름을 입력하세요 (선택사항)"
                   placeholderTextColor={colors.TEXT.TERTIARY}
@@ -1038,7 +1033,7 @@ export const AddInterestScreen: React.FC = () => {
             disabled={!selectedType || !value.trim() || loading}
           >
             <Text style={styles.submitButtonText}>
-              {loading ? t('interest:buttons.registering') : t('interest:buttons.register')}
+              {loading ? '등록 중...' : (relationshipType === 'friend' ? '친구 찾기 등록' : '관심상대 찾기 등록')}
             </Text>
           </TouchableOpacity>
 
@@ -1047,10 +1042,12 @@ export const AddInterestScreen: React.FC = () => {
             <Icon name="information-circle-outline" size={20} color={colors.INFO} />
             <View style={{ flex: 1 }}>
               <Text style={[styles.infoTitle, { color: colors.TEXT.PRIMARY }]}>
-                {t('interest:info.title')}
+                {relationshipType === 'friend' ? '친구 찾기 안내' : '관심상대 찾기 안내'}
               </Text>
               <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
-                {t('interest:info.content')}
+                {relationshipType === 'friend' 
+                  ? '서로가 친구로 등록하면 매칭이 성립됩니다. 매칭 시 닉네임이 공개되어 대화를 시작할 수 있습니다.'
+                  : '서로가 관심을 표시하면 매칭이 성립됩니다. 매칭 시 닉네임이 공개되어 대화를 시작할 수 있습니다.'}
               </Text>
             </View>
           </View>

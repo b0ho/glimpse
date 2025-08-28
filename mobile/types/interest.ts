@@ -9,7 +9,6 @@ export enum InterestType {
   NAME = 'NAME',  // 이름으로 찾기
   GROUP = 'GROUP',
   LOCATION = 'LOCATION',
-  APPEARANCE = 'APPEARANCE',
   NICKNAME = 'NICKNAME',
   COMPANY = 'COMPANY',
   SCHOOL = 'SCHOOL',

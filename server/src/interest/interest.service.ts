@@ -25,7 +25,6 @@ enum InterestType {
   NAME = 'NAME',
   GROUP = 'GROUP',
   LOCATION = 'LOCATION',
-  APPEARANCE = 'APPEARANCE',
   NICKNAME = 'NICKNAME',
   COMPANY = 'COMPANY',
   SCHOOL = 'SCHOOL',
@@ -103,12 +102,35 @@ export class InterestService {
         break;
     }
 
+    // 프리미엄 레벨별 제한 검사
     if (activeSearchCount >= maxSearchesPerType) {
       const message =
         premiumLevel === 'FREE'
           ? `무료 사용자는 ${dto.type} 유형으로 최대 ${maxSearchesPerType}개까지만 등록 가능합니다. 프리미엄 업그레이드를 통해 더 많은 관심상대를 등록하세요.`
           : `현재 프리미엄 레벨에서는 ${dto.type} 유형으로 최대 ${maxSearchesPerType}개까지만 등록 가능합니다.`;
       throw new BadRequestException(message);
+    }
+    
+    // FREE 계정은 최대 3개 유형까지만 등록 가능
+    if (premiumLevel === 'FREE') {
+      const uniqueTypes = await this.prisma.interestSearch.findMany({
+        where: {
+          userId,
+          status: SearchStatus.ACTIVE,
+        },
+        select: {
+          type: true,
+        },
+        distinct: ['type'],
+      });
+      
+      const hasCurrentType = uniqueTypes.some(search => search.type === dto.type);
+      
+      if (uniqueTypes.length >= 3 && !hasCurrentType) {
+        throw new BadRequestException(
+          '무료 사용자는 최대 3개 유형까지만 등록 가능합니다. 프리미엄 업그레이드를 통해 더 많은 유형을 등록하세요.'
+        );
+      }
     }
 
     // 유효기간 설정
@@ -377,11 +399,6 @@ export class InterestService {
       case InterestType.LOCATION:
         // 장소 매칭 - 위치 정보 확인
         await this.checkLocationMatches(search);
-        break;
-
-      case InterestType.APPEARANCE:
-        // 인상착의 매칭 - 설명 텍스트 매칭
-        await this.checkAppearanceMatches(search);
         break;
 
       case InterestType.NICKNAME:
@@ -818,39 +835,6 @@ export class InterestService {
     }
   }
 
-  /**
-   * 인상착의 매칭 확인
-   */
-  private async checkAppearanceMatches(search: any): Promise<void> {
-    // 인상착의 설명이 유사한 사용자 찾기
-    const allAppearanceSearches = await this.prisma.interestSearch.findMany({
-      where: {
-        type: InterestType.APPEARANCE,
-        status: SearchStatus.ACTIVE,
-        userId: { not: search.userId },
-      },
-      include: {
-        user: true,
-      },
-    });
-
-    for (const potentialMatch of allAppearanceSearches) {
-      // 간단한 텍스트 유사도 확인 (키워드 포함 여부)
-      const searchKeywords = search.value.toLowerCase().split(' ');
-      const matchKeywords = potentialMatch.value.toLowerCase().split(' ');
-
-      const commonKeywords = searchKeywords.filter((keyword: string) =>
-        matchKeywords.some(
-          (mk) => mk.includes(keyword) || keyword.includes(mk),
-        ),
-      );
-
-      // 키워드가 50% 이상 일치하면 매칭
-      if (commonKeywords.length >= searchKeywords.length * 0.5) {
-        await this.createMatch(search, potentialMatch);
-      }
-    }
-  }
 
   /**
    * 닉네임 매칭 확인
