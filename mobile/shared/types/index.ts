@@ -74,6 +74,35 @@ export interface User {
   drinking?: string;
   smoking?: string;
   
+  // 12종 유형 정보 (관심상대 찾기와 동일한 유형들)
+  email?: string; // EMAIL 유형
+  socialIds?: { // SOCIAL_ID 유형
+    platform: string;
+    id: string;
+  }[];
+  school?: string; // SCHOOL 유형
+  major?: string; // 학과/전공
+  partTimeJob?: { // PART_TIME_JOB 유형
+    place: string; // 알바 장소
+    position?: string; // 포지션
+    workingHours?: string; // 근무시간대
+  };
+  platformIds?: { // PLATFORM 유형 (Discord, Slack 등)
+    platform: string;
+    id: string;
+  }[];
+  gameIds?: { // GAME_ID 유형
+    game: string;
+    id: string;
+  }[];
+  birthdate?: string; // 생년월일 (YYYY-MM-DD) - BIRTHDATE 유형
+  appearance?: string; // 인상착의 (LOCATION 유형과 함께 사용)
+  hobbies?: string; // 취미/관심사
+  realName?: string; // 실명 (선택)
+  groups?: string[]; // 소속 그룹들 (동호회, 모임 등)
+  department?: string; // 부서/팀 (회사)
+  studentId?: string; // 학번 (학교)
+  
   // Relations
   matches?: Match[];
   friends?: User[];
@@ -108,9 +137,40 @@ export interface UserCreateRequest {
  */
 export interface UserUpdateRequest {
   nickname?: string;
+  realName?: string;
   age?: number;
   bio?: string;
   profileImage?: string;
+  gender?: Gender;
+  birthdate?: string;
+  email?: string;
+  phoneNumber?: string;
+  companyName?: string;
+  school?: string;
+  major?: string;
+  location?: string;
+  appearance?: string;
+  hobbies?: string;
+  partTimeJob?: {
+    place: string;
+    position?: string;
+    workingHours?: string;
+  };
+  socialIds?: {
+    platform: string;
+    id: string;
+  }[];
+  platformIds?: {
+    platform: string;
+    id: string;
+  }[];
+  gameIds?: {
+    game: string;
+    id: string;
+  }[];
+  groups?: string[];
+  department?: string;
+  studentId?: string;
 }
 
 /**

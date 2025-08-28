@@ -2,17 +2,24 @@
  * 관심상대 찾기 관련 타입 정의
  */
 
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  OTHER = 'OTHER',
+  PREFER_NOT_TO_SAY = 'PREFER_NOT_TO_SAY',
+}
+
 export enum InterestType {
   PHONE = 'PHONE',
   EMAIL = 'EMAIL',
   SOCIAL_ID = 'SOCIAL_ID',
-  NAME = 'NAME',  // 이름으로 찾기
+  BIRTHDATE = 'BIRTHDATE',  // 생년월일로 찾기
   GROUP = 'GROUP',
-  LOCATION = 'LOCATION',
+  LOCATION = 'LOCATION',  // 장소 + 인상착의
   NICKNAME = 'NICKNAME',
   COMPANY = 'COMPANY',
   SCHOOL = 'SCHOOL',
-  HOBBY = 'HOBBY',
+  PART_TIME_JOB = 'PART_TIME_JOB',  // 알바
   PLATFORM = 'PLATFORM',  // 기타 플랫폼 (Discord, Slack 등)
   GAME_ID = 'GAME_ID',    // 게임 아이디
 }
@@ -29,6 +36,7 @@ export interface InterestSearch {
   type: InterestType;
   value: string;
   metadata?: Record<string, any>;
+  gender?: Gender; // 찾고자 하는 성별
   status: SearchStatus;
   matchedWithId?: string;
   matchedAt?: Date;
@@ -63,6 +71,7 @@ export interface CreateInterestSearchDto {
   type: InterestType;
   value: string;
   metadata?: Record<string, any>;
+  gender?: Gender; // 찾고자 하는 성별
   expiresAt?: string;
 }
 

@@ -15,23 +15,7 @@ import {
   InterestSearchResponseDto,
   InterestMatchResponseDto,
 } from './dto/interest.dto';
-import { SearchStatus, Prisma } from '@prisma/client';
-
-// InterestType enum 정의 (Prisma 스키마와 동기화)
-enum InterestType {
-  PHONE = 'PHONE',
-  EMAIL = 'EMAIL',
-  SOCIAL_ID = 'SOCIAL_ID',
-  NAME = 'NAME',
-  GROUP = 'GROUP',
-  LOCATION = 'LOCATION',
-  NICKNAME = 'NICKNAME',
-  COMPANY = 'COMPANY',
-  SCHOOL = 'SCHOOL',
-  HOBBY = 'HOBBY',
-  PLATFORM = 'PLATFORM',  // 기타 플랫폼 (Discord, Slack 등)
-  GAME_ID = 'GAME_ID',    // 게임 아이디
-}
+import { SearchStatus, Prisma, InterestType } from '@prisma/client';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -110,7 +94,7 @@ export class InterestService {
           : `현재 프리미엄 레벨에서는 ${dto.type} 유형으로 최대 ${maxSearchesPerType}개까지만 등록 가능합니다.`;
       throw new BadRequestException(message);
     }
-    
+
     // FREE 계정은 최대 3개 유형까지만 등록 가능
     if (premiumLevel === 'FREE') {
       const uniqueTypes = await this.prisma.interestSearch.findMany({
@@ -123,12 +107,14 @@ export class InterestService {
         },
         distinct: ['type'],
       });
-      
-      const hasCurrentType = uniqueTypes.some(search => search.type === dto.type);
-      
+
+      const hasCurrentType = uniqueTypes.some(
+        (search) => search.type === dto.type,
+      );
+
       if (uniqueTypes.length >= 3 && !hasCurrentType) {
         throw new BadRequestException(
-          '무료 사용자는 최대 3개 유형까지만 등록 가능합니다. 프리미엄 업그레이드를 통해 더 많은 유형을 등록하세요.'
+          '무료 사용자는 최대 3개 유형까지만 등록 가능합니다. 프리미엄 업그레이드를 통해 더 많은 유형을 등록하세요.',
         );
       }
     }
@@ -376,7 +362,7 @@ export class InterestService {
 
     // 타입별 특수 매칭 로직
     switch (search.type) {
-      case InterestType.NAME:
+      case InterestType.BIRTHDATE:
         // 이름 매칭 - 생일 정보도 함께 고려
         await this.checkNameMatches(search);
         break;
@@ -406,12 +392,12 @@ export class InterestService {
         await this.checkNicknameMatches(search);
         break;
 
-      case InterestType.HOBBY:
-        // 취미/관심사 매칭
-        await this.checkHobbyMatches(search);
+      case InterestType.PART_TIME_JOB:
+        // 알바 매칭
+        await this.checkPartTimeJobMatches(search);
         break;
 
-      default:
+      default: {
         // 기본 매칭 (PHONE, EMAIL, SOCIAL_ID)
         const potentialMatches = await this.prisma.interestSearch.findMany({
           where: {
@@ -432,6 +418,7 @@ export class InterestService {
           }
         }
         break;
+      }
     }
   }
 
@@ -540,7 +527,7 @@ export class InterestService {
   /**
    * 값 정규화
    */
-  private normalizeValue(type: InterestType | string, value: string): string {
+  private normalizeValue(type: InterestType, value: string): string {
     switch (type) {
       case InterestType.PHONE:
         // 전화번호 정규화 (하이픈 제거, 국가 코드 처리)
@@ -551,7 +538,7 @@ export class InterestService {
       case InterestType.SOCIAL_ID:
         // 소셜 ID 정규화
         return value.toLowerCase().trim().replace('@', '');
-      case InterestType.NAME:
+      case InterestType.BIRTHDATE:
         // 이름 정규화 (공백 제거)
         return value.replace(/\s+/g, '').trim();
       case InterestType.COMPANY:
@@ -561,12 +548,9 @@ export class InterestService {
       case InterestType.NICKNAME:
         // 닉네임 정규화
         return value.trim().toLowerCase();
-      case InterestType.HOBBY:
-        // 취미 정규화 (콤마로 구분, 공백 제거)
-        return value
-          .split(',')
-          .map((h) => h.trim().toLowerCase())
-          .join(',');
+      case InterestType.PART_TIME_JOB:
+        // 알바 정규화 (공백 제거, 소문자)
+        return value.replace(/\s+/g, ' ').trim().toLowerCase();
       default:
         return value.trim();
     }
@@ -575,7 +559,7 @@ export class InterestService {
   /**
    * 암호화 필요 여부 확인
    */
-  private shouldEncrypt(type: InterestType | string): boolean {
+  private shouldEncrypt(type: InterestType): boolean {
     return type === InterestType.PHONE || type === InterestType.EMAIL;
   }
 
@@ -620,10 +604,7 @@ export class InterestService {
   /**
    * 민감한 값 마스킹
    */
-  private maskSensitiveValue(
-    type: InterestType | string,
-    value: string,
-  ): string {
+  private maskSensitiveValue(type: InterestType, value: string): string {
     switch (type) {
       case InterestType.PHONE:
         // 010-****-5678 형태로 마스킹
@@ -649,7 +630,7 @@ export class InterestService {
    */
   private async checkNameMatches(search: any): Promise<void> {
     const whereCondition: any = {
-      type: InterestType.NAME,
+      type: InterestType.BIRTHDATE,
       value: search.value,
       status: SearchStatus.ACTIVE,
       userId: { not: search.userId },
@@ -814,7 +795,7 @@ export class InterestService {
   }
 
   /**
-   * 위치 매칭 확인
+   * 위치 매칭 확인 (인상착의 포함)
    */
   private async checkLocationMatches(search: any): Promise<void> {
     // 위치 기반 매칭 - 같은 장소를 등록한 사용자들
@@ -831,10 +812,64 @@ export class InterestService {
     });
 
     for (const potentialMatch of potentialMatches) {
-      await this.createMatch(search, potentialMatch);
+      let shouldMatch = true;
+
+      // 인상착의 정보가 있으면 비교
+      const searchMeta = search.metadata;
+      const matchMeta = potentialMatch.metadata as any;
+
+      if (searchMeta?.appearance && matchMeta?.appearance) {
+        // 인상착의 유사도 확인 (간단한 키워드 매칭)
+        const searchAppearance = searchMeta.appearance.toLowerCase();
+        const matchAppearance = matchMeta.appearance.toLowerCase();
+
+        // 공통 키워드가 없으면 매칭하지 않음
+        const searchKeywords = searchAppearance.split(/[\s,]+/);
+        const matchKeywords = matchAppearance.split(/[\s,]+/);
+
+        const hasCommon = searchKeywords.some((keyword: string) =>
+          matchKeywords.includes(keyword),
+        );
+
+        if (!hasCommon) {
+          shouldMatch = false;
+        }
+      }
+
+      if (shouldMatch) {
+        await this.createMatch(search, potentialMatch);
+      }
+    }
+
+    // 사용자 프로필의 위치/인상착의 정보와도 매칭
+    const searchMeta = search.metadata;
+    if (searchMeta?.appearance) {
+      const users = await this.prisma.user.findMany({
+        where: {
+          id: { not: search.userId },
+          appearance: {
+            contains: searchMeta.appearance,
+            mode: 'insensitive',
+          },
+        },
+      });
+
+      for (const user of users) {
+        // 해당 사용자가 역으로 위치 검색을 등록했는지 확인
+        const reverseSearch = await this.prisma.interestSearch.findFirst({
+          where: {
+            userId: user.id,
+            type: InterestType.LOCATION,
+            status: SearchStatus.ACTIVE,
+          },
+        });
+
+        if (reverseSearch) {
+          await this.createMatch(search, reverseSearch);
+        }
+      }
     }
   }
-
 
   /**
    * 닉네임 매칭 확인
@@ -879,17 +914,13 @@ export class InterestService {
   }
 
   /**
-   * 취미/관심사 매칭 확인
+   * 알바 매칭 확인
    */
-  private async checkHobbyMatches(search: any): Promise<void> {
-    // 같은 취미/관심사를 등록한 사용자들
+  private async checkPartTimeJobMatches(search: any): Promise<void> {
+    // 먼저 동일한 알바 검색을 등록한 사용자들 확인
     const potentialMatches = await this.prisma.interestSearch.findMany({
       where: {
-        type: InterestType.HOBBY,
-        value: {
-          contains: search.value,
-          mode: 'insensitive',
-        },
+        type: InterestType.PART_TIME_JOB,
         status: SearchStatus.ACTIVE,
         userId: { not: search.userId },
       },
@@ -899,23 +930,60 @@ export class InterestService {
     });
 
     for (const potentialMatch of potentialMatches) {
-      // 취미가 유사하면 매칭
-      const searchHobbies = search.value
-        .toLowerCase()
-        .split(',')
-        .map((h: string) => h.trim());
-      const matchHobbies = potentialMatch.value
-        .toLowerCase()
-        .split(',')
-        .map((h: string) => h.trim());
+      let shouldMatch = false;
 
-      const commonHobbies = searchHobbies.filter((hobby: string) =>
-        matchHobbies.some((mh) => mh.includes(hobby) || hobby.includes(mh)),
-      );
+      // metadata를 확인하여 알바 정보 비교
+      const searchMeta = search.metadata;
+      const matchMeta = potentialMatch.metadata as any;
 
-      // 공통 취미가 있으면 매칭
-      if (commonHobbies.length > 0) {
+      if (searchMeta?.place && matchMeta?.place) {
+        // 같은 알바 장소인 경우
+        if (searchMeta.place.toLowerCase() === matchMeta.place.toLowerCase()) {
+          shouldMatch = true;
+
+          // 포지션도 같다면 더 높은 우선순위
+          if (
+            searchMeta.position &&
+            matchMeta.position &&
+            searchMeta.position.toLowerCase() ===
+              matchMeta.position.toLowerCase()
+          ) {
+            // 추가 가중치 부여 가능
+          }
+        }
+      }
+
+      if (shouldMatch) {
         await this.createMatch(search, potentialMatch);
+      }
+    }
+
+    // 사용자 프로필에서도 알바 정보 확인
+    const searchMeta = search.metadata;
+    if (searchMeta?.place) {
+      const users = await this.prisma.user.findMany({
+        where: {
+          id: { not: search.userId },
+          partTimeJob: {
+            path: ['place'],
+            string_contains: searchMeta.place,
+          },
+        },
+      });
+
+      for (const user of users) {
+        // 해당 사용자가 역으로 알바 검색을 등록했는지 확인
+        const reverseSearch = await this.prisma.interestSearch.findFirst({
+          where: {
+            userId: user.id,
+            type: InterestType.PART_TIME_JOB,
+            status: SearchStatus.ACTIVE,
+          },
+        });
+
+        if (reverseSearch) {
+          await this.createMatch(search, reverseSearch);
+        }
       }
     }
   }

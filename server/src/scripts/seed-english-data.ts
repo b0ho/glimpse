@@ -386,7 +386,7 @@ async function seedEnglishData() {
           user1Id: user3.id,
           user2Id: user4.id,
           groupId: groups[1].id,
-          interestType: 'NAME',
+          interestType: 'NICKNAME',
           relationshipIntent: 'FRIEND',
           isActive: true,
         },

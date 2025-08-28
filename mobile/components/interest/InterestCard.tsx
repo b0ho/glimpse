@@ -55,8 +55,8 @@ export const InterestCard: React.FC<InterestCardProps> = ({
         color: '#E91E63',
         gradient: ['#E91E63', '#C2185B'],
       },
-      [InterestType.NAME]: {
-        icon: 'person-outline',
+      [InterestType.BIRTHDATE]: {
+        icon: 'calendar-outline',
         color: '#9C27B0',
         gradient: ['#9C27B0', '#7B1FA2'],
       },
@@ -85,8 +85,8 @@ export const InterestCard: React.FC<InterestCardProps> = ({
         color: '#00BCD4',
         gradient: ['#00BCD4', '#0097A7'],
       },
-      [InterestType.HOBBY]: {
-        icon: 'heart-outline',
+      [InterestType.PART_TIME_JOB]: {
+        icon: 'briefcase-outline',
         color: '#F44336',
         gradient: ['#F44336', '#D32F2F'],
       },
@@ -101,7 +101,7 @@ export const InterestCard: React.FC<InterestCardProps> = ({
         gradient: ['#673AB7', '#512DA8'],
       },
     };
-    return configs[type] || configs[InterestType.HOBBY];
+    return configs[type] || configs[InterestType.NICKNAME];
   };
 
   const typeConfig = getTypeConfig(item.type || item.matchType);
@@ -305,13 +305,13 @@ function getTypeLabel(type: InterestType): string {
     [InterestType.PHONE]: '전화번호',
     [InterestType.EMAIL]: '이메일',
     [InterestType.SOCIAL_ID]: '소셜 계정',
-    [InterestType.NAME]: '이름',
+    [InterestType.BIRTHDATE]: '생년월일',
     [InterestType.GROUP]: '특정 그룹',
-    [InterestType.LOCATION]: '장소',
+    [InterestType.LOCATION]: '장소/인상착의',
     [InterestType.NICKNAME]: '닉네임',
     [InterestType.COMPANY]: '회사',
     [InterestType.SCHOOL]: '학교',
-    [InterestType.HOBBY]: '취미/관심사',
+    [InterestType.PART_TIME_JOB]: '알바',
     [InterestType.PLATFORM]: '기타 플랫폼',
     [InterestType.GAME_ID]: '게임',
   };

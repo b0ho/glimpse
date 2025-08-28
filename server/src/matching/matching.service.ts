@@ -166,7 +166,7 @@ export class MatchingService {
           fromUserId: targetUserId,
           toUserId: userId,
           groupId,
-          relationshipIntent,  // 동일한 관심 유형만 매칭
+          relationshipIntent, // 동일한 관심 유형만 매칭
           isMatch: false,
         },
       });

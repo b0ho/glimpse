@@ -34,14 +34,30 @@ model User {
   updatedAt     DateTime @updatedAt
   
   // Additional profile fields
+  realName      String? // 실명 (매칭 후 공개)
+  email         String?
+  birthdate     String? // 생년월일 (YYYY-MM-DD)
   companyName   String?
   education     String?
+  school        String? // 학교명
+  major         String? // 학과/전공
   location      String?
   interests     String[] // Array of interests
   height        Int?
   mbti          String?
   drinking      String?
   smoking       String?
+  
+  // 12종 유형 정보
+  socialIds     Json? // [{platform: string, id: string}]
+  platformIds   Json? // [{platform: string, id: string}]
+  gameIds       Json? // [{game: string, id: string}]
+  partTimeJob   Json? // {place: string, position?: string, workingHours?: string}
+  appearance    String? // 인상착의
+  hobbies       String? // 취미/관심사
+  groups        String[] // 소속 그룹들 (동호회, 모임 등)
+  department    String? // 부서/팀 (회사)
+  studentId     String? // 학번 (학교)
   
   // Settings
   privacySettings Json?
@@ -910,6 +926,7 @@ model InterestSearch {
   userId          String
   type            InterestType     // 검색 유형
   value           String           // 검색 값
+  gender          Gender?          // 찾고자 하는 성별
   metadata        Json?            // 추가 메타데이터
   status          SearchStatus     @default(ACTIVE)
   matchedWithId   String?          // 매칭된 상대방 ID
@@ -930,14 +947,13 @@ enum InterestType {
   PHONE           // 전화번호
   EMAIL           // 이메일
   SOCIAL_ID       // 소셜 계정 ID
-  NAME            // 이름으로 찾기
+  BIRTHDATE       // 생년월일로 찾기
   GROUP           // 특정 그룹
-  LOCATION        // 장소
-  APPEARANCE      // 인상착의
+  LOCATION        // 장소 + 인상착의
   NICKNAME        // 닉네임 일부
   COMPANY         // 회사명
   SCHOOL          // 학교명
-  HOBBY           // 취미/관심사
+  PART_TIME_JOB   // 알바
   PLATFORM        // 플랫폼 (SNS, 메신저, 앱 등)
   GAME_ID         // 게임 아이디
   LIKE            // 좋아요/매칭

@@ -7,7 +7,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { InterestType, SearchStatus } from '@prisma/client';
+import { InterestType, SearchStatus, Gender } from '@prisma/client';
 
 export class CreateInterestSearchDto {
   @IsEnum(InterestType)
@@ -17,6 +17,10 @@ export class CreateInterestSearchDto {
   @MinLength(1)
   @MaxLength(500)
   value: string;
+
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: Gender;
 
   @IsOptional()
   @IsString()
@@ -68,6 +72,7 @@ export class InterestSearchResponseDto {
   id: string;
   type: InterestType;
   value: string;
+  gender?: Gender;
   metadata?: Record<string, any>;
   status: SearchStatus;
   matchedWithId?: string;

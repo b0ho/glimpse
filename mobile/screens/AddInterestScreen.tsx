@@ -16,7 +16,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { useInterestStore } from '@/store/slices/interestSlice';
-import { InterestType } from '@/types/interest';
+import { InterestType, Gender } from '@/types/interest';
 import { RelationshipIntent } from '@/shared/types';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
@@ -42,6 +42,7 @@ export const AddInterestScreen: React.FC = () => {
   const [value, setValue] = useState('');
   const [name, setName] = useState(''); // 이름 필드 추가
   const [metadata, setMetadata] = useState<any>({});
+  const [selectedGender, setSelectedGender] = useState<Gender | null>(null); // 성별 선택
   const [birthdate, setBirthdate] = useState<string>(''); // 생일 (YYYY-MM-DD)
   const [showBirthdateOption, setShowBirthdateOption] = useState(false);
   const [companyName, setCompanyName] = useState(''); // 회사/학교에서 사용할 이름
@@ -70,18 +71,18 @@ export const AddInterestScreen: React.FC = () => {
   const relationshipIntent = relationshipType === 'romantic' ? RelationshipIntent.ROMANTIC : RelationshipIntent.FRIEND;
 
   const getInterestTypes = () => [
-    { type: InterestType.PHONE, label: t('interest:types.phone'), icon: 'call-outline', color: '#4CAF50' },
-    { type: InterestType.EMAIL, label: t('interest:types.email'), icon: 'mail-outline', color: '#2196F3' },
-    { type: InterestType.SOCIAL_ID, label: t('interest:types.socialId'), icon: 'logo-instagram', color: '#E91E63' },
-    { type: InterestType.NAME, label: t('interest:types.name'), icon: 'person-outline', color: '#9C27B0' },
-    { type: InterestType.GROUP, label: t('interest:types.group'), icon: 'people-outline', color: '#9C27B0' },
-    { type: InterestType.LOCATION, label: t('interest:types.location'), icon: 'location-outline', color: '#FF9800' },
-    { type: InterestType.NICKNAME, label: t('interest:types.nickname'), icon: 'at-outline', color: '#607D8B' },
-    { type: InterestType.COMPANY, label: t('interest:types.company'), icon: 'business-outline', color: '#3F51B5' },
-    { type: InterestType.SCHOOL, label: t('interest:types.school'), icon: 'school-outline', color: '#00BCD4' },
-    { type: InterestType.HOBBY, label: t('interest:types.hobby'), icon: 'heart-outline', color: '#F44336' },
-    { type: InterestType.PLATFORM, label: t('interest:types.platform'), icon: 'globe-outline', color: '#9C27B0' },
-    { type: InterestType.GAME_ID, label: t('interest:types.gameId'), icon: 'game-controller-outline', color: '#673AB7' },
+    { type: InterestType.PHONE, label: '전화번호', icon: 'call-outline', color: '#4CAF50' },
+    { type: InterestType.EMAIL, label: '이메일', icon: 'mail-outline', color: '#2196F3' },
+    { type: InterestType.SOCIAL_ID, label: '소셜 계정', icon: 'logo-instagram', color: '#E91E63' },
+    { type: InterestType.BIRTHDATE, label: '생년월일', icon: 'calendar-outline', color: '#9C27B0' },
+    { type: InterestType.GROUP, label: '특정 그룹', icon: 'people-outline', color: '#9C27B0' },
+    { type: InterestType.LOCATION, label: '장소/인상착의', icon: 'location-outline', color: '#FF9800' },
+    { type: InterestType.NICKNAME, label: '닉네임', icon: 'at-outline', color: '#607D8B' },
+    { type: InterestType.COMPANY, label: '회사', icon: 'business-outline', color: '#3F51B5' },
+    { type: InterestType.SCHOOL, label: '학교', icon: 'school-outline', color: '#00BCD4' },
+    { type: InterestType.PART_TIME_JOB, label: '알바', icon: 'time-outline', color: '#FF5722' },
+    { type: InterestType.PLATFORM, label: '기타 플랫폼', icon: 'globe-outline', color: '#9C27B0' },
+    { type: InterestType.GAME_ID, label: '게임 아이디', icon: 'game-controller-outline', color: '#673AB7' },
   ];
 
   const interestTypes = getInterestTypes();
@@ -237,6 +238,18 @@ export const AddInterestScreen: React.FC = () => {
       return;
     }
 
+    // 성별 선택 필수 검증
+    if (!selectedGender) {
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '찾고자 하는 성별을 선택해주세요',
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       // metadata 구성
@@ -273,6 +286,7 @@ export const AddInterestScreen: React.FC = () => {
           ...searchMetadata, 
           relationshipIntent 
         },
+        gender: selectedGender, // 성별 추가
         expiresAt: expiresAt?.toISOString(),
       });
 
@@ -482,59 +496,59 @@ export const AddInterestScreen: React.FC = () => {
           </View>
         );
 
-      case InterestType.NAME:
+      case InterestType.BIRTHDATE:
         return (
           <View style={styles.inputContainer}>
+            <Text style={[styles.label, { color: colors.TEXT.SECONDARY, marginBottom: 8 }]}>
+              생년월일 <Text style={{ color: colors.ERROR }}>*</Text>
+            </Text>
             <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-              placeholder="이름을 입력하세요 (성명)"
+              placeholder="YYYY-MM-DD (예: 1995-03-15)"
               placeholderTextColor={colors.TEXT.TERTIARY}
               value={value}
-              onChangeText={setValue}
+              onChangeText={(text) => {
+                // 자동 하이픈 추가
+                let cleaned = text.replace(/[^0-9]/g, '');
+                if (cleaned.length >= 5 && cleaned.length <= 6) {
+                  cleaned = cleaned.slice(0, 4) + '-' + cleaned.slice(4);
+                } else if (cleaned.length >= 7) {
+                  cleaned = cleaned.slice(0, 4) + '-' + cleaned.slice(4, 6) + '-' + cleaned.slice(6, 8);
+                }
+                setValue(cleaned);
+              }}
+              keyboardType="numeric"
+              maxLength={10}
             />
             
-            {/* 생일 추가 옵션 */}
+            {/* 이름 추가 옵션 */}
             <TouchableOpacity
               style={[styles.optionRow, { backgroundColor: colors.SURFACE, marginTop: 12 }]}
-              onPress={() => setShowBirthdateOption(!showBirthdateOption)}
+              onPress={() => setShowAdditionalOptions(!showAdditionalOptions)}
             >
-              <Icon name="calendar-outline" size={20} color={colors.PRIMARY} />
+              <Icon name="person-outline" size={20} color={colors.PRIMARY} />
               <Text style={[styles.optionLabel, { color: colors.TEXT.PRIMARY }]}>
-                생일 추가 (동명이인 구분)
+                이름 추가 (선택)
               </Text>
               <Icon 
-                name={showBirthdateOption ? "chevron-up" : "chevron-down"} 
+                name={showAdditionalOptions ? "chevron-up" : "chevron-down"} 
                 size={20} 
                 color={colors.TEXT.SECONDARY} 
               />
             </TouchableOpacity>
             
-            {showBirthdateOption && (
+            {showAdditionalOptions && (
               <View style={styles.birthdateContainer}>
                 <Text style={[styles.birthdateLabel, { color: colors.TEXT.SECONDARY }]}>
-                  생년월일 (선택)
+                  이름 (선택)
                 </Text>
                 <CrossPlatformInput
                   style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                  placeholder="YYYY-MM-DD (예: 1995-03-15)"
+                  placeholder="이름을 입력하세요"
                   placeholderTextColor={colors.TEXT.TERTIARY}
-                  value={birthdate}
-                  onChangeText={(text) => {
-                    // 자동 하이픈 추가
-                    let cleaned = text.replace(/[^0-9]/g, '');
-                    if (cleaned.length >= 5 && cleaned.length <= 6) {
-                      cleaned = cleaned.slice(0, 4) + '-' + cleaned.slice(4);
-                    } else if (cleaned.length >= 7) {
-                      cleaned = cleaned.slice(0, 4) + '-' + cleaned.slice(4, 6) + '-' + cleaned.slice(6, 8);
-                    }
-                    setBirthdate(cleaned);
-                  }}
-                  keyboardType="numeric"
-                  maxLength={10}
+                  value={name}
+                  onChangeText={setName}
                 />
-                <Text style={[styles.birthdateHint, { color: colors.TEXT.TERTIARY }]}>
-                  동명이인이 많은 경우 정확한 매칭을 위해 사용됩니다
-                </Text>
               </View>
             )}
           </View>
@@ -700,6 +714,9 @@ export const AddInterestScreen: React.FC = () => {
       case InterestType.LOCATION:
         return (
           <View style={styles.inputContainer}>
+            <Text style={[styles.label, { color: colors.TEXT.SECONDARY, marginBottom: 8 }]}>
+              장소 <Text style={{ color: colors.ERROR }}>*</Text>
+            </Text>
             <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
               placeholder="장소를 입력하세요 (예: 강남역 스타벅스)"
@@ -707,12 +724,27 @@ export const AddInterestScreen: React.FC = () => {
               value={value}
               onChangeText={setValue}
             />
+            
+            <Text style={[styles.label, { color: colors.TEXT.SECONDARY, marginTop: 12, marginBottom: 8 }]}>
+              인상착의 (선택)
+            </Text>
+            <CrossPlatformInput
+              style={[styles.textArea, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              placeholder="인상착의를 자세히 설명해주세요&#10;예: 검은색 코트, 빨간 가방, 안경 착용"
+              placeholderTextColor={colors.TEXT.TERTIARY}
+              value={metadata.appearance || ''}
+              onChangeText={(text) => setMetadata({ ...metadata, appearance: text })}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+            
             <TouchableOpacity
-              style={[styles.contactButton, { backgroundColor: colors.PRIMARY }]}
+              style={[styles.contactButton, { backgroundColor: colors.PRIMARY, marginTop: 10 }]}
               onPress={() => navigation.navigate('Map' as never)}
             >
               <Icon name="map-outline" size={20} color="#FFFFFF" />
-              <Text style={styles.contactButtonText}>지도에서 선택</Text>
+              <Text style={styles.contactButtonText}>지도에서 장소 선택</Text>
             </TouchableOpacity>
           </View>
         );
@@ -749,19 +781,74 @@ export const AddInterestScreen: React.FC = () => {
           </View>
         );
 
-      case InterestType.HOBBY:
+      case InterestType.PART_TIME_JOB:
         return (
           <View style={styles.inputContainer}>
+            <Text style={[styles.label, { color: colors.TEXT.SECONDARY, marginBottom: 8 }]}>
+              알바 장소/브랜드 <Text style={{ color: colors.ERROR }}>*</Text>
+            </Text>
             <CrossPlatformInput
               style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-              placeholder="취미/관심사를 입력하세요 (예: 등산, 독서, 요리)"
+              placeholder="알바 장소를 입력하세요 (예: 스타벅스 강남점)"
               placeholderTextColor={colors.TEXT.TERTIARY}
               value={value}
               onChangeText={setValue}
             />
-            <Text style={[styles.inputHint, { color: colors.TEXT.TERTIARY }]}>
-              콤마로 구분하여 여러 개 입력 가능합니다
-            </Text>
+            
+            {/* 추가 정보 토글 */}
+            <TouchableOpacity
+              style={[styles.optionRow, { backgroundColor: colors.SURFACE, marginTop: 12 }]}
+              onPress={() => setShowAdditionalOptions(!showAdditionalOptions)}
+            >
+              <Icon name="information-circle-outline" size={20} color={colors.PRIMARY} />
+              <Text style={[styles.optionLabel, { color: colors.TEXT.PRIMARY }]}>
+                추가 정보 입력 (선택)
+              </Text>
+              <Icon 
+                name={showAdditionalOptions ? "chevron-up" : "chevron-down"} 
+                size={20} 
+                color={colors.TEXT.SECONDARY} 
+              />
+            </TouchableOpacity>
+            
+            {showAdditionalOptions && (
+              <View style={styles.additionalOptionsContainer}>
+                <Text style={[styles.additionalOptionsTitle, { color: colors.TEXT.PRIMARY }]}>
+                  추가 정보 (선택)
+                </Text>
+                
+                {/* 이름 */}
+                <CrossPlatformInput
+                  style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+                  placeholder="이름 (예: 김민수)"
+                  placeholderTextColor={colors.TEXT.TERTIARY}
+                  value={metadata.workerName || ''}
+                  onChangeText={(text) => setMetadata({ ...metadata, workerName: text })}
+                />
+                
+                {/* 포지션/업무 */}
+                <CrossPlatformInput
+                  style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER, marginTop: 8 }]}
+                  placeholder="포지션/업무 (예: 바리스타, 캐셔)"
+                  placeholderTextColor={colors.TEXT.TERTIARY}
+                  value={metadata.position || ''}
+                  onChangeText={(text) => setMetadata({ ...metadata, position: text })}
+                />
+                
+                {/* 근무 시간대 */}
+                <CrossPlatformInput
+                  style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER, marginTop: 8 }]}
+                  placeholder="근무 시간대 (예: 평일 오후, 주말 오전)"
+                  placeholderTextColor={colors.TEXT.TERTIARY}
+                  value={metadata.workingHours || ''}
+                  onChangeText={(text) => setMetadata({ ...metadata, workingHours: text })}
+                />
+                
+                <Text style={[styles.additionalOptionsHint, { color: colors.TEXT.TERTIARY }]}>
+                  더 정확한 매칭을 위해 사용되며, 모든 정보는 익명으로 보호됩니다
+                </Text>
+              </View>
+            )}
           </View>
         );
 
@@ -924,6 +1011,58 @@ export const AddInterestScreen: React.FC = () => {
                 <Text style={[styles.nameHint, { color: colors.TEXT.TERTIARY }]}>
                   매칭 시 상대방이 확인할 수 있는 이름입니다
                 </Text>
+              </View>
+            </View>
+          )}
+
+          {/* 성별 선택 */}
+          {selectedType && (
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+                찾고자 하는 성별 <Text style={{ color: colors.ERROR }}>*</Text>
+              </Text>
+              <View style={styles.genderContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.genderOption,
+                    { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
+                    selectedGender === Gender.MALE && { borderColor: colors.PRIMARY, borderWidth: 2 }
+                  ]}
+                  onPress={() => setSelectedGender(Gender.MALE)}
+                >
+                  <Icon name="male-outline" size={24} color={selectedGender === Gender.MALE ? colors.PRIMARY : colors.TEXT.SECONDARY} />
+                  <Text style={[styles.genderText, { color: selectedGender === Gender.MALE ? colors.PRIMARY : colors.TEXT.SECONDARY }]}>
+                    남성
+                  </Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[
+                    styles.genderOption,
+                    { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
+                    selectedGender === Gender.FEMALE && { borderColor: colors.PRIMARY, borderWidth: 2 }
+                  ]}
+                  onPress={() => setSelectedGender(Gender.FEMALE)}
+                >
+                  <Icon name="female-outline" size={24} color={selectedGender === Gender.FEMALE ? colors.PRIMARY : colors.TEXT.SECONDARY} />
+                  <Text style={[styles.genderText, { color: selectedGender === Gender.FEMALE ? colors.PRIMARY : colors.TEXT.SECONDARY }]}>
+                    여성
+                  </Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[
+                    styles.genderOption,
+                    { backgroundColor: colors.SURFACE, borderColor: colors.BORDER },
+                    selectedGender === Gender.OTHER && { borderColor: colors.PRIMARY, borderWidth: 2 }
+                  ]}
+                  onPress={() => setSelectedGender(Gender.OTHER)}
+                >
+                  <Icon name="transgender-outline" size={24} color={selectedGender === Gender.OTHER ? colors.PRIMARY : colors.TEXT.SECONDARY} />
+                  <Text style={[styles.genderText, { color: selectedGender === Gender.OTHER ? colors.PRIMARY : colors.TEXT.SECONDARY }]}>
+                    기타
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -1154,6 +1293,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  // 성별 선택 스타일
+  genderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  genderOption: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  genderText: {
+    fontSize: 14,
+    marginTop: 5,
+    fontWeight: '500',
   },
   // 드롭다운 스타일
   dropdownContainer: {

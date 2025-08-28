@@ -119,7 +119,7 @@ export const ProfileScreen = () => {
    * @description 닉네임 편집 모달을 표시
    */
   const handleEditNickname = () => {
-    setIsNicknameModalVisible(true);
+    navigation.navigate('ProfileEdit' as never);
   };
 
   /**
@@ -210,7 +210,7 @@ export const ProfileScreen = () => {
           style={[styles.editButton, { backgroundColor: colors.BACKGROUND, borderColor: colors.BORDER }]}
           onPress={handleEditNickname}
         >
-          <Ionicons name="pencil" size={16} color={colors.TEXT.PRIMARY} />
+          <Ionicons name="create-outline" size={20} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
       </View>
     </View>
