@@ -196,7 +196,10 @@
     }
   },
   "loading": {
-    "groups": "그룹을 불러오는 중..."
+    "groups": "그룹을 불러오는 중...",
+    "moreGroups": "더 많은 그룹을 불러오는 중...",
+    "noMoreGroups": "모든 그룹을 불러왔습니다",
+    "endReached": "최신 그룹까지 모두 확인했어요! ✨"
   },
   "alerts": {
     "alreadyJoined": "이미 참여 중인 그룹입니다.",

@@ -49,7 +49,10 @@
     }
   },
   "loading": {
-    "groups": "Loading groups..."
+    "groups": "Loading groups...",
+    "moreGroups": "Loading more groups...",
+    "noMoreGroups": "All groups loaded",
+    "endReached": "You're all caught up! ✨"
   },
   "alerts": {
     "alreadyJoined": "You have already joined this group.",

@@ -20,7 +20,9 @@
   },
   "loading": {
     "content": "Loading content...",
-    "moreContent": "Loading more content..."
+    "moreContent": "Loading more content...",
+    "noMoreContent": "All content loaded",
+    "endReached": "You're all caught up! ✨"
   },
   "refreshing": "Refreshing...",
   "empty": {

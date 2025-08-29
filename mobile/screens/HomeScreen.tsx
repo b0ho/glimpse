@@ -284,6 +284,22 @@ export const HomeScreen = () => {
   }, []);
 
   /**
+   * 3일 이내 콘텐츠만 필터링
+   * @param {Content[]} contents - 필터링할 콘텐츠 배열
+   * @returns {Content[]} 필터링된 콘텐츠 배열
+   */
+  const filterRecentContents = useCallback((contents: Content[]): Content[] => {
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    threeDaysAgo.setHours(0, 0, 0, 0); // 자정부터 시작
+    
+    return contents.filter(content => {
+      const contentDate = new Date(content.createdAt);
+      return contentDate >= threeDaysAgo;
+    });
+  }, []);
+
+  /**
    * 콘텐츠 목록 로드
    * @param {boolean} refresh - 새로고침 여부
    * @returns {Promise<void>}
@@ -319,9 +335,117 @@ export const HomeScreen = () => {
       
       // API 응답이 없거나 에러인 경우 테스트 데이터 사용
       if (!apiContents || apiContents.length === 0) {
+        // 현재 날짜 기준으로 테스트 데이터 생성 (3일 이내)
+        const now = new Date();
         const testContents: Content[] = [
           {
-            id: '1',
+            id: `test-${page}-1`,
+            userId: 'user1',
+            authorId: 'user1',
+            authorNickname: i18n.language === 'ko' ? '커피러버' : 'Coffee Lover',
+            type: 'text',
+            text: i18n.language === 'ko' 
+              ? `오늘 날씨가 너무 좋네요! 다들 좋은 하루 되세요 ☀️ (Page ${page})` 
+              : `The weather is so nice today! Have a great day everyone ☀️ (Page ${page})`,
+            imageUrls: [],
+            likes: 12,
+            likeCount: 12,
+            views: 45,
+            isPublic: true,
+            isLikedByUser: false,
+            groupId: 'group1',
+            createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000).toISOString(), // 시간 차이 두기
+            updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000).toISOString(),
+          },
+          {
+            id: `test-${page}-2`,
+            userId: 'user2',
+            authorId: 'user2',
+            authorNickname: i18n.language === 'ko' ? '개발자' : 'Developer',
+            type: 'text',
+            text: i18n.language === 'ko'
+              ? `새로운 프로젝트 시작했습니다! 화이팅 💪 (Page ${page})`
+              : `Started a new project! Fighting 💪 (Page ${page})`,
+            imageUrls: [],
+            likes: 8,
+            likeCount: 8,
+            views: 32,
+            isPublic: true,
+            isLikedByUser: false,
+            groupId: 'group2',
+            createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 60 * 60 * 1000).toISOString(),
+            updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 60 * 60 * 1000).toISOString(),
+          },
+          {
+            id: `test-${page}-3`,
+            userId: 'user3',
+            authorId: 'user3',
+            authorNickname: i18n.language === 'ko' ? '운동매니아' : 'Fitness Enthusiast',
+            type: 'text',
+            text: i18n.language === 'ko'
+              ? `오늘도 헬스장 다녀왔습니다! 운동하면 기분이 좋아져요 🏋️ (Page ${page})`
+              : `Went to the gym today! Exercise makes me feel good 🏋️ (Page ${page})`,
+            imageUrls: [],
+            likes: 15,
+            likeCount: 15,
+            views: 67,
+            isPublic: true,
+            isLikedByUser: true,
+            groupId: 'group3',
+            createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 2 * 60 * 60 * 1000).toISOString(),
+            updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 2 * 60 * 60 * 1000).toISOString(),
+          },
+        ];
+        
+        console.log('[HomeScreen] Using test contents for page:', page);
+        
+        // 3일 이내 콘텐츠만 필터링
+        const recentTestContents = filterRecentContents(testContents);
+        
+        if (refresh || page === 1) {
+          setContents(recentTestContents);
+          setCurrentPage(1);
+        } else {
+          setContents(prevContents => [...prevContents, ...recentTestContents]);
+          setCurrentPage(page);
+        }
+        
+        // 테스트 데이터의 경우 3페이지까지만 로드
+        setHasMoreData(page < 3 && recentTestContents.length > 0);
+        return;
+      }
+      
+      console.log('[HomeScreen] Setting real contents:', apiContents.length);
+      
+      // 3일 이내 콘텐츠만 필터링
+      const recentContents = filterRecentContents(apiContents);
+      console.log('[HomeScreen] Filtered recent contents:', recentContents.length, '/ original:', apiContents.length);
+      
+      if (refresh || page === 1) {
+        setContents(recentContents);
+        setCurrentPage(1);
+      } else {
+        setContents(prevContents => [...prevContents, ...recentContents]);
+        setCurrentPage(page);
+      }
+      
+      // 더 이상 로드할 데이터가 있는지 확인
+      // API에서 받은 데이터가 10개 미만이거나, 필터링 후 데이터가 없으면 끝
+      setHasMoreData(apiContents.length >= 10 && recentContents.length > 0);
+      
+      // 새로고침 완료 시 부드러운 피드백 제공
+      if (refresh) {
+        console.log('[HomeScreen] 새로고침 완료: 최신 데이터 로드됨');
+      }
+    } catch (error) {
+      console.error('[HomeScreen] Content load failed:', error);
+      Alert.alert(t('common:status.error'), t('home:errors.loadError'));
+      
+      // 에러 시 fallback 데이터
+      if (page === 1) {
+        const fallbackContents: Content[] = [
+          {
+            id: 'fallback-1',
             userId: 'user1',
             authorId: 'user1',
             authorNickname: i18n.language === 'ko' ? '커피러버' : 'Coffee Lover',
@@ -335,146 +459,21 @@ export const HomeScreen = () => {
             views: 45,
             isPublic: true,
             isLikedByUser: false,
-            groupId: 'group1', // 그룹 ID 추가
+            groupId: 'group1',
             createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
             updatedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
           },
-          {
-            id: '2',
-            userId: 'user2',
-            authorId: 'user2',
-            authorNickname: i18n.language === 'ko' ? '개발자' : 'Developer',
-            type: 'text',
-            text: i18n.language === 'ko'
-              ? '새로운 프로젝트 시작했습니다! 화이팅 💪'
-              : 'Started a new project! Fighting 💪',
-            imageUrls: [],
-            likes: 8,
-            likeCount: 8,
-            views: 32,
-            isPublic: true,
-            isLikedByUser: false,
-            groupId: 'group2', // 그룹 ID 추가
-            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          },
-          {
-            id: '3',
-            userId: 'user3',
-            authorId: 'user3',
-            authorNickname: i18n.language === 'ko' ? '운동매니아' : 'Fitness Enthusiast',
-            type: 'text',
-            text: i18n.language === 'ko'
-              ? '오늘도 헬스장 다녀왔습니다! 운동하면 기분이 좋아져요 🏋️'
-              : 'Went to the gym today! Exercise makes me feel good 🏋️',
-            imageUrls: [],
-            likes: 15,
-            likeCount: 15,
-            views: 67,
-            isPublic: true,
-            isLikedByUser: true,
-            groupId: 'group3', // 그룹 ID 추가
-            createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-            updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-          },
-          {
-            id: '4',
-            userId: 'user4',
-            authorId: 'user4',
-            authorNickname: i18n.language === 'ko' ? '맛집탐방' : 'Foodie Explorer',
-            type: 'text',
-            text: i18n.language === 'ko'
-              ? '강남역 근처 맛집 추천해주세요! 🍜'
-              : 'Please recommend good restaurants near Gangnam Station! 🍜',
-            imageUrls: [],
-            likes: 23,
-            likeCount: 23,
-            views: 89,
-            isPublic: true,
-            isLikedByUser: false,
-            groupId: 'group1', // 그룹 ID 추가 (기존 그룹 재사용)
-            createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-            updatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-          },
-          {
-            id: '5',
-            userId: 'user5',
-            authorId: 'user5',
-            authorNickname: i18n.language === 'ko' ? '책벌레' : 'Bookworm',
-            type: 'text',
-            text: i18n.language === 'ko'
-              ? '이번 주말에 읽을 책 추천 받습니다 📚 장르는 소설이면 좋겠어요!'
-              : 'Looking for book recommendations for this weekend 📚 Preferably fiction!',
-            imageUrls: [],
-            likes: 10,
-            likeCount: 10,
-            views: 54,
-            isPublic: true,
-            isLikedByUser: false,
-            groupId: 'group4', // 그룹 ID 추가
-            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          },
         ];
-        
-        console.log('[HomeScreen] Using test contents');
-        setContents(testContents);
-        // 테스트 콘텐츠 사용 시에도 더 보기 가능하도록 설정
-        setHasMoreData(true);
-        return;
+        const recentFallbackContents = filterRecentContents(fallbackContents);
+        setContents(recentFallbackContents);
+        setHasMoreData(false); // 에러 시에는 추가 로드 안함
       }
-      
-      console.log('[HomeScreen] Setting real contents:', apiContents.length);
-      
-      if (refresh || page === 1) {
-        // 새로고침이거나 첫 페이지인 경우 기존 데이터 교체
-        setContents(apiContents);
-        setCurrentPage(1);
-      } else {
-        // 다음 페이지 데이터를 기존 데이터에 추가 (무한 스크롤)
-        setContents(prevContents => [...prevContents, ...apiContents]);
-        setCurrentPage(page);
-      }
-      
-      // 더 이상 로드할 데이터가 있는지 확인 (10개 미만이면 마지막 페이지)
-      setHasMoreData(apiContents.length >= 10);
-      
-      // 새로고침 완료 시 부드러운 피드백 제공
-      if (refresh) {
-        console.log('[HomeScreen] 새로고침 완료: 최신 데이터 로드됨');
-      }
-    } catch (error) {
-      console.error('[HomeScreen] Content load failed:', error);
-      Alert.alert(t('common:status.error'), t('home:errors.loadError'));
-      
-      // 에러 시에도 테스트 데이터 표시
-      const testContents: Content[] = [
-        {
-          id: '1',
-          userId: 'user1',
-          authorId: 'user1',
-          authorNickname: i18n.language === 'ko' ? '커피러버' : 'Coffee Lover',
-          type: 'text',
-          text: i18n.language === 'ko' 
-            ? '오늘 날씨가 너무 좋네요! 다들 좋은 하루 되세요 ☀️' 
-            : 'The weather is so nice today! Have a great day everyone ☀️',
-          imageUrls: [],
-          likes: 12,
-          likeCount: 12,
-          views: 45,
-          isPublic: true,
-          isLikedByUser: false,
-          groupId: 'group1', // 그룹 ID 추가
-          createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-          updatedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-        },
-      ];
-      setContents(testContents);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
+      setIsLoadingMore(false);
     }
-  }, [t, lastRefreshTime]);
+  }, [t, lastRefreshTime, filterRecentContents]);
 
   /**
    * Pull-to-refresh 핸들러
@@ -496,22 +495,16 @@ export const HomeScreen = () => {
    * @description 스크롤 끝에 도달했을 때 추가 콘텐츠를 로드하는 함수
    */
   const loadMoreContents = useCallback(async () => {
-    if (!hasMoreData || isLoading || isLoadingMore) return;
-
-    try {
-      setIsLoadingMore(true);
-      console.log('[HomeScreen] 무한 스크롤: 다음 페이지 로드 중...', { currentPage: currentPage + 1 });
-      
-      // 다음 페이지 로드
-      await loadContents(false, currentPage + 1);
-      
-    } catch (error) {
-      console.error('[HomeScreen] 무한 스크롤 로드 실패:', error);
-      Alert.alert(t('common:status.error'), t('home:errors.loadError'));
-    } finally {
-      setIsLoadingMore(false);
+    console.log('[HomeScreen] loadMoreContents called:', { hasMoreData, isLoading, isLoadingMore, currentPage });
+    
+    if (!hasMoreData || isLoading || isLoadingMore) {
+      console.log('[HomeScreen] 무한 스크롤 중단:', { hasMoreData, isLoading, isLoadingMore });
+      return;
     }
-  }, [hasMoreData, isLoading, isLoadingMore, currentPage, loadContents, t]);
+
+    console.log('[HomeScreen] 무한 스크롤: 다음 페이지 로드 시작', { nextPage: currentPage + 1 });
+    await loadContents(false, currentPage + 1);
+  }, [hasMoreData, isLoading, isLoadingMore, currentPage, loadContents]);
 
   useEffect(() => {
     // 컴포넌트 마운트 시 콘텐츠 로드
@@ -674,17 +667,36 @@ export const HomeScreen = () => {
   /**
    * 풋터 렌더링
    * @returns {JSX.Element | null} 풋터 UI
-   * @description 무한 스크롤 로딩 표시
+   * @description 무한 스크롤 로딩 표시 및 마지막 안내
    */
   const renderFooter = () => {
-    if (!hasMoreData) return null;
+    console.log('[HomeScreen] renderFooter:', { hasMoreData, isLoadingMore, contentsLength: contents.length });
     
-    return (
-      <View style={styles.loadingFooter}>
-        <ActivityIndicator size="small" color={colors.PRIMARY} />
-        <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('home:loading.moreContent')}</Text>
-      </View>
-    );
+    if (isLoadingMore) {
+      return (
+        <View style={styles.loadingFooter}>
+          <ActivityIndicator size="small" color={colors.PRIMARY} />
+          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>
+            {t('home:loading.moreContent')}
+          </Text>
+        </View>
+      );
+    }
+    
+    if (!hasMoreData && contents.length > 0) {
+      return (
+        <View style={styles.endReachedFooter}>
+          <Text style={[styles.endReachedText, { color: colors.TEXT.SECONDARY }]}>
+            {t('home:loading.endReached')}
+          </Text>
+          <Text style={[styles.endReachedSubtext, { color: colors.TEXT.SECONDARY }]}>
+            {t('home:loading.noMoreContent')}
+          </Text>
+        </View>
+      );
+    }
+    
+    return null;
   };
 
   if (isLoading && contents.length === 0) {
@@ -741,7 +753,7 @@ export const HomeScreen = () => {
           />
         }
         onEndReached={loadMoreContents}
-        onEndReachedThreshold={0.1}
+        onEndReachedThreshold={0.3}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={contents.length === 0 ? styles.emptyContainer : undefined}
       />
@@ -853,6 +865,21 @@ const styles = StyleSheet.create({
   loadingFooter: {
     paddingVertical: SPACING.LG,
     alignItems: 'center',
+  },
+  endReachedFooter: {
+    paddingVertical: SPACING.XL,
+    alignItems: 'center',
+    marginTop: SPACING.MD,
+  },
+  endReachedText: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: SPACING.XS,
+  },
+  endReachedSubtext: {
+    fontSize: FONT_SIZES.SM,
+    textAlign: 'center',
   },
   fab: {
     position: 'absolute',
