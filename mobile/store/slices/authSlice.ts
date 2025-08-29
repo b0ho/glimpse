@@ -294,25 +294,24 @@ const createAuthStore = (set: any, get: any) => ({
  * const { user, setUser, clearAuth } = useAuthStore();
  * ```
  */
-export const useAuthStore = Platform.OS === 'web' 
-  ? create<AuthStore>()(createAuthStore)
-  : create<AuthStore>()(
-      persist(
-        createAuthStore,
-        {
-          /** 저장소 키 이름 */
-          name: 'auth-storage',
-          /** SecureStore를 사용하는 커스텀 저장소 */
-          storage: createJSONStorage(() => secureStorage),
-          /**
-           * 영속화할 상태 선택
-           * @description 토큰, 인증 상태, 앱 모드만 안전하게 저장
-           */
-          partialize: (state) => ({
-            token: state.token,
-            isAuthenticated: state.isAuthenticated,
-            currentMode: state.currentMode,
-          }),
-        }
-      )
-    );
+export const useAuthStore = create<AuthStore>()(
+  persist(
+    createAuthStore,
+    {
+      /** 저장소 키 이름 */
+      name: 'auth-storage',
+      /** SecureStore를 사용하는 커스텀 저장소 */
+      storage: createJSONStorage(() => secureStorage),
+      /**
+       * 영속화할 상태 선택
+       * @description 토큰, 인증 상태, 사용자 정보, 앱 모드만 안전하게 저장
+       */
+      partialize: (state) => ({
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+        user: state.user,
+        currentMode: state.currentMode,
+      }),
+    }
+  )
+);

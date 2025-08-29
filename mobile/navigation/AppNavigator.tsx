@@ -693,12 +693,8 @@ function AppNavigator() {
         },
       }}
     >
-      {!hasCompletedOnboarding ? (
-        // Show onboarding if not completed
-        <Stack.Screen name="Onboarding">
-          {() => <OnboardingScreen onComplete={handleOnboardingComplete} />}
-        </Stack.Screen>
-      ) : isAuthenticated ? (
+      {isAuthenticated ? (
+        // 로그인된 사용자: 바로 메인화면으로 이동 (온보딩 스킵)
         <>
           {!hasSelectedMode ? (
             <Stack.Screen 
@@ -712,7 +708,13 @@ function AppNavigator() {
             />
           )}
         </>
+      ) : !hasCompletedOnboarding ? (
+        // 미로그인 + 온보딩 미완료: 온보딩 화면
+        <Stack.Screen name="Onboarding">
+          {() => <OnboardingScreen onComplete={handleOnboardingComplete} />}
+        </Stack.Screen>
       ) : (
+        // 미로그인 + 온보딩 완료: 로그인 화면
         <Stack.Screen 
           name="Auth" 
           component={AuthNavigator} 
