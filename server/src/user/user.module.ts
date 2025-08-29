@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { UserDeletionController } from './user-deletion.controller';
+import { UserDeletionService } from './user-deletion.service';
+import { AccountDeletionSchedulerService } from './account-deletion-scheduler.service';
 import { PrismaModule } from '../core/prisma/prisma.module';
 
 /**
@@ -10,8 +13,8 @@ import { PrismaModule } from '../core/prisma/prisma.module';
  */
 @Module({
   imports: [PrismaModule],
-  controllers: [UserController],
-  providers: [UserService],
-  exports: [UserService],
+  controllers: [UserController, UserDeletionController],
+  providers: [UserService, UserDeletionService, AccountDeletionSchedulerService],
+  exports: [UserService, UserDeletionService],
 })
 export class UserModule {}

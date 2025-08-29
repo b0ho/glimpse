@@ -9,16 +9,18 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 // import { useAuth } from '@clerk/clerk-expo';
-import { useAuth } from '@/hooks/useDevAuth';
+import { useAuth } from '@/hooks/useAuth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { authService } from '@/services/api/authService';
+import { accountDeletionService } from '@/services/api/accountDeletionService';
 
 export const DeleteAccountScreen = () => {
   const navigation = useNavigation();
@@ -40,56 +42,88 @@ export const DeleteAccountScreen = () => {
   ];
   
   const handleDelete = async () => {
-    if (confirmText !== t('settings:deleteAccount.confirm.confirmText')) {
-      Alert.alert(t('settings:deleteAccount.alerts.confirmRequired.title'), t('settings:deleteAccount.alerts.confirmRequired.message'));
+    const requiredText = String(t('settings:deleteAccount.confirm.confirmText'));
+    console.log('[DeleteAccount] Comparing:', { confirmText, requiredText, match: confirmText === requiredText });
+    
+    if (confirmText !== requiredText) {
+      const title = String(t('settings:deleteAccount.alerts.confirmRequired.title'));
+      const message = String(t('settings:deleteAccount.alerts.confirmRequired.message'));
+      if (Platform.OS === 'web') {
+        alert(`${title}\n\n${message}`);
+      } else {
+        Alert.alert(title, message);
+      }
       return;
     }
     
-    Alert.alert(
-      t('settings:deleteAccount.alerts.finalConfirm.title'),
-      t('settings:deleteAccount.alerts.finalConfirm.message'),
-      [
-        { text: t('settings:deleteAccount.alerts.finalConfirm.cancel'), style: 'cancel' },
-        {
-          text: t('settings:deleteAccount.alerts.finalConfirm.delete'),
-          style: 'destructive',
-          onPress: handleDeleteConfirmed,
-        },
-      ]
-    );
+    // For web compatibility, use window.confirm instead of Alert.alert
+    if (Platform.OS === 'web') {
+      const confirmMessage = `${String(t('settings:deleteAccount.alerts.finalConfirm.title'))}\n\n${String(t('settings:deleteAccount.alerts.finalConfirm.message'))}`;
+      if (window.confirm(confirmMessage)) {
+        handleDeleteConfirmed();
+      }
+    } else {
+      Alert.alert(
+        String(t('settings:deleteAccount.alerts.finalConfirm.title')),
+        String(t('settings:deleteAccount.alerts.finalConfirm.message')),
+        [
+          { text: String(t('settings:deleteAccount.alerts.finalConfirm.cancel')), style: 'cancel' },
+          {
+            text: String(t('settings:deleteAccount.alerts.finalConfirm.delete')),
+            style: 'destructive',
+            onPress: handleDeleteConfirmed,
+          },
+        ]
+      );
+    }
   };
   
   const handleDeleteConfirmed = async () => {
     setIsDeleting(true);
     
     try {
-      // API 호출
-      const response = await authService.deleteAccount({
+      // 새로운 7일 대기 시스템 API 호출
+      const response = await accountDeletionService.requestDeletion({
         reason: deleteReason,
       });
       
       if (response.success) {
-        Alert.alert(
-          t('settings:deleteAccount.alerts.success.title'),
-          t('settings:deleteAccount.alerts.success.message'),
-          [
-            {
-              text: t('common:buttons.confirm'),
-              onPress: async () => {
-                // 로그아웃 및 스토어 초기화
-                await signOut();
-                clearAuth();
+        const successMessage = `계정 삭제가 요청되었습니다.\n\n• ${response.daysRemaining}일 후 완전 삭제 예정\n• 삭제 예정일: ${new Date(response.scheduledDeletionAt).toLocaleDateString('ko-KR')}\n• 기간 내 복구 가능`;
+        
+        if (Platform.OS === 'web') {
+          alert(`계정 삭제 요청 완료\n\n${successMessage}`);
+          navigation.goBack();
+        } else {
+          Alert.alert(
+            '계정 삭제 요청 완료',
+            successMessage,
+            [
+              {
+                text: '확인',
+                onPress: () => {
+                  navigation.goBack();
+                },
               },
-            },
-          ],
-          { cancelable: false }
-        );
+            ],
+            { cancelable: false }
+          );
+        }
       } else {
-        Alert.alert(t('settings:deleteAccount.alerts.error.title'), response.message || t('settings:deleteAccount.alerts.error.message'));
+        const errorMessage = response.message || String(t('settings:deleteAccount.alerts.error.message'));
+        if (Platform.OS === 'web') {
+          alert(`${String(t('settings:deleteAccount.alerts.error.title'))}\n\n${errorMessage}`);
+        } else {
+          Alert.alert(String(t('settings:deleteAccount.alerts.error.title')), errorMessage);
+        }
       }
     } catch (error) {
       console.error('Delete account error:', error);
-      Alert.alert(t('settings:deleteAccount.alerts.error.title'), t('settings:deleteAccount.alerts.error.message'));
+      const errorMessage = String(t('settings:deleteAccount.alerts.error.message'));
+      if (Platform.OS === 'web') {
+        alert(`${String(t('settings:deleteAccount.alerts.error.title'))}\n\n${errorMessage}`);
+      } else {
+        Alert.alert(String(t('settings:deleteAccount.alerts.error.title')), errorMessage);
+      }
     } finally {
       setIsDeleting(false);
     }
@@ -201,10 +235,10 @@ export const DeleteAccountScreen = () => {
           style={[
             styles.deleteButton,
             { backgroundColor: colors.ERROR },
-            confirmText !== t('settings:deleteAccount.confirm.confirmText') && [styles.deleteButtonDisabled, { backgroundColor: colors.TEXT.LIGHT }],
+            confirmText !== String(t('settings:deleteAccount.confirm.confirmText')) && [styles.deleteButtonDisabled, { backgroundColor: colors.TEXT.LIGHT }],
           ]}
           onPress={handleDelete}
-          disabled={confirmText !== t('settings:deleteAccount.confirm.confirmText') || isDeleting}
+          disabled={confirmText !== String(t('settings:deleteAccount.confirm.confirmText')) || isDeleting}
         >
           {isDeleting ? (
             <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
