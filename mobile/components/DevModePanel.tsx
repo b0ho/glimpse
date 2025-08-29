@@ -13,6 +13,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuth } from '@/hooks/useAuth';
 import { SUPER_ACCOUNTS, isAuthBypassEnabled, DEV_CONFIG } from '@/config/dev.config';
@@ -45,6 +46,29 @@ export const DevModePanel = () => {
             if (typeof window !== 'undefined') {
               window.localStorage.setItem('DEV_ACCOUNT_TYPE', accountType);
               window.location.reload();
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleResetOnboarding = () => {
+    Alert.alert(
+      '온보딩 초기화',
+      '온보딩을 다시 볼 수 있게 초기화하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '초기화',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('@glimpse_onboarding_completed');
+              Alert.alert('완료', '온보딩이 초기화되었습니다. 앱을 재시작하면 온보딩을 다시 볼 수 있습니다.');
+            } catch (error) {
+              Alert.alert('오류', '온보딩 초기화에 실패했습니다.');
+              console.error('Failed to reset onboarding:', error);
             }
           },
         },
@@ -104,6 +128,15 @@ export const DevModePanel = () => {
             <Text style={[styles.info, { color: colors.TEXT.SECONDARY }]}>{t('environment', { ns: 'dev' })}: development</Text>
             <Text style={[styles.info, { color: colors.TEXT.SECONDARY }]}>API: http://localhost:3001/api/v1</Text>
             <Text style={[styles.info, { color: colors.TEXT.SECONDARY }]}>{t('mockApi', { ns: 'dev' })}: {DEV_CONFIG.mockApiCalls ? 'ON' : 'OFF'}</Text>
+          </View>
+
+          <View style={styles.section}>
+            <TouchableOpacity
+              style={[styles.resetButton, { backgroundColor: colors.WARNING }]}
+              onPress={handleResetOnboarding}
+            >
+              <Text style={[styles.resetButtonText, { color: colors.TEXT.WHITE }]}>🔄 온보딩 초기화</Text>
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity
@@ -192,6 +225,16 @@ const styles = StyleSheet.create({
     marginTop: SPACING.SM,
   },
   closeButtonText: {
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '600',
+  },
+  resetButton: {
+    paddingVertical: SPACING.SM,
+    paddingHorizontal: SPACING.MD,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  resetButtonText: {
     fontSize: FONT_SIZES.MD,
     fontWeight: '600',
   },

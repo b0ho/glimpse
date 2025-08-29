@@ -80,38 +80,63 @@ export const ProfileScreen = () => {
    * 로그아웃 핸들러
    * @description Clerk 로그아웃 및 로컬 상태 초기화를 처리
    */
-  const handleSignOut = () => {
-    Alert.alert(
-      t('profile:settings.logout'),
-      t('profile:settings.logoutConfirm'),
-      [
-        { text: t('common:buttons.cancel'), style: 'cancel' },
-        {
-          text: t('profile:settings.logout'),
-          style: 'destructive',
-          onPress: async () => {
-            setIsLoggingOut(true);
-            try {
-              // 스토어 초기화를 먼저 수행
-              authStore.clearAuth();
-              likeStore.clearLikes();
-              groupStore.clearGroups();
-              
-              // Clerk/DevAuth 로그아웃 수행
-              await signOut();
-              
-              // 로그아웃 후 자동으로 Auth 화면으로 이동합니다.
-              // AppNavigator의 조건부 렌더링이 처리합니다.
-            } catch (error) {
-              console.error('Sign out error:', error);
-              Alert.alert(t('common:status.error'), t('profile:settings.logoutError'));
-            } finally {
-              setIsLoggingOut(false);
-            }
+  const handleSignOut = async () => {
+    // 웹 환경과 네이티브 환경 구분 처리
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm(t('profile:settings.logoutConfirm'));
+      if (!confirmed) return;
+      
+      setIsLoggingOut(true);
+      try {
+        // 스토어 초기화를 먼저 수행
+        authStore.clearAuth();
+        likeStore.clearLikes();
+        groupStore.clearGroups();
+        
+        // Clerk/DevAuth 로그아웃 수행
+        await signOut();
+        
+        // 로그아웃 후 자동으로 Auth 화면으로 이동합니다.
+        // AppNavigator의 조건부 렌더링이 처리합니다.
+      } catch (error) {
+        console.error('Sign out error:', error);
+        window.alert(t('profile:settings.logoutError'));
+      } finally {
+        setIsLoggingOut(false);
+      }
+    } else {
+      Alert.alert(
+        t('profile:settings.logout'),
+        t('profile:settings.logoutConfirm'),
+        [
+          { text: t('common:buttons.cancel'), style: 'cancel' },
+          {
+            text: t('profile:settings.logout'),
+            style: 'destructive',
+            onPress: async () => {
+              setIsLoggingOut(true);
+              try {
+                // 스토어 초기화를 먼저 수행
+                authStore.clearAuth();
+                likeStore.clearLikes();
+                groupStore.clearGroups();
+                
+                // Clerk/DevAuth 로그아웃 수행
+                await signOut();
+                
+                // 로그아웃 후 자동으로 Auth 화면으로 이동합니다.
+                // AppNavigator의 조건부 렌더링이 처리합니다.
+              } catch (error) {
+                console.error('Sign out error:', error);
+                Alert.alert(t('common:status.error'), t('profile:settings.logoutError'));
+              } finally {
+                setIsLoggingOut(false);
+              }
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
   };
 
   /**

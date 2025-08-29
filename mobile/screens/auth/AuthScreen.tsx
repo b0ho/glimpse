@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PhoneVerificationScreen } from './PhoneVerificationScreen';
 import { SMSVerificationScreen } from './SMSVerificationScreen';
 import { NicknameSetupScreen } from './NicknameSetupScreen';
@@ -272,7 +273,72 @@ export const AuthScreen= ({ onAuthCompleted }) => {
   };
 
   /**
-   * 개발자 직접 로그인 핸들러
+   * 온보딩 초기화 및 재시작 핸들러
+   * @description 개발 환경에서 온보딩을 초기화하고 온보딩 화면으로 이동
+   */
+  const handleResetOnboarding = async (): Promise<void> => {
+    try {
+      console.log('🔄 온보딩 초기화 시작');
+      
+      // 온보딩 완료 상태 제거
+      await AsyncStorage.removeItem('@glimpse_onboarding_completed');
+      
+      // 페이지 새로고침으로 앱 재시작
+      if (Platform.OS === 'web') {
+        window.location.reload();
+      } else {
+        // 네이티브에서는 앱 재시작이 필요함
+        Alert.alert(
+          '온보딩 초기화 완료',
+          '앱을 재시작하면 온보딩을 다시 볼 수 있습니다.',
+          [{ text: '확인' }]
+        );
+      }
+    } catch (error) {
+      console.error('온보딩 초기화 실패:', error);
+      Alert.alert('오류', '온보딩 초기화에 실패했습니다.');
+    }
+  };
+
+  /**
+   * 간단한 개발용 로그인 핸들러
+   * @description 개발 환경에서 즉시 로그인 (Clerk 우회)
+   */
+  const handleQuickDevLogin = async (): Promise<void> => {
+    console.log('🔧 개발용 간편 로그인 시작');
+    
+    try {
+      // 개발용 사용자 데이터 직접 설정
+      const devUser = {
+        id: 'dev_user_quick',
+        email: 'dev@glimpse.app',
+        nickname: '개발자',
+        anonymousId: 'anon_dev_quick',
+        phoneNumber: '+82-10-1234-5678',
+        isVerified: true,
+        credits: 100,
+        isPremium: true,
+        lastActive: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        currentMode: 'DATING' as any,
+      };
+      
+      // Zustand store에 사용자 정보 설정
+      setUser(devUser);
+      console.log('✅ 개발용 간편 로그인 완료');
+      
+      // 로그인 완료 알림 없이 바로 이동
+      onAuthCompleted();
+      
+    } catch (error) {
+      console.error('🔥 개발용 로그인 오류:', error);
+      Alert.alert('로그인 오류', '개발용 로그인에 실패했습니다.');
+    }
+  };
+
+  /**
+   * 기존 개발자 직접 로그인 핸들러 (Clerk 연동용)
    * @description 개발 환경에서 OAuth 우회하여 직접 로그인
    */
   const handleDevLogin = async (): Promise<void> => {
@@ -400,13 +466,22 @@ export const AuthScreen= ({ onAuthCompleted }) => {
             <ClerkGoogleAuth onSuccess={onAuthCompleted} />
 
             {/* 개발 환경 직접 로그인 옵션 */}
-            {process.env.NODE_ENV === 'development' && (
-              <TouchableOpacity
-                style={[styles.devButton]}
-                onPress={handleDevLogin}
-              >
-                <Text style={styles.devButtonText}>{t('welcome.devLogin')}</Text>
-              </TouchableOpacity>
+            {__DEV__ && (
+              <>
+                <TouchableOpacity
+                  style={[styles.devButton, { backgroundColor: colors.WARNING, marginTop: SPACING.MD }]}
+                  onPress={handleQuickDevLogin}
+                >
+                  <Text style={[styles.devButtonText, { color: colors.TEXT.WHITE }]}>🛠️ 개발용 간편 로그인</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.devButton, { backgroundColor: colors.SECONDARY, marginTop: SPACING.SM }]}
+                  onPress={handleResetOnboarding}
+                >
+                  <Text style={[styles.devButtonText, { color: colors.TEXT.WHITE }]}>🔄 온보딩 다시 보기</Text>
+                </TouchableOpacity>
+              </>
             )}
           </View>
 
@@ -597,27 +672,22 @@ const styles = StyleSheet.create({
   },
   // 개발자 로그인 버튼
   devButton: {
-    backgroundColor: '#4CAF50', // 개발자 전용 초록색
-    borderWidth: 1,
-    borderColor: '#45A049',
-    paddingVertical: SPACING.SM,
-    paddingHorizontal: SPACING.LG,
-    borderRadius: 8,
+    paddingVertical: SPACING.MD,
+    paddingHorizontal: SPACING.XL,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: SPACING.SM,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 3,
+    elevation: 3,
   },
   devButtonText: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: '500',
-    color: '#FFFFFF',
+    fontSize: FONT_SIZES.LG,
+    fontWeight: '600',
   },
   // 약관 텍스트
   termsText: {

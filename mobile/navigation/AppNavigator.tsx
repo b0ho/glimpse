@@ -9,7 +9,8 @@ import { Platform } from 'react-native';
 import { NavigationContainer, NavigationContainerRef, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { NAVIGATION_ICONS } from '@/utils/icons';
 // import { CallProvider } from '@/providers/CallProvider';
@@ -22,6 +23,7 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 
 // Screens
+import { OnboardingScreen } from '@/screens/OnboardingScreen';
 import { AuthScreen } from '@/screens/auth/AuthScreen';
 import { HomeScreen } from '@/screens/HomeScreen';
 import { GroupsScreen } from '@/screens/GroupsScreen';
@@ -622,14 +624,32 @@ function AppNavigator() {
   const { currentMode, user } = useAuthStore();
   const { colors } = useTheme();
   const [hasSelectedMode, setHasSelectedMode] = React.useState(false);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = React.useState<boolean | null>(null);
   
   // 개발 모드에서는 Zustand 스토어의 user 상태도 확인
   const isAuthenticated = __DEV__ ? (isSignedIn || !!user) : isSignedIn;
+
+  // Check onboarding status
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const completed = await AsyncStorage.getItem('@glimpse_onboarding_completed');
+        setHasCompletedOnboarding(completed === 'true');
+      } catch (error) {
+        console.error('[Onboarding] Failed to check status:', error);
+        setHasCompletedOnboarding(true); // Default to completed on error
+      }
+    };
+    checkOnboarding();
+  }, []);
 
   useEffect(() => {
     // Check if user has selected a mode
     if (isAuthenticated && currentMode) {
       setHasSelectedMode(true);
+    } else if (!isAuthenticated) {
+      // Reset mode selection when user logs out
+      setHasSelectedMode(false);
     }
   }, [isAuthenticated, currentMode]);
 
@@ -654,9 +674,14 @@ function AppNavigator() {
     setupToken();
   }, [isAuthenticated, getToken]);
 
-  if (!isLoaded) {
+  if (!isLoaded || hasCompletedOnboarding === null) {
     return null; // 로딩 화면은 App.tsx에서 처리
   }
+
+  // Handle onboarding completion
+  const handleOnboardingComplete = async () => {
+    setHasCompletedOnboarding(true);
+  };
 
   return (
     <Stack.Navigator 
@@ -668,7 +693,12 @@ function AppNavigator() {
         },
       }}
     >
-      {isAuthenticated ? (
+      {!hasCompletedOnboarding ? (
+        // Show onboarding if not completed
+        <Stack.Screen name="Onboarding">
+          {() => <OnboardingScreen onComplete={handleOnboardingComplete} />}
+        </Stack.Screen>
+      ) : isAuthenticated ? (
         <>
           {!hasSelectedMode ? (
             <Stack.Screen 

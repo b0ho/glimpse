@@ -110,17 +110,9 @@ const secureStorage = {
 const createAuthStore = (set: any, get: any) => ({
   // Initial state
   /** 인증 여부 */
-  isAuthenticated: __DEV__ ? true : false,
+  isAuthenticated: false,
   /** 현재 로그인한 사용자 정보 */
-  user: __DEV__ ? {
-    id: 'current_user',
-    email: 'test@example.com',
-    nickname: '테스트유저',
-    isVerified: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    currentMode: 'DATING' as any,
-  } : null,
+  user: null,
   /** JWT 인증 토큰 */
   token: null,
   /** 로딩 상태 */
