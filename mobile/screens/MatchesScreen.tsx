@@ -202,7 +202,7 @@ export const MatchesScreen = React.memo(() => {
    */
   const renderHeader = () => (
     <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
-      <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>{t('matches:header.title')}</Text>
+      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>{t('matches:header.title')}</Text>
       <Text style={[styles.headerSubtitle, { color: colors.TEXT.SECONDARY }]}>
         {t('matches:header.subtitle')}
       </Text>
@@ -225,7 +225,7 @@ export const MatchesScreen = React.memo(() => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateEmoji}>💬</Text>
-      <Text style={[styles.emptyStateTitle, { color: colors.TEXT.PRIMARY }]}>{t('matches:emptyState.title')}</Text>
+      <Text style={[styles.emptyStateTitle, { color: colors.PRIMARY }]}>{t('matches:emptyState.title')}</Text>
       <Text style={[styles.emptyStateSubtitle, { color: colors.TEXT.SECONDARY }]}>
         {t('matches:emptyState.subtitle')}
       </Text>

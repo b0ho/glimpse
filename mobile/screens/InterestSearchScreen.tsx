@@ -20,7 +20,7 @@ import { useInterestStore } from '@/store/slices/interestSlice';
 import { InterestCard } from '@/components/interest/InterestCard';
 import { InterestEmptyState } from '@/components/interest/InterestEmptyState';
 import { useAuthStore } from '@/store/slices/authSlice';
-import { LinearGradient } from 'expo-linear-gradient';
+import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CreateStoryModal } from '@/components/successStory/CreateStoryModal';
 import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
@@ -588,9 +588,11 @@ export const InterestSearchScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      <View style={[styles.header, { backgroundColor: colors.SURFACE }]}>
-        <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>
-          찾기
+      {/* 상단 헤더 - 프로필 화면과 동일한 스타일 */}
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+        <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>찾기</Text>
+        <Text style={[styles.headerSubtitle, { color: colors.TEXT.PRIMARY }]}>
+          관심상대와 친구를 찾아보세요
         </Text>
       </View>
       
@@ -734,8 +736,21 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    borderBottomWidth: 1,
     backgroundColor: '#FFFFFF',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0px 1px 3px rgba(0,0,0,0.05)',
+      } as any,
+    }),
   },
   tabButton: {
     flex: 1,
@@ -756,14 +771,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   header: {
-    padding: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderBottomColor: 'rgba(0,0,0,0.1)',
   },
-  title: {
+  headerTitle: {
     fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 12,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
   },
   headerActions: {
     marginTop: 8,

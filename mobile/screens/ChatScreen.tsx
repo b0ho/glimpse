@@ -17,6 +17,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   StatusBar,
+  TouchableOpacity,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
@@ -56,7 +57,7 @@ export const ChatScreen = () => {
   const navigation = useNavigation();
   const { roomId, matchId, otherUserNickname } = route.params;
   const { initiateCall, isInCall } = useCall();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { t } = useAndroidSafeTranslation('chat');
 
   // Store states

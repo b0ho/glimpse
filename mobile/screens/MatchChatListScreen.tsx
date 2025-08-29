@@ -8,12 +8,13 @@ import {
   RefreshControl,
   SafeAreaView,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
-import { LinearGradient } from 'expo-linear-gradient';
+import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface ChatRoom {
@@ -194,10 +195,11 @@ export const MatchChatListScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      <View style={[styles.header, { backgroundColor: colors.SURFACE }]}>
-        <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('chat:title')}</Text>
-        <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
-          {t('chat:subtitle')}
+      {/* 상단 헤더 - 프로필 화면과 동일한 스타일 */}
+      <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+        <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>채팅</Text>
+        <Text style={[styles.headerSubtitle, { color: colors.TEXT.PRIMARY }]}>
+          매칭된 상대와 대화를 나눠보세요
         </Text>
       </View>
 
@@ -224,21 +226,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
   },
-  title: {
+  headerTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: 'bold',
+    marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 14,
-    marginTop: 4,
+  headerSubtitle: {
+    fontSize: 16,
   },
   loadingContainer: {
     flex: 1,
