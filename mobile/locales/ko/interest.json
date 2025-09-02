@@ -110,10 +110,10 @@
     "confirm": "확인"
   },
   "subscription": {
-    "basic": "일반: 3일",
+    "basic": "일반: 7일",
     "advanced": "고급: 2주", 
     "premium": "프리미엄: 무제한",
-    "duration3Days": "3일",
+    "duration7Days": "7일",
     "duration2Weeks": "2주",
     "durationUnlimited": "무제한"
   },

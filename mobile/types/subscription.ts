@@ -33,7 +33,7 @@ export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeature
   [SubscriptionTier.BASIC]: {
     interestSearchLimit: 3,           // 최대 3개 (유형별 1개씩)
     interestSearchTypes: 3,            // 3개 유형만 사용 가능
-    interestSearchDuration: 3,         // 3일
+    interestSearchDuration: 7,         // 7일
     canSendInterestFirst: false,
     dailyLikeLimit: 1,                // 1일 1회
     personaTopPlacement: false,

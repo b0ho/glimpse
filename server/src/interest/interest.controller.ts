@@ -136,4 +136,64 @@ export class InterestController {
   ): Promise<InterestMatchResponseDto | null> {
     return this.interestService.checkMatch(userId, dto);
   }
+
+  /**
+   * 보안 관심상대 등록 (해시 기반)
+   * POST /api/v1/interest/secure/register
+   */
+  @Post('secure/register')
+  @HttpCode(HttpStatus.CREATED)
+  async registerSecureInterest(
+    @CurrentUserId() userId: string,
+    @Body() dto: any,
+  ): Promise<any> {
+    return this.interestService.createSecureInterestSearch(userId, dto);
+  }
+
+  /**
+   * 내 보안 관심상대 상태 조회
+   * GET /api/v1/interest/secure/my-status
+   */
+  @Get('secure/my-status')
+  async getMySecureStatus(
+    @CurrentUserId() userId: string,
+  ): Promise<any[]> {
+    return this.interestService.getMySecureStatus(userId);
+  }
+
+  /**
+   * 보안 매칭 목록 조회
+   * GET /api/v1/interest/secure/matches
+   */
+  @Get('secure/matches')
+  async getSecureMatches(
+    @CurrentUserId() userId: string,
+  ): Promise<any[]> {
+    return this.interestService.getSecureMatches(userId);
+  }
+
+  /**
+   * 보안 관심상대 취소
+   * POST /api/v1/interest/secure/cancel/:id
+   */
+  @Post('secure/cancel/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async cancelSecureInterest(
+    @CurrentUserId() userId: string,
+    @Param('id') cardId: string,
+  ): Promise<void> {
+    return this.interestService.cancelSecureInterest(userId, cardId);
+  }
+
+  /**
+   * 복합 조건 매칭 확인
+   * POST /api/v1/interest/secure/check-multi
+   */
+  @Post('secure/check-multi')
+  async checkMultiMatch(
+    @CurrentUserId() userId: string,
+    @Body() dto: any,
+  ): Promise<{ matched: boolean }> {
+    return this.interestService.checkMultiMatch(userId, dto);
+  }
 }

@@ -12,11 +12,12 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useInterestStore } from '@/store/slices/interestSlice';
+import { secureInterestService } from '@/services/secureInterestService';
 import { InterestCard } from '@/components/interest/InterestCard';
 import { InterestEmptyState } from '@/components/interest/InterestEmptyState';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -48,28 +49,48 @@ export const InterestSearchScreen: React.FC = () => {
   const [storyModalVisible, setStoryModalVisible] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
   const [selectedTab, setSelectedTab] = useState<'interest' | 'friend'>('interest');
+  const [localMergedSearches, setLocalMergedSearches] = useState<any[]>([]);
   
   const subscriptionTier = getSubscriptionTier();
   const features = getSubscriptionFeatures();
 
+  // 로컬과 서버 데이터가 병합된 searches 사용
+  // localMergedSearches가 아직 로드되지 않았으면 searches 사용
+  const allSearches = localMergedSearches.length > 0 ? localMergedSearches : searches;
+
   // 탭에 따라 필터링된 데이터
-  const filteredSearches = searches.filter(search => {
-    const relationshipIntent = search.metadata?.relationshipIntent?.toLowerCase();
+  const filteredSearches = allSearches.filter(search => {
+    const relationshipIntent = search.metadata?.relationshipIntent?.toLowerCase() || 'romantic';
     return relationshipIntent === (selectedTab === 'interest' ? 'romantic' : 'friend');
   });
+  
+  // 디버깅: 실제 데이터 확인
+  useEffect(() => {
+    console.log('[InterestSearchScreen] Data state:', {
+      localMergedSearchesCount: localMergedSearches.length,
+      searchesCount: searches.length,
+      allSearchesCount: allSearches.length,
+      filteredCount: filteredSearches.length,
+    });
+  }, [localMergedSearches, searches, allSearches, filteredSearches]);
   
   const filteredMatches = matches.filter(match => {
     const relationshipIntent = match.metadata?.relationshipIntent?.toLowerCase();
     return relationshipIntent === (selectedTab === 'interest' ? 'romantic' : 'friend');
   });
 
-  useEffect(() => {
-    loadData();
-    // 개발 모드에서 테스트 데이터 생성
-    if (__DEV__) {
-      createTestMatches();
-    }
-  }, []);
+  // 화면이 포커스될 때마다 데이터 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      console.log('[InterestSearchScreen] Screen focused - refreshing data');
+      loadData();
+      
+      // 개발 모드에서 테스트 데이터 생성
+      if (__DEV__) {
+        createTestMatches();
+      }
+    }, [])
+  );
 
   const createTestMatches = async () => {
     try {
@@ -109,8 +130,14 @@ export const InterestSearchScreen: React.FC = () => {
     }
   };
 
-  const loadData = async () => {
+  const loadData = async (forceRefresh = true) => {
     try {
+      // 강제 새로고침 시 상태 초기화
+      if (forceRefresh) {
+        setLocalMergedSearches([]);
+      }
+      
+      // 1. 서버 데이터 먼저 로드
       await Promise.all([
         fetchSearches().catch(err => {
           console.log('[InterestSearchScreen] fetchSearches error:', err);
@@ -119,6 +146,111 @@ export const InterestSearchScreen: React.FC = () => {
           console.log('[InterestSearchScreen] fetchMatches error:', err);
         }),
       ]);
+      
+      // 2. 서버 데이터 가져오기
+      const serverSearches = useInterestStore.getState().searches;
+      console.log('[InterestSearchScreen] Server searches:', serverSearches.length);
+      
+      // 3. 로컬에 저장된 보안 카드 로드
+      const localCards = await secureInterestService.getMyInterestCards();
+      console.log('[InterestSearchScreen] Local secure cards:', localCards.length);
+      
+      // 4. 서버 검색과 로컬 데이터 병합
+      const mergedSearches = serverSearches.map(serverSearch => {
+        // 로컬 카드와 매칭 (ID 또는 타입+값으로)
+        const localCard = localCards.find(card => 
+          card.id === serverSearch.id || 
+          (card.type === serverSearch.type && card.status === 'local')
+        );
+        
+        if (localCard && localCard.deviceInfo === 'current') {
+          // 현재 기기에서 등록한 카드 - 상세 정보 표시 가능
+          return {
+            ...serverSearch,
+            displayValue: localCard.actualValue || localCard.displayValue || serverSearch.value,
+            hasLocalData: true,
+            deviceInfo: 'current',
+            isSecure: true,
+            metadata: {
+              ...serverSearch.metadata,
+              hasDetails: true,
+              localData: {
+                actualValue: localCard.actualValue,
+                displayValue: localCard.displayValue,
+                registeredAt: localCard.registeredAt,
+              }
+            }
+          };
+        } else {
+          // 다른 기기에서 등록했거나 로컬 정보가 없는 경우 - 서버 데이터 표시
+          return {
+            ...serverSearch,
+            displayValue: null, // 상세 정보는 표시 불가
+            value: serverSearch.value, // 서버에서 받은 마스킹된 값
+            hasLocalData: false,
+            deviceInfo: 'other',
+            isSecure: true,
+            metadata: {
+              ...serverSearch.metadata,
+              hasDetails: false,
+            }
+          };
+        }
+      });
+      
+      // 5. 로컬에만 있는 카드 추가 (아직 서버에 동기화되지 않은 경우)
+      // type을 기준으로 이미 처리된 항목 확인
+      const processedTypes = new Set(mergedSearches.map(s => s.type));
+      const localOnlyCards = localCards.filter(card => 
+        !processedTypes.has(card.type) && card.deviceInfo === 'current'
+      );
+      
+      const localOnlySearches = localOnlyCards.map(card => ({
+        id: card.id,
+        type: card.type,
+        value: card.actualValue || card.displayValue,
+        displayValue: card.actualValue || card.displayValue,
+        status: card.status === 'matched' ? 'MATCHED' : 'ACTIVE',
+        hasLocalData: true,
+        deviceInfo: 'current',
+        isSecure: true,
+        metadata: {
+          relationshipIntent: selectedTab === 'interest' ? 'romantic' : 'friend',
+          hasDetails: true,
+          localOnly: true,
+          localData: {
+            actualValue: card.actualValue,
+            displayValue: card.displayValue,
+            registeredAt: card.registeredAt,
+          }
+        },
+        createdAt: card.registeredAt,
+        expiresAt: card.expiresAt,
+      }));
+      
+      // 6. 최종 병합 - type 기준으로 중복 제거
+      const allSearchesMap = new Map();
+      
+      // 서버 데이터를 먼저 추가 (우선순위가 높음)
+      [...mergedSearches, ...localOnlySearches].forEach(search => {
+        // type이 같은 경우 로컬 데이터가 있는 것을 우선
+        if (!allSearchesMap.has(search.type) || 
+            (search.hasLocalData && !allSearchesMap.get(search.type).hasLocalData)) {
+          allSearchesMap.set(search.type, search);
+        }
+      });
+      
+      const allMergedSearches = Array.from(allSearchesMap.values());
+      setLocalMergedSearches(allMergedSearches);
+      
+      console.log('[InterestSearchScreen] Final merged data:', {
+        serverCount: serverSearches.length,
+        localCount: localCards.length,
+        localOnlyCount: localOnlyCards.length,
+        totalMerged: allMergedSearches.length,
+        withDetails: allMergedSearches.filter(s => s.hasLocalData).length,
+        withoutDetails: allMergedSearches.filter(s => !s.hasLocalData).length,
+      });
     } catch (error) {
       console.error('[InterestSearchScreen] loadData error:', error);
     }
@@ -130,17 +262,102 @@ export const InterestSearchScreen: React.FC = () => {
     setRefreshing(false);
   }, []);
 
+  const handleDeleteSearch = async (searchId: string) => {
+    // 삭제 확인 다이얼로그
+    const showDeleteConfirm = (): Promise<boolean> => {
+      return new Promise((resolve) => {
+        if (Platform.OS === 'web') {
+          const confirmed = window.confirm('이 검색을 삭제하시겠습니까?\n\n삭제 후 7일간 동일한 유형을 다시 등록할 수 없습니다.');
+          resolve(confirmed);
+        } else {
+          Alert.alert(
+            '검색 삭제',
+            '이 검색을 삭제하시겠습니까?\n\n삭제 후 7일간 동일한 유형을 다시 등록할 수 없습니다.',
+            [
+              { text: '취소', style: 'cancel', onPress: () => resolve(false) },
+              { text: '삭제', style: 'destructive', onPress: () => resolve(true) }
+            ]
+          );
+        }
+      });
+    };
+
+    const confirmed = await showDeleteConfirm();
+    
+    if (confirmed) {
+      try {
+        // 서버 검색인지 로컬 검색인지 확인
+        const isServerSearch = searches.some(s => s.id === searchId);
+        
+        if (isServerSearch) {
+          // 서버 API 호출하여 삭제 (store의 deleteSearch 사용)
+          await deleteSearch(searchId);
+          
+          // 서버 데이터 새로고침
+          await fetchSearches();
+        } else {
+          // 로컬 검색 삭제
+          const storedCards = await AsyncStorage.getItem('interest-secure-cards');
+          if (storedCards) {
+            const cards = JSON.parse(storedCards);
+            const updatedCards = cards.filter((card: any) => card.id !== searchId);
+            await AsyncStorage.setItem('interest-secure-cards', JSON.stringify(updatedCards));
+          }
+        }
+        
+        // 데이터 새로고침
+        await loadData(true);
+        
+        Toast.show({
+          type: 'success',
+          text1: '삭제 완료',
+          text2: '검색이 삭제되었습니다',
+          position: 'bottom',
+          visibilityTime: 3000,
+        });
+      } catch (error) {
+        console.error('[InterestSearchScreen] Delete error:', error);
+        Toast.show({
+          type: 'error',
+          text1: '삭제 실패',
+          text2: '삭제 중 오류가 발생했습니다',
+          position: 'bottom',
+          visibilityTime: 3000,
+        });
+      }
+    }
+  };
+
   const handleAddInterest = () => {
     // BASIC (무료) 계정 제한 확인
     if (subscriptionTier === SubscriptionTier.BASIC) {
-      // 현재 등록된 유형 개수 확인
-      const uniqueTypes = new Set(searches.map(s => s.type));
+      // 현재 탭의 관심사만 카운트 (romantic 또는 friend)
+      // 전체가 아닌 현재 컨텍스트의 검색만 제한
+      const currentTabSearches = allSearches.filter(search => {
+        const intent = search.metadata?.relationshipIntent?.toLowerCase();
+        return intent === (selectedTab === 'interest' ? 'romantic' : 'friend');
+      });
       
-      if (uniqueTypes.size >= 3) {
+      const activeSearchCount = currentTabSearches.length;
+      
+      console.log('[InterestSearchScreen] Subscription check:', {
+        tier: subscriptionTier,
+        activeSearchCount,
+        currentTab: selectedTab,
+        currentTabSearches: currentTabSearches.map(s => ({ 
+          type: s.type, 
+          value: s.value || s.displayValue,
+          intent: s.metadata?.relationshipIntent 
+        })),
+        totalSearches: allSearches.length,
+      });
+      
+      // 현재 탭 기준으로 체크
+      if (activeSearchCount >= 3) {
         Toast.show({
           type: 'info',
           text1: '구독 제한',
-          text2: '무료 사용자는 최대 3개 유형까지 등록 가능합니다',
+          text2: '무료 사용자는 최대 3개까지 등록 가능합니다',
           position: 'bottom',
           visibilityTime: 4000,
         });
@@ -156,7 +373,7 @@ export const InterestSearchScreen: React.FC = () => {
     if (subscriptionTier === SubscriptionTier.ADVANCED) {
       // 각 유형별 개수 확인
       const typeCounts: Record<string, number> = {};
-      searches.forEach(search => {
+      allSearches.forEach(search => {
         typeCounts[search.type] = (typeCounts[search.type] || 0) + 1;
       });
       
@@ -182,54 +399,6 @@ export const InterestSearchScreen: React.FC = () => {
     navigation.navigate('AddInterest', { 
       relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend' 
     });
-  };
-
-  const handleDeleteSearch = async (searchId: string) => {
-    // Toast로 삭제 확인 및 결과 표시
-    const showConfirmToast = (): Promise<boolean> => {
-      return new Promise((resolve) => {
-        if (Platform.OS === 'web') {
-          const confirmed = window.confirm('이 관심상대 검색을 삭제하시겠습니까?\n삭제하면 검색 등록 횟수가 복구됩니다.');
-          resolve(confirmed);
-        } else {
-          Alert.alert(
-            '삭제 확인',
-            '이 관심상대 검색을 삭제하시겠습니까?\n삭제하면 검색 등록 횟수가 복구됩니다.',
-            [
-              { text: '취소', style: 'cancel', onPress: () => resolve(false) },
-              { text: '삭제', style: 'destructive', onPress: () => resolve(true) }
-            ]
-          );
-        }
-      });
-    };
-
-    const confirmed = await showConfirmToast();
-
-    if (confirmed) {
-      try {
-        await deleteSearch(searchId);
-        // 삭제 성공 시 데이터 새로고침
-        await fetchSearches();
-        
-        Toast.show({
-          type: 'success',
-          text1: '삭제 완료',
-          text2: '관심상대 검색이 삭제되었습니다',
-          position: 'bottom',
-          visibilityTime: 3000,
-        });
-      } catch (error) {
-        console.error('Failed to delete search:', error);
-        Toast.show({
-          type: 'error',
-          text1: '삭제 실패',
-          text2: '삭제 중 오류가 발생했습니다. 다시 시도해주세요',
-          position: 'bottom',
-          visibilityTime: 3000,
-        });
-      }
-    }
   };
 
   const handleReportMismatch = async (item: any) => {
@@ -479,6 +648,7 @@ export const InterestSearchScreen: React.FC = () => {
     return (
       <InterestCard
         item={item}
+        isSecure={true}
         isMatch={true}
         onPress={() => handleChatPress(item)}
         onMismatch={() => handleReportMismatch(item)}
@@ -489,11 +659,12 @@ export const InterestSearchScreen: React.FC = () => {
   const renderSearchItem = ({ item }: { item: any }) => (
     <InterestCard
       item={item}
-      onDelete={() => handleDeleteSearch(item.id)}
-      onEdit={() => navigation.navigate('AddInterest', { 
+      isSecure={true}
+      onPress={() => navigation.navigate('AddInterest', { 
         editItem: item,
         relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend' 
       })}
+      onDelete={() => handleDeleteSearch(item.id)}
     />
   );
 
@@ -991,3 +1162,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+

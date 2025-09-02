@@ -23,6 +23,7 @@ interface InterestCardProps {
   onMismatch?: () => void;
   isMatch?: boolean;
   onEdit?: () => void;
+  isSecure?: boolean; // 보안 모드 표시 여부
 }
 
 /**
@@ -35,6 +36,7 @@ export const InterestCard: React.FC<InterestCardProps> = ({
   onMismatch,
   isMatch = false,
   onEdit,
+  isSecure = false,
 }) => {
   const { colors, isDark } = useTheme();
 
@@ -168,17 +170,51 @@ export const InterestCard: React.FC<InterestCardProps> = ({
                 <Text style={styles.badgeText}>매칭됨</Text>
               </View>
             )}
-            {!isMatch && (
+            {!isMatch && !isSecure && (
               <View style={[styles.badge, { backgroundColor: colors.ERROR + '20' }]}>
                 <Icon name="trash-outline" size={14} color={colors.ERROR} />
                 <Text style={[styles.badgeText, { color: colors.ERROR }]}>탭하여 삭제</Text>
               </View>
             )}
+            {!isMatch && isSecure && item.deviceInfo === 'other' && (
+              <View style={[styles.badge, { backgroundColor: colors.INFO + '20' }]}>
+                <Icon name="phone-portrait-outline" size={14} color={colors.INFO} />
+                <Text style={[styles.badgeText, { color: colors.INFO }]}>다른 기기</Text>
+              </View>
+            )}
           </View>
 
-          <Text style={[styles.value, { color: colors.TEXT.PRIMARY }]} numberOfLines={2}>
-            {item.value || item.matchValue}
-          </Text>
+          <View style={styles.valueContainer}>
+            {item.hasLocalData && item.displayValue ? (
+              // 로컬 데이터가 있는 경우 - 상세 정보 표시
+              <Text style={[styles.value, { color: colors.TEXT.PRIMARY }]} numberOfLines={2}>
+                {item.displayValue}
+              </Text>
+            ) : (
+              // 로컬 데이터가 없는 경우 - 유형만 표시
+              <Text style={[styles.value, { color: colors.TEXT.SECONDARY, fontStyle: 'italic' }]} numberOfLines={2}>
+                {item.deviceInfo === 'other' 
+                  ? '다른 기기에서 등록됨' 
+                  : (item.value || '등록된 정보')}
+              </Text>
+            )}
+            {isSecure && (
+              <View style={[styles.secureIndicator, { 
+                backgroundColor: item.hasLocalData ? colors.SUCCESS + '20' : colors.WARNING + '20' 
+              }]}>
+                <Icon 
+                  name={item.hasLocalData ? "lock-closed" : "lock-open"} 
+                  size={12} 
+                  color={item.hasLocalData ? colors.SUCCESS : colors.WARNING} 
+                />
+                <Text style={[styles.secureText, { 
+                  color: item.hasLocalData ? colors.SUCCESS : colors.WARNING 
+                }]}>
+                  {item.hasLocalData ? '암호화' : '원격'}
+                </Text>
+              </View>
+            )}
+          </View>
 
           {item.metadata?.platform && (
             <View style={styles.metadata}>
@@ -404,11 +440,29 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 4,
   },
+  valueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
   value: {
     fontSize: 15,
     fontWeight: '600',
-    marginBottom: 6,
     lineHeight: 20,
+    flex: 1,
+  },
+  secureIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  secureText: {
+    fontSize: 10,
+    fontWeight: '600',
+    marginLeft: 3,
   },
   metadata: {
     flexDirection: 'row',

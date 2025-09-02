@@ -31,7 +31,9 @@
     "report": "Report",
     "block": "Block",
     "reset": "Reset",
-    "done": "Done"
+    "done": "Done",
+    "currentPlan": "Current Plan",
+    "upgrade": "Upgrade"
   },
   "status": {
     "loading": "Loading...",

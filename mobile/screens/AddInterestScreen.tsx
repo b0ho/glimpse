@@ -21,6 +21,12 @@ import { RelationshipIntent } from '@/shared/types';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
+import { 
+  saveLocalInterestCard, 
+  canRegisterInterestType,
+  getLocalInterestCards
+} from '@/utils/secureLocalStorage';
+import { secureInterestService } from '@/services/secureInterestService';
 // import DateTimePicker from '@react-native-community/datetimepicker';
 // import * as Contacts from 'expo-contacts';
 
@@ -52,7 +58,7 @@ export const AddInterestScreen: React.FC = () => {
   // 구독 티어에 따른 기본 만료일 설정
   const getDefaultExpiryDate = () => {
     const date = new Date();
-    const days = features.interestSearchDuration || 3;
+    const days = features.interestSearchDuration || 7;
     date.setDate(date.getDate() + days);
     return date;
   };
@@ -180,6 +186,9 @@ export const AddInterestScreen: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    // 보안 모드 플래그 (나중에 설정에서 변경 가능)
+    const useSecureMode = true; // 보안 기능 활성화
+    
     if (!selectedType) {
       Toast.show({
         type: 'error',
@@ -252,6 +261,24 @@ export const AddInterestScreen: React.FC = () => {
 
     setLoading(true);
     try {
+      // 보안 모드인 경우 쿨다운 체크
+      if (useSecureMode) {
+        const eligibility = await canRegisterInterestType(selectedType);
+        if (!eligibility.canRegister) {
+          Toast.show({
+            type: 'info',
+            text1: '등록 제한',
+            text2: `이 유형은 ${new Date(eligibility.cooldownEndsAt!).toLocaleDateString()}까지 등록할 수 없습니다`,
+            position: 'bottom',
+            visibilityTime: 4000,
+          });
+          setTimeout(() => {
+            navigation.navigate('Premium' as never);
+          }, 1000);
+          return;
+        }
+      }
+      
       // metadata 구성
       const searchMetadata = { ...metadata };
       
@@ -279,16 +306,35 @@ export const AddInterestScreen: React.FC = () => {
         searchMetadata.name = name.trim();
       }
 
-      await createSearch({
-        type: selectedType,
-        value: value.trim(),
-        metadata: { 
-          ...searchMetadata, 
-          relationshipIntent 
-        },
-        gender: selectedGender, // 성별 추가
-        expiresAt: expiresAt?.toISOString(),
-      });
+      // 보안 모드와 일반 모드 분기
+      if (useSecureMode) {
+        // 보안 모드: 로컬 암호화 + 서버 해시 전송
+        await secureInterestService.registerInterestCard(
+          selectedType,
+          value.trim(),
+          {
+            displayName: name,
+            notes: JSON.stringify({
+              ...searchMetadata,
+              relationshipIntent,
+              gender: selectedGender,
+            }),
+            additionalInfo: searchMetadata,
+          }
+        );
+      } else {
+        // 기존 모드: 직접 서버 저장
+        await createSearch({
+          type: selectedType,
+          value: value.trim(),
+          metadata: { 
+            ...searchMetadata, 
+            relationshipIntent 
+          },
+          gender: selectedGender,
+          expiresAt: expiresAt?.toISOString(),
+        });
+      }
 
       console.log('[AddInterestScreen] 관심상대 등록 성공, 화면 전환');
       // 성공 메시지 표시 후 뒤로 이동
@@ -299,9 +345,12 @@ export const AddInterestScreen: React.FC = () => {
         position: 'bottom',
         visibilityTime: 3000,
       });
+      
+      // 짧은 딜레이 후 즉시 이전 화면으로 돌아가기
+      // InterestSearchScreen의 useFocusEffect가 자동으로 데이터를 새로고침
       setTimeout(() => {
         navigation.goBack();
-      }, 1000);
+      }, 500);
     } catch (error: any) {
       console.error('[AddInterestScreen] 등록 실패:', error);
       
@@ -1102,7 +1151,7 @@ export const AddInterestScreen: React.FC = () => {
                   disabled
                 >
                   <Text style={[styles.durationText, { color: colors.PRIMARY }]}>
-                    {t('interest:subscription.duration3Days')}
+                    {t('interest:subscription.duration7Days')}
                   </Text>
                   <TouchableOpacity
                     style={styles.upgradeButton}

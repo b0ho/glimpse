@@ -33,6 +33,11 @@ export class InterestService {
     userId: string,
     dto: CreateInterestSearchDto,
   ): Promise<InterestSearchResponseDto> {
+    // 해시 기반 매칭 옵션 (클라이언트에서 해시값 전송 시)
+    if ((dto as any).hashedValue) {
+      return this.createSecureInterestSearch(userId, dto);
+    }
+    
     // 유저 확인
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -41,6 +46,10 @@ export class InterestService {
     if (!user) {
       throw new NotFoundException('사용자를 찾을 수 없습니다');
     }
+
+    // 해시값 생성 (새로운 구조에 맞게)
+    const normalizedValue = this.normalizeValue(dto.type as any, dto.value);
+    const hashedPrimary = this.generateHash(`${dto.type}:${normalizedValue}`);
 
     // 중복 검색 확인
     const existingSearch = await this.prisma.interestSearch.findFirst({
@@ -95,6 +104,33 @@ export class InterestService {
       throw new BadRequestException(message);
     }
 
+    // 삭제된 동일 유형 검색 확인 (재등록 제한)
+    const cooldownDays = premiumLevel === 'FREE' ? 7 : 
+                        premiumLevel === 'STANDARD' ? 3 : 
+                        premiumLevel === 'PREMIUM' ? 1 : 7;
+    
+    const cooldownDate = new Date();
+    cooldownDate.setDate(cooldownDate.getDate() - cooldownDays);
+
+    const recentlyDeleted = await this.prisma.interestSearch.findFirst({
+      where: {
+        userId,
+        type: dto.type,
+        status: SearchStatus.DELETED,
+        deletedAt: { gte: cooldownDate },
+      },
+    });
+
+    if (recentlyDeleted) {
+      const remainingDays = Math.ceil(
+        (new Date(recentlyDeleted.deletedAt!).getTime() + cooldownDays * 24 * 60 * 60 * 1000 - Date.now()) / 
+        (24 * 60 * 60 * 1000)
+      );
+      throw new BadRequestException(
+        `삭제한 ${dto.type} 유형은 ${remainingDays}일 후에 다시 등록할 수 있습니다`,
+      );
+    }
+
     // FREE 계정은 최대 3개 유형까지만 등록 가능
     if (premiumLevel === 'FREE') {
       const uniqueTypes = await this.prisma.interestSearch.findMany({
@@ -133,16 +169,22 @@ export class InterestService {
       ? this.encryptionService.encrypt(dto.value)
       : dto.value;
 
-    // 검색 등록
+    // 검색 등록 (새로운 구조에 맞게)
     const interestSearch = await this.prisma.interestSearch.create({
       data: {
         userId,
         type: dto.type,
         value: this.normalizeValue(dto.type as any, encryptedValue),
         metadata: dto.metadata,
+        // 새로운 컬럼들 추가
+        hashedPrimary: hashedPrimary as any,
+        relationshipIntent: (dto.metadata?.relationshipIntent || 'ROMANTIC') as any,
+        targetGender: dto.gender as any,
+        deviceId: dto.metadata?.deviceId as any,
+        isLocalOnly: dto.metadata?.isSecure || false,
         expiresAt,
         status: SearchStatus.ACTIVE,
-      },
+      } as any,
       include: {
         matchedWith: {
           select: {
@@ -166,10 +208,13 @@ export class InterestService {
     userId: string,
     query: GetInterestSearchesQueryDto,
   ): Promise<InterestSearchResponseDto[]> {
+    // DELETED 상태를 기본적으로 제외
     const where: Prisma.InterestSearchWhereInput = {
       userId,
       ...(query.type && { type: query.type }),
-      ...(query.status && { status: query.status }),
+      ...(query.status 
+        ? { status: query.status } 
+        : { status: { not: SearchStatus.DELETED } }),
     };
 
     const searches = await this.prisma.interestSearch.findMany({
@@ -233,7 +278,8 @@ export class InterestService {
   }
 
   /**
-   * 관심상대 검색 삭제
+   * 관심상대 검색 삭제 (Soft Delete)
+   * 실제로 삭제하지 않고 상태를 DELETED로 변경
    */
   async deleteInterestSearch(userId: string, searchId: string): Promise<void> {
     const search = await this.prisma.interestSearch.findUnique({
@@ -248,8 +294,13 @@ export class InterestService {
       throw new ForbiddenException('권한이 없습니다');
     }
 
-    await this.prisma.interestSearch.delete({
+    // Soft delete: 상태를 DELETED로 변경
+    await this.prisma.interestSearch.update({
       where: { id: searchId },
+      data: {
+        status: SearchStatus.DELETED,
+        deletedAt: new Date(),
+      },
     });
   }
 
@@ -525,6 +576,82 @@ export class InterestService {
   }
 
   /**
+   * 보안 관심상대 검색 등록 (해시 기반)
+   */
+  async createSecureInterestSearch(
+    userId: string,
+    dto: any,
+  ): Promise<InterestSearchResponseDto> {
+    // 유저 확인
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다');
+    }
+
+    // 중복 해시 확인
+    const existingSearch = await this.prisma.interestSearch.findFirst({
+      where: {
+        userId,
+        type: dto.type,
+        value: dto.hashedValue, // 해시값으로 저장
+        status: SearchStatus.ACTIVE,
+      },
+    });
+
+    if (existingSearch) {
+      throw new BadRequestException('이미 동일한 검색이 등록되어 있습니다');
+    }
+
+    const expiresAt = dto.expiresAt ? new Date(dto.expiresAt) : null;
+
+    // 해시값으로 검색 등록
+    const interestSearch = await this.prisma.interestSearch.create({
+      data: {
+        userId,
+        type: dto.type,
+        value: dto.hashedValue, // 해시값 저장
+        metadata: dto.metadata || {},
+        expiresAt,
+        status: SearchStatus.ACTIVE,
+      },
+    });
+
+    // 매칭 확인 (해시값 비교)
+    await this.checkSecureMatches(interestSearch);
+
+    return this.formatInterestSearchResponse(interestSearch);
+  }
+
+  /**
+   * 보안 매칭 확인 (해시 기반)
+   */
+  private async checkSecureMatches(search: any): Promise<void> {
+    // 같은 해시값을 가진 다른 사용자의 검색 찾기
+    const matches = await this.prisma.interestSearch.findMany({
+      where: {
+        type: search.type,
+        value: search.value, // 해시값 비교
+        status: SearchStatus.ACTIVE,
+        userId: { not: search.userId },
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gt: new Date() } },
+        ],
+      },
+    });
+
+    if (matches.length > 0) {
+      // 매칭 처리
+      for (const match of matches) {
+        await this.createMatch(search, match);
+      }
+    }
+  }
+
+  /**
    * 값 정규화
    */
   private normalizeValue(type: InterestType, value: string): string {
@@ -585,7 +712,10 @@ export class InterestService {
       id: search.id,
       type: search.type,
       value: displayValue,
-      metadata: search.metadata,
+      metadata: {
+        ...search.metadata,
+        relationshipIntent: search.relationshipIntent || 'ROMANTIC', // DB에서 가져온 값 포함
+      },
       status: search.status,
       matchedWithId: search.matchedWithId,
       matchedAt: search.matchedAt,
@@ -1003,5 +1133,133 @@ export class InterestService {
         status: SearchStatus.EXPIRED,
       },
     });
+  }
+
+  /**
+   * 내 보안 관심상대 상태 조회
+   */
+  async getMySecureStatus(userId: string): Promise<any[]> {
+    const searches = await this.prisma.interestSearch.findMany({
+      where: {
+        userId,
+        OR: [
+          { status: SearchStatus.ACTIVE },
+          { status: SearchStatus.MATCHED },
+        ],
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // 해시값만 반환 (실제 값은 클라이언트에서만 알 수 있음)
+    return searches.map(search => ({
+      id: search.id,
+      type: search.type,
+      hashedValue: search.value, // 해시값
+      status: search.status,
+      registeredAt: search.createdAt,
+      expiresAt: search.expiresAt,
+      isMatched: search.status === SearchStatus.MATCHED,
+    }));
+  }
+
+  /**
+   * 보안 매칭 목록 조회
+   */
+  async getSecureMatches(userId: string): Promise<any[]> {
+    const matches = await this.prisma.interestSearch.findMany({
+      where: {
+        userId,
+        status: SearchStatus.MATCHED,
+        matchedWithId: { not: null },
+      },
+      include: {
+        matchedWith: {
+          select: {
+            id: true,
+            nickname: true,
+            profileImage: true,
+          },
+        },
+      },
+      orderBy: {
+        matchedAt: 'desc',
+      },
+    });
+
+    return matches.map(match => ({
+      id: match.id,
+      type: match.type,
+      hashedValue: match.value, // 해시값
+      matchedUser: {
+        id: match.matchedWithId,
+        nickname: match.matchedWith?.nickname,
+        profileImage: match.matchedWith?.profileImage,
+      },
+      matchedAt: match.matchedAt,
+    }));
+  }
+
+  /**
+   * 보안 관심상대 취소
+   */
+  async cancelSecureInterest(userId: string, cardId: string): Promise<void> {
+    const search = await this.prisma.interestSearch.findUnique({
+      where: { id: cardId },
+    });
+
+    if (!search) {
+      throw new NotFoundException('관심상대 검색을 찾을 수 없습니다');
+    }
+
+    if (search.userId !== userId) {
+      throw new ForbiddenException('권한이 없습니다');
+    }
+
+    await this.prisma.interestSearch.update({
+      where: { id: cardId },
+      data: {
+        status: SearchStatus.CANCELLED,
+      },
+    });
+  }
+
+  /**
+   * 복합 조건 매칭 확인
+   */
+  async checkMultiMatch(userId: string, dto: any): Promise<{ matched: boolean }> {
+    const { primary, secondary, tertiary } = dto;
+
+    // 기본 조건 확인
+    let query: any = {
+      value: primary,
+      status: SearchStatus.ACTIVE,
+      userId: { not: userId },
+    };
+
+    // 추가 조건이 있으면 metadata로 확인
+    if (secondary || tertiary) {
+      query.metadata = {};
+      if (secondary) {
+        query.metadata.secondaryHash = secondary;
+      }
+      if (tertiary) {
+        query.metadata.tertiaryHash = tertiary;
+      }
+    }
+
+    const matches = await this.prisma.interestSearch.findMany({
+      where: query,
+    });
+
+    return { matched: matches.length > 0 };
+  }
+
+  /**
+   * SHA-256 해시 생성
+   */
+  private generateHash(data: string): string {
+    return crypto.createHash('sha256').update(data.toLowerCase()).digest('hex');
   }
 }
