@@ -328,7 +328,7 @@ export const InterestSearchScreen: React.FC = () => {
     }
   };
 
-  const handleAddInterest = () => {
+  const handleAddInterest = (registrationType: 'MY_INFO' | 'LOOKING_FOR' = 'LOOKING_FOR') => {
     // BASIC (무료) 계정 제한 확인
     if (subscriptionTier === SubscriptionTier.BASIC) {
       // 현재 탭의 관심사만 카운트 (romantic 또는 friend)
@@ -397,7 +397,8 @@ export const InterestSearchScreen: React.FC = () => {
     }
     
     navigation.navigate('AddInterest', { 
-      relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend' 
+      relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend',
+      registrationType
     });
   };
 
@@ -784,7 +785,7 @@ export const InterestSearchScreen: React.FC = () => {
           <View style={styles.headerActions}>
               <TouchableOpacity
                   style={styles.headerButton}
-                  onPress={() => navigation.navigate('MyInfo')}
+                  onPress={() => handleAddInterest('MY_INFO')}
               >
                   <Icon name="person-circle-outline" size={24} color={colors.PRIMARY} />
                   <Text style={[styles.headerButtonText, { color: colors.PRIMARY }]}>
@@ -794,7 +795,7 @@ export const InterestSearchScreen: React.FC = () => {
               </TouchableOpacity>
               <TouchableOpacity
                   style={[styles.headerButton, { marginTop: 8 }]}
-                  onPress={handleAddInterest}
+                  onPress={() => handleAddInterest('LOOKING_FOR')}
               >
                   <Icon name="add-circle-outline" size={24} color={colors.SUCCESS} />
                   <Text style={[styles.headerButtonText, { color: colors.SUCCESS }]}>
