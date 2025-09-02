@@ -925,21 +925,52 @@ model InterestSearch {
   id              String           @id @default(cuid())
   userId          String
   type            InterestType     // 검색 유형
-  value           String           // 검색 값
-  gender          Gender?          // 찾고자 하는 성별
-  metadata        Json?            // 추가 메타데이터
+  value           String           // 해시값 또는 암호화된 값
+  gender          Gender?          // 찾고자 하는 성별 (deprecated)
   status          SearchStatus     @default(ACTIVE)
-  matchedWithId   String?          // 매칭된 상대방 ID
-  matchedAt       DateTime?
-  expiresAt       DateTime?        // 만료일 (옵션)
+  matchedWithId   String?          // 매칭된 상대방 ID (deprecated)
+  matchedAt       DateTime?        // 매칭 시간 (deprecated)
+  expiresAt       DateTime?        // 만료일
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?        // Soft delete 시간
+  
+  // 새로운 구조화된 컬럼들
+  relationshipIntent RelationshipIntent? @default(ROMANTIC)
+  primaryHash        String?          // 주 검색값의 해시
+  secondaryHash      String?          // 보조 검색값의 해시
+  encryptedData      String?          // 암호화된 개인정보
+  encryptedIV        String?          // 암호화 IV
+  encryptedTag       String?          // 암호화 태그
+  displayValue       String?          // 마스킹된 표시값
+  
+  // 검색/필터용 비식별 정보
+  phoneCountryCode   String?
+  phoneLastDigits    String?
+  emailDomain        String?
+  emailFirstChar     String?
+  socialPlatform     String?
+  birthYear          Int?
+  ageRange           String?
+  locationCity       String?
+  companyDomain      String?
+  schoolName         String?
+  partTimeCategory   String?
+  platformName       String?
+  gameTitle          String?
+  
+  // 메타데이터 (하위 호환성을 위해 유지)
+  metadata           Json?
   
   user            User             @relation("UserInterests", fields: [userId], references: [id], onDelete: Cascade)
   matchedWith     User?            @relation("MatchedInterests", fields: [matchedWithId], references: [id])
   
-  @@index([type, value])
+  @@index([type, primaryHash, status])
   @@index([userId, status])
+  @@index([relationshipIntent, status])
+  @@index([emailDomain, status])
+  @@index([companyDomain, status])
+  @@index([schoolName, status])
   @@map("interest_searches")
 }
 
@@ -964,6 +995,7 @@ enum SearchStatus {
   MATCHED         // 매칭됨
   EXPIRED         // 만료됨
   CANCELLED       // 취소됨
+  DELETED         // 삭제됨 (soft delete)
 }
 
 // Email Logs
