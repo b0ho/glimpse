@@ -103,10 +103,10 @@ export const AuthScreen= ({ onAuthCompleted }) => {
   const handleGoogleLogin = async (): Promise<void> => {
     console.log('🟡 Google login button clicked (Clerk OAuth)');
     
-    // 개발 환경에서는 OAuth 우회하고 바로 로그인
+    // 개발 환경에서는 OAuth 우회하고 바로 프리미엄 계정으로 로그인
     if (__DEV__) {
-      console.log('🔧 개발 모드 감지 - OAuth 우회하고 직접 로그인');
-      return handleDevLogin();
+      console.log('🔧 개발 모드 감지 - OAuth 우회하고 프리미엄 계정으로 직접 로그인');
+      return handleQuickDevLogin(true);
     }
     
     setIsGoogleLoading(true);
@@ -301,23 +301,40 @@ export const AuthScreen= ({ onAuthCompleted }) => {
   };
 
   /**
-   * 간단한 개발용 로그인 핸들러
-   * @description 개발 환경에서 즉시 로그인 (Clerk 우회)
+   * 간단한 개발용 로그인 핸들러 (프리미엄/일반 계정 선택)
+   * @description 개발 환경에서 프리미엄 또는 일반 계정으로 즉시 로그인 (Clerk 우회)
+   * @param {boolean} isPremiumAccount - 프리미엄 계정 여부
    */
-  const handleQuickDevLogin = async (): Promise<void> => {
-    console.log('🔧 개발용 간편 로그인 시작');
+  const handleQuickDevLogin = async (isPremiumAccount: boolean = true): Promise<void> => {
+    console.log(`🔧 개발용 ${isPremiumAccount ? '프리미엄' : '일반'} 간편 로그인 시작`);
     
     try {
       // 개발용 사용자 데이터 직접 설정
-      const devUser = {
-        id: 'dev_user_quick',
-        email: 'dev@glimpse.app',
-        nickname: '개발자',
-        anonymousId: 'anon_dev_quick',
-        phoneNumber: '+82-10-1234-5678',
+      const devUser = isPremiumAccount ? {
+        // 프리미엄 계정
+        id: 'dev_user_premium',
+        email: 'premium@glimpse.app',
+        nickname: '프리미엄개발자',
+        anonymousId: 'anon_dev_premium',
+        phoneNumber: '+82-10-9999-8888',
         isVerified: true,
-        credits: 100,
+        credits: 999,
         isPremium: true,
+        premiumUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1년 후
+        lastActive: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        currentMode: 'DATING' as any,
+      } : {
+        // 일반 계정
+        id: 'dev_user_normal',
+        email: 'normal@glimpse.app',
+        nickname: '일반개발자',
+        anonymousId: 'anon_dev_normal',
+        phoneNumber: '+82-10-1111-2222',
+        isVerified: true,
+        credits: 5,
+        isPremium: false,
         lastActive: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -326,7 +343,7 @@ export const AuthScreen= ({ onAuthCompleted }) => {
       
       // Zustand store에 사용자 정보 설정
       setUser(devUser);
-      console.log('✅ 개발용 간편 로그인 완료');
+      console.log(`✅ 개발용 ${isPremiumAccount ? '프리미엄' : '일반'} 간편 로그인 완료`);
       
       // 로그인 완료 알림 없이 바로 이동
       onAuthCompleted();
@@ -469,10 +486,17 @@ export const AuthScreen= ({ onAuthCompleted }) => {
             {__DEV__ && (
               <>
                 <TouchableOpacity
-                  style={[styles.devButton, { backgroundColor: colors.WARNING, marginTop: SPACING.MD }]}
-                  onPress={handleQuickDevLogin}
+                  style={[styles.devButton, { backgroundColor: colors.PRIMARY, marginTop: SPACING.MD }]}
+                  onPress={() => handleQuickDevLogin(true)}
                 >
-                  <Text style={[styles.devButtonText, { color: colors.TEXT.WHITE }]}>🛠️ 개발용 간편 로그인</Text>
+                  <Text style={[styles.devButtonText, { color: colors.TEXT.WHITE }]}>👑 프리미엄 개발자 로그인</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.devButton, { backgroundColor: colors.WARNING, marginTop: SPACING.SM }]}
+                  onPress={() => handleQuickDevLogin(false)}
+                >
+                  <Text style={[styles.devButtonText, { color: colors.TEXT.WHITE }]}>🛠️ 일반 개발자 로그인</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity

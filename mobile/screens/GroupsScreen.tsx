@@ -22,6 +22,7 @@ import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { ACTION_ICONS } from '@/utils/icons';
 import { groupApi } from '@/services/api/groupApi';
+import { ServerConnectionError } from '@/components/ServerConnectionError';
 
 /**
  * 그룹 탐색 화면 컴포넌트 - 다양한 타입의 그룹 목록 표시
@@ -39,6 +40,7 @@ export const GroupsScreen = () => {
   const [hasMoreData, setHasMoreData] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [serverConnectionError, setServerConnectionError] = useState(false);
   
   const navigation = useNavigation();
   const groupStore = useGroupStore();
@@ -195,26 +197,11 @@ export const GroupsScreen = () => {
       setHasMoreData(loadedGroups.length >= 10 && recentGroups.length > 0);
     } catch (error: any) {
       console.error('[GroupsScreen] 그룹 목록 로드 실패:', error);
-      // 에러 시 fallback 데이터
+      // 서버 연결 실패 시 빈 배열로 설정
       if (page === 1) {
-        const fallbackGroups: Group[] = [
-          {
-            id: 'fallback-group-1',
-            name: '기본 그룹',
-            description: '기본 그룹 설명입니다.',
-            type: 'CREATED' as any,
-            memberCount: 10,
-            maleCount: 5,
-            femaleCount: 5,
-            isMatchingActive: true,
-            creatorId: 'fallback-user',
-            createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-            updatedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString()
-          }
-        ];
-        const recentFallbackGroups = filterRecentGroups(fallbackGroups);
-        setGroups(recentFallbackGroups);
+        setGroups([]);
         setHasMoreData(false); // 에러 시에는 추가 로드 안함
+        setServerConnectionError(true);
       }
     } finally {
       setIsLoading(false);
@@ -571,6 +558,19 @@ export const GroupsScreen = () => {
     
     return null;
   };
+
+  // 서버 연결 에러 시 에러 화면 표시
+  if (serverConnectionError) {
+    return (
+      <ServerConnectionError 
+        onRetry={() => {
+          setServerConnectionError(false);
+          loadGroups(true);
+        }}
+        message="그룹 목록을 불러올 수 없습니다"
+      />
+    );
+  }
 
   if (isLoading && groups.length === 0) {
     return (

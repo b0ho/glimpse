@@ -18,6 +18,7 @@ import { CommunityPost } from '../../shared/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatDistanceToNow } from '@/utils/dateUtils';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
+import { ServerConnectionError } from '@/components/ServerConnectionError';
 
 interface PostItemProps {
   post: CommunityPost;
@@ -93,6 +94,7 @@ export const CommunityScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [serverConnectionError, setServerConnectionError] = useState(false);
 
   const categories = [
     { id: 'all', name: t('community:categories.all') },
@@ -108,54 +110,25 @@ export const CommunityScreen = () => {
   const loadPosts = async () => {
     try {
       setIsLoading(true);
-      // TODO: API 호출로 실제 데이터 가져오기
-      // const response = await communityApi.getPosts({
-      //   groupId: currentGroup?.id,
-      //   category: selectedCategory,
-      // });
+      setServerConnectionError(false);
       
-      // 더미 데이터
-      const dummyPosts: CommunityPost[] = [
-        {
-          id: '1',
-          authorId: 'user1',
-          groupId: currentGroup?.id || 'group1',
-          title: 'Anyone want to have lunch together today?',
-          content: 'Looking for someone to have lunch with at a restaurant near the company. Let\'s meet at the lobby on the 1st floor at 12:30!',
-          imageUrls: [],
-          viewCount: 45,
-          likeCount: 12,
-          commentCount: 5,
-          isPinned: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          author: {
-            id: 'user1',
-            nickname: 'Food Explorer',
-            profileImage: 'https://via.placeholder.com/100',
-          } as any,
-        },
-        {
-          id: '2',
-          authorId: 'user2',
-          groupId: currentGroup?.id || 'group1',
-          title: 'Anyone joining the weekend hiking group?',
-          content: 'Recruiting people to go hiking at Bukhansan this weekend. Beginners are welcome! We plan to depart at 8 AM.',
-          imageUrls: ['https://via.placeholder.com/300', 'https://via.placeholder.com/300'],
-          viewCount: 120,
-          likeCount: 25,
-          commentCount: 15,
-          createdAt: new Date(Date.now() - 3600000),
-          updatedAt: new Date(Date.now() - 3600000),
-          author: {
-            id: 'user2',
-            nickname: 'Mountain Lover',
-            profileImage: 'https://via.placeholder.com/100',
-          } as any,
-        },
-      ];
+      // API 호출로 실제 데이터 가져오기
+      // TODO: communityApi가 구현되면 주석 해제
+      // try {
+      //   const response = await communityApi.getPosts({
+      //     groupId: currentGroup?.id,
+      //     category: selectedCategory,
+      //   });
+      //   setPosts(response.data);
+      // } catch (error) {
+      //   console.error('Failed to load posts:', error);
+      //   setServerConnectionError(true);
+      //   setPosts([]);
+      // }
       
-      setPosts(dummyPosts);
+      // 현재는 빈 배열로 설정 (서버 API 없음)
+      setPosts([]);
+      setServerConnectionError(true);
     } catch (error) {
       console.error('Failed to load posts:', error);
     } finally {
@@ -203,6 +176,19 @@ export const CommunityScreen = () => {
       </View>
     </View>
   );
+
+  // 서버 연결 에러 시 에러 화면 표시
+  if (serverConnectionError) {
+    return (
+      <ServerConnectionError 
+        onRetry={() => {
+          setServerConnectionError(false);
+          loadPosts();
+        }}
+        message="커뮤니티 게시글을 불러올 수 없습니다"
+      />
+    );
+  }
 
   if (isLoading && !isRefreshing) {
     return (

@@ -24,6 +24,7 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CreateStoryModal } from '@/components/successStory/CreateStoryModal';
+import { ServerConnectionError } from '@/components/ServerConnectionError';
 import { SubscriptionTier, SUBSCRIPTION_FEATURES } from '@/types/subscription';
 import { InterestType } from '@/types/interest';
 import Toast from 'react-native-toast-message';
@@ -50,6 +51,7 @@ export const InterestSearchScreen: React.FC = () => {
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
   const [selectedTab, setSelectedTab] = useState<'interest' | 'friend'>('interest');
   const [localMergedSearches, setLocalMergedSearches] = useState<any[]>([]);
+  const [serverConnectionError, setServerConnectionError] = useState(false);
   
   const subscriptionTier = getSubscriptionTier();
   const features = getSubscriptionFeatures();
@@ -84,68 +86,30 @@ export const InterestSearchScreen: React.FC = () => {
     useCallback(() => {
       console.log('[InterestSearchScreen] Screen focused - refreshing data');
       loadData();
-      
-      // 개발 모드에서 테스트 데이터 생성
-      if (__DEV__) {
-        createTestMatches();
-      }
     }, [])
   );
 
-  const createTestMatches = async () => {
-    try {
-      const testMatches = [
-        {
-          id: 'test-match-1',
-          matchType: InterestType.PHONE,
-          matchValue: '010-1234-5678',
-          status: 'MATCHED',
-          matchedUser: {
-            id: 'user-1',
-            nickname: '김민수',
-            profileImage: null,
-          },
-          matchedAt: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'test-match-2',
-          matchType: InterestType.COMPANY,
-          matchValue: '삼성전자',
-          status: 'MATCHED',
-          matchedUser: {
-            id: 'user-2',
-            nickname: '이서연',
-            profileImage: null,
-          },
-          matchedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-        },
-      ];
-      
-      await AsyncStorage.setItem('interest-matches', JSON.stringify(testMatches));
-      await fetchMatches();
-    } catch (error) {
-      console.error('Failed to create test matches:', error);
-    }
-  };
 
   const loadData = async (forceRefresh = true) => {
     try {
       // 강제 새로고침 시 상태 초기화
       if (forceRefresh) {
         setLocalMergedSearches([]);
+        setServerConnectionError(false);
       }
       
       // 1. 서버 데이터 먼저 로드
-      await Promise.all([
-        fetchSearches().catch(err => {
-          console.log('[InterestSearchScreen] fetchSearches error:', err);
-        }),
-        fetchMatches().catch(err => {
-          console.log('[InterestSearchScreen] fetchMatches error:', err);
-        }),
+      const results = await Promise.allSettled([
+        fetchSearches(),
+        fetchMatches(),
       ]);
+      
+      // 모든 요청이 실패했는지 확인
+      const allFailed = results.every(result => result.status === 'rejected');
+      if (allFailed) {
+        setServerConnectionError(true);
+        return;
+      }
       
       // 2. 서버 데이터 가져오기
       const serverSearches = useInterestStore.getState().searches;
@@ -329,6 +293,17 @@ export const InterestSearchScreen: React.FC = () => {
   };
 
   const handleAddInterest = (registrationType: 'MY_INFO' | 'LOOKING_FOR' = 'LOOKING_FOR') => {
+    // TESTING: Completely bypass ALL subscription checks for comprehensive testing
+    console.log('[InterestSearchScreen] Subscription check COMPLETELY BYPASSED for testing all 12 types');
+    
+    // Skip all checks and go directly to navigation
+    navigation.navigate('AddInterest', { 
+      relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend',
+      registrationType
+    });
+    return;
+    
+    /* Original subscription check code - temporarily disabled for testing
     // BASIC (무료) 계정 제한 확인
     if (subscriptionTier === SubscriptionTier.BASIC) {
       // 현재 탭의 관심사만 카운트 (romantic 또는 friend)
@@ -395,6 +370,7 @@ export const InterestSearchScreen: React.FC = () => {
         return;
       }
     }
+    */
     
     navigation.navigate('AddInterest', { 
       relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend',
@@ -757,6 +733,19 @@ export const InterestSearchScreen: React.FC = () => {
       )}
     </View>
   );
+
+  // 서버 연결 에러 시 에러 화면 표시
+  if (serverConnectionError) {
+    return (
+      <ServerConnectionError 
+        onRetry={() => {
+          setServerConnectionError(false);
+          loadData(true);
+        }}
+        message="관심상대 정보를 불러올 수 없습니다"
+      />
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>

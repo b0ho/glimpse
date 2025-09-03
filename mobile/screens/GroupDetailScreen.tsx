@@ -18,6 +18,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ServerConnectionError } from '@/components/ServerConnectionError';
 
 interface GroupDetailScreenProps {
   route: {
@@ -42,40 +43,31 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
   const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCode, setInviteCode] = useState<string>('');
+  const [serverConnectionError, setServerConnectionError] = useState(false);
 
   useEffect(() => {
     loadGroupDetail();
   }, [groupId]);
 
   const loadGroupDetail = async () => {
-    // Mock 데이터 - 실제로는 API 호출
-    const mockGroup = {
-      id: groupId,
-      name: '서강대학교',
-      type: 'OFFICIAL',
-      description: '서강대학교 공식 그룹입니다. 재학생 및 졸업생들이 참여할 수 있습니다.',
-      memberCount: 1234,
-      postCount: 567,
-      createdAt: '2024-01-01',
-      coverImage: `https://picsum.photos/400/200?random=${groupId}`,
-      category: '대학교',
-      isJoined: groups.find(g => g.id === groupId)?.isJoined || false,
-      members: [
-        { id: '1', nickname: '익명1', profileImage: 'https://picsum.photos/100/100?random=1' },
-        { id: '2', nickname: '익명2', profileImage: 'https://picsum.photos/100/100?random=2' },
-        { id: '3', nickname: '익명3', profileImage: 'https://picsum.photos/100/100?random=3' },
-        { id: '4', nickname: '익명4', profileImage: 'https://picsum.photos/100/100?random=4' },
-      ],
-      recentPosts: [
-        { id: '1', title: '스터디 모집합니다', author: '익명1', createdAt: '2시간 전', likes: 12 },
-        { id: '2', title: '학교 근처 맛집 추천', author: '익명2', createdAt: '5시간 전', likes: 34 },
-        { id: '3', title: '중고책 판매합니다', author: '익명3', createdAt: '1일 전', likes: 8 },
-      ],
-    };
-
-    setGroup(mockGroup);
-    setIsJoined(mockGroup.isJoined);
-    setLoading(false);
+    setLoading(true);
+    setServerConnectionError(false);
+    try {
+      // TODO: 실제 API 호출로 대체 필요
+      // const response = await groupApi.getGroupDetail(groupId);
+      // setGroup(response.data);
+      // setIsJoined(response.data.isJoined);
+      
+      // 현재는 서버 API가 없으므로 에러 상태 설정
+      setGroup(null);
+      setServerConnectionError(true);
+    } catch (error) {
+      console.error('Failed to load group detail:', error);
+      setGroup(null);
+      setServerConnectionError(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleJoinLeave = async () => {
@@ -158,6 +150,19 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
       isGroupChat: true,
     });
   };
+
+  // 서버 연결 에러 시 에러 화면 표시
+  if (serverConnectionError) {
+    return (
+      <ServerConnectionError 
+        onRetry={() => {
+          setServerConnectionError(false);
+          loadGroupDetail();
+        }}
+        message="그룹 정보를 불러올 수 없습니다"
+      />
+    );
+  }
 
   if (loading) {
     return (

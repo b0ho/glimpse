@@ -33,6 +33,7 @@ import { ACTION_ICONS } from '@/utils/icons';
 import { SuccessStoryCard } from '@/components/successStory/SuccessStoryCard';
 import { SuccessStory } from '@/types/successStory';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ServerConnectionError } from '@/components/ServerConnectionError';
 
 /**
  * 홈 스크린 컴포넌트 - 메인 피드 및 스토리 표시
@@ -48,6 +49,7 @@ export const HomeScreen = () => {
   const [hasMoreData, setHasMoreData] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [serverConnectionError, setServerConnectionError] = useState(false);
   
   // Story states
   const [stories, setStories] = useState<StoryUser[]>([]);
@@ -439,34 +441,25 @@ export const HomeScreen = () => {
       }
     } catch (error) {
       console.error('[HomeScreen] Content load failed:', error);
-      Alert.alert(t('common:status.error'), t('home:errors.loadError'));
       
-      // 에러 시 fallback 데이터
-      if (page === 1) {
-        const fallbackContents: Content[] = [
-          {
-            id: 'fallback-1',
-            userId: 'user1',
-            authorId: 'user1',
-            authorNickname: i18n.language === 'ko' ? '커피러버' : 'Coffee Lover',
-            type: 'text',
-            text: i18n.language === 'ko' 
-              ? '오늘 날씨가 너무 좋네요! 다들 좋은 하루 되세요 ☀️' 
-              : 'The weather is so nice today! Have a great day everyone ☀️',
-            imageUrls: [],
-            likes: 12,
-            likeCount: 12,
-            views: 45,
-            isPublic: true,
-            isLikedByUser: false,
-            groupId: 'group1',
-            createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-            updatedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-          },
-        ];
-        const recentFallbackContents = filterRecentContents(fallbackContents);
-        setContents(recentFallbackContents);
-        setHasMoreData(false); // 에러 시에는 추가 로드 안함
+      // 서버 연결 실패 처리
+      setServerConnectionError(true);
+      setHasMoreData(false);
+      setContents([]); // 빈 컨텐츠로 설정
+      
+      // 첫 페이지 로드 실패 시에만 Alert 표시
+      if (page === 1 && !refresh) {
+        Alert.alert(
+          '서버 연결 실패',
+          '서버에 연결할 수 없습니다. 인터넷 연결을 확인하고 다시 시도해주세요.',
+          [
+            { text: '확인', style: 'cancel' },
+            { text: '다시 시도', onPress: () => {
+              setServerConnectionError(false);
+              loadContents(true);
+            }}
+          ]
+        );
       }
     } finally {
       setIsLoading(false);
@@ -698,6 +691,16 @@ export const HomeScreen = () => {
     
     return null;
   };
+
+  // 서버 연결 에러 시 에러 화면 표시
+  if (serverConnectionError) {
+    return (
+      <ServerConnectionError 
+        onRetry={loadContents}
+        message="홈 피드를 불러올 수 없습니다"
+      />
+    );
+  }
 
   if (isLoading && contents.length === 0) {
     return (

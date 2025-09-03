@@ -21,6 +21,7 @@ import { Group, Content } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { groupApi } from '@/services/api/groupApi';
 import { contentApi } from '@/services/api/contentApi';
+import { apiClient } from '@/services/api/config';
 
 export const CreateContentScreen = ({ route }: any) => {
   const { t } = useAndroidSafeTranslation(['common', 'post']);
@@ -167,38 +168,24 @@ export const CreateContentScreen = ({ route }: any) => {
       if (!userNickname || !userId) {
         try {
           console.log('[CreateContentScreen] 서버에서 사용자 정보 가져오기 시도');
-          const userResponse = await fetch('http://localhost:3002/api/v1/users/profile', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-dev-auth': 'true',
-            },
-          });
-          
-          if (userResponse.ok) {
-            const userData = await userResponse.json();
-            console.log('[CreateContentScreen] 서버 사용자 정보 응답:', userData);
-            if (userData.success && userData.data) {
-              userNickname = userData.data.nickname || '테스트유저';
-              userId = userData.data.id || 'current_user';
-              
-              // authStore 업데이트
-              authStore.setUser({
-                ...authStore.user,
-                id: userId,
-                nickname: userNickname,
-                ...userData.data
-              });
-              
-              console.log('[CreateContentScreen] 사용자 정보 업데이트 완료:', {
-                nickname: userNickname,
-                userId: userId
-              });
-            }
-          } else {
-            console.warn('[CreateContentScreen] 서버 응답 실패:', userResponse.status);
-            userNickname = t('post:create.defaultUserName');
-            userId = 'current_user';
+          const userData = await apiClient.get('/users/profile');
+          console.log('[CreateContentScreen] 서버 사용자 정보 응답:', userData);
+          if (userData.success && userData.data) {
+            userNickname = userData.data.nickname || '테스트유저';
+            userId = userData.data.id || 'current_user';
+            
+            // authStore 업데이트
+            authStore.setUser({
+              ...authStore.user,
+              id: userId,
+              nickname: userNickname,
+              ...userData.data
+            });
+            
+            console.log('[CreateContentScreen] 사용자 정보 업데이트 완료:', {
+              nickname: userNickname,
+              userId: userId
+            });
           }
         } catch (error) {
           console.warn('[CreateContentScreen] 서버 사용자 정보 가져오기 실패:', error);

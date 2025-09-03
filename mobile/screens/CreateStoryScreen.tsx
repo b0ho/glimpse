@@ -18,6 +18,7 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { saveStory } from '@/utils/storyData';
 import { useTheme } from '@/hooks/useTheme';
+import { apiClient } from '@/services/api/config';
 
 export const CreateStoryScreen = () => {
   const { t } = useAndroidSafeTranslation('story');
@@ -86,17 +87,9 @@ export const CreateStoryScreen = () => {
       if (!userNickname || !userId) {
         try {
           console.log('[CreateStoryScreen] 서버에서 사용자 정보 가져오기');
-          const userResponse = await fetch('http://localhost:3002/api/v1/users/profile', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-dev-auth': 'true',
-            },
-          });
+          const userData = await apiClient.get('/users/profile');
           
-          if (userResponse.ok) {
-            const userData = await userResponse.json();
-            if (userData.success && userData.data) {
+          if (userData.success && userData.data) {
               userNickname = userData.data.nickname || '테스트유저';
               userId = userData.data.id || 'current_user';
               
@@ -108,7 +101,6 @@ export const CreateStoryScreen = () => {
                 ...userData.data
               });
             }
-          }
         } catch (error) {
           console.warn('[CreateStoryScreen] 서버 사용자 정보 가져오기 실패:', error);
           userNickname = '테스트유저';

@@ -44,7 +44,8 @@ export const ProfileScreen = () => {
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
   
-  const isPremiumUser = usePremiumStore(premiumSelectors.isPremiumUser());
+  // 개발 환경에서는 authStore.user?.isPremium을 직접 사용
+  const isPremiumUser = __DEV__ ? authStore.user?.isPremium || false : usePremiumStore(premiumSelectors.isPremiumUser());
   const currentPlan = usePremiumStore(premiumSelectors.getCurrentPlan());
   const currentMode = authStore.currentMode || AppMode.DATING;
   const modeTexts = MODE_TEXTS[currentMode];
@@ -358,9 +359,9 @@ export const ProfileScreen = () => {
           <Text style={[
             styles.likeSystemValue,
             { color: colors.TEXT.PRIMARY },
-            likeStore.hasPremium ? { color: colors.SUCCESS } : { color: colors.TEXT.SECONDARY }
+            isPremiumUser ? { color: colors.SUCCESS } : { color: colors.TEXT.SECONDARY }
           ]}>
-            {likeStore.hasPremium ? t('profile:likeSystem.active') : t('profile:likeSystem.inactive')}
+            {isPremiumUser ? t('profile:likeSystem.active') : t('profile:likeSystem.inactive')}
           </Text>
         </View>
         

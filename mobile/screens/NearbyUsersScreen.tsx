@@ -28,7 +28,8 @@ import { locationTracker } from '@/services/locationTracker';
 import { useChatStore } from '@/store/slices/chatSlice';
 import { User, NearbyUser } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { API_BASE_URL } from '@/services/api/config';
+import { apiClient } from '@/services/api/config';
+import { ServerConnectionError } from '@/components/ServerConnectionError';
 
 interface LocationData {
   latitude: number;
@@ -57,6 +58,7 @@ export const NearbyUsersScreen = React.memo(() => {
   const [hiddenUsers, setHiddenUsers] = useState<Set<string>>(new Set());
   const [showPersonaModal, setShowPersonaModal] = useState(false);
   const [likedUsers, setLikedUsers] = useState<Set<string>>(new Set());
+  const [serverConnectionError, setServerConnectionError] = useState(false);
 
   const radiusOptions = [1, 2, 5, 10]; // km 단위
   
@@ -209,23 +211,15 @@ export const NearbyUsersScreen = React.memo(() => {
         
         // 기존 location API 호출 시도
         try {
-          const response = await fetch(
-            `${API_BASE_URL}/location/nearby/users?latitude=${currentLocation.latitude}&longitude=${currentLocation.longitude}&radius=${selectedRadius}`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-dev-auth': 'true',
-              },
-            }
-          );
-
-          if (response.ok) {
-            const data = await response.json();
-            if (data && data.length > 0) {
-              setNearbyUsers(data);
-              return;
-            }
+          const data = await apiClient.get('/location/nearby/users', {
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+            radius: selectedRadius
+          });
+          
+          if (data && data.length > 0) {
+            setNearbyUsers(data);
+            return;
           }
         } catch (locationApiError) {
           console.log('Location API call also failed:', locationApiError);
@@ -245,155 +239,10 @@ export const NearbyUsersScreen = React.memo(() => {
         return R * c * 1000; // km를 m로 변환
       };
 
-      // API 실패 시 더미 데이터 사용 (다양한 거리의 사용자들)
-      const allDummyUsers = [
-        {
-          id: 'user1',
-          nickname: '카페러버',
-          age: 25,
-          gender: 'FEMALE' as const,
-          profileImage: undefined,
-          isVerified: true,
-          isPremium: false,
-          latitude: currentLocation.latitude + 0.001,
-          longitude: currentLocation.longitude + 0.001,
-          lastSeen: '방금 전',
-          isOnline: true,
-          commonGroups: ['스타벅스 강남점 모임'],
-          bio: '커피와 독서를 좋아하는 25살입니다 ☕️📚',
-          phoneNumber: '',
-          credits: 5,
-          lastActive: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          anonymousId: 'anon_user1',
-        },
-        {
-          id: 'user2',
-          nickname: '헬스매니아',
-          age: 28,
-          gender: 'MALE' as const,
-          profileImage: undefined,
-          isVerified: false,
-          isPremium: true,
-          latitude: currentLocation.latitude - 0.003,
-          longitude: currentLocation.longitude + 0.003,
-          lastSeen: '5분 전',
-          isOnline: false,
-          commonGroups: ['피트니스 센터', '판교 테크노밸리'],
-          bio: '건강한 삶을 추구하는 개발자입니다 💪',
-          phoneNumber: '',
-          credits: 10,
-          lastActive: new Date(Date.now() - 5 * 60 * 1000),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          anonymousId: 'anon_user2',
-        },
-        {
-          id: 'user3',
-          nickname: '음악감상가',
-          age: 23,
-          gender: 'FEMALE' as const,
-          profileImage: undefined,
-          isVerified: true,
-          isPremium: false,
-          latitude: currentLocation.latitude + 0.008,
-          longitude: currentLocation.longitude - 0.008,
-          lastSeen: '1시간 전',
-          isOnline: false,
-          commonGroups: ['연세대학교'],
-          bio: '클래식과 재즈를 사랑하는 대학생 🎵',
-          phoneNumber: '',
-          credits: 3,
-          lastActive: new Date(Date.now() - 60 * 60 * 1000),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          anonymousId: 'anon_user3',
-        },
-        {
-          id: 'user4',
-          nickname: '요리왕',
-          age: 30,
-          gender: 'MALE' as const,
-          profileImage: undefined,
-          isVerified: true,
-          isPremium: true,
-          latitude: currentLocation.latitude + 0.015,
-          longitude: currentLocation.longitude + 0.015,
-          lastSeen: '30분 전',
-          isOnline: false,
-          commonGroups: ['요리 동호회'],
-          bio: '맛있는 요리를 함께 나눠요 🍳',
-          phoneNumber: '',
-          credits: 20,
-          lastActive: new Date(Date.now() - 30 * 60 * 1000),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          anonymousId: 'anon_user4',
-        },
-        {
-          id: 'user5',
-          nickname: '영화광',
-          age: 27,
-          gender: 'FEMALE' as const,
-          profileImage: undefined,
-          isVerified: false,
-          isPremium: false,
-          latitude: currentLocation.latitude + 0.04,
-          longitude: currentLocation.longitude - 0.04,
-          lastSeen: '2시간 전',
-          isOnline: false,
-          commonGroups: ['영화 감상 모임'],
-          bio: '함께 영화 보실 분 찾아요 🎬',
-          phoneNumber: '',
-          credits: 1,
-          lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          anonymousId: 'anon_user5',
-        },
-        {
-          id: 'user6',
-          nickname: '등산러',
-          age: 35,
-          gender: 'MALE' as const,
-          profileImage: undefined,
-          isVerified: true,
-          isPremium: false,
-          latitude: currentLocation.latitude - 0.08,
-          longitude: currentLocation.longitude + 0.08,
-          lastSeen: '3시간 전',
-          isOnline: false,
-          commonGroups: ['주말 등산 모임'],
-          bio: '주말마다 산에 가요 ⛰️',
-          phoneNumber: '',
-          credits: 5,
-          lastActive: new Date(Date.now() - 3 * 60 * 60 * 1000),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          anonymousId: 'anon_user6',
-        },
-      ];
-
-      // 각 사용자의 실제 거리 계산 및 필터링
-      const usersWithDistance = allDummyUsers
-        .filter(dummyUser => dummyUser.id !== user.id)
-        .map(dummyUser => {
-          const distance = calculateDistance(
-            currentLocation.latitude,
-            currentLocation.longitude,
-            dummyUser.latitude!,
-            dummyUser.longitude!
-          );
-          return {
-            ...dummyUser,
-            distance,
-          };
-        })
-        .filter(dummyUser => dummyUser.distance <= selectedRadius * 1000) // km to meters
-        .sort((a, b) => a.distance - b.distance); // 거리순 정렬
-
-      setNearbyUsers(usersWithDistance as NearbyUser[]);
+      // 서버 연결 실패 시 에러 상태 설정
+      setNearbyUsers([]);
+      setServerConnectionError(true);
+      return;
     } catch (error) {
       console.error('Load nearby users error:', error);
     } finally {
@@ -739,6 +588,19 @@ export const NearbyUsersScreen = React.memo(() => {
       </View>
     </View>
   );
+
+  // 서버 연결 에러 시 에러 화면 표시
+  if (serverConnectionError) {
+    return (
+      <ServerConnectionError 
+        onRetry={() => {
+          setServerConnectionError(false);
+          loadNearbyUsers();
+        }}
+        message="주변 사용자 정보를 불러올 수 없습니다"
+      />
+    );
+  }
 
   if (isLoading && !nearbyUsers.length) {
     return (

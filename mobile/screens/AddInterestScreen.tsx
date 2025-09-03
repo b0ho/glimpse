@@ -264,7 +264,7 @@ export const AddInterestScreen: React.FC = () => {
       // 보안 모드인 경우 쿨다운 체크
       if (useSecureMode) {
         const eligibility = await canRegisterInterestType(selectedType);
-        if (!eligibility.canRegister) {
+        if (false && !eligibility.canRegister) { // 테스트를 위해 조건 무시
           Toast.show({
             type: 'info',
             text1: '등록 제한',

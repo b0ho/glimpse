@@ -19,6 +19,7 @@ import { GroupChat } from '../../shared/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatDistanceToNow } from '@/utils/dateUtils';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
+import { ServerConnectionError } from '@/components/ServerConnectionError';
 
 interface ChatItemProps {
   chat: GroupChat;
@@ -79,6 +80,7 @@ export const GroupChatListScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [serverConnectionError, setServerConnectionError] = useState(false);
 
   useEffect(() => {
     loadChats();
@@ -87,80 +89,24 @@ export const GroupChatListScreen = () => {
   const loadChats = async () => {
     try {
       setIsLoading(true);
-      // TODO: API 호출로 실제 데이터 가져오기
-      // const response = await groupChatApi.getChats({
-      //   groupId: currentGroup?.id,
-      // });
+      setServerConnectionError(false);
       
-      // 더미 데이터
-      const dummyChats: GroupChat[] = [
-        {
-          id: '1',
-          groupId: currentGroup?.id || 'group1',
-          name: t('groupchat:dummyData.freeChat'),
-          description: t('groupchat:dummyData.freeChatDesc'),
-          imageUrl: 'https://via.placeholder.com/100',
-          maxMembers: 50,
-          memberCount: 23,
-          isPublic: true,
-          lastMessageAt: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          lastMessage: {
-            id: 'msg1',
-            chatId: '1',
-            senderId: 'user1',
-            content: t('groupchat:dummyData.messages.greeting'),
-            type: 'TEXT',
-            isEncrypted: true,
-            createdAt: new Date(),
-            sender: {
-              id: 'user1',
-              nickname: t('groupchat:dummyData.nicknames.kind'),
-            } as any,
-          } as any,
-        },
-        {
-          id: '2',
-          groupId: currentGroup?.id || 'group1',
-          name: t('groupchat:dummyData.exerciseChat'),
-          description: t('groupchat:dummyData.exerciseChatDesc'),
-          imageUrl: 'https://via.placeholder.com/100',
-          maxMembers: 30,
-          memberCount: 12,
-          isPublic: true,
-          lastMessageAt: new Date(Date.now() - 3600000),
-          createdAt: new Date(Date.now() - 86400000),
-          updatedAt: new Date(Date.now() - 3600000),
-          lastMessage: {
-            id: 'msg2',
-            chatId: '2',
-            senderId: 'user2',
-            content: t('groupchat:dummyData.messages.meetup'),
-            type: 'TEXT',
-            isEncrypted: true,
-            createdAt: new Date(Date.now() - 3600000),
-            sender: {
-              id: 'user2',
-              nickname: t('groupchat:dummyData.nicknames.fitness'),
-            } as any,
-          } as any,
-        },
-        {
-          id: '3',
-          groupId: currentGroup?.id || 'group1',
-          name: t('groupchat:dummyData.foodChat'),
-          description: t('groupchat:dummyData.foodChatDesc'),
-          imageUrl: 'https://via.placeholder.com/100',
-          maxMembers: 100,
-          memberCount: 45,
-          isPublic: true,
-          createdAt: new Date(Date.now() - 172800000),
-          updatedAt: new Date(Date.now() - 172800000),
-        },
-      ];
+      // API 호출로 실제 데이터 가져오기
+      // TODO: groupChatApi가 구현되면 주석 해제
+      // try {
+      //   const response = await groupChatApi.getChats({
+      //     groupId: currentGroup?.id,
+      //   });
+      //   setChats(response.data);
+      // } catch (error) {
+      //   console.error('Failed to load chats:', error);
+      //   setServerConnectionError(true);
+      //   setChats([]);
+      // }
       
-      setChats(dummyChats);
+      // 현재는 빈 배열로 설정 (서버 API 없음)
+      setChats([]);
+      setServerConnectionError(true);
     } catch (error) {
       console.error('Failed to load chats:', error);
     } finally {
@@ -190,6 +136,19 @@ export const GroupChatListScreen = () => {
     chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     chat.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // 서버 연결 에러 시 에러 화면 표시
+  if (serverConnectionError) {
+    return (
+      <ServerConnectionError 
+        onRetry={() => {
+          setServerConnectionError(false);
+          loadChats();
+        }}
+        message="그룹 채팅 목록을 불러올 수 없습니다"
+      />
+    );
+  }
 
   if (isLoading && !isRefreshing) {
     return (

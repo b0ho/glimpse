@@ -17,6 +17,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { authService } from '@/services/api/authService';
+import { ServerConnectionError } from '@/components/ServerConnectionError';
 
 interface DeletionStatus {
   isScheduledForDeletion: boolean;
@@ -35,26 +36,27 @@ export const AccountRestoreScreen = () => {
   const [deletionStatus, setDeletionStatus] = useState<DeletionStatus | null>(null);
   const [isRestoring, setIsRestoring] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [serverConnectionError, setServerConnectionError] = useState(false);
   
   useEffect(() => {
     fetchDeletionStatus();
   }, []);
 
   const fetchDeletionStatus = async () => {
+    setIsLoading(true);
+    setServerConnectionError(false);
     try {
-      setIsLoading(true);
-      // TODO: API 호출로 삭제 상태 조회
-      const mockStatus: DeletionStatus = {
-        isScheduledForDeletion: true,
-        deletionRequestedAt: new Date().toISOString(),
-        scheduledDeletionAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-        daysRemaining: 5,
-        reason: 'not_useful',
-      };
-      setDeletionStatus(mockStatus);
+      // TODO: 실제 API 호출로 대체 필요
+      // const response = await authService.getDeletionStatus();
+      // setDeletionStatus(response.data);
+      
+      // 현재는 서버 API가 없으므로 에러 상태 설정
+      setDeletionStatus(null);
+      setServerConnectionError(true);
     } catch (error) {
       console.error('Failed to fetch deletion status:', error);
-      Alert.alert(t('common:error'), t('settings:deleteAccount.alerts.statusError.message'));
+      setDeletionStatus(null);
+      setServerConnectionError(true);
     } finally {
       setIsLoading(false);
     }
@@ -81,8 +83,9 @@ export const AccountRestoreScreen = () => {
     setIsRestoring(true);
     
     try {
-      // TODO: API 호출로 계정 복구
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Mock API call
+      // TODO: 실제 API 호출로 대체 필요
+      // await authService.restoreAccount();
+      throw new Error('서버 API가 구현되지 않았습니다');
       
       Alert.alert(
         t('settings:deleteAccount.restore.successTitle'),
@@ -123,6 +126,19 @@ export const AccountRestoreScreen = () => {
     if (days <= 3) return colors.WARNING || colors.ERROR;
     return colors.PRIMARY;
   };
+
+  // 서버 연결 에러 시 에러 화면 표시
+  if (serverConnectionError) {
+    return (
+      <ServerConnectionError 
+        onRetry={() => {
+          setServerConnectionError(false);
+          fetchDeletionStatus();
+        }}
+        message="계정 삭제 상태를 불러올 수 없습니다"
+      />
+    );
+  }
 
   if (isLoading) {
     return (

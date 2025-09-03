@@ -22,7 +22,8 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { API_BASE_URL } from '@/services/api/config';
+import { apiClient } from '@/services/api/config';
+import { ServerConnectionError } from '@/components/ServerConnectionError';
 
 interface LocationData {
   latitude: number;
@@ -63,6 +64,7 @@ export const NearbyGroupsScreen = React.memo(() => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showMapView, setShowMapView] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<LocationGroup | null>(null);
+  const [serverConnectionError, setServerConnectionError] = useState(false);
   
   // 새 그룹 생성 상태
   const [newGroupName, setNewGroupName] = useState('');
@@ -156,23 +158,13 @@ export const NearbyGroupsScreen = React.memo(() => {
 
       // 실제 API 호출
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/location/nearby/groups?radius=${selectedRadius}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-dev-auth': 'true',
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.length > 0) {
-            setNearbyGroups(data);
-            return;
-          }
+        const data = await apiClient.get('/location/nearby/groups', {
+          radius: selectedRadius
+        });
+        
+        if (data && data.length > 0) {
+          setNearbyGroups(data);
+          return;
         }
       } catch (apiError) {
         console.log('API call failed, using dummy data:', apiError);
@@ -191,114 +183,10 @@ export const NearbyGroupsScreen = React.memo(() => {
         return R * c * 1000; // km를 m로 변환
       };
 
-      // API 실패 시 더미 데이터 사용 (다양한 거리의 그룹들)
-      const allDummyGroups: LocationGroup[] = [
-        {
-          id: 'group1',
-          name: '스타벅스 강남점',
-          description: '스타벅스에서 만나요! 커피 한잔하며 대화해요 ☕️',
-          latitude: currentLocation.latitude + 0.001,
-          longitude: currentLocation.longitude + 0.001,
-          radius: 0.5,
-          distance: 0,
-          memberCount: 12,
-          activeMembers: 8,
-          createdBy: 'user123',
-          createdAt: new Date(),
-          expiresAt: new Date(Date.now() + 3 * 60 * 60 * 1000),
-          isJoined: false,
-        },
-        {
-          id: 'group2',
-          name: '코엑스 런치 모임',
-          description: '점심 같이 먹을 사람 구해요! 맛집 추천 환영 🍚',
-          latitude: currentLocation.latitude - 0.003,
-          longitude: currentLocation.longitude + 0.003,
-          radius: 1,
-          distance: 0,
-          memberCount: 25,
-          activeMembers: 15,
-          createdBy: 'user456',
-          createdAt: new Date(Date.now() - 30 * 60 * 1000),
-          expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
-          isJoined: true,
-        },
-        {
-          id: 'group3',
-          name: '한강공원 러닝',
-          description: '저녁 7시 한강에서 러닝해요! 초보자도 환영 🏃‍♂️',
-          latitude: currentLocation.latitude + 0.008,
-          longitude: currentLocation.longitude - 0.008,
-          radius: 2,
-          distance: 0,
-          memberCount: 8,
-          activeMembers: 5,
-          createdBy: 'user789',
-          createdAt: new Date(Date.now() - 60 * 60 * 1000),
-          expiresAt: new Date(Date.now() + 5 * 60 * 60 * 1000),
-          isJoined: false,
-        },
-        {
-          id: 'group4',
-          name: '강남역 스터디 카페',
-          description: '개발 스터디 함께해요! 💻',
-          latitude: currentLocation.latitude + 0.015,
-          longitude: currentLocation.longitude + 0.015,
-          radius: 1,
-          distance: 0,
-          memberCount: 6,
-          activeMembers: 4,
-          createdBy: 'user111',
-          createdAt: new Date(),
-          isJoined: false,
-        },
-        {
-          id: 'group5',
-          name: '판교 테크노밸리',
-          description: 'IT 종사자 모임',
-          latitude: currentLocation.latitude + 0.04,
-          longitude: currentLocation.longitude + 0.04,
-          radius: 3,
-          distance: 0,
-          memberCount: 30,
-          activeMembers: 20,
-          createdBy: 'user222',
-          createdAt: new Date(),
-          isJoined: false,
-        },
-        {
-          id: 'group6',
-          name: '서울숲 피크닉',
-          description: '주말 피크닉 함께해요 🧺',
-          latitude: currentLocation.latitude + 0.08,
-          longitude: currentLocation.longitude - 0.08,
-          radius: 2,
-          distance: 0,
-          memberCount: 15,
-          activeMembers: 10,
-          createdBy: 'user333',
-          createdAt: new Date(),
-          isJoined: false,
-        },
-      ];
-
-      // 각 그룹의 실제 거리 계산
-      const groupsWithDistance = allDummyGroups.map(group => ({
-        ...group,
-        distance: calculateDistance(
-          currentLocation.latitude,
-          currentLocation.longitude,
-          group.latitude,
-          group.longitude
-        )
-      }));
-
-      // 선택된 반경 내의 그룹만 필터링
-      const filteredGroups = groupsWithDistance.filter(group => 
-        group.distance <= selectedRadius * 1000 // km to meters
-      ).sort((a, b) => a.distance - b.distance); // 거리순 정렬
-
-      setNearbyGroups(filteredGroups);
+      // API 호출 실패 시 빈 배열 설정
+      setNearbyGroups([]);
+      setServerConnectionError(true);
+      Alert.alert('연결 오류', '서버에서 근처 그룹을 가져올 수 없습니다.');
     } catch (error) {
       console.error('Load nearby groups error:', error);
     } finally {
@@ -351,33 +239,22 @@ export const NearbyGroupsScreen = React.memo(() => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/location/groups`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-dev-auth': 'true',
-        },
-        body: JSON.stringify({
-          name: newGroupName,
-          description: newGroupDescription,
-          latitude: currentLocation.latitude,
-          longitude: currentLocation.longitude,
-          radius: parseFloat(newGroupRadius),
-          durationHours: parseInt(newGroupDuration),
-        }),
+      await apiClient.post('/location/groups', {
+        name: newGroupName,
+        description: newGroupDescription,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        radius: parseFloat(newGroupRadius),
+        durationHours: parseInt(newGroupDuration),
       });
 
-      if (response.ok) {
-        Alert.alert(t('common:alerts.success.title'), t('nearbygroups:alerts.group.createSuccess'));
-        setShowCreateModal(false);
-        setNewGroupName('');
-        setNewGroupDescription('');
-        setNewGroupRadius('1');
-        setNewGroupDuration('4');
-        loadNearbyGroups();
-      } else {
-        throw new Error('Failed to create group');
-      }
+      Alert.alert(t('common:alerts.success.title'), t('nearbygroups:alerts.group.createSuccess'));
+      setShowCreateModal(false);
+      setNewGroupName('');
+      setNewGroupDescription('');
+      setNewGroupRadius('1');
+      setNewGroupDuration('4');
+      loadNearbyGroups();
     } catch (error) {
       console.error('Create group error:', error);
       Alert.alert(t('common:alerts.error.title'), t('nearbygroups:alerts.group.createError'));
@@ -541,6 +418,19 @@ export const NearbyGroupsScreen = React.memo(() => {
       </View>
     </Modal>
   );
+
+  // 서버 연결 에러 시 에러 화면 표시
+  if (serverConnectionError) {
+    return (
+      <ServerConnectionError 
+        onRetry={() => {
+          setServerConnectionError(false);
+          loadNearbyGroups();
+        }}
+        message="근처 그룹을 불러올 수 없습니다"
+      />
+    );
+  }
 
   if (isLoading && !nearbyGroups.length) {
     return (

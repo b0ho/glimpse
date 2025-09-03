@@ -1,128 +1,890 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-// User Management
 model User {
-  id            String   @id @default(cuid())
-  clerkId       String?  @unique
-  anonymousId   String   @unique @default(cuid())
-  phoneNumber   String   @unique
-  nickname      String?
-  age           Int?
-  gender        Gender?
-  profileImage  String?
-  bio           String?
-  isVerified    Boolean  @default(false)
-  credits       Int      @default(1)
-  isPremium     Boolean  @default(false)
-  premiumLevel  PremiumLevel @default(FREE)
-  premiumUntil  DateTime?
-  lastActive    DateTime @default(now())
-  lastOnline    DateTime?
-  deletedAt     DateTime?
-  deletionReason String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  // Additional profile fields
-  realName      String? // 실명 (매칭 후 공개)
-  email         String?
-  birthdate     String? // 생년월일 (YYYY-MM-DD)
-  companyName   String?
-  education     String?
-  school        String? // 학교명
-  major         String? // 학과/전공
-  location      String?
-  interests     String[] // Array of interests
-  height        Int?
-  mbti          String?
-  drinking      String?
-  smoking       String?
-  
-  // 12종 유형 정보
-  socialIds     Json? // [{platform: string, id: string}]
-  platformIds   Json? // [{platform: string, id: string}]
-  gameIds       Json? // [{game: string, id: string}]
-  partTimeJob   Json? // {place: string, position?: string, workingHours?: string}
-  appearance    String? // 인상착의
-  hobbies       String? // 취미/관심사
-  groups        String[] // 소속 그룹들 (동호회, 모임 등)
-  department    String? // 부서/팀 (회사)
-  studentId     String? // 학번 (학교)
-  
-  // Settings
-  privacySettings Json?
-  notificationSettings Json?
-  
-  // Location Profile Settings
-  locationProfileMode String? // 'real' or 'persona'
-  personaProfile Json? // 페르소나 프로필 정보 (deprecated - use Persona model)
-  personaSettings Json? // 근처 사용자 페르소나 설정 (deprecated - use Persona model)
-  
-  // Location tracking
-  lastLatitude  Float?
-  lastLongitude Float?
-  lastLocationUpdateAt DateTime?
-  locationSharingEnabled Boolean @default(false)
-
-  // Relations
-  deviceTokens       UserDeviceToken[]
-  fcmTokens          FcmToken[]
-  verifications      CompanyVerification[]
-  emailVerifications EmailVerification[]
-  groupMemberships   GroupMember[]
-  sentLikes          UserLike[] @relation("SentLikes")
-  receivedLikes      UserLike[] @relation("ReceivedLikes")
-  matches1           Match[] @relation("User1Matches")
-  matches2           Match[] @relation("User2Matches")
-  sentMessages       ChatMessage[]
-  messageReactions   MessageReaction[]
-  callsMade          VideoCall[] @relation("CallsMade")
-  callsReceived      VideoCall[] @relation("CallsReceived")
-  stories            Story[]
-  storyViews         StoryView[]
-  notifications      Notification[]
-  scheduledNotifications ScheduledNotification[]
-  payments           Payment[]
-  subscriptions      Subscription[]
-  locationCheckIns   LocationCheckIn[]
-  createdGroups      Group[] @relation("GroupCreator")
-  createdInvites     GroupInvite[]
-  files              File[]
-  communityPosts     CommunityPost[]
-  comments           Comment[]
-  postLikes          PostLike[]
-  commentLikes       CommentLike[]
-  groupChatMembers   GroupChatMember[]
-  groupChatMessages  GroupChatMessage[]
-  groupLikes         GroupLike[]
-  feedbacks          Feedback[]
-  feedbackVotes      FeedbackVote[]
-  feedbackComments   FeedbackComment[]
-  
-  // Friend relations
-  sentFriendRequests     FriendRequest[] @relation("SentRequests")
-  receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
-  friendships1           Friendship[] @relation("User1Friends")
-  friendships2           Friendship[] @relation("User2Friends")
-  
-  // Interest Search relations
-  interestSearches       InterestSearch[] @relation("UserInterests")
-  matchedInterests       InterestSearch[] @relation("MatchedInterests")
-  
-  // Persona relation
+  id                     String                  @id @default(cuid())
+  clerkId                String?                 @unique
+  anonymousId            String                  @unique @default(cuid())
+  phoneNumber            String                  @unique
+  nickname               String?
+  age                    Int?
+  gender                 Gender?
+  profileImage           String?
+  bio                    String?
+  isVerified             Boolean                 @default(false)
+  credits                Int                     @default(1)
+  isPremium              Boolean                 @default(false)
+  premiumLevel           PremiumLevel            @default(FREE)
+  premiumUntil           DateTime?
+  lastActive             DateTime                @default(now())
+  lastOnline             DateTime?
+  deletedAt              DateTime?
+  deletionReason         String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  companyName            String?
+  education              String?
+  location               String?
+  interests              String[]
+  height                 Int?
+  mbti                   String?
+  drinking               String?
+  smoking                String?
+  privacySettings        Json?
+  notificationSettings   Json?
+  locationProfileMode    String?
+  personaProfile         Json?
+  personaSettings        Json?
+  lastLatitude           Float?
+  lastLongitude          Float?
+  lastLocationUpdateAt   DateTime?
+  locationSharingEnabled Boolean                 @default(false)
+  birthdate              String?
+  email                  String?
+  gameIds                Json?
+  major                  String?
+  platformIds            Json?
+  realName               String?
+  school                 String?
+  socialIds              Json?
+  appearance             String?
+  hobbies                String?
+  partTimeJob            Json?
+  department             String?
+  groups                 String[]
+  studentId              String?
+  sentMessages           ChatMessage[]
+  commentLikes           CommentLike[]
+  comments               Comment[]
+  communityPosts         CommunityPost[]
+  verifications          CompanyVerification[]
+  emailVerifications     EmailVerification[]
+  fcmTokens              FcmToken[]
+  feedbackComments       FeedbackComment[]
+  feedbackVotes          FeedbackVote[]
+  feedbacks              Feedback[]
+  files                  File[]
+  sentFriendRequests     FriendRequest[]         @relation("SentRequests")
+  receivedFriendRequests FriendRequest[]         @relation("ReceivedRequests")
+  friendships1           Friendship[]            @relation("User1Friends")
+  friendships2           Friendship[]            @relation("User2Friends")
+  groupChatMembers       GroupChatMember[]
+  groupChatMessages      GroupChatMessage[]
+  createdInvites         GroupInvite[]
+  groupLikes             GroupLike[]
+  groupMemberships       GroupMember[]
+  createdGroups          Group[]                 @relation("GroupCreator")
+  matchedInterests       InterestSearch[]        @relation("MatchedInterests")
+  interestSearches       InterestSearch[]        @relation("UserInterests")
+  locationCheckIns       LocationCheckIn[]
+  matches1               Match[]                 @relation("User1Matches")
+  matches2               Match[]                 @relation("User2Matches")
+  messageReactions       MessageReaction[]
+  notifications          Notification[]
+  payments               Payment[]
   persona                Persona?
+  postLikes              PostLike[]
+  scheduledNotifications ScheduledNotification[]
+  stories                Story[]
+  storyViews             StoryView[]
+  subscriptions          Subscription[]
+  deviceTokens           UserDeviceToken[]
+  user_encrypted_data    user_encrypted_data[]
+  sentLikes              UserLike[]              @relation("SentLikes")
+  receivedLikes          UserLike[]              @relation("ReceivedLikes")
+  user_profile_infos     user_profile_infos[]
+  callsMade              VideoCall[]             @relation("CallsMade")
+  callsReceived          VideoCall[]             @relation("CallsReceived")
 
   @@map("users")
+}
+
+model Persona {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  nickname   String
+  age        Int?
+  bio        String?
+  interests  String[]
+  occupation String?
+  height     Int?
+  mbti       String?
+  drinking   String?
+  smoking    String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("personas")
+}
+
+model UserDeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_device_tokens")
+}
+
+model FcmToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  deviceType String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("fcm_tokens")
+}
+
+model Company {
+  id            String                @id @default(cuid())
+  name          String
+  domain        String                @unique
+  type          CompanyType
+  isVerified    Boolean               @default(false)
+  logo          String?
+  description   String?
+  location      String?
+  createdAt     DateTime              @default(now())
+  verifications CompanyVerification[]
+  groups        Group[]
+
+  @@map("companies")
+}
+
+model CompanyVerification {
+  id          String             @id @default(cuid())
+  userId      String
+  companyId   String
+  method      VerificationMethod
+  status      VerificationStatus @default(PENDING)
+  data        Json?
+  submittedAt DateTime           @default(now())
+  reviewedAt  DateTime?
+  reviewedBy  String?
+  company     Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("company_verifications")
+}
+
+model Group {
+  id             String            @id @default(cuid())
+  name           String
+  description    String?
+  type           GroupType
+  imageUrl       String?
+  isActive       Boolean           @default(true)
+  maxMembers     Int?
+  creatorId      String?
+  companyId      String?
+  settings       Json
+  location       Json?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  communityPosts CommunityPost[]
+  groupChats     GroupChat[]
+  groupInvites   GroupInvite[]
+  groupLikes     GroupLike[]
+  members        GroupMember[]
+  company        Company?          @relation(fields: [companyId], references: [id])
+  creator        User?             @relation("GroupCreator", fields: [creatorId], references: [id])
+  inviteCodes    InviteCode[]
+  checkIns       LocationCheckIn[]
+  matches        Match[]
+  likes          UserLike[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id       String            @id @default(cuid())
+  userId   String
+  groupId  String
+  role     GroupMemberRole   @default(MEMBER)
+  status   GroupMemberStatus @default(ACTIVE)
+  joinedAt DateTime          @default(now())
+  group    Group             @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@map("group_members")
+}
+
+model GroupInvite {
+  id              String   @id @default(cuid())
+  groupId         String
+  inviteCode      String   @unique
+  createdByUserId String
+  expiresAt       DateTime
+  maxUses         Int?
+  uses            Int      @default(0)
+  createdAt       DateTime @default(now())
+  createdBy       User     @relation(fields: [createdByUserId], references: [id])
+  group           Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([inviteCode])
+  @@index([expiresAt])
+  @@map("group_invites")
+}
+
+model InviteCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  groupId   String
+  createdBy String
+  maxUses   Int      @default(1)
+  usedCount Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("invite_codes")
+}
+
+model UserLike {
+  id                 String             @id @default(cuid())
+  fromUserId         String
+  toUserId           String
+  groupId            String
+  isMatch            Boolean            @default(false)
+  isSuper            Boolean            @default(false)
+  cancelledAt        DateTime?
+  deletedAt          DateTime?
+  createdAt          DateTime           @default(now())
+  relationshipIntent RelationshipIntent
+  fromUser           User               @relation("SentLikes", fields: [fromUserId], references: [id], onDelete: Cascade)
+  group              Group              @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  toUser             User               @relation("ReceivedLikes", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId, groupId])
+  @@index([fromUserId, groupId])
+  @@index([toUserId, groupId])
+  @@index([groupId, createdAt])
+  @@map("user_likes")
+}
+
+model GroupLike {
+  id        String   @id @default(cuid())
+  userId    String
+  groupId   String
+  createdAt DateTime @default(now())
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@index([groupId])
+  @@map("group_likes")
+}
+
+model Match {
+  id                 String             @id @default(cuid())
+  user1Id            String
+  user2Id            String
+  groupId            String
+  status             MatchStatus        @default(ACTIVE)
+  lastMessageAt      DateTime?
+  isActive           Boolean            @default(true)
+  createdAt          DateTime           @default(now())
+  mismatchedBy       String?
+  mismatchedAt       DateTime?
+  mismatchReason     String?
+  interestType       InterestType
+  relationshipIntent RelationshipIntent
+  messages           ChatMessage[]
+  group              Group              @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user1              User               @relation("User1Matches", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2              User               @relation("User2Matches", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  @@unique([user1Id, user2Id, groupId])
+  @@map("matches")
+}
+
+model ChatMessage {
+  id          String            @id @default(cuid())
+  matchId     String
+  senderId    String
+  content     String
+  type        MessageType       @default(TEXT)
+  isEncrypted Boolean           @default(true)
+  readAt      DateTime?
+  createdAt   DateTime          @default(now())
+  match       Match             @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  sender      User              @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  reactions   MessageReaction[]
+
+  @@index([matchId, createdAt])
+  @@index([senderId])
+  @@map("chat_messages")
+}
+
+model MessageReaction {
+  id        String      @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime    @default(now())
+  message   ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@map("message_reactions")
+}
+
+model VideoCall {
+  id         String     @id @default(cuid())
+  callerId   String
+  receiverId String
+  callType   CallType   @default(VIDEO)
+  status     CallStatus @default(INITIATED)
+  startedAt  DateTime?
+  endedAt    DateTime?
+  duration   Int?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  caller     User       @relation("CallsMade", fields: [callerId], references: [id], onDelete: Cascade)
+  receiver   User       @relation("CallsReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([callerId])
+  @@index([receiverId])
+  @@index([status])
+  @@map("video_calls")
+}
+
+model Story {
+  id        String         @id @default(cuid())
+  userId    String
+  mediaUrl  String
+  mediaType StoryMediaType
+  caption   String?
+  isActive  Boolean        @default(true)
+  expiresAt DateTime
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  views     StoryView[]
+
+  @@index([userId])
+  @@index([isActive])
+  @@index([expiresAt])
+  @@map("stories")
+}
+
+model StoryView {
+  id       String   @id @default(cuid())
+  storyId  String
+  viewerId String
+  viewedAt DateTime @default(now())
+  story    Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  viewer   User     @relation(fields: [viewerId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, viewerId])
+  @@index([storyId])
+  @@index([viewerId])
+  @@map("story_views")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  userId          String
+  amount          Int
+  currency        String        @default("KRW")
+  type            PaymentType
+  status          PaymentStatus @default(PENDING)
+  method          PaymentMethod
+  stripePaymentId String?
+  metadata        Json?
+  createdAt       DateTime      @default(now())
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("payments")
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String
+  plan                 SubscriptionPlan
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model ScheduledNotification {
+  id          String    @id @default(cuid())
+  userId      String
+  title       String
+  body        String
+  data        Json?
+  scheduledAt DateTime
+  sent        Boolean   @default(false)
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("scheduled_notifications")
+}
+
+model LocationCheckIn {
+  id        String              @id @default(cuid())
+  userId    String
+  groupId   String
+  latitude  Float
+  longitude Float
+  accuracy  Float
+  method    LocationCheckMethod
+  isValid   Boolean             @default(true)
+  createdAt DateTime            @default(now())
+  group     Group               @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("location_check_ins")
+}
+
+model File {
+  id           String   @id @default(cuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  path         String?
+  uploadedBy   String?
+  userId       String?
+  category     String?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User?    @relation(fields: [userId], references: [id])
+
+  @@map("files")
+}
+
+model CommunityPost {
+  id           String     @id @default(cuid())
+  authorId     String
+  groupId      String
+  title        String
+  content      String
+  imageUrls    String[]
+  viewCount    Int        @default(0)
+  likeCount    Int        @default(0)
+  commentCount Int        @default(0)
+  isPinned     Boolean    @default(false)
+  category     String?
+  tags         String[]
+  isDeleted    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  comments     Comment[]
+  author       User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  group        Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  likes        PostLike[]
+
+  @@index([groupId, createdAt])
+  @@index([authorId])
+  @@map("community_posts")
+}
+
+model Comment {
+  id        String        @id @default(cuid())
+  postId    String
+  authorId  String
+  content   String
+  parentId  String?
+  likeCount Int           @default(0)
+  isDeleted Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  likes     CommentLike[]
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent    Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[]     @relation("CommentReplies")
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model PostLike {
+  id        String        @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime      @default(now())
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@map("post_likes")
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  userId    String
+  createdAt DateTime @default(now())
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@map("comment_likes")
+}
+
+model Feedback {
+  id        String            @id @default(cuid())
+  userId    String
+  title     String
+  content   String
+  category  String
+  priority  String            @default("medium")
+  status    String            @default("pending")
+  voteCount Int               @default(0)
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  comments  FeedbackComment[]
+  votes     FeedbackVote[]
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([category])
+  @@map("feedbacks")
+}
+
+model FeedbackVote {
+  id         String   @id @default(cuid())
+  feedbackId String
+  userId     String
+  voteType   String
+  createdAt  DateTime @default(now())
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, feedbackId])
+  @@map("feedback_votes")
+}
+
+model FeedbackComment {
+  id         String   @id @default(cuid())
+  feedbackId String
+  userId     String
+  content    String
+  createdAt  DateTime @default(now())
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([feedbackId])
+  @@map("feedback_comments")
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([order])
+  @@map("faqs")
+}
+
+model GroupChat {
+  id            String             @id @default(cuid())
+  groupId       String
+  name          String
+  description   String?
+  imageUrl      String?
+  maxMembers    Int                @default(50)
+  isPublic      Boolean            @default(true)
+  lastMessageAt DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  members       GroupChatMember[]
+  messages      GroupChatMessage[]
+  group         Group              @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@map("group_chats")
+}
+
+model GroupChatMember {
+  id         String        @id @default(cuid())
+  chatId     String
+  userId     String
+  role       GroupChatRole @default(MEMBER)
+  joinedAt   DateTime      @default(now())
+  lastReadAt DateTime?
+  chat       GroupChat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([chatId, userId])
+  @@index([userId])
+  @@map("group_chat_members")
+}
+
+model GroupChatMessage {
+  id          String             @id @default(cuid())
+  chatId      String
+  senderId    String
+  content     String
+  type        GroupMessageType   @default(TEXT)
+  isEncrypted Boolean            @default(true)
+  replyToId   String?
+  createdAt   DateTime           @default(now())
+  chat        GroupChat          @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  replyTo     GroupChatMessage?  @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies     GroupChatMessage[] @relation("MessageReplies")
+  sender      User               @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt])
+  @@map("group_chat_messages")
+}
+
+model InterestSearch {
+  id                                                               String              @id @default(cuid())
+  userId                                                           String
+  type                                                             InterestType
+  value                                                            String
+  metadata                                                         Json?
+  status                                                           SearchStatus        @default(ACTIVE)
+  matchedWithId                                                    String?
+  matchedAt                                                        DateTime?
+  expiresAt                                                        DateTime?
+  createdAt                                                        DateTime            @default(now())
+  updatedAt                                                        DateTime            @updatedAt
+  gender                                                           Gender?
+  deletedAt                                                        DateTime?
+  deviceId                                                         String?
+  hashedPrimary                                                    String?
+  isLocalOnly                                                      Boolean             @default(false)
+  relationshipIntent                                               RelationshipIntent  @default(ROMANTIC)
+  targetGender                                                     Gender?
+  primaryHash                                                      String?
+  secondaryHash                                                    String?
+  encryptedData                                                    String?
+  encryptedIV                                                      String?
+  encryptedTag                                                     String?
+  displayValue                                                     String?
+  phoneCountryCode                                                 String?
+  phoneLastDigits                                                  String?
+  emailDomain                                                      String?
+  emailFirstChar                                                   String?
+  socialPlatform                                                   String?
+  birthYear                                                        Int?
+  ageRange                                                         String?
+  locationCity                                                     String?
+  companyDomain                                                    String?
+  schoolName                                                       String?
+  partTimeCategory                                                 String?
+  platformName                                                     String?
+  gameTitle                                                        String?
+  matchedWith                                                      User?               @relation("MatchedInterests", fields: [matchedWithId], references: [id])
+  user                                                             User                @relation("UserInterests", fields: [userId], references: [id], onDelete: Cascade)
+  potential_matches_potential_matches_search1IdTointerest_searches potential_matches[] @relation("potential_matches_search1IdTointerest_searches")
+  potential_matches_potential_matches_search2IdTointerest_searches potential_matches[] @relation("potential_matches_search2IdTointerest_searches")
+
+  @@index([type, primaryHash, status])
+  @@index([userId, status])
+  @@index([relationshipIntent, status])
+  @@index([type, value])
+  @@map("interest_searches")
+}
+
+model EmailLog {
+  id       String   @id @default(cuid())
+  to       String
+  subject  String
+  provider String
+  status   String
+  sent_at  DateTime @default(now())
+  metadata Json?
+
+  @@map("email_logs")
+}
+
+model SMSLog {
+  id          String   @id @default(cuid())
+  phoneNumber String
+  message     String
+  messageType String
+  provider    String
+  status      String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([phoneNumber])
+  @@index([status])
+  @@index([createdAt])
+  @@map("sms_logs")
+}
+
+model CompanyDomain {
+  id            String   @id @default(cuid())
+  domain        String   @unique
+  companyName   String
+  companyNameKr String?
+  isVerified    Boolean  @default(true)
+  employeeCount Int?
+  industry      String?
+  logoUrl       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([domain])
+  @@index([isVerified])
+  @@map("company_domains")
+}
+
+model EmailVerification {
+  id          String    @id @default(cuid())
+  userId      String
+  email       String
+  domain      String
+  code        String
+  isVerified  Boolean   @default(false)
+  expiresAt   DateTime
+  verifiedAt  DateTime?
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, email])
+  @@index([email])
+  @@index([code])
+  @@index([expiresAt])
+  @@map("email_verifications")
+}
+
+model FriendRequest {
+  id         String              @id @default(cuid())
+  fromUserId String
+  toUserId   String
+  message    String?
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  fromUser   User                @relation("SentRequests", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser     User                @relation("ReceivedRequests", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId])
+  @@index([toUserId, status])
+  @@map("friend_requests")
+}
+
+model Friendship {
+  id        String   @id @default(cuid())
+  user1Id   String
+  user2Id   String
+  createdAt DateTime @default(now())
+  user1     User     @relation("User1Friends", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2     User     @relation("User2Friends", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  @@unique([user1Id, user2Id])
+  @@index([user2Id])
+  @@map("friendships")
+}
+
+model potential_matches {
+  id                                                               String               @id
+  search1Id                                                        String
+  search2Id                                                        String
+  matchType                                                        InterestType
+  matchStrength                                                    Float                @default(100)
+  status                                                           PotentialMatchStatus @default(PENDING)
+  isConfirmed                                                      Boolean              @default(false)
+  confirmedAt                                                      DateTime?
+  chatEnabled                                                      Boolean              @default(false)
+  chatStartedAt                                                    DateTime?
+  createdAt                                                        DateTime             @default(now())
+  updatedAt                                                        DateTime
+  interest_searches_potential_matches_search1IdTointerest_searches InterestSearch       @relation("potential_matches_search1IdTointerest_searches", fields: [search1Id], references: [id])
+  interest_searches_potential_matches_search2IdTointerest_searches InterestSearch       @relation("potential_matches_search2IdTointerest_searches", fields: [search2Id], references: [id])
+
+  @@unique([search1Id, search2Id])
+  @@index([status, isConfirmed])
+}
+
+model user_encrypted_data {
+  id            String   @id
+  userId        String
+  deviceId      String
+  encryptedBlob String
+  dataType      String
+  lastSyncedAt  DateTime @default(now())
+  version       Int      @default(1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime
+  users         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deviceId, dataType])
+}
+
+model user_profile_infos {
+  id           String            @id
+  userId       String
+  infoType     ProfileInfoType
+  hashedValue1 String
+  hashedValue2 String?
+  hashedValue3 String?
+  displayValue String?
+  visibility   ProfileVisibility @default(MATCH_ONLY)
+  isVerified   Boolean           @default(false)
+  verifiedAt   DateTime?
+  priority     Int               @default(0)
+  isActive     Boolean           @default(true)
+  expiresAt    DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime
+  users        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([hashedValue1])
+  @@index([userId, infoType, isActive])
 }
 
 enum Gender {
@@ -137,96 +899,10 @@ enum PremiumLevel {
   UPPER
 }
 
-// Persona for location-based profiles
-model Persona {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  nickname    String   // Different from user's main nickname
-  age         Int?
-  bio         String?  @db.Text
-  interests   String[]
-  occupation  String?
-  height      Int?
-  mbti        String?
-  drinking    String?
-  smoking     String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@map("personas")
-}
-
-// Device & Authentication
-model UserDeviceToken {
-  id          String   @id @default(cuid())
-  userId      String
-  token       String   @unique
-  platform    String   // 'ios', 'android', 'web'
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("user_device_tokens")
-}
-
-model FcmToken {
-  id          String   @id @default(cuid())
-  userId      String
-  token       String   @unique
-  deviceType  String   // 'ios', 'android'
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("fcm_tokens")
-}
-
-// Company & Verification
-model Company {
-  id          String      @id @default(cuid())
-  name        String
-  domain      String      @unique
-  type        CompanyType
-  isVerified  Boolean     @default(false)
-  logo        String?
-  description String?
-  location    String?
-  createdAt   DateTime    @default(now())
-
-  groups        Group[]
-  verifications CompanyVerification[]
-
-  @@map("companies")
-}
-
 enum CompanyType {
   COMPANY
   UNIVERSITY
   ORGANIZATION
-}
-
-model CompanyVerification {
-  id          String             @id @default(cuid())
-  userId      String
-  companyId   String
-  method      VerificationMethod
-  status      VerificationStatus @default(PENDING)
-  data        Json?              // Flexible field for method-specific data
-  submittedAt DateTime           @default(now())
-  reviewedAt  DateTime?
-  reviewedBy  String?
-
-  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company     Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  @@map("company_verifications")
 }
 
 enum VerificationMethod {
@@ -243,57 +919,11 @@ enum VerificationStatus {
   EXPIRED
 }
 
-// Groups
-model Group {
-  id          String      @id @default(cuid())
-  name        String
-  description String?
-  type        GroupType
-  imageUrl    String?
-  isActive    Boolean     @default(true)
-  maxMembers  Int?
-  creatorId   String?
-  companyId   String?
-  settings    Json        // GroupSettings as JSON
-  location    Json?       // GroupLocation as JSON
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  creator       User?            @relation("GroupCreator", fields: [creatorId], references: [id])
-  company       Company?         @relation(fields: [companyId], references: [id])
-  members       GroupMember[]
-  likes         UserLike[]
-  matches       Match[]
-  inviteCodes   InviteCode[]
-  groupInvites  GroupInvite[]
-  checkIns      LocationCheckIn[]
-  communityPosts CommunityPost[]
-  groupChats     GroupChat[]
-  groupLikes    GroupLike[]
-
-  @@map("groups")
-}
-
 enum GroupType {
-  OFFICIAL    // Company/University groups
-  CREATED     // User-created groups
-  INSTANCE    // Temporary event groups
-  LOCATION    // Location-based groups
-}
-
-model GroupMember {
-  id        String            @id @default(cuid())
-  userId    String
-  groupId   String
-  role      GroupMemberRole   @default(MEMBER)
-  status    GroupMemberStatus @default(ACTIVE)
-  joinedAt  DateTime          @default(now())
-
-  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  group     Group             @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, groupId])
-  @@map("group_members")
+  OFFICIAL
+  CREATED
+  INSTANCE
+  LOCATION
 }
 
 enum GroupMemberRole {
@@ -308,173 +938,16 @@ enum GroupMemberStatus {
   BANNED
 }
 
-// Group Invites
-model GroupInvite {
-  id              String   @id @default(cuid())
-  groupId         String
-  inviteCode      String   @unique
-  createdByUserId String
-  expiresAt       DateTime
-  maxUses         Int?
-  uses            Int      @default(0)
-  createdAt       DateTime @default(now())
-
-  group           Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  createdBy       User     @relation(fields: [createdByUserId], references: [id])
-
-  @@index([inviteCode])
-  @@index([expiresAt])
-  @@map("group_invites")
-}
-
-// Invite Codes (legacy - to be removed)
-model InviteCode {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  groupId   String
-  createdBy String
-  maxUses   Int      @default(1)
-  usedCount Int      @default(0)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  @@map("invite_codes")
-}
-
-// Likes & Matches
-model UserLike {
-  id         String   @id @default(cuid())
-  fromUserId String
-  toUserId   String
-  groupId    String
-  isMatch    Boolean  @default(false)
-  relationshipIntent RelationshipIntent  // 관심 유형: FRIEND or ROMANTIC
-  isSuper    Boolean  @default(false)
-  cancelledAt DateTime?
-  deletedAt  DateTime?
-  createdAt  DateTime @default(now())
-
-  fromUser   User     @relation("SentLikes", fields: [fromUserId], references: [id], onDelete: Cascade)
-  toUser     User     @relation("ReceivedLikes", fields: [toUserId], references: [id], onDelete: Cascade)
-  group      Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  @@unique([fromUserId, toUserId, groupId])
-  @@index([fromUserId, groupId])
-  @@index([toUserId, groupId])
-  @@index([groupId, createdAt])
-  @@map("user_likes")
-}
-
-model GroupLike {
-  id        String   @id @default(cuid())
-  userId    String
-  groupId   String
-  createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, groupId])
-  @@index([groupId])
-  @@map("group_likes")
-}
-
-model Match {
-  id            String      @id @default(cuid())
-  user1Id       String
-  user2Id       String
-  groupId       String
-  status        MatchStatus @default(ACTIVE)
-  interestType  InterestType  // 관심 유형: FRIEND or ROMANTIC
-  relationshipIntent RelationshipIntent // 관계 의도: FRIEND or ROMANTIC
-  lastMessageAt DateTime?
-  isActive      Boolean     @default(true)
-  createdAt     DateTime    @default(now())
-  
-  // Mismatch tracking fields
-  mismatchedBy     String?     // User ID who reported the mismatch
-  mismatchedAt     DateTime?   // When the mismatch was reported
-  mismatchReason   String?     // Reason for mismatch (for admin monitoring)
-
-  user1     User        @relation("User1Matches", fields: [user1Id], references: [id], onDelete: Cascade)
-  user2     User        @relation("User2Matches", fields: [user2Id], references: [id], onDelete: Cascade)
-  group     Group       @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  messages  ChatMessage[]
-
-  @@unique([user1Id, user2Id, groupId])
-  @@map("matches")
-}
-
 enum MatchStatus {
   ACTIVE
   EXPIRED
   DELETED
-  MISMATCH  // New status for mismatched pairs
+  MISMATCH
 }
 
-// Relationship Intent for likes and matches
 enum RelationshipIntent {
-  FRIEND      // 친구
-  ROMANTIC    // 호감 (연애)
-}
-
-// Chat
-model ChatMessage {
-  id          String          @id @default(cuid())
-  matchId     String
-  senderId    String
-  content     String
-  type        MessageType     @default(TEXT)
-  isEncrypted Boolean         @default(true)
-  readAt      DateTime?
-  createdAt   DateTime        @default(now())
-
-  match       Match           @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  sender      User            @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  reactions   MessageReaction[]
-
-  @@index([matchId, createdAt])
-  @@index([senderId])
-  @@map("chat_messages")
-}
-
-// Message Reactions
-model MessageReaction {
-  id          String   @id @default(cuid())
-  messageId   String
-  userId      String
-  emoji       String   // 이모지 유니코드
-  createdAt   DateTime @default(now())
-
-  message     ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([messageId, userId, emoji])
-  @@map("message_reactions")
-}
-
-// Video Calls
-model VideoCall {
-  id          String   @id @default(cuid())
-  callerId    String
-  receiverId  String
-  callType    CallType @default(VIDEO)
-  status      CallStatus @default(INITIATED)
-  startedAt   DateTime?
-  endedAt     DateTime?
-  duration    Int?     // in seconds
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  caller      User     @relation("CallsMade", fields: [callerId], references: [id], onDelete: Cascade)
-  receiver    User     @relation("CallsReceived", fields: [receiverId], references: [id], onDelete: Cascade)
-  
-  @@index([callerId])
-  @@index([receiverId])
-  @@index([status])
-  @@map("video_calls")
+  FRIEND
+  ROMANTIC
 }
 
 enum CallType {
@@ -497,88 +970,14 @@ enum MessageType {
   SYSTEM
 }
 
-// Stories
-model Story {
-  id          String   @id @default(cuid())
-  userId      String
-  mediaUrl    String   // S3 URL for image/video
-  mediaType   StoryMediaType
-  caption     String?  @db.Text
-  isActive    Boolean  @default(true)
-  expiresAt   DateTime // 24 hours from creation
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  views       StoryView[]
-  
-  @@index([userId])
-  @@index([isActive])
-  @@index([expiresAt])
-  @@map("stories")
-}
-
-model StoryView {
-  id          String   @id @default(cuid())
-  storyId     String
-  viewerId    String
-  viewedAt    DateTime @default(now())
-  
-  story       Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
-  viewer      User     @relation(fields: [viewerId], references: [id], onDelete: Cascade)
-  
-  @@unique([storyId, viewerId])
-  @@index([storyId])
-  @@index([viewerId])
-  @@map("story_views")
-}
-
 enum StoryMediaType {
   IMAGE
   VIDEO
 }
 
-// Payments
-model Payment {
-  id               String        @id @default(cuid())
-  userId           String
-  amount           Int           // Amount in cents/won
-  currency         String        @default("KRW")
-  type             PaymentType
-  status           PaymentStatus @default(PENDING)
-  method           PaymentMethod
-  stripePaymentId  String?
-  metadata         Json?
-  createdAt        DateTime      @default(now())
-
-  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, status])
-  @@index([status, createdAt])
-  @@map("payments")
-}
-
 enum PaymentType {
   PREMIUM_SUBSCRIPTION
   LIKE_CREDITS
-}
-
-// Subscriptions
-model Subscription {
-  id                     String             @id @default(cuid())
-  userId                 String
-  plan                   SubscriptionPlan
-  status                 SubscriptionStatus @default(ACTIVE)
-  stripeCustomerId       String?
-  stripeSubscriptionId   String?
-  currentPeriodStart     DateTime
-  currentPeriodEnd       DateTime
-  createdAt              DateTime           @default(now())
-  updatedAt              DateTime           @updatedAt
-
-  user                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("subscriptions")
 }
 
 enum SubscriptionPlan {
@@ -608,66 +1007,15 @@ enum PaymentMethod {
   NAVER_PAY
 }
 
-// Notifications
-model Notification {
-  id        String           @id @default(cuid())
-  userId    String
-  type      NotificationType
-  title     String
-  message   String
-  data      Json?
-  isRead    Boolean          @default(false)
-  readAt    DateTime?
-  createdAt DateTime         @default(now())
-
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("notifications")
-}
-
-model ScheduledNotification {
-  id          String   @id @default(cuid())
-  userId      String
-  title       String
-  body        String
-  data        Json?
-  scheduledAt DateTime
-  sent        Boolean  @default(false)
-  sentAt      DateTime?
-  createdAt   DateTime @default(now())
-
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("scheduled_notifications")
-}
-
 enum NotificationType {
   LIKE_RECEIVED
   MATCH_CREATED
   MESSAGE_RECEIVED
   GROUP_INVITATION
-  VERIFICATION_APPROVED  
+  VERIFICATION_APPROVED
   VERIFICATION_REJECTED
   PAYMENT_SUCCESS
   SUBSCRIPTION_CANCELLED
-}
-
-// Location
-model LocationCheckIn {
-  id        String               @id @default(cuid())
-  userId    String
-  groupId   String
-  latitude  Float
-  longitude Float
-  accuracy  Float
-  method    LocationCheckMethod
-  isValid   Boolean              @default(true)
-  createdAt DateTime             @default(now())
-
-  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  group     Group                @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  @@map("location_check_ins")
 }
 
 enum LocationCheckMethod {
@@ -675,238 +1023,6 @@ enum LocationCheckMethod {
   QR_CODE
 }
 
-// File Storage
-model File {
-  id          String   @id @default(cuid())
-  filename    String
-  originalName String
-  mimeType    String
-  size        Int
-  url         String
-  path        String?
-  uploadedBy  String?
-  userId      String?
-  category    String?
-  metadata    Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@map("files")
-}
-
-// Community Feature Models
-model CommunityPost {
-  id           String        @id @default(cuid())
-  authorId     String
-  groupId      String
-  title        String
-  content      String        @db.Text
-  imageUrls    String[]
-  viewCount    Int           @default(0)
-  likeCount    Int           @default(0)
-  commentCount Int           @default(0)
-  isPinned     Boolean       @default(false)
-  category     String?
-  tags         String[]
-  isDeleted    Boolean       @default(false)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  
-  // Relations
-  author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  group        Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  comments     Comment[]
-  likes        PostLike[]
-  
-  @@index([groupId, createdAt])
-  @@index([authorId])
-  @@map("community_posts")
-}
-
-model Comment {
-  id        String    @id @default(cuid())
-  postId    String
-  authorId  String
-  content   String    @db.Text
-  parentId  String?
-  likeCount Int       @default(0)
-  isDeleted Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  
-  // Relations
-  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  parent    Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   Comment[]     @relation("CommentReplies")
-  likes     CommentLike[]
-  
-  @@index([postId])
-  @@index([parentId])
-  @@map("comments")
-}
-
-model PostLike {
-  id        String        @id @default(cuid())
-  postId    String
-  userId    String
-  createdAt DateTime      @default(now())
-  
-  // Relations
-  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([postId, userId])
-  @@map("post_likes")
-}
-
-model CommentLike {
-  id        String   @id @default(cuid())
-  commentId String
-  userId    String
-  createdAt DateTime @default(now())
-  
-  // Relations
-  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([commentId, userId])
-  @@map("comment_likes")
-}
-
-// Support/Feedback Models
-model Feedback {
-  id        String   @id @default(cuid())
-  userId    String
-  title     String
-  content   String   @db.Text
-  category  String   // 'bug', 'feature', 'improvement', 'other'
-  priority  String   @default("medium") // 'low', 'medium', 'high'
-  status    String   @default("pending") // 'pending', 'in-progress', 'resolved', 'closed'
-  voteCount Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relations
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  votes     FeedbackVote[]
-  comments  FeedbackComment[]
-  
-  @@index([userId])
-  @@index([status])
-  @@index([category])
-  @@map("feedbacks")
-}
-
-model FeedbackVote {
-  id         String   @id @default(cuid())
-  feedbackId String
-  userId     String
-  voteType   String   // 'up' or 'down'
-  createdAt  DateTime @default(now())
-  
-  // Relations
-  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, feedbackId])
-  @@map("feedback_votes")
-}
-
-model FeedbackComment {
-  id         String   @id @default(cuid())
-  feedbackId String
-  userId     String
-  content    String   @db.Text
-  createdAt  DateTime @default(now())
-  
-  // Relations
-  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@index([feedbackId])
-  @@map("feedback_comments")
-}
-
-model FAQ {
-  id        String   @id @default(cuid())
-  question  String
-  answer    String   @db.Text
-  category  String
-  order     Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@index([category])
-  @@index([order])
-  @@map("faqs")
-}
-
-// Group Chat Feature Models
-model GroupChat {
-  id            String               @id @default(cuid())
-  groupId       String
-  name          String
-  description   String?
-  imageUrl      String?
-  maxMembers    Int                  @default(50)
-  isPublic      Boolean              @default(true)
-  lastMessageAt DateTime?
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-  
-  // Relations
-  group         Group                @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  members       GroupChatMember[]
-  messages      GroupChatMessage[]
-  
-  @@index([groupId])
-  @@map("group_chats")
-}
-
-model GroupChatMember {
-  id         String              @id @default(cuid())
-  chatId     String
-  userId     String
-  role       GroupChatRole       @default(MEMBER)
-  joinedAt   DateTime            @default(now())
-  lastReadAt DateTime?
-  
-  // Relations
-  chat       GroupChat           @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([chatId, userId])
-  @@index([userId])
-  @@map("group_chat_members")
-}
-
-model GroupChatMessage {
-  id          String              @id @default(cuid())
-  chatId      String
-  senderId    String
-  content     String              @db.Text
-  type        GroupMessageType    @default(TEXT)
-  isEncrypted Boolean             @default(true)
-  replyToId   String?
-  createdAt   DateTime            @default(now())
-  
-  // Relations
-  chat        GroupChat           @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  sender      User                @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  replyTo     GroupChatMessage?   @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
-  replies     GroupChatMessage[]  @relation("MessageReplies")
-  
-  @@index([chatId, createdAt])
-  @@map("group_chat_messages")
-}
-
-// New Enums
 enum GroupChatRole {
   ADMIN
   MODERATOR
@@ -920,171 +1036,28 @@ enum GroupMessageType {
   EMOJI
 }
 
-// Interest Search Models
-model InterestSearch {
-  id              String           @id @default(cuid())
-  userId          String
-  type            InterestType     // 검색 유형
-  value           String           // 해시값 또는 암호화된 값
-  gender          Gender?          // 찾고자 하는 성별 (deprecated)
-  status          SearchStatus     @default(ACTIVE)
-  matchedWithId   String?          // 매칭된 상대방 ID (deprecated)
-  matchedAt       DateTime?        // 매칭 시간 (deprecated)
-  expiresAt       DateTime?        // 만료일
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  deletedAt       DateTime?        // Soft delete 시간
-  
-  // 새로운 구조화된 컬럼들
-  relationshipIntent RelationshipIntent? @default(ROMANTIC)
-  primaryHash        String?          // 주 검색값의 해시
-  secondaryHash      String?          // 보조 검색값의 해시
-  encryptedData      String?          // 암호화된 개인정보
-  encryptedIV        String?          // 암호화 IV
-  encryptedTag       String?          // 암호화 태그
-  displayValue       String?          // 마스킹된 표시값
-  
-  // 검색/필터용 비식별 정보
-  phoneCountryCode   String?
-  phoneLastDigits    String?
-  emailDomain        String?
-  emailFirstChar     String?
-  socialPlatform     String?
-  birthYear          Int?
-  ageRange           String?
-  locationCity       String?
-  companyDomain      String?
-  schoolName         String?
-  partTimeCategory   String?
-  platformName       String?
-  gameTitle          String?
-  
-  // 메타데이터 (하위 호환성을 위해 유지)
-  metadata           Json?
-  
-  user            User             @relation("UserInterests", fields: [userId], references: [id], onDelete: Cascade)
-  matchedWith     User?            @relation("MatchedInterests", fields: [matchedWithId], references: [id])
-  
-  @@index([type, primaryHash, status])
-  @@index([userId, status])
-  @@index([relationshipIntent, status])
-  @@index([emailDomain, status])
-  @@index([companyDomain, status])
-  @@index([schoolName, status])
-  @@map("interest_searches")
-}
-
 enum InterestType {
-  PHONE           // 전화번호
-  EMAIL           // 이메일
-  SOCIAL_ID       // 소셜 계정 ID
-  BIRTHDATE       // 생년월일로 찾기
-  GROUP           // 특정 그룹
-  LOCATION        // 장소 + 인상착의
-  NICKNAME        // 닉네임 일부
-  COMPANY         // 회사명
-  SCHOOL          // 학교명
-  PART_TIME_JOB   // 알바
-  PLATFORM        // 플랫폼 (SNS, 메신저, 앱 등)
-  GAME_ID         // 게임 아이디
-  LIKE            // 좋아요/매칭
+  PHONE
+  EMAIL
+  SOCIAL_ID
+  BIRTHDATE
+  GROUP
+  LOCATION
+  NICKNAME
+  COMPANY
+  SCHOOL
+  PART_TIME_JOB
+  PLATFORM
+  GAME_ID
+  LIKE
 }
 
 enum SearchStatus {
-  ACTIVE          // 활성화
-  MATCHED         // 매칭됨
-  EXPIRED         // 만료됨
-  CANCELLED       // 취소됨
-  DELETED         // 삭제됨 (soft delete)
-}
-
-// Email Logs
-model EmailLog {
-  id          String   @id @default(cuid())
-  to          String
-  subject     String
-  provider    String
-  status      String
-  sent_at     DateTime @default(now())
-  metadata    Json?
-  
-  @@map("email_logs")
-}
-
-// SMS Logs
-model SMSLog {
-  id          String   @id @default(cuid())
-  phoneNumber String
-  message     String   @db.Text
-  messageType String   // verification, notification, marketing
-  provider    String   // twilio, aligo, toast, dev
-  status      String   // sent, failed, delivered
-  metadata    Json?
-  createdAt   DateTime @default(now())
-  
-  @@index([phoneNumber])
-  @@index([status])
-  @@index([createdAt])
-  @@map("sms_logs")
-}
-
-// Company Domain Verification
-model CompanyDomain {
-  id           String    @id @default(cuid())
-  domain       String    @unique
-  companyName  String
-  companyNameKr String?  // 한글 회사명
-  isVerified   Boolean   @default(true)
-  employeeCount Int?
-  industry     String?
-  logoUrl      String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
-  @@index([domain])
-  @@index([isVerified])
-  @@map("company_domains")
-}
-
-// Email Verification
-model EmailVerification {
-  id          String    @id @default(cuid())
-  userId      String
-  email       String
-  domain      String
-  code        String
-  isVerified  Boolean   @default(false)
-  expiresAt   DateTime
-  verifiedAt  DateTime?
-  attempts    Int       @default(0)
-  maxAttempts Int       @default(3)
-  user        User      @relation(fields: [userId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@unique([userId, email])
-  @@index([email])
-  @@index([code])
-  @@index([expiresAt])
-  @@map("email_verifications")
-}
-
-// Friend System
-model FriendRequest {
-  id         String   @id @default(cuid())
-  fromUserId String
-  toUserId   String
-  message    String?
-  status     FriendRequestStatus @default(PENDING)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  fromUser   User     @relation("SentRequests", fields: [fromUserId], references: [id], onDelete: Cascade)
-  toUser     User     @relation("ReceivedRequests", fields: [toUserId], references: [id], onDelete: Cascade)
-
-  @@unique([fromUserId, toUserId])
-  @@index([toUserId, status])
-  @@map("friend_requests")
+  ACTIVE
+  MATCHED
+  EXPIRED
+  CANCELLED
+  DELETED
 }
 
 enum FriendRequestStatus {
@@ -1093,16 +1066,46 @@ enum FriendRequestStatus {
   REJECTED
 }
 
-model Friendship {
-  id        String   @id @default(cuid())
-  user1Id   String
-  user2Id   String
-  createdAt DateTime @default(now())
+enum PotentialMatchStatus {
+  PENDING
+  CONFIRMED
+  EXPIRED
+  REJECTED
+}
 
-  user1     User     @relation("User1Friends", fields: [user1Id], references: [id], onDelete: Cascade)
-  user2     User     @relation("User2Friends", fields: [user2Id], references: [id], onDelete: Cascade)
+enum ProfileInfoType {
+  PHONE
+  EMAIL
+  KAKAO_ID
+  INSTAGRAM
+  FACEBOOK
+  TWITTER
+  TIKTOK
+  DISCORD
+  SLACK
+  TELEGRAM
+  LINE
+  WHATSAPP
+  GAME_LOL
+  GAME_PUBG
+  GAME_OVERWATCH
+  GAME_VALORANT
+  BIRTHDATE
+  REALNAME
+  MBTI
+  HEIGHT
+  COMPANY
+  SCHOOL
+  MAJOR
+  DEPARTMENT
+  HOBBY
+  PART_TIME
+  GROUP
+}
 
-  @@unique([user1Id, user2Id])
-  @@index([user2Id])
-  @@map("friendships")
+enum ProfileVisibility {
+  PRIVATE
+  MATCH_ONLY
+  GROUP
+  PUBLIC
 }

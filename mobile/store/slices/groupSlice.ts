@@ -8,7 +8,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Group, GroupType } from '@/types';
-import { API_BASE_URL } from '@/services/api/config';
+import { apiClient } from '@/services/api/config';
 
 /**
  * 두 지점 간 거리 계산
@@ -154,96 +154,16 @@ interface GroupStore extends GroupState {
  * const { groups, joinGroup, getFilteredGroups } = useGroupStore();
  * ```
  */
-// 샘플 그룹 데이터
-const sampleGroups: Group[] = [
-  {
-    id: 'group-1',
-    name: '서강대학교',
-    type: GroupType.OFFICIAL,
-    description: '서강대학교 공식 그룹입니다.',
-    memberCount: 1234,
-    maleCount: 650,
-    femaleCount: 584,
-    creatorId: 'current_user', // 내가 만든 그룹
-    isMatchingActive: true,
-    isActive: true,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date(),
-  },
-  {
-    id: 'group-2',
-    name: '강남 러닝 크루',
-    type: GroupType.CREATED,
-    description: '매주 화요일, 목요일 저녁 7시 한강에서 함께 달려요!',
-    memberCount: 89,
-    maleCount: 45,
-    femaleCount: 44,
-    creatorId: 'current_user', // 내가 만든 그룹
-    isMatchingActive: true,
-    isActive: true,
-    createdAt: new Date('2024-02-15'),
-    updatedAt: new Date(),
-  },
-  {
-    id: 'group-3',
-    name: '삼성전자',
-    type: GroupType.OFFICIAL,
-    description: '삼성전자 임직원 그룹',
-    memberCount: 5678,
-    maleCount: 3500,
-    femaleCount: 2178,
-    creatorId: 'other_user', // 내가 참여한 그룹
-    isMatchingActive: true,
-    isActive: true,
-    createdAt: new Date('2023-12-01'),
-    updatedAt: new Date(),
-  },
-  {
-    id: 'group-4',
-    name: '독서 모임 - 책갈피',
-    type: GroupType.CREATED,
-    description: '매월 한 권의 책을 함께 읽고 토론하는 모임입니다.',
-    memberCount: 45,
-    maleCount: 20,
-    femaleCount: 25,
-    creatorId: 'other_user', // 내가 참여한 그룹
-    isMatchingActive: true,
-    isActive: true,
-    createdAt: new Date('2024-03-10'),
-    updatedAt: new Date(),
-  },
-  {
-    id: 'group-5',
-    name: '스타벅스 강남역점',
-    type: GroupType.LOCATION,
-    description: '스타벅스 강남역점에 있는 사람들의 그룹',
-    memberCount: 23,
-    maleCount: 12,
-    femaleCount: 11,
-    creatorId: 'other_user', // 내가 참여한 그룹
-    isMatchingActive: true,
-    isActive: true,
-    location: {
-      name: '스타벅스 강남역점',
-      latitude: 37.498095,
-      longitude: 127.027610,
-      address: '서울 강남구 강남대로 390',
-    },
-    createdAt: new Date('2024-03-20'),
-    updatedAt: new Date(),
-  },
-];
-
 export const useGroupStore = create<GroupStore>()(
   persist(
     (set, get) => ({
-  // Initial state with sample data
+  // Initial state - no fallback data, must be loaded from server
   /** 전체 그룹 목록 */
-  groups: sampleGroups,
+  groups: [],
   /** 현재 선택된 그룹 */
   currentGroup: null,
-  /** 참여한 그룹 목록 - 샘플 데이터로 초기화 */
-  joinedGroups: sampleGroups, // 모든 샘플 그룹에 참여한 상태로 시작
+  /** 참여한 그룹 목록 */
+  joinedGroups: [],
   /** 근처 그룹 목록 */
   nearbyGroups: [],
   /** 공식 그룹 목록 */
@@ -362,23 +282,15 @@ export const useGroupStore = create<GroupStore>()(
     if (isAlreadyJoined) return;
 
     try {
-      // API 호출
-      const response = await fetch(`/api/v1/groups/${groupId}/join`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-dev-auth': 'true',
-        },
-      });
+      // API 호출 - apiClient 사용 (환경별 헤더 자동 처리)
+      await apiClient.post(`/groups/${groupId}/join`);
 
-      if (response.ok) {
-        // 그룹 찾아서 joinedGroups에 추가
-        const group = state.groups.find(g => g.id === groupId);
-        if (group) {
-          set((state) => ({
-            joinedGroups: [...state.joinedGroups, group],
-          }));
-        }
+      // 그룹 찾아서 joinedGroups에 추가
+      const group = state.groups.find(g => g.id === groupId);
+      if (group) {
+        set((state) => ({
+          joinedGroups: [...state.joinedGroups, group],
+        }));
       }
     } catch (error) {
       console.error('Failed to join group:', error);
@@ -393,20 +305,13 @@ export const useGroupStore = create<GroupStore>()(
    */
   leaveGroup: async (groupId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/groups/${groupId}/leave`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-dev-auth': 'true',
-        },
-      });
+      // API 호출 - apiClient 사용 (환경별 헤더 자동 처리)
+      await apiClient.delete(`/groups/${groupId}/leave`);
 
-      if (response.ok) {
-        set((state) => ({
-          joinedGroups: state.joinedGroups.filter((group) => group.id !== groupId),
-          currentGroup: state.currentGroup?.id === groupId ? null : state.currentGroup,
-        }));
-      }
+      set((state) => ({
+        joinedGroups: state.joinedGroups.filter((group) => group.id !== groupId),
+        currentGroup: state.currentGroup?.id === groupId ? null : state.currentGroup,
+      }));
     } catch (error) {
       console.error('Failed to leave group:', error);
       throw error;
@@ -428,29 +333,19 @@ export const useGroupStore = create<GroupStore>()(
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/groups/${groupId}/invites`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-dev-auth': 'true',
+      // API 호출 - apiClient 사용 (환경별 헤더 자동 처리)
+      const data = await apiClient.post(`/groups/${groupId}/invites`);
+      const inviteCode = data.data.inviteLink.split('/').pop(); // 초대코드만 추출
+      
+      // 초대코드 캐시
+      set((state) => ({
+        groupInviteCodes: {
+          ...state.groupInviteCodes,
+          [groupId]: inviteCode,
         },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const inviteCode = data.data.inviteLink.split('/').pop(); // 초대코드만 추출
-        
-        // 초대코드 캐시
-        set((state) => ({
-          groupInviteCodes: {
-            ...state.groupInviteCodes,
-            [groupId]: inviteCode,
-          },
-        }));
-        
-        return inviteCode;
-      }
-      throw new Error('Failed to generate invite code');
+      }));
+      
+      return inviteCode;
     } catch (error) {
       console.error('Failed to get/create invite code:', error);
       throw error;
@@ -464,31 +359,22 @@ export const useGroupStore = create<GroupStore>()(
    */
   joinGroupByInviteCode: async (inviteCode: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/groups/join/${inviteCode}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-dev-auth': 'true',
-        },
+      // API 호출 - apiClient 사용 (환경별 헤더 자동 처리)
+      const data = await apiClient.post(`/groups/join/${inviteCode}`);
+      const group = data.data;
+      
+      set((state) => {
+        const isAlreadyJoined = state.joinedGroups.some(g => g.id === group.id);
+        if (!isAlreadyJoined) {
+          return {
+            joinedGroups: [...state.joinedGroups, group],
+            groups: state.groups.some(g => g.id === group.id) 
+              ? state.groups 
+              : [...state.groups, group],
+          };
+        }
+        return state;
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        const group = data.data;
-        
-        set((state) => {
-          const isAlreadyJoined = state.joinedGroups.some(g => g.id === group.id);
-          if (!isAlreadyJoined) {
-            return {
-              joinedGroups: [...state.joinedGroups, group],
-              groups: state.groups.some(g => g.id === group.id) 
-                ? state.groups 
-                : [...state.groups, group],
-            };
-          }
-          return state;
-        });
-      }
     } catch (error) {
       console.error('Failed to join group by invite code:', error);
       throw error;
@@ -502,25 +388,17 @@ export const useGroupStore = create<GroupStore>()(
    */
   toggleGroupLike: async (groupId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/groups/${groupId}/like`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-dev-auth': 'true',
-        },
+      // API 호출 - apiClient 사용 (환경별 헤더 자동 처리)
+      const data = await apiClient.post(`/groups/${groupId}/like`);
+      
+      set((state) => {
+        const isLiked = state.likedGroupIds.includes(groupId);
+        return {
+          likedGroupIds: data.data.liked
+            ? [...state.likedGroupIds.filter(id => id !== groupId), groupId]
+            : state.likedGroupIds.filter(id => id !== groupId)
+        };
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        set((state) => {
-          const isLiked = state.likedGroupIds.includes(groupId);
-          return {
-            likedGroupIds: data.data.liked
-              ? [...state.likedGroupIds.filter(id => id !== groupId), groupId]
-              : state.likedGroupIds.filter(id => id !== groupId)
-          };
-        });
-      }
     } catch (error) {
       console.error('Failed to toggle group like:', error);
       throw error;

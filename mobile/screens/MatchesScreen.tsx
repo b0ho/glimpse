@@ -19,6 +19,7 @@ import { Match } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { matchApi } from '@/services/api/matchApi';
+import { ServerConnectionError } from '@/components/ServerConnectionError';
 
 /**
  * 매칭 화면 컴포넌트 - 서로 좋아요한 사용자 목록
@@ -30,6 +31,7 @@ export const MatchesScreen = React.memo(() => {
   console.log('[MatchesScreen] 컴포넌트 렌더링');
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [serverConnectionError, setServerConnectionError] = useState(false);
   
   const navigation = useNavigation();
   const likeStore = useLikeStore();
@@ -55,6 +57,7 @@ export const MatchesScreen = React.memo(() => {
     const loadMatches = async () => {
       try {
         console.log('[MatchesScreen] API에서 매칭 데이터 로드 시작');
+        setServerConnectionError(false);
         const matchData = await matchApi.getMatches();
         console.log('[MatchesScreen] 매칭 데이터 로드 성공:', matchData.length);
         setMatches(matchData);
@@ -63,8 +66,9 @@ export const MatchesScreen = React.memo(() => {
         setIsLoading(false);
       } catch (error) {
         console.error('[MatchesScreen] Failed to load matches:', error);
-        // API 실패 시 빈 배열로 설정
+        // 서버 연결 실패 시 에러 화면 표시
         setMatches([]);
+        setServerConnectionError(true);
         setIsLoading(false);
       }
     };
@@ -231,6 +235,33 @@ export const MatchesScreen = React.memo(() => {
       </Text>
     </View>
   );
+
+  // 서버 연결 에러 시 에러 화면 표시
+  if (serverConnectionError) {
+    return (
+      <ServerConnectionError 
+        onRetry={async () => {
+          setServerConnectionError(false);
+          setIsLoading(true);
+          const loadMatches = async () => {
+            try {
+              const matchData = await matchApi.getMatches();
+              setMatches(matchData);
+              likeStore.setMatches(matchData);
+              setIsLoading(false);
+            } catch (error) {
+              console.error('[MatchesScreen] Failed to load matches:', error);
+              setMatches([]);
+              setServerConnectionError(true);
+              setIsLoading(false);
+            }
+          };
+          await loadMatches();
+        }}
+        message="매칭 정보를 불러올 수 없습니다"
+      />
+    );
+  }
 
   if (isLoading) {
     return (

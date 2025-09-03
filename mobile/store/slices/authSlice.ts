@@ -240,7 +240,16 @@ const createAuthStore = (set: any, get: any) => ({
     const user = get().user;
     if (!user) return SubscriptionTier.BASIC;
     
-    // 프리미엄 레벨에 따라 구독 티어 결정
+    // 개발 환경에서는 isPremium 값을 직접 확인
+    if (__DEV__) {
+      if (user.isPremium) {
+        // 개발 환경에서 프리미엄이면 PREMIUM 티어로 설정
+        return SubscriptionTier.PREMIUM;
+      }
+      return SubscriptionTier.BASIC;
+    }
+    
+    // 프로덕션 환경에서는 프리미엄 레벨에 따라 구독 티어 결정
     if (user.premiumLevel === 'UPPER') return SubscriptionTier.PREMIUM;
     if (user.premiumLevel === 'BASIC') return SubscriptionTier.ADVANCED;
     return SubscriptionTier.BASIC;

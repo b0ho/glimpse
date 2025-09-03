@@ -19,6 +19,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { ServerConnectionError } from '@/components/ServerConnectionError';
 
 interface Comment {
   id: string;
@@ -67,6 +68,7 @@ export const PostDetailScreen = () => {
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverConnectionError, setServerConnectionError] = useState(false);
 
   useEffect(() => {
     loadPostDetail();
@@ -74,69 +76,23 @@ export const PostDetailScreen = () => {
 
   const loadPostDetail = async () => {
     setIsLoading(true);
+    setServerConnectionError(false);
     try {
-      // 실제로는 API 호출
-      const mockPost: Post = {
-        id: postId,
-        title: t('sample.title'),
-        content: t('sample.content'),
-        author: {
-          id: 'author1',
-          nickname: t('sample.author'),
-        },
-        group: {
-          id: 'group1',
-          name: t('sample.group'),
-        },
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
-        viewCount: 156,
-        likeCount: 23,
-        commentCount: 8,
-        isLiked: false,
-        comments: [],
-      };
-
-      const mockComments: Comment[] = [
-        {
-          id: 'c1',
-          content: '관심있습니다! 참여하고 싶어요',
-          author: {
-            id: 'user1',
-            nickname: '익명1',
-          },
-          createdAt: new Date(Date.now() - 60 * 60 * 1000),
-          isLiked: false,
-          likeCount: 5,
-        },
-        {
-          id: 'c2',
-          content: '저도 참여하고 싶습니다. 어떤 주제로 스터디하나요?',
-          author: {
-            id: 'user2',
-            nickname: '익명2',
-          },
-          createdAt: new Date(Date.now() - 30 * 60 * 1000),
-          isLiked: true,
-          likeCount: 3,
-        },
-        {
-          id: 'c3',
-          content: '좋은 기회네요! 꼭 참여하고 싶습니다',
-          author: {
-            id: 'user3',
-            nickname: '익명3',
-          },
-          createdAt: new Date(Date.now() - 15 * 60 * 1000),
-          isLiked: false,
-          likeCount: 1,
-        },
-      ];
-
-      setPost(mockPost);
-      setComments(mockComments);
+      // TODO: 실제 API 호출로 대체 필요
+      // const response = await postApi.getPost(postId);
+      // const commentsResponse = await postApi.getComments(postId);
+      // setPost(response.data);
+      // setComments(commentsResponse.data);
+      
+      // 현재는 서버 API가 없으므로 에러 상태 설정
+      setPost(null);
+      setComments([]);
+      setServerConnectionError(true);
     } catch (error) {
       console.error('Failed to load post detail:', error);
-      Alert.alert(t('errors.imageError'), t('detail.loadError'));
+      setPost(null);
+      setComments([]);
+      setServerConnectionError(true);
     } finally {
       setIsLoading(false);
     }
@@ -291,6 +247,19 @@ export const PostDetailScreen = () => {
       </View>
     );
   };
+
+  // 서버 연결 에러 시 에러 화면 표시
+  if (serverConnectionError) {
+    return (
+      <ServerConnectionError 
+        onRetry={() => {
+          setServerConnectionError(false);
+          loadPostDetail();
+        }}
+        message="게시글을 불러올 수 없습니다"
+      />
+    );
+  }
 
   if (isLoading) {
     return (

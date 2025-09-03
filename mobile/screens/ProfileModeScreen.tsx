@@ -16,7 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { API_BASE_URL } from '@/services/api/config';
+import { apiClient } from '@/services/api/config';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface PersonaProfile {
@@ -46,23 +46,11 @@ export const ProfileModeScreen = React.memo(() => {
 
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `${API_BASE_URL}/location/profile-mode`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-dev-auth': 'true',
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setProfileMode(data.mode || 'real');
-        if (data.personaProfile) {
-          setPersonaProfile(data.personaProfile);
-        }
+      const data = await apiClient.get('/location/profile-mode');
+      
+      setProfileMode(data.mode || 'real');
+      if (data.personaProfile) {
+        setPersonaProfile(data.personaProfile);
       }
     } catch (error) {
       console.error('Load profile mode error:', error);
@@ -80,30 +68,18 @@ export const ProfileModeScreen = React.memo(() => {
 
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `${API_BASE_URL}/location/profile-mode`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-dev-auth': 'true',
-          },
-          body: JSON.stringify({
-            mode,
-            personaData: mode === 'persona' ? personaProfile : undefined,
-          }),
-        }
+      await apiClient.post('/location/profile-mode', {
+        mode,
+        personaData: mode === 'persona' ? personaProfile : undefined,
+      });
+      
+      setProfileMode(mode);
+      Alert.alert(
+        t('profilemode:alerts.modeChanged'),
+        mode === 'real' 
+          ? t('profilemode:alerts.realModeMessage')
+          : t('profilemode:alerts.personaModeMessage')
       );
-
-      if (response.ok) {
-        setProfileMode(mode);
-        Alert.alert(
-          t('profilemode:alerts.modeChanged'),
-          mode === 'real' 
-            ? t('profilemode:alerts.realModeMessage')
-            : t('profilemode:alerts.personaModeMessage')
-        );
-      }
     } catch (error) {
       console.error('Change profile mode error:', error);
       Alert.alert(t('profilemode:alerts.error'), t('profilemode:alerts.modeChangeError'));
@@ -120,25 +96,13 @@ export const ProfileModeScreen = React.memo(() => {
 
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `${API_BASE_URL}/location/profile-mode`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-dev-auth': 'true',
-          },
-          body: JSON.stringify({
-            mode: 'persona',
-            personaData: personaProfile,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        setIsEditing(false);
-        Alert.alert(t('profilemode:alerts.success'), t('profilemode:alerts.personaSaved'));
-      }
+      await apiClient.post('/location/profile-mode', {
+        mode: 'persona',
+        personaData: personaProfile,
+      });
+      
+      setIsEditing(false);
+      Alert.alert(t('profilemode:alerts.success'), t('profilemode:alerts.personaSaved'));
     } catch (error) {
       console.error('Save persona error:', error);
       Alert.alert(t('profilemode:alerts.error'), t('profilemode:alerts.personaSaveError'));
