@@ -240,6 +240,16 @@ export default function App() {
     );
   }
 
+  // Vercel 도메인에서는 프로덕션 키 사용 방지
+  if (typeof window !== 'undefined') {
+    const hostname = window.location?.hostname || '';
+    if (hostname.includes('vercel.app')) {
+      // Vercel에서는 강제로 개발 키 사용
+      clerkPublishableKey = 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
+      clerkFrontendApi = undefined;
+    }
+  }
+  
   // frontendApi가 설정되어 있으면 사용 (Production 환경)
   const clerkProviderProps: any = {
     publishableKey: clerkPublishableKey,
