@@ -98,25 +98,27 @@ export default function App() {
         // 번역 로딩을 위한 일관된 대기 시간
         await new Promise(resolve => setTimeout(resolve, 300));
         
-        // i18n 작동 확인
+        // 테스트 번역 확인
         const testTranslation = i18n.t('navigation:tabs.home');
         console.log('[App] i18n test:', testTranslation);
         
-        if (testTranslation === 'navigation:tabs.home' || testTranslation === 'tabs.home') {
-          console.warn('[App] i18n not fully ready, waiting more...');
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        
-        console.log('[App] i18n initialized successfully');
-        setIsI18nInitialized(true);
-      } catch (error) {
-        console.error('[App] Failed to initialize i18n:', error);
-        
-        // 모든 플랫폼에서 동일한 재시도 로직
-        if (initAttempts < 5) {
-          setInitAttempts(prev => prev + 1);
-          setTimeout(() => initializeI18n(), 1000);
+        if (testTranslation && testTranslation !== 'navigation:tabs.home') {
+          console.log('[App] i18n initialized successfully');
+          setIsI18nInitialized(true);
         } else {
+          console.warn('[App] i18n initialization incomplete, retrying...');
+          throw new Error('i18n not ready');
+        }
+      } catch (error) {
+        console.error('[App] i18n initialization error:', error);
+        // 재시도 로직
+        if (initAttempts < 3) {
+          console.log(`[App] Retrying i18n initialization (attempt ${initAttempts + 1}/3)`);
+          setTimeout(() => {
+            setInitAttempts(prev => prev + 1);
+          }, 1000);
+        } else {
+          console.warn('[App] Max i18n initialization attempts reached, continuing anyway');
           // 초기화 실패 시에도 앱 로드 계속
           setIsI18nInitialized(true);
         }
@@ -240,23 +242,27 @@ export default function App() {
     );
   }
 
-  // Vercel 도메인에서는 프로덕션 키 사용 방지
+  // CRITICAL FIX: Vercel 도메인에서는 프로덕션 키와 frontendApi 완전 차단
+  let isVercelDomain = false;
   if (typeof window !== 'undefined') {
     const hostname = window.location?.hostname || '';
-    if (hostname.includes('vercel.app')) {
-      // Vercel에서는 강제로 개발 키 사용
+    isVercelDomain = hostname.includes('vercel.app');
+    if (isVercelDomain) {
+      // Vercel에서는 무조건 개발 키만 사용, 환경변수 완전 무시
       clerkPublishableKey = 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
       clerkFrontendApi = undefined;
+      console.log('🔧 CRITICAL: Forcing development Clerk key for Vercel deployment');
     }
   }
   
-  // frontendApi가 설정되어 있으면 사용 (Production 환경)
+  // ClerkProvider 설정 - Vercel에서는 frontendApi 절대 사용 안함
   const clerkProviderProps: any = {
     publishableKey: clerkPublishableKey,
     tokenCache: tokenCache,
   };
   
-  if (clerkFrontendApi) {
+  // Vercel이 아닌 경우에만 frontendApi 설정 (glimpse.contact 도메인용)
+  if (clerkFrontendApi && !isVercelDomain) {
     clerkProviderProps.frontendApi = clerkFrontendApi;
   }
 
