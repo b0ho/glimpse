@@ -240,6 +240,7 @@
       "message": "\"{{groupName}}\" 그룹에 게시물이 성공적으로 작성되었습니다."
     }
   },
+  "change": "변경",
   "interest": {
     "types": {
       "PHONE": "전화번호",

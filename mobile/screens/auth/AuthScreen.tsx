@@ -1,280 +1,90 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
+/**
+ * 인증 화면 컴포넌트 - 모듈화된 버전
+ */
+
+import React from 'react';
+import { View, StyleSheet, Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import { PhoneVerificationScreen } from './PhoneVerificationScreen';
 import { SMSVerificationScreen } from './SMSVerificationScreen';
 import { NicknameSetupScreen } from './NicknameSetupScreen';
 import { CompanyVerificationScreen } from './CompanyVerificationScreen';
+import { WelcomeScreen } from '@/components/auth/WelcomeScreen';
 import { useTheme } from '@/hooks/useTheme';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { useSignUp, useOAuth, useAuth } from '@clerk/clerk-expo';
+import { useAuthSteps } from '@/hooks/auth/useAuthSteps';
+import { useGoogleAuth } from '@/hooks/auth/useGoogleAuth';
 import { useAuthStore } from '@/store/slices/authSlice';
-import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
-import { ClerkGoogleAuth } from '@/components/auth/ClerkGoogleAuth';
-
-/**
- * 인증 단계 타입
- * @typedef {'welcome' | 'phone' | 'sms' | 'nickname' | 'company' | 'completed'} AuthStep
- */
-type AuthStep = 'welcome' | 'phone' | 'sms' | 'nickname' | 'company' | 'completed';
-
-/**
- * 인증 화면 컴포넌트 Props
- * @interface AuthScreenProps
- * @property {Function} onAuthCompleted - 인증 완료 콜백
- */
-interface AuthScreenProps {
-  onAuthCompleted: () => void;
-}
+import { AuthScreenProps, QuickDevUser } from '@/types/auth.types';
 
 /**
  * 인증 화면 컴포넌트 - 다단계 인증 프로세스 관리
- * @component
- * @param {AuthScreenProps} props - 컴포넌트 속성
- * @returns {JSX.Element} 인증 화면 UI
- * @description 전화번호 인증, SMS 확인, 닉네임 설정, 회사 인증 단계를 관리하는 컴포넌트
  */
-export const AuthScreen= ({ onAuthCompleted }) => {
-  const [currentStep, setCurrentStep] = useState<AuthStep>('welcome');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
   const { colors } = useTheme();
-  const { t } = useAndroidSafeTranslation('auth');
-  const { signUp, setActive } = useSignUp();
-  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
   const { setUser, setToken } = useAuthStore();
-
+  const navigation = useNavigation<any>();
+  
+  // 인증 단계 관리
+  const {
+    currentStep,
+    phoneNumber,
+    authMode,
+    handleVerificationSent,
+    handleVerificationSuccess,
+    handleNicknameSet,
+    handleCompanyVerificationSubmitted,
+    handleSignInMode,
+    handleSignUpMode,
+    handleBack,
+  } = useAuthSteps();
+  
+  // 구글 인증
+  const { isGoogleLoading, handleGoogleLogin, handleQuickDevLogin } = useGoogleAuth(onAuthCompleted);
+  
   /**
-   * 인증코드 발송 핸들러
-   * @param {string} phone - 전화번호
-   * @description SMS 인증 단계로 진행
+   * 회사 인증 완료 핸들러
    */
-  const handleVerificationSent = (phone: string): void => {
-    setPhoneNumber(phone);
-    setCurrentStep('sms');
-  };
-
-  /**
-   * 인증 성공 핸들러
-   * @description 닉네임 설정 단계로 진행
-   */
-  const handleVerificationSuccess = (): void => {
-    setCurrentStep('nickname');
-  };
-
-  /**
-   * 닉네임 설정 완료 핸들러
-   * @description 회사 인증 단계로 진행
-   */
-  const handleNicknameSet = (): void => {
-    setCurrentStep('company');
-  };
-
-  /**
-   * 회사 인증 제출 핸들러
-   * @description 인증 프로세스 완료
-   */
-  const handleCompanyVerificationSubmitted = (): void => {
-    setCurrentStep('completed');
+  const handleCompanyVerificationComplete = (): void => {
+    handleCompanyVerificationSubmitted();
     onAuthCompleted();
   };
-
+  
   /**
-   * 로그인 모드 선택 핸들러
+   * 빠른 개발 로그인 핸들러
    */
-  const handleSignInMode = (): void => {
-    setAuthMode('signin');
-    setCurrentStep('phone');
-  };
-
-  /**
-   * 가입 모드 선택 핸들러
-   */
-  const handleSignUpMode = (): void => {
-    setAuthMode('signup');
-    setCurrentStep('phone');
-  };
-
-  /**
-   * 구글 로그인 핸들러 (Clerk OAuth 사용)
-   * @description Clerk를 통한 구글 OAuth 소셜 로그인 처리
-   */
-  const handleGoogleLogin = async (): Promise<void> => {
-    console.log('🟡 Google login button clicked (Clerk OAuth)');
+  const handleQuickDevUserLogin = (user: QuickDevUser): void => {
+    const mockUser = {
+      id: user.id,
+      nickname: user.nickname,
+      email: `${user.id}@test.com`,
+      anonymousId: `anon_${user.id}`,
+      phoneNumber: user.phoneNumber || '',
+      isVerified: true,
+      profileImageUrl: user.profileImageUrl,
+      credits: user.isPremium ? 999 : 5,
+      isPremium: user.isPremium,
+      lastActive: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      currentMode: 'DATING' as any,
+    };
     
-    // 개발 환경에서는 OAuth 우회하고 바로 프리미엄 계정으로 로그인
-    if (__DEV__) {
-      console.log('🔧 개발 모드 감지 - OAuth 우회하고 프리미엄 계정으로 직접 로그인');
-      return handleQuickDevLogin(true);
-    }
+    // 개발 환경에서 토큰도 설정
+    const devToken = `dev-token-${user.id}`;
+    setToken(devToken);
+    setUser(mockUser);
+    onAuthCompleted();
     
-    setIsGoogleLoading(true);
-    
-    try {
-      // OAuth 플로우 시작
-      const result = await startOAuthFlow();
-      
-      console.log('🔍 OAuth 결과:', { 
-        createdSessionId: !!result?.createdSessionId,
-        hasSignIn: !!result?.signIn,
-        hasSignUp: !!result?.signUp,
-        hasSetActive: !!result?.setActive
-      });
-      
-      // 결과가 없으면 사용자가 취소한 것
-      if (!result) {
-        console.log('❌ OAuth 플로우 취소됨');
-        setIsGoogleLoading(false);
-        return;
-      }
-      
-      const { createdSessionId, signIn, signUp, setActive } = result;
-      
-      if (createdSessionId && setActive) {
-        console.log('✅ Clerk OAuth 로그인 성공:', createdSessionId);
-        
-        // 세션 활성화
-        await setActive({ session: createdSessionId });
-        
-        // 사용자 정보 가져오기 - signIn 우선, 없으면 signUp 사용
-        const userInfo = signIn || signUp;
-        if (userInfo) {
-          console.log('👤 사용자 정보:', {
-            id: userInfo.id,
-            email: userInfo.emailAddress,
-            firstName: userInfo.firstName,
-            lastName: userInfo.lastName,
-          });
-          
-          // Zustand store에 사용자 정보 설정
-          const userData = {
-            id: userInfo.id || 'temp_user_id',
-            email: userInfo.emailAddress || '',
-            nickname: `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() || t('fallbackUser.googleUser'),
-            anonymousId: `anon_${userInfo.id || 'temp'}`,
-            phoneNumber: '',
-            isVerified: true,
-            profileImageUrl: userInfo.imageUrl || undefined,
-            credits: 0,
-            isPremium: false,
-            lastActive: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            currentMode: 'DATING' as any,
-          };
-          
-          setUser(userData);
-          
-          Alert.alert(
-            t('alerts.loginSuccess.title'),
-            t('alerts.loginSuccess.messageWithName', { nickname: userData.nickname }),
-            [
-              {
-                text: t('alerts.loginSuccess.confirm'),
-                onPress: () => onAuthCompleted(),
-              }
-            ]
-          );
-        } else {
-          console.log('❌ 사용자 정보를 가져올 수 없음');
-          
-          // fallback: 기본 사용자 정보로 진행
-          const fallbackUser = {
-            id: createdSessionId,
-            email: 'user@example.com',
-            nickname: t('fallbackUser.googleUser'),
-            anonymousId: `anon_${createdSessionId}`,
-            phoneNumber: '',
-            isVerified: true,
-            credits: 0,
-            isPremium: false,
-            lastActive: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            currentMode: 'DATING' as any,
-          };
-          
-          setUser(fallbackUser);
-          
-          Alert.alert(
-            t('alerts.loginSuccess.title'),
-            t('alerts.loginSuccess.messageDefault'),
-            [
-              {
-                text: t('alerts.loginSuccess.confirm'),
-                onPress: () => onAuthCompleted(),
-              }
-            ]
-          );
-        }
-      } else {
-        console.log('❌ 세션 생성 실패:', { createdSessionId, setActive: !!setActive });
-        console.log('📝 OAuth 플로우 디버깅:', {
-          signIn,
-          signUp,
-          setActive: !!setActive
-        });
-        
-        Alert.alert(
-          t('alerts.loginFailure.title'), 
-          t('alerts.loginFailure.messageOauth'),
-          [
-            {
-              text: t('alerts.loginFailure.confirm'),
-            }
-          ]
-        );
-      }
-    } catch (error: any) {
-      console.error('🔥 Clerk 구글 로그인 예외:', error);
-      
-      // Cloudflare 오류나 기타 네트워크 오류 처리
-      if (error.message?.includes('401') || error.message?.includes('cloudflare')) {
-        console.log('🔧 Cloudflare 오류 감지, 개발 환경 fallback 적용');
-        
-        if (process.env.NODE_ENV === 'development') {
-          const fallbackUser = {
-            id: 'fallback_google_user',
-            email: 'fallback.user@gmail.com',
-            nickname: t('fallbackUser.fallbackUser'),
-            anonymousId: 'anon_fallback_google',
-            phoneNumber: '',
-            isVerified: true,
-            credits: 0,
-            isPremium: false,
-            lastActive: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            currentMode: 'DATING' as any,
-          };
-          
-          setUser(fallbackUser);
-          
-          Alert.alert(
-            t('alerts.devMode.title'),
-            t('alerts.devMode.message'),
-            [
-              {
-                text: t('alerts.devMode.confirm'),
-                onPress: () => onAuthCompleted(),
-              }
-            ]
-          );
-        } else {
-          Alert.alert(t('alerts.loginFailure.messageNetwork'), t('alerts.loginFailure.messageNetworkDescription'));
-        }
-      } else {
-        Alert.alert(t('alerts.loginFailure.messageGeneral'), error.message || t('alerts.loginFailure.messageGeneralDescription'));
-      }
-    } finally {
-      setIsGoogleLoading(false);
-    }
+    // 명시적으로 Main 화면으로 네비게이션
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Main' }],
+    });
   };
-
+  
   /**
-   * 온보딩 초기화 및 재시작 핸들러
-   * @description 개발 환경에서 온보딩을 초기화하고 온보딩 화면으로 이동
+   * 온보딩 초기화 핸들러
    */
   const handleResetOnboarding = async (): Promise<void> => {
     try {
@@ -287,7 +97,6 @@ export const AuthScreen= ({ onAuthCompleted }) => {
       if (Platform.OS === 'web') {
         window.location.reload();
       } else {
-        // 네이티브에서는 앱 재시작이 필요함
         Alert.alert(
           '온보딩 초기화 완료',
           '앱을 재시작하면 온보딩을 다시 볼 수 있습니다.',
@@ -299,297 +108,67 @@ export const AuthScreen= ({ onAuthCompleted }) => {
       Alert.alert('오류', '온보딩 초기화에 실패했습니다.');
     }
   };
-
+  
   /**
-   * 간단한 개발용 로그인 핸들러 (프리미엄/일반 계정 선택)
-   * @description 개발 환경에서 프리미엄 또는 일반 계정으로 즉시 로그인 (Clerk 우회)
-   * @param {boolean} isPremiumAccount - 프리미엄 계정 여부
+   * 현재 단계에 따른 화면 렌더링
    */
-  const handleQuickDevLogin = async (isPremiumAccount: boolean = true): Promise<void> => {
-    console.log(`🔧 개발용 ${isPremiumAccount ? '프리미엄' : '일반'} 간편 로그인 시작`);
-    
-    try {
-      // 개발용 사용자 데이터 직접 설정
-      const devUser = isPremiumAccount ? {
-        // 프리미엄 계정
-        id: 'dev_user_premium',
-        email: 'premium@glimpse.app',
-        nickname: '프리미엄개발자',
-        anonymousId: 'anon_dev_premium',
-        phoneNumber: '+82-10-9999-8888',
-        isVerified: true,
-        credits: 999,
-        isPremium: true,
-        premiumUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1년 후
-        lastActive: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        currentMode: 'DATING' as any,
-      } : {
-        // 일반 계정
-        id: 'dev_user_normal',
-        email: 'normal@glimpse.app',
-        nickname: '일반개발자',
-        anonymousId: 'anon_dev_normal',
-        phoneNumber: '+82-10-1111-2222',
-        isVerified: true,
-        credits: 5,
-        isPremium: false,
-        lastActive: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        currentMode: 'DATING' as any,
-      };
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 'welcome':
+        return (
+          <WelcomeScreen
+            onSignInMode={handleSignInMode}
+            onSignUpMode={handleSignUpMode}
+            onGoogleLogin={handleGoogleLogin}
+            onQuickDevLogin={handleQuickDevUserLogin}
+            onResetOnboarding={handleResetOnboarding}
+            isGoogleLoading={isGoogleLoading}
+          />
+        );
       
-      // Zustand store에 사용자 정보 설정
-      setUser(devUser);
-      console.log(`✅ 개발용 ${isPremiumAccount ? '프리미엄' : '일반'} 간편 로그인 완료`);
+      case 'phone':
+        return (
+          <PhoneVerificationScreen
+            onCodeSent={handleVerificationSent}
+            onBack={handleBack}
+            mode={authMode}
+          />
+        );
       
-      // 로그인 완료 알림 없이 바로 이동
-      onAuthCompleted();
-      
-    } catch (error) {
-      console.error('🔥 개발용 로그인 오류:', error);
-      Alert.alert('로그인 오류', '개발용 로그인에 실패했습니다.');
-    }
-  };
-
-  /**
-   * 기존 개발자 직접 로그인 핸들러 (Clerk 연동용)
-   * @description 개발 환경에서 OAuth 우회하여 직접 로그인
-   */
-  const handleDevLogin = async (): Promise<void> => {
-    console.log('🔧 개발자 직접 로그인 시작');
-    
-    try {
-      // 개발용 임시 이메일로 Clerk 계정 생성/로그인
-      const devEmail = 'developer@glimpse.app';
-      
-      if (signUp && setActive) {
-        console.log('🔄 Clerk 개발 계정 생성 중...');
-        
-        // Clerk에서 임시 계정 생성
-        await signUp.create({
-          emailAddress: devEmail,
-          password: 'dev123!@#', // 개발용 임시 패스워드
-        });
-        
-        // 이메일 인증 건너뛰기 (개발 환경)
-        if (signUp.status === 'missing_requirements') {
-          await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-        }
-        
-        // 개발 환경에서는 자동으로 verified로 처리
-        const sessionResponse = await signUp.attemptEmailAddressVerification({
-          code: '424242' // Clerk 개발 환경 기본 코드
-        });
-        
-        if (sessionResponse.status === 'complete' && sessionResponse.createdSessionId) {
-          await setActive({ session: sessionResponse.createdSessionId });
-          console.log('✅ Clerk 개발 세션 활성화 완료');
-          
-          const devUser = {
-            id: sessionResponse.createdUserId || 'dev_user_direct',
-            email: devEmail,
-            nickname: t('fallbackUser.developer'),
-            anonymousId: `anon_${sessionResponse.createdUserId || 'dev'}`,
-            phoneNumber: '',
-            isVerified: true,
-            credits: 0,
-            isPremium: false,
-            lastActive: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            currentMode: 'DATING' as any,
-          };
-          
-          setUser(devUser);
-          console.log('✅ 개발자 로그인 완료, 홈화면으로 이동');
-          onAuthCompleted();
-          return;
-        }
-      }
-      
-      // Clerk 계정 생성이 실패한 경우 fallback
-      console.log('⚠️ Clerk 계정 생성 실패, Zustand만 사용');
-      const devUser = {
-        id: 'dev_user_fallback',
-        email: 'developer@glimpse.app',
-        nickname: t('fallbackUser.developerFallback'),
-        anonymousId: 'anon_dev_fallback',
-        phoneNumber: '',
-        isVerified: true,
-        credits: 0,
-        isPremium: false,
-        lastActive: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        currentMode: 'DATING' as any,
-      };
-      
-      setUser(devUser);
-      console.log('✅ 개발자 Fallback 로그인 완료');
-      
-      // AppNavigator에서 isSignedIn 상태를 체크하므로, 
-      // 실제로는 Clerk 세션 없이는 메인화면으로 이동할 수 없음
-      Alert.alert(
-        t('alerts.devMode.alertTitle'), 
-        t('alerts.devMode.alertMessage'),
-        [{ text: t('alerts.devMode.confirm') }]
-      );
-      
-    } catch (error) {
-      console.error('🔥 개발자 로그인 오류:', error);
-      Alert.alert(t('alerts.devMode.failureTitle'), t('alerts.devMode.failureMessage'));
-    }
-  };
-
-  /**
-   * 전화번호 인증 선택 핸들러
-   * @description 전화번호 인증 방식으로 전환
-   */
-  const handlePhoneAuthOption = (): void => {
-    setCurrentStep('phone');
-  };
-
-  /**
-   * 뒤로가기 핸들러
-   * @description 이전 인증 단계로 돌아가기
-   */
-  const handleBack = (): void => {
-    if (currentStep === 'phone') {
-      setCurrentStep('welcome');
-    } else if (currentStep === 'sms') {
-      setCurrentStep('phone');
-      setPhoneNumber('');
-    } else if (currentStep === 'nickname') {
-      setCurrentStep('sms');
-    } else if (currentStep === 'company') {
-      setCurrentStep('nickname');
-    }
-  };
-
-  return (
-    <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      {currentStep === 'welcome' && (
-        <View style={styles.welcomeContainer}>
-          <Text style={[styles.welcomeTitle, { color: colors.PRIMARY }]}>{t('welcome.title')}</Text>
-          <Text style={[styles.welcomeSubtitle, { color: colors.TEXT.SECONDARY }]}>
-            {t('welcome.subtitle')}
-          </Text>
-          
-          <View style={styles.buttonContainer}>
-            {/* 구글 로그인 - Clerk OAuth 컴포넌트 사용 */}
-            <ClerkGoogleAuth onSuccess={onAuthCompleted} />
-
-            {/* 개발 환경 직접 로그인 옵션 */}
-            {__DEV__ && (
-              <>
-                <TouchableOpacity
-                  style={[styles.devButton, { backgroundColor: colors.PRIMARY, marginTop: SPACING.MD }]}
-                  onPress={() => handleQuickDevLogin(true)}
-                >
-                  <Text style={[styles.devButtonText, { color: colors.TEXT.WHITE }]}>👑 프리미엄 개발자 로그인</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.devButton, { backgroundColor: colors.WARNING, marginTop: SPACING.SM }]}
-                  onPress={() => handleQuickDevLogin(false)}
-                >
-                  <Text style={[styles.devButtonText, { color: colors.TEXT.WHITE }]}>🛠️ 일반 개발자 로그인</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.devButton, { backgroundColor: colors.SECONDARY, marginTop: SPACING.SM }]}
-                  onPress={handleResetOnboarding}
-                >
-                  <Text style={[styles.devButtonText, { color: colors.TEXT.WHITE }]}>🔄 온보딩 다시 보기</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-
-          <Text style={[styles.termsText, { color: colors.TEXT.LIGHT }]}>
-            {t('welcome.termsNotice')}
-          </Text>
-        </View>
-      )}
-
-      {currentStep === 'phone' && (
-        <View style={{ flex: 1 }}>
-          <View style={styles.phoneStepContainer}>
-            <Text style={[styles.phoneStepTitle, { color: colors.PRIMARY }]}>{t('authMode.title')}</Text>
-            <Text style={[styles.phoneStepSubtitle, { color: colors.TEXT.SECONDARY }]}>
-              {t('authMode.subtitle')}
-            </Text>
-            
-            <View style={styles.authModeContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.authModeButton,
-                  { 
-                    backgroundColor: authMode === 'signin' ? colors.PRIMARY : colors.SURFACE,
-                    borderColor: colors.PRIMARY 
-                  }
-                ]}
-                onPress={() => setAuthMode('signin')}
-              >
-                <Text style={[
-                  styles.authModeButtonText,
-                  { color: authMode === 'signin' ? colors.TEXT.WHITE : colors.PRIMARY }
-                ]}>
-                  {t('authMode.signIn')}
-                </Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[
-                  styles.authModeButton,
-                  { 
-                    backgroundColor: authMode === 'signup' ? colors.PRIMARY : colors.SURFACE,
-                    borderColor: colors.PRIMARY 
-                  }
-                ]}
-                onPress={() => setAuthMode('signup')}
-              >
-                <Text style={[
-                  styles.authModeButtonText,
-                  { color: authMode === 'signup' ? colors.TEXT.WHITE : colors.PRIMARY }
-                ]}>
-                  {t('authMode.signUp')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          
-          <PhoneVerificationScreen 
-            onVerificationSent={handleVerificationSent} 
-            authMode={authMode}
+      case 'sms':
+        return (
+          <SMSVerificationScreen
+            phoneNumber={phoneNumber}
+            onVerificationSuccess={handleVerificationSuccess}
             onBack={handleBack}
           />
-        </View>
-      )}
+        );
       
-      {currentStep === 'sms' && (
-        <SMSVerificationScreen
-          phoneNumber={phoneNumber}
-          onVerificationSuccess={handleVerificationSuccess}
-          onBack={handleBack}
-        />
-      )}
+      case 'nickname':
+        return (
+          <NicknameSetupScreen
+            onNicknameSet={handleNicknameSet}
+            onBack={handleBack}
+          />
+        );
       
-      {currentStep === 'nickname' && (
-        <NicknameSetupScreen
-          onNicknameSet={handleNicknameSet}
-        />
-      )}
+      case 'company':
+        return (
+          <CompanyVerificationScreen
+            onVerificationSubmitted={handleCompanyVerificationComplete}
+            onSkip={onAuthCompleted}
+            onBack={handleBack}
+          />
+        );
       
-      {currentStep === 'company' && (
-        <CompanyVerificationScreen
-          onVerificationSubmitted={handleCompanyVerificationSubmitted}
-          onSkip={handleCompanyVerificationSubmitted}
-        />
-      )}
+      default:
+        return null;
+    }
+  };
+  
+  return (
+    <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      {renderCurrentStep()}
     </View>
   );
 };
@@ -597,190 +176,5 @@ export const AuthScreen= ({ onAuthCompleted }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
-  },
-  welcomeContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.XL,
-  },
-  welcomeTitle: {
-    fontSize: FONT_SIZES.XXXL,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY,
-    marginBottom: SPACING.SM,
-  },
-  welcomeSubtitle: {
-    fontSize: FONT_SIZES.LG,
-    color: COLORS.TEXT.SECONDARY,
-    textAlign: 'center',
-    marginBottom: SPACING.XXL,
-  },
-  buttonContainer: {
-    width: '100%',
-    marginBottom: SPACING.XL,
-  },
-  // 구글 로그인 버튼
-  googleButton: {
-    backgroundColor: '#FFFFFF', // 구글 브랜드 컬러 (흰색)
-    borderWidth: 1,
-    borderColor: '#DADCE0', // 구글 보더 컬러
-    paddingVertical: SPACING.MD,
-    paddingHorizontal: SPACING.XL,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: SPACING.LG,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  googleButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  googleIcon: {
-    fontSize: 20,
-    marginRight: SPACING.SM,
-  },
-  googleButtonText: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '500',
-    color: '#1F1F1F', // 구글 텍스트 컬러 (어두운 회색)
-  },
-  // 구분선
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: SPACING.LG,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: COLORS.BORDER,
-  },
-  dividerText: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.LIGHT,
-    paddingHorizontal: SPACING.MD,
-  },
-  // 전화번호 인증 버튼
-  phoneButton: {
-    backgroundColor: COLORS.SURFACE,
-    borderWidth: 1,
-    borderColor: COLORS.BORDER,
-    paddingVertical: SPACING.MD,
-    paddingHorizontal: SPACING.XL,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  phoneButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  phoneIcon: {
-    fontSize: 18,
-    marginRight: SPACING.SM,
-  },
-  phoneButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '500',
-    color: COLORS.TEXT.PRIMARY,
-  },
-  // 개발자 로그인 버튼
-  devButton: {
-    paddingVertical: SPACING.MD,
-    paddingHorizontal: SPACING.XL,
-    borderRadius: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  devButtonText: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '600',
-  },
-  // 약관 텍스트
-  termsText: {
-    fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
-    textAlign: 'center',
-    lineHeight: 16,
-    marginTop: SPACING.LG,
-  },
-  // 기존 버튼 스타일들 (전화번호 인증 화면에서 사용)
-  primaryButton: {
-    backgroundColor: COLORS.PRIMARY,
-    paddingVertical: SPACING.MD,
-    paddingHorizontal: SPACING.XL,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  primaryButtonText: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '600',
-    color: COLORS.TEXT.WHITE,
-  },
-  secondaryButton: {
-    backgroundColor: COLORS.SURFACE,
-    borderWidth: 2,
-    borderColor: COLORS.PRIMARY,
-    paddingVertical: SPACING.MD,
-    paddingHorizontal: SPACING.XL,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  secondaryButtonText: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '600',
-    color: COLORS.PRIMARY,
-  },
-  // 전화번호 인증 단계 스타일
-  phoneStepContainer: {
-    paddingHorizontal: SPACING.XL,
-    paddingVertical: SPACING.LG,
-    backgroundColor: COLORS.SURFACE,
-  },
-  phoneStepTitle: {
-    fontSize: FONT_SIZES.XL,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY,
-    textAlign: 'center',
-    marginBottom: SPACING.SM,
-  },
-  phoneStepSubtitle: {
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
-    textAlign: 'center',
-    marginBottom: SPACING.LG,
-  },
-  authModeContainer: {
-    flexDirection: 'row',
-    gap: SPACING.SM,
-  },
-  authModeButton: {
-    flex: 1,
-    paddingVertical: SPACING.SM,
-    paddingHorizontal: SPACING.MD,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  authModeButtonText: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: '500',
   },
 });

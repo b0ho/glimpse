@@ -1,6 +1,8 @@
 {
   "title": "Register Person of Interest",
+  "findTitle": "Find Interest",
   "selectType": "Select Search Type",
+  "selectMethodTitle": "Select How to Find Your Interest",
   "inputInfo": "Enter Search Information",
   "validDuration": "Search Valid Period",
   "types": {
@@ -63,6 +65,7 @@
   },
   "labels": {
     "socialPlatform": "Select Social Platform",
+    "platform": "Select Social Platform",
     "required": "*",
     "platformName": "Platform Name",
     "platformId": "Platform ID",
@@ -78,6 +81,7 @@
     "addDetails": "Add details (name, department, birthdate)",
     "addDetailsSchool": "Add details (name, major, birthdate)"
   },
+  "additionalInfo": "Additional Information",
   "hints": {
     "groupMatch": "People in the same group will be matched",
     "nicknameLength": "Enter at least 2 characters",
@@ -109,6 +113,17 @@
     "upgradeButton": "Upgrade",
     "confirm": "OK"
   },
+  "selectDuration": "Select Search Duration",
+  "customDate": "Custom Date",
+  "duration": {
+    "3days": "3 Days",
+    "3daysDesc": "Basic duration",
+    "2weeks": "2 Weeks",
+    "2weeksDesc": "Advanced members",
+    "unlimited": "Unlimited",
+    "unlimitedDesc": "Premium members only"
+  },
+  "selectContact": "Select from Contacts",
   "subscription": {
     "basic": "Basic: 3 days",
     "advanced": "Advanced: 2 weeks", 

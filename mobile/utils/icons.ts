@@ -5,10 +5,11 @@
 
 // 네비게이션 탭 아이콘
 export const NAVIGATION_ICONS = {
-  HOME: 'home',
-  GROUPS: 'people',
-  MATCHES: 'heart',
-  PROFILE: 'person',
+  Home: 'home',
+  Groups: 'people',
+  Interest: 'search',
+  Matches: 'chatbubbles',
+  Profile: 'person',
 } as const;
 
 // 액션 아이콘

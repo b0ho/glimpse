@@ -4,7 +4,7 @@
  * @description 앱 최초 실행 시 보여주는 온보딩 화면 (2개 페이지)
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -20,25 +20,30 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
+import { useRoute, useNavigation } from '@react-navigation/native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-interface OnboardingScreenProps {
-  onComplete: () => void;
-}
 
 /**
  * 온보딩 화면 컴포넌트
  * @component OnboardingScreen
  * @description 2개의 스와이프 가능한 온보딩 페이지
  */
-export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
+export const OnboardingScreen: React.FC = () => {
   const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation('onboarding');
-  const scrollViewRef = useRef<ScrollView>(null);
+  const route = useRoute() as any;
+  const navigation = useNavigation() as any;
   const [currentPage, setCurrentPage] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+  const [dimensions, setDimensions] = useState({ width: SCREEN_WIDTH, height: SCREEN_HEIGHT });
+  
+  // route params에서 onComplete 가져오기
+  const onComplete = route.params?.onComplete || (() => {
+    // fallback: Auth 화면으로 이동
+    navigation.replace('Auth');
+  });
 
   // 애니메이션 실행
   React.useEffect(() => {
@@ -55,6 +60,18 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       }),
     ]).start();
   }, [currentPage]);
+
+
+  // Dimensions 업데이트 처리
+  useEffect(() => {
+    const updateDimensions = () => {
+      const { width, height } = Dimensions.get('window');
+      setDimensions({ width, height });
+    };
+
+    const subscription = Dimensions.addEventListener('change', updateDimensions);
+    return () => subscription?.remove();
+  }, []);
 
   /**
    * 온보딩 완료 처리
@@ -75,40 +92,22 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
    */
   const goToNextPage = () => {
     if (currentPage === 0) {
-      scrollViewRef.current?.scrollTo({ x: SCREEN_WIDTH, animated: true });
       setCurrentPage(1);
+      // 페이지 변경 시 애니메이션 초기화
+      fadeAnim.setValue(0);
+      slideAnim.setValue(50);
     } else {
       handleComplete();
     }
   };
 
-  /**
-   * 스크롤 이벤트 처리
-   */
-  const handleScroll = (event: any) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const page = Math.round(offsetX / SCREEN_WIDTH);
-    if (page !== currentPage) {
-      setCurrentPage(page);
-      // 페이지 변경 시 애니메이션 초기화
-      fadeAnim.setValue(0);
-      slideAnim.setValue(50);
-    }
-  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        bounces={false}
-      >
+      <View style={styles.pageContainer}>
         {/* 첫 번째 페이지 - 로고와 간단한 소개 */}
-        <View style={[styles.page, { width: SCREEN_WIDTH }]}>
+        {currentPage === 0 && (
+        <View style={[styles.page, { width: dimensions.width }]}>
           <LinearGradient
             colors={[colors.PRIMARY + '20', colors.BACKGROUND]}
             style={styles.gradientBackground}
@@ -160,9 +159,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             </TouchableOpacity>
           </View>
         </View>
+        )}
 
         {/* 두 번째 페이지 - 상세 설명 */}
-        <View style={[styles.page, { width: SCREEN_WIDTH }]}>
+        {currentPage === 1 && (
+        <View style={[styles.page, { width: dimensions.width }]}>
           <LinearGradient
             colors={[colors.SECONDARY + '20', colors.BACKGROUND]}
             style={styles.gradientBackground}
@@ -273,7 +274,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
+        )}
+      </View>
 
       {/* Skip 버튼 (첫 페이지에서만 표시) */}
       {currentPage === 0 && (
@@ -293,6 +295,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    overflow: 'hidden',
+  },
+  pageContainer: {
+    flex: 1,
+    position: 'relative',
   },
   gradientBackground: {
     position: 'absolute',
@@ -304,6 +311,7 @@ const styles = StyleSheet.create({
   page: {
     flex: 1,
     justifyContent: 'space-between',
+    overflow: 'hidden',
   },
   content: {
     flex: 1,

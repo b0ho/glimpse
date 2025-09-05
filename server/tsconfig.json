@@ -25,11 +25,19 @@
   },
   "include": [
     "src/**/*",
-    "test/**/*"
+    "test/**/*",
+    "!src/scripts/migrate-to-structured.ts",
+    "!src/scripts/register-all-my-info.ts",
+    "!src/scripts/test-all-registrations.ts",
+    "!src/scripts/upgrade-to-premium.ts"
   ],
   "exclude": [
     "eslint.config.mjs",
     "node_modules",
-    "dist"
+    "dist",
+    "src/scripts/migrate-to-structured.ts",
+    "src/scripts/register-all-my-info.ts",
+    "src/scripts/test-all-registrations.ts",
+    "src/scripts/upgrade-to-premium.ts"
   ]
 }

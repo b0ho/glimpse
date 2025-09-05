@@ -156,13 +156,55 @@ export class GroupService {
     const userMembership = group.members.find(
       (member) => member.userId === userId,
     );
+    
+    // Transform members to expected format for mobile app
+    const transformedMembers = group.members.slice(0, 10).map(member => ({
+      id: member.user.id,
+      nickname: member.user.nickname || '익명',
+      profileImage: member.user.profileImage || `https://avatar.vercel.sh/${member.user.id}`,
+    }));
 
+    // Mock recent posts for development
+    const mockRecentPosts = [
+      {
+        id: '1',
+        title: '스터디 모집합니다',
+        content: '주말에 함께 공부하실 분들 구합니다',
+        author: '익명1',
+        createdAt: '2시간 전',
+        likes: 12,
+      },
+      {
+        id: '2',
+        title: '학교 근처 맛집 추천',
+        content: '오늘 갔던 곳 너무 맛있었어요',
+        author: '익명2',
+        createdAt: '5시간 전',
+        likes: 34,
+      },
+      {
+        id: '3',
+        title: '중고책 판매합니다',
+        content: '전공 서적 싸게 팝니다',
+        author: '익명3',
+        createdAt: '1일 전',
+        likes: 8,
+      },
+    ];
+    
     return {
       ...group,
       memberCount: group._count.members,
       isUserMember: !!userMembership,
+      isJoined: !!userMembership,
       userRole: userMembership?.role,
       isMatchingEnabled: this.isMatchingEnabled(group),
+      members: transformedMembers,
+      recentPosts: mockRecentPosts,
+      coverImage: group.imageUrl || 'https://source.unsplash.com/400x200/?university,campus',
+      category: group.type === 'OFFICIAL' ? '공식 그룹' : 
+                group.type === 'CREATED' ? '생성 그룹' : 
+                group.type === 'INSTANCE' ? '인스턴스 그룹' : '위치 그룹',
     };
   }
 

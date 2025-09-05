@@ -1,6 +1,9 @@
 {
   "title": "관심상대 등록",
+  "addTitle": "관심상대 등록",
+  "findTitle": "관심상대 찾기",
   "selectType": "검색 유형 선택",
+  "selectMethodTitle": "관심상대를 찾을 방법 선택",
   "inputInfo": "검색 정보 입력",
   "validDuration": "검색 유효 기간",
   "types": {
@@ -16,7 +19,19 @@
     "school": "학교",
     "hobby": "취미/관심사",
     "platform": "기타 플랫폼",
-    "gameId": "게임"
+    "gameId": "게임",
+    "PHONE": "전화번호",
+    "EMAIL": "이메일",
+    "SOCIAL_ID": "소셜 계정",
+    "BIRTHDATE": "생년월일",
+    "GROUP": "특정 그룹",
+    "LOCATION": "장소",
+    "NICKNAME": "닉네임",
+    "COMPANY": "회사",
+    "SCHOOL": "학교",
+    "PART_TIME_JOB": "아르바이트",
+    "PLATFORM": "기타 플랫폼",
+    "GAME_ID": "게임"
   },
   "placeholders": {
     "phone": "전화번호를 입력하세요 (예: 010-1234-5678)",
@@ -51,7 +66,7 @@
   "buttons": {
     "selectFromContacts": "연락처에서 선택",
     "selectFromMap": "지도에서 선택",
-    "register": "관심상대 등록",
+    "register": "등록하기",
     "registering": "등록 중...",
     "cancel": "취소",
     "delete": "삭제",
@@ -63,6 +78,7 @@
   },
   "labels": {
     "socialPlatform": "소셜 플랫폼 선택",
+    "platform": "소셜 플랫폼 선택",
     "required": "*",
     "platformName": "플랫폼명",
     "platformId": "플랫폼 아이디",
@@ -78,6 +94,7 @@
     "addDetails": "상세 정보 추가 (이름, 부서, 생일)",
     "addDetailsSchool": "상세 정보 추가 (이름, 학과, 생일)"
   },
+  "additionalInfo": "추가 정보",
   "hints": {
     "groupMatch": "같은 그룹에 있는 사람끼리 매칭됩니다",
     "nicknameLength": "최소 2글자 이상 입력하세요",
@@ -109,6 +126,17 @@
     "upgradeButton": "업그레이드",
     "confirm": "확인"
   },
+  "selectDuration": "검색 유효 기간 선택",
+  "customDate": "직접 선택",
+  "duration": {
+    "3days": "3일",
+    "3daysDesc": "기본 기간",
+    "2weeks": "2주",
+    "2weeksDesc": "고급 회원",
+    "unlimited": "무제한",
+    "unlimitedDesc": "프리미엄 회원 전용"
+  },
+  "selectContact": "연락처에서 선택",
   "subscription": {
     "basic": "일반: 7일",
     "advanced": "고급: 2주", 
@@ -123,6 +151,15 @@
     "content": "정확한 정보를 입력해주세요\n등록한 조건과 일치하는 사용자가 있으면 자동 매칭됩니다\n구글 검색 기준 최상단 정보를 입력하면 가장 정확하게 매칭될 수 있습니다\n매칭 전까지 모든 정보는 익명으로 보호됩니다"
   },
   "search": {
+    "title": "관심상대 찾기",
+    "registeredSearches": "등록된 검색",
+    "noSearches": "등록된 검색이 없습니다",
+    "noSearchesDescription": "관심있는 사람을 찾기 위해 검색을 등록해보세요",
+    "matches": "매칭 결과",
+    "noMatches": "아직 매칭이 없습니다",
+    "noMatchesDescription": "검색 조건에 맞는 사람이 나타나면 알려드릴게요",
+    "privacyInfo": "모든 정보는 안전하게 보호되며 매칭 전까지 익명으로 유지됩니다",
+    "addNew": "새로운 검색 추가",
     "deleteConfirmTitle": "삭제 확인",
     "deleteConfirmMessage": "이 관심상대 검색을 삭제하시겠습니까?",
     "mismatchReportTitle": "미스매치 신고",

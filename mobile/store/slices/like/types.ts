@@ -130,6 +130,10 @@ export interface LikeStore extends LikeState {
   resetDailyLimits: () => void;
   /** 일일 리셋 확인 및 처리 */
   checkAndResetDaily: () => void;
+  
+  // Clear data
+  /** 모든 좋아요 데이터 초기화 */
+  clearLikes: () => void;
 }
 
 /**

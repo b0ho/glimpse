@@ -60,7 +60,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
    */
   const renderMessageContent = () => {
     switch (message.type) {
-      case 'TEXT':
+      case 'text':
         return (
           <Text 
             style={[
@@ -75,7 +75,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           </Text>
         );
       
-      case 'IMAGE':
+      case 'image':
         return (
           <TouchableOpacity
             onPress={() => onImagePress?.(message.content)}
@@ -99,7 +99,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           </TouchableOpacity>
         );
       
-      case 'VOICE':
+      case 'voice':
         return (
           <View style={styles.fileMessage}>
             <Icon
@@ -194,7 +194,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
             {
               backgroundColor: isOwnMessage ? colors.PRIMARY : colors.SURFACE,
             },
-            message.type === 'IMAGE' && styles.imageMessageBubble,
+            message.type === 'image' && styles.imageMessageBubble,
           ]}
           onLongPress={() => onLongPress?.(message)}
           activeOpacity={0.7}

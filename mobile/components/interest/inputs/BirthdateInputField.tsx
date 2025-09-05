@@ -5,14 +5,15 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
-import { Gender } from '@/types/interest';
 import { formatBirthdate } from '@/utils/interest/formValidation';
 
 interface BirthdateInputFieldProps {
   value: string;
   onChange: (value: string) => void;
-  selectedGender: Gender | null;
-  onGenderSelect: (gender: Gender) => void;
+  name?: string;
+  onNameChange?: (name: string) => void;
+  selectedGender?: 'male' | 'female' | 'other';
+  onGenderSelect?: (gender: 'male' | 'female' | 'other') => void;
   showAdditionalOptions: boolean;
   onToggleAdditionalOptions: () => void;
   birthdate?: string;
@@ -24,7 +25,9 @@ interface BirthdateInputFieldProps {
 export const BirthdateInputField: React.FC<BirthdateInputFieldProps> = ({
   value,
   onChange,
-  selectedGender,
+  name = '',
+  onNameChange,
+  selectedGender = 'male',
   onGenderSelect,
   showAdditionalOptions,
   onToggleAdditionalOptions,
@@ -45,8 +48,17 @@ export const BirthdateInputField: React.FC<BirthdateInputFieldProps> = ({
     }
   };
 
+  const genderOptions = [
+    { id: 'male' as const, label: t('common:gender.male'), icon: 'male-outline' },
+    { id: 'female' as const, label: t('common:gender.female'), icon: 'female-outline' },
+    { id: 'other' as const, label: t('common:gender.other'), icon: 'help-outline' },
+  ];
+
   return (
     <View style={styles.container}>
+      <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+        {t('interest:placeholders.birthdate')}
+      </Text>
       <CrossPlatformInput
         style={[
           styles.input,
@@ -64,56 +76,70 @@ export const BirthdateInputField: React.FC<BirthdateInputFieldProps> = ({
         maxLength={10}
       />
       
-      <View style={styles.genderContainer}>
-        <Text style={[styles.label, { color: colors.TEXT.SECONDARY }]}>
-          {t('interest:gender')} *
+      {/* 이름 입력 필드 (선택) */}
+      <View style={styles.nameSection}>
+        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+          {t('interest:labels.nameOptional')}
         </Text>
-        <View style={styles.genderButtons}>
-          <TouchableOpacity
-            style={[
-              styles.genderButton,
-              { 
-                backgroundColor: selectedGender === Gender.MALE ? colors.PRIMARY : colors.SURFACE,
-                borderColor: selectedGender === Gender.MALE ? colors.PRIMARY : colors.BORDER,
-              }
-            ]}
-            onPress={() => onGenderSelect(Gender.MALE)}
-          >
-            <Icon 
-              name="male" 
-              size={20} 
-              color={selectedGender === Gender.MALE ? colors.TEXT.WHITE : colors.TEXT.SECONDARY} 
-            />
-            <Text style={[
-              styles.genderButtonText,
-              { color: selectedGender === Gender.MALE ? colors.TEXT.WHITE : colors.TEXT.PRIMARY }
-            ]}>
-              {t('interest:male')}
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[
-              styles.genderButton,
-              { 
-                backgroundColor: selectedGender === Gender.FEMALE ? colors.PRIMARY : colors.SURFACE,
-                borderColor: selectedGender === Gender.FEMALE ? colors.PRIMARY : colors.BORDER,
-              }
-            ]}
-            onPress={() => onGenderSelect(Gender.FEMALE)}
-          >
-            <Icon 
-              name="female" 
-              size={20} 
-              color={selectedGender === Gender.FEMALE ? colors.TEXT.WHITE : colors.TEXT.SECONDARY} 
-            />
-            <Text style={[
-              styles.genderButtonText,
-              { color: selectedGender === Gender.FEMALE ? colors.TEXT.WHITE : colors.TEXT.PRIMARY }
-            ]}>
-              {t('interest:female')}
-            </Text>
-          </TouchableOpacity>
+        <CrossPlatformInput
+          style={[
+            styles.input,
+            { 
+              backgroundColor: colors.BACKGROUND, 
+              color: colors.TEXT.PRIMARY,
+              borderColor: colors.BORDER,
+            }
+          ]}
+          placeholder={t('interest:placeholders.nameOptional')}
+          placeholderTextColor={colors.TEXT.LIGHT}
+          value={name}
+          onChangeText={onNameChange}
+          maxLength={50}
+        />
+        <Text style={[styles.hint, { color: colors.TEXT.SECONDARY }]}>
+          {t('interest:hints.nameDescription')}
+        </Text>
+      </View>
+      
+      {/* 성별 선택 */}
+      <View style={styles.genderSection}>
+        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+          찾고자 하는 성별 <Text style={{ color: colors.ERROR }}>*</Text>
+        </Text>
+        <View style={styles.genderOptions}>
+          {genderOptions.map((option) => (
+            <TouchableOpacity
+              key={option.id}
+              style={[
+                styles.genderOption,
+                {
+                  backgroundColor: selectedGender === option.id 
+                    ? colors.PRIMARY + '20' 
+                    : colors.SURFACE,
+                  borderColor: selectedGender === option.id 
+                    ? colors.PRIMARY 
+                    : colors.BORDER,
+                }
+              ]}
+              onPress={() => onGenderSelect?.(option.id)}
+            >
+              <Icon 
+                name={option.icon} 
+                size={20} 
+                color={selectedGender === option.id ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+              />
+              <Text style={[
+                styles.genderLabel,
+                { 
+                  color: selectedGender === option.id 
+                    ? colors.PRIMARY 
+                    : colors.TEXT.PRIMARY 
+                }
+              ]}>
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
@@ -175,14 +201,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontWeight: '500',
   },
-  genderContainer: {
-    marginTop: 12,
+  nameSection: {
+    marginTop: 20,
   },
-  genderButtons: {
+  hint: {
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  genderSection: {
+    marginTop: 20,
+  },
+  genderOptions: {
     flexDirection: 'row',
     gap: 12,
   },
-  genderButton: {
+  genderOption: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -190,11 +224,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 1,
+    gap: 8,
   },
-  genderButtonText: {
-    marginLeft: 8,
+  genderLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   additionalOptionsButton: {
     flexDirection: 'row',

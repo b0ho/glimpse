@@ -234,6 +234,7 @@
       "message": "Your post has been successfully published to \"{{groupName}}\" group."
     }
   },
+  "change": "Change",
   "interest": {
     "types": {
       "PHONE": "Phone Number",

@@ -2,16 +2,66 @@
   "nearbyGroups": {
     "title": "근처 그룹"
   },
+  "currentLocation": "현재 위치",
+  "searchRadius": "검색 반경",
+  "nearbyGroupsCount": "근처 그룹",
+  "joinedGroupsCount": "가입한 그룹",
+  "memberCount": "멤버 {{count}}명",
+  "distance": "거리",
+  "join": "가입하기",
+  "leave": "나가기",
+  "joined": "가입됨",
+  "hoursRemaining": "{{hours}}시간 남음",
+  "noPermission": {
+    "title": "위치 권한이 필요해요",
+    "message": "근처 그룹을 찾기 위해 위치 권한을 허용해주세요",
+    "button": "권한 설정하기"
+  },
+  "empty": {
+    "title": "근처에 그룹이 없어요",
+    "message": "반경을 늘리거나 새로운 그룹을 만들어보세요",
+    "button": "새 그룹 만들기"
+  },
+  "errors": {
+    "serverConnection": "서버 연결에 문제가 있습니다",
+    "permissionDenied": "위치 권한이 거부되었습니다",
+    "permissionError": "위치 권한 오류가 발생했습니다",
+    "locationFailed": "위치 정보를 가져올 수 없습니다"
+  },
   "alerts": {
     "permission": {
       "title": "위치 권한 필요",
       "message": "근처 그룹을 찾기 위해 위치 권한이 필요합니다.",
       "later": "나중에",
-      "requestError": "위치 권한 요청 중 오류가 발생했습니다."
+      "required": "위치 정보가 필요합니다.",
+      "requestError": "위치 권한 요청 중 오류가 발생했습니다.",
+      "openSettings": "설정 열기",
+      "error": "위치 권한 요청 실패"
     },
     "location": {
       "error": "위치 정보를 가져올 수 없습니다.",
       "required": "위치 정보가 필요합니다."
+    },
+    "join": {
+      "title": "그룹 가입",
+      "message": "{{name}} 그룹에 가입하시겠습니까?",
+      "confirm": "가입",
+      "successTitle": "가입 완료",
+      "successMessage": "{{name}} 그룹에 가입했습니다.",
+      "error": "그룹 가입 중 오류가 발생했습니다."
+    },
+    "leave": {
+      "title": "그룹 나가기",
+      "message": "{{name}} 그룹에서 나가시겠습니까?",
+      "confirm": "나가기",
+      "successTitle": "나가기 완료",
+      "successMessage": "그룹에서 나갔습니다.",
+      "error": "그룹 나가기 중 오류가 발생했습니다."
+    },
+    "create": {
+      "successTitle": "생성 완료",
+      "successMessage": "그룹이 성공적으로 생성되었습니다.",
+      "error": "그룹 생성 중 오류가 발생했습니다."
     },
     "group": {
       "joinTitle": "그룹 가입",
@@ -19,6 +69,11 @@
       "join": "가입",
       "joinSuccess": "그룹에 성공적으로 가입했습니다.",
       "joinError": "그룹 가입 중 오류가 발생했습니다.",
+      "leaveTitle": "그룹 나가기",
+      "leaveMessage": "{{groupName}} 그룹에서 나가시겠습니까?",
+      "leave": "나가기",
+      "leaveSuccess": "그룹에서 나갔습니다.",
+      "leaveError": "그룹 나가기 중 오류가 발생했습니다.",
       "createSuccess": "그룹이 성공적으로 생성되었습니다.",
       "createError": "그룹 생성 중 오류가 발생했습니다."
     },

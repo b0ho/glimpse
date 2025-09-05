@@ -22,8 +22,11 @@
     "content": "Loading content...",
     "moreContent": "Loading more content...",
     "noMoreContent": "All content loaded",
-    "endReached": "You're all caught up! ✨"
+    "endReached": "You're all caught up! ✨",
+    "pullToRefresh": "Pull to refresh"
   },
+  "premium": "Premium",
+  "nearbyGroups": "Nearby Groups",
   "refreshing": "Refreshing...",
   "empty": {
     "title": "No content yet",

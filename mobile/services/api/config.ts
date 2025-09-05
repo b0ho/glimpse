@@ -4,15 +4,14 @@ import { Platform } from 'react-native';
  * API 기본 URL
  * @constant {string}
  */
-// 환경 감지: Vercel 환경에서는 production으로 간주 (Vercel API 함수 사용)
+// 환경 감지: Vercel 환경에서는 production으로 간주
 const isProduction = process.env.NODE_ENV === 'production' || 
                      (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.hostname?.includes('.vercel.app'));
 
 // Web에서는 localhost 사용, Native에서는 IP 주소 사용
 const getBaseURL = () => {
   if (isProduction) {
-    // Vercel API 함수 사용 (같은 도메인)
-    return 'https://www.glimpse.contact/api/v1';
+    return 'https://glimpse-server.up.railway.app/api/v1';
   }
   
   // Web 환경에서는 항상 localhost 사용
@@ -42,7 +41,7 @@ console.log('[API Config] Environment Detection:', {
  */
 const getSocketURL = () => {
   if (isProduction) {
-    return 'wss://glimpse-production.up.railway.app';
+    return 'wss://glimpse-server.up.railway.app';
   }
   
   // Web 환경에서는 항상 localhost 사용
@@ -173,8 +172,13 @@ class ApiClient {
       url += `?${queryString}`;
     }
 
-    // Get auth token
-    const token = await this.getAuthToken();
+    // Check if we're in dev mode first
+    const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : 
+                  !isProduction ||
+                  process.env.NODE_ENV === 'development' || 
+                  process.env.ENV === 'development' ||
+                  url.includes('localhost') ||
+                  url.includes('127.0.0.1');
 
     // Set up headers
     const headers: Record<string, string> = {
@@ -182,26 +186,21 @@ class ApiClient {
       ...(options.headers as Record<string, string>),
     };
 
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    // Add dev auth header ONLY for local development servers
-    // Check if the API URL is pointing to a local server (not the browser location)
-    const isLocalServer = url.includes('localhost') || 
-                         url.includes('127.0.0.1') || 
-                         url.includes('192.168') ||
-                         url.includes('10.') ||
-                         url.includes('172.');
-    
-    // Only add x-dev-auth for local development servers
-    if (isLocalServer && !url.includes('railway.app') && !url.includes('glimpse.contact')) {
+    // In dev mode, use x-dev-auth header and skip token
+    // In production mode, use token authentication
+    if (isDev) {
       headers['x-dev-auth'] = 'true';
-      console.log('[ApiClient] Local development server detected, adding x-dev-auth header');
+      console.log('[ApiClient] Development mode detected, adding x-dev-auth header');
+    } else {
+      // Only use token in production
+      const token = await this.getAuthToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
     }
 
     try {
-      if (isLocalServer) {
+      if (isDev) {
         console.log('[ApiClient] Request:', {
           url,
           method: requestOptions.method || 'GET',

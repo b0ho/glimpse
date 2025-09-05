@@ -1,6 +1,37 @@
 {
   "myStory": "My Story",
-  "addStory": "Add Story",
+  "addStory": {
+    "title": "Add Story",
+    "upload": "Upload",
+    "selectPhoto": "Select from Gallery",
+    "takePhoto": "Take Photo",
+    "permissions": {
+      "title": "Permission Required",
+      "message": "Permission is needed to access photo library.",
+      "cameraTitle": "Camera Permission Required",
+      "cameraMessage": "Permission is needed to use the camera."
+    },
+    "errors": {
+      "noImage": {
+        "title": "Photo Required",
+        "message": "Please select a photo for your story."
+      },
+      "upload": {
+        "title": "Upload Failed",
+        "message": "An error occurred while uploading the story. Please try again."
+      }
+    },
+    "success": {
+      "title": "Upload Complete",
+      "message": "Your story has been uploaded successfully!"
+    },
+    "confirm": {
+      "title": "Cancel Story",
+      "message": "You have a story in progress. Are you sure you want to cancel?",
+      "cancel": "Keep Editing",
+      "confirm": "Cancel"
+    }
+  },
   "newStory": "New Story",
   "permissions": {
     "required": "Permission Required",

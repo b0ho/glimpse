@@ -20,8 +20,11 @@
     "content": "콘텐츠를 불러오는 중...",
     "moreContent": "더 많은 콘텐츠를 불러오는 중...",
     "noMoreContent": "모든 콘텐츠를 불러왔습니다",
-    "endReached": "최신 게시물까지 모두 확인했어요! ✨"
+    "endReached": "최신 게시물까지 모두 확인했어요! ✨",
+    "pullToRefresh": "당겨서 새로고침"
   },
+  "premium": "프리미엄",
+  "nearbyGroups": "주변 그룹",
   "refreshing": "새로고침 중...",
   "empty": {
     "title": "아직 콘텐츠가 없어요",

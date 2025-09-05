@@ -5,12 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Image,
   ActivityIndicator,
   Share,
   Modal,
 } from 'react-native';
+import { showAlert } from '@/utils/webAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
@@ -19,6 +19,7 @@ import { useGroupStore } from '@/store/slices/groupSlice';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
+import { apiClient } from '@/services/api/config';
 
 interface GroupDetailScreenProps {
   route: {
@@ -53,14 +54,17 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
     setLoading(true);
     setServerConnectionError(false);
     try {
-      // TODO: 실제 API 호출로 대체 필요
-      // const response = await groupApi.getGroupDetail(groupId);
-      // setGroup(response.data);
-      // setIsJoined(response.data.isJoined);
+      // 실제 API 호출
+      const response = await apiClient.get<any>(`/groups/${groupId}`);
       
-      // 현재는 서버 API가 없으므로 에러 상태 설정
-      setGroup(null);
-      setServerConnectionError(true);
+      if (response.success && response.data) {
+        setGroup(response.data);
+        setIsJoined(response.data.isJoined || false);
+      } else {
+        // API 응답은 있지만 데이터가 없는 경우
+        setGroup(null);
+        setServerConnectionError(true);
+      }
     } catch (error) {
       console.error('Failed to load group detail:', error);
       setGroup(null);
@@ -72,7 +76,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
 
   const handleJoinLeave = async () => {
     if (isJoined) {
-      Alert.alert(
+      showAlert(
         t('detail.alerts.leaveConfirm.title'),
         t('detail.alerts.leaveConfirm.message'),
         [
@@ -87,10 +91,10 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
                 setIsJoined(false);
                 // 그룹 정보 업데이트
                 setGroup({ ...group, memberCount: group.memberCount - 1 });
-                Alert.alert(t('detail.alerts.leaveSuccess.title'), t('detail.alerts.leaveSuccess.message'));
+                showAlert(t('detail.alerts.leaveSuccess.title'), t('detail.alerts.leaveSuccess.message'));
                 navigation.goBack();
               } catch (error) {
-                Alert.alert(t('detail.alerts.leaveError.title'), t('detail.alerts.leaveError.message'));
+                showAlert(t('detail.alerts.leaveError.title'), t('detail.alerts.leaveError.message'));
               }
             },
           },
@@ -103,16 +107,16 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
         setIsJoined(true);
         // 그룹 정보 업데이트
         setGroup({ ...group, memberCount: group.memberCount + 1 });
-        Alert.alert(t('detail.alerts.joinSuccess.title'), t('detail.alerts.joinSuccess.message'));
+        showAlert(t('detail.alerts.joinSuccess.title'), t('detail.alerts.joinSuccess.message'));
       } catch (error) {
-        Alert.alert(t('detail.alerts.joinError.title'), t('detail.alerts.joinError.message'));
+        showAlert(t('detail.alerts.joinError.title'), t('detail.alerts.joinError.message'));
       }
     }
   };
 
   const handleInviteCode = async () => {
     if (!isJoined) {
-      Alert.alert(t('detail.alerts.inviteCodeRequiresJoin.title'), t('detail.alerts.inviteCodeRequiresJoin.message'));
+      showAlert(t('detail.alerts.inviteCodeRequiresJoin.title'), t('detail.alerts.inviteCodeRequiresJoin.message'));
       return;
     }
     
@@ -121,7 +125,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
       setInviteCode(code);
       setShowInviteModal(true);
     } catch (error) {
-      Alert.alert(t('detail.alerts.inviteCodeError.title'), t('detail.alerts.inviteCodeError.message'));
+      showAlert(t('detail.alerts.inviteCodeError.title'), t('detail.alerts.inviteCodeError.message'));
     }
   };
 
@@ -140,7 +144,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
 
   const handleGroupChat = () => {
     if (!isJoined) {
-      Alert.alert(t('detail.alerts.chatRequiresJoin.title'), t('detail.alerts.chatRequiresJoin.message'));
+      showAlert(t('detail.alerts.chatRequiresJoin.title'), t('detail.alerts.chatRequiresJoin.message'));
       return;
     }
     navigation.navigate('Chat', {

@@ -47,12 +47,20 @@ export const CreateContentScreen = ({ route }: any) => {
         const groups = await groupApi.getGroups();
         groupStore.setGroups(groups);
         
-        // 개발 환경에서는 모든 그룹에 자동으로 참여한 것으로 처리
+        // 개발 환경에서는 모든 그룹에 자동으로 참여한 것으로 처리 (중복 체크)
         if (__DEV__) {
-          groups.forEach(group => {
-            groupStore.joinGroup(group.id);
+          const joinedIds = new Set(groupStore.joinedGroups.map(g => g.id));
+          groups.forEach(async group => {
+            if (!joinedIds.has(group.id)) {
+              try {
+                await groupStore.joinGroup(group.id);
+              } catch (error) {
+                // 이미 가입된 그룹인 경우 무시
+                console.log(`[CreateContentScreen] 그룹 ${group.name} 자동 참여 스킵 (이미 가입됨)`);
+              }
+            }
           });
-          console.log('[CreateContentScreen] 개발 모드: 모든 그룹에 자동 참여');
+          console.log('[CreateContentScreen] 개발 모드: 필요한 그룹에만 자동 참여');
         }
         
         console.log('[CreateContentScreen] 그룹 목록 로드 완료:', groups.length, '개');

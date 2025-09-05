@@ -14,7 +14,7 @@ export const isDevelopment = true;
 /**
  * 개발 모드 인증 우회 활성화 여부
  */
-export const isAuthBypassEnabled = false;
+export const isAuthBypassEnabled = true;
 
 /**
  * 슈퍼 계정 정의
@@ -120,7 +120,7 @@ export const DEV_CONFIG = {
   enableDebugLogging: isDevelopment,
   
   // 개발 토큰 (실제 DB의 사용자 ID와 매칭되는 JWT)
-  devToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWUweHJvbDIwMDAwdXJhNHcwaDJmeXR2Iiwic3ViIjoiY21lMHhyb2wyMDAwMHVyYTR3MGgyZnl0diIsInBob25lTnVtYmVyIjoiKzgyMDEwMTIzNDU2NzgiLCJpc1ZlcmlmaWVkIjp0cnVlLCJpYXQiOjE3NTQ1NTU0NjgsImV4cCI6MTc1NzE0NzQ2OH0.T4IX4a4h9eRVak-vooa6wFjVXeu4vtIVrBpqsmJIiw4',
+  devToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWVrdHUxeTgwMDAweHRjZ3IxYTF3aGozIiwic3ViIjoiY21la3R1MXk4MDAwMHh0Y2dyMWExd2hqMyIsInBob25lTnVtYmVyIjoiKzgyMDEwMDAwMDAwMCIsImlzVmVyaWZpZWQiOnRydWUsImlhdCI6MTc1Njk4MTU2MywiZXhwIjoxNzU5NTczNTYzfQ.8vU7_3b8HqXQhWL_avontJq5nstvh3nRzn2uXKOP94E',
   
   // 개발 세션 ID
   devSessionId: 'dev-session-glimpse',

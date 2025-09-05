@@ -28,7 +28,15 @@
     "myInfo": "내 정보 관리",
     "postDetail": "게시물 상세",
     "premium": "프리미엄",
-    "chat": "채팅"
+    "chat": "채팅",
+    "profileEdit": "프로필 수정",
+    "whoLikesYou": "나를 좋아한 사람",
+    "notificationSettings": "알림 설정",
+    "likeHistory": "좋아요 내역",
+    "deleteAccount": "계정 삭제",
+    "privacyPolicy": "개인정보 처리방침",
+    "termsOfService": "서비스 이용약관",
+    "support": "고객지원"
   },
   "accessibility": {
     "home": "홈 화면으로 이동",

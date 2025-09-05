@@ -100,6 +100,10 @@ export const AddInterestScreen: React.FC = () => {
             value={value}
             onChange={setValue}
             onContactPress={handleSelectContact}
+            name={name}
+            onNameChange={setName}
+            selectedGender={selectedGender}
+            onGenderSelect={setSelectedGender}
             colors={colors}
             t={t}
           />
@@ -110,7 +114,12 @@ export const AddInterestScreen: React.FC = () => {
           <EmailInputField
             value={value}
             onChange={setValue}
+            name={name}
+            onNameChange={setName}
+            selectedGender={selectedGender}
+            onGenderSelect={setSelectedGender}
             colors={colors}
+            t={t}
           />
         );
 
@@ -119,6 +128,8 @@ export const AddInterestScreen: React.FC = () => {
           <BirthdateInputField
             value={value}
             onChange={setValue}
+            name={name}
+            onNameChange={setName}
             selectedGender={selectedGender}
             onGenderSelect={setSelectedGender}
             showAdditionalOptions={showAdditionalOptions}
@@ -137,10 +148,12 @@ export const AddInterestScreen: React.FC = () => {
             onChange={setValue}
             selectedPlatform={metadata.platform}
             onPlatformSelect={(platform) => setMetadata({ ...metadata, platform })}
-            nickname={showAdditionalOptions ? name : undefined}
+            name={name}
             onNicknameChange={setName}
             showAdditionalOptions={showAdditionalOptions}
             onToggleAdditionalOptions={() => setShowAdditionalOptions(!showAdditionalOptions)}
+            selectedGender={selectedGender}
+            onGenderSelect={setSelectedGender}
             colors={colors}
             t={t}
           />
@@ -156,6 +169,10 @@ export const AddInterestScreen: React.FC = () => {
             nickname={showAdditionalOptions ? name : undefined}
             onNicknameChange={setName}
             showAdditionalOptions={showAdditionalOptions}
+            name={name}
+            onNameChange={setName}
+            selectedGender={selectedGender}
+            onGenderSelect={setSelectedGender}
             colors={colors}
             t={t}
           />
@@ -173,6 +190,10 @@ export const AddInterestScreen: React.FC = () => {
             nickname={showAdditionalOptions ? name : undefined}
             onNicknameChange={setName}
             showAdditionalOptions={showAdditionalOptions}
+            name={name}
+            onNameChange={setName}
+            selectedGender={selectedGender}
+            onGenderSelect={setSelectedGender}
             colors={colors}
             t={t}
           />
@@ -185,6 +206,10 @@ export const AddInterestScreen: React.FC = () => {
             onChange={setValue}
             selectedGame={metadata.game}
             onGameSelect={(game) => setMetadata({ ...metadata, game })}
+            name={name}
+            onNameChange={setName}
+            selectedGender={selectedGender}
+            onGenderSelect={setSelectedGender}
             colors={colors}
             t={t}
           />
@@ -195,6 +220,10 @@ export const AddInterestScreen: React.FC = () => {
           <LocationInputField
             value={value}
             onChange={setValue}
+            name={name}
+            onNameChange={setName}
+            selectedGender={selectedGender}
+            onGenderSelect={setSelectedGender}
             colors={colors}
             t={t}
           />
@@ -207,6 +236,10 @@ export const AddInterestScreen: React.FC = () => {
             onPlatformNameChange={(platformName) => setMetadata({ ...metadata, platformName })}
             userId={value}
             onUserIdChange={setValue}
+            name={name}
+            onNameChange={setName}
+            selectedGender={selectedGender}
+            onGenderSelect={setSelectedGender}
             colors={colors}
             t={t}
           />
@@ -221,6 +254,10 @@ export const AddInterestScreen: React.FC = () => {
             onPositionChange={setDepartment}
             nickname={showAdditionalOptions ? name : undefined}
             onNicknameChange={setName}
+            name={name}
+            onNameChange={setName}
+            selectedGender={selectedGender}
+            onGenderSelect={setSelectedGender}
             colors={colors}
             t={t}
           />
@@ -233,6 +270,10 @@ export const AddInterestScreen: React.FC = () => {
             onChange={setValue}
             description={metadata.description}
             onDescriptionChange={(description) => setMetadata({ ...metadata, description })}
+            name={name}
+            onNameChange={setName}
+            selectedGender={selectedGender}
+            onGenderSelect={setSelectedGender}
             colors={colors}
             t={t}
           />
@@ -251,7 +292,7 @@ export const AddInterestScreen: React.FC = () => {
       >
         {/* 헤더 */}
         <ScreenHeader 
-          title={t('interest:addTitle')}
+          title={t('interest:findTitle')}
           colors={colors}
         />
 
@@ -320,7 +361,7 @@ export const AddInterestScreen: React.FC = () => {
                   <ActivityIndicator color={colors.TEXT.WHITE} />
                 ) : (
                   <Text style={[styles.submitButtonText, { color: colors.TEXT.WHITE }]}>
-                    {t('interest:register')}
+                    {t('interest:buttons.register')}
                   </Text>
                 )}
               </TouchableOpacity>

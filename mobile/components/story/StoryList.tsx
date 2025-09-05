@@ -89,7 +89,7 @@ export const StoryList= ({
                 ) : (
                   <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.PRIMARY }]}>
                     <Text style={[styles.profileImageText, { color: colors.TEXT.WHITE }]}>
-                      {item.nickname.charAt(0).toUpperCase()}
+                      {item.nickname?.charAt(0)?.toUpperCase() || '?'}
                     </Text>
                   </View>
                 )}
@@ -102,7 +102,7 @@ export const StoryList= ({
               ) : (
                 <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.PRIMARY }]}>
                   <Text style={[styles.profileImageText, { color: colors.TEXT.WHITE }]}>
-                    {item.nickname.charAt(0).toUpperCase()}
+                    {item.nickname?.charAt(0)?.toUpperCase() || '?'}
                   </Text>
                 </View>
               )}
@@ -110,7 +110,7 @@ export const StoryList= ({
           )}
         </View>
         <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]} numberOfLines={1}>
-          {item.nickname}
+          {item.nickname || '익명'}
         </Text>
       </TouchableOpacity>
     );
@@ -133,7 +133,7 @@ export const StoryList= ({
               ) : (
                 <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.PRIMARY }]}>
                   <Text style={[styles.profileImageText, { color: colors.TEXT.WHITE }]}>
-                    {myStories.nickname.charAt(0).toUpperCase()}
+                    {myStories.nickname?.charAt(0)?.toUpperCase() || '?'}
                   </Text>
                 </View>
               )}

@@ -53,19 +53,16 @@ export interface Story {
  * @description 사용자별로 그룹화된 스토리 정보
  */
 export interface StoryGroup {
-  /** 사용자 정보 */
-  user: {
-    /** 사용자 ID */
-    id: string;
-    /** 닉네임 */
-    nickname: string;
-    /** 프로필 이미지 */
-    profileImage?: string;
-  };
+  /** 사용자 ID */
+  userId: string;
+  /** 사용자 이름 */
+  userName: string;
+  /** 사용자 아바타 */
+  userAvatar?: string;
   /** 스토리 목록 */
   stories: Story[];
   /** 미조회 스토리 존재 여부 */
-  hasUnviewed: boolean;
+  hasUnseen: boolean;
 }
 
 /**
@@ -155,6 +152,61 @@ class StoryService {
       return data.data;
     } catch (error) {
       console.error('Failed to get my stories:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 스토리 그룹 조회
+   * @async
+   * @returns {Promise<StoryGroup[]>} 스토리 그룹 목록
+   * @throws {Error} 조회 실패 시
+   * @description 매칭된 사용자들의 스토리를 그룹화하여 조회
+   */
+  async getStoryGroups(): Promise<StoryGroup[]> {
+    try {
+      // 개발 환경에서는 더미 데이터 반환
+      if (__DEV__) {
+        return [
+          {
+            userId: 'user1',
+            userName: '커피러버',
+            userAvatar: undefined,
+            stories: [],
+            hasUnseen: false,
+          },
+          {
+            userId: 'user2',
+            userName: '개발자',
+            userAvatar: undefined,
+            stories: [],
+            hasUnseen: true,
+          },
+        ];
+      }
+
+      // TODO: Get token from Clerk
+      const token = '';
+      if (!token) {
+        throw new Error('No authentication token');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/stories/groups`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch story groups');
+      }
+
+      const data = await response.json();
+      return data.data;
+    } catch (error) {
+      console.error('Failed to get story groups:', error);
       throw error;
     }
   }

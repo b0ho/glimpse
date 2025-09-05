@@ -14,7 +14,7 @@ import {
   ChevronRight,
   Download
 } from 'lucide-react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface AccountDeletionItem {
   id: string;

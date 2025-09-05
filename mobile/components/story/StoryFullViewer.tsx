@@ -58,8 +58,8 @@ export const StoryFullViewer: React.FC<StoryFullViewerProps> = ({
   const [isPaused, setIsPaused] = useState(false);
 
   // 현재 표시중인 스토리 사용자와 스토리
-  const currentUser = storyUsers[userIndex];
-  const currentStory = currentUser?.stories[currentStoryIndex];
+  const currentUser = storyUsers?.[userIndex];
+  const currentStory = currentUser?.stories?.[currentStoryIndex];
 
   // 스토리 자동 진행 (5초)
   useEffect(() => {
@@ -92,7 +92,7 @@ export const StoryFullViewer: React.FC<StoryFullViewerProps> = ({
       return;
     }
 
-    if (currentStoryIndex < currentUser.stories.length - 1) {
+    if (currentStoryIndex < (currentUser.stories?.length || 0) - 1) {
       // 같은 사용자의 다음 스토리
       setCurrentStoryIndex(prev => prev + 1);
       setProgress(0);
@@ -121,7 +121,7 @@ export const StoryFullViewer: React.FC<StoryFullViewerProps> = ({
         const prevUserIndex = userIndex - 1;
         const prevUser = storyUsers[prevUserIndex];
         setUserIndex(prevUserIndex);
-        setCurrentStoryIndex(prevUser.stories.length - 1);
+        setCurrentStoryIndex((prevUser?.stories?.length || 1) - 1);
         setProgress(0);
       } else {
         // 첫 번째 스토리
@@ -167,7 +167,7 @@ export const StoryFullViewer: React.FC<StoryFullViewerProps> = ({
 
         {/* 상단 프로그레스 바 */}
         <View style={styles.progressContainer}>
-          {currentUser.stories.map((_, index) => (
+          {currentUser.stories?.map((_, index) => (
             <View key={index} style={styles.progressBarBackground}>
               <View
                 style={[
@@ -184,7 +184,7 @@ export const StoryFullViewer: React.FC<StoryFullViewerProps> = ({
                 ]}
               />
             </View>
-          ))}
+          )) || null}
         </View>
 
         {/* 상단 헤더 */}

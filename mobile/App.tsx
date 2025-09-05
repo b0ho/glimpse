@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ClerkProvider } from '@clerk/clerk-expo';
 import { Platform, ActivityIndicator, View, Text } from 'react-native';
-import RootNavigator from './navigation/AppNavigator';
+import { AppNavigator as RootNavigator } from './navigation/AppNavigator';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { initI18n, ensureI18nReady } from './services/i18n/i18n';
 import { I18nextProvider } from 'react-i18next';

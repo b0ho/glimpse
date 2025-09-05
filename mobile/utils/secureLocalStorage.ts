@@ -216,14 +216,20 @@ async function generateHash(data: string): Promise<string> {
 /**
  * 로컬 관심상대 카드 저장
  */
-export async function saveLocalInterestCard(
-  type: InterestType,
-  value: string,
-  metadata?: any
-): Promise<LocalInterestCard> {
+export async function saveLocalInterestCard(params: {
+  userId: string;
+  type: InterestType;
+  value: string;
+  name?: string;
+  metadata?: any;
+  status: string;
+  expiresAt: string;
+}): Promise<LocalInterestCard> {
   try {
+    const { type, value, name, metadata, expiresAt } = params;
+    
     // 개인정보 암호화
-    const encryptedData = await encryptData(JSON.stringify({ value, metadata }));
+    const encryptedData = await encryptData(JSON.stringify({ value, name, metadata }));
     
     // 해시 생성 (서버 전송용)
     const hashedValue = await generateHash(`${type}:${value}`);
@@ -235,9 +241,9 @@ export async function saveLocalInterestCard(
       encryptedData,
       hashedValue,
       createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7일
+      expiresAt: expiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 전달된 값 또는 7일
       localMetadata: {
-        displayName: metadata?.displayName || value.substring(0, 3) + '***',
+        displayName: name || metadata?.displayName || value.substring(0, 3) + '***',
         notes: metadata?.notes
       }
     };

@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { LocationController } from './location.controller';
+import { LocationGroupController } from './location-group.controller';
 import { LocationService } from './location.service';
 import { PrismaModule } from '../core/prisma/prisma.module';
 import { CacheModule } from '../core/cache/cache.module';
 
 @Module({
   imports: [PrismaModule, CacheModule],
-  controllers: [LocationController],
+  controllers: [LocationController, LocationGroupController],
   providers: [LocationService],
   exports: [LocationService],
 })

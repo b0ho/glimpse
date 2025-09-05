@@ -1,6 +1,37 @@
 {
   "myStory": "내 스토리",
-  "addStory": "스토리 추가",
+  "addStory": {
+    "title": "스토리 추가",
+    "upload": "올리기",
+    "selectPhoto": "갤러리에서 선택",
+    "takePhoto": "사진 촬영",
+    "permissions": {
+      "title": "권한 필요",
+      "message": "사진 라이브러리에 접근하려면 권한이 필요합니다.",
+      "cameraTitle": "카메라 권한 필요",
+      "cameraMessage": "카메라를 사용하려면 권한이 필요합니다."
+    },
+    "errors": {
+      "noImage": {
+        "title": "사진 선택 필요",
+        "message": "스토리에 올릴 사진을 선택해주세요."
+      },
+      "upload": {
+        "title": "업로드 실패",
+        "message": "스토리 업로드 중 오류가 발생했습니다. 다시 시도해주세요."
+      }
+    },
+    "success": {
+      "title": "업로드 완료",
+      "message": "스토리가 성공적으로 업로드되었습니다!"
+    },
+    "confirm": {
+      "title": "작성 취소",
+      "message": "작성 중인 스토리가 있습니다. 정말로 취소하시겠습니까?",
+      "cancel": "계속 작성",
+      "confirm": "취소"
+    }
+  },
   "newStory": "새 스토리",
   "permissions": {
     "required": "권한 필요",

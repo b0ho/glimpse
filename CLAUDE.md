@@ -263,6 +263,109 @@ Before ANY commit:
 - **Version Control**: Independent versioning per package
 - **Reduced Coupling**: Less risk of breaking changes across packages
 
+## 📐 Modularization Guidelines (모듈화 가이드라인)
+
+### Core Principles
+**목표**: 모든 파일을 300줄 이하로 유지하여 가독성과 유지보수성 극대화
+
+### 1. File Size Standards
+- **Component Files**: Maximum 300 lines
+- **Hook Files**: Maximum 200 lines  
+- **Utility Files**: Maximum 150 lines
+- **Type Definition Files**: No limit (but split by domain)
+
+### 2. Component Structure Pattern
+```typescript
+// ❌ BAD - Everything in one file (800+ lines)
+screens/ProfileScreen.tsx
+
+// ✅ GOOD - Modularized structure
+screens/ProfileScreen.tsx (< 300 lines)     // Main screen orchestrator
+├── hooks/profile/useProfileData.ts         // Business logic
+├── components/profile/PremiumSection.tsx   // Feature component
+├── components/profile/ActivityStats.tsx    // Feature component
+├── components/profile/LikeSystemStatus.tsx // Feature component
+└── types/profile.ts                        // Type definitions
+```
+
+### 3. Modularization Checklist
+When creating new components:
+- [ ] **파일당 300줄 이하 유지** - Keep files under 300 lines
+- [ ] **즉시 hook 분리** - Extract hooks immediately when adding business logic
+- [ ] **타입 정의 분리** - Separate type definitions into dedicated files
+- [ ] **재사용 가능한 컴포넌트 추출** - Extract reusable UI components
+
+### 4. Refactoring Patterns
+
+#### Pattern 1: Custom Hook Extraction
+```typescript
+// Before: Logic mixed with UI (500+ lines)
+const ProfileScreen = () => {
+  const [data, setData] = useState();
+  const [loading, setLoading] = useState();
+  // ... 100 lines of business logic
+  return <View>...</View>;
+};
+
+// After: Separated concerns
+const useProfileData = () => {
+  const [data, setData] = useState();
+  const [loading, setLoading] = useState();
+  // ... business logic
+  return { data, loading };
+};
+
+const ProfileScreen = () => {
+  const { data, loading } = useProfileData();
+  return <View>...</View>;
+};
+```
+
+#### Pattern 2: Component Composition
+```typescript
+// Before: Monolithic component
+const ProfileScreen = () => (
+  <View>
+    {/* 200 lines of premium section */}
+    {/* 150 lines of stats section */}
+    {/* 180 lines of settings */}
+  </View>
+);
+
+// After: Composed components
+const ProfileScreen = () => (
+  <View>
+    <PremiumSection />
+    <ActivityStats />
+    <SettingsMenu />
+  </View>
+);
+```
+
+### 5. Real-world Examples
+Successfully refactored files in this project:
+
+| Original File | Lines | After Refactoring | Reduction |
+|--------------|-------|-------------------|-----------|
+| likeSlice.ts | 1,163 | 459 | 60.5% |
+| NearbyGroupsScreen.tsx | 917 | 414 | 54.9% |
+| ProfileScreen.tsx | 879 | 324 | 63.1% |
+
+### 6. Benefits Achieved
+- **가독성 향상**: 각 파일이 단일 책임만 담당
+- **테스트 용이성**: 독립된 모듈별 유닛 테스트 가능
+- **재사용성**: 컴포넌트와 훅을 다른 화면에서 재사용
+- **유지보수성**: 변경사항이 격리되어 사이드 이펙트 최소화
+- **팀 협업**: 여러 개발자가 충돌 없이 동시 작업 가능
+
+### 7. When to Modularize
+Immediate modularization triggers:
+- File exceeds 300 lines
+- Component has 3+ distinct responsibilities
+- Business logic mixed with UI logic
+- Duplicate code patterns detected
+- Complex state management in component
+
 ## 🚨 Safety Rules (CRITICAL - 반드시 준수)
 
 ### 🔴 Absolutely Forbidden Commands
@@ -665,9 +768,173 @@ const styles = StyleSheet.create<Styles>({
 
 **React Native + Expo development benefits from flexible TypeScript settings that prioritize development velocity while maintaining essential type safety.**
 
+## 📐 Modularization Guidelines
+
+### Screen Component Architecture
+
+**Goal**: Keep screen files under 400 lines by extracting logic and UI into reusable modules.
+
+#### 1. Screen Structure Pattern
+
+```typescript
+// screens/ExampleScreen.tsx (Target: < 400 lines)
+export const ExampleScreen = () => {
+  // 1. Store hooks
+  const authStore = useAuthStore();
+  
+  // 2. Custom hooks for data & logic
+  const { data, handlers } = useExampleData();
+  const { actions } = useExampleActions();
+  
+  // 3. Simple rendering logic
+  return (
+    <SafeAreaView>
+      <ExampleHeader />
+      <ExampleContent data={data} />
+      <ExampleFooter />
+    </SafeAreaView>
+  );
+};
+```
+
+#### 2. Hook Extraction Pattern
+
+**Data Management Hooks** (`hooks/[screen]/use[Screen]Data.ts`):
+```typescript
+export const useExampleData = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  
+  const loadData = useCallback(async () => {
+    // API calls or complex data fetching
+  }, []);
+  
+  return { data, loading, loadData };
+};
+```
+
+**Action Handlers** (`hooks/[screen]/use[Screen]Handlers.ts`):
+```typescript
+export const useExampleHandlers = ({ data, setData }) => {
+  const handleAction = useCallback(() => {
+    // Business logic here
+  }, [data]);
+  
+  return { handleAction };
+};
+```
+
+#### 3. Component Extraction Pattern
+
+**List Components** (`components/[feature]/[Feature]List.tsx`):
+```typescript
+interface ExampleListProps {
+  items: Item[];
+  onItemPress: (id: string) => void;
+}
+
+export const ExampleList: React.FC<ExampleListProps> = ({ items, onItemPress }) => {
+  return (
+    <FlatList
+      data={items}
+      renderItem={({ item }) => <ExampleItem item={item} onPress={onItemPress} />}
+    />
+  );
+};
+```
+
+**Section Components** (`components/[feature]/[Feature]Section.tsx`):
+```typescript
+export const ExampleSection: React.FC<Props> = ({ title, children }) => {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.title}>{title}</Text>
+      {children}
+    </View>
+  );
+};
+```
+
+#### 4. Modularization Checklist
+
+Before starting a new screen:
+- [ ] Plan the screen structure (< 400 lines target)
+- [ ] Identify reusable components
+- [ ] Extract data fetching into custom hooks
+- [ ] Extract business logic into handler hooks
+- [ ] Create section components for complex UI parts
+
+When refactoring existing screens:
+- [ ] Identify logical sections (data, UI, actions)
+- [ ] Extract hooks first (easier to test)
+- [ ] Then extract UI components
+- [ ] Keep props minimal and focused
+- [ ] Ensure TypeScript types are properly defined
+
+#### 5. File Organization
+
+```
+mobile/
+├── screens/
+│   └── ExampleScreen.tsx (< 400 lines)
+├── hooks/
+│   └── example/
+│       ├── useExampleData.ts
+│       ├── useExampleHandlers.ts
+│       └── useExampleHelpers.ts
+├── components/
+│   └── example/
+│       ├── ExampleHeader.tsx
+│       ├── ExampleContent.tsx
+│       ├── ExampleFooter.tsx
+│       └── ExampleItem.tsx
+└── services/
+    └── exampleService.ts
+```
+
+#### 6. Benefits of This Architecture
+
+- **Maintainability**: Smaller files are easier to understand
+- **Reusability**: Components and hooks can be shared
+- **Testability**: Isolated logic is easier to test
+- **Performance**: Better code splitting and lazy loading
+- **Team Collaboration**: Less merge conflicts
+- **Type Safety**: Clear interfaces between modules
+
+#### 7. Real Examples from This Codebase
+
+**Before** (948 lines):
+```typescript
+// HomeScreen.tsx - Monolithic file with everything
+```
+
+**After** (267 lines):
+```typescript
+// HomeScreen.tsx - Clean orchestrator
+// hooks/home/useContentData.ts - Data management
+// hooks/home/useLikeHandlers.ts - Business logic
+// hooks/home/useStoryData.ts - Story management
+// components/home/HomeHeader.tsx - UI component
+// components/home/HomeFooter.tsx - UI component
+// components/home/HomeEmptyState.tsx - UI component
+```
+
+**Results**:
+- HomeScreen: 948 → 267 lines (72% reduction)
+- GroupsScreen: 978 → 163 lines (83% reduction)
+- InterestSearchScreen: 1,155 → 347 lines (70% reduction)
+- NearbyUsersScreen: 1,172 → 325 lines (72% reduction)
+
+#### 8. When to Modularize
+
+- **Immediate**: When file exceeds 400 lines
+- **Proactive**: When adding new features
+- **Refactor**: During bug fixes or updates
+- **Always**: For new screens from the start
+
 ---
 
 > 💡 **Remember**: This is a privacy-focused Korean dating app with complete full-stack implementation.  
 > Always prioritize user anonymity, payment security, Korean UX, and type safety across the entire stack.
 
-*Last updated: 2025-08-27*
+*Last updated: 2025-09-03*

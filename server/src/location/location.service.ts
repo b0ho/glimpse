@@ -754,4 +754,55 @@ export class LocationService {
         user.locationProfileMode === 'persona' ? user.personaProfile : null,
     };
   }
+
+  /**
+   * ID로 위치 그룹 가입
+   * 
+   * @param userId 사용자 ID
+   * @param groupId 그룹 ID
+   */
+  async joinLocationGroupById(userId: string, groupId: string) {
+    // 개발 환경에서는 바로 성공 응답
+    if (process.env.NODE_ENV === 'development') {
+      return { success: true };
+    }
+
+    // 프로덕션에서는 실제 로직 구현
+    // TODO: 실제 데이터베이스 연동 구현
+    throw new BadRequestException('위치 그룹 가입 기능이 아직 구현되지 않았습니다.');
+  }
+
+  /**
+   * 위치 그룹 나가기
+   * 
+   * @param userId 사용자 ID
+   * @param groupId 그룹 ID
+   */
+  async leaveLocationGroup(userId: string, groupId: string) {
+    // 개발 환경에서는 바로 성공 응답
+    if (process.env.NODE_ENV === 'development') {
+      return { success: true };
+    }
+
+    // 프로덕션에서는 실제 로직 구현
+    // TODO: 실제 데이터베이스 연동 구현
+    throw new BadRequestException('위치 그룹 나가기 기능이 아직 구현되지 않았습니다.');
+  }
+
+  /**
+   * 위치 그룹 삭제
+   * 
+   * @param userId 사용자 ID (그룹 생성자만 삭제 가능)
+   * @param groupId 그룹 ID
+   */
+  async deleteLocationGroup(userId: string, groupId: string) {
+    // 개발 환경에서는 바로 성공 응답
+    if (process.env.NODE_ENV === 'development') {
+      return { success: true };
+    }
+
+    // 프로덕션에서는 실제 로직 구현
+    // TODO: 실제 데이터베이스 연동 구현
+    throw new BadRequestException('위치 그룹 삭제 기능이 아직 구현되지 않았습니다.');
+  }
 }
