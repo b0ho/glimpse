@@ -61,11 +61,10 @@ export const ClerkGoogleAuth: React.FC<ClerkGoogleAuthProps> = ({ onSuccess }) =
       setUser(devUser as any);
       console.log('✅ 개발 모드 로그인 성공');
       
-      // 짧은 지연 후 성공 콜백 호출
-      setTimeout(() => {
-        setIsLoading(false);
-        onSuccess();
-      }, 500);
+      // 자동으로 인증 성공 호출
+      setIsLoading(false);
+      onSuccess();
+      console.log('🎯 onSuccess 콜백 호출완료');
       
       return;
     }

@@ -626,8 +626,10 @@ function AppNavigator() {
   const [hasSelectedMode, setHasSelectedMode] = React.useState(false);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = React.useState<boolean | null>(null);
   
-  // 개발 모드에서는 Zustand 스토어의 user 상태도 확인
-  const isAuthenticated = __DEV__ ? (isSignedIn || !!user) : isSignedIn;
+  // 개발 모드 또는 Vercel 도메인에서는 Zustand 스토어의 user 상태도 확인
+  const isVercelDomain = typeof window !== 'undefined' && 
+                        window.location?.hostname?.includes('vercel.app');
+  const isAuthenticated = (__DEV__ || isVercelDomain) ? (isSignedIn || !!user) : isSignedIn;
 
   // Check onboarding status
   useEffect(() => {
