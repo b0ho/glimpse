@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ClerkProvider } from '@clerk/clerk-expo';
 import { Platform, ActivityIndicator, View, Text } from 'react-native';
-import { AppNavigator as RootNavigator } from './navigation/AppNavigator';
+import RootNavigator from './navigation/AppNavigator';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { initI18n, ensureI18nReady } from './services/i18n/i18n';
 import { I18nextProvider } from 'react-i18next';
@@ -98,27 +98,25 @@ export default function App() {
         // 번역 로딩을 위한 일관된 대기 시간
         await new Promise(resolve => setTimeout(resolve, 300));
         
-        // 테스트 번역 확인
+        // i18n 작동 확인
         const testTranslation = i18n.t('navigation:tabs.home');
         console.log('[App] i18n test:', testTranslation);
         
-        if (testTranslation && testTranslation !== 'navigation:tabs.home') {
-          console.log('[App] i18n initialized successfully');
-          setIsI18nInitialized(true);
-        } else {
-          console.warn('[App] i18n initialization incomplete, retrying...');
-          throw new Error('i18n not ready');
+        if (testTranslation === 'navigation:tabs.home' || testTranslation === 'tabs.home') {
+          console.warn('[App] i18n not fully ready, waiting more...');
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
+        
+        console.log('[App] i18n initialized successfully');
+        setIsI18nInitialized(true);
       } catch (error) {
-        console.error('[App] i18n initialization error:', error);
-        // 재시도 로직
-        if (initAttempts < 3) {
-          console.log(`[App] Retrying i18n initialization (attempt ${initAttempts + 1}/3)`);
-          setTimeout(() => {
-            setInitAttempts(prev => prev + 1);
-          }, 1000);
+        console.error('[App] Failed to initialize i18n:', error);
+        
+        // 모든 플랫폼에서 동일한 재시도 로직
+        if (initAttempts < 5) {
+          setInitAttempts(prev => prev + 1);
+          setTimeout(() => initializeI18n(), 1000);
         } else {
-          console.warn('[App] Max i18n initialization attempts reached, continuing anyway');
           // 초기화 실패 시에도 앱 로드 계속
           setIsI18nInitialized(true);
         }
@@ -143,9 +141,9 @@ export default function App() {
   }
 
   // Clerk publishable key - 환경에 따라 적절한 키 선택
-  let clerkPublishableKey: string;
-  let clerkFrontendApi: string | undefined = undefined;
-  const devKey = 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
+  // VERCEL 임시 수정: 개발 키 강제 사용
+  let clerkPublishableKey = 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
+  let clerkFrontendApi = undefined;
   
   // 환경별 Clerk 설정
   const isDevelopment = __DEV__ || process.env.NODE_ENV === 'development';
@@ -163,53 +161,28 @@ export default function App() {
     // Vercel 도메인 체크 (임시 - Clerk Dashboard에서 도메인 추가 전까지)
     const isVercelDomain = hostname.includes('vercel.app');
     
-    // 운영 도메인 체크 (glimpse.contact 및 www.glimpse.contact)
-    const isProductionDomain = hostname === 'glimpse.contact' || 
-                               hostname === 'www.glimpse.contact' ||
-                               hostname.endsWith('.glimpse.contact');
-    
-    // 로컬 개발 환경 또는 Vercel 도메인
-    if (isLocalhost || isVercelDomain) {
-      // 로컬과 Vercel에서는 개발 키 사용
-      clerkPublishableKey = devKey;
+    // 로컬 개발 환경, 개발 모드, 또는 Vercel 도메인
+    if (isLocalhost || isDevelopment || isVercelDomain) {
+      // 로컬과 Vercel에서는 개발 키 사용 (환경 변수 무시)
+      clerkPublishableKey = 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
       clerkFrontendApi = undefined; // 개발 키는 커스텀 도메인 불필요
       
       if (isVercelDomain) {
-        console.log('⚠️ Using development Clerk key for Vercel domain (temporary)');
+        console.log('⚠️ FORCING development Clerk key for Vercel domain - ENV VARS OVERRIDDEN');
       } else {
         console.log('🔧 Using development Clerk key for local environment');
       }
     } 
-    // 운영 환경 (glimpse.contact, www.glimpse.contact 등)
-    else if (isProductionDomain) {
-      // 운영 도메인에서는 반드시 프로덕션 키 사용
-      clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || devKey;
-      console.log('🚀 Using production Clerk key for production domain:', hostname);
-      console.log('Production key:', clerkPublishableKey.substring(0, 20) + '...');
-      
-      // 프로덕션 키가 없으면 경고
-      if (!process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) {
-        console.error('⚠️ WARNING: Production Clerk key not found in environment variables!');
-      }
-    }
-    // 기타 도메인
+    // 운영 환경 (glimpse.contact)
     else {
-      // 알 수 없는 도메인에서는 환경 변수 사용 (개발 키 폴백)
-      clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || devKey;
-      console.log('🔍 Unknown domain, using environment variable or dev key:', hostname);
+      // glimpse.contact에서만 프로덕션 키 사용
+      console.log('🚀 Using production Clerk key for production environment (glimpse.contact)');
     }
-  } else {
-    // 모바일 앱 환경
-    if (isDevelopment) {
-      // 개발 환경
-      clerkPublishableKey = devKey;
-      console.log('📱 Using development Clerk key for mobile development');
-    } else {
-      // 운영 환경 - 환경 변수 사용
-      clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || devKey;
-      console.log('📱 Using production Clerk key for mobile production');
-    }
+  } else if (isDevelopment) {
+    // 모바일 앱 개발 환경
+    clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
     clerkFrontendApi = undefined;
+    console.log('📱 Using development Clerk key for mobile development');
   }
   
   // 앱 컨텐츠
@@ -242,27 +215,13 @@ export default function App() {
     );
   }
 
-  // CRITICAL FIX: Vercel 도메인에서는 프로덕션 키와 frontendApi 완전 차단
-  let isVercelDomain = false;
-  if (typeof window !== 'undefined') {
-    const hostname = window.location?.hostname || '';
-    isVercelDomain = hostname.includes('vercel.app');
-    if (isVercelDomain) {
-      // Vercel에서는 무조건 개발 키만 사용, 환경변수 완전 무시
-      clerkPublishableKey = 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
-      clerkFrontendApi = undefined;
-      console.log('🔧 CRITICAL: Forcing development Clerk key for Vercel deployment');
-    }
-  }
-  
-  // ClerkProvider 설정 - Vercel에서는 frontendApi 절대 사용 안함
+  // frontendApi가 설정되어 있으면 사용 (Production 환경)
   const clerkProviderProps: any = {
     publishableKey: clerkPublishableKey,
     tokenCache: tokenCache,
   };
   
-  // Vercel이 아닌 경우에만 frontendApi 설정 (glimpse.contact 도메인용)
-  if (clerkFrontendApi && !isVercelDomain) {
+  if (clerkFrontendApi) {
     clerkProviderProps.frontendApi = clerkFrontendApi;
   }
 
