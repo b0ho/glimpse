@@ -116,14 +116,14 @@ export class InterestService {
       where: {
         userId,
         type: dto.type,
-        status: SearchStatus.DELETED,
-        deletedAt: { gte: cooldownDate },
+        status: SearchStatus.CANCELLED,
+        updatedAt: { gte: cooldownDate },
       },
     });
 
     if (recentlyDeleted) {
       const remainingDays = Math.ceil(
-        (new Date(recentlyDeleted.deletedAt!).getTime() + cooldownDays * 24 * 60 * 60 * 1000 - Date.now()) / 
+        (new Date(recentlyDeleted.updatedAt).getTime() + cooldownDays * 24 * 60 * 60 * 1000 - Date.now()) / 
         (24 * 60 * 60 * 1000)
       );
       throw new BadRequestException(
@@ -214,7 +214,7 @@ export class InterestService {
       ...(query.type && { type: query.type }),
       ...(query.status 
         ? { status: query.status } 
-        : { status: { not: SearchStatus.DELETED } }),
+        : { status: { not: SearchStatus.CANCELLED } }),
     };
 
     const searches = await this.prisma.interestSearch.findMany({
@@ -298,8 +298,8 @@ export class InterestService {
     await this.prisma.interestSearch.update({
       where: { id: searchId },
       data: {
-        status: SearchStatus.DELETED,
-        deletedAt: new Date(),
+        status: SearchStatus.CANCELLED,
+        // Use updatedAt which is automatically updated
       },
     });
   }
