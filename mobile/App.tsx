@@ -141,8 +141,9 @@ export default function App() {
   }
 
   // Clerk publishable key - 환경에 따라 적절한 키 선택
-  let clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  let clerkFrontendApi = process.env.EXPO_PUBLIC_CLERK_FRONTEND_API;
+  let clerkPublishableKey: string;
+  let clerkFrontendApi: string | undefined = undefined;
+  const devKey = 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
   
   // 환경별 Clerk 설정
   const isDevelopment = __DEV__ || process.env.NODE_ENV === 'development';
@@ -160,28 +161,37 @@ export default function App() {
     // Vercel 도메인 체크 (임시 - Clerk Dashboard에서 도메인 추가 전까지)
     const isVercelDomain = hostname.includes('vercel.app');
     
-    // 로컬 개발 환경, 개발 모드, 또는 Vercel 도메인
-    if (isLocalhost || isDevelopment || isVercelDomain) {
+    // 로컬 개발 환경 또는 Vercel 도메인
+    if (isLocalhost || isVercelDomain) {
       // 로컬과 Vercel에서는 개발 키 사용
-      clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
+      clerkPublishableKey = devKey;
       clerkFrontendApi = undefined; // 개발 키는 커스텀 도메인 불필요
       
       if (isVercelDomain) {
-        console.log('⚠️ Using development Clerk key for Vercel domain (temporary until domain is added to Clerk Dashboard)');
+        console.log('⚠️ Using development Clerk key for Vercel domain (temporary)');
       } else {
         console.log('🔧 Using development Clerk key for local environment');
       }
     } 
-    // 운영 환경 (glimpse.contact)
+    // 운영 환경 (glimpse.contact 등)
     else {
-      // glimpse.contact에서만 프로덕션 키 사용
-      console.log('🚀 Using production Clerk key for production environment (glimpse.contact)');
+      // 운영 환경에서는 환경 변수 사용 (개발 키 폴백)
+      clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || devKey;
+      console.log('🚀 Using production Clerk key for production environment');
+      console.log('Production key:', clerkPublishableKey.substring(0, 20) + '...');
     }
-  } else if (isDevelopment) {
-    // 모바일 앱 개발 환경
-    clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
+  } else {
+    // 모바일 앱 환경
+    if (isDevelopment) {
+      // 개발 환경
+      clerkPublishableKey = devKey;
+      console.log('📱 Using development Clerk key for mobile development');
+    } else {
+      // 운영 환경 - 환경 변수 사용
+      clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || devKey;
+      console.log('📱 Using production Clerk key for mobile production');
+    }
     clerkFrontendApi = undefined;
-    console.log('📱 Using development Clerk key for mobile development');
   }
   
   // 앱 컨텐츠
