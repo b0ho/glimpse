@@ -1,5 +1,5 @@
 {
-  "_rebuild": "2025-09-07-fix-api-auth-v4-force",
+  "_rebuild": "2025-09-07-fix-api-auth-v5-final",
   "buildCommand": "npx expo export --platform web --clear",
   "outputDirectory": "dist",
   "installCommand": "npm install --legacy-peer-deps",
