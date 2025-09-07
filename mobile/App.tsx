@@ -162,7 +162,7 @@ export default function App() {
     const hostname = window.location?.hostname || '';
     
     // 환경 변수 디버깅 정보 출력
-    console.log('=== Clerk Configuration Debug ===');
+    console.log('=== Clerk Configuration Debug v2 ===');
     console.log('Hostname:', hostname);
     console.log('NODE_ENV:', process.env.NODE_ENV);
     console.log('__DEV__:', __DEV__);
