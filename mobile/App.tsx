@@ -3,6 +3,8 @@ import { StatusBar } from 'expo-status-bar';
 import { ClerkProvider, ClerkLoaded } from '@clerk/clerk-expo';
 import { Platform, ActivityIndicator, View, Text } from 'react-native';
 import RootNavigator from './navigation/AppNavigator';
+import { useAuth } from '@clerk/clerk-expo';
+import { setAuthToken } from './services/api/config';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { initI18n, ensureI18nReady } from './services/i18n/i18n';
 import { I18nextProvider } from 'react-i18next';
@@ -206,14 +208,54 @@ export default function App() {
   const AppContent = () => {
     const isDark = useIsDark();
     const colors = useColors();
+    const { isLoaded, isSignedIn, getToken } = useAuth();
+    const [authReady, setAuthReady] = useState(false);
+
+    useEffect(() => {
+      const prepareAuth = async () => {
+        if (!isLoaded) {
+          setAuthReady(false);
+          return;
+        }
+        if (!isSignedIn) {
+          setAuthToken(null);
+          setAuthReady(true);
+          return;
+        }
+        // Retry getting token a few times to avoid post-login race
+        let token: string | null = null;
+        for (let i = 0; i < 5; i++) {
+          try {
+            token = await getToken();
+            if (token) break;
+          } catch {}
+          await new Promise(r => setTimeout(r, 250));
+        }
+        if (token) {
+          setAuthToken(token);
+          setAuthReady(true);
+        } else {
+          setAuthReady(false);
+        }
+      };
+      prepareAuth();
+    }, [isLoaded, isSignedIn, getToken]);
     
     return (
       <I18nextProvider i18n={i18n}>
         <SafeAreaProvider>
           <StatusBar style={isDark ? "light" : "dark"} backgroundColor={colors.BACKGROUND} />
           <View style={{ flex: 1, backgroundColor: colors.BACKGROUND }}>
-            <RootNavigator />
-            <Toast />
+            {!authReady ? (
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={colors.PRIMARY} />
+              </View>
+            ) : (
+              <>
+                <RootNavigator />
+                <Toast />
+              </>
+            )}
           </View>
         </SafeAreaProvider>
       </I18nextProvider>
