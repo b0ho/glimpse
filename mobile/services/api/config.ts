@@ -172,7 +172,7 @@ class ApiClient {
       url += `?${queryString}`;
     }
 
-    // Check if we're in dev mode first
+    // Check if we're in dev mode first (fixed 2025-09-07 for glimpse.contact)
     const isDev = (typeof __DEV__ !== 'undefined' && __DEV__) ||
                   process.env.NODE_ENV === 'development' || 
                   process.env.ENV === 'development' ||
