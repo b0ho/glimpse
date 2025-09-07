@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useAuth } from '@/hooks/useAuth';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -53,6 +54,7 @@ export const HomeScreen = () => {
   const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation(['navigation']);
   const navigation = useNavigation() as any;
+  const { isSignedIn, isLoaded } = useAuth();
 
   // 콘텐츠 데이터 관리
   const {
@@ -103,23 +105,21 @@ export const HomeScreen = () => {
   // 화면 포커스 시 데이터 로드
   useFocusEffect(
     useCallback(() => {
+      if (!isLoaded || !isSignedIn) {
+        return;
+      }
       console.log('[HomeScreen] Screen focused - loading data');
-      Promise.all([
-        loadContents(),
-        loadStories(),
-        loadSuccessStories()
-      ]);
-    }, [])
+      Promise.all([loadContents(), loadStories(), loadSuccessStories()]);
+    }, [isLoaded, isSignedIn, loadContents, loadStories, loadSuccessStories])
   );
 
   // 초기 데이터 로드
   useEffect(() => {
-    Promise.all([
-      loadContents(),
-      loadStories(),
-      loadSuccessStories()
-    ]);
-  }, []);
+    if (!isLoaded || !isSignedIn) {
+      return;
+    }
+    Promise.all([loadContents(), loadStories(), loadSuccessStories()]);
+  }, [isLoaded, isSignedIn, loadContents, loadStories, loadSuccessStories]);
 
   /**
    * Pull-to-refresh 핸들러
@@ -153,6 +153,18 @@ export const HomeScreen = () => {
       />
     );
   };
+
+  // 비로그인: 가벼운 안내 화면
+  if (!isSignedIn) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+        <ServerConnectionError 
+          onRetry={() => {}}
+          message={t('home:loading.content')}
+        />
+      </SafeAreaView>
+    );
+  }
 
   // 서버 연결 에러 시 에러 화면 표시
   if (serverConnectionError) {
