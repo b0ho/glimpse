@@ -208,7 +208,21 @@ export default function App() {
   const AppContent = () => {
     const isDark = useIsDark();
     const colors = useColors();
-    const { isLoaded, isSignedIn, getToken } = useAuth();
+    
+    // Clerk hooks를 안전하게 사용
+    let isLoaded = false;
+    let isSignedIn = false;
+    let getToken: (() => Promise<string | null>) | null = null;
+    
+    try {
+      const auth = useAuth();
+      isLoaded = auth.isLoaded;
+      isSignedIn = auth.isSignedIn;
+      getToken = auth.getToken;
+    } catch (error) {
+      console.log('[AppContent] Clerk not ready yet');
+    }
+    
     const [authReady, setAuthReady] = useState(false);
 
     useEffect(() => {
@@ -224,12 +238,14 @@ export default function App() {
         }
         // Retry getting token a few times to avoid post-login race
         let token: string | null = null;
-        for (let i = 0; i < 5; i++) {
-          try {
-            token = await getToken();
-            if (token) break;
-          } catch {}
-          await new Promise(r => setTimeout(r, 250));
+        if (getToken) {
+          for (let i = 0; i < 5; i++) {
+            try {
+              token = await getToken();
+              if (token) break;
+            } catch {}
+            await new Promise(r => setTimeout(r, 250));
+          }
         }
         if (token) {
           setAuthToken(token);

@@ -137,8 +137,9 @@ export const HomeScreen = () => {
    * 콘텐츠 아이템 렌더링
    */
   const renderContentItem = ({ item }: { item: Content }) => {
-    // 그룹 정보 찾기
-    const group = groupStore.groups.find(g => g.id === item.groupId);
+    // 그룹 정보 찾기 (배열 검증 추가)
+    const groups = Array.isArray(groupStore.groups) ? groupStore.groups : [];
+    const group = groups.find(g => g.id === item.groupId);
     const groupName = group?.name || '일반';
     
     return (
