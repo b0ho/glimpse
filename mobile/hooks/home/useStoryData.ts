@@ -8,7 +8,7 @@ import { getStoriesByUser, StoryUser } from '@/utils/storyData';
 import { SuccessStory } from '@/types/successStory';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { useAuthStore } from '@/store/slices/authSlice';
+import { getAuthToken } from '@/services/api/config';
 
 export const useStoryData = () => {
   const navigation = useNavigation() as any;
@@ -27,17 +27,17 @@ export const useStoryData = () => {
   /**
    * 스토리 목록 로드
    */
-  const { token } = useAuthStore();
-
   const loadStories = useCallback(async () => {
     try {
       setStoriesLoading(true);
       console.log('[useStoryData] Loading stories...');
       
       // 토큰이 없으면 API 호출을 건너뜁니다 (웹 초기 로드 보호)
+      const token = getAuthToken();
       if (!token) {
         console.log('[useStoryData] Skip story API: no auth token loaded');
         setStories([]);
+        setStoriesLoading(false);
         return;
       }
 
