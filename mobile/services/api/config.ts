@@ -4,14 +4,15 @@ import { Platform } from 'react-native';
  * API 기본 URL
  * @constant {string}
  */
-// 환경 감지: Vercel 환경에서는 production으로 간주
+// 환경 감지: Vercel 환경에서는 production으로 간주 (Vercel API 함수 사용)
 const isProduction = process.env.NODE_ENV === 'production' || 
                      (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.hostname?.includes('.vercel.app'));
 
 // Web에서는 localhost 사용, Native에서는 IP 주소 사용
 const getBaseURL = () => {
   if (isProduction) {
-    return 'https://glimpse-production.up.railway.app/api/v1';
+    // Vercel API 함수 사용 (같은 도메인)
+    return 'https://www.glimpse.contact/api/v1';
   }
   
   // Web 환경에서는 항상 localhost 사용
