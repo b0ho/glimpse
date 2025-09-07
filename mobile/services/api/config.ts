@@ -177,6 +177,14 @@ class ApiClient {
     const isGlimpseContact = typeof window !== 'undefined' && 
                              window.location?.hostname?.includes('glimpse.contact');
     
+    console.log('[ApiClient] Environment check:', {
+      hostname: typeof window !== 'undefined' ? window.location?.hostname : 'not-browser',
+      isGlimpseContact,
+      __DEV__: typeof __DEV__ !== 'undefined' ? __DEV__ : 'undefined',
+      NODE_ENV: process.env.NODE_ENV,
+      url
+    });
+    
     const isDev = !isGlimpseContact && (
                   (typeof __DEV__ !== 'undefined' && __DEV__) ||
                   process.env.NODE_ENV === 'development' || 
@@ -201,8 +209,12 @@ class ApiClient {
     } else {
       // Only use token in production
       const token = await this.getAuthToken();
+      console.log('[ApiClient] Production mode, token status:', token ? 'exists' : 'missing');
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        console.log('[ApiClient] Added Authorization header');
+      } else {
+        console.warn('[ApiClient] No token available in production mode!');
       }
     }
 
