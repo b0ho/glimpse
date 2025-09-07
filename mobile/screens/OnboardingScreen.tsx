@@ -20,7 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -29,21 +29,20 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
  * @component OnboardingScreen
  * @description 2개의 스와이프 가능한 온보딩 페이지
  */
-export const OnboardingScreen: React.FC = () => {
+type OnboardingScreenProps = {
+  onComplete: () => void;
+};
+
+export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
   const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation('onboarding');
-  const route = useRoute() as any;
   const navigation = useNavigation() as any;
   const [currentPage, setCurrentPage] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const [dimensions, setDimensions] = useState({ width: SCREEN_WIDTH, height: SCREEN_HEIGHT });
   
-  // route params에서 onComplete 가져오기
-  const onComplete = route.params?.onComplete || (() => {
-    // fallback: Auth 화면으로 이동
-    navigation.replace('Auth');
-  });
+  // onComplete는 상위(AppNavigator)에서 전달됨 (온보딩 상태 갱신)
 
   // 애니메이션 실행
   React.useEffect(() => {
