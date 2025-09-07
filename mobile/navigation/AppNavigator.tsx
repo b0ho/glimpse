@@ -663,10 +663,18 @@ function AppNavigator() {
       }
       if (isAuthenticated && getToken) {
         try {
-          const token = await getToken();
+          // 토큰이 즉시 준비되지 않는 경우를 대비해 재시도
+          let token: string | null = null;
+          for (let attempt = 0; attempt < 5; attempt++) {
+            token = await getToken();
+            if (token) break;
+            await new Promise(r => setTimeout(r, 300));
+          }
           if (token) {
             setAuthToken(token);
             console.log('[Auth] Clerk token set for API client');
+          } else {
+            console.warn('[Auth] Clerk token not available after retries');
           }
         } catch (error) {
           console.error('[Auth] Failed to get Clerk token:', error);
