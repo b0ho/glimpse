@@ -186,7 +186,8 @@ class StoryService {
 
       const token = getAuthToken();
       if (!token) {
-        throw new Error('No authentication token');
+        // 비로그인 시 조용히 빈 목록 반환 (웹 초기 로드용)
+        return [];
       }
 
       const response = await fetch(`${API_BASE_URL}/stories/groups`, {
@@ -198,14 +199,14 @@ class StoryService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch story groups');
+        return [];
       }
 
       const data = await response.json();
       return data.data;
     } catch (error) {
-      console.error('Failed to get story groups:', error);
-      throw error;
+      console.log('Failed to get story groups (non-fatal):', (error as any)?.message || error);
+      return [];
     }
   }
 

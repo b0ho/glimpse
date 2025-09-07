@@ -59,8 +59,8 @@ export const StoryList= ({
   const safeStories = Array.isArray(stories) ? stories : [];
 
   // Find current user's stories (가드 포함)
-  const myStories = safeStories.find(story => story?.userId === currentUserId);
-  const otherStories = safeStories.filter(story => story?.userId !== currentUserId);
+  const myStories = safeStories.find?.((story: any) => story?.userId === currentUserId) || undefined;
+  const otherStories = safeStories.filter?.((story: any) => story?.userId !== currentUserId) || [];
 
   /**
    * 개별 스토리 아이템 렌더링
