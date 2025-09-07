@@ -25,14 +25,23 @@ import { SendMessageDto } from './dto/chat.dto';
     origin: (origin, callback) => {
       // 허용된 도메인 목록
       const allowedOrigins = [
+        // Development origins
         'http://localhost:8081',
         'http://localhost:8082',
         'http://localhost:19000',
         'http://localhost:3000',
         'http://localhost:3001',
         'exp://192.168.0.2:8081',
-        // 운영 도메인 추가
+        // Production origins - CRITICAL FIX
+        'https://www.glimpse.contact',
+        'https://glimpse.contact',
+        'https://glimpse-mobile.vercel.app',
+        'https://glimpse-web.vercel.app',
+        'https://glimpse-admin.vercel.app',
+        'https://glimpse.vercel.app',
+        // Environment variable fallbacks
         process.env.CLIENT_URL,
+        process.env.WEB_URL,
       ].filter(Boolean);
 
       // 개발 환경에서는 localhost 허용

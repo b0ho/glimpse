@@ -26,6 +26,41 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = process.env.PORT || configService.get<number>('PORT', 3000);
 
+  // CRITICAL: Emergency CORS headers for production
+  // This ensures CORS headers are ALWAYS sent, even if the middleware below fails
+  app.use((req: any, res: any, next: any) => {
+    const origin = req.headers.origin;
+    const allowedOrigins = [
+      'https://www.glimpse.contact',
+      'https://glimpse.contact',
+      'https://glimpse-mobile.vercel.app',
+      'https://glimpse-web.vercel.app',
+      'https://glimpse-admin.vercel.app',
+      'https://glimpse.vercel.app',
+      'exp://u.expo.dev',
+      'https://u.expo.dev',
+    ];
+
+    // In production, always set CORS headers for allowed origins
+    if (process.env.NODE_ENV === 'production') {
+      if (allowedOrigins.includes(origin) || !origin) {
+        res.header('Access-Control-Allow-Origin', origin || 'https://www.glimpse.contact');
+        res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-dev-auth, Accept, X-Requested-With');
+        res.header('Access-Control-Allow-Credentials', 'true');
+        res.header('Access-Control-Max-Age', '86400');
+      }
+      
+      // Handle preflight OPTIONS requests immediately
+      if (req.method === 'OPTIONS') {
+        res.sendStatus(204);
+        return;
+      }
+    }
+    
+    next();
+  });
+
   // 보안 헤더 설정
   app.use(
     helmet({
@@ -55,34 +90,40 @@ async function bootstrap() {
 
   // CORS 설정 - 개발 환경과 프로덕션 환경 구분
   const isDevelopment = configService.get<string>('NODE_ENV') === 'development';
-  const isProduction = configService.get<string>('NODE_ENV') === 'production';
+  const isProduction = configService.get<string>('NODE_ENV') === 'production' || 
+                       process.env.NODE_ENV === 'production' ||
+                       process.env.RAILWAY_ENVIRONMENT === 'production';
+
+  // Production CORS origins - explicitly defined
+  const productionOrigins = [
+    'https://www.glimpse.contact',
+    'https://glimpse.contact',
+    'https://glimpse-mobile.vercel.app',
+    'https://glimpse-web.vercel.app',
+    'https://glimpse-admin.vercel.app',
+    'https://glimpse.vercel.app',
+    'exp://u.expo.dev',
+    'https://u.expo.dev',
+    process.env.CLIENT_URL,
+    process.env.WEB_URL,
+  ].filter(Boolean);
+
+  console.log('🔒 CORS Configuration:', {
+    environment: process.env.NODE_ENV,
+    isProduction,
+    isDevelopment,
+    allowedOrigins: isProduction ? productionOrigins : 'development-all',
+  });
 
   app.enableCors({
     origin: isDevelopment
       ? true
-      : isProduction
-        ? [
-            'https://glimpse-mobile.vercel.app',
-            'https://glimpse-web.vercel.app',
-            'https://glimpse-admin.vercel.app',
-            'https://glimpse.vercel.app',
-            // Expo production URLs
-            'exp://u.expo.dev',
-            'https://u.expo.dev',
-          ]
-        : [
-            'http://localhost:8081',
-            'http://localhost:8082',
-            'http://localhost:19000',
-            'http://localhost:19001',
-            'http://localhost:3000',
-            'http://localhost:3001',
-            'exp://192.168.0.2:8081',
-            'exp://192.168.0.2:19000',
-          ],
+      : productionOrigins,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-dev-auth'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-dev-auth', 'Accept', 'X-Requested-With'],
+    exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
+    maxAge: 86400,
   });
 
   // 전역 파이프
