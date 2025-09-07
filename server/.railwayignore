@@ -17,7 +17,7 @@ e2e/
 
 # 빌드 캐시
 .next/
-dist/
+# dist/  # NestJS 빌드 결과물이므로 Railway에 필요
 node_modules/.cache/
 
 # 로그 파일들
