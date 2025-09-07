@@ -30,15 +30,8 @@ export class AdminAuthGuard implements CanActivate {
 
     // 개발 모드 확인
     const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
-    const useDevAuth =
-      this.configService.get<string>('USE_DEV_AUTH') === 'true';
-
-    // 운영 환경에서 개발 모드 사용 시 에러
-    if (nodeEnv === 'production' && useDevAuth) {
-      throw new UnauthorizedException(
-        '운영 환경에서는 개발 모드를 사용할 수 없습니다.',
-      );
-    }
+    const useDevAuthConfig = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    const allowDevAuth = nodeEnv !== 'production' && useDevAuthConfig;
 
     if (!token) {
       throw new UnauthorizedException('관리자 인증 토큰이 필요합니다.');
@@ -46,7 +39,7 @@ export class AdminAuthGuard implements CanActivate {
 
     try {
       // 개발 모드에서 dev-token 처리
-      if (useDevAuth && token === 'dev-token') {
+      if (allowDevAuth && token === 'dev-token') {
         const devAuth = request.headers['x-dev-auth'];
         if (devAuth === 'true') {
           console.log('[AdminAuthGuard] Admin dev token verified');

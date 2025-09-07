@@ -26,18 +26,11 @@ export class AuthGuard implements CanActivate {
 
     // 개발 모드 확인 - 운영 환경에서는 절대 허용하지 않음
     const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
-    const useDevAuth =
-      this.configService.get<string>('USE_DEV_AUTH') === 'true';
-
-    // 운영 환경에서 개발 모드 사용 시 에러
-    if (nodeEnv === 'production' && useDevAuth) {
-      throw new UnauthorizedException(
-        '운영 환경에서는 개발 모드를 사용할 수 없습니다.',
-      );
-    }
+    const useDevAuthConfig = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    const allowDevAuth = nodeEnv !== 'production' && useDevAuthConfig;
 
     // 개발 환경에서만 개발 모드 허용 (토큰이 없을 때만)
-    if (nodeEnv === 'development' && useDevAuth && !token) {
+    if (allowDevAuth && !token) {
       const devAuth = request.headers['x-dev-auth'];
       if (devAuth === 'true') {
         console.log(
@@ -68,7 +61,7 @@ export class AuthGuard implements CanActivate {
 
       // 개발 모드에서 관리자 토큰 처리
       const devAuthHeader = request.headers['x-dev-auth'];
-      if (useDevAuth && devAuthHeader === 'true' && payload.role === 'admin') {
+      if (allowDevAuth && devAuthHeader === 'true' && payload.role === 'admin') {
         console.log(
           '[AuthGuard] Admin token verified in dev mode:',
           payload.email,
@@ -84,12 +77,7 @@ export class AuthGuard implements CanActivate {
       }
 
       // 개발 모드 사용자 토큰 처리
-      if (
-        useDevAuth &&
-        devAuthHeader === 'true' &&
-        payload.role === 'user' &&
-        payload.userId
-      ) {
+      if (allowDevAuth && devAuthHeader === 'true' && payload.role === 'user' && payload.userId) {
         // userId로 사용자 찾기
         const user = await this.authService.findUserByClerkId(payload.userId);
         if (user) {

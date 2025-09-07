@@ -6,8 +6,10 @@ import { Alert } from 'react-native';
 import { Content } from '@/types';
 import { contentApi } from '@/services/api/contentApi';
 import i18n from '@/services/i18n/i18n';
+import { useAuthStore } from '@/store/slices/authSlice';
 
 export const useContentData = () => {
+  const { token } = useAuthStore();
   const [contents, setContents] = useState<Content[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -123,6 +125,14 @@ export const useContentData = () => {
     }
 
     try {
+      if (!token) {
+        console.log('[useContentData] Skip API call: no auth token loaded');
+        setIsLoading(false);
+        setIsRefreshing(false);
+        setIsLoadingMore(false);
+        setServerConnectionError(false);
+        return;
+      }
       console.log('[useContentData] Calling API...');
       const apiContents = await contentApi.getContents(undefined, page, 10);
       console.log('[useContentData] API response:', apiContents);
@@ -177,7 +187,7 @@ export const useContentData = () => {
       setIsRefreshing(false);
       setIsLoadingMore(false);
     }
-  }, [lastRefreshTime, filterRecentContents]);
+  }, [lastRefreshTime, filterRecentContents, token]);
 
   /**
    * 추가 콘텐츠 로드 (무한 스크롤)
