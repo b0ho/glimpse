@@ -186,22 +186,22 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // Add dev auth header in development mode
-    // Always add in development environment
-    const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : 
-                  !isProduction ||
-                  process.env.NODE_ENV === 'development' || 
-                  process.env.ENV === 'development' ||
-                  url.includes('localhost') ||
-                  url.includes('127.0.0.1');
+    // Add dev auth header ONLY for local development servers
+    // Check if the API URL is pointing to a local server (not the browser location)
+    const isLocalServer = url.includes('localhost') || 
+                         url.includes('127.0.0.1') || 
+                         url.includes('192.168') ||
+                         url.includes('10.') ||
+                         url.includes('172.');
     
-    if (isDev) {
+    // Only add x-dev-auth for local development servers
+    if (isLocalServer && !url.includes('railway.app') && !url.includes('glimpse.contact')) {
       headers['x-dev-auth'] = 'true';
-      console.log('[ApiClient] Development mode detected, adding x-dev-auth header');
+      console.log('[ApiClient] Local development server detected, adding x-dev-auth header');
     }
 
     try {
-      if (isDev) {
+      if (isLocalServer) {
         console.log('[ApiClient] Request:', {
           url,
           method: requestOptions.method || 'GET',

@@ -15,15 +15,15 @@ const getApiConfig = () => {
   
   if (isProduction) {
     return {
-      baseURL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api.glimpse.app/api/v1',
-      websocketURL: process.env.EXPO_PUBLIC_WEBSOCKET_URL || 'wss://api.glimpse.app',
+      baseURL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://glimpse-server.up.railway.app/api/v1',
+      websocketURL: process.env.EXPO_PUBLIC_WEBSOCKET_URL || 'wss://glimpse-server.up.railway.app',
     };
   }
   
-  // 기본값 (staging)
+  // 기본값 (staging/development fallback)
   return {
-    baseURL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api-staging.glimpse.app/api/v1',
-    websocketURL: process.env.EXPO_PUBLIC_WEBSOCKET_URL || 'wss://api-staging.glimpse.app',
+    baseURL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://glimpse-server.up.railway.app/api/v1',
+    websocketURL: process.env.EXPO_PUBLIC_WEBSOCKET_URL || 'wss://glimpse-server.up.railway.app',
   };
 };
 
