@@ -1,0 +1,24 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "buildCommand": "npm ci && npm run build:railway",
+    "rootDirectory": "server",
+    "watchPatterns": [
+      "**/*"
+    ]
+  },
+  "deploy": {
+    "startCommand": "npm run start:railway",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 100,
+    "restartPolicyType": "on_failure",
+    "restartPolicyMaxRetries": 3,
+    "numReplicas": 1,
+    "sleep": false
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
+
+

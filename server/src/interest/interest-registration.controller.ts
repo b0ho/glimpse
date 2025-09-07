@@ -19,7 +19,7 @@ import {
 import { AuthGuard } from '../auth/auth.guard';
 import { InterestRegistrationService, RegisterInterestDto, RegistrationType } from './interest-registration.service';
 
-@Controller('api/v1/interest/registration')
+@Controller('interest/registration')
 @UseGuards(AuthGuard)
 export class InterestRegistrationController {
   constructor(private readonly service: InterestRegistrationService) {}
