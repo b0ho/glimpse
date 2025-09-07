@@ -11,7 +11,7 @@ const isProduction = process.env.NODE_ENV === 'production' ||
 // Web에서는 localhost 사용, Native에서는 IP 주소 사용
 const getBaseURL = () => {
   if (isProduction) {
-    return 'https://glimpse-server.up.railway.app/api/v1';
+    return 'https://glimpse-production.up.railway.app/api/v1';
   }
   
   // Web 환경에서는 항상 localhost 사용
@@ -41,7 +41,7 @@ console.log('[API Config] Environment Detection:', {
  */
 const getSocketURL = () => {
   if (isProduction) {
-    return 'wss://glimpse-server.up.railway.app';
+    return 'wss://glimpse-production.up.railway.app';
   }
   
   // Web 환경에서는 항상 localhost 사용
