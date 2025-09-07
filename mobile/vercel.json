@@ -1,6 +1,6 @@
 {
-  "_rebuild": "2025-09-07-fix-clerk-errors",
-  "buildCommand": "npx expo export --platform web",
+  "_rebuild": "2025-09-07-fix-clerk-env-vars-v2",
+  "buildCommand": "npx expo export --platform web --clear",
   "outputDirectory": "dist",
   "installCommand": "npm install --legacy-peer-deps",
   "framework": null,

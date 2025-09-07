@@ -161,6 +161,16 @@ export default function App() {
   if (typeof window !== 'undefined') {
     const hostname = window.location?.hostname || '';
     
+    // 환경 변수 디버깅 정보 출력
+    console.log('=== Clerk Configuration Debug ===');
+    console.log('Hostname:', hostname);
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('__DEV__:', __DEV__);
+    console.log('ENV vars available:', Object.keys(process.env).filter(key => key.startsWith('EXPO_PUBLIC_')));
+    console.log('EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY exists:', !!process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY);
+    console.log('EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY value:', process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY?.substring(0, 30) + '...');
+    console.log('=================================');
+    
     // 로컬 개발 환경 체크
     const isLocalhost = hostname === 'localhost' || 
                        hostname.includes('127.0.0.1') || 
@@ -171,9 +181,12 @@ export default function App() {
     // Vercel 도메인 체크 (임시 - Clerk Dashboard에서 도메인 추가 전까지)
     const isVercelDomain = hostname.includes('vercel.app');
     
-    // 로컬 개발 환경 또는 Vercel 도메인
+    // glimpse.contact 도메인 체크 - 운영 도메인
+    const isGlimpseContact = hostname.includes('glimpse.contact');
+    
+    // 로컬 개발 환경 또는 Vercel 임시 도메인
     if (isLocalhost || isVercelDomain) {
-      // 로컬과 Vercel에서는 개발 키 사용
+      // 로컬과 Vercel 임시 도메인에서는 개발 키 사용
       clerkPublishableKey = devKey;
       clerkFrontendApi = undefined; // 개발 키는 커스텀 도메인 불필요
       
@@ -183,12 +196,47 @@ export default function App() {
         console.log('🔧 Using development Clerk key for local environment');
       }
     } 
-    // 운영 환경 (glimpse.contact 등)
+    // 운영 환경 (glimpse.contact 및 기타 프로덕션 도메인)
     else {
-      // 운영 환경에서는 환경 변수 사용 (개발 키 폴백)
-      clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || devKey;
-      console.log('🚀 Using production Clerk key for production environment');
-      console.log('Production key:', clerkPublishableKey.substring(0, 20) + '...');
+      // 운영 환경에서는 환경 변수 사용
+      const prodKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+      
+      // 여러 방법으로 환경 변수 확인
+      const alternativeKey = (typeof globalThis !== 'undefined' && (globalThis as any).EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) ||
+                            (typeof window !== 'undefined' && (window as any).EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY);
+      
+      const finalProdKey = prodKey || alternativeKey;
+      
+      if (finalProdKey && finalProdKey !== '' && finalProdKey !== 'undefined' && finalProdKey !== devKey) {
+        clerkPublishableKey = finalProdKey;
+        console.log('🚀 Using production Clerk key for production environment');
+        console.log('Production domain:', hostname);
+        console.log('Production key found:', finalProdKey.substring(0, 20) + '...');
+      } else {
+        // glimpse.contact에서는 특별 처리
+        if (isGlimpseContact) {
+          console.error('🚨 CRITICAL: Production key not found for glimpse.contact!');
+          console.error('Environment variables:', {
+            'process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY': process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
+            'window.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY': (window as any).EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
+            'All EXPO_PUBLIC vars': Object.keys(process.env).filter(k => k.startsWith('EXPO_PUBLIC_'))
+          });
+          
+          // glimpse.contact는 프로덕션이므로 개발 키 사용을 피하고 싶지만,
+          // 키가 없으면 앱이 작동하지 않으므로 폴백
+          console.warn('⚠️ FALLBACK: Using development key for glimpse.contact (not ideal!)');
+          clerkPublishableKey = devKey;
+        } else {
+          // 다른 도메인에서는 일반 폴백
+          console.warn('⚠️ Production key not found, falling back to dev key');
+          clerkPublishableKey = devKey;
+        }
+      }
+      
+      if (isGlimpseContact) {
+        console.log('✅ glimpse.contact domain detected');
+        console.log('Key being used:', clerkPublishableKey === devKey ? 'DEVELOPMENT KEY (FALLBACK)' : 'PRODUCTION KEY');
+      }
     }
   } else {
     // 모바일 앱 환경

@@ -55,12 +55,16 @@ export const StoryList= ({
   const { t } = useAndroidSafeTranslation();
   const { colors } = useTheme();
   
-  // 입력 안전화
+  // 입력 안전화 - 더 강력한 타입 체크
   const safeStories = Array.isArray(stories) ? stories : [];
 
   // Find current user's stories (가드 포함)
-  const myStories = safeStories.find?.((story: any) => story?.userId === currentUserId) || undefined;
-  const otherStories = safeStories.filter?.((story: any) => story?.userId !== currentUserId) || [];
+  const myStories = safeStories.length > 0 
+    ? safeStories.find((story: any) => story?.userId === currentUserId) 
+    : undefined;
+  const otherStories = safeStories.length > 0 
+    ? safeStories.filter((story: any) => story?.userId !== currentUserId) 
+    : [];
 
   /**
    * 개별 스토리 아이템 렌더링
