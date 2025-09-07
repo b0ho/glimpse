@@ -173,12 +173,14 @@ class ApiClient {
     }
 
     // Check if we're in dev mode first
-    const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : 
-                  !isProduction ||
+    const isDev = (typeof __DEV__ !== 'undefined' && __DEV__) ||
                   process.env.NODE_ENV === 'development' || 
                   process.env.ENV === 'development' ||
                   url.includes('localhost') ||
-                  url.includes('127.0.0.1');
+                  url.includes('127.0.0.1') ||
+                  url.includes('192.168') ||
+                  url.includes('10.') ||
+                  url.includes('172.');
 
     // Set up headers
     const headers: Record<string, string> = {
