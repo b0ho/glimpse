@@ -1,5 +1,4 @@
 {
-  "_comment": "Force rebuild at 2025-09-07 - glimpse.contact cache invalidation",
   "buildCommand": "npx expo export --platform web",
   "outputDirectory": "dist",
   "installCommand": "npm install --legacy-peer-deps",
