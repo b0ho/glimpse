@@ -81,6 +81,7 @@ const tokenCache = {
 
 export default function App() {
   const [isI18nInitialized, setIsI18nInitialized] = useState(false);
+  const [mountClerk, setMountClerk] = useState(Platform.OS !== 'web');
   const [initAttempts, setInitAttempts] = useState(0);
 
   useEffect(() => {
@@ -139,6 +140,13 @@ export default function App() {
       </View>
     );
   }
+
+  // On web, delay ClerkProvider mount to next tick to avoid context race (#321)
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      Promise.resolve().then(() => setMountClerk(true));
+    }
+  }, []);
 
   // Clerk publishable key - 환경에 따라 적절한 키 선택
   let clerkPublishableKey: string;
@@ -236,9 +244,15 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <ClerkProvider {...clerkProviderProps}>
-        <AppContent />
-      </ClerkProvider>
+      {mountClerk ? (
+        <ClerkProvider {...clerkProviderProps}>
+          <AppContent />
+        </ClerkProvider>
+      ) : (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000' }}>
+          <ActivityIndicator size="large" color="#FF8A8A" />
+        </View>
+      )}
     </ErrorBoundary>
   );
 }

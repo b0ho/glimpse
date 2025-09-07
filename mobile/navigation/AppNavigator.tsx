@@ -656,8 +656,11 @@ function AppNavigator() {
   }, [isAuthenticated, currentMode]);
 
   useEffect(() => {
-    // Clerk 토큰을 API 클라이언트에 설정
+    // Clerk 로딩이 완료된 뒤에만 토큰 요청
     const setupToken = async () => {
+      if (!isLoaded) {
+        return;
+      }
       if (isAuthenticated && getToken) {
         try {
           const token = await getToken();
@@ -672,9 +675,8 @@ function AppNavigator() {
         setAuthToken(null);
       }
     };
-    
     setupToken();
-  }, [isAuthenticated, getToken]);
+  }, [isAuthenticated, getToken, isLoaded]);
 
   if (!isLoaded || hasCompletedOnboarding === null) {
     return null; // 로딩 화면은 App.tsx에서 처리
