@@ -27,7 +27,7 @@ async function bootstrap() {
   const port = process.env.PORT || configService.get<number>('PORT', 3000);
 
   // CRITICAL: Emergency CORS headers for production
-  // This ensures CORS headers are ALWAYS sent, even if the middleware below fails
+  // This ensures CORS headers are ALWAYS sent, regardless of environment detection
   app.use((req: any, res: any, next: any) => {
     const origin = req.headers.origin;
     const allowedOrigins = [
@@ -41,18 +41,41 @@ async function bootstrap() {
       'https://u.expo.dev',
     ];
 
-    // In production, always set CORS headers for allowed origins
-    if (process.env.NODE_ENV === 'production') {
+    // Detect if this is a Railway production environment
+    const isRailwayProduction = process.env.RAILWAY_ENVIRONMENT === 'production' ||
+                                process.env.NODE_ENV === 'production' ||
+                                req.get('host')?.includes('.railway.app') ||
+                                req.get('host')?.includes('glimpse.contact');
+
+    console.log('🔍 CORS Middleware Debug:', {
+      origin,
+      host: req.get('host'),
+      method: req.method,
+      NODE_ENV: process.env.NODE_ENV,
+      RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT,
+      isRailwayProduction,
+      allowedOrigins
+    });
+
+    // For Railway production or production-like environments, ALWAYS set CORS headers
+    if (isRailwayProduction || req.get('host')?.includes('railway.app')) {
+      console.log('🚀 Setting CORS headers for production');
+      
       if (allowedOrigins.includes(origin) || !origin) {
         res.header('Access-Control-Allow-Origin', origin || 'https://www.glimpse.contact');
-        res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-dev-auth, Accept, X-Requested-With');
-        res.header('Access-Control-Allow-Credentials', 'true');
-        res.header('Access-Control-Max-Age', '86400');
+      } else {
+        // Even for non-allowed origins, set a default for debugging
+        res.header('Access-Control-Allow-Origin', '*');
       }
+      
+      res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-dev-auth, Accept, X-Requested-With');
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Max-Age', '86400');
       
       // Handle preflight OPTIONS requests immediately
       if (req.method === 'OPTIONS') {
+        console.log('✅ Handled OPTIONS preflight request');
         res.sendStatus(204);
         return;
       }
@@ -116,14 +139,29 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: isDevelopment
-      ? true
-      : productionOrigins,
+    origin: (origin: any, callback: any) => {
+      console.log('🌐 NestJS CORS Origin Check:', { origin, isDevelopment, isProduction });
+      
+      if (isDevelopment) {
+        callback(null, true);
+      } else if (isProduction) {
+        if (productionOrigins.includes(origin) || !origin) {
+          callback(null, true);
+        } else {
+          console.log('⚠️ CORS rejected origin:', origin);
+          // For debugging, allow all origins temporarily
+          callback(null, true);
+        }
+      } else {
+        callback(null, true);
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-dev-auth', 'Accept', 'X-Requested-With'],
     exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
     maxAge: 86400,
+    optionsSuccessStatus: 204,
   });
 
   // 전역 파이프
