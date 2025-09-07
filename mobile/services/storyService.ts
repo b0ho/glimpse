@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './api/config';
+import { API_BASE_URL, getAuthToken } from './api/config';
 // import { authService } from './auth/auth-service'; // TODO: Implement token handling
 
 /**
@@ -83,8 +83,8 @@ class StoryService {
    */
   async createStory(mediaUri: string, mediaType: 'image' | 'video', caption?: string): Promise<Story> {
     try {
-      // TODO: Get token from Clerk
-      const token = '';
+      // Get token from Clerk (set via setAuthToken in api/config)
+      const token = getAuthToken();
       if (!token) {
         throw new Error('No authentication token');
       }
@@ -130,8 +130,7 @@ class StoryService {
    */
   async getMyStories(): Promise<Story[]> {
     try {
-      // TODO: Get token from Clerk
-      const token = '';
+      const token = getAuthToken();
       if (!token) {
         throw new Error('No authentication token');
       }
@@ -185,8 +184,7 @@ class StoryService {
         ];
       }
 
-      // TODO: Get token from Clerk
-      const token = '';
+      const token = getAuthToken();
       if (!token) {
         throw new Error('No authentication token');
       }
@@ -222,8 +220,7 @@ class StoryService {
    */
   async getStoriesFeed(page: number = 1, limit: number = 20): Promise<StoryGroup[]> {
     try {
-      // TODO: Get token from Clerk
-      const token = '';
+      const token = getAuthToken();
       if (!token) {
         throw new Error('No authentication token');
       }
@@ -261,8 +258,7 @@ class StoryService {
    */
   async getStoryById(storyId: string): Promise<Story> {
     try {
-      // TODO: Get token from Clerk
-      const token = '';
+      const token = getAuthToken();
       if (!token) {
         throw new Error('No authentication token');
       }
@@ -296,8 +292,7 @@ class StoryService {
    */
   async viewStory(storyId: string): Promise<void> {
     try {
-      // TODO: Get token from Clerk
-      const token = '';
+      const token = getAuthToken();
       if (!token) {
         throw new Error('No authentication token');
       }
@@ -328,8 +323,7 @@ class StoryService {
    */
   async getStoryViewers(storyId: string): Promise<any[]> {
     try {
-      // TODO: Get token from Clerk
-      const token = '';
+      const token = getAuthToken();
       if (!token) {
         throw new Error('No authentication token');
       }
