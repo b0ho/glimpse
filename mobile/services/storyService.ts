@@ -1,4 +1,4 @@
-import { API_BASE_URL, getAuthToken } from './api/config';
+import { API_BASE_URL, getAuthToken, apiClient } from './api/config';
 // import { authService } from './auth/auth-service'; // TODO: Implement token handling
 
 /**
@@ -132,23 +132,15 @@ class StoryService {
     try {
       const token = getAuthToken();
       if (!token) {
+        console.log('[StoryService] No token for getMyStories');
         throw new Error('No authentication token');
       }
 
-      const response = await fetch(`${API_BASE_URL}/stories/my`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch stories');
-      }
-
-      const data = await response.json();
-      return data.data;
+      console.log('[StoryService] Fetching my stories with apiClient...');
+      const response = await apiClient.get<{ data: Story[] }>('/stories/my');
+      
+      console.log('[StoryService] My stories fetched successfully');
+      return response.data || [];
     } catch (error) {
       console.error('Failed to get my stories:', error);
       throw error;
@@ -164,8 +156,13 @@ class StoryService {
    */
   async getStoryGroups(): Promise<StoryGroup[]> {
     try {
+      // 웹 빌드에서 __DEV__가 제대로 작동하지 않을 수 있으므로 추가 체크
+      const isDevelopment = (typeof __DEV__ !== 'undefined' && __DEV__) || 
+                           process.env.NODE_ENV === 'development';
+      
       // 개발 환경에서는 더미 데이터 반환
-      if (__DEV__) {
+      if (isDevelopment && typeof window !== 'undefined' && window.location?.hostname === 'localhost') {
+        console.log('[StoryService] Returning dummy data for development');
         return [
           {
             userId: 'user1',
@@ -186,26 +183,20 @@ class StoryService {
 
       const token = getAuthToken();
       if (!token) {
+        console.log('[StoryService] No token available, returning empty array');
         // 비로그인 시 조용히 빈 목록 반환 (웹 초기 로드용)
         return [];
       }
 
-      const response = await fetch(`${API_BASE_URL}/stories/groups`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        return [];
-      }
-
-      const data = await response.json();
-      return data.data;
+      console.log('[StoryService] Fetching story groups with apiClient...');
+      // apiClient 사용으로 변경 - 개발/운영 환경을 자동으로 처리
+      const response = await apiClient.get<{ data: StoryGroup[] }>('/stories/groups');
+      
+      console.log('[StoryService] Story groups fetched successfully');
+      return response.data || [];
     } catch (error) {
-      console.log('Failed to get story groups (non-fatal):', (error as any)?.message || error);
+      console.log('[StoryService] Failed to get story groups (non-fatal):', (error as any)?.message || error);
+      // 에러 발생 시에도 앱이 크래시하지 않도록 빈 배열 반환
       return [];
     }
   }

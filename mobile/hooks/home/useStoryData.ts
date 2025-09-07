@@ -34,6 +34,8 @@ export const useStoryData = () => {
       
       // 토큰이 없으면 API 호출을 건너뜁니다 (웹 초기 로드 보호)
       const token = getAuthToken();
+      console.log('[useStoryData] Current auth token:', token ? 'exists' : 'null');
+      
       if (!token) {
         console.log('[useStoryData] Skip story API: no auth token loaded');
         setStories([]);
@@ -41,6 +43,7 @@ export const useStoryData = () => {
         return;
       }
 
+      console.log('[useStoryData] Calling getStoryGroups with token...');
       const storyGroups = await storyService.getStoryGroups();
       console.log('[useStoryData] Story groups loaded:', storyGroups.length);
       

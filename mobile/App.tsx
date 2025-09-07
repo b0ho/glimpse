@@ -276,30 +276,44 @@ export default function App() {
     useEffect(() => {
       const prepareAuth = async () => {
         if (!isLoaded) {
+          console.log('[AppContent] Clerk not loaded yet');
           setAuthReady(false);
           return;
         }
         if (!isSignedIn) {
+          console.log('[AppContent] User not signed in, clearing token');
           setAuthToken(null);
           setAuthReady(true);
           return;
         }
+        
+        console.log('[AppContent] User signed in, getting token...');
         // Retry getting token a few times to avoid post-login race
         let token: string | null = null;
         if (getToken) {
           for (let i = 0; i < 5; i++) {
             try {
               token = await getToken();
-              if (token) break;
-            } catch {}
+              if (token) {
+                console.log('[AppContent] Token obtained on attempt', i + 1);
+                break;
+              }
+            } catch (error) {
+              console.log('[AppContent] Token attempt', i + 1, 'failed:', error);
+            }
             await new Promise(r => setTimeout(r, 250));
           }
         }
+        
         if (token) {
+          console.log('[AppContent] Setting auth token for API client');
           setAuthToken(token);
           setAuthReady(true);
         } else {
-          setAuthReady(false);
+          console.error('[AppContent] Failed to get token after 5 attempts');
+          // 토큰을 가져올 수 없어도 앱은 로드하되, API 호출은 실패할 것임
+          setAuthToken(null);
+          setAuthReady(true);
         }
       };
       prepareAuth();

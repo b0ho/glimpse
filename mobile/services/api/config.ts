@@ -173,14 +173,19 @@ class ApiClient {
     }
 
     // Check if we're in dev mode first (fixed 2025-09-07 for glimpse.contact)
-    const isDev = (typeof __DEV__ !== 'undefined' && __DEV__) ||
+    // glimpse.contact는 운영 환경이므로 개발 모드에서 제외
+    const isGlimpseContact = typeof window !== 'undefined' && 
+                             window.location?.hostname?.includes('glimpse.contact');
+    
+    const isDev = !isGlimpseContact && (
+                  (typeof __DEV__ !== 'undefined' && __DEV__) ||
                   process.env.NODE_ENV === 'development' || 
                   process.env.ENV === 'development' ||
                   url.includes('localhost') ||
                   url.includes('127.0.0.1') ||
                   url.includes('192.168') ||
                   url.includes('10.') ||
-                  url.includes('172.');
+                  url.includes('172.'));
 
     // Set up headers
     const headers: Record<string, string> = {
