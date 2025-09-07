@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { ClerkProvider } from '@clerk/clerk-expo';
+import { ClerkProvider, ClerkLoaded } from '@clerk/clerk-expo';
 import { Platform, ActivityIndicator, View, Text } from 'react-native';
 import RootNavigator from './navigation/AppNavigator';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -246,7 +246,9 @@ export default function App() {
     <ErrorBoundary>
       {mountClerk ? (
         <ClerkProvider {...clerkProviderProps}>
-          <AppContent />
+          <ClerkLoaded>
+            <AppContent />
+          </ClerkLoaded>
         </ClerkProvider>
       ) : (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000' }}>
