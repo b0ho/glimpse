@@ -41,16 +41,15 @@ import { HealthModule } from './health/health.module';
  */
 @Module({
   imports: [
-    // 환경변수 설정 - 통합 환경 변수 시스템 사용
+    // 환경변수 설정 - 플랫폼 기반 환경 변수 사용
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [
-        'secrets.env', // 민감한 정보 (gitignore)
-        '.env', // 기본 설정
-        '../config/private/secrets.env',
-        '../config/private/.env.local',
-        '../.env.defaults',
-      ],
+      envFilePath: process.env.NODE_ENV === 'production' 
+        ? [] // Production에서는 파일 읽지 않음, Railway/Vercel 환경 변수만 사용
+        : [
+            'secrets.env', // 로컬 개발용 민감한 정보 (gitignore)
+            '.env', // 로컬 개발용 기본 설정
+          ],
       expandVariables: true,
     }),
 
