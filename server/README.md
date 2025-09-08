@@ -213,3 +213,4 @@ npm run seed:railway          # 150명 사용자 추가 (주의: 대용량)
 ## 라이선스
 
 MIT# Trigger redeploy Tue Sep  9 00:20:42 KST 2025
+# Force redeploy 1757346075
