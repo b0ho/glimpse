@@ -1,7 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
-import { clerkClient } from '@clerk/clerk-sdk-node';
+import { createClerkClient } from '@clerk/clerk-sdk-node';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { SmsService } from '../core/sms/sms.service';
 import { CacheService } from '../core/cache/cache.service';
@@ -16,13 +16,32 @@ import axios from 'axios';
 @Injectable()
 export class AuthService {
   private readonly clerkApiUrl = 'https://api.clerk.com/v1';
+  private clerkClient: any;
 
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
     private readonly smsService: SmsService,
     private readonly cacheService: CacheService,
-  ) {}
+  ) {
+    // Initialize Clerk client with secret key
+    const secretKey = process.env.CLERK_SECRET_KEY || process.env.CLERK_API_KEY;
+    if (secretKey) {
+      try {
+        this.clerkClient = createClerkClient({
+          secretKey: secretKey,
+        });
+        console.log('✅ Clerk client initialized in AuthService');
+      } catch (error) {
+        console.error('❌ Failed to initialize Clerk client:', error);
+        // Fallback to legacy import if createClerkClient fails
+        const { clerkClient: legacyClient } = require('@clerk/clerk-sdk-node');
+        this.clerkClient = legacyClient;
+      }
+    } else {
+      console.warn('⚠️ No Clerk secret key found, authentication will fail');
+    }
+  }
 
   /**
    * 전화번호 인증 및 사용자 생성/업데이트
@@ -134,7 +153,7 @@ export class AuthService {
       if (cached) return cached;
 
       // Get user details from Clerk
-      const clerkUser = await clerkClient.users.getUser(clerkUserId);
+      const clerkUser = await this.clerkClient.users.getUser(clerkUserId);
       const phoneNumber = clerkUser.phoneNumbers?.[0]?.phoneNumber;
 
       if (!phoneNumber) {
@@ -187,7 +206,7 @@ export class AuthService {
     try {
       if (user.clerkId) {
         // Update user metadata in Clerk
-        await clerkClient.users.updateUserMetadata(user.clerkId, {
+        await this.clerkClient.users.updateUserMetadata(user.clerkId, {
           publicMetadata: {
             userId: user.id,
             nickname: user.nickname,
@@ -228,7 +247,7 @@ export class AuthService {
           phoneNumbers: [{ phoneNumber }],
         };
       } else {
-        clerkUser = await clerkClient.users.getUser(clerkUserId);
+        clerkUser = await this.clerkClient.users.getUser(clerkUserId);
         phoneNumber = clerkUser.phoneNumbers?.[0]?.phoneNumber || '';
       }
 
@@ -364,9 +383,41 @@ export class AuthService {
 
     try {
       // Try Clerk token first
-      const clerkVerification = await clerkClient.verifyToken(token);
-      if (clerkVerification) {
-        return clerkVerification;
+      if (this.clerkClient) {
+        try {
+          // Try new SDK method
+          const clerkVerification = await this.clerkClient.verifyToken(token);
+          if (clerkVerification) {
+            return clerkVerification;
+          }
+        } catch (verifyError) {
+          // Try alternative verification method
+          console.log('Trying alternative Clerk verification method...');
+          const secretKey = process.env.CLERK_SECRET_KEY || process.env.CLERK_API_KEY;
+          if (secretKey) {
+            try {
+              // Direct API call to Clerk
+              const response = await axios.post(
+                `${this.clerkApiUrl}/tokens/verify`,
+                {},
+                {
+                  headers: {
+                    'Authorization': `Bearer ${secretKey}`,
+                    'Content-Type': 'application/json',
+                  },
+                  params: {
+                    token: token,
+                  }
+                }
+              );
+              if (response.data) {
+                return response.data;
+              }
+            } catch (apiError) {
+              console.error('Clerk API verification failed:', apiError);
+            }
+          }
+        }
       }
     } catch (error) {
       // Fall back to legacy JWT

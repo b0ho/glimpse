@@ -8,23 +8,18 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { initI18n, getI18nMiddleware } from './i18n/i18n.config';
 import { EnvConfig } from './config/env.config';
-import { clerkClient } from '@clerk/clerk-sdk-node';
 
 // Load environment configuration (including secrets)
 const envConfig = EnvConfig.getInstance();
 envConfig.load();
 
-// Initialize Clerk SDK with secret key
-const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+// Verify Clerk configuration
+const clerkSecretKey = process.env.CLERK_SECRET_KEY || process.env.CLERK_API_KEY;
 if (clerkSecretKey) {
-  try {
-    (clerkClient as any).secretKey = clerkSecretKey;
-    console.log('✅ Clerk SDK initialized in main.ts with key:', clerkSecretKey.substring(0, 20) + '...');
-  } catch (error) {
-    console.error('❌ Failed to initialize Clerk SDK:', error);
-  }
+  console.log('✅ Clerk secret key found:', clerkSecretKey.substring(0, 20) + '...');
 } else {
-  console.warn('⚠️ CLERK_SECRET_KEY not found in environment variables - some features may not work');
+  console.warn('⚠️ CLERK_SECRET_KEY not found in environment variables - authentication will not work');
+  console.warn('Please set either CLERK_SECRET_KEY or CLERK_API_KEY environment variable');
 }
 
 /**
