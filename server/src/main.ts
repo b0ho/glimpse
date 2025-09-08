@@ -17,10 +17,14 @@ envConfig.load();
 // Initialize Clerk SDK with secret key
 const clerkSecretKey = process.env.CLERK_SECRET_KEY;
 if (clerkSecretKey) {
-  (clerkClient as any).secretKey = clerkSecretKey;
-  console.log('✅ Clerk SDK initialized in main.ts with key:', clerkSecretKey.substring(0, 20) + '...');
+  try {
+    (clerkClient as any).secretKey = clerkSecretKey;
+    console.log('✅ Clerk SDK initialized in main.ts with key:', clerkSecretKey.substring(0, 20) + '...');
+  } catch (error) {
+    console.error('❌ Failed to initialize Clerk SDK:', error);
+  }
 } else {
-  console.error('❌ CLERK_SECRET_KEY not found in environment variables');
+  console.warn('⚠️ CLERK_SECRET_KEY not found in environment variables - some features may not work');
 }
 
 /**
