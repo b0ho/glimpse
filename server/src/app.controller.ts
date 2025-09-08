@@ -10,6 +10,8 @@ export class AppController {
     
     return {
       timestamp: new Date().toISOString(),
+      buildTime: '2025-09-08T15:37:30Z', // 빌드 타임스탬프
+      version: '1.0.1', // 버전 마커
       nodeEnv: process.env.NODE_ENV,
       railway: !!process.env.RAILWAY_ENVIRONMENT,
       clerk: {
