@@ -20,6 +20,7 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatDistanceToNow } from '@/utils/dateUtils';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
+import { shadowStyles } from '@/utils/shadowStyles';
 
 interface ChatItemProps {
   chat: GroupChat;
@@ -231,11 +232,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.MD,
     borderRadius: 25,
     height: 44,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    ...shadowStyles.small,
   },
   searchInput: {
     flex: 1,
@@ -359,10 +356,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#4ECDC4',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
+    ...shadowStyles.large,
   },
 });

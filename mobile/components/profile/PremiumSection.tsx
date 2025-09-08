@@ -8,6 +8,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
+import { shadowStyles } from '@/utils/shadowStyles';
 import { SPACING, FONT_SIZES } from '@/utils/constants';
 
 interface PremiumSectionProps {
@@ -88,14 +89,7 @@ const styles = StyleSheet.create({
     padding: SPACING.LG,
     borderRadius: 12,
     borderWidth: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 3.84,
-    elevation: 3,
+    ...shadowStyles.card,
   },
   premiumHeader: {
     flexDirection: 'row',

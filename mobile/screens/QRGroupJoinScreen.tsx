@@ -23,6 +23,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { Group } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { shadowStyles } from '@/utils/shadowStyles';
 
 interface QRGroupData {
   groupId: string;
@@ -498,11 +499,7 @@ const styles = StyleSheet.create({
     padding: SPACING.LG,
     borderRadius: 16,
     marginBottom: SPACING.LG,
-    elevation: 3,
-    shadowColor: COLORS.SHADOW,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    ...shadowStyles.card,
   },
   groupInfo: {
     alignItems: 'center',

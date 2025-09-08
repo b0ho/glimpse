@@ -16,7 +16,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useIsFocused } from '@react-navigation/native';
 import { useAuth } from '@/hooks/useAuth';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
@@ -48,6 +48,7 @@ import { HomeFooter } from '@/components/home/HomeFooter';
  * 홈 스크린 - 메인 피드 및 스토리 표시
  */
 export const HomeScreen = () => {
+  const isFocused = useIsFocused();
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
@@ -165,6 +166,11 @@ export const HomeScreen = () => {
         />
       </SafeAreaView>
     );
+  }
+
+  // 웹에서 포커스되지 않은 경우 빈 View 반환
+  if (Platform.OS === 'web' && !isFocused) {
+    return <View style={styles.container} />;
   }
 
   // 서버 연결 에러 시 에러 화면 표시

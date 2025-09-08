@@ -97,10 +97,18 @@ export const useInterestForm = ({ relationshipType, t }: UseInterestFormProps) =
   const handleSubmit = useCallback(async () => {
     console.log('[useInterestForm] handleSubmit - starting submission');
     
+    // 회사/학교/아르바이트 타입의 경우 value를 companyName으로 설정
+    let finalValue = value;
+    if ((selectedType === InterestType.COMPANY || 
+         selectedType === InterestType.SCHOOL || 
+         selectedType === InterestType.PART_TIME_JOB) && companyName) {
+      finalValue = companyName;
+    }
+    
     // 유효성 검사
     const validationParams: FormValidationParams = {
       selectedType,
-      value,
+      value: finalValue,
       metadata,
       selectedGender,
       name,
@@ -139,7 +147,7 @@ export const useInterestForm = ({ relationshipType, t }: UseInterestFormProps) =
       const savedCard = await saveLocalInterestCard({
         userId: 'current_user',
         type: selectedType!,
-        value,
+        value: finalValue,
         name: name || undefined,
         metadata: {
           ...metadata,
@@ -159,7 +167,7 @@ export const useInterestForm = ({ relationshipType, t }: UseInterestFormProps) =
       try {
         const encryptedCard = await secureInterestService.encryptInterestCard({
           type: selectedType!,
-          value,
+          value: finalValue,
           name: name || undefined,
           metadata: {
             ...metadata,

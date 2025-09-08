@@ -8,6 +8,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { LocationGroup } from '@/types/nearbyGroups';
 import { useTheme } from '@/hooks/useTheme';
+import { shadowStyles } from '@/utils/shadowStyles';
 import { SPACING, FONT_SIZES } from '@/utils/constants';
 
 interface NearbyGroupItemProps {
@@ -130,11 +131,7 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.MD,
     marginVertical: SPACING.SM,
     borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    ...shadowStyles.medium,
   },
   groupHeader: {
     flexDirection: 'row',

@@ -15,6 +15,7 @@ import { useGroupStore } from '@/store/slices/groupSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { Group, GroupType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { shadowStyles } from '@/utils/shadowStyles';
 
 export const MyGroupsScreen = () => {
   const { t } = useAndroidSafeTranslation('mygroups');
@@ -311,11 +312,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: SPACING.MD,
     marginBottom: SPACING.MD,
-    elevation: 2,
-    shadowColor: COLORS.SHADOW,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    ...shadowStyles.small,
   },
   groupHeader: {
     marginBottom: SPACING.MD,

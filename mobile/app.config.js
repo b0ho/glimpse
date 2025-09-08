@@ -84,7 +84,7 @@ export default {
       // 'expo-notifications',   // 패키지 확인 후 활성화
       // 'expo-location',        // 패키지 확인 후 활성화
       // 'expo-camera',          // 패키지 설치 후 활성화
-      // 'expo-av',              // 패키지 확인 후 활성화
+      'expo-audio',           // audio 기능용
     ],
     
     // 환경별 설정

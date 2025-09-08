@@ -19,6 +19,7 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatDistanceToNow } from '@/utils/dateUtils';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
+import { shadowStyles } from '@/utils/shadowStyles';
 
 interface PostItemProps {
   post: CommunityPost;
@@ -277,11 +278,7 @@ const styles = StyleSheet.create({
     marginVertical: SPACING.SM,
     padding: SPACING.MD,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...shadowStyles.card,
   },
   authorRow: {
     flexDirection: 'row',
@@ -389,10 +386,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.PRIMARY,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
+    ...shadowStyles.large,
   },
 });

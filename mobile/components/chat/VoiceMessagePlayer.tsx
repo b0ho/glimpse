@@ -10,7 +10,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Slider from '@react-native-community/slider';
 import { audioService } from '../../services/audioService';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
-import { Audio, AVPlaybackStatus } from 'expo-av';
+import { AVPlaybackStatus } from 'expo-audio';
 
 /**
  * VoiceMessagePlayer 컴포넌트 Props

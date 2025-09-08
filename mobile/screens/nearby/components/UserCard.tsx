@@ -9,6 +9,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { NearbyUser } from '@/types';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { shadowStyles } from '@/utils/shadowStyles';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 interface UserCardProps {
@@ -106,11 +107,7 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.lg,
     marginVertical: SPACING.sm,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...shadowStyles.card,
   },
   profileImage: {
     width: 80,

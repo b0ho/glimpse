@@ -6,6 +6,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-nati
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { InterestType } from '@/types/interest';
 import { INTEREST_TYPE_CONFIG } from '@/constants/interest/interestTypes';
+import { shadowStyles } from '@/utils/shadowStyles';
 
 interface InterestTypeSelectorProps {
   selectedType: InterestType | null;
@@ -101,11 +102,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
     position: 'relative',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    ...shadowStyles.small,
   },
   iconContainer: {
     width: 52,

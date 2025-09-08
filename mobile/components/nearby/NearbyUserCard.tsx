@@ -14,6 +14,7 @@ import {
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { NearbyUser } from '@/types';
 import { LinearGradient } from 'expo-linear-gradient';
+import { shadowStyles } from '@/utils/shadowStyles';
 
 interface NearbyUserCardProps {
   user: NearbyUser;
@@ -210,11 +211,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginHorizontal: 16,
     marginVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...shadowStyles.card,
   },
   gradient: {
     flex: 1,
@@ -299,11 +296,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...shadowStyles.button,
   },
   hideButton: {},
   likeButton: {},

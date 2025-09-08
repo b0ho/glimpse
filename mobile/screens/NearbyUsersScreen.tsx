@@ -15,8 +15,9 @@ import {
   Text,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -43,6 +44,7 @@ import { EmptyState } from '@/components/common';
 import { NearbyUser } from '@/types';
 
 export const NearbyUsersScreen = React.memo(() => {
+  const isFocused = useIsFocused();
   const navigation = useNavigation<any>();
   const { t } = useAndroidSafeTranslation('location');
   const { colors } = useTheme();
@@ -166,6 +168,11 @@ export const NearbyUsersScreen = React.memo(() => {
     await updateLocation();
     await loadNearbyUsers();
   }, [updateLocation, loadNearbyUsers]);
+
+  // 웹에서 포커스되지 않은 경우 빈 View 반환
+  if (Platform.OS === 'web' && !isFocused) {
+    return <View style={styles.container} />;
+  }
 
   if (isLoading) {
     return <LoadingScreen message={t('location:loadingLocation')} colors={colors} />;

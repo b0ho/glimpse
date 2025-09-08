@@ -4,6 +4,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
+import { shadowStyles } from '@/utils/shadowStyles';
 
 interface LocationPermissionPromptProps {
   onRequestPermission: () => void;
@@ -81,11 +82,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 32,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    ...shadowStyles.card,
   },
   title: {
     fontSize: 20,

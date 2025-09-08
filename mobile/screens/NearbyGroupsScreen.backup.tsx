@@ -22,6 +22,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { shadowStyles } from '@/utils/shadowStyles';
 import { apiClient } from '@/services/api/config';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
 
@@ -837,11 +838,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    ...shadowStyles.button,
   },
   mapContainer: {
     flex: 1,

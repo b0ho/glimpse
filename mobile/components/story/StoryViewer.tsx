@@ -12,7 +12,8 @@ import {
   FlatList,
   Animated,
 } from 'react-native';
-import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
+import { Video, ResizeMode } from 'expo-av';
+import { AVPlaybackStatus } from 'expo-audio';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';

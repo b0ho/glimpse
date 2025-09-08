@@ -129,6 +129,13 @@ export default function App() {
     initializeI18n();
   }, [initAttempts]);
 
+  // On web, delay ClerkProvider mount to next tick to avoid context race (#321)
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      Promise.resolve().then(() => setMountClerk(true));
+    }
+  }, []);
+
   // 웹 환경 체크
   if (Platform.OS === 'web') {
     console.log('Glimpse app is running on web');
@@ -142,13 +149,6 @@ export default function App() {
       </View>
     );
   }
-
-  // On web, delay ClerkProvider mount to next tick to avoid context race (#321)
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      Promise.resolve().then(() => setMountClerk(true));
-    }
-  }, []);
 
   // Clerk publishable key - 환경에 따라 적절한 키 선택
   let clerkPublishableKey: string;

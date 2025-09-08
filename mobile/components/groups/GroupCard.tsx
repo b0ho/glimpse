@@ -10,6 +10,7 @@ import { useGroupStore } from '@/store/slices/groupSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
+import { shadowStyles } from '@/utils/shadowStyles';
 
 interface GroupCardProps {
   group: Group;
@@ -183,11 +184,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginVertical: 8,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...shadowStyles.card,
   },
   groupHeader: {
     flexDirection: 'row',

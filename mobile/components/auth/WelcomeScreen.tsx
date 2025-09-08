@@ -7,6 +7,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, ActivityIndicator }
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { shadowStyles } from '@/utils/shadowStyles';
 import { ClerkGoogleAuth } from '@/components/auth/ClerkGoogleAuth';
 import { QuickDevUser } from '@/types/auth.types';
 import { isDevelopment } from '@/config/dev.config';
@@ -205,20 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    ...Platform.select({
-      ios: {
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-      web: {
-        boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-      } as any,
-    }),
+    ...shadowStyles.small,
   },
   googleButtonText: {
     fontSize: FONT_SIZES.MD,

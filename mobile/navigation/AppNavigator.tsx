@@ -538,8 +538,11 @@ function MainTabNavigator() {
   return (
     <Tab.Navigator
       id={undefined}
+      lazy={true}
+      detachInactiveScreens={true}
       screenOptions={{
         headerShown: false,
+        unmountOnBlur: true,
         tabBarStyle: {
           backgroundColor: colors.BACKGROUND,
           borderTopWidth: 1,

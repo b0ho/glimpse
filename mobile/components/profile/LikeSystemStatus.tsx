@@ -9,6 +9,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
+import { shadowStyles } from '@/utils/shadowStyles';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { SPACING, FONT_SIZES, COLORS } from '@/utils/constants';
 
@@ -174,13 +175,7 @@ const styles = StyleSheet.create({
   },
   likeSystemCard: {
     borderRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 3.84,
-    elevation: 3,
+    ...shadowStyles.card,
   },
   likeSystemItem: {
     flexDirection: 'row',

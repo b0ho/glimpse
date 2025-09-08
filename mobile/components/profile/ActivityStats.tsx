@@ -31,35 +31,35 @@ export const ActivityStats: React.FC<ActivityStatsProps> = ({
   return (
     <View style={styles.section}>
       <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-        {t('profile:stats.title', 'Activity Stats')}
+        {t('profile:stats.title', '활동 통계')}
       </Text>
       
       <View style={styles.statsGrid}>
         <View style={[styles.statItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
           <Text style={[styles.statNumber, { color: colors.PRIMARY }]}>{joinedGroupsCount}</Text>
           <Text style={[styles.statLabel, { color: colors.TEXT.SECONDARY }]}>
-            {t('profile:stats.joinedGroups', 'Joined Groups')}
+            {t('profile:stats.joinedGroups', '참여 그룹')}
           </Text>
         </View>
         
         <View style={[styles.statItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
           <Text style={[styles.statNumber, { color: colors.PRIMARY }]}>{sentLikesCount}</Text>
           <Text style={[styles.statLabel, { color: colors.TEXT.SECONDARY }]}>
-            {t('profile:stats.sentLikes', 'Sent Likes')}
+            {t('profile:stats.sentLikes', '보낸 좋아요')}
           </Text>
         </View>
         
         <View style={[styles.statItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
           <Text style={[styles.statNumber, { color: colors.PRIMARY }]}>{receivedLikesCount}</Text>
           <Text style={[styles.statLabel, { color: colors.TEXT.SECONDARY }]}>
-            {t('profile:stats.receivedLikes', 'Received Likes')}
+            {t('profile:stats.receivedLikes', '받은 좋아요')}
           </Text>
         </View>
         
         <View style={[styles.statItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
           <Text style={[styles.statNumber, { color: colors.PRIMARY }]}>{matchesCount}</Text>
           <Text style={[styles.statLabel, { color: colors.TEXT.SECONDARY }]}>
-            {t('profile:stats.totalMatches', 'Total Matches')}
+            {t('profile:stats.totalMatches', '총 매칭')}
           </Text>
         </View>
       </View>

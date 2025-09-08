@@ -15,7 +15,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -33,6 +33,7 @@ import { ServerConnectionError } from '@/components/ServerConnectionError';
  * 그룹 탐색 화면 - 다양한 타입의 그룹 목록 표시
  */
 export const GroupsScreen = () => {
+  const isFocused = useIsFocused();
   const { t } = useAndroidSafeTranslation('group');
   const { colors } = useTheme();
   
@@ -68,6 +69,11 @@ export const GroupsScreen = () => {
   const handleRefresh = () => {
     loadGroups(true);
   };
+
+  // 웹에서 포커스되지 않은 경우 빈 View 반환
+  if (Platform.OS === 'web' && !isFocused) {
+    return <View style={styles.container} />;
+  }
 
   // 서버 연결 에러 시 에러 화면 표시
   if (serverConnectionError) {

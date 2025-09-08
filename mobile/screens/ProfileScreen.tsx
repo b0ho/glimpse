@@ -9,9 +9,10 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
+import { shadowStyles } from '@/utils/shadowStyles';
 import { useProfileData } from '@/hooks/profile/useProfileData';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { EditNicknameModal } from '@/components/modals/EditNicknameModal';
@@ -30,6 +31,7 @@ import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
  * @description 사용자 프로필, 통계, 프리미엄 상태, 설정 기능을 제공하는 화면
  */
 export const ProfileScreen = () => {
+  const isFocused = useIsFocused();
   const [isNicknameModalVisible, setIsNicknameModalVisible] = useState(false);
   
   const navigation = useNavigation();
@@ -48,6 +50,11 @@ export const ProfileScreen = () => {
     handleDeleteAccount,
     isLoggingOut,
   } = useProfileData(t);
+
+  // 웹에서 포커스되지 않은 경우 렌더링하지 않음
+  if (Platform.OS === 'web' && !isFocused) {
+    return null;
+  }
 
   /**
    * 설정 섹션 렌더링
@@ -176,6 +183,11 @@ export const ProfileScreen = () => {
     </View>
   );
 
+  // 웹에서 포커스되지 않은 경우 빈 View 반환
+  if (Platform.OS === 'web' && !isFocused) {
+    return <View style={styles.container} />;
+  }
+
   return (
     <SafeAreaView 
       style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
@@ -262,13 +274,7 @@ const styles = StyleSheet.create({
   },
   settingsCard: {
     borderRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 3.84,
-    elevation: 3,
+    ...shadowStyles.card,
   },
   settingItem: {
     flexDirection: 'row',

@@ -17,9 +17,10 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
+import { shadowStyles } from '@/utils/shadowStyles';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthStore } from '@/store/slices/authSlice';
 import Toast from 'react-native-toast-message';
@@ -39,6 +40,7 @@ import { EmptySection } from '@/components/interestSearch/EmptySection';
 import { showDeleteConfirm, getSearchInfo } from '@/utils/interestSearch/interestHelpers';
 
 export const InterestSearchScreen: React.FC = () => {
+  const isFocused = useIsFocused();
   const navigation = useNavigation<any>();
   const { colors, isDark } = useTheme();
   const { t } = useAndroidSafeTranslation('interest');
@@ -141,6 +143,11 @@ export const InterestSearchScreen: React.FC = () => {
       onDelete={() => handleDeleteSearch(item.id)}
     />
   );
+
+  // 웹에서 포커스되지 않은 경우 빈 View 반환
+  if (Platform.OS === 'web' && !isFocused) {
+    return <View style={styles.container} />;
+  }
 
   if (serverConnectionError) {
     return <ServerConnectionError onRetry={loadData} />;
@@ -369,11 +376,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    ...shadowStyles.medium,
   },
   ctaButtonText: {
     flex: 1,
@@ -504,11 +507,7 @@ const styles = StyleSheet.create({
     padding: 16,
     margin: 16,
     borderRadius: 12,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    ...shadowStyles.small,
   },
   subscriptionInfo: {
     flexDirection: 'row',

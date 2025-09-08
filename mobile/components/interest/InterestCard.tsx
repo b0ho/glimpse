@@ -13,6 +13,7 @@ import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { InterestType, SearchStatus } from '@/types/interest';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { shadowStyles } from '@/utils/shadowStyles';
 
 const { width } = Dimensions.get('window');
 
@@ -310,8 +311,12 @@ export const InterestCard: React.FC<InterestCardProps> = ({
                 {formatDate(item.createdAt)}
               </Text>
               {item.expiresAt && !isMatched && (
-                <Text style={[styles.expires, { color: colors.WARNING }]}>
-                  만료: {formatDate(item.expiresAt)}
+                <Text style={[styles.expires, { 
+                  color: new Date(item.expiresAt) < new Date() ? colors.ERROR : colors.WARNING 
+                }]}>
+                  {new Date(item.expiresAt) < new Date() 
+                    ? `만료됨 (${formatDate(item.expiresAt)})` 
+                    : `만료: ${formatDate(item.expiresAt)}`}
                 </Text>
               )}
             </View>
@@ -360,6 +365,18 @@ function formatDate(date: string | Date): string {
   const diff = now.getTime() - d.getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
+  // 미래 날짜 처리 (만료 날짜 등)
+  if (diff < 0) {
+    const futureDays = Math.abs(days);
+    if (futureDays === 0) return '오늘';
+    if (futureDays === 1) return '내일';
+    if (futureDays < 7) return `${futureDays}일 후`;
+    if (futureDays < 30) return `${Math.floor(futureDays / 7)}주 후`;
+    if (futureDays < 365) return `${Math.floor(futureDays / 30)}개월 후`;
+    return `${Math.floor(futureDays / 365)}년 후`;
+  }
+
+  // 과거 날짜 처리
   if (days === 0) return '오늘';
   if (days === 1) return '어제';
   if (days < 7) return `${days}일 전`;
@@ -387,11 +404,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     flexDirection: 'row',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    ...shadowStyles.card,
     minHeight: 100,
     position: 'relative',
   },

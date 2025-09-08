@@ -1,4 +1,4 @@
-import { Audio, AVPlaybackStatus } from 'expo-av';
+import { Audio, AVPlaybackStatus } from 'expo-audio';
 import * as FileSystem from 'expo-file-system';
 import { Platform } from 'react-native';
 

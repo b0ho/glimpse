@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useLikeStore } from '@/store/slices/likeSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
@@ -29,6 +29,7 @@ import { ServerConnectionError } from '@/components/ServerConnectionError';
  */
 export const MatchesScreen = React.memo(() => {
   console.log('[MatchesScreen] 컴포넌트 렌더링');
+  const isFocused = useIsFocused();
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [serverConnectionError, setServerConnectionError] = useState(false);
@@ -235,6 +236,11 @@ export const MatchesScreen = React.memo(() => {
       </Text>
     </View>
   );
+
+  // 웹에서 포커스되지 않은 경우 빈 View 반환
+  if (Platform.OS === 'web' && !isFocused) {
+    return <View style={styles.container} />;
+  }
 
   // 서버 연결 에러 시 에러 화면 표시
   if (serverConnectionError) {
