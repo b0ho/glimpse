@@ -385,42 +385,50 @@ export class AuthService {
       // Try Clerk token first
       if (this.clerkClient) {
         try {
-          // Try new SDK method
-          const clerkVerification = await this.clerkClient.verifyToken(token);
-          if (clerkVerification) {
-            return clerkVerification;
-          }
-        } catch (verifyError) {
-          // Try alternative verification method
-          console.log('Trying alternative Clerk verification method...');
+          console.log('[AuthService] Verifying token with Clerk SDK...');
+          
+          // Clerk SDK v5 requires different approach
+          // Use authenticateRequest or direct JWT verification
           const secretKey = process.env.CLERK_SECRET_KEY || process.env.CLERK_API_KEY;
+          
           if (secretKey) {
+            // Import verifyToken from @clerk/backend
+            const { verifyToken: clerkVerifyToken } = await import('@clerk/backend');
+            
             try {
-              // Direct API call to Clerk
-              const response = await axios.post(
-                `${this.clerkApiUrl}/tokens/verify`,
-                {},
-                {
-                  headers: {
-                    'Authorization': `Bearer ${secretKey}`,
-                    'Content-Type': 'application/json',
-                  },
-                  params: {
-                    token: token,
-                  }
-                }
-              );
-              if (response.data) {
-                return response.data;
+              const payload = await clerkVerifyToken(token, {
+                secretKey: secretKey,
+                authorizedParties: [
+                  'https://glimpse.contact',
+                  'https://www.glimpse.contact',
+                  'http://localhost:3000',
+                  'http://localhost:8081'
+                ]
+              });
+              
+              console.log('[AuthService] Token verified successfully:', payload?.sub);
+              return payload;
+            } catch (verifyError: any) {
+              console.error('[AuthService] Clerk token verification failed:', verifyError.message);
+              
+              // Try without authorizedParties as fallback
+              try {
+                const payload = await clerkVerifyToken(token, {
+                  secretKey: secretKey
+                });
+                console.log('[AuthService] Token verified (no authorized parties):', payload?.sub);
+                return payload;
+              } catch (fallbackError: any) {
+                console.error('[AuthService] Fallback verification also failed:', fallbackError.message);
               }
-            } catch (apiError) {
-              console.error('Clerk API verification failed:', apiError);
             }
           }
+        } catch (importError) {
+          console.error('[AuthService] Failed to import @clerk/backend:', importError);
         }
       }
-    } catch (error) {
-      // Fall back to legacy JWT
+      
+      // Fall back to legacy JWT if Clerk fails
       try {
         const secret = this.configService.get<string>(
           'JWT_SECRET',
@@ -428,9 +436,12 @@ export class AuthService {
         );
         return jwt.verify(token, secret);
       } catch (jwtError) {
-        console.error('Token verification failed:', jwtError);
+        console.error('[AuthService] JWT verification failed:', jwtError);
         return null;
       }
+    } catch (error) {
+      console.error('[AuthService] Unexpected error in verifyToken:', error);
+      return null;
     }
   }
 

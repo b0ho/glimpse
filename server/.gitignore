@@ -47,3 +47,4 @@ uploads/
 
 # Prisma
 prisma/migrations/dev/
+.vercel

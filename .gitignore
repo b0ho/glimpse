@@ -170,3 +170,4 @@ monitoring/grafana/data/
 *.temp
 *.cache
 .turbo
+.vercel
