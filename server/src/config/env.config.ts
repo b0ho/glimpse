@@ -34,8 +34,8 @@ export class EnvConfig {
     const nodeEnv = process.env.NODE_ENV || 'development';
 
     // Skip file loading in Railway/production environment
-    if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID) {
-      console.log('🚂 Running on Railway - using environment variables');
+    if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID || process.env.NODE_ENV === 'production') {
+      console.log('🚂 Running on Railway/Production - using environment variables only');
       this.validateRequiredVars();
       this.loaded = true;
       return;
@@ -50,15 +50,14 @@ export class EnvConfig {
       console.log(`✅ Loaded configuration from .env`);
     }
 
-    // 2. Load environment-specific .env file
+    // 2. Load environment-specific .env file (only in development)
     let envSpecificFile: string;
-    if (nodeEnv === 'production') {
-      envSpecificFile = '.env.production';
-    } else if (nodeEnv === 'development' || nodeEnv === 'local') {
+    if (nodeEnv === 'development' || nodeEnv === 'local') {
       envSpecificFile = '.env.local';
     } else if (nodeEnv === 'test') {
       envSpecificFile = '.env.test';
     } else {
+      // Don't try to load production file
       envSpecificFile = `.env.${nodeEnv}`;
     }
 
