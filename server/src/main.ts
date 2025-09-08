@@ -8,10 +8,20 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { initI18n, getI18nMiddleware } from './i18n/i18n.config';
 import { EnvConfig } from './config/env.config';
+import { clerkClient } from '@clerk/clerk-sdk-node';
 
 // Load environment configuration (including secrets)
 const envConfig = EnvConfig.getInstance();
 envConfig.load();
+
+// Initialize Clerk SDK with secret key
+const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+if (clerkSecretKey) {
+  (clerkClient as any).secretKey = clerkSecretKey;
+  console.log('✅ Clerk SDK initialized in main.ts with key:', clerkSecretKey.substring(0, 20) + '...');
+} else {
+  console.error('❌ CLERK_SECRET_KEY not found in environment variables');
+}
 
 /**
  * NestJS 애플리케이션 부트스트랩
