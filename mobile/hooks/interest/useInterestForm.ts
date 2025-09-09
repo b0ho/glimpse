@@ -165,28 +165,22 @@ export const useInterestForm = ({ relationshipType, t }: UseInterestFormProps) =
 
       // 서버에 저장 시도 (실패해도 계속 진행)
       try {
-        const encryptedCard = await secureInterestService.encryptInterestCard({
-          type: selectedType!,
-          value: finalValue,
-          name: name || undefined,
-          metadata: {
-            ...metadata,
-            gender: selectedGender,
-            birthdate: birthdate || undefined,
-            companyName: companyName || undefined,
-            department: department || undefined,
-          },
-          relationshipIntent,
-        });
-
-        await createSearch({
-          type: selectedType!,
-          encryptedValue: encryptedCard.encryptedValue,
-          encryptedMetadata: encryptedCard.encryptedMetadata,
-          expiresAt,
-          relationshipIntent,
-          status: 'active',
-        });
+        const registeredCard = await secureInterestService.registerInterestCard(
+          selectedType!,
+          finalValue,
+          {
+            displayName: name || undefined,
+            notes: department || undefined,
+            additionalInfo: {
+              ...metadata,
+              gender: selectedGender,
+              birthdate: birthdate || undefined,
+              companyName: companyName || undefined,
+              department: department || undefined,
+              relationshipIntent,
+            },
+          }
+        );
 
         console.log('[useInterestForm] Successfully synced to server');
       } catch (serverError) {

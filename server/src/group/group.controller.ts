@@ -20,6 +20,7 @@ import {
 import { GroupService } from './group.service';
 import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import {
   CreateGroupDto,
   UpdateGroupDto,
@@ -36,6 +37,39 @@ import {
 @ApiBearerAuth('JWT-auth')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
+
+  /**
+   * 공개 그룹 목록 조회 (인증 불필요)
+   */
+  @Get('public')
+  @Public()
+  @ApiOperation({ summary: '공개 그룹 목록 조회' })
+  @ApiResponse({ status: 200, description: '공개 그룹 목록' })
+  async getPublicGroups(
+    @Query() query: GetGroupsQueryDto,
+  ) {
+    try {
+      // 공개 그룹만 반환 (예: 공식 그룹들)
+      const groups = await this.groupService.getPublicGroups(
+        query.type,
+        query.search,
+        query.page || 1,
+        query.limit || 20,
+      );
+      return {
+        success: true,
+        data: groups,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message || '공개 그룹 목록 조회에 실패했습니다.',
+        },
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   /**
    * 그룹 목록 조회

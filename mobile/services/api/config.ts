@@ -4,9 +4,14 @@ import { Platform } from 'react-native';
  * API 기본 URL
  * @constant {string}
  */
-// 환경 감지: Vercel 환경에서는 production으로 간주
-const isProduction = process.env.NODE_ENV === 'production' || 
-                     (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.hostname?.includes('.vercel.app'));
+// 환경 감지: 명시적으로 production이거나 실제 프로덕션 도메인일 때만 production으로 간주
+const isProduction = process.env.NODE_ENV === 'production' && 
+                     !__DEV__ && // React Native의 개발 모드 체크
+                     (Platform.OS === 'web' ? 
+                       (typeof window !== 'undefined' && 
+                        (window.location?.hostname?.includes('.vercel.app') || 
+                         window.location?.hostname?.includes('glimpse.contact'))) : 
+                       false); // Native에서는 __DEV__ 플래그로만 판단
 
 // Web에서는 localhost 사용, Native에서는 IP 주소 사용
 const getBaseURL = () => {
@@ -172,28 +177,23 @@ class ApiClient {
       url += `?${queryString}`;
     }
 
-    // Check if we're in dev mode first (fixed 2025-09-07 for glimpse.contact)
-    // glimpse.contact는 운영 환경이므로 개발 모드에서 제외
-    const isGlimpseContact = typeof window !== 'undefined' && 
-                             window.location?.hostname?.includes('glimpse.contact');
-    
-    console.log('[ApiClient] Environment check:', {
-      hostname: typeof window !== 'undefined' ? window.location?.hostname : 'not-browser',
-      isGlimpseContact,
-      __DEV__: typeof __DEV__ !== 'undefined' ? __DEV__ : 'undefined',
-      NODE_ENV: process.env.NODE_ENV,
-      url
-    });
-    
-    const isDev = !isGlimpseContact && (
-                  (typeof __DEV__ !== 'undefined' && __DEV__) ||
+    // Check if we're in dev mode - simplified and consistent with isProduction check
+    const isDev = (typeof __DEV__ !== 'undefined' && __DEV__) ||
                   process.env.NODE_ENV === 'development' || 
                   process.env.ENV === 'development' ||
                   url.includes('localhost') ||
                   url.includes('127.0.0.1') ||
                   url.includes('192.168') ||
                   url.includes('10.') ||
-                  url.includes('172.'));
+                  url.includes('172.');
+    
+    console.log('[ApiClient] Environment check:', {
+      hostname: typeof window !== 'undefined' ? window.location?.hostname : 'not-browser',
+      __DEV__: typeof __DEV__ !== 'undefined' ? __DEV__ : 'undefined',
+      NODE_ENV: process.env.NODE_ENV,
+      isDev,
+      url
+    });
 
     // Set up headers
     const headers: Record<string, string> = {
