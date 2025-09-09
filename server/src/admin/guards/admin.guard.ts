@@ -25,8 +25,11 @@ export class AdminGuard implements CanActivate {
     const userId = user?.id || user?.userId;
 
     // 개발 모드 확인
-    const useDevAuth =
-      this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
+    const railwayEnv = this.configService.get<string>('RAILWAY_ENVIRONMENT');
+    const isProduction = nodeEnv === 'production' || railwayEnv === 'production';
+    const useDevAuthConfig = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    const useDevAuth = !isProduction && useDevAuthConfig;
     const devAuth = request.headers['x-dev-auth'];
 
     // 디버깅을 위한 로그

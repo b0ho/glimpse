@@ -13,7 +13,7 @@ export class TestAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     // 개발/테스트 환경에서만 동작
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT === 'production') {
       return false;
     }
 

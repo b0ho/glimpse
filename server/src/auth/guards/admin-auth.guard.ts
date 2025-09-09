@@ -30,8 +30,10 @@ export class AdminAuthGuard implements CanActivate {
 
     // 개발 모드 확인
     const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
+    const railwayEnv = this.configService.get<string>('RAILWAY_ENVIRONMENT');
+    const isProduction = nodeEnv === 'production' || railwayEnv === 'production';
     const useDevAuthConfig = this.configService.get<string>('USE_DEV_AUTH') === 'true';
-    const allowDevAuth = nodeEnv !== 'production' && useDevAuthConfig;
+    const allowDevAuth = !isProduction && useDevAuthConfig;
 
     if (!token) {
       throw new UnauthorizedException('관리자 인증 토큰이 필요합니다.');

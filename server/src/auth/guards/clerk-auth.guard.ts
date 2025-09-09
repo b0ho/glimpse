@@ -27,8 +27,10 @@ export class ClerkAuthGuard implements CanActivate {
 
     // 개발 모드 확인 - 운영 환경에서는 절대 허용하지 않음
     const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
+    const railwayEnv = this.configService.get<string>('RAILWAY_ENVIRONMENT');
+    const isProduction = nodeEnv === 'production' || railwayEnv === 'production';
     const useDevAuthConfig = this.configService.get<string>('USE_DEV_AUTH') === 'true';
-    const allowDevAuth = nodeEnv !== 'production' && useDevAuthConfig;
+    const allowDevAuth = !isProduction && useDevAuthConfig;
 
     // 개발 환경에서만 개발 모드 허용 (토큰이 없을 때만)
     if (allowDevAuth && !token) {
