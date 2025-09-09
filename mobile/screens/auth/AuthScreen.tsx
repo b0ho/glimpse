@@ -129,9 +129,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
       case 'phone':
         return (
           <PhoneVerificationScreen
-            onCodeSent={handleVerificationSent}
+            onVerificationSent={handleVerificationSent}
             onBack={handleBack}
-            mode={authMode}
+            authMode={authMode}
           />
         );
       

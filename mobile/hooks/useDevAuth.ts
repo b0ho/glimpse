@@ -21,6 +21,16 @@ export function useDevAuth() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   
+  // localStorage에서 로그아웃 상태 확인 (동기적으로 처리)
+  const checkLoggedOutStatus = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('dev-auth-logged-out') === 'true';
+    }
+    return false;
+  };
+  
+  const [hasLoggedOut, setHasLoggedOut] = useState(checkLoggedOutStatus());
+  
   const superAccount = getCurrentSuperAccount();
 
   useEffect(() => {
@@ -30,7 +40,16 @@ export function useDevAuth() {
       return;
     }
     
-    console.log('[DevAuth] Hydration complete. Auth state:', { isAuthenticated, user: !!user, token: !!token });
+    // 매번 localStorage를 직접 확인
+    const isLoggedOut = checkLoggedOutStatus();
+    console.log('[DevAuth] Hydration complete. Auth state:', { isAuthenticated, user: !!user, token: !!token, isLoggedOut });
+    
+    // 로그아웃 상태면 자동 로그인하지 않음
+    if (isLoggedOut) {
+      console.log('[DevAuth] User has logged out, skipping auto-login');
+      setIsLoaded(true);
+      return;
+    }
     
     // 이미 인증되어 있으면 해당 상태 사용
     if (isAuthenticated && user) {
@@ -44,8 +63,9 @@ export function useDevAuth() {
       return;
     }
     
-    // 개발 환경에서 자동 로그인
+    // 개발 환경에서 자동 로그인 (로그아웃한 경우는 위에서 이미 처리됨)
     const loadUserFromAPI = async () => {
+      
       if (isAuthBypassEnabled && superAccount && !user) {
         console.log('[DevAuth] Logging in with super account:', superAccount.nickname);
         
@@ -88,7 +108,7 @@ export function useDevAuth() {
     };
     
     loadUserFromAPI();
-  }, [setUser, setToken, user, superAccount, hasHydrated, isAuthenticated, token]);
+  }, [setUser, setToken, user, superAccount, hasHydrated, isAuthenticated, token, hasLoggedOut]);
 
   return {
     isLoaded: hasHydrated && isLoaded,
@@ -99,9 +119,16 @@ export function useDevAuth() {
     sessionId: DEV_CONFIG.devSessionId,
     signOut: async () => {
       console.log('[DevAuth] Signing out');
+      
+      // localStorage에 로그아웃 상태 저장
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('dev-auth-logged-out', 'true');
+      }
+      setHasLoggedOut(true);  // 로그아웃 플래그 설정
       setIsSignedIn(false);
-      useAuthStore.getState().clearAuth();
+      await useAuthStore.getState().clearAuth();
       setAuthToken(null);
+      console.log('[DevAuth] Sign out complete, user:', useAuthStore.getState().user);
     },
     // 개발 모드 전용 메서드
     switchAccount: (accountType: string) => {

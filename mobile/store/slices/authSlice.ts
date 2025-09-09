@@ -40,7 +40,7 @@ interface AuthStore extends AuthState {
   /** 에러 메시지 설정 */
   setError: (error: string | null) => void;
   /** 인증 정보 초기화 */
-  clearAuth: () => void;
+  clearAuth: () => Promise<void>;
   /** 사용자 정보 업데이트 */
   updateUser: (updates: Partial<User>) => void;
   /** 사용자 프로필 업데이트 (호환성) */
@@ -168,13 +168,23 @@ const createAuthStore = (set: any, get: any) => ({
    * 인증 정보 초기화
    * @description 로그아웃 시 모든 인증 관련 정보 제거
    */
-  clearAuth: () => {
+  clearAuth: async () => {
+    // storage에서도 데이터 삭제
+    try {
+      await secureStorage.removeItem('auth-storage');
+    } catch (error) {
+      console.error('Failed to clear auth storage:', error);
+    }
+    
     set({
       isAuthenticated: false,
       user: null,
       token: null,
       error: null,
-      // 앱 모드는 유지
+      isLoading: false,
+      // 앱 모드도 초기화하여 로그인 화면으로 이동하도록 함
+      currentMode: AppMode.DATING,
+      subscriptionTier: SubscriptionTier.BASIC,
     });
   },
 

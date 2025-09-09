@@ -11,6 +11,7 @@ import { shadowStyles } from '@/utils/shadowStyles';
 import { ClerkGoogleAuth } from '@/components/auth/ClerkGoogleAuth';
 import { QuickDevUser } from '@/types/auth.types';
 import { isDevelopment } from '@/config/dev.config';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 interface WelcomeScreenProps {
   onSignInMode: () => void;
@@ -84,7 +85,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             <ActivityIndicator size="small" color="#4285F4" />
           ) : (
             <>
-              <ClerkGoogleAuth onSuccess={onGoogleLogin} />
+              <MaterialCommunityIcons 
+                name="google" 
+                size={20} 
+                color="#4285F4" 
+              />
               <Text style={[styles.googleButtonText, { color: '#4285F4' }]}>
                 {t('welcome.continueWithGoogle')}
               </Text>
@@ -92,29 +97,59 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           )}
         </TouchableOpacity>
         
-        {/* 전화번호 로그인 버튼 - 개발 환경에서만 표시 */}
-        {isDevelopment && (
-          <>
-            <TouchableOpacity
-              style={[styles.authButton, { backgroundColor: colors.PRIMARY }]}
-              onPress={onSignInMode}
-            >
-              <Text style={[styles.authButtonText, { color: '#fff' }]}>
-                {t('welcome.loginWithPhone')}
-              </Text>
-            </TouchableOpacity>
-            
-            {/* 회원가입 버튼 */}
-            <TouchableOpacity
-              style={[styles.authButton, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER, borderWidth: 1 }]}
-              onPress={onSignUpMode}
-            >
-              <Text style={[styles.authButtonText, { color: colors.TEXT.PRIMARY }]}>
-                {t('welcome.signUpWithPhone')}
-              </Text>
-            </TouchableOpacity>
-          </>
-        )}
+        {/* 전화번호 로그인 버튼 - 모든 환경에서 표시 */}
+        <TouchableOpacity
+          style={[styles.authButton, { backgroundColor: colors.PRIMARY }]}
+          onPress={onSignInMode}
+        >
+          <MaterialCommunityIcons 
+            name="phone" 
+            size={20} 
+            color="#fff" 
+          />
+          <Text style={[styles.authButtonText, { color: '#fff', marginLeft: SPACING.SM }]}>
+            {t('welcome.loginWithPhone')}
+          </Text>
+        </TouchableOpacity>
+        
+        {/* 회원가입 버튼 */}
+        <TouchableOpacity
+          style={[styles.authButton, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER, borderWidth: 1 }]}
+          onPress={onSignUpMode}
+        >
+          <MaterialCommunityIcons 
+            name="account-plus" 
+            size={20} 
+            color={colors.TEXT.PRIMARY} 
+          />
+          <Text style={[styles.authButtonText, { color: colors.TEXT.PRIMARY, marginLeft: SPACING.SM }]}>
+            {t('welcome.signUpWithPhone')}
+          </Text>
+        </TouchableOpacity>
+        
+        {/* 또는 구분선 */}
+        <View style={styles.dividerContainer}>
+          <View style={[styles.divider, { backgroundColor: colors.BORDER }]} />
+          <Text style={[styles.dividerText, { color: colors.TEXT.TERTIARY }]}>
+            또는
+          </Text>
+          <View style={[styles.divider, { backgroundColor: colors.BORDER }]} />
+        </View>
+        
+        {/* Clerk 전화번호 인증 버튼 (신규) */}
+        <TouchableOpacity
+          style={[styles.authButton, { backgroundColor: '#00D632' }]}
+          onPress={onSignUpMode}
+        >
+          <MaterialCommunityIcons 
+            name="message-text" 
+            size={20} 
+            color="#fff" 
+          />
+          <Text style={[styles.authButtonText, { color: '#fff', marginLeft: SPACING.SM }]}>
+            SMS로 빠른 시작
+          </Text>
+        </TouchableOpacity>
       </View>
       
       {/* 개발 환경 빠른 로그인 */}
@@ -190,10 +225,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.XL,
   },
   authButton: {
+    flexDirection: 'row',
     paddingVertical: SPACING.MD,
     paddingHorizontal: SPACING.LG,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   authButtonText: {
     fontSize: FONT_SIZES.MD,
@@ -273,5 +310,18 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.XS,
     textAlign: 'center',
     lineHeight: 18,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: SPACING.MD,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    marginHorizontal: SPACING.MD,
+    fontSize: FONT_SIZES.SM,
   },
 });

@@ -71,13 +71,27 @@ export const useProfileData = (t: (key: string) => string) => {
       
       setIsLoggingOut(true);
       try {
-        // 스토어 초기화를 먼저 수행
-        authStore.clearAuth();
+        console.log('[Logout] Starting logout process...');
+        
+        // 스토어 초기화를 먼저 수행 (clearAuth는 이제 async)
+        await authStore.clearAuth();
         likeStore.clearLikes();
         groupStore.clearGroups();
         
+        console.log('[Logout] Stores cleared, user:', authStore.user);
+        
         // Clerk/DevAuth 로그아웃 수행
         await signOut();
+        
+        console.log('[Logout] SignOut completed, navigating to Auth...');
+        
+        // 네비게이션을 Auth 화면으로 리셋
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Auth' }],
+        });
+        
+        console.log('[Logout] Navigation reset completed');
       } catch (error) {
         console.error('Sign out error:', error);
         window.alert(t('profile:settings.logoutError'));
@@ -96,13 +110,23 @@ export const useProfileData = (t: (key: string) => string) => {
             onPress: async () => {
               setIsLoggingOut(true);
               try {
-                // 스토어 초기화를 먼저 수행
-                authStore.clearAuth();
+                console.log('[Logout] Starting logout process (Native)...');
+                
+                // 스토어 초기화를 먼저 수행 (clearAuth는 이제 async)
+                await authStore.clearAuth();
                 likeStore.clearLikes();
                 groupStore.clearGroups();
                 
+                console.log('[Logout] Stores cleared (Native), user:', authStore.user);
+                
                 // Clerk/DevAuth 로그아웃 수행
                 await signOut();
+                
+                // 네비게이션을 Auth 화면으로 리셋
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Auth' }],
+                });
               } catch (error) {
                 console.error('Sign out error:', error);
                 Alert.alert(t('common:status.error'), t('profile:settings.logoutError'));

@@ -632,7 +632,20 @@ function AppNavigator() {
   // 개발 모드 또는 Vercel 도메인에서는 Zustand 스토어의 user 상태도 확인
   const isVercelDomain = typeof window !== 'undefined' && 
                         window.location?.hostname?.includes('vercel.app');
-  const isAuthenticated = (__DEV__ || isVercelDomain) ? (isSignedIn || !!user) : isSignedIn;
+  // user가 명시적으로 null이면 로그아웃된 것으로 처리
+  const isAuthenticated = (__DEV__ || isVercelDomain) 
+    ? (user !== null && (isSignedIn || !!user)) 
+    : isSignedIn;
+  
+  // 디버깅을 위한 로그
+  console.log('[AppNavigator] Auth State:', {
+    isSignedIn,
+    hasUser: !!user,
+    userIsNull: user === null,
+    isAuthenticated,
+    currentMode,
+    hasSelectedMode,
+  });
 
   // Check onboarding status
   useEffect(() => {
