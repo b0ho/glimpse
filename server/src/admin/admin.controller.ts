@@ -62,16 +62,6 @@ export class AdminController {
     const isProduction = nodeEnv === 'production' || railwayEnv === 'production';
     const useDevAuthConfig = this.configService.get<string>('USE_DEV_AUTH') === 'true';
     const allowDevAuth = !isProduction && useDevAuthConfig;
-    
-    // 디버깅 로그
-    console.log('Admin Login Debug:', {
-      nodeEnv,
-      railwayEnv,
-      isProduction,
-      useDevAuthConfig,
-      allowDevAuth,
-      devAuth,
-    });
 
     if (allowDevAuth && devAuth === 'true') {
       // 개발 모드에서는 어떤 이메일/비밀번호도 허용
