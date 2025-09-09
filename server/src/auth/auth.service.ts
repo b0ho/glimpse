@@ -357,11 +357,14 @@ export class AuthService {
    * JWT 토큰 검증
    */
   async verifyToken(token: string): Promise<any> {
-    // 개발 모드 확인
-    const useDevAuth =
-      this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    // 개발 모드 확인 - 운영 환경에서는 절대 허용하지 않음
+    const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
+    const railwayEnv = this.configService.get<string>('RAILWAY_ENVIRONMENT');
+    const isProduction = nodeEnv === 'production' || railwayEnv === 'production';
+    const useDevAuthConfig = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    const allowDevAuth = !isProduction && useDevAuthConfig;
 
-    if (useDevAuth && token.startsWith('dev-')) {
+    if (allowDevAuth && token.startsWith('dev-')) {
       // 개발 모드 간단한 토큰 처리
       if (token === 'dev-token') {
         return {

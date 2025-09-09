@@ -58,11 +58,15 @@ export class AuthController {
     @Headers('x-dev-auth') devAuth?: string,
   ) {
     try {
-      const useDevAuth =
-        this.configService.get<string>('USE_DEV_AUTH') === 'true';
+      // 개발 모드 확인 - 운영 환경에서는 절대 허용하지 않음
+      const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
+      const railwayEnv = this.configService.get<string>('RAILWAY_ENVIRONMENT');
+      const isProduction = nodeEnv === 'production' || railwayEnv === 'production';
+      const useDevAuthConfig = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+      const allowDevAuth = !isProduction && useDevAuthConfig;
 
       let userId: string;
-      if (useDevAuth && devAuth === 'true' && body.phoneNumber) {
+      if (allowDevAuth && devAuth === 'true' && body.phoneNumber) {
         // 개발 모드에서는 전화번호를 사용자 ID로 사용
         userId = body.phoneNumber;
       } else if (body.clerkUserId) {

@@ -56,11 +56,14 @@ export class AdminController {
   ): Promise<AdminTokenResponseDto> {
     const { email, password } = loginDto;
 
-    // 개발 모드 확인
-    const useDevAuth =
-      this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    // 개발 모드 확인 - 운영 환경에서는 절대 허용하지 않음
+    const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
+    const railwayEnv = this.configService.get<string>('RAILWAY_ENVIRONMENT');
+    const isProduction = nodeEnv === 'production' || railwayEnv === 'production';
+    const useDevAuthConfig = this.configService.get<string>('USE_DEV_AUTH') === 'true';
+    const allowDevAuth = !isProduction && useDevAuthConfig;
 
-    if (useDevAuth && devAuth === 'true') {
+    if (allowDevAuth && devAuth === 'true') {
       // 개발 모드에서는 어떤 이메일/비밀번호도 허용
       const payload = {
         email,
