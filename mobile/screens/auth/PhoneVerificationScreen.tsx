@@ -81,17 +81,27 @@ export const PhoneVerificationScreen = ({
         const titleKey = authMode === 'signup' ? 'phoneVerification.signup.success.title' : 'phoneVerification.success.title';
         const messageKey = authMode === 'signup' ? 'phoneVerification.signup.success.message' : 'phoneVerification.success.message';
         
-        console.log('✅ Success, showing alert');
-        Alert.alert(
-          t(titleKey),
-          t(messageKey),
-          [
-            {
-              text: t('common:actions.confirm'),
-              onPress: () => onVerificationSent(rawNumbers),
-            },
-          ]
-        );
+        console.log('✅ Success, moving to SMS verification');
+        
+        // 웹 환경에서는 Alert 콜백이 작동하지 않을 수 있으므로 플랫폼별 처리
+        if (Platform.OS === 'web') {
+          // 웹에서는 바로 다음 화면으로 이동
+          onVerificationSent(rawNumbers);
+          // 옵션: 토스트 메시지나 다른 방식으로 알림
+          window.alert(`${t(titleKey)}\n${t(messageKey)}`);
+        } else {
+          // 네이티브에서는 Alert 사용
+          Alert.alert(
+            t(titleKey),
+            t(messageKey),
+            [
+              {
+                text: t('common:actions.confirm'),
+                onPress: () => onVerificationSent(rawNumbers),
+              },
+            ]
+          );
+        }
       } else {
         console.log('❌ Auth service failed:', result.error);
         Alert.alert(t('common:errors.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('auth:phoneVerification.errors.sendFailed'));
