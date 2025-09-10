@@ -41,6 +41,82 @@ export class GroupService {
   ) {}
 
   /**
+   * 공개 그룹 목록 조회 (인증 불필요)
+   *
+   * @param type 그룹 타입 필터
+   * @param search 검색어
+   * @param page 페이지 번호
+   * @param limit 페이지당 항목 수
+   * @returns 공개 그룹 목록
+   */
+  async getPublicGroups(
+    type?: GroupType,
+    search?: string,
+    page: number = 1,
+    limit: number = 20,
+  ) {
+    const where: Prisma.GroupWhereInput = {
+      isActive: true,
+      // 공개 그룹만 조회 (OFFICIAL 타입이나 공개 설정된 그룹)
+      OR: [
+        { type: 'OFFICIAL' },
+        { settings: { path: ['isPublic'], equals: true } },
+      ],
+    };
+
+    if (type) {
+      where.type = type;
+    }
+
+    if (search) {
+      where.AND = [
+        {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+          ],
+        },
+      ];
+    }
+
+    const groups = await this.prisma.group.findMany({
+      where,
+      include: {
+        creator: {
+          select: { id: true, nickname: true },
+        },
+        company: {
+          select: { id: true, name: true, logo: true },
+        },
+        _count: {
+          select: { members: { where: { status: 'ACTIVE' } } },
+        },
+      },
+      orderBy: [
+        { type: 'asc' }, // 공식 그룹 우선
+        { createdAt: 'desc' },
+      ],
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return groups.map((group) => ({
+      id: group.id,
+      name: group.name,
+      description: group.description,
+      type: group.type,
+      memberCount: group._count.members,
+      maxMembers: group.maxMembers,
+      settings: group.settings,
+      location: group.location,
+      creator: group.creator,
+      company: group.company,
+      createdAt: group.createdAt,
+      isPublic: true, // 공개 그룹이므로 true
+    }));
+  }
+
+  /**
    * 그룹 목록 조회
    *
    * @param userId 사용자 ID
