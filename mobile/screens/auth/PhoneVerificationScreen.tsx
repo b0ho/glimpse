@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Pressable,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthService } from '@/services/auth/auth-service';
 import { useTheme } from '@/hooks/useTheme';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { LIGHT_COLORS, DARK_COLORS, SIZES } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { validatePhoneNumber as validatePhone } from '@/services/auth/clerk-config';
 
 interface PhoneVerificationScreenProps {
@@ -23,6 +26,8 @@ interface PhoneVerificationScreenProps {
   onBack?: () => void;
 }
 
+const { width } = Dimensions.get('window');
+
 export const PhoneVerificationScreen = ({
   onVerificationSent,
   authMode = 'signin',
@@ -30,9 +35,39 @@ export const PhoneVerificationScreen = ({
 }: PhoneVerificationScreenProps) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const authService = useAuthService();
   const { t } = useAndroidSafeTranslation('auth');
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
+  
+  // 애니메이션 값
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+  const inputBorderAnim = useRef(new Animated.Value(0)).current;
+  
+  useEffect(() => {
+    // 페이드인 애니메이션
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 4,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+  
+  const animateInputFocus = (focused: boolean) => {
+    Animated.timing(inputBorderAnim, {
+      toValue: focused ? 1 : 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
 
   const formatPhoneInput = (input: string): string => {
     // 숫자만 추출
@@ -129,72 +164,171 @@ export const PhoneVerificationScreen = ({
     >
       {onBack && (
         <View style={styles.header}>
-          <Pressable
-            style={[styles.backButton, { backgroundColor: colors.SURFACE }]}
+          <TouchableOpacity
+            style={styles.backButton}
             onPress={onBack}
+            activeOpacity={0.7}
           >
-            <Text style={[styles.backButtonText, { color: colors.TEXT.PRIMARY }]}>← 뒤로가기</Text>
-          </Pressable>
+            <Ionicons 
+              name="arrow-back" 
+              size={24} 
+              color={isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY} 
+            />
+            <Text style={[styles.backButtonText, { color: isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY }]}>
+              뒤로가기
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
       
-      <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.PRIMARY }]}>
-          {authMode === 'signup' ? t('auth:phoneVerification.signup.title') : t('auth:phoneVerification.title')}
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
-          {authMode === 'signup' ? t('auth:phoneVerification.signup.subtitle') : t('auth:phoneVerification.subtitle')}
-        </Text>
+      <Animated.View 
+        style={[
+          styles.content,
+          {
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }],
+          },
+        ]}
+      >
+        {/* 타이틀 섹션 */}
+        <View style={styles.titleSection}>
+          <View style={styles.iconContainer}>
+            <LinearGradient
+              colors={isDarkMode ? ['#FF8A8A', '#FF6B6B'] : ['#FF6B6B', '#FF5252']}
+              style={styles.gradientIcon}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="phone-portrait" size={32} color="white" />
+            </LinearGradient>
+          </View>
+          <Text style={[styles.title, { color: isDarkMode ? DARK_COLORS.PRIMARY : LIGHT_COLORS.PRIMARY }]}>
+            {authMode === 'signup' ? t('auth:phoneVerification.signup.title') : t('auth:phoneVerification.title')}
+          </Text>
+          <Text style={[styles.subtitle, { color: isDarkMode ? DARK_COLORS.TEXT.SECONDARY : LIGHT_COLORS.TEXT.SECONDARY }]}>
+            {authMode === 'signup' ? t('auth:phoneVerification.signup.subtitle') : t('auth:phoneVerification.subtitle')}
+          </Text>
+        </View>
         
+        {/* 폼 섹션 */}
         <View style={styles.form}>
-          <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>{t('auth:phoneVerification.phoneLabel')}</Text>
-          <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
+          <View style={styles.labelContainer}>
+            <Text style={[styles.label, { color: isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY }]}>
+              {t('auth:phoneVerification.phoneLabel')}
+            </Text>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>필수</Text>
+            </View>
+          </View>
+          
+          <Text style={[styles.description, { color: isDarkMode ? DARK_COLORS.TEXT.SECONDARY : LIGHT_COLORS.TEXT.SECONDARY }]}>
             {t('auth:phoneVerification.description')}
           </Text>
           
-          <TextInput
-            style={[styles.input, { 
-              backgroundColor: colors.SURFACE,
-              borderColor: colors.BORDER,
-              color: colors.TEXT.PRIMARY
-            }]}
-            placeholder={t('auth:phoneVerification.placeholder')}
-            placeholderTextColor={colors.TEXT.LIGHT}
-            value={phoneNumber}
-            onChangeText={handlePhoneChange}
-            keyboardType="phone-pad"
-            maxLength={13}
-            autoFocus
-          />
-          
-          <Pressable
+          {/* 입력 필드 */}
+          <Animated.View
             style={[
-              styles.button,
-              { backgroundColor: colors.PRIMARY },
-              (!phoneNumber.trim() || isLoading) && [styles.buttonDisabled, { backgroundColor: colors.TEXT.LIGHT }],
+              styles.inputContainer,
+              {
+                borderColor: inputBorderAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [
+                    isDarkMode ? DARK_COLORS.BORDER : LIGHT_COLORS.BORDER,
+                    isDarkMode ? DARK_COLORS.PRIMARY : LIGHT_COLORS.PRIMARY,
+                  ],
+                }),
+                borderWidth: inputBorderAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1, 2],
+                }),
+              },
             ]}
+          >
+            <View style={styles.inputPrefix}>
+              <Ionicons 
+                name="call-outline" 
+                size={20} 
+                color={isFocused 
+                  ? (isDarkMode ? DARK_COLORS.PRIMARY : LIGHT_COLORS.PRIMARY)
+                  : (isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY)
+                } 
+              />
+              <Text style={[
+                styles.countryCode,
+                { color: isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY }
+              ]}>
+                +82
+              </Text>
+            </View>
+            <TextInput
+              style={[styles.input, { 
+                color: isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY
+              }]}
+              placeholder="10-1234-5678"
+              placeholderTextColor={isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY}
+              value={phoneNumber}
+              onChangeText={handlePhoneChange}
+              keyboardType="phone-pad"
+              maxLength={13}
+              autoFocus
+              onFocus={() => {
+                setIsFocused(true);
+                animateInputFocus(true);
+              }}
+              onBlur={() => {
+                setIsFocused(false);
+                animateInputFocus(false);
+              }}
+            />
+          </Animated.View>
+          
+          {/* 버튼 */}
+          <TouchableOpacity
             onPress={handleSendVerification}
             disabled={!phoneNumber.trim() || isLoading}
+            activeOpacity={0.8}
           >
-            {isLoading ? (
-              <View style={styles.buttonContent}>
-                <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
-                <Text style={[styles.buttonText, { color: colors.TEXT.WHITE, marginLeft: SPACING.SM }]}>
-                  {authMode === 'signup' ? t('auth:phoneVerification.signup.sendingButton') : t('auth:phoneVerification.sendingButton')}
-                </Text>
-              </View>
-            ) : (
-              <Text style={[styles.buttonText, { color: colors.TEXT.WHITE }]}>
-                {authMode === 'signup' ? t('auth:phoneVerification.signup.sendButton') : t('auth:phoneVerification.sendButton')}
-              </Text>
-            )}
-          </Pressable>
+            <LinearGradient
+              colors={
+                !phoneNumber.trim() || isLoading
+                  ? isDarkMode ? ['#48484A', '#48484A'] : ['#CED4DA', '#CED4DA']
+                  : isDarkMode ? ['#FF8A8A', '#FF6B6B'] : ['#FF6B6B', '#FF5252']
+              }
+              style={styles.gradientButton}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              {isLoading ? (
+                <View style={styles.buttonContent}>
+                  <ActivityIndicator size="small" color="white" />
+                  <Text style={[styles.buttonText, { marginLeft: 8 }]}>
+                    {authMode === 'signup' ? t('auth:phoneVerification.signup.sendingButton') : t('auth:phoneVerification.sendingButton')}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.buttonContent}>
+                  <Text style={styles.buttonText}>
+                    {authMode === 'signup' ? t('auth:phoneVerification.signup.sendButton') : t('auth:phoneVerification.sendButton')}
+                  </Text>
+                  <Ionicons name="arrow-forward" size={20} color="white" style={{ marginLeft: 8 }} />
+                </View>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
         
-        <Text style={[styles.privacy, { color: colors.TEXT.LIGHT }]}>
-          {t('auth:phoneVerification.privacyNotice')}
-        </Text>
-      </View>
+        {/* 개인정보 안내 */}
+        <View style={styles.privacyContainer}>
+          <Ionicons 
+            name="shield-checkmark-outline" 
+            size={16} 
+            color={isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY} 
+          />
+          <Text style={[styles.privacy, { color: isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY }]}>
+            {t('auth:phoneVerification.privacyNotice')}
+          </Text>
+        </View>
+      </Animated.View>
     </KeyboardAvoidingView>
   );
 };
@@ -202,79 +336,160 @@ export const PhoneVerificationScreen = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
-    paddingHorizontal: SPACING.LG,
-    paddingVertical: SPACING.MD,
-    paddingTop: SPACING.XL, // Safe area 고려
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 20,
   },
   backButton: {
-    paddingVertical: SPACING.SM,
-    paddingHorizontal: SPACING.MD,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
   },
   backButtonText: {
-    fontSize: FONT_SIZES.MD,
+    fontSize: 16,
     fontWeight: '500',
-    color: COLORS.TEXT.PRIMARY,
+    marginLeft: 4,
   },
   content: {
     flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+  },
+  titleSection: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  iconContainer: {
+    marginBottom: 24,
+  },
+  gradientIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     justifyContent: 'center',
-    paddingHorizontal: SPACING.LG,
+    alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#FF6B6B',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.3,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 10,
+      },
+      web: {
+        boxShadow: '0px 8px 24px rgba(255, 107, 107, 0.3)',
+      } as any,
+    }),
   },
   title: {
-    fontSize: FONT_SIZES.XXXL,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: COLORS.PRIMARY,
     textAlign: 'center',
-    marginBottom: SPACING.SM,
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
+    fontSize: 15,
     textAlign: 'center',
-    marginBottom: SPACING.XXL,
+    lineHeight: 22,
+    paddingHorizontal: 20,
   },
   form: {
-    marginBottom: SPACING.XXL,
+    marginBottom: 32,
+  },
+  labelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   label: {
-    fontSize: FONT_SIZES.LG,
+    fontSize: 16,
     fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
-    marginBottom: SPACING.SM,
+  },
+  badge: {
+    marginLeft: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+    borderRadius: 12,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#FF6B6B',
   },
   description: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
+    fontSize: 14,
     lineHeight: 20,
-    marginBottom: SPACING.LG,
+    marginBottom: 20,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+    marginBottom: 24,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
+      } as any,
+    }),
+  },
+  inputPrefix: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 16,
+    paddingRight: 8,
+  },
+  countryCode: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 8,
   },
   input: {
-    backgroundColor: COLORS.SURFACE,
-    borderWidth: 1,
-    borderColor: COLORS.BORDER,
-    borderRadius: 12,
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.MD,
-    fontSize: FONT_SIZES.MD,
-    marginBottom: SPACING.LG,
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: Platform.OS === 'ios' ? 18 : 16,
+    paddingRight: 16,
   },
-  button: {
-    backgroundColor: COLORS.PRIMARY,
-    borderRadius: 12,
-    paddingVertical: SPACING.MD,
+  gradientButton: {
+    borderRadius: 16,
+    paddingVertical: 18,
     alignItems: 'center',
-  },
-  buttonDisabled: {
-    backgroundColor: COLORS.TEXT.LIGHT,
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#FF6B6B',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 8,
+      },
+      web: {
+        boxShadow: '0px 4px 16px rgba(255, 107, 107, 0.25)',
+      } as any,
+    }),
   },
   buttonText: {
-    color: COLORS.TEXT.WHITE,
-    fontSize: FONT_SIZES.MD,
+    color: 'white',
+    fontSize: 16,
     fontWeight: '600',
   },
   buttonContent: {
@@ -282,10 +497,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  privacyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 24,
+  },
   privacy: {
-    fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
+    fontSize: 13,
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 18,
+    marginLeft: 6,
   },
 });

@@ -1,4 +1,4 @@
-import { useAuth, useSignIn, useSignUp, useUser } from '@clerk/clerk-expo';
+import { useAuth, useSignIn, useSignUp, useUser, useClerk } from '@clerk/clerk-expo';
 import { formatPhoneNumber, validatePhoneNumber } from './clerk-config';
 import { ApiResponse } from '@/types';
 
@@ -31,8 +31,9 @@ export interface AuthService {
 export const useAuthService = (): AuthService => {
   const { signOut: clerkSignOut, isSignedIn } = useAuth();
   const { user } = useUser();
-  const { signIn, isLoaded: signInLoaded } = useSignIn();
-  const { signUp, isLoaded: signUpLoaded } = useSignUp();
+  const { signIn, isLoaded: signInLoaded, setActive: setSignInActive } = useSignIn();
+  const { signUp, isLoaded: signUpLoaded, setActive: setSignUpActive } = useSignUp();
+  const { setActive } = useClerk();
 
   /**
    * 전화번호로 로그인 시작 (기존 사용자만)
@@ -176,8 +177,15 @@ export const useAuthService = (): AuthService => {
    * @description SMS 인증 코드를 확인하고 사용자 세션 생성
    */
   const verifyPhoneCode = async (code: string): Promise<ApiResponse<{ user: object }>> => {
+    console.log('🔍 verifyPhoneCode called with code:', code);
+    console.log('📦 signIn status:', signIn?.status);
+    console.log('📦 signUp status:', signUp?.status);
+    console.log('📦 signInLoaded:', signInLoaded);
+    console.log('📦 signUpLoaded:', signUpLoaded);
+    
     try {
       if (!signInLoaded || !signUpLoaded) {
+        console.log('❌ Auth service not ready');
         return {
           success: false,
           error: {
@@ -188,12 +196,19 @@ export const useAuthService = (): AuthService => {
 
       // 로그인 시도
       if (signIn?.status === 'needs_first_factor') {
+        console.log('🔑 Attempting sign in with phone code');
         const result = await signIn.attemptFirstFactor({
           strategy: 'phone_code',
           code,
         });
+        console.log('📨 Sign in result:', result);
 
         if (result.status === 'complete') {
+          console.log('✅ Sign in complete, activating session');
+          // Clerk 세션 활성화
+          if (result.createdSessionId) {
+            await setActive({ session: result.createdSessionId });
+          }
           return {
             success: true,
             data: { user: (result.createdSessionId as unknown as object) || {} },
@@ -203,11 +218,18 @@ export const useAuthService = (): AuthService => {
 
       // 회원가입 시도
       if (signUp?.status === 'missing_requirements') {
+        console.log('🔐 Attempting sign up with phone code');
         const result = await signUp.attemptPhoneNumberVerification({
           code,
         });
+        console.log('📨 Sign up result:', result);
 
         if (result.status === 'complete') {
+          console.log('✅ Sign up complete, activating session');
+          // Clerk 세션 활성화
+          if (result.createdSessionId) {
+            await setActive({ session: result.createdSessionId });
+          }
           return {
             success: true,
             data: { user: (result.createdSessionId as unknown as object) || {} },
@@ -215,14 +237,19 @@ export const useAuthService = (): AuthService => {
         }
       }
 
+      console.log('❌ No matching status for verification');
+      console.log('Current signIn status:', signIn?.status);
+      console.log('Current signUp status:', signUp?.status);
+      
       return {
         success: false,
         error: {
-          message: 'Invalid verification code',
+          message: 'Invalid verification code or session state',
         },
       };
     } catch (error) {
-      console.error('Phone verification error:', error);
+      console.error('🔥 Phone verification error:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       return {
         success: false,
         error: {
