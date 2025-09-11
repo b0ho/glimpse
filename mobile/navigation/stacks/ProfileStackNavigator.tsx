@@ -9,7 +9,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { ProfileStackParamList } from '@/types/navigation';
 
 // Screens
-import { ProfileScreen } from '@/screens/ProfileScreen';
+import { ProfileScreen } from '@/screens/ProfileScreen-NW';
 import { PremiumScreen } from '@/screens/PremiumScreen';
 import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
 import { ProfileEditScreen } from '@/screens/ProfileEditScreen';

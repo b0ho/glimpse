@@ -1,3 +1,4 @@
+import './global.css';
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ClerkProvider, ClerkLoaded } from '@clerk/clerk-expo';

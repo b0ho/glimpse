@@ -9,7 +9,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { GroupsStackParamList } from '@/types/navigation';
 
 // Screens
-import { GroupsScreen } from '@/screens/GroupsScreen';
+import { GroupsScreen } from '@/screens/GroupsScreen-NW';
 import { CreateGroupScreen } from '@/screens/CreateGroupScreen';
 import { LocationGroupScreen } from '@/screens/LocationGroupScreen';
 import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen';

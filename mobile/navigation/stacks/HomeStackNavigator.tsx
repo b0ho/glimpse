@@ -9,7 +9,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { HomeStackParamList } from '@/types/navigation';
 
 // Screens
-import { HomeScreen } from '@/screens/HomeScreen';
+import { HomeScreen } from '@/screens/HomeScreen-NW';
 import { CreateContentScreen } from '@/screens/CreateContentScreen';
 import { CreateStoryScreen } from '@/screens/CreateStoryScreen';
 import { StoryUploadScreen } from '@/screens/StoryUploadScreen';

@@ -8,7 +8,10 @@ module.exports = function (api) {
   api.cache(true);
   
   return {
-    presets: ['babel-preset-expo'],
+    presets: [
+      ["babel-preset-expo", { jsxImportSource: "nativewind" }],
+      "nativewind/babel",
+    ],
     plugins: [
       // Transform import.meta for all platforms (safer approach)
       require('./babel-plugin-transform-import-meta-web'),
