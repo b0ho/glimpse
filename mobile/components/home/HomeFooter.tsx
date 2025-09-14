@@ -2,7 +2,7 @@
  * 홈 화면 리스트 풋터 컴포넌트
  */
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 
 interface HomeFooterProps {
@@ -24,9 +24,9 @@ export const HomeFooter: React.FC<HomeFooterProps> = ({
   
   if (isLoadingMore) {
     return (
-      <View style={styles.loadingFooter}>
+      <View className="py-5 items-center">
         <ActivityIndicator size="small" color={colors.PRIMARY} />
-        <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>
+        <Text className="mt-2 text-sm text-gray-900 dark:text-gray-100">
           {t('home:loading.moreContent')}
         </Text>
       </View>
@@ -35,11 +35,11 @@ export const HomeFooter: React.FC<HomeFooterProps> = ({
   
   if (!hasMoreData && contentsLength > 0) {
     return (
-      <View style={styles.endReachedFooter}>
-        <Text style={[styles.endReachedText, { color: colors.TEXT.SECONDARY }]}>
+      <View className="py-8 items-center">
+        <Text className="text-sm text-gray-600 dark:text-gray-400 mb-1">
           {t('home:loading.endReached')}
         </Text>
-        <Text style={[styles.endReachedSubtext, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="text-xs text-gray-600 dark:text-gray-400">
           {t('home:loading.noMoreContent')}
         </Text>
       </View>
@@ -48,25 +48,3 @@ export const HomeFooter: React.FC<HomeFooterProps> = ({
   
   return null;
 };
-
-const styles = StyleSheet.create({
-  loadingFooter: {
-    paddingVertical: 20,
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 14,
-  },
-  endReachedFooter: {
-    paddingVertical: 30,
-    alignItems: 'center',
-  },
-  endReachedText: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  endReachedSubtext: {
-    fontSize: 12,
-  },
-});

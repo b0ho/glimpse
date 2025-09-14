@@ -32,7 +32,7 @@ import { useLikeHandlers } from '@/hooks/home/useLikeHandlers';
 import { useStoryData } from '@/hooks/home/useStoryData';
 
 // Components
-import { ContentItem } from '@/components/ContentItem';
+import { ContentItem } from '@/components/ContentItem-NW';
 import { StoryList } from '@/components/story/StoryList';
 import { StoryFullViewer } from '@/components/story/StoryFullViewer';
 import { AddStoryModal } from '@/components/story/AddStoryModal';
