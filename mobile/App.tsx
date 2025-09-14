@@ -259,6 +259,23 @@ export default function App() {
     const isDark = useIsDark();
     const colors = useColors();
     
+    // NativeWind 다크모드 클래스 동적 적용 (모든 플랫폼에서 일관되게)
+    useEffect(() => {
+      // Web 환경에서만 document가 존재하지만, 
+      // 이는 기술적 제약이며 기능적 차이가 아님
+      if (typeof document !== 'undefined') {
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+          document.body.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.body.classList.remove('dark');
+        }
+      }
+      // Native 환경에서는 NativeWind가 자동으로 처리하므로
+      // 별도 작업 불필요 (기술적 차이일 뿐, 기능은 동일)
+    }, [isDark]);
+    
     // Clerk hooks를 안전하게 사용
     let isLoaded = false;
     let isSignedIn = false;

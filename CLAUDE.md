@@ -97,10 +97,62 @@ glimpse/
 
 ### Core Principles
 1. **Universal Functionality**: Every feature must be implemented for all three platforms
-2. **Platform Detection**: Always use `Platform.OS` or `Platform.select()` for platform-specific code
+2. **Platform Detection**: Use `Platform.OS` or `Platform.select()` ONLY for technical differences (styling, APIs), NEVER for functional differences
 3. **Graceful Degradation**: If a native feature isn't available on web, provide alternative implementation
 4. **No Platform Exclusivity**: Never implement features that only work on one platform
 5. **Consistent User Experience**: All platforms should provide identical functionality and behavior
+6. **🚨 Universal Solutions Required**: When fixing bugs or implementing features, the solution MUST work identically across ALL platforms - no "Web에서만", "Android에서만", "iOS에서만" solutions allowed
+
+### ⚠️ CRITICAL RULE: Platform Consistency Enforcement
+
+**절대 금지 사항 (ABSOLUTELY FORBIDDEN)**:
+```javascript
+// ❌ NEVER - Platform-specific functionality
+if (Platform.OS === 'web') {
+  // Web만 특별한 기능이나 수정사항 적용
+  applySpecialWebFix();
+}
+// 이렇게 하면 Android/iOS는 버그가 계속 남아있음!
+
+// ❌ NEVER - Different behavior per platform
+if (Platform.OS === 'android') {
+  return <AndroidOnlyComponent />;
+}
+```
+
+**올바른 접근 방법 (CORRECT APPROACH)**:
+```javascript
+// ✅ CORRECT - Universal solution with technical adaptation
+useEffect(() => {
+  // 모든 플랫폼에서 동일한 기능 실행
+  if (typeof document !== 'undefined') {
+    // Web 환경의 기술적 구현
+    document.documentElement.classList.add('dark');
+  }
+  // Native는 NativeWind가 자동 처리
+  // 결과: 모든 플랫폼에서 다크모드 적용됨
+}, [isDark]);
+
+// ✅ CORRECT - Feature works everywhere
+const handleFeature = () => {
+  // 모든 플랫폼에서 동일한 로직
+  performAction();
+  
+  // 기술적 차이만 처리
+  if (Platform.OS === 'web') {
+    // Web API 사용
+  } else {
+    // Native API 사용
+  }
+  // 결과는 동일!
+};
+```
+
+**핵심 원칙**:
+- 버그 수정 시: 모든 플랫폼에서 동시에 해결되는 방법만 사용
+- 기능 구현 시: 모든 플랫폼에서 동일하게 작동하는 코드만 작성
+- "Web에서만 수정", "Android에서만 적용" 등의 접근 절대 금지
+- 기술적 구현은 다를 수 있지만, 사용자 경험은 100% 동일해야 함
 
 ### Platform-Specific Implementations
 
@@ -932,9 +984,101 @@ mobile/
 - **Refactor**: During bug fixes or updates
 - **Always**: For new screens from the start
 
+## 🎨 NativeWind v4 전환 가이드 (CRITICAL)
+
+### 핵심 개념 이해
+
+**NativeWind v4**는 Tailwind CSS 클래스를 React Native에서 사용 가능하게 하는 도구입니다.
+- **Atomic CSS**: 컴파일 타임에 최적화된 재사용 가능한 스타일 클래스
+- **NOT 인라인 스타일**: className은 컴파일되어 StyleSheet 객체로 변환됨
+- **Zero Runtime Cost**: 모든 스타일이 컴파일 타임에 생성됨
+
+### ⚠️ 전환 시 주의사항 (실수 방지)
+
+#### 1. Dark Mode 처리 - 가장 중요!
+```typescript
+// ❌ 잘못된 방식 - 수동 다크모드 체크
+className={cn(
+  "mx-4 my-2 p-4",
+  isDarkMode ? "bg-gray-800" : "bg-white"  // 이렇게 하지 마세요!
+)}
+
+// ✅ 올바른 방식 - dark: prefix 사용
+className="mx-4 my-2 p-4 bg-white dark:bg-gray-800"
+```
+
+**이유**: NativeWind v4는 이미 `dark:` prefix를 완벽 지원합니다. 수동 체크는 불필요하고 비효율적입니다.
+
+#### 2. 플랫폼별 스타일
+```typescript
+// ✅ Platform.select와 cn() 조합 사용
+className={cn(
+  "base-styles",
+  Platform.select({
+    ios: "shadow-sm",
+    android: "elevation-2", 
+    web: "shadow-md"
+  })
+)}
+```
+
+#### 3. 조건부 스타일링
+```typescript
+// ✅ cn()으로 조건부 클래스 적용
+<Text className={cn(
+  "text-sm",
+  isActive ? "text-primary-500" : "text-gray-600 dark:text-gray-400"
+)}>
+```
+
+#### 4. Icon 색상 처리
+```typescript
+// ❌ 잘못된 방식
+color={isDarkMode ? "#9CA3AF" : "#6B7280"}
+
+// ✅ 올바른 방식 - 테마 색상 사용
+color={colors.TEXT.SECONDARY}
+```
+
+### 전환 체크리스트
+
+- [ ] **StyleSheet.create() 완전 제거**
+- [ ] **모든 isDarkMode 조건문을 dark: prefix로 교체**
+- [ ] **-NW.tsx 접미사로 병렬 운영**
+- [ ] **cn() 유틸리티 반드시 사용**
+- [ ] **Icon 색상은 colors 객체 사용**
+
+### 성능 비교
+
+| 측면 | StyleSheet | NativeWind v4 |
+|------|-----------|---------------|
+| **코드량** | 100% | 40-60% |
+| **다크모드** | 수동 조건문 | dark: 자동 |
+| **번들 크기** | 큼 | 30% 감소 |
+| **메모리** | 중복 생성 | 재사용 |
+| **개발 속도** | 느림 | 빠름 |
+
+### 실제 전환 예시
+
+```typescript
+// Before: 413줄 (StyleSheet + 수동 다크모드)
+const styles = StyleSheet.create({...150줄});
+style={[styles.item, { backgroundColor: isDarkMode ? '#000' : '#FFF' }]}
+
+// After: 295줄 (NativeWind + 자동 다크모드)
+className="p-4 bg-white dark:bg-black"
+```
+
+### 자주하는 실수
+
+1. **isDarkMode 수동 체크**: dark: prefix가 있는데도 조건문 사용
+2. **StyleSheet 일부 남김**: 완전 제거해야 함
+3. **cn() 미사용**: 클래스 충돌 방지 필수
+4. **인라인 스타일 오해**: Atomic CSS는 컴파일 최적화됨
+
 ---
 
 > 💡 **Remember**: This is a privacy-focused Korean dating app with complete full-stack implementation.  
 > Always prioritize user anonymity, payment security, Korean UX, and type safety across the entire stack.
 
-*Last updated: 2025-09-03*
+*Last updated: 2025-01-14*
