@@ -50,7 +50,7 @@ export const HomeScreen = () => {
   const authStore = useAuthStore();
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation(['navigation']);
   const navigation = useNavigation() as any;
   const { isSignedIn, isLoaded } = useAuth();
@@ -154,10 +154,10 @@ export const HomeScreen = () => {
     );
   };
 
-  // 비로그인: 가벼운 안내 화면
+  // 비로그인: 매력적인 안내 화면
   if (!isSignedIn) {
     return (
-      <SafeAreaView className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}>
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-950">
         <ServerConnectionError 
           onRetry={() => {}}
           message={t('home:loading.content')}
@@ -174,10 +174,12 @@ export const HomeScreen = () => {
   // 서버 연결 에러 시 에러 화면 표시
   if (serverConnectionError) {
     return (
-      <ServerConnectionError 
-        onRetry={() => loadContents(true)}
-        message="홈 피드를 불러올 수 없습니다"
-      />
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-950">
+        <ServerConnectionError 
+          onRetry={() => loadContents(true)}
+          message="홈 피드를 불러올 수 없습니다"
+        />
+      </SafeAreaView>
     );
   }
 
@@ -185,15 +187,12 @@ export const HomeScreen = () => {
   if (isLoading && contents.length === 0) {
     return (
       <SafeAreaView 
-        className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}
+        className="flex-1 bg-gray-50 dark:bg-gray-950"
         edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
       >
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={colors.PRIMARY} />
-          <Text className={cn(
-            'mt-3 text-base',
-            isDarkMode ? 'text-gray-300' : 'text-gray-700'
-          )}>
+          <Text className="mt-3 text-base text-gray-700 dark:text-gray-300">
             {t('home:loading.content')}
           </Text>
         </View>
@@ -203,7 +202,7 @@ export const HomeScreen = () => {
 
   return (
     <SafeAreaView 
-      className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}
+      className="flex-1 bg-gray-50 dark:bg-gray-950"
       edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
     >
       <FlatList
@@ -288,9 +287,8 @@ export const HomeScreen = () => {
       <TouchableOpacity
         className={cn(
           'absolute bottom-5 right-5 w-14 h-14 rounded-full',
-          'bg-primary-500 dark:bg-primary-400',
+          'bg-pink-500 dark:bg-pink-600',
           'justify-center items-center',
-          'shadow-lg shadow-black/25',
           Platform.select({
             ios: 'shadow-lg',
             android: 'elevation-8',
@@ -298,7 +296,7 @@ export const HomeScreen = () => {
           })
         )}
         onPress={() => navigation.navigate('CreateContent' as never)}
-        activeOpacity={0.8}
+        activeOpacity={0.9}
         accessibilityLabel="게시물 작성"
         accessibilityHint="새로운 게시물을 작성할 수 있는 화면으로 이동합니다"
         accessibilityRole="button"

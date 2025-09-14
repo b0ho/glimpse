@@ -40,7 +40,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
 }) => {
   const isOwnContent = item.authorId === currentUserId;
   const { getUserDisplayName } = useLikeStore();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation();
   const navigation = useNavigation<StackNavigationProp<HomeStackParamList>>();
   const [showMenu, setShowMenu] = useState(false);
@@ -105,56 +105,42 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   return (
     <TouchableOpacity
       className={cn(
-        "mx-4 my-2 p-4 rounded-2xl",
-        isDarkMode ? "bg-gray-800" : "bg-white",
+        "mx-4 my-3 p-5 rounded-2xl",
+        "bg-white dark:bg-gray-900",
+        "border border-gray-200 dark:border-gray-800",
         Platform.select({
-          ios: "shadow-sm",
-          android: "elevation-2",
-          web: "shadow-md"
+          ios: "shadow-lg shadow-pink-200/50",
+          android: "elevation-4",
+          web: "shadow-lg shadow-pink-200/30"
         })
       )}
       onPress={handlePostPress}
-      activeOpacity={0.9}
+      activeOpacity={0.95}
     >
       {/* Header */}
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-row items-center flex-1">
-          <View className={cn(
-            "w-10 h-10 rounded-full items-center justify-center mr-3",
-            isDarkMode ? "bg-gray-700" : "bg-gray-100"
-          )}>
+          <View className="w-12 h-12 rounded-full items-center justify-center mr-3 bg-gray-100 dark:bg-gray-800">
             <Icon 
-              name="person-outline" 
-              size={20} 
-              color={isDarkMode ? "#9CA3AF" : "#6B7280"} 
+              name="person" 
+              size={24} 
+              color="#EC4899" 
             />
           </View>
           <View className="flex-1">
-            <Text className={cn(
-              "text-sm font-semibold",
-              isDarkMode ? "text-gray-100" : "text-gray-900"
-            )}>
+            <Text className="text-base font-bold text-gray-900 dark:text-gray-100">
               {displayName}
             </Text>
             <View className="flex-row items-center">
-              <Text className={cn(
-                "text-xs",
-                isDarkMode ? "text-gray-400" : "text-gray-500"
-              )}>
+              <Text className="text-xs text-gray-500 dark:text-gray-400">
                 {formatTimeAgo(item.createdAt)}
               </Text>
               {groupName && (
                 <>
-                  <Text className={cn(
-                    "text-xs mx-1",
-                    isDarkMode ? "text-gray-500" : "text-gray-400"
-                  )}>
+                  <Text className="text-xs mx-1 text-gray-400 dark:text-gray-500">
                     •
                   </Text>
-                  <Text className={cn(
-                    "text-xs",
-                    isDarkMode ? "text-gray-400" : "text-gray-500"
-                  )}>
+                  <Text className="text-xs text-gray-500 dark:text-gray-400">
                     {groupName}
                   </Text>
                 </>
@@ -171,7 +157,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
             <Icon 
               name="ellipsis-horizontal" 
               size={20} 
-              color={isDarkMode ? "#9CA3AF" : "#6B7280"} 
+              color={colors.TEXT.SECONDARY} 
             />
           </TouchableOpacity>
         )}
@@ -179,29 +165,29 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
 
       {/* Content */}
       <View className="mb-3">
-        <Text className={cn(
-          "text-sm leading-5",
-          isDarkMode ? "text-gray-200" : "text-gray-800"
-        )}>
+        <Text className="text-sm leading-5 text-gray-800 dark:text-gray-200">
           {item.text || ''}
         </Text>
       </View>
 
       {/* Actions */}
-      <View className="flex-row items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+      <View className="flex-row items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
         <TouchableOpacity
           onPress={handleLikePress}
-          className="flex-row items-center"
+          className={cn(
+            "flex-row items-center px-3 py-1.5 rounded-full",
+            item.isLikedByUser ? "bg-pink-50 dark:bg-pink-950" : "bg-gray-50 dark:bg-gray-800"
+          )}
           disabled={isOwnContent}
         >
           <Icon
             name={item.isLikedByUser ? "heart" : "heart-outline"}
-            size={20}
-            color={item.isLikedByUser ? colors.PRIMARY : (isDarkMode ? "#9CA3AF" : "#6B7280")}
+            size={22}
+            color={item.isLikedByUser ? "#EC4899" : colors.TEXT.SECONDARY}
           />
           <Text className={cn(
-            "ml-1 text-sm",
-            item.isLikedByUser ? "text-primary-500" : (isDarkMode ? "text-gray-400" : "text-gray-600")
+            "ml-1.5 text-sm font-medium",
+            item.isLikedByUser ? "text-pink-500" : "text-gray-600 dark:text-gray-400"
           )}>
             {item.likeCount || 0}
           </Text>
@@ -209,26 +195,23 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
 
         <TouchableOpacity
           onPress={handlePostPress}
-          className="flex-row items-center"
+          className="flex-row items-center px-3 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950"
         >
           <Icon
             name="chatbubble-outline"
-            size={18}
-            color={isDarkMode ? "#9CA3AF" : "#6B7280"}
+            size={20}
+            color="#A855F7"
           />
-          <Text className={cn(
-            "ml-1 text-sm",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
+          <Text className="ml-1.5 text-sm font-medium text-purple-600 dark:text-purple-400">
             {item.commentCount || 0}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="flex-row items-center">
+        <TouchableOpacity className="flex-row items-center px-3 py-1.5 rounded-full bg-gray-50 dark:bg-gray-800">
           <Icon
             name="share-outline"
-            size={18}
-            color={isDarkMode ? "#9CA3AF" : "#6B7280"}
+            size={20}
+            color={colors.TEXT.SECONDARY}
           />
         </TouchableOpacity>
       </View>
@@ -243,21 +226,12 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
         <TouchableWithoutFeedback onPress={() => setShowMenu(false)}>
           <View className="flex-1 justify-end bg-black/50">
             <TouchableWithoutFeedback>
-              <View className={cn(
-                "mx-4 mb-4 rounded-2xl overflow-hidden",
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              )}>
+              <View className="mx-4 mb-4 rounded-2xl overflow-hidden bg-white dark:bg-gray-900">
                 <TouchableOpacity
                   onPress={handleEdit}
-                  className={cn(
-                    "px-4 py-4 border-b",
-                    isDarkMode ? "border-gray-700" : "border-gray-200"
-                  )}
+                  className="px-4 py-4 border-b border-gray-200 dark:border-gray-700"
                 >
-                  <Text className={cn(
-                    "text-base text-center",
-                    isDarkMode ? "text-gray-100" : "text-gray-900"
-                  )}>
+                  <Text className="text-base text-center text-gray-900 dark:text-gray-100">
                     {t('common:actions.edit')}
                   </Text>
                 </TouchableOpacity>
@@ -273,15 +247,9 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
             </TouchableWithoutFeedback>
             <TouchableOpacity
               onPress={() => setShowMenu(false)}
-              className={cn(
-                "mx-4 mb-8 py-4 rounded-2xl",
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              )}
+              className="mx-4 mb-8 py-4 rounded-2xl bg-white dark:bg-gray-900"
             >
-              <Text className={cn(
-                "text-base text-center font-medium",
-                isDarkMode ? "text-gray-100" : "text-gray-900"
-              )}>
+              <Text className="text-base text-center font-medium text-gray-900 dark:text-gray-100">
                 {t('common:actions.cancel')}
               </Text>
             </TouchableOpacity>
