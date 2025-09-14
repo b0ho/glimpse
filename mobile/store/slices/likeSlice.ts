@@ -1,5 +1,4 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create, persist, createJSONStorage } from '../zustandCompat';
 import { secureStorage } from '@/utils/storage';
 import { Like, Match } from '@/types';
 import { LIKE_SYSTEM } from '@/utils/constants';

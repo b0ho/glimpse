@@ -4,8 +4,7 @@
  * @description 즉석 미팅 참여, 특징 입력, 매칭 관리
  */
 
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create, persist, createJSONStorage } from './zustandCompat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**

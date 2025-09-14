@@ -4,17 +4,16 @@
  * @description React Native 및 Expo를 위한 Babel 설정
  */
 
+const nativeWindPlugins = require('./babel-nativewind-wrapper');
+
 module.exports = function (api) {
   api.cache(true);
   
   return {
-    presets: [
-      ["babel-preset-expo", { jsxImportSource: "nativewind" }],
-      "nativewind/babel",
-    ],
+    presets: ["babel-preset-expo"],
     plugins: [
-      // Transform import.meta for all platforms (safer approach)
-      require('./babel-plugin-transform-import-meta-web'),
+      // Spread the NativeWind plugins instead of using them directly
+      ...nativeWindPlugins,
       [
         'module-resolver',
         {

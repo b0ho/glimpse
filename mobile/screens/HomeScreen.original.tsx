@@ -159,7 +159,7 @@ export const HomeScreen = () => {
   // 비로그인: 가벼운 안내 화면
   if (!isSignedIn) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
         <ServerConnectionError 
           onRetry={() => {}}
           message={t('home:loading.content')}
@@ -170,7 +170,7 @@ export const HomeScreen = () => {
 
   // 웹에서 포커스되지 않은 경우 빈 View 반환
   if (Platform.OS === 'web' && !isFocused) {
-    return <View className="flex-1" />;
+    return <View style={styles.container} />;
   }
 
   // 서버 연결 에러 시 에러 화면 표시
@@ -187,12 +187,12 @@ export const HomeScreen = () => {
   if (isLoading && contents.length === 0) {
     return (
       <SafeAreaView 
-        className="flex-1 bg-white dark:bg-gray-900"
+        style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
         edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
       >
-        <View className="flex-1 items-center justify-center">
+        <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.PRIMARY} />
-          <Text className="mt-4 text-gray-600 dark:text-gray-400 text-base">
+          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>
             {t('home:loading.content')}
           </Text>
         </View>
@@ -202,7 +202,7 @@ export const HomeScreen = () => {
 
   return (
     <SafeAreaView 
-      className="flex-1 bg-gray-50 dark:bg-gray-900"
+      style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
       edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
     >
       <FlatList
@@ -261,9 +261,8 @@ export const HomeScreen = () => {
         }
         onEndReached={loadMoreContents}
         onEndReachedThreshold={0.5}
-        contentContainerStyle={contents.length === 0 ? { flex: 1 } : undefined}
+        contentContainerStyle={contents.length === 0 ? styles.emptyContainer : undefined}
         showsVerticalScrollIndicator={false}
-        className="flex-1"
       />
 
       {/* 스토리 뷰어 */}
@@ -286,21 +285,14 @@ export const HomeScreen = () => {
       
       {/* FAB - 게시물 작성 버튼 */}
       <TouchableOpacity
-        className="absolute bottom-5 right-4 w-14 h-14 bg-primary rounded-full items-center justify-center"
-        style={{
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-          elevation: 5,
-        }}
+        style={[styles.fab, { backgroundColor: colors.PRIMARY }]}
         onPress={() => navigation.navigate('CreateContent' as never)}
         activeOpacity={0.8}
         accessibilityLabel="게시물 작성"
         accessibilityHint="새로운 게시물을 작성할 수 있는 화면으로 이동합니다"
         accessibilityRole="button"
       >
-        <Icon name={ACTION_ICONS.CREATE} color="#FFFFFF" size={28} />
+        <Icon name={ACTION_ICONS.CREATE} color={colors.TEXT.WHITE} size={28} />
       </TouchableOpacity>
     </SafeAreaView>
   );

@@ -1,5 +1,4 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create, persist, createJSONStorage } from '../zustandCompat';
 // import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 

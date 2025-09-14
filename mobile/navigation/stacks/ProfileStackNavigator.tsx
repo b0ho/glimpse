@@ -10,11 +10,11 @@ import { ProfileStackParamList } from '@/types/navigation';
 
 // Screens
 import { ProfileScreen } from '@/screens/ProfileScreen-NW';
-import { PremiumScreen } from '@/screens/PremiumScreen';
+import { PremiumScreen } from '@/screens/PremiumScreen-NW';
 import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
 import { ProfileEditScreen } from '@/screens/ProfileEditScreen';
 import { WhoLikesYouScreen } from '@/screens/WhoLikesYouScreen';
-import { NotificationSettingsScreen } from '@/screens/NotificationSettingsScreen';
+import { NotificationSettingsScreen } from '@/screens/NotificationSettingsScreen-NW';
 import { LikeHistoryScreen } from '@/screens/LikeHistoryScreen';
 import { DeleteAccountScreen } from '@/screens/DeleteAccountScreen';
 import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen';

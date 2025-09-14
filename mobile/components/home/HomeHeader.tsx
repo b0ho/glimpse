@@ -2,11 +2,10 @@
  * 홈 화면 헤더 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@/hooks/useTheme';
-import { shadowPresets } from '@/utils/styles/platformStyles';
 
 interface HomeHeaderProps {
   t: (key: string) => string;
@@ -20,39 +19,39 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({ t, remainingLikes, recei
   const navigation = useNavigation() as any;
 
   return (
-    <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
-      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>Glimpse</Text>
-      <Text style={[styles.headerSubtitle, { color: colors.TEXT.PRIMARY }]}>
+    <View className="px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <Text className="text-3xl font-bold text-primary mb-1">Glimpse</Text>
+      <Text className="text-base text-gray-900 dark:text-gray-100 mb-2">
         {t('home:header.greeting', { name: userName || t('common:user.defaultName') || '사용자' })}
       </Text>
-      <View style={styles.headerStats}>
-        <Text style={[styles.statsText, { color: colors.TEXT.SECONDARY }]}>
+      <View className="flex-row gap-4 mb-3">
+        <Text className="text-sm text-gray-600 dark:text-gray-400">
           {t('home:header.receivedLikes', { count: receivedLikesCount })}
         </Text>
-        <Text style={[styles.statsText, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="text-sm text-gray-600 dark:text-gray-400">
           {t('home:header.remainingLikes', { count: remainingLikes })}
         </Text>
       </View>
       
       {/* 위치 기반 기능 버튼들 */}
-      <View style={styles.locationButtonsContainer}>
+      <View className="flex-row gap-2">
         <TouchableOpacity
-          style={[styles.locationButton, { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY + '20' }]}
+          className="flex-1 flex-row items-center p-2.5 bg-white dark:bg-gray-800 border border-primary/20 rounded-lg"
           onPress={() => navigation.navigate('NearbyGroups' as never)}
         >
           <Icon name="location-outline" size={20} color={colors.PRIMARY} />
-          <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>
+          <Text className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100 ml-1.5">
             {t('navigation:screens.nearbyGroups')}
           </Text>
           <Icon name="chevron-forward" size={16} color={colors.TEXT.SECONDARY} />
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={[styles.locationButton, { backgroundColor: colors.SURFACE, borderColor: colors.PRIMARY + '20' }]}
+          className="flex-1 flex-row items-center p-2.5 bg-white dark:bg-gray-800 border border-primary/20 rounded-lg"
           onPress={() => navigation.navigate('NearbyUsers' as never)}
         >
           <Icon name="people-outline" size={20} color={colors.PRIMARY} />
-          <Text style={[styles.locationButtonText, { color: colors.TEXT.PRIMARY }]}>
+          <Text className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100 ml-1.5">
             {t('navigation:screens.nearbyUsers')}
           </Text>
           <Icon name="chevron-forward" size={16} color={colors.TEXT.SECONDARY} />
@@ -61,86 +60,3 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({ t, remainingLikes, recei
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 0.5,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  headerStats: {
-    flexDirection: 'row',
-    gap: 16,
-    marginBottom: 12,
-  },
-  statsText: {
-    fontSize: 13,
-  },
-  locationButtonsContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 6,
-  },
-  actionButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  likeIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 4,
-  },
-  likeCount: {
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  headerBottom: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  locationButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: 6,
-  },
-  locationButtonText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '500',
-  },
-});

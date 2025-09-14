@@ -9,10 +9,10 @@ import { useTheme } from '@/hooks/useTheme';
 import { InterestStackParamList } from '@/types/navigation';
 
 // Screens
-import { InterestSearchScreen } from '@/screens/InterestSearchScreen';
+import { InterestSearchScreen } from '@/screens/InterestSearchScreen-NW';
 import { AddInterestScreen } from '@/screens/AddInterestScreen';
 import { MyInfoScreen } from '@/screens/MyInfoScreen';
-import { ChatScreenSimple as ChatScreen } from '@/screens/ChatScreenSimple';
+import { ChatScreen } from '@/screens/ChatScreen-NW';
 
 const InterestStack = createStackNavigator<InterestStackParamList>();
 

@@ -4,8 +4,7 @@
  * @description 다크모드/라이트모드 테마 관리를 위한 Zustand 스토어
  */
 
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create, persist, createJSONStorage } from '../zustandCompat';
 import { Platform, Appearance } from 'react-native';
 import { ThemeStore, ThemeMode, ColorPalette } from '@/types/theme';
 import { LIGHT_COLORS, DARK_COLORS } from '@/constants/theme';

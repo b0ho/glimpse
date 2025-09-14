@@ -1,5 +1,4 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create, persist, createJSONStorage } from '../zustandCompat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import profileService from '@/services/profile/profileService';
 import { 

@@ -4,8 +4,7 @@
  * @description 그룹 생성, 참여, 검색, 필터링 기능 관리
  */
 
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create, persist, createJSONStorage } from '../zustandCompat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Group, GroupType } from '@/types';
 import { apiClient } from '@/services/api/config';

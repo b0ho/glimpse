@@ -34,7 +34,7 @@ import { CreateStoryScreen } from '@/screens/CreateStoryScreen';
 import { CreateGroupScreen } from '@/screens/CreateGroupScreen';
 import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
 import { ChatScreenSimple as ChatScreen } from '@/screens/ChatScreenSimple';
-import { PremiumScreen } from '@/screens/PremiumScreen';
+import { PremiumScreen } from '@/screens/PremiumScreen-NW';
 import { LocationGroupScreen } from '@/screens/LocationGroupScreen';
 import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen';
 import { NearbyGroupsScreen } from '@/screens/NearbyGroupsScreen';

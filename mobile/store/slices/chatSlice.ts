@@ -2,8 +2,7 @@
  * 채팅 상태 관리 슬라이스 - 모듈화된 버전
  */
 
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create, persist, createJSONStorage } from '../zustandCompat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { chatService } from '@/services/chat/chatService';
 import { socketService } from '@/services/chat/socketService';

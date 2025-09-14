@@ -4,8 +4,7 @@
  * @description 프리미엄 구독, 결제, 좋아요 관리
  */
 
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create, persist, createJSONStorage } from '../zustandCompat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   PremiumPlan, 

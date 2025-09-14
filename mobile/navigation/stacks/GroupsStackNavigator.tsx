@@ -15,9 +15,9 @@ import { LocationGroupScreen } from '@/screens/LocationGroupScreen';
 import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen';
 import { MapScreen } from '@/screens/MapScreen';
 import { GroupInviteScreen } from '@/screens/GroupInviteScreen';
-import { JoinGroupScreen } from '@/screens/JoinGroupScreen';
+import { JoinGroupScreen } from '@/screens/JoinGroupScreen-NW';
 import { GroupManageScreen } from '@/screens/GroupManageScreen';
-import { GroupDetailScreen } from '@/screens/GroupDetailScreen';
+import { GroupDetailScreen } from '@/screens/GroupDetailScreen-NW';
 
 const GroupsStack = createStackNavigator<GroupsStackParamList>();
 

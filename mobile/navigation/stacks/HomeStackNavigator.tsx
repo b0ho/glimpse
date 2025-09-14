@@ -10,7 +10,7 @@ import { HomeStackParamList } from '@/types/navigation';
 
 // Screens
 import { HomeScreen } from '@/screens/HomeScreen-NW';
-import { CreateContentScreen } from '@/screens/CreateContentScreen';
+import { CreateContentScreen } from '@/screens/CreateContentScreen-NW';
 import { CreateStoryScreen } from '@/screens/CreateStoryScreen';
 import { StoryUploadScreen } from '@/screens/StoryUploadScreen';
 import { PostDetailScreen } from '@/screens/PostDetailScreen';
