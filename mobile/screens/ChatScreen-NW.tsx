@@ -49,7 +49,7 @@ export const ChatScreen = () => {
   const navigation = useNavigation();
   const { roomId, matchId, otherUserNickname } = route.params;
   const { initiateCall, isInCall } = useCall();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation('chat');
 
   // Store states
@@ -162,10 +162,7 @@ export const ChatScreen = () => {
   useEffect(() => {
     navigation.setOptions({
       header: () => (
-        <SafeAreaView className={cn(
-          "border-b",
-          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
-        )}>
+        <SafeAreaView className="border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
           <View className="flex-row items-center px-4 py-3">
             {/* Back Button */}
             <TouchableOpacity
@@ -175,7 +172,7 @@ export const ChatScreen = () => {
               <Ionicons 
                 name="arrow-back" 
                 size={24} 
-                color={isDarkMode ? '#FF8A8A' : '#FF6B6B'} 
+                color={colors.PRIMARY} 
               />
             </TouchableOpacity>
             
@@ -190,10 +187,7 @@ export const ChatScreen = () => {
                 </Text>
               </LinearGradient>
               <View className="flex-1">
-                <Text className={cn(
-                  "text-lg font-semibold",
-                  isDarkMode ? "text-white" : "text-gray-900"
-                )}>
+                <Text className="text-lg font-semibold text-gray-900 dark:text-white">
                   {otherUserNickname}
                 </Text>
                 {isOtherUserTyping && (
@@ -217,7 +211,7 @@ export const ChatScreen = () => {
                 <Ionicons 
                   name="call" 
                   size={20} 
-                  color={isInCall ? '#9CA3AF' : (isDarkMode ? '#FF8A8A' : '#FF6B6B')} 
+                  color={isInCall ? colors.TEXT.SECONDARY : colors.PRIMARY} 
                 />
               </TouchableOpacity>
               <TouchableOpacity
@@ -231,7 +225,7 @@ export const ChatScreen = () => {
                 <Ionicons 
                   name="videocam" 
                   size={20} 
-                  color={isInCall ? '#9CA3AF' : (isDarkMode ? '#4ECDC4' : '#45B7D1')} 
+                  color={isInCall ? colors.TEXT.SECONDARY : colors.SECONDARY} 
                 />
               </TouchableOpacity>
             </View>
@@ -239,7 +233,7 @@ export const ChatScreen = () => {
         </SafeAreaView>
       ),
     });
-  }, [navigation, otherUserNickname, isInCall, isOtherUserTyping, isDarkMode]);
+  }, [navigation, otherUserNickname, isInCall, isOtherUserTyping, colors]);
 
   const handleCall = useCallback((callType: 'video' | 'audio') => {
     const otherUserId = matchId;
@@ -367,7 +361,7 @@ export const ChatScreen = () => {
             "px-4 py-2 rounded-2xl",
             isOwnMessage 
               ? "bg-gradient-to-r from-primary-500 to-primary-400" 
-              : (isDarkMode ? "bg-gray-800" : "bg-gray-100"),
+              : "bg-gray-100 dark:bg-gray-800",
             isOwnMessage ? "rounded-br-sm" : "rounded-bl-sm"
           )}>
             {isOwnMessage ? (
@@ -380,9 +374,7 @@ export const ChatScreen = () => {
                 <Text className="text-white">{item.content}</Text>
               </LinearGradient>
             ) : (
-              <Text className={cn(
-                isDarkMode ? "text-white" : "text-gray-900"
-              )}>
+              <Text className="text-gray-900 dark:text-white">
                 {item.content}
               </Text>
             )}
@@ -403,11 +395,8 @@ export const ChatScreen = () => {
 
     return (
       <View className="py-4 items-center">
-        <ActivityIndicator size="small" color={isDarkMode ? '#FF8A8A' : '#FF6B6B'} />
-        <Text className={cn(
-          "text-sm mt-2",
-          isDarkMode ? "text-gray-400" : "text-gray-600"
-        )}>
+        <ActivityIndicator size="small" color={colors.PRIMARY} />
+        <Text className="text-sm mt-2 text-gray-600 dark:text-gray-400">
           {t('chat:loading.previousMessages')}
         </Text>
       </View>
@@ -467,16 +456,10 @@ export const ChatScreen = () => {
       >
         <Text className="text-6xl">💌</Text>
       </Animated.View>
-      <Text className={cn(
-        "text-xl font-bold mb-2",
-        isDarkMode ? "text-white" : "text-gray-900"
-      )}>
+      <Text className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
         {t('chat:emptyState.title')}
       </Text>
-      <Text className={cn(
-        "text-center",
-        isDarkMode ? "text-gray-400" : "text-gray-600"
-      )}>
+      <Text className="text-center text-gray-600 dark:text-gray-400">
         {t('emptyState:emptyState.subtitle', { name: otherUserNickname })}
       </Text>
     </View>
@@ -495,7 +478,7 @@ export const ChatScreen = () => {
 
   if (isLoading && !isInitialized) {
     return (
-      <SafeAreaView className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}>
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-950">
         <View className="flex-1 items-center justify-center">
           <Animated.View
             style={{
@@ -503,13 +486,10 @@ export const ChatScreen = () => {
             }}
             className="mb-4"
           >
-            <Ionicons name="heart" size={48} color={isDarkMode ? '#FF8A8A' : '#FF6B6B'} />
+            <Ionicons name="heart" size={48} color={colors.PRIMARY} />
           </Animated.View>
-          <ActivityIndicator size="large" color={isDarkMode ? '#FF8A8A' : '#FF6B6B'} />
-          <Text className={cn(
-            "mt-4 font-medium",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
+          <Text className="mt-4 font-medium text-gray-600 dark:text-gray-400">
             {t('common:loading.text')}
           </Text>
         </View>
@@ -518,8 +498,8 @@ export const ChatScreen = () => {
   }
 
   return (
-    <SafeAreaView className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-white')}>
-      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
+    <SafeAreaView className="flex-1 bg-white dark:bg-gray-950">
+      <StatusBar barStyle="dark-content" />
       
       <KeyboardAvoidingView 
         className="flex-1"

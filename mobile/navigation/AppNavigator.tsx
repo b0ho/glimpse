@@ -25,7 +25,7 @@ import { useTheme } from '@/hooks/useTheme';
 // Screens
 import { OnboardingScreen } from '@/screens/OnboardingScreen';
 import { AuthScreen } from '@/screens/auth/AuthScreen';
-import { HomeScreen } from '@/screens/HomeScreen';
+import { HomeScreen } from '@/screens/HomeScreen-NW';
 import { GroupsScreen } from '@/screens/GroupsScreen';
 import { MatchesScreen } from '@/screens/MatchesScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
