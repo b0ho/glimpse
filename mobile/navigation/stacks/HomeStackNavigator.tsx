@@ -14,8 +14,8 @@ import { CreateContentScreen } from '@/screens/CreateContentScreen-NW';
 import { CreateStoryScreen } from '@/screens/CreateStoryScreen';
 import { StoryUploadScreen } from '@/screens/StoryUploadScreen';
 import { PostDetailScreen } from '@/screens/PostDetailScreen';
-import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen';
-import { NearbyGroupsScreen } from '@/screens/NearbyGroupsScreen';
+import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen-NW';
+import { NearbyGroupsScreen } from '@/screens/NearbyGroupsScreen-NW';
 
 const HomeStack = createStackNavigator<HomeStackParamList>();
 
