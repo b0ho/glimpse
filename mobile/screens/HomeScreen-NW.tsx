@@ -157,7 +157,7 @@ export const HomeScreen = () => {
   // 비로그인: 매력적인 안내 화면
   if (!isSignedIn) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-950">
+      <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
         <ServerConnectionError 
           onRetry={() => {}}
           message={t('home:loading.content')}
@@ -174,7 +174,7 @@ export const HomeScreen = () => {
   // 서버 연결 에러 시 에러 화면 표시
   if (serverConnectionError) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-950">
+      <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
         <ServerConnectionError 
           onRetry={() => loadContents(true)}
           message="홈 피드를 불러올 수 없습니다"
@@ -187,12 +187,12 @@ export const HomeScreen = () => {
   if (isLoading && contents.length === 0) {
     return (
       <SafeAreaView 
-        className="flex-1 bg-gray-50 dark:bg-gray-950"
+        className="flex-1 bg-background dark:bg-background-dark"
         edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
       >
         <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color={colors.PRIMARY} />
-          <Text className="mt-3 text-base text-gray-700 dark:text-gray-300">
+          <ActivityIndicator size="large" color="#FF6B6B" />
+          <Text className="mt-3 text-base text-foreground dark:text-foreground-dark">
             {t('home:loading.content')}
           </Text>
         </View>
@@ -202,7 +202,7 @@ export const HomeScreen = () => {
 
   return (
     <SafeAreaView 
-      className="flex-1 bg-gray-50 dark:bg-gray-950"
+      className="flex-1 bg-background dark:bg-background-dark"
       edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
     >
       <FlatList

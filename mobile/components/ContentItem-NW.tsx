@@ -105,9 +105,9 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   return (
     <TouchableOpacity
       className={cn(
-        "mx-4 my-3 p-5 rounded-2xl",
-        "bg-white dark:bg-gray-900",
-        "border border-gray-200 dark:border-gray-800",
+        "mx-4 my-3 p-5 rounded-lg",
+        "bg-card dark:bg-card-dark",
+        "border border-border dark:border-border-dark",
         Platform.select({
           ios: "shadow-lg shadow-pink-200/50",
           android: "elevation-4",
@@ -120,7 +120,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
       {/* Header */}
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-row items-center flex-1">
-          <View className="w-12 h-12 rounded-full items-center justify-center mr-3 bg-gray-100 dark:bg-gray-800">
+          <View className="w-12 h-12 rounded-full items-center justify-center mr-3 bg-muted dark:bg-muted-dark">
             <Icon 
               name="person" 
               size={24} 
@@ -128,11 +128,11 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
             />
           </View>
           <View className="flex-1">
-            <Text className="text-base font-bold text-gray-900 dark:text-gray-100">
+            <Text className="text-base font-bold text-foreground dark:text-foreground-dark">
               {displayName}
             </Text>
             <View className="flex-row items-center">
-              <Text className="text-xs text-gray-500 dark:text-gray-400">
+              <Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark">
                 {formatTimeAgo(item.createdAt)}
               </Text>
               {groupName && (
@@ -140,7 +140,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
                   <Text className="text-xs mx-1 text-gray-400 dark:text-gray-500">
                     •
                   </Text>
-                  <Text className="text-xs text-gray-500 dark:text-gray-400">
+                  <Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark">
                     {groupName}
                   </Text>
                 </>
@@ -165,18 +165,18 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
 
       {/* Content */}
       <View className="mb-3">
-        <Text className="text-sm leading-5 text-gray-800 dark:text-gray-200">
+        <Text className="text-sm leading-5 text-foreground dark:text-foreground-dark">
           {item.text || ''}
         </Text>
       </View>
 
       {/* Actions */}
-      <View className="flex-row items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+      <View className="flex-row items-center justify-between pt-4 border-t border-border dark:border-border-dark">
         <TouchableOpacity
           onPress={handleLikePress}
           className={cn(
             "flex-row items-center px-3 py-1.5 rounded-full",
-            item.isLikedByUser ? "bg-pink-50 dark:bg-pink-950" : "bg-gray-50 dark:bg-gray-800"
+            item.isLikedByUser ? "bg-primary/10 dark:bg-primary-dark/20" : "bg-muted dark:bg-muted-dark"
           )}
           disabled={isOwnContent}
         >
@@ -187,7 +187,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
           />
           <Text className={cn(
             "ml-1.5 text-sm font-medium",
-            item.isLikedByUser ? "text-pink-500" : "text-gray-600 dark:text-gray-400"
+            item.isLikedByUser ? "text-primary dark:text-primary-dark" : "text-muted-foreground dark:text-muted-foreground-dark"
           )}>
             {item.likeCount || 0}
           </Text>
