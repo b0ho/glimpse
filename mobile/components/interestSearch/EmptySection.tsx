@@ -1,16 +1,16 @@
 /**
- * 빈 섹션 표시 컴포넌트
+ * 빈 섹션 표시 컴포넌트 - NativeWind 버전
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
+import { cn } from '@/lib/utils';
 
 interface EmptySectionProps {
   title: string;
   description: string;
   type: 'search' | 'match';
   onAddPress?: () => void;
-  colors: any;
   t: (key: string) => string;
 }
 
@@ -19,29 +19,31 @@ export const EmptySection: React.FC<EmptySectionProps> = ({
   description,
   type,
   onAddPress,
-  colors,
   t,
 }) => {
   return (
-    <View style={[styles.emptySection, { backgroundColor: colors.SURFACE }]}>
+    <View className="p-10 items-center rounded-xl mx-4 my-2 bg-white dark:bg-gray-800">
       <Icon
         name={type === 'search' ? 'search-outline' : 'heart-outline'}
         size={48}
-        color={colors.TEXT.TERTIARY}
+        color="#9CA3AF"
       />
-      <Text style={[styles.emptyTitle, { color: colors.TEXT.PRIMARY }]}>
+      <Text className="text-lg font-semibold mt-4 mb-2 text-gray-900 dark:text-gray-100">
         {title}
       </Text>
-      <Text style={[styles.emptyDescription, { color: colors.TEXT.SECONDARY }]}>
+      <Text className="text-sm text-center leading-5 text-gray-600 dark:text-gray-400">
         {description}
       </Text>
       {type === 'search' && onAddPress && (
         <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: colors.PRIMARY }]}
+          className={cn(
+            "flex-row items-center px-5 py-2.5 rounded-full mt-5",
+            "bg-primary dark:bg-primary-dark"
+          )}
           onPress={onAddPress}
         >
-          <Icon name="add-outline" size={20} color={colors.TEXT.WHITE} />
-          <Text style={[styles.addButtonText, { color: colors.TEXT.WHITE }]}>
+          <Icon name="add-outline" size={20} color="#FFFFFF" />
+          <Text className="text-sm font-semibold ml-2 text-white">
             {t('search.addNew')}
           </Text>
         </TouchableOpacity>
@@ -49,37 +51,3 @@ export const EmptySection: React.FC<EmptySectionProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  emptySection: {
-    padding: 40,
-    alignItems: 'center',
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginVertical: 8,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyDescription: {
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    marginTop: 20,
-  },
-  addButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-});

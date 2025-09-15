@@ -131,15 +131,9 @@ export const InterestCard: React.FC<InterestCardProps> = ({
     );
   };
 
-  // 카드 클릭 핸들러 - 매칭된 카드는 채팅으로, 검색 카드는 삭제 확인으로
+  // 카드 클릭 핸들러 - 모든 카드는 onPress 실행 (편집 또는 채팅으로 이동)
   const handleCardPress = () => {
-    if (isMatch) {
-      // 매칭된 카드는 기존 onPress 실행 (채팅으로 이동)
-      onPress?.();
-    } else {
-      // 검색 카드는 삭제 확인 실행
-      onDelete?.();
-    }
+    onPress?.();
   };
 
   const content = (
@@ -169,12 +163,6 @@ export const InterestCard: React.FC<InterestCardProps> = ({
               <View style={[styles.badge, { backgroundColor: colors.SUCCESS }]}>
                 <Icon name="checkmark-circle" size={16} color="#FFFFFF" />
                 <Text style={styles.badgeText}>매칭됨</Text>
-              </View>
-            )}
-            {!isMatch && !isSecure && (
-              <View style={[styles.badge, { backgroundColor: colors.ERROR + '20' }]}>
-                <Icon name="trash-outline" size={14} color={colors.ERROR} />
-                <Text style={[styles.badgeText, { color: colors.ERROR }]}>탭하여 삭제</Text>
               </View>
             )}
             {!isMatch && isSecure && item.deviceInfo === 'other' && (

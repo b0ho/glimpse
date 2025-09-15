@@ -1,7 +1,5 @@
 /**
  * 관심상대 찾기 메인 화면 - NativeWind 버전
- * 
- * 데이팅 앱의 핵심 기능으로 스와이프 카드 UI와 매치 애니메이션 적용
  */
 import React, { useCallback, useState } from 'react';
 import {
@@ -13,7 +11,6 @@ import {
   RefreshControl,
   Platform,
   Alert,
-  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
@@ -22,9 +19,6 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthStore } from '@/store/slices/authSlice';
 import Toast from 'react-native-toast-message';
-import { LinearGradient } from 'expo-linear-gradient';
-import { cn } from '@/lib/utils';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // Custom hooks
 import { useInterestData } from '@/hooks/interestSearch/useInterestData';
@@ -43,12 +37,11 @@ import { showDeleteConfirm, getSearchInfo } from '@/utils/interestSearch/interes
 export const InterestSearchScreen: React.FC = () => {
   const isFocused = useIsFocused();
   const navigation = useNavigation<any>();
-  const { colors, isDarkMode } = useTheme();
+  const { colors, isDark } = useTheme();
   const { t } = useAndroidSafeTranslation('interest');
   const { user, getSubscriptionTier, getSubscriptionFeatures } = useAuthStore();
   
   const [selectedTab, setSelectedTab] = useState<'interest' | 'friend'>('interest');
-  const [pulseAnim] = useState(new Animated.Value(1));
   
   const subscriptionTier = getSubscriptionTier();
   const features = getSubscriptionFeatures();
@@ -83,27 +76,8 @@ export const InterestSearchScreen: React.FC = () => {
     useCallback(() => {
       console.log('[InterestSearchScreen] Screen focused - refreshing data');
       loadData();
-      startPulseAnimation();
     }, [loadData])
   );
-
-  // 하트 펄스 애니메이션
-  const startPulseAnimation = () => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.2,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  };
 
   const handleDeleteSearch = async (searchId: string) => {
     const confirmed = await showDeleteConfirm();
@@ -123,296 +97,244 @@ export const InterestSearchScreen: React.FC = () => {
     }
   };
 
-  // 웹에서 포커스되지 않은 경우
-  if (Platform.OS === 'web' && !isFocused) {
-    return <View className="flex-1" />;
-  }
+  const handleAddInterest = (registrationType: 'MY_INFO' | 'LOOKING_FOR' = 'LOOKING_FOR') => {
+    // TESTING: Completely bypass ALL subscription checks for comprehensive testing
+    console.log('[InterestSearchScreen] Subscription check COMPLETELY BYPASSED for testing all 12 types');
+    
+    navigation.navigate('AddInterest', { 
+      type: registrationType,
+      relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend'
+    });
+  };
 
-  // 서버 연결 에러 처리
+  const renderSearchItem = ({ item }: { item: any }) => (
+    <InterestCard
+      item={item}
+      isSecure={true}
+      onPress={() => navigation.navigate('AddInterest', { 
+        editItem: item,
+        relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend' 
+      })}
+      onDelete={() => handleDeleteSearch(item.id)}
+    />
+  );
+
+  const renderMatchItem = ({ item }: { item: any }) => {
+    return (
+      <InterestCard
+        item={item}
+        isSecure={true}
+        isMatch={true}
+        onPress={() => handleChatPress(item)}
+        onMismatch={() => handleReportMismatch(item)}
+      />
+    );
+  };
+
   if (serverConnectionError) {
     return (
-      <ServerConnectionError 
+      <ServerConnectionError
         onRetry={handleRefresh}
-        message="관심상대 데이터를 불러올 수 없습니다"
+        message={t('error.serverConnectionError')}
       />
     );
   }
 
-  const renderTabContent = () => {
-    if (selectedTab === 'friend') {
-      return (
-        <ScrollView 
-          className="flex-1"
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={colors.PRIMARY}
-              colors={[colors.PRIMARY]}
-            />
-          }
-          showsVerticalScrollIndicator={false}
-        >
-          {filteredMatches.length === 0 ? (
-            <EmptySection
-              title={t('interest:matches.empty.title')}
-              subtitle={t('interest:matches.empty.subtitle')}
-              icon="heart-outline"
-              isFullHeight
-            />
-          ) : (
-            <View className="px-4 py-2">
-              {filteredMatches.map((match, index) => (
-                <Animated.View
-                  key={match.id}
-                  style={{
-                    transform: [{ scale: pulseAnim }],
-                    opacity: index === 0 ? 1 : 0.9,
-                  }}
-                  className={cn(
-                    "mb-4 rounded-2xl overflow-hidden",
-                    "shadow-lg",
-                    isDarkMode ? "bg-gray-900" : "bg-white"
-                  )}
-                >
-                  <LinearGradient
-                    colors={['#FF6B6B', '#FF8E53']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={{ height: 4 }}
-                  />
-                  <View className="p-4">
-                    <View className="flex-row items-center justify-between mb-3">
-                      <View className="flex-row items-center">
-                        <View className={cn(
-                          "w-12 h-12 rounded-full items-center justify-center",
-                          "bg-gradient-to-br from-pink-500 to-red-500"
-                        )}>
-                          <Ionicons name="heart" size={24} color="white" />
-                        </View>
-                        <View className="ml-3">
-                          <Text className={cn(
-                            "text-lg font-bold",
-                            isDarkMode ? "text-white" : "text-gray-900"
-                          )}>
-                            {match.nickname || '익명'}
-                          </Text>
-                          <Text className={cn(
-                            "text-sm",
-                            isDarkMode ? "text-gray-400" : "text-gray-600"
-                          )}>
-                            매치됨 · {match.matchedAt}
-                          </Text>
-                        </View>
-                      </View>
-                      <View className="flex-row">
-                        <TouchableOpacity
-                          onPress={() => handleChatPress(match)}
-                          className={cn(
-                            "px-4 py-2 rounded-full mr-2",
-                            "bg-primary-500"
-                          )}
-                        >
-                          <Text className="text-white font-semibold">채팅</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleDeleteMatch(match.id)}
-                          className="p-2"
-                        >
-                          <Ionicons name="close-circle-outline" size={24} color="#EF4444" />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                </Animated.View>
-              ))}
-            </View>
-          )}
-        </ScrollView>
-      );
-    }
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
+      {/* 헤더 섹션 */}
+      <View className="bg-white dark:bg-gray-800 px-4 py-4">
+        <Text className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          찾기
+        </Text>
+        <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          관심상대와 친구를 찾아보세요
+        </Text>
+      </View>
 
-    // Interest tab content
-    return (
-      <FlatList
-        data={filteredSearches}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View className={cn(
-            "mx-4 mb-4 rounded-2xl overflow-hidden",
-            "shadow-lg",
-            isDarkMode ? "bg-gray-900" : "bg-white"
-          )}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('InterestDetail', { searchId: item.id })}
-              activeOpacity={0.95}
-            >
-              <LinearGradient
-                colors={isDarkMode ? ['#374151', '#1F2937'] : ['#FFFFFF', '#F9FAFB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-                className="p-4"
-              >
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-1">
-                    <View className="flex-row items-center mb-2">
-                      <View className={cn(
-                        "px-3 py-1 rounded-full mr-2",
-                        item.category === 'dating' ? "bg-pink-100" : "bg-blue-100"
-                      )}>
-                        <Text className={cn(
-                          "text-xs font-semibold",
-                          item.category === 'dating' ? "text-pink-600" : "text-blue-600"
-                        )}>
-                          {item.category === 'dating' ? '데이팅' : '친구'}
-                        </Text>
-                      </View>
-                      {item.isPremium && (
-                        <View className="px-3 py-1 rounded-full bg-yellow-100">
-                          <Text className="text-xs font-semibold text-yellow-700">
-                            프리미엄
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text className={cn(
-                      "text-lg font-bold mb-1",
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    )}>
-                      {item.title}
-                    </Text>
-                    <Text className={cn(
-                      "text-sm",
-                      isDarkMode ? "text-gray-400" : "text-gray-600"
-                    )} numberOfLines={2}>
-                      {item.description}
-                    </Text>
-                  </View>
-                  <View className="ml-3">
-                    <Animated.View
-                      style={{ transform: [{ scale: pulseAnim }] }}
-                      className={cn(
-                        "w-16 h-16 rounded-full items-center justify-center",
-                        "bg-gradient-to-br from-pink-500 to-red-500"
-                      )}
-                    >
-                      <Text className="text-white text-xl font-bold">
-                        {item.matchCount || 0}
-                      </Text>
-                      <Text className="text-white text-xs">매치</Text>
-                    </Animated.View>
-                  </View>
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
+      {/* 탭 바 */}
+      <TabBar
+        selectedTab={selectedTab}
+        onTabChange={setSelectedTab}
+        colors={colors}
+      />
+
+      {/* CTA 버튼 섹션 */}
+      <View className="px-4 py-3">
+        <TouchableOpacity
+          className="bg-red-500 flex-row items-center justify-between px-4 py-3 rounded-xl mb-2"
+          onPress={() => handleAddInterest('MY_INFO')}
+        >
+          <View className="flex-row items-center">
+            <Icon name="person-add" size={20} color="#FFFFFF" />
+            <Text className="text-white font-semibold ml-3">
+              내 정보 등록하기
+            </Text>
           </View>
-        )}
-        ListEmptyComponent={
-          <EmptySection
-            title={t('interest:searches.empty.title')}
-            subtitle={t('interest:searches.empty.subtitle')}
-            icon="search-outline"
-            isFullHeight
-          />
-        }
+          <Icon name="chevron-forward" size={20} color="#FFFFFF" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          className="bg-teal-500 flex-row items-center justify-between px-4 py-3 rounded-xl"
+          onPress={() => handleAddInterest('LOOKING_FOR')}
+        >
+          <View className="flex-row items-center">
+            <Icon name="heart" size={20} color="#FFFFFF" />
+            <Text className="text-white font-semibold ml-3">
+              새로운 관심상대 등록하기
+            </Text>
+          </View>
+          <Icon name="chevron-forward" size={20} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+
+      {/* 컨텐츠 */}
+      <ScrollView
+        className="flex-1"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
             tintColor={colors.PRIMARY}
-            colors={[colors.PRIMARY]}
           />
         }
-        contentContainerStyle={{ paddingVertical: 16 }}
         showsVerticalScrollIndicator={false}
-      />
-    );
-  };
-
-  return (
-    <SafeAreaView 
-      className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}
-      edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
-    >
-      {/* Header */}
-      <View className={cn(
-        "px-4 py-4 border-b",
-        isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
-      )}>
-        <View className="flex-row items-center justify-between mb-3">
-          <Text className={cn(
-            "text-2xl font-bold",
-            isDarkMode ? "text-white" : "text-gray-900"
-          )}>
-            💝 {t('interest:title')}
-          </Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('AddInterest')}
-            className={cn(
-              "px-4 py-2 rounded-full",
-              "bg-gradient-to-r from-pink-500 to-red-500"
-            )}
-          >
-            <View className="flex-row items-center">
-              <Ionicons name="add-circle-outline" size={20} color="white" />
-              <Text className="text-white font-semibold ml-1">
-                {t('interest:actions.add')}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-        
-        {/* Tab Bar */}
-        <View className="flex-row bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-          <TouchableOpacity
-            onPress={() => setSelectedTab('interest')}
-            className={cn(
-              "flex-1 py-3 rounded-lg",
-              selectedTab === 'interest' 
-                ? "bg-white dark:bg-gray-700" 
-                : "bg-transparent"
-            )}
-          >
-            <Text className={cn(
-              "text-center font-semibold",
-              selectedTab === 'interest'
-                ? (isDarkMode ? "text-primary-400" : "text-primary-500")
-                : (isDarkMode ? "text-gray-400" : "text-gray-600")
-            )}>
-              관심 검색
+      >
+        {/* 등록한 검색 섹션 */}
+        <View className="px-4 py-3">
+          <View className="flex-row items-center mb-3">
+            <Icon name="search" size={20} color={colors.TEXT.SECONDARY} />
+            <Text className="text-base font-semibold text-gray-900 dark:text-gray-100 ml-2">
+              등록된 검색 ({filteredSearches.length})
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setSelectedTab('friend')}
-            className={cn(
-              "flex-1 py-3 rounded-lg",
-              selectedTab === 'friend' 
-                ? "bg-white dark:bg-gray-700" 
-                : "bg-transparent"
-            )}
-          >
-            <Text className={cn(
-              "text-center font-semibold",
-              selectedTab === 'friend'
-                ? (isDarkMode ? "text-primary-400" : "text-primary-500")
-                : (isDarkMode ? "text-gray-400" : "text-gray-600")
-            )}>
+          </View>
+          
+          {filteredSearches.length > 0 ? (
+            <FlatList
+              data={filteredSearches}
+              keyExtractor={(item) => item.id}
+              renderItem={renderSearchItem}
+              scrollEnabled={false}
+            />
+          ) : (
+            <View className="bg-white dark:bg-gray-800 rounded-xl p-6 items-center">
+              <Icon name="search-outline" size={48} color={colors.TEXT.TERTIARY} />
+              <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-3">
+                {selectedTab === 'interest' ? '등록된 검색이 없습니다' : '등록된 친구 검색이 없습니다'}
+              </Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">
+                {selectedTab === 'interest' 
+                  ? '관심있는 사람을 찾기 위해 다양한 조건으로 검색을 등록해보세요'
+                  : '친구를 찾기 위해 다양한 조건으로 검색을 등록해보세요'}
+              </Text>
+              <TouchableOpacity
+                className="bg-red-500 px-5 py-2.5 rounded-full flex-row items-center mt-4"
+                onPress={() => handleAddInterest('LOOKING_FOR')}
+              >
+                <Icon name="add" size={20} color="#FFFFFF" />
+                <Text className="text-white font-semibold ml-1">
+                  첫 검색 등록하기
+                </Text>
+              </TouchableOpacity>
+              
+              {/* 검색 팁 */}
+              <View className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 mt-4 w-full">
+                <Text className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  💡 검색 팁
+                </Text>
+                <View className="flex-row items-center mb-2">
+                  <Icon name="call" size={16} color={colors.TEXT.SECONDARY} />
+                  <Text className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                    연락처의 전화번호로 아는 사람 찾기
+                  </Text>
+                </View>
+                <View className="flex-row items-center mb-2">
+                  <Icon name="location" size={16} color={colors.TEXT.SECONDARY} />
+                  <Text className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                    특정 장소에서 만난 사람 찾기
+                  </Text>
+                </View>
+                <View className="flex-row items-center">
+                  <Icon name="people" size={16} color={colors.TEXT.SECONDARY} />
+                  <Text className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                    같은 그룹에 있는 사람 찾기
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
+        </View>
+
+        {/* 매칭 섹션 */}
+        <View className="px-4 py-3">
+          <View className="flex-row items-center mb-3">
+            <Text className="text-base font-semibold text-gray-900 dark:text-gray-100">
               매치 목록
             </Text>
-          </TouchableOpacity>
+            {filteredMatches.length > 0 && (
+              <View className="bg-green-500 px-2 py-0.5 rounded-full ml-2">
+                <Text className="text-xs text-white font-semibold">
+                  {filteredMatches.length}
+                </Text>
+              </View>
+            )}
+          </View>
+          
+          {filteredMatches.length > 0 ? (
+            <FlatList
+              data={filteredMatches}
+              keyExtractor={(item) => item.id}
+              renderItem={renderMatchItem}
+              scrollEnabled={false}
+            />
+          ) : (
+            <EmptySection
+              title={selectedTab === 'interest' ? '매치가 없습니다' : '친구 매치가 없습니다'}
+              description={selectedTab === 'interest' 
+                ? '서로 관심을 등록하면 매치가 됩니다'
+                : '서로 친구로 등록하면 매치가 됩니다'}
+              type="match"
+              colors={colors}
+              t={t}
+            />
+          )}
         </View>
-      </View>
 
-      {/* Content */}
-      {renderTabContent()}
+        {/* 구독 상태 카드 */}
+        <View className="mx-4 mb-6 p-4 bg-white dark:bg-gray-800 rounded-xl">
+          <View className="flex-row items-center">
+            <Icon name="star-outline" size={20} color={colors.TEXT.SECONDARY} />
+            <View className="flex-1 ml-3">
+              <Text className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                {subscriptionTier === 'PREMIUM' ? '프리미엄 플랜' : '무료 플랜'} 이용 중
+              </Text>
+              <Text className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                등록 가능: {3 - filteredSearches.length}개 남음 • 유효기간: 3일
+              </Text>
+            </View>
+            {subscriptionTier === 'FREE' && (
+              <TouchableOpacity
+                className="bg-red-500 px-3 py-1.5 rounded-full"
+                onPress={() => navigation.navigate('PricingScreen')}
+              >
+                <Text className="text-xs text-white font-semibold">
+                  업그레이드
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </ScrollView>
 
-      {/* Story Modal */}
-      <CreateStoryModal
-        visible={storyModalVisible}
-        onClose={() => setStoryModalVisible(false)}
-        match={selectedMatch}
-        onSave={handleSaveSuccessStory}
-      />
+      {/* 성공 스토리 모달 */}
+      {storyModalVisible && selectedMatch && (
+        <CreateStoryModal
+          visible={storyModalVisible}
+          onClose={() => setStoryModalVisible(false)}
+          onSave={handleSaveSuccessStory}
+          matchInfo={getSearchInfo(selectedMatch)}
+        />
+      )}
     </SafeAreaView>
   );
 };
