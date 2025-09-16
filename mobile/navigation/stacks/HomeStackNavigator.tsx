@@ -11,9 +11,9 @@ import { HomeStackParamList } from '@/types/navigation';
 // Screens
 import { HomeScreen } from '@/screens/HomeScreen-NW';
 import { CreateContentScreen } from '@/screens/CreateContentScreen-NW';
-import { CreateStoryScreen } from '@/screens/CreateStoryScreen';
-import { StoryUploadScreen } from '@/screens/StoryUploadScreen';
-import { PostDetailScreen } from '@/screens/PostDetailScreen';
+import { CreateStoryScreen } from '@/screens/CreateStoryScreen-NW';
+import { StoryUploadScreen } from '@/screens/StoryUploadScreen-NW';
+import { PostDetailScreen } from '@/screens/PostDetailScreen-NW';
 import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen-NW';
 import { NearbyGroupsScreen } from '@/screens/NearbyGroupsScreen-NW';
 

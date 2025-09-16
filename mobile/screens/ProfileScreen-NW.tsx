@@ -60,18 +60,11 @@ export const ProfileScreen = () => {
    */
   const renderSettingsSection = () => (
     <View className="mb-6">
-      <Text className={cn(
-        "text-lg font-bold mb-4 px-4",
-        isDarkMode ? "text-white" : "text-gray-900"
-      )}>
+      <Text className="text-lg font-bold mb-4 px-4 text-gray-900 dark:text-white">
         {t('common:navigation.settings')}
       </Text>
       
-      <View className={cn(
-        "mx-4 rounded-2xl p-1",
-        isDarkMode ? "bg-gray-900" : "bg-white",
-        "shadow-md"
-      )}>
+      <View className="mx-4 rounded-2xl p-1 bg-white dark:bg-gray-900 shadow-md">
         <LanguageSelector onLanguageChange={() => {}} />
         <ThemeSelector onThemeChange={() => {}} />
         
@@ -80,18 +73,12 @@ export const ProfileScreen = () => {
           onPress={() => navigation.navigate('MyGroups' as never)}
         >
           <View className="flex-row items-center flex-1">
-            <Ionicons name="layers-outline" size={20} color={isDarkMode ? '#9CA3AF' : '#4B5563'} />
-            <Text className={cn(
-              "ml-3 text-base",
-              isDarkMode ? "text-gray-300" : "text-gray-700"
-            )}>
+            <Ionicons name="layers-outline" size={20} color={colors.TEXT.SECONDARY} />
+            <Text className="ml-3 text-base text-gray-700 dark:text-gray-300">
               {t('profile:settings.myGroups')}
             </Text>
           </View>
-          <Text className={cn(
-            "text-lg",
-            isDarkMode ? "text-gray-500" : "text-gray-400"
-          )}>{'>'}</Text>
+          <Text className="text-lg text-gray-400 dark:text-gray-500">{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -99,18 +86,12 @@ export const ProfileScreen = () => {
           onPress={() => navigation.navigate('NotificationSettings' as never)}
         >
           <View className="flex-row items-center flex-1">
-            <Ionicons name="notifications-outline" size={20} color={isDarkMode ? '#9CA3AF' : '#4B5563'} />
-            <Text className={cn(
-              "ml-3 text-base",
-              isDarkMode ? "text-gray-300" : "text-gray-700"
-            )}>
+            <Ionicons name="notifications-outline" size={20} color={colors.TEXT.SECONDARY} />
+            <Text className="ml-3 text-base text-gray-700 dark:text-gray-300">
               {t('profile:settings.notificationSettings')}
             </Text>
           </View>
-          <Text className={cn(
-            "text-lg",
-            isDarkMode ? "text-gray-500" : "text-gray-400"
-          )}>{'>'}</Text>
+          <Text className="text-lg text-gray-400 dark:text-gray-500">{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -118,18 +99,12 @@ export const ProfileScreen = () => {
           onPress={() => navigation.navigate('PrivacyPolicy' as never)}
         >
           <View className="flex-row items-center flex-1">
-            <Ionicons name="document-text-outline" size={20} color={isDarkMode ? '#9CA3AF' : '#4B5563'} />
-            <Text className={cn(
-              "ml-3 text-base",
-              isDarkMode ? "text-gray-300" : "text-gray-700"
-            )}>
+            <Ionicons name="document-text-outline" size={20} color={colors.TEXT.SECONDARY} />
+            <Text className="ml-3 text-base text-gray-700 dark:text-gray-300">
               {t('profile:settings.privacy')}
             </Text>
           </View>
-          <Text className={cn(
-            "text-lg",
-            isDarkMode ? "text-gray-500" : "text-gray-400"
-          )}>{'>'}</Text>
+          <Text className="text-lg text-gray-400 dark:text-gray-500">{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -137,18 +112,12 @@ export const ProfileScreen = () => {
           onPress={() => navigation.navigate('TermsOfService' as never)}
         >
           <View className="flex-row items-center flex-1">
-            <Ionicons name="book-outline" size={20} color={isDarkMode ? '#9CA3AF' : '#4B5563'} />
-            <Text className={cn(
-              "ml-3 text-base",
-              isDarkMode ? "text-gray-300" : "text-gray-700"
-            )}>
+            <Ionicons name="book-outline" size={20} color={colors.TEXT.SECONDARY} />
+            <Text className="ml-3 text-base text-gray-700 dark:text-gray-300">
               {t('profile:settings.terms')}
             </Text>
           </View>
-          <Text className={cn(
-            "text-lg",
-            isDarkMode ? "text-gray-500" : "text-gray-400"
-          )}>{'>'}</Text>
+          <Text className="text-lg text-gray-400 dark:text-gray-500">{'>'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -156,18 +125,12 @@ export const ProfileScreen = () => {
           onPress={() => navigation.navigate('Support' as never)}
         >
           <View className="flex-row items-center flex-1">
-            <Ionicons name="help-circle-outline" size={20} color={isDarkMode ? '#9CA3AF' : '#4B5563'} />
-            <Text className={cn(
-              "ml-3 text-base",
-              isDarkMode ? "text-gray-300" : "text-gray-700"
-            )}>
+            <Ionicons name="help-circle-outline" size={20} color={colors.TEXT.SECONDARY} />
+            <Text className="ml-3 text-base text-gray-700 dark:text-gray-300">
               {t('profile:settings.support')}
             </Text>
           </View>
-          <Text className={cn(
-            "text-lg",
-            isDarkMode ? "text-gray-500" : "text-gray-400"
-          )}>{'>'}</Text>
+          <Text className="text-lg text-gray-400 dark:text-gray-500">{'>'}</Text>
         </TouchableOpacity>
       </View>
       
@@ -221,24 +184,18 @@ export const ProfileScreen = () => {
 
   return (
     <SafeAreaView 
-      className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}
+      className="flex-1 bg-gray-50 dark:bg-gray-950"
       edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
     >
       <ScrollView 
         className="flex-1"
         showsVerticalScrollIndicator={false}
       >
-        <View className={cn(
-          "px-4 py-6 border-b",
-          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
-        )}>
+        <View className="px-4 py-6 border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
           <Text className={cn(
             "text-2xl font-bold text-primary-500 mb-1"
           )}>{t('profile:title')}</Text>
-          <Text className={cn(
-            "text-base",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
+          <Text className="text-base text-gray-600 dark:text-gray-400">
             {t('profile:subtitle')}
           </Text>
         </View>
@@ -265,7 +222,7 @@ export const ProfileScreen = () => {
         <View className="px-4 py-8">
           <Text className={cn(
             "text-center text-xs",
-            isDarkMode ? "text-gray-600" : "text-gray-400"
+            "text-gray-400 dark:text-gray-600"
           )}>
             {t('profile:footer.version')}{'\n'}
             {t('profile:footer.tagline')}

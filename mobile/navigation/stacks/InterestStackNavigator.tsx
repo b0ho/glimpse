@@ -10,8 +10,8 @@ import { InterestStackParamList } from '@/types/navigation';
 
 // Screens
 import { InterestSearchScreen } from '@/screens/InterestSearchScreen-NW';
-import { AddInterestScreen } from '@/screens/AddInterestScreen';
-import { MyInfoScreen } from '@/screens/MyInfoScreen';
+import { AddInterestScreen } from '@/screens/AddInterestScreen-NW';
+import { MyInfoScreen } from '@/screens/MyInfoScreen-NW';
 import { ChatScreen } from '@/screens/ChatScreen-NW';
 
 const InterestStack = createStackNavigator<InterestStackParamList>();

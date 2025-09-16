@@ -21,6 +21,7 @@ import { fcmService } from '@/services/notifications/fcmService';
 import { AppMode, MODE_TEXTS } from '../shared/types';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { LinearGradient } from 'expo-linear-gradient';
+import { cn } from '@/lib/utils';
 
 interface SettingItemProps {
   title: string;
@@ -92,9 +93,10 @@ function SettingItem({
       }}
     >
       <TouchableOpacity
-        className={`bg-white dark:bg-gray-800 rounded-2xl p-4 mb-3 ${
-          disabled ? 'opacity-50' : ''
-        }`}
+        className={cn(
+          "bg-white dark:bg-gray-800 rounded-2xl p-4 mb-3",
+          disabled && "opacity-50"
+        )}
         onPress={handleToggle}
         disabled={disabled}
       >

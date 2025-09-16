@@ -18,7 +18,10 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "typecheck": "echo 'TypeScript check skipped'",
-    "typecheck:real": "tsc --noEmit"
+    "typecheck:real": "tsc --noEmit",
+    "test:darkmode": "node scripts/test-darkmode.js",
+    "test:darkmode:visual": "npm run test:darkmode && npm run test:visual",
+    "validate:nw": "node scripts/validate-nativewind.js"
   },
   "dependencies": {
     "@clerk/clerk-expo": "^2.14.7",

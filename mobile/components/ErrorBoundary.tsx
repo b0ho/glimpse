@@ -2,15 +2,14 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { WithTranslation, withTranslation } from 'react-i18next';
-import { SPACING, FONT_SIZES } from '../utils/constants';
 import { captureError } from '../services/sentry/sentry-config';
 import { useTheme } from '../hooks/useTheme';
+import { cn } from '../lib/utils';
 
 /**
  * ErrorBoundary 컴포넌트 Props
@@ -117,27 +116,31 @@ const ErrorFallback: React.FC<{
   const { colors } = useTheme();
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      <View style={styles.content}>
-        <View style={styles.iconContainer}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
+      <View className="flex-1 justify-center items-center px-6">
+        <View className="mb-6">
           <Icon name="warning" size={64} color={colors.ERROR} />
         </View>
         
-        <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('common:errors.errorBoundary.title')}</Text>
+        <Text className="text-2xl font-bold text-center mb-4 text-gray-900 dark:text-white">
+          {t('common:errors.errorBoundary.title')}
+        </Text>
         
-        <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="text-base text-center leading-5 mb-6 text-gray-600 dark:text-gray-400">
           {t('common:errors.errorBoundary.description')}{'\n'}
           {t('common:errors.errorBoundary.support')}
         </Text>
         
         {__DEV__ && error && (
-          <View style={[styles.errorDetails, { backgroundColor: colors.ERROR + '10' }]}>
-            <Text style={[styles.errorDetailsTitle, { color: colors.ERROR }]}>{t('common:errors.errorBoundary.developerInfo')}</Text>
-            <Text style={[styles.errorDetailsText, { color: colors.ERROR }]}>
+          <View className="bg-red-50 dark:bg-red-900/10 rounded-lg p-4 mb-6 w-full">
+            <Text className="text-sm font-bold mb-2 text-red-600 dark:text-red-400">
+              {t('common:errors.errorBoundary.developerInfo')}
+            </Text>
+            <Text className="text-xs font-mono mb-1 text-red-600 dark:text-red-400">
               {error.toString()}
             </Text>
             {errorInfo?.componentStack && (
-              <Text style={[styles.errorDetailsText, { color: colors.ERROR }]}>
+              <Text className="text-xs font-mono text-red-600 dark:text-red-400">
                 {errorInfo.componentStack}
               </Text>
             )}
@@ -145,70 +148,17 @@ const ErrorFallback: React.FC<{
         )}
         
         <TouchableOpacity 
-          style={[styles.retryButton, { backgroundColor: colors.PRIMARY }]}
+          className="flex-row items-center bg-primary-500 px-5 py-3 rounded-lg"
           onPress={onRestart}
         >
           <Icon name="refresh" size={20} color={colors.TEXT.WHITE} />
-          <Text style={[styles.retryButtonText, { color: colors.TEXT.WHITE }]}>{t('common:buttons.retry')}</Text>
+          <Text className="text-base font-semibold ml-2 text-white">
+            {t('common:buttons.retry')}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.XL,
-  },
-  iconContainer: {
-    marginBottom: SPACING.XL,
-  },
-  title: {
-    fontSize: FONT_SIZES.XXL,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: SPACING.MD,
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.MD,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: SPACING.XL,
-  },
-  errorDetails: {
-    borderRadius: 8,
-    padding: SPACING.MD,
-    marginBottom: SPACING.XL,
-    width: '100%',
-  },
-  errorDetailsTitle: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: 'bold',
-    marginBottom: SPACING.SM,
-  },
-  errorDetailsText: {
-    fontSize: FONT_SIZES.XS,
-    fontFamily: 'monospace',
-    marginBottom: SPACING.XS,
-  },
-  retryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.LG,
-    paddingVertical: SPACING.MD,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    marginLeft: SPACING.SM,
-  },
-});
 
 export const ErrorBoundary = withTranslation('common')(ErrorBoundaryComponent);

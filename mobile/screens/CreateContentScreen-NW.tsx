@@ -292,17 +292,11 @@ export const CreateContentScreen = ({ route }: any) => {
                 },
               ],
             }}
-            className={cn(
-              "rounded-t-3xl max-h-[70%]",
-              isDarkMode ? "bg-gray-900" : "bg-white"
-            )}
+            className="rounded-t-3xl max-h-[70%] bg-white dark:bg-gray-900"
           >
             <View className="p-4 border-b border-gray-200 dark:border-gray-800">
               <View className="w-12 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto mb-4" />
-              <Text className={cn(
-                "text-xl font-bold text-center",
-                isDarkMode ? "text-white" : "text-gray-900"
-              )}>
+              <Text className="text-xl font-bold text-center text-gray-900 dark:text-white">
                 {t('group:picker.title')}
               </Text>
             </View>
@@ -313,10 +307,7 @@ export const CreateContentScreen = ({ route }: any) => {
                   <TouchableOpacity
                     key={group.id}
                     onPress={() => handleGroupSelect(group)}
-                    className={cn(
-                      "py-4 border-b flex-row items-center justify-between",
-                      isDarkMode ? "border-gray-800" : "border-gray-200"
-                    )}
+                    className="py-4 border-b flex-row items-center justify-between border-gray-200 dark:border-gray-800"
                   >
                     <View className="flex-row items-center flex-1">
                       <LinearGradient
@@ -326,16 +317,10 @@ export const CreateContentScreen = ({ route }: any) => {
                         <Ionicons name="people" size={20} color="white" />
                       </LinearGradient>
                       <View className="flex-1">
-                        <Text className={cn(
-                          "text-lg font-semibold",
-                          isDarkMode ? "text-white" : "text-gray-900"
-                        )}>
+                        <Text className="text-lg font-semibold text-gray-900 dark:text-white">
                           {group.name}
                         </Text>
-                        <Text className={cn(
-                          "text-sm",
-                          isDarkMode ? "text-gray-400" : "text-gray-600"
-                        )}>
+                        <Text className="text-sm text-gray-600 dark:text-gray-400">
                           {group.type}
                         </Text>
                       </View>
@@ -343,16 +328,13 @@ export const CreateContentScreen = ({ route }: any) => {
                     <Ionicons 
                       name="chevron-forward" 
                       size={20} 
-                      color={isDarkMode ? '#9CA3AF' : '#6B7280'} 
+                      color={colors.TEXT.SECONDARY} 
                     />
                   </TouchableOpacity>
                 ))
               ) : (
                 <View className="py-12 items-center">
-                  <Text className={cn(
-                    "text-center",
-                    isDarkMode ? "text-gray-400" : "text-gray-600"
-                  )}>
+                  <Text className="text-center text-gray-600 dark:text-gray-400">
                     {__DEV__ ? t('post:create.loading') : t('post:create.noGroups')}
                   </Text>
                 </View>
@@ -365,28 +347,19 @@ export const CreateContentScreen = ({ route }: any) => {
   };
 
   return (
-    <SafeAreaView className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}>
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <View className={cn(
-        "flex-row items-center justify-between px-4 py-3 border-b",
-        isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
-      )}>
+      <View className="flex-row items-center justify-between px-4 py-3 border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="px-3 py-2"
         >
-          <Text className={cn(
-            "text-base",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
+          <Text className="text-base text-gray-600 dark:text-gray-400">
             {t('common:content.create.cancel')}
           </Text>
         </TouchableOpacity>
         
-        <Text className={cn(
-          "text-lg font-bold",
-          isDarkMode ? "text-white" : "text-gray-900"
-        )}>
+        <Text className="text-lg font-bold text-gray-900 dark:text-white">
           {isEditMode ? t('post:create.editStory') : t('common:content.create.title')}
         </Text>
         
@@ -437,13 +410,13 @@ export const CreateContentScreen = ({ route }: any) => {
                   <Ionicons 
                     name="people-circle" 
                     size={24} 
-                    color={selectedGroup ? (isDarkMode ? '#FF8A8A' : '#FF6B6B') : '#9CA3AF'} 
+                    color={selectedGroup ? colors.PRIMARY : colors.TEXT.DISABLED} 
                   />
                   <Text className={cn(
                     "ml-3 text-base",
                     selectedGroup
-                      ? (isDarkMode ? "text-white font-semibold" : "text-gray-900 font-semibold")
-                      : (isDarkMode ? "text-gray-400" : "text-gray-600")
+                      ? "text-gray-900 dark:text-white font-semibold"
+                      : "text-gray-600 dark:text-gray-400"
                   )}>
                     {selectedGroup ? selectedGroup.name : t('post:create.selectGroup')}
                   </Text>
@@ -451,7 +424,7 @@ export const CreateContentScreen = ({ route }: any) => {
                 <Ionicons 
                   name="chevron-down" 
                   size={20} 
-                  color={isDarkMode ? '#9CA3AF' : '#6B7280'} 
+                  color={colors.TEXT.SECONDARY} 
                 />
               </View>
             </TouchableOpacity>
@@ -459,13 +432,13 @@ export const CreateContentScreen = ({ route }: any) => {
             {/* Text Input */}
             <View className={cn(
               "mb-4 p-4 rounded-2xl",
-              isDarkMode ? "bg-gray-900" : "bg-white"
+              "bg-white dark:bg-gray-900"
             )}>
               <TextInput
                 value={contentText}
                 onChangeText={setContentText}
                 placeholder={t('post:create.placeholder')}
-                placeholderTextColor={isDarkMode ? '#9CA3AF' : '#6B7280'}
+                placeholderTextColor={colors.TEXT.SECONDARY}
                 multiline
                 style={{ minHeight: textHeight }}
                 onContentSizeChange={(event) => {
@@ -473,7 +446,7 @@ export const CreateContentScreen = ({ route }: any) => {
                 }}
                 className={cn(
                   "text-base",
-                  isDarkMode ? "text-white" : "text-gray-900"
+                  "text-gray-900 dark:text-white"
                 )}
               />
               
@@ -486,13 +459,13 @@ export const CreateContentScreen = ({ route }: any) => {
                   <Ionicons 
                     name="image" 
                     size={24} 
-                    color={selectedImages.length >= 5 ? '#9CA3AF' : (isDarkMode ? '#4ECDC4' : '#45B7D1')} 
+                    color={selectedImages.length >= 5 ? '#9CA3AF' : colors.PRIMARY} 
                   />
                   <Text className={cn(
                     "ml-2",
                     selectedImages.length >= 5
                       ? "text-gray-400"
-                      : (isDarkMode ? "text-secondary-400" : "text-secondary-500")
+                      : "text-secondary-500 dark:text-secondary-400"
                   )}>
                     {t('post:create.addPhoto')} ({selectedImages.length}/5)
                   </Text>
@@ -500,7 +473,7 @@ export const CreateContentScreen = ({ route }: any) => {
                 
                 <Text className={cn(
                   "text-sm",
-                  isDarkMode ? "text-gray-500" : "text-gray-400"
+                  "text-gray-400 dark:text-gray-500"
                 )}>
                   {contentText.length}/500
                 </Text>
@@ -511,11 +484,11 @@ export const CreateContentScreen = ({ route }: any) => {
             {selectedImages.length > 0 && (
               <View className={cn(
                 "p-4 rounded-2xl",
-                isDarkMode ? "bg-gray-900" : "bg-white"
+                "bg-white dark:bg-gray-900"
               )}>
                 <Text className={cn(
                   "text-sm font-semibold mb-3",
-                  isDarkMode ? "text-white" : "text-gray-900"
+                  "text-gray-900 dark:text-white"
                 )}>
                   {t('common:content.create.selectedImages', { count: selectedImages.length })}
                 </Text>

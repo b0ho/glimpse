@@ -1,57 +1,55 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   TextInput,
+  TouchableOpacity,
+  Alert,
   KeyboardAvoidingView,
   Platform,
-  Alert,
-  Animated,
-  ScrollView,
-  SafeAreaView,
-  TouchableOpacity,
   ActivityIndicator,
-} from 'react-native'
-import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation'
-import { useAuthService } from '@/services/auth/auth-service'
-import { useTheme } from '@/hooks/useTheme'
-import { Button } from '@/components/nativewindui/Button'
-import { Ionicons } from '@expo/vector-icons'
-import { LinearGradient } from 'expo-linear-gradient'
-import { cn } from '@/lib/utils'
+  Animated,
+  Dimensions,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
+import { useAuthService } from '@/services/auth/auth-service';
+import { useAuthStore } from '@/store/slices/authSlice';
+import { useTheme } from '@/hooks/useTheme';
+import { SECURITY } from '@/utils/constants';
+import { cn } from '@/lib/utils';
 
 interface SMSVerificationScreenProps {
-  phoneNumber: string
-  onVerificationSuccess: () => void
-  onBack?: () => void
+  phoneNumber: string;
+  onVerificationSuccess: () => void;
+  onBack: () => void;
 }
+
+const { width } = Dimensions.get('window');
 
 export const SMSVerificationScreen = ({
   phoneNumber,
   onVerificationSuccess,
   onBack,
 }: SMSVerificationScreenProps) => {
-  const [code, setCode] = useState(['', '', '', '', '', ''])
-  const [isLoading, setIsLoading] = useState(false)
-  const [isResending, setIsResending] = useState(false)
-  const [resendTimer, setResendTimer] = useState(60)
-  const authService = useAuthService()
-  const { t } = useAndroidSafeTranslation('auth')
-  const { isDarkMode } = useTheme()
+  const [code, setCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(SECURITY.OTP_EXPIRY_MINUTES * 60);
+  const [canResend, setCanResend] = useState(false);
+  const authService = useAuthService();
+  const authStore = useAuthStore();
+  const inputRefs = useRef<(TextInput | null)[]>([]);
+  const { t } = useAndroidSafeTranslation();
+  const { colors: themeColors } = useTheme();
   
-  // Refs for input boxes
-  const inputRefs = useRef<(TextInput | null)[]>([])
-  
-  // Animation values
-  const fadeAnim = useRef(new Animated.Value(0)).current
-  const scaleAnim = useRef(new Animated.Value(0.9)).current
-  const shakeAnim = useRef(new Animated.Value(0)).current
-  const codeBoxAnimations = useRef(
-    Array(6).fill(0).map(() => new Animated.Value(0))
-  ).current
-  
+  // 애니메이션 값
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
-    // Initial animations
+    // 페이드인 애니메이션
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -63,356 +61,400 @@ export const SMSVerificationScreen = ({
         friction: 4,
         useNativeDriver: true,
       }),
-    ]).start()
+    ]).start();
     
-    // Staggered animation for code boxes
-    const staggerDelay = 80
-    codeBoxAnimations.forEach((anim, index) => {
-      Animated.timing(anim, {
-        toValue: 1,
-        duration: 400,
-        delay: index * staggerDelay,
-        useNativeDriver: true,
-      }).start()
-    })
-    
-    // Auto-focus first input
-    setTimeout(() => {
-      inputRefs.current[0]?.focus()
-    }, 800)
-  }, [])
-  
-  // Resend timer
+    // 타이머 시작
+    const timer = setInterval(() => {
+      setRemainingTime(prev => {
+        if (prev <= 1) {
+          setCanResend(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   useEffect(() => {
-    if (resendTimer > 0) {
-      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000)
-      return () => clearTimeout(timer)
+    // 첫번째 입력 필드에 포커스
+    if (inputRefs.current[0]) {
+      inputRefs.current[0].focus();
     }
-  }, [resendTimer])
+  }, []);
   
   const shakeAnimation = () => {
     Animated.sequence([
       Animated.timing(shakeAnim, {
         toValue: 10,
-        duration: 50,
+        duration: 100,
         useNativeDriver: true,
       }),
       Animated.timing(shakeAnim, {
         toValue: -10,
-        duration: 50,
+        duration: 100,
         useNativeDriver: true,
       }),
       Animated.timing(shakeAnim, {
         toValue: 10,
-        duration: 50,
+        duration: 100,
         useNativeDriver: true,
       }),
       Animated.timing(shakeAnim, {
         toValue: 0,
-        duration: 50,
+        duration: 100,
         useNativeDriver: true,
       }),
-    ]).start()
-  }
-  
-  const handleCodeChange = (value: string, index: number) => {
-    const newCode = [...code]
+    ]).start();
+  };
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const formatPhoneNumber = (phone: string): string => {
+    if (phone.length === 11) {
+      return `${phone.slice(0, 3)}-${phone.slice(3, 7)}-${phone.slice(7)}`;
+    }
+    return phone;
+  };
+
+  const handleCodeChange = (text: string, index: number): void => {
+    // 숫자만 허용
+    const digit = text.replace(/\D/g, '').slice(-1);
+    const newCode = code.split('');
+    newCode[index] = digit;
     
-    // Handle paste
-    if (value.length > 1) {
-      const pastedCode = value.slice(0, 6).split('')
-      for (let i = 0; i < pastedCode.length && index + i < 6; i++) {
-        newCode[index + i] = pastedCode[i]
-      }
-      setCode(newCode)
-      
-      // Focus last filled input or next empty
-      const lastFilledIndex = Math.min(index + pastedCode.length - 1, 5)
-      inputRefs.current[lastFilledIndex]?.focus()
-      
-      // Auto-submit if all filled
-      if (newCode.every(digit => digit !== '')) {
-        handleVerifyCode(newCode.join(''))
-      }
-      return
+    // 코드 업데이트
+    const updatedCode = newCode.join('');
+    setCode(updatedCode);
+    
+    // 다음 필드로 자동 이동
+    if (digit && index < SECURITY.OTP_LENGTH - 1) {
+      inputRefs.current[index + 1]?.focus();
     }
     
-    // Single character input
-    newCode[index] = value
-    setCode(newCode)
-    
-    // Move to next input
-    if (value !== '' && index < 5) {
-      inputRefs.current[index + 1]?.focus()
+    // 마지막 입력 시 자동 제출
+    if (updatedCode.length === SECURITY.OTP_LENGTH) {
+      handleVerifyCode();
     }
-    
-    // Auto-submit when all digits entered
-    if (index === 5 && value !== '' && newCode.every(digit => digit !== '')) {
-      handleVerifyCode(newCode.join(''))
-    }
-  }
+  };
   
   const handleKeyPress = (key: string, index: number) => {
-    if (key === 'Backspace' && code[index] === '' && index > 0) {
-      inputRefs.current[index - 1]?.focus()
+    if (key === 'Backspace' && !code[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
     }
-  }
-  
-  const handleVerifyCode = async (verificationCode?: string) => {
-    const codeToVerify = verificationCode || code.join('')
+  };
+
+  const handleVerifyCode = async (): Promise<void> => {
+    console.log('🔍 handleVerifyCode called');
+    console.log('📝 Code entered:', code);
+    console.log('📏 Code length:', code.length);
     
-    if (codeToVerify.length !== 6) {
-      shakeAnimation()
-      Alert.alert(t('common:errors.error'), t('auth:smsVerification.errors.invalidCode'))
-      return
+    if (code.length !== SECURITY.OTP_LENGTH) {
+      console.log('❌ Invalid code length');
+      Alert.alert(t('common:status.error'), t('auth:smsVerification.errors.enterSixDigitCode'));
+      return;
     }
-    
-    setIsLoading(true)
-    
+
+    console.log('✅ Starting verification process');
+    setIsLoading(true);
+
     try {
-      const result = await authService.verifyPhoneCode(codeToVerify)
+      console.log('🚀 Calling authService.verifyPhoneCode with code:', code);
+      const result = await authService.verifyPhoneCode(code);
+      console.log('📨 Verification result:', result);
       
       if (result.success) {
-        // Success animation
-        Animated.parallel([
-          Animated.timing(fadeAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 1.1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]).start(() => {
-          onVerificationSuccess()
-        })
-      } else {
-        shakeAnimation()
-        Alert.alert(t('common:errors.error'), result.error || t('auth:smsVerification.errors.verificationFailed'))
+        console.log('✅ Verification successful');
+        // 인증 성공 시 사용자 정보를 스토어에 저장
+        const currentUser = authService.getCurrentUser();
+        console.log('👤 Current user:', currentUser);
+        if (currentUser) {
+          authStore.setUser({
+            id: (currentUser as { id: string }).id,
+            anonymousId: `anon_${(currentUser as { id: string }).id.slice(-8)}`,
+            nickname: (currentUser as { firstName?: string }).firstName || t('common:user.defaultName'),
+            phoneNumber: phoneNumber, // 해시화된 전화번호 (실제로는 백엔드에서 처리)
+            isVerified: true,
+            credits: 10, // 기본 크레딧
+            isPremium: false,
+            lastActive: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+        }
         
-        // Clear code on error
-        setCode(['', '', '', '', '', ''])
-        inputRefs.current[0]?.focus()
+        Alert.alert(
+          t('auth:smsVerification.success.title'),
+          t('auth:smsVerification.success.message'),
+          [
+            {
+              text: t('common:buttons.confirm'),
+              onPress: onVerificationSuccess,
+            },
+          ]
+        );
+      } else {
+        console.log('❌ Verification failed:', result.error);
+        shakeAnimation(); // 에러 시 흔들림 효과
+        Alert.alert(t('common:status.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('auth:smsVerification.errors.invalidCode'));
+        setCode(''); // 코드 초기화
+        inputRefs.current[0]?.focus(); // 첫번째 필드로 포커스
       }
     } catch (error) {
-      shakeAnimation()
-      Alert.alert(t('common:errors.error'), t('auth:smsVerification.errors.networkError'))
+      console.error('🔥 SMS verification error:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      Alert.alert(t('common:status.error'), t('auth:smsVerification.errors.verificationFailed'));
+      setCode('');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
-  
-  const handleResendCode = async () => {
-    if (resendTimer > 0) return
-    
-    setIsResending(true)
-    
+  };
+
+  const handleResendCode = async (): Promise<void> => {
+    if (!canResend) return;
+
+    setIsLoading(true);
+
     try {
-      const result = await authService.signInWithPhone(phoneNumber)
+      const result = await authService.signInWithPhone(phoneNumber);
       
       if (result.success) {
-        Alert.alert(
-          t('auth:smsVerification.resend.success.title'),
-          t('auth:smsVerification.resend.success.message')
-        )
-        setResendTimer(60)
-        setCode(['', '', '', '', '', ''])
-        inputRefs.current[0]?.focus()
+        Alert.alert(t('auth:smsVerification.resend.success.title'), t('auth:smsVerification.resend.success.message'));
+        setRemainingTime(SECURITY.OTP_EXPIRY_MINUTES * 60);
+        setCanResend(false);
+        setCode('');
       } else {
-        Alert.alert(t('common:errors.error'), result.error || t('auth:smsVerification.resend.error'))
+        Alert.alert(t('common:status.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('auth:smsVerification.resend.errors.failed'));
       }
     } catch (error) {
-      Alert.alert(t('common:errors.error'), t('auth:smsVerification.errors.networkError'))
+      console.error('Resend code error:', error);
+      Alert.alert(t('common:status.error'), t('common:errors.network'));
     } finally {
-      setIsResending(false)
+      setIsLoading(false);
     }
-  }
-  
-  const formatPhoneNumber = (phone: string) => {
-    const cleaned = phone.replace(/\D/g, '')
-    if (cleaned.length <= 3) return cleaned
-    if (cleaned.length <= 7) return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`
-    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 7)}-${cleaned.slice(7, 11)}`
-  }
-  
+  };
+
   return (
-    <SafeAreaView className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}>
-      <KeyboardAvoidingView 
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <KeyboardAvoidingView 
+      className="flex-1 bg-gray-50 dark:bg-black"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <Animated.View 
+        className={cn(
+          "flex-1 px-6",
+          Platform.OS === 'ios' ? "pt-20" : "pt-15"
+        )}
+        style={{
+          opacity: fadeAnim,
+          transform: [{ scale: scaleAnim }],
+        }}
       >
-        <ScrollView 
-          className="flex-1"
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
+        {/* 헤더 */}
+        <TouchableOpacity 
+          className="flex-row items-center py-2 px-3 rounded-[20px] bg-red-100 dark:bg-red-100/10 self-start mb-8"
+          onPress={onBack}
+          activeOpacity={0.7}
         >
-          {/* Header */}
-          {onBack && (
-            <View className="px-6 pt-4 pb-2">
-              <TouchableOpacity
-                onPress={onBack}
-                activeOpacity={0.7}
-                className="flex-row items-center self-start px-3 py-2 rounded-full bg-primary-50 dark:bg-primary-900/20"
-              >
-                <Ionicons 
-                  name="arrow-back" 
-                  size={20} 
-                  color={isDarkMode ? '#FF8A8A' : '#FF6B6B'} 
-                />
-                <Text className="ml-2 text-primary-500 dark:text-primary-400 font-medium">
-                  뒤로가기
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          
-          {/* Content */}
-          <Animated.View 
-            style={{
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
-            }}
-            className="flex-1 px-6 justify-center"
-          >
-            {/* Icon & Title Section */}
-            <View className="items-center mb-8">
-              <View className="mb-6">
-                <LinearGradient
-                  colors={isDarkMode ? ['#FF8A8A', '#FF6B6B'] : ['#FF6B6B', '#FF5252']}
-                  className="w-20 h-20 rounded-full items-center justify-center shadow-lg"
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Ionicons name="chatbubbles" size={36} color="white" />
-                </LinearGradient>
-              </View>
-              
-              <Text className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-2">
-                {t('auth:smsVerification.title')}
-              </Text>
-              
-              <Text className="text-gray-600 dark:text-gray-400 text-center px-8">
-                {t('auth:smsVerification.subtitle', { phone: formatPhoneNumber(phoneNumber) })}
-              </Text>
-            </View>
-            
-            {/* Code Input Boxes */}
-            <Animated.View
-              style={{
-                transform: [{ translateX: shakeAnim }],
-              }}
-              className="mb-8"
+          <Ionicons 
+            name="arrow-back" 
+            size={24} 
+            color={themeColors.TEXT.PRIMARY} 
+          />
+          <Text className="text-base font-medium ml-1 text-gray-900 dark:text-white">
+            {t('common:buttons.back')}
+          </Text>
+        </TouchableOpacity>
+
+        {/* 타이틀 섹션 */}
+        <View className="items-center mb-10">
+          <View className="mb-6">
+            <LinearGradient
+              colors={['#FF8A8A', '#FF6B6B']}
+              className={cn(
+                "w-20 h-20 rounded-full justify-center items-center",
+                Platform.select({
+                  ios: "shadow-lg",
+                  android: "elevation-10",
+                  web: ""
+                })
+              )}
+              style={Platform.OS === 'web' ? {
+                boxShadow: '0px 8px 24px rgba(255, 107, 107, 0.3)'
+              } : undefined}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
             >
-              <View className="flex-row justify-center space-x-3">
-                {code.map((digit, index) => (
-                  <Animated.View
-                    key={index}
-                    style={{
-                      opacity: codeBoxAnimations[index],
-                      transform: [
-                        {
-                          scale: codeBoxAnimations[index].interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0.8, 1],
-                          }),
-                        },
-                      ],
-                    }}
-                  >
-                    <View
-                      className={cn(
-                        'w-12 h-14 rounded-xl border-2',
-                        digit !== '' 
-                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' 
-                          : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900'
-                      )}
-                    >
-                      <TextInput
-                        ref={ref => (inputRefs.current[index] = ref)}
-                        value={digit}
-                        onChangeText={(value) => handleCodeChange(value, index)}
-                        onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
-                        keyboardType="number-pad"
-                        maxLength={index === 0 ? 6 : 1}
-                        selectTextOnFocus
-                        className="flex-1 text-center text-2xl font-bold text-gray-900 dark:text-white"
-                        style={{ paddingTop: Platform.OS === 'ios' ? 10 : 8 }}
-                      />
-                    </View>
-                  </Animated.View>
-                ))}
-              </View>
-            </Animated.View>
-            
-            {/* Actions */}
-            <View className="space-y-4">
-              {/* Verify Button */}
-              <Button
-                onPress={() => handleVerifyCode()}
-                disabled={code.some(digit => digit === '')}
-                loading={isLoading}
-                variant="gradient"
-                size="lg"
-                gradientColors={isDarkMode ? ['#FF8A8A', '#FF6B6B'] : ['#FF6B6B', '#FF5252']}
-                rightIcon={
-                  !isLoading && (
-                    <Ionicons name="checkmark-circle" size={20} color="white" />
-                  )
-                }
-              >
-                {isLoading ? t('auth:smsVerification.verifyingButton') : t('auth:smsVerification.verifyButton')}
-              </Button>
-              
-              {/* Resend Code */}
-              <View className="items-center">
-                {resendTimer > 0 ? (
-                  <View className="flex-row items-center">
-                    <Ionicons 
-                      name="time-outline" 
-                      size={16} 
-                      color={isDarkMode ? '#9CA3AF' : '#6B7280'} 
-                    />
-                    <Text className="ml-2 text-gray-500 dark:text-gray-400">
-                      {t('auth:smsVerification.resendTimer', { seconds: resendTimer })}
-                    </Text>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    onPress={handleResendCode}
-                    disabled={isResending}
-                    activeOpacity={0.7}
-                    className="flex-row items-center px-4 py-2"
-                  >
-                    {isResending ? (
-                      <ActivityIndicator size="small" color={isDarkMode ? '#FF8A8A' : '#FF6B6B'} />
-                    ) : (
-                      <>
-                        <Ionicons 
-                          name="refresh" 
-                          size={18} 
-                          color={isDarkMode ? '#FF8A8A' : '#FF6B6B'} 
-                        />
-                        <Text className="ml-2 text-primary-500 dark:text-primary-400 font-medium">
-                          {t('auth:smsVerification.resendButton')}
-                        </Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
+              <Ionicons name="lock-closed" size={32} color="white" />
+            </LinearGradient>
+          </View>
+          <Text className="text-3xl font-bold text-center mb-2 text-gray-900 dark:text-white">
+            {t('auth:smsVerification.title')}
+          </Text>
+          <Text className="text-base text-center leading-6 px-5 text-gray-600 dark:text-gray-400">
+            {t('auth:smsVerification.subtitle', { phoneNumber: formatPhoneNumber(phoneNumber) })}
+          </Text>
+        </View>
+        
+        {/* 코드 입력 필드 */}
+        <Animated.View 
+          className="mb-8"
+          style={{
+            transform: [{ translateX: shakeAnim }],
+          }}
+        >
+          <View className="flex-row justify-between mb-6 px-5">
+            {[...Array(SECURITY.OTP_LENGTH)].map((_, index) => (
+              <View
+                key={index}
+                className={cn(
+                  "w-11 h-14 rounded-xl justify-center items-center bg-white dark:bg-gray-800",
+                  Platform.select({
+                    ios: "shadow-sm",
+                    android: "elevation-2",
+                    web: ""
+                  }),
+                  code[index] ? "border-2 border-red-500 dark:border-red-400" : "border border-gray-200 dark:border-gray-600"
                 )}
+                style={Platform.OS === 'web' ? {
+                  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
+                } : undefined}
+              >
+                <TextInput
+                  ref={(ref) => (inputRefs.current[index] = ref)}
+                  className="text-2xl font-semibold w-full h-full text-center text-gray-900 dark:text-white"
+                  value={code[index] || ''}
+                  onChangeText={(text) => handleCodeChange(text, index)}
+                  onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
+                  keyboardType="number-pad"
+                  maxLength={1}
+                  textAlign="center"
+                />
               </View>
-              
-              {/* Help Text */}
-              <View className="items-center mt-4">
-                <Text className="text-xs text-gray-500 dark:text-gray-400 text-center px-8">
-                  {t('auth:smsVerification.helpText')}
-                </Text>
-              </View>
+            ))}
+          </View>
+          
+          {/* 타이머 */}
+          <View className="flex-row items-center justify-center mb-6">
+            <Ionicons 
+              name="time-outline" 
+              size={16} 
+              color={remainingTime > 30 
+                ? themeColors.SUCCESS
+                : themeColors.WARNING
+              } 
+            />
+            <Text className={cn(
+              "text-sm ml-1.5",
+              remainingTime > 30 
+                ? "text-gray-600 dark:text-gray-400"
+                : "text-amber-600 dark:text-amber-400"
+            )}>
+              {remainingTime > 0 
+                ? t('auth:smsVerification.timer.expires', { time: formatTime(remainingTime) }) 
+                : t('auth:smsVerification.timer.expired')
+              }
+            </Text>
+          </View>
+          
+          {/* 확인 버튼 */}
+          <TouchableOpacity
+            onPress={() => {
+              console.log('🔮️ Verify button pressed');
+              console.log('🔢 Code length check:', code.length, 'vs required:', SECURITY.OTP_LENGTH);
+              console.log('🎯 Is loading:', isLoading);
+              if (code.length === SECURITY.OTP_LENGTH && !isLoading) {
+                handleVerifyCode();
+              }
+            }}
+            disabled={code.length !== SECURITY.OTP_LENGTH || isLoading}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={
+                code.length !== SECURITY.OTP_LENGTH || isLoading
+                  ? ['#CED4DA', '#CED4DA']
+                  : ['#FF6B6B', '#FF5252']
+              }
+              className={cn(
+                "rounded-2xl py-4.5 items-center justify-center mb-4",
+                Platform.select({
+                  ios: "shadow-lg",
+                  android: "elevation-8",
+                  web: ""
+                })
+              )}
+              style={Platform.OS === 'web' && (code.length === SECURITY.OTP_LENGTH && !isLoading) ? {
+                boxShadow: '0px 4px 16px rgba(255, 107, 107, 0.25)'
+              } : undefined}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              {isLoading ? (
+                <View className="flex-row items-center justify-center">
+                  <ActivityIndicator size="small" color="white" />
+                  <Text className="text-white text-base font-semibold ml-2">
+                    {t('auth:smsVerification.verifying')}
+                  </Text>
+                </View>
+              ) : (
+                <View className="flex-row items-center justify-center">
+                  <Ionicons name="checkmark-circle" size={20} color="white" style={{ marginRight: 8 }} />
+                  <Text className="text-white text-base font-semibold">
+                    {t('auth:smsVerification.verifyButton')}
+                  </Text>
+                </View>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+          
+          {/* 재전송 버튼 */}
+          <TouchableOpacity
+            className={cn(
+              "items-center py-3",
+              !canResend && "opacity-50"
+            )}
+            onPress={handleResendCode}
+            disabled={!canResend || isLoading}
+            activeOpacity={0.7}
+          >
+            <View className="flex-row items-center justify-center">
+              <Ionicons 
+                name="refresh" 
+                size={18} 
+                color={canResend 
+                  ? themeColors.PRIMARY
+                  : themeColors.TEXT.TERTIARY
+                } 
+              />
+              <Text className={cn(
+                "text-base font-medium ml-1.5",
+                canResend 
+                  ? "text-red-500 dark:text-red-400"
+                  : "text-gray-400 dark:text-gray-500"
+              )}>
+                {t('auth:smsVerification.resendButton')}
+              </Text>
             </View>
-          </Animated.View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
-  )
-}
+          </TouchableOpacity>
+        </Animated.View>
+        
+        {/* 도움말 */}
+        <View className="flex-row items-center justify-center mt-8 px-5">
+          <Ionicons 
+            name="information-circle-outline" 
+            size={16} 
+            color={themeColors.TEXT.TERTIARY} 
+          />
+          <Text className="text-xs text-center leading-4.5 ml-1.5 flex-1 text-gray-500 dark:text-gray-400">
+            {t('auth:smsVerification.help')}
+          </Text>
+        </View>
+      </Animated.View>
+    </KeyboardAvoidingView>
+  );
+};

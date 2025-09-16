@@ -1,7 +1,5 @@
 /**
  * 그룹 탐색 화면 컴포넌트 - NativeWind 버전
- * 
- * Tailwind CSS 클래스를 사용하여 스타일링된 버전
  */
 import React, { useEffect } from 'react';
 import {
@@ -16,7 +14,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
-import { cn } from '@/lib/utils';
 
 // Custom hooks
 import { useGroupData } from '@/hooks/groups/useGroupData';
@@ -34,7 +31,7 @@ import { ServerConnectionError } from '@/components/ServerConnectionError';
 export const GroupsScreen = () => {
   const isFocused = useIsFocused();
   const { t } = useAndroidSafeTranslation('group');
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   
   // 그룹 데이터 관리 훅
   const {
@@ -90,15 +87,12 @@ export const GroupsScreen = () => {
   if (isLoading && groups.length === 0) {
     return (
       <SafeAreaView 
-        className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}
+        className="flex-1 bg-gray-50 dark:bg-gray-900"
         edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
       >
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={colors.PRIMARY} />
-          <Text className={cn(
-            'mt-3 text-base',
-            isDarkMode ? 'text-gray-300' : 'text-gray-700'
-          )}>
+          <Text className="mt-3 text-base text-gray-900 dark:text-gray-100">
             {t('group:loading.groups')}
           </Text>
         </View>
@@ -108,7 +102,7 @@ export const GroupsScreen = () => {
 
   return (
     <SafeAreaView 
-      className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}
+      className="flex-1 bg-gray-50 dark:bg-gray-900"
       edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
     >
       <FlatList

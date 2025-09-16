@@ -1,10 +1,4 @@
-/**
- * 매칭 화면 - NativeWind 버전
- * 
- * 서로 좋아요한 사용자들과의 매칭을 보여주는 데이팅 앱 핵심 화면
- * 하트 애니메이션과 스와이프 카드 UI로 로맨틱한 경험 제공
- */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,9 +7,6 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
-  Animated,
-  Dimensions,
-  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
@@ -27,14 +18,16 @@ import { Match } from '@/types';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { matchApi } from '@/services/api/matchApi';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
-import { LinearGradient } from 'expo-linear-gradient';
 import { cn } from '@/lib/utils';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const { width: screenWidth } = Dimensions.get('window');
-const CARD_WIDTH = screenWidth - 32;
-
+/**
+ * 매칭 화면 컴포넌트 - NativeWind 버전
+ * @component
+ * @returns {JSX.Element} 매칭 화면 UI
+ * @description 서로 좋아요를 보내 매칭된 사용자 목록을 표시하고 채팅을 시작할 수 있는 화면
+ */
 export const MatchesScreen = React.memo(() => {
+  console.log('[MatchesScreen] 컴포넌트 렌더링');
   const isFocused = useIsFocused();
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,100 +38,35 @@ export const MatchesScreen = React.memo(() => {
   const { user } = useAuthStore();
   const { colors, isDarkMode } = useTheme();
   const { t } = useAndroidSafeTranslation('matches');
-  
-  // Animation values
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.9)).current;
-  const heartBeats = useRef(matches.map(() => new Animated.Value(1))).current;
-  const cardAnimations = useRef<Animated.Value[]>([]).current;
-  
-  // Initialize card animations
+
+  /**
+   * 매칭 데이터 로드
+   * @effect
+   * @description 서버에서 매칭 목록을 가져와 표시
+   */
   useEffect(() => {
-    matches.forEach((_, index) => {
-      if (!cardAnimations[index]) {
-        cardAnimations[index] = new Animated.Value(0);
-      }
-    });
-  }, [matches]);
-  
-  // Entry animations
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 4,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    console.log('[MatchesScreen] useEffect 실행됨, isLoading:', isLoading);
     
-    // Staggered card animations
-    matches.forEach((_, index) => {
-      if (cardAnimations[index]) {
-        Animated.timing(cardAnimations[index], {
-          toValue: 1,
-          duration: 400,
-          delay: index * 100,
-          useNativeDriver: true,
-        }).start();
-      }
-    });
-  }, [matches]);
-  
-  // Heart beat animation
-  const startHeartBeat = (index: number) => {
-    if (!heartBeats[index]) {
-      heartBeats[index] = new Animated.Value(1);
+    // 이미 로드된 경우 스킵
+    if (!isLoading) {
+      console.log('[MatchesScreen] 이미 로드됨, 스킵');
+      return;
     }
     
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(heartBeats[index], {
-          toValue: 1.2,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(heartBeats[index], {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(heartBeats[index], {
-          toValue: 1.1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(heartBeats[index], {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  };
-  
-  // Load matches
-  useEffect(() => {
-    if (!isLoading) return;
-    
+    // API에서 매칭 데이터 로드
     const loadMatches = async () => {
       try {
+        console.log('[MatchesScreen] API에서 매칭 데이터 로드 시작');
         setServerConnectionError(false);
         const matchData = await matchApi.getMatches();
+        console.log('[MatchesScreen] 매칭 데이터 로드 성공:', matchData.length);
         setMatches(matchData);
         likeStore.setMatches(matchData);
+        console.log('[MatchesScreen] setIsLoading(false) 호출');
         setIsLoading(false);
-        
-        // Start heart animations
-        matchData.forEach((_, index) => {
-          setTimeout(() => startHeartBeat(index), index * 200);
-        });
       } catch (error) {
         console.error('[MatchesScreen] Failed to load matches:', error);
+        // 서버 연결 실패 시 에러 화면 표시
         setMatches([]);
         setServerConnectionError(true);
         setIsLoading(false);
@@ -146,17 +74,35 @@ export const MatchesScreen = React.memo(() => {
     };
     
     loadMatches();
-  }, []);
-  
+    
+    // Cleanup 함수
+    return () => {
+      console.log('[MatchesScreen] 컴포넌트 언마운트됨');
+    };
+  }, []); // dependency를 빈 배열로 변경하여 컴포넌트 마운트 시에만 실행
+
+  /**
+   * 채팅 시작 핸들러
+   * @param {string} matchId - 매칭 ID
+   * @param {string} nickname - 상대방 닉네임
+   * @description 선택한 매칭과의 채팅 화면으로 이동
+   */
   const handleStartChat = (matchId: string, nickname: string) => {
+    // 채팅 화면으로 네비게이션
     const roomId = `room_${matchId}`;
-    (navigation as any).navigate('Chat', {
+    (navigation as { navigate: (screen: string, params: object) => void }).navigate('Chat', {
       roomId,
       matchId,
       otherUserNickname: nickname,
     });
   };
-  
+
+  /**
+   * 미스매치 신고 핸들러
+   * @param {string} matchId - 매칭 ID
+   * @param {string} nickname - 상대방 닉네임
+   * @description 잘못된 매칭을 신고하고 다시 대기 상태로 전환
+   */
   const handleReportMismatch = (matchId: string, nickname: string) => {
     Alert.alert(
       t('matches:mismatch.reportTitle'),
@@ -171,7 +117,10 @@ export const MatchesScreen = React.memo(() => {
           style: 'destructive',
           onPress: async () => {
             try {
+              // API 호출하여 미스매치 신고
               await matchApi.reportMismatch(matchId, '사용자가 미스매치를 신고했습니다.');
+              
+              // 매칭 목록에서 제거
               setMatches(prevMatches => prevMatches.filter(m => m.id !== matchId));
               
               Alert.alert(
@@ -192,242 +141,107 @@ export const MatchesScreen = React.memo(() => {
       ]
     );
   };
-  
-  const renderMatchCard = ({ item, index }: { item: Match; index: number }) => {
+
+
+  /**
+   * 매칭 아이템 렌더링
+   * @param {Object} params - 리스트 아이템 파라미터
+   * @param {Match} params.item - 매칭 객체
+   * @returns {JSX.Element} 매칭 카드 UI
+   * @description 각 매칭의 정보와 채팅 시작 버튼을 표시
+   */
+  const renderMatchItem = ({ item }: { item: Match }) => {
     const otherUserId = item.user1Id === user?.id ? item.user2Id : item.user1Id;
+    
+    // 익명성 시스템: 매칭된 상대방이므로 실명 표시
     const displayName = user?.id 
       ? likeStore.getUserDisplayName(otherUserId, user.id)
       : t('matches:user.anonymous');
-    
-    const cardOpacity = cardAnimations[index] || new Animated.Value(1);
-    const cardScale = (cardAnimations[index] || new Animated.Value(1)).interpolate({
-      inputRange: [0, 1],
-      outputRange: [0.8, 1],
-    });
-    
+
     return (
-      <Animated.View
-        style={{
-          opacity: cardOpacity,
-          transform: [{ scale: cardScale }],
-        }}
-        className="mb-4"
-      >
-        <View className={cn(
-          "mx-4 rounded-3xl overflow-hidden",
-          "shadow-xl",
-          isDarkMode ? "bg-gray-900" : "bg-white"
-        )}>
-          {/* Gradient Header */}
-          <LinearGradient
-            colors={['#FF6B6B', '#FF8E53']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ height: 120, padding: 16 }}
-          >
-            <View className="flex-row items-center justify-between h-full">
-              <View className="flex-row items-center flex-1">
-                {/* Animated Avatar */}
-                <Animated.View
-                  style={{ transform: [{ scale: heartBeats[index] || 1 }] }}
-                  className="w-16 h-16 rounded-full bg-white/20 items-center justify-center mr-3"
-                >
-                  <Text className="text-2xl font-bold text-white">
-                    {displayName.charAt(0)}
-                  </Text>
-                </Animated.View>
-                
-                <View className="flex-1">
-                  <Text className="text-xl font-bold text-white mb-1">
-                    {displayName}
-                  </Text>
-                  <View className="flex-row items-center">
-                    <Ionicons name="time-outline" size={14} color="rgba(255,255,255,0.8)" />
-                    <Text className="text-sm text-white/80 ml-1">
-                      {formatTimeAgo(new Date(item.matchedAt || item.createdAt))}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-              
-              {/* Match Hearts Animation */}
-              <Animated.View
-                style={{ transform: [{ scale: heartBeats[index] || 1 }] }}
-                className="absolute right-4"
-              >
-                <View className="flex-row">
-                  <Ionicons name="heart" size={24} color="white" />
-                  <Ionicons name="heart" size={24} color="white" style={{ marginLeft: -8 }} />
-                </View>
-              </Animated.View>
+      <View className="my-1 mx-4 rounded-xl p-4 shadow-md bg-white dark:bg-gray-900">
+        <View className="flex-row justify-between items-center mb-3">
+          <View className="flex-row items-center flex-1">
+            <View className="w-12 h-12 rounded-full bg-primary-500 justify-center items-center mr-3">
+              <Text className="text-white text-lg font-bold">
+                {displayName.charAt(0)}
+              </Text>
             </View>
-          </LinearGradient>
+            <View>
+              <Text className="text-lg font-bold mb-0.5 text-gray-900 dark:text-white">{displayName}</Text>
+              <Text className="text-sm text-gray-600 dark:text-gray-400">
+                {formatTimeAgo(new Date(item.matchedAt || item.createdAt))}
+              </Text>
+            </View>
+          </View>
           
-          {/* Card Content */}
-          <View className="p-4">
-            <Text className={cn(
-              "text-center mb-4",
-              isDarkMode ? "text-gray-400" : "text-gray-600"
-            )}>
-              {t('matches:messages.matchDescription')}
-            </Text>
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity
+              className="bg-primary-500 px-4 py-2 rounded-lg"
+              onPress={() => handleStartChat(item.id, displayName)}
+            >
+              <Text className="text-white text-sm font-semibold">{t('matches:actions.startChat')}</Text>
+            </TouchableOpacity>
             
-            {/* Action Buttons */}
-            <View className="flex-row space-x-3">
-              <TouchableOpacity
-                onPress={() => handleStartChat(item.id, displayName)}
-                className="flex-1"
-                activeOpacity={0.8}
-              >
-                <LinearGradient
-                  colors={isDarkMode ? ['#4ECDC4', '#36B3AA'] : ['#4ECDC4', '#45B7D1']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  className="py-3 rounded-xl flex-row items-center justify-center"
-                >
-                  <Ionicons name="chatbubbles" size={20} color="white" />
-                  <Text className="text-white font-bold ml-2">
-                    {t('matches:actions.startChat')}
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                onPress={() => handleReportMismatch(item.id, displayName)}
-                className={cn(
-                  "w-12 h-12 rounded-xl items-center justify-center",
-                  "bg-red-500"
-                )}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="warning" size={20} color="white" />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              className="w-9 h-9 bg-red-500 rounded-full justify-center items-center"
+              onPress={() => handleReportMismatch(item.id, displayName)}
+            >
+              <Text className="text-white text-base">⚠️</Text>
+            </TouchableOpacity>
           </View>
-        </View>
-      </Animated.View>
-    );
-  };
-  
-  const renderHeader = () => (
-    <Animated.View
-      style={{ opacity: fadeAnim, transform: [{ scale: scaleAnim }] }}
-      className={cn(
-        "mx-4 mb-4 p-4 rounded-2xl",
-        isDarkMode ? "bg-gray-900" : "bg-white"
-      )}
-    >
-      <View className="flex-row items-center mb-3">
-        <View className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-red-500 items-center justify-center mr-3">
-          <Ionicons name="heart" size={24} color="white" />
-        </View>
-        <View>
-          <Text className={cn(
-            "text-2xl font-bold",
-            isDarkMode ? "text-white" : "text-gray-900"
-          )}>
-            {t('matches:header.title')}
-          </Text>
-          <Text className={cn(
-            "text-sm",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
-            {t('matches:header.subtitle')}
-          </Text>
-        </View>
-      </View>
-      
-      {/* Stats Cards */}
-      <View className="flex-row space-x-3">
-        <View className={cn(
-          "flex-1 p-3 rounded-xl",
-          isDarkMode ? "bg-gray-800" : "bg-pink-50"
-        )}>
-          <View className="flex-row items-center">
-            <Ionicons 
-              name="people" 
-              size={20} 
-              color={isDarkMode ? '#FF8A8A' : '#FF6B6B'} 
-            />
-            <Text className={cn(
-              "ml-2 font-semibold",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              {matches.length}
-            </Text>
-          </View>
-          <Text className={cn(
-            "text-xs mt-1",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
-            {t('matches:stats.totalMatches', { count: matches.length })}
-          </Text>
         </View>
         
-        <View className={cn(
-          "flex-1 p-3 rounded-xl",
-          isDarkMode ? "bg-gray-800" : "bg-blue-50"
-        )}>
-          <View className="flex-row items-center">
-            <Ionicons 
-              name="heart-circle" 
-              size={20} 
-              color={isDarkMode ? '#4ECDC4' : '#45B7D1'} 
-            />
-            <Text className={cn(
-              "ml-2 font-semibold",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              {likeStore.getReceivedLikesCount()}
-            </Text>
-          </View>
-          <Text className={cn(
-            "text-xs mt-1",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
-            {t('matches:stats.receivedLikes', { count: likeStore.getReceivedLikesCount() })}
-          </Text>
-        </View>
+        <Text className="text-sm text-center italic leading-5 text-gray-600 dark:text-gray-400">
+          {t('matches:messages.matchDescription')}
+        </Text>
       </View>
-    </Animated.View>
-  );
-  
-  const renderEmptyState = () => (
-    <View className="flex-1 items-center justify-center px-8 py-16">
-      <Animated.View
-        style={{
-          transform: [
-            {
-              rotate: fadeAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0deg', '360deg'],
-              }),
-            },
-          ],
-        }}
-        className="mb-6"
-      >
-        <Text className="text-6xl">💝</Text>
-      </Animated.View>
-      <Text className={cn(
-        "text-xl font-bold mb-2",
-        isDarkMode ? "text-white" : "text-gray-900"
-      )}>
-        {t('matches:emptyState.title')}
+    );
+  };
+
+  /**
+   * 헤더 렌더링
+   * @returns {JSX.Element} 헤더 UI
+   * @description 매칭 통계와 안내 메시지를 표시
+   */
+  const renderHeader = () => (
+    <View className="px-5 py-5 border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+      <Text className="text-primary-500 text-2xl font-bold mb-1">{t('matches:header.title')}</Text>
+      <Text className="text-base mb-3 text-gray-600 dark:text-gray-400">
+        {t('matches:header.subtitle')}
       </Text>
-      <Text className={cn(
-        "text-center",
-        isDarkMode ? "text-gray-400" : "text-gray-600"
-      )}>
+      <View className="flex-row justify-between">
+        <Text className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {t('matches:stats.totalMatches', { count: matches.length })}
+        </Text>
+        <Text className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {t('matches:stats.receivedLikes', { count: likeStore.getReceivedLikesCount() })}
+        </Text>
+      </View>
+    </View>
+  );
+
+  /**
+   * 빈 상태 렌더링
+   * @returns {JSX.Element} 빈 상태 UI
+   * @description 매칭이 없을 때 표시되는 안내 UI
+   */
+  const renderEmptyState = () => (
+    <View className="flex-1 justify-center items-center px-8">
+      <Text className="text-6xl mb-5">💬</Text>
+      <Text className="text-primary-500 text-lg font-bold mb-2 text-center">{t('matches:emptyState.title')}</Text>
+      <Text className="text-base text-center leading-6 text-gray-600 dark:text-gray-400">
         {t('matches:emptyState.subtitle')}
       </Text>
     </View>
   );
-  
+
+  // 웹에서 포커스되지 않은 경우 빈 View 반환
   if (Platform.OS === 'web' && !isFocused) {
     return <View className="flex-1" />;
   }
-  
+
+  // 서버 연결 에러 시 에러 화면 표시
   if (serverConnectionError) {
     return (
       <ServerConnectionError 
@@ -453,54 +267,34 @@ export const MatchesScreen = React.memo(() => {
       />
     );
   }
-  
+
   if (isLoading) {
     return (
       <SafeAreaView 
-        className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}
+        className="flex-1 bg-gray-50 dark:bg-gray-950"
         edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
       >
-        <View className="flex-1 items-center justify-center">
-          <Animated.View
-            style={{
-              transform: [
-                {
-                  rotate: fadeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0deg', '360deg'],
-                  }),
-                },
-              ],
-            }}
-            className="mb-4"
-          >
-            <Ionicons name="heart" size={48} color={isDarkMode ? '#FF8A8A' : '#FF6B6B'} />
-          </Animated.View>
-          <ActivityIndicator size="large" color={isDarkMode ? '#FF8A8A' : '#FF6B6B'} />
-          <Text className={cn(
-            "mt-4 font-medium",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
-            {t('common:loading.text')}
-          </Text>
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
+          <Text className="mt-3 text-base text-gray-700 dark:text-gray-300">{t('common:loading.text')}</Text>
         </View>
       </SafeAreaView>
     );
   }
-  
+
   return (
     <SafeAreaView 
-      className={cn('flex-1', isDarkMode ? 'bg-gray-950' : 'bg-gray-50')}
+      className="flex-1 bg-gray-50 dark:bg-gray-950"
       edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
     >
       <FlatList
         data={matches}
         keyExtractor={(item) => item.id}
-        renderItem={renderMatchCard}
+        renderItem={renderMatchItem}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={matches.length === 0 ? { flexGrow: 1 } : { paddingBottom: 20 }}
+        contentContainerStyle={matches.length === 0 ? { flexGrow: 1 } : undefined}
       />
     </SafeAreaView>
   );

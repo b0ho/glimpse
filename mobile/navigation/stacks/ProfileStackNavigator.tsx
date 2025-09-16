@@ -11,15 +11,15 @@ import { ProfileStackParamList } from '@/types/navigation';
 // Screens
 import { ProfileScreen } from '@/screens/ProfileScreen-NW';
 import { PremiumScreen } from '@/screens/PremiumScreen-NW';
-import { MyGroupsScreen } from '@/screens/MyGroupsScreen';
-import { ProfileEditScreen } from '@/screens/ProfileEditScreen';
-import { WhoLikesYouScreen } from '@/screens/WhoLikesYouScreen';
+import { MyGroupsScreen } from '@/screens/MyGroupsScreen-NW';
+import { ProfileEditScreen } from '@/screens/ProfileEditScreen-NW';
+import { WhoLikesYouScreen } from '@/screens/WhoLikesYouScreen-NW';
 import { NotificationSettingsScreen } from '@/screens/NotificationSettingsScreen-NW';
-import { LikeHistoryScreen } from '@/screens/LikeHistoryScreen';
-import { DeleteAccountScreen } from '@/screens/DeleteAccountScreen';
-import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen';
-import { TermsOfServiceScreen } from '@/screens/TermsOfServiceScreen';
-import { SupportScreen } from '@/screens/SupportScreen';
+import { LikeHistoryScreen } from '@/screens/LikeHistoryScreen-NW';
+import { DeleteAccountScreen } from '@/screens/DeleteAccountScreen-NW';
+import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen-NW';
+import { TermsOfServiceScreen } from '@/screens/TermsOfServiceScreen-NW';
+import { SupportScreen } from '@/screens/SupportScreen-NW';
 
 const ProfileStack = createStackNavigator<ProfileStackParamList>();
 

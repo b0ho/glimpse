@@ -10,13 +10,13 @@ import { GroupsStackParamList } from '@/types/navigation';
 
 // Screens
 import { GroupsScreen } from '@/screens/GroupsScreen-NW';
-import { CreateGroupScreen } from '@/screens/CreateGroupScreen';
-import { LocationGroupScreen } from '@/screens/LocationGroupScreen';
-import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen';
-import { MapScreen } from '@/screens/MapScreen';
-import { GroupInviteScreen } from '@/screens/GroupInviteScreen';
+import { CreateGroupScreen } from '@/screens/CreateGroupScreen-NW';
+import { LocationGroupScreen } from '@/screens/LocationGroupScreen-NW';
+import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen-NW';
+import { MapScreen } from '@/screens/MapScreen-NW';
+import { GroupInviteScreen } from '@/screens/GroupInviteScreen-NW';
 import { JoinGroupScreen } from '@/screens/JoinGroupScreen-NW';
-import { GroupManageScreen } from '@/screens/GroupManageScreen';
+import { GroupManageScreen } from '@/screens/GroupManageScreen-NW';
 import { GroupDetailScreen } from '@/screens/GroupDetailScreen-NW';
 
 const GroupsStack = createStackNavigator<GroupsStackParamList>();
