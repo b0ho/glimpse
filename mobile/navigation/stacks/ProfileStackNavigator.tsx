@@ -9,17 +9,17 @@ import { useTheme } from '@/hooks/useTheme';
 import { ProfileStackParamList } from '@/types/navigation';
 
 // Screens
-import { ProfileScreen } from '@/screens/ProfileScreen-NW';
-import { PremiumScreen } from '@/screens/PremiumScreen-NW';
-import { MyGroupsScreen } from '@/screens/MyGroupsScreen-NW';
-import { ProfileEditScreen } from '@/screens/ProfileEditScreen-NW';
-import { WhoLikesYouScreen } from '@/screens/WhoLikesYouScreen-NW';
-import { NotificationSettingsScreen } from '@/screens/NotificationSettingsScreen-NW';
-import { LikeHistoryScreen } from '@/screens/LikeHistoryScreen-NW';
-import { DeleteAccountScreen } from '@/screens/DeleteAccountScreen-NW';
-import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen-NW';
-import { TermsOfServiceScreen } from '@/screens/TermsOfServiceScreen-NW';
-import { SupportScreen } from '@/screens/SupportScreen-NW';
+import { ProfileScreen } from '@/screens/profile/ProfileScreen-NW';
+import { PremiumScreen } from '@/screens/premium/PremiumScreen-NW';
+import { MyGroupsScreen } from '@/screens/groups/MyGroupsScreen-NW';
+import { ProfileEditScreen } from '@/screens/profile/ProfileEditScreen-NW';
+import { WhoLikesYouScreen } from '@/screens/matches/WhoLikesYouScreen-NW';
+import { NotificationSettingsScreen } from '@/screens/settings/NotificationSettingsScreen-NW';
+import { LikeHistoryScreen } from '@/screens/matches/LikeHistoryScreen-NW';
+import { DeleteAccountScreen } from '@/screens/settings/DeleteAccountScreen-NW';
+import { PrivacyPolicyScreen } from '@/screens/settings/PrivacyPolicyScreen-NW';
+import { TermsOfServiceScreen } from '@/screens/settings/TermsOfServiceScreen-NW';
+import { SupportScreen } from '@/screens/settings/SupportScreen-NW';
 
 const ProfileStack = createStackNavigator<ProfileStackParamList>();
 

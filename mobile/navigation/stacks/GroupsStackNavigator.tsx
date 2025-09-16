@@ -9,15 +9,15 @@ import { useTheme } from '@/hooks/useTheme';
 import { GroupsStackParamList } from '@/types/navigation';
 
 // Screens
-import { GroupsScreen } from '@/screens/GroupsScreen-NW';
-import { CreateGroupScreen } from '@/screens/CreateGroupScreen-NW';
-import { LocationGroupScreen } from '@/screens/LocationGroupScreen-NW';
-import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen-NW';
-import { MapScreen } from '@/screens/MapScreen-NW';
-import { GroupInviteScreen } from '@/screens/GroupInviteScreen-NW';
-import { JoinGroupScreen } from '@/screens/JoinGroupScreen-NW';
-import { GroupManageScreen } from '@/screens/GroupManageScreen-NW';
-import { GroupDetailScreen } from '@/screens/GroupDetailScreen-NW';
+import { GroupsScreen } from '@/screens/groups/GroupsScreen-NW';
+import { CreateGroupScreen } from '@/screens/groups/CreateGroupScreen-NW';
+import { LocationGroupScreen } from '@/screens/groups/LocationGroupScreen-NW';
+import { NearbyUsersScreen } from '@/screens/nearby/NearbyUsersScreen-NW';
+import { MapScreen } from '@/screens/nearby/MapScreen-NW';
+import { GroupInviteScreen } from '@/screens/groups/GroupInviteScreen-NW';
+import { JoinGroupScreen } from '@/screens/groups/JoinGroupScreen-NW';
+import { GroupManageScreen } from '@/screens/groups/GroupManageScreen-NW';
+import { GroupDetailScreen } from '@/screens/groups/GroupDetailScreen-NW';
 
 const GroupsStack = createStackNavigator<GroupsStackParamList>();
 

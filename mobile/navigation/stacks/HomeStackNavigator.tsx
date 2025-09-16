@@ -9,13 +9,13 @@ import { useTheme } from '@/hooks/useTheme';
 import { HomeStackParamList } from '@/types/navigation';
 
 // Screens
-import { HomeScreen } from '@/screens/HomeScreen-NW';
-import { CreateContentScreen } from '@/screens/CreateContentScreen-NW';
-import { CreateStoryScreen } from '@/screens/CreateStoryScreen-NW';
-import { StoryUploadScreen } from '@/screens/StoryUploadScreen-NW';
-import { PostDetailScreen } from '@/screens/PostDetailScreen-NW';
-import { NearbyUsersScreen } from '@/screens/NearbyUsersScreen-NW';
-import { NearbyGroupsScreen } from '@/screens/NearbyGroupsScreen-NW';
+import { HomeScreen } from '@/screens/home/HomeScreen-NW';
+import { CreateContentScreen } from '@/screens/home/CreateContentScreen-NW';
+import { CreateStoryScreen } from '@/screens/premium/CreateStoryScreen-NW';
+import { StoryUploadScreen } from '@/screens/home/StoryUploadScreen-NW';
+import { PostDetailScreen } from '@/screens/home/PostDetailScreen-NW';
+import { NearbyUsersScreen } from '@/screens/nearby/NearbyUsersScreen-NW';
+import { NearbyGroupsScreen } from '@/screens/nearby/NearbyGroupsScreen-NW';
 
 const HomeStack = createStackNavigator<HomeStackParamList>();
 
