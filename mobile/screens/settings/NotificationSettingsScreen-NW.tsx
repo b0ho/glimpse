@@ -18,7 +18,7 @@ import { usePremiumStore, premiumSelectors } from '@/store/slices/premiumSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { fcmService } from '@/services/notifications/fcmService';
-import { AppMode, MODE_TEXTS } from '../shared/types';
+import { AppMode, MODE_TEXTS } from '@/shared/types';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { LinearGradient } from 'expo-linear-gradient';
 import { cn } from '@/lib/utils';

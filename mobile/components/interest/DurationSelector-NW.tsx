@@ -2,7 +2,7 @@
  * 기간 선택 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 
 interface DurationSelectorProps {
@@ -11,7 +11,6 @@ interface DurationSelectorProps {
   expiresAt: Date;
   onExpiresAtChange: (date: Date) => void;
   isUnlimitedAllowed: boolean;
-  colors: any;
   t: (key: string) => string;
 }
 
@@ -21,7 +20,6 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
   expiresAt,
   onExpiresAtChange,
   isUnlimitedAllowed,
-  colors,
   t,
 }) => {
   const [showDatePicker, setShowDatePicker] = React.useState(false);
@@ -78,12 +76,12 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
   };
 
   return (
-    <View className="container">
-      <Text className="title">
+    <View className="mb-6">
+      <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
         {t('interest:selectDuration')}
       </Text>
       
-      <View className="optionsContainer">
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
         {durationOptions.map((option) => {
           const isDisabled = option.isPremium && !isUnlimitedAllowed;
           const isSelected = selectedDuration === option.id;
@@ -91,36 +89,45 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
           return (
             <TouchableOpacity
               key={option.id}
-              className="optionCard"
+              style={{ 
+                flex: 1, 
+                minWidth: 100, 
+                backgroundColor: isSelected ? '#3B82F6' : '#FFFFFF',
+                borderRadius: 12,
+                padding: 16,
+                borderWidth: 2,
+                borderColor: isSelected ? '#3B82F6' : '#E5E7EB',
+                opacity: isDisabled ? 0.5 : 1
+              }}
               onPress={() => !isDisabled && handleDurationChange(option.id)}
               disabled={isDisabled}
             >
-              <View className="optionHeader">
+              <View className="flex-row items-center justify-between mb-2">
                 <Icon 
                   name={option.icon} 
                   size={24} 
-                  color={isSelected ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                  color={isSelected ? "#3B82F6" : "#6B7280"} 
                 />
                 {option.isPremium && (
-                  <View className="premiumBadge">
-                    <Text className="premiumBadgeText">
+                  <View className="bg-yellow-100 dark:bg-yellow-900 px-2 py-1 rounded">
+                    <Text className="text-xs font-bold text-yellow-800 dark:text-yellow-200">
                       PRO
                     </Text>
                   </View>
                 )}
               </View>
-              <Text className="optionLabel">
+              <Text className="text-base font-medium text-gray-900 dark:text-white mb-1">
                 {option.label}
               </Text>
-              <Text className="optionDescription">
+              <Text className="text-sm text-gray-600 dark:text-gray-400">
                 {option.description}
               </Text>
               {isSelected && (
                 <Icon 
                   name="checkmark-circle" 
                   size={20} 
-                  color={colors.PRIMARY} 
-                  className="checkIcon"
+                  color="#3B82F6" 
+                  className="absolute top-2 right-2"
                 />
               )}
             </TouchableOpacity>
@@ -130,11 +137,11 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
 
       {selectedDuration !== 'unlimited' && (
         <TouchableOpacity
-          className="customDateButton"
+          className="flex-row items-center bg-gray-100 dark:bg-gray-800 p-3 rounded-lg mt-3"
           onPress={() => setShowDatePicker(true)}
         >
-          <Icon name="calendar" size={20} color={colors.PRIMARY} />
-          <Text className="customDateText">
+          <Icon name="calendar" size={20} color="#3B82F6" />
+          <Text className="text-gray-700 dark:text-gray-300 ml-2">
             {t('interest:customDate')}: {expiresAt.toLocaleDateString()}
           </Text>
         </TouchableOpacity>
@@ -142,7 +149,7 @@ export const DurationSelector: React.FC<DurationSelectorProps> = ({
 
       {/* 날짜 선택기는 네이티브 플랫폼에서만 사용 가능 */}
       {showDatePicker && Platform.OS !== 'web' && (
-        <Text className="datePickerText">
+        <Text className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
           날짜 선택 기능은 모바일 앱에서만 사용 가능합니다
         </Text>
       )}

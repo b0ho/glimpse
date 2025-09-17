@@ -22,7 +22,7 @@ try {
 } catch (error) {
   console.warn('BarCodeScanner not available in this environment');
 }
-import { locationService } from '../services/locationService';
+import { locationService } from '@/services/locationService';
 import { cn } from '@/lib/utils';
 
 /**

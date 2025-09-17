@@ -11,7 +11,7 @@ interface ScreenHeaderProps {
   onBackPress?: () => void;
   rightComponent?: React.ReactNode;
   showBackButton?: boolean;
-  colors: any;
+  colors?: any; // Optional for backward compatibility
 }
 
 export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
@@ -19,7 +19,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   onBackPress,
   rightComponent,
   showBackButton = true,
-  colors,
+  colors, // No longer used with NativeWind
 }) => {
   const navigation = useNavigation();
   
@@ -32,27 +32,27 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   };
 
   return (
-    <View className="header">
+    <View className="flex-row items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
       {showBackButton ? (
-        <TouchableOpacity onPress={handleBack} className="backButton">
-          <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
+        <TouchableOpacity onPress={handleBack} className="p-2">
+          <Icon name="arrow-back" size={24} color={colors?.TEXT?.PRIMARY || '#000000'} />
         </TouchableOpacity>
       ) : (
-        <View className="placeholder" />
+        <View className="w-10" />
       )}
       
       {title && (
-        <Text className="title">
+        <Text className="text-lg font-semibold text-gray-900 dark:text-white flex-1 text-center">
           {title}
         </Text>
       )}
       
       {rightComponent ? (
-        <View className="rightContainer">
+        <View className="min-w-[40px]">
           {rightComponent}
         </View>
       ) : (
-        <View className="placeholder" />
+        <View className="w-10" />
       )}
     </View>
   );

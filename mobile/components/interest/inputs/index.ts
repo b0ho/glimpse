@@ -1,14 +1,14 @@
 /**
  * 관심상대 입력 컴포넌트 모음
  */
-export { PhoneInputField } from './PhoneInputField';
-export { EmailInputField } from './EmailInputField';
-export { BirthdateInputField } from './BirthdateInputField';
-export { SocialInputField } from './SocialInputField';
-export { CompanyInputField } from './CompanyInputField';
-export { SchoolInputField } from './SchoolInputField';
-export { GameInputField } from './GameInputField';
-export { LocationInputField } from './LocationInputField';
-export { PlatformInputField } from './PlatformInputField';
-export { PartTimeJobInputField } from './PartTimeJobInputField';
-export { NicknameInputField } from './NicknameInputField';
+export { PhoneInputField } from './PhoneInputField-NW';
+export { EmailInputField } from './EmailInputField-NW';
+export { BirthdateInputField } from './BirthdateInputField-NW';
+export { SocialInputField } from './SocialInputField-NW';
+export { CompanyInputField } from './CompanyInputField-NW';
+export { SchoolInputField } from './SchoolInputField-NW';
+export { GameInputField } from './GameInputField-NW';
+export { LocationInputField } from './LocationInputField-NW';
+export { PlatformInputField } from './PlatformInputField-NW';
+export { PartTimeJobInputField } from './PartTimeJobInputField-NW';
+export { NicknameInputField } from './NicknameInputField-NW';

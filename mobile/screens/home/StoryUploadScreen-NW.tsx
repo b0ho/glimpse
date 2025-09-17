@@ -16,8 +16,8 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import * as ImagePicker from 'expo-image-picker';
 import { Video, ResizeMode } from 'expo-av';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { API_BASE_URL } from '../services/api/config';
-import { useAuthService } from '../services/auth/auth-service';
+import { API_BASE_URL } from '@/services/api/config';
+import { useAuthService } from '@/services/auth/auth-service';
 
 export const StoryUploadScreen = () => {
   const { t } = useAndroidSafeTranslation('story');

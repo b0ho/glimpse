@@ -26,8 +26,8 @@ import { ScreenHeader } from '@/components/common';
 import { useInterestForm } from '@/hooks/interest/useInterestForm';
 
 // 컴포넌트
-import { InterestTypeSelector } from '@/components/interest/InterestTypeSelector';
-import { DurationSelector } from '@/components/interest/DurationSelector';
+import { InterestTypeSelector } from '@/components/interest/InterestTypeSelector-NW';
+import { DurationSelector } from '@/components/interest/DurationSelector-NW';
 import {
   PhoneInputField,
   EmailInputField,
@@ -93,7 +93,6 @@ export const AddInterestScreen: React.FC = () => {
     if (!selectedType) return null;
 
     const commonProps = {
-      colors: null, // NativeWind에서는 colors prop 불필요
       t,
     };
 
@@ -286,7 +285,6 @@ export const AddInterestScreen: React.FC = () => {
         {/* 헤더 */}
         <ScreenHeader 
           title={t('interest:findTitle')}
-          colors={null} // NativeWind에서는 불필요
         />
 
         <ScrollView 
@@ -298,7 +296,6 @@ export const AddInterestScreen: React.FC = () => {
             <InterestTypeSelector
               selectedType={selectedType}
               onTypeSelect={setSelectedType}
-              colors={null} // NativeWind에서는 불필요
               t={t}
             />
           ) : (
@@ -334,7 +331,6 @@ export const AddInterestScreen: React.FC = () => {
                 expiresAt={expiresAt}
                 onExpiresAtChange={setExpiresAt}
                 isUnlimitedAllowed={subscriptionTier === SubscriptionTier.PREMIUM}
-                colors={null} // NativeWind에서는 불필요
                 t={t}
               />
 

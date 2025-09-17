@@ -21,7 +21,10 @@
     "noGroups": "No groups joined.",
     "editStory": "Edit Story",
     "updateComplete": "Update Complete",
-    "defaultUserName": "TestUser"
+    "defaultUserName": "TestUser",
+    "selectGroup": "Select Group",
+    "placeholder": "What's on your mind?",
+    "addPhoto": "Add Photos"
   },
   "detail": {
     "loadError": "Unable to load the post.",

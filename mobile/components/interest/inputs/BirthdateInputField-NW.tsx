@@ -1,34 +1,51 @@
 /**
- * 닉네임 입력 컴포넌트
+ * 생년월일 입력 컴포넌트 - NativeWind 버전
  */
 import React from 'react';
-import { View, Text, TouchableOpacity} from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
+import { formatBirthdate } from '@/utils/interest/formValidation';
 
-interface NicknameInputFieldProps {
+interface BirthdateInputFieldProps {
   value: string;
   onChange: (value: string) => void;
-  description?: string;
-  onDescriptionChange?: (value: string) => void;
   name?: string;
   onNameChange?: (name: string) => void;
   selectedGender?: 'male' | 'female' | 'other';
   onGenderSelect?: (gender: 'male' | 'female' | 'other') => void;
+  showAdditionalOptions: boolean;
+  onToggleAdditionalOptions: () => void;
+  birthdate?: string;
+  onBirthdateChange?: (value: string) => void;
   t: (key: string) => string;
 }
 
-export const NicknameInputField: React.FC<NicknameInputFieldProps> = ({
+export const BirthdateInputField: React.FC<BirthdateInputFieldProps> = ({
   value,
   onChange,
-  description,
-  onDescriptionChange,
   name = '',
   onNameChange,
   selectedGender = 'male',
   onGenderSelect,
+  showAdditionalOptions,
+  onToggleAdditionalOptions,
+  birthdate,
+  onBirthdateChange,
   t,
 }) => {
+  const handleChange = (text: string) => {
+    const formatted = formatBirthdate(text);
+    onChange(formatted);
+  };
+
+  const handleBirthdateChange = (text: string) => {
+    if (onBirthdateChange) {
+      const formatted = formatBirthdate(text);
+      onBirthdateChange(formatted);
+    }
+  };
+
   const genderOptions = [
     { id: 'male' as const, label: t('common:gender.male'), icon: 'male-outline' },
     { id: 'female' as const, label: t('common:gender.female'), icon: 'female-outline' },
@@ -37,45 +54,54 @@ export const NicknameInputField: React.FC<NicknameInputFieldProps> = ({
 
   return (
     <View className="space-y-4">
-      <View>
-        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
-          {t('interest:nickname')} *
-        </Text>
-        <CrossPlatformInput
-          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
-          placeholder={t('interest:nicknamePlaceholder')}
-          placeholderTextColor="#D1D5DB"
-          value={value}
-          onChangeText={onChange}
-          maxLength={20}
+      <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
+        {t('interest:placeholders.birthdate')}
+      </Text>
+      <CrossPlatformInput
+        className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
+        placeholder="YYYY-MM-DD"
+        placeholderTextColor="#D1D5DB"
+        value={value}
+        onChangeText={handleChange}
+        keyboardType="numeric"
+        maxLength={10}
+      />
+      
+      {/* 추가 옵션 토글 */}
+      <TouchableOpacity
+        className="flex-row items-center"
+        onPress={onToggleAdditionalOptions}
+      >
+        <Icon 
+          name={showAdditionalOptions ? "chevron-up" : "chevron-down"} 
+          size={20} 
+          color="#6B7280"
         />
-        <Text className="text-sm text-gray-500 dark:text-gray-400 text-right">
-          {value.length}/20
+        <Text className="ml-2 text-gray-600 dark:text-gray-400">
+          {t('interest:additionalInfo')}
         </Text>
-      </View>
+      </TouchableOpacity>
 
-      {description !== undefined && (
-        <View>
-          <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
-            {t('interest:additionalDescription')}
-          </Text>
-          <CrossPlatformInput
-            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white min-h-[80px]"
-            placeholder={t('interest:descriptionPlaceholder')}
-            placeholderTextColor="#D1D5DB"
-            value={description}
-            onChangeText={onDescriptionChange}
-            multiline
-            numberOfLines={3}
-            textAlignVertical="top"
-            maxLength={100}
-          />
-          <Text className="text-sm text-gray-500 dark:text-gray-400 text-right">
-            {description.length}/100
-          </Text>
-        </View>
+      {showAdditionalOptions && (
+        <>
+          {/* 본인 생년월일 입력 */}
+          <View className="mt-4">
+            <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
+              {t('interest:myBirthdate')}
+            </Text>
+            <CrossPlatformInput
+              className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor="#D1D5DB"
+              value={birthdate}
+              onChangeText={handleBirthdateChange}
+              keyboardType="numeric"
+              maxLength={10}
+            />
+          </View>
+        </>
       )}
-
+      
       {/* 이름 입력 필드 (선택) */}
       <View className="mt-4">
         <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
@@ -131,4 +157,3 @@ export const NicknameInputField: React.FC<NicknameInputFieldProps> = ({
     </View>
   );
 };
-

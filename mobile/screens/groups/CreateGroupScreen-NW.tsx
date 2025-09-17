@@ -14,7 +14,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
-import { useTheme } from '@/store/slices/themeSlice';
 import { GroupType, Group } from '@/types';
 import { groupApi } from '@/services/api/groupApi';
 import { cn } from '@/lib/utils';
@@ -66,7 +65,6 @@ export const CreateGroupScreen = () => {
   const authStore = useAuthStore();
   const groupStore = useGroupStore();
   const { t } = useAndroidSafeTranslation('group');
-  const { isDarkMode } = useTheme();
 
   /**
    * 폼 유효성 검사

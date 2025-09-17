@@ -13,7 +13,6 @@ interface LocationInputFieldProps {
   onNameChange?: (name: string) => void;
   selectedGender?: 'male' | 'female' | 'other';
   onGenderSelect?: (gender: 'male' | 'female' | 'other') => void;
-  colors: any;
   t: (key: string) => string;
 }
 
@@ -24,7 +23,6 @@ export const LocationInputField: React.FC<LocationInputFieldProps> = ({
   onNameChange,
   selectedGender = 'male',
   onGenderSelect,
-  colors,
   t,
 }) => {
   const genderOptions = [
@@ -34,63 +32,73 @@ export const LocationInputField: React.FC<LocationInputFieldProps> = ({
   ];
 
   return (
-    <View className="container">
-      <Text className="label">
+    <View className="space-y-4">
+      <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
         {t('interest:locationDescription')} *
       </Text>
-      <Text className="helpText">
+      <Text className="text-sm text-gray-600 dark:text-gray-400 mb-2">
         {t('interest:locationHelp')}
       </Text>
       <CrossPlatformInput
-        className="textArea"
+        className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white min-h-[100px]"
         placeholder={t('interest:locationPlaceholder')}
-        placeholderTextColor={colors.TEXT.LIGHT}
+        placeholderTextColor="#D1D5DB"
         value={value}
         onChangeText={onChange}
         multiline
         numberOfLines={4}
         textAlignVertical="top"
       />
-      <Text className="charCount">
+      <Text className="text-sm text-gray-500 dark:text-gray-400 text-right">
         {value.length}/200
       </Text>
 
       {/* 이름 입력 필드 (선택) */}
-      <View className="nameSection">
-        <Text className="label">
+      <View className="mt-4">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
           {t('interest:labels.nameOptional')}
         </Text>
         <CrossPlatformInput
-          className="input"
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
           placeholder={t('interest:placeholders.nameOptional')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={name}
           onChangeText={onNameChange}
           maxLength={50}
         />
-        <Text className="hint">
+        <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {t('interest:hints.nameDescription')}
         </Text>
       </View>
 
       {/* 성별 선택 */}
-      <View className="genderSection">
-        <Text className="label">
-          찾고자 하는 성별 <Text style={{ color: colors.ERROR }}>*</Text>
+      <View className="mt-4">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
+          찾고자 하는 성별 <Text className="text-red-500">*</Text>
         </Text>
-        <View className="genderOptions">
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {genderOptions.map((option) => (
             <TouchableOpacity
               key={option.id}
-              className="genderOption"
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: selectedGender === option.id ? '#FEE2E2' : '#FFFFFF',
+                borderWidth: 1,
+                borderColor: selectedGender === option.id ? '#EF4444' : '#D1D5DB',
+                borderRadius: 8,
+                paddingVertical: 12
+              }}
               onPress={() => onGenderSelect?.(option.id)}
             >
               <Icon 
                 name={option.icon} 
                 size={20} 
-                color={selectedGender === option.id ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                color={selectedGender === option.id ? "#EF4444" : "#6B7280"} 
               />
-              <Text className="genderLabel">
+              <Text className="ml-2 text-gray-900 dark:text-white font-medium">
                 {option.label}
               </Text>
             </TouchableOpacity>

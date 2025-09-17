@@ -2,7 +2,7 @@
  * 게임 ID 입력 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { GAME_PLATFORM_OPTIONS } from '@/constants/interest/interestTypes';
@@ -16,7 +16,6 @@ interface GameInputFieldProps {
   onNameChange?: (name: string) => void;
   selectedGender?: 'male' | 'female' | 'other';
   onGenderSelect?: (gender: 'male' | 'female' | 'other') => void;
-  colors: any;
   t: (key: string) => string;
 }
 
@@ -29,7 +28,6 @@ export const GameInputField: React.FC<GameInputFieldProps> = ({
   onNameChange,
   selectedGender = 'male',
   onGenderSelect,
-  colors,
   t,
 }) => {
   const genderOptions = [
@@ -64,7 +62,7 @@ export const GameInputField: React.FC<GameInputFieldProps> = ({
       <CrossPlatformInput
         className="input"
         placeholder={t('interest:gameIdPlaceholder')}
-        placeholderTextColor={colors.TEXT.LIGHT}
+        placeholderTextColor="#D1D5DB"
         value={value}
         onChangeText={onChange}
         autoCapitalize="none"
@@ -78,7 +76,7 @@ export const GameInputField: React.FC<GameInputFieldProps> = ({
         <CrossPlatformInput
           className="input"
           placeholder={t('interest:placeholders.nameOptional')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={name}
           onChangeText={onNameChange}
           maxLength={50}
@@ -91,7 +89,7 @@ export const GameInputField: React.FC<GameInputFieldProps> = ({
       {/* 성별 선택 */}
       <View className="genderSection">
         <Text className="label">
-          찾고자 하는 성별 <Text style={{ color: colors.ERROR }}>*</Text>
+          찾고자 하는 성별 <Text style={{ color: "#EF4444" }}>*</Text>
         </Text>
         <View className="genderOptions">
           {genderOptions.map((option) => (
@@ -103,7 +101,7 @@ export const GameInputField: React.FC<GameInputFieldProps> = ({
               <Icon 
                 name={option.icon} 
                 size={20} 
-                color={selectedGender === option.id ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                color={selectedGender === option.id ? "#3B82F6" : "#6B7280"} 
               />
               <Text className="genderLabel">
                 {option.label}

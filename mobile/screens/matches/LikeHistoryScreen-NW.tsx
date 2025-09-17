@@ -17,7 +17,7 @@ import { ko, enUS } from 'date-fns/locale';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useLikeStore } from '@/store/slices/likeSlice';
-import { Like, AppMode, MODE_TEXTS } from '../shared/types';
+import { Like, AppMode, MODE_TEXTS } from '@/shared/types';
 import { cn } from '@/lib/utils';
 
 export const LikeHistoryScreen = () => {

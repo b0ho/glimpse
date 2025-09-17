@@ -15,7 +15,6 @@ interface PlatformInputFieldProps {
   onNameChange?: (name: string) => void;
   selectedGender?: 'male' | 'female' | 'other';
   onGenderSelect?: (gender: 'male' | 'female' | 'other') => void;
-  colors: any;
   t: (key: string) => string;
 }
 
@@ -28,7 +27,6 @@ export const PlatformInputField: React.FC<PlatformInputFieldProps> = ({
   onNameChange,
   selectedGender = 'male',
   onGenderSelect,
-  colors,
   t,
 }) => {
   const genderOptions = [
@@ -38,28 +36,28 @@ export const PlatformInputField: React.FC<PlatformInputFieldProps> = ({
   ];
 
   return (
-    <View className="container">
-      <View className="fieldContainer">
-        <Text className="label">
+    <View className="space-y-4">
+      <View className="space-y-2">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
           {t('interest:platformName')} *
         </Text>
         <CrossPlatformInput
-          className="input"
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
           placeholder={t('interest:platformNamePlaceholder')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={platformName}
           onChangeText={onPlatformNameChange}
         />
       </View>
 
-      <View className="fieldContainer">
-        <Text className="label">
+      <View className="space-y-2">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
           {t('interest:userId')} *
         </Text>
         <CrossPlatformInput
-          className="input"
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
           placeholder={t('interest:userIdPlaceholder')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={userId}
           onChangeText={onUserIdChange}
           autoCapitalize="none"
@@ -67,41 +65,55 @@ export const PlatformInputField: React.FC<PlatformInputFieldProps> = ({
       </View>
 
       {/* 이름 입력 필드 (선택) */}
-      <View className="nameSection">
-        <Text className="label">
+      <View className="space-y-2">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
           {t('interest:labels.nameOptional')}
         </Text>
         <CrossPlatformInput
-          className="input"
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
           placeholder={t('interest:placeholders.nameOptional')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={name}
           onChangeText={onNameChange}
           maxLength={50}
         />
-        <Text className="hint">
+        <Text className="text-sm text-gray-600 dark:text-gray-400">
           {t('interest:hints.nameDescription')}
         </Text>
       </View>
 
       {/* 성별 선택 */}
-      <View className="genderSection">
-        <Text className="label">
-          찾고자 하는 성별 <Text style={{ color: colors.ERROR }}>*</Text>
+      <View className="space-y-3">
+        <Text className="text-base font-medium text-gray-900 dark:text-white">
+          찾고자 하는 성별 <Text className="text-red-500">*</Text>
         </Text>
-        <View className="genderOptions">
+        <View className="flex-row space-x-3">
           {genderOptions.map((option) => (
             <TouchableOpacity
               key={option.id}
-              className="genderOption"
+              className="flex-row items-center space-x-2 flex-1"
               onPress={() => onGenderSelect?.(option.id)}
+              style={{
+                backgroundColor: selectedGender === option.id ? '#EF4444' : 'transparent',
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: selectedGender === option.id ? '#EF4444' : '#D1D5DB'
+              }}
             >
               <Icon 
                 name={option.icon} 
                 size={20} 
-                color={selectedGender === option.id ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                color={selectedGender === option.id ? '#FFFFFF' : '#6B7280'} 
               />
-              <Text className="genderLabel">
+              <Text 
+                style={{
+                  color: selectedGender === option.id ? '#FFFFFF' : '#6B7280',
+                  fontSize: 14,
+                  fontWeight: '500'
+                }}
+              >
                 {option.label}
               </Text>
             </TouchableOpacity>

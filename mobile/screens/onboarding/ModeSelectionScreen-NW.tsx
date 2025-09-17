@@ -11,7 +11,7 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
-import { AppMode } from '../shared/types';
+import { AppMode } from '@/shared/types';
 import { cn } from '@/lib/utils';
 
 const { width } = Dimensions.get('window');

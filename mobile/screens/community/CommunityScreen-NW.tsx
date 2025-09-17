@@ -13,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
-import { CommunityPost } from '../../shared/types';
+import { CommunityPost } from '@/../shared/types';
 import { formatDistanceToNow } from '@/utils/dateUtils';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { ServerConnectionError } from '@/components/ServerConnectionError';

@@ -1,16 +1,19 @@
 /**
- * 닉네임 입력 컴포넌트
+ * 회사 정보 입력 컴포넌트 - NativeWind 버전
  */
 import React from 'react';
-import { View, Text, TouchableOpacity} from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 
-interface NicknameInputFieldProps {
-  value: string;
-  onChange: (value: string) => void;
-  description?: string;
-  onDescriptionChange?: (value: string) => void;
+interface CompanyInputFieldProps {
+  companyName: string;
+  onCompanyNameChange: (value: string) => void;
+  department?: string;
+  onDepartmentChange?: (value: string) => void;
+  nickname?: string;
+  onNicknameChange?: (value: string) => void;
+  showAdditionalOptions?: boolean;
   name?: string;
   onNameChange?: (name: string) => void;
   selectedGender?: 'male' | 'female' | 'other';
@@ -18,11 +21,14 @@ interface NicknameInputFieldProps {
   t: (key: string) => string;
 }
 
-export const NicknameInputField: React.FC<NicknameInputFieldProps> = ({
-  value,
-  onChange,
-  description,
-  onDescriptionChange,
+export const CompanyInputField: React.FC<CompanyInputFieldProps> = ({
+  companyName,
+  onCompanyNameChange,
+  department,
+  onDepartmentChange,
+  nickname,
+  onNicknameChange,
+  showAdditionalOptions = false,
   name = '',
   onNameChange,
   selectedGender = 'male',
@@ -34,45 +40,34 @@ export const NicknameInputField: React.FC<NicknameInputFieldProps> = ({
     { id: 'female' as const, label: t('common:gender.female'), icon: 'female-outline' },
     { id: 'other' as const, label: t('common:gender.other'), icon: 'help-outline' },
   ];
-
+  
   return (
     <View className="space-y-4">
       <View>
         <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
-          {t('interest:nickname')} *
+          {t('interest:companyName')} *
         </Text>
         <CrossPlatformInput
           className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
-          placeholder={t('interest:nicknamePlaceholder')}
+          placeholder={t('interest:companyPlaceholder')}
           placeholderTextColor="#D1D5DB"
-          value={value}
-          onChangeText={onChange}
-          maxLength={20}
+          value={companyName}
+          onChangeText={onCompanyNameChange}
         />
-        <Text className="text-sm text-gray-500 dark:text-gray-400 text-right">
-          {value.length}/20
-        </Text>
       </View>
 
-      {description !== undefined && (
+      {department !== undefined && (
         <View>
           <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
-            {t('interest:additionalDescription')}
+            {t('interest:department')}
           </Text>
           <CrossPlatformInput
-            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white min-h-[80px]"
-            placeholder={t('interest:descriptionPlaceholder')}
+            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
+            placeholder={t('interest:departmentPlaceholder')}
             placeholderTextColor="#D1D5DB"
-            value={description}
-            onChangeText={onDescriptionChange}
-            multiline
-            numberOfLines={3}
-            textAlignVertical="top"
-            maxLength={100}
+            value={department}
+            onChangeText={onDepartmentChange}
           />
-          <Text className="text-sm text-gray-500 dark:text-gray-400 text-right">
-            {description.length}/100
-          </Text>
         </View>
       )}
 
@@ -131,4 +126,3 @@ export const NicknameInputField: React.FC<NicknameInputFieldProps> = ({
     </View>
   );
 };
-

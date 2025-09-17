@@ -14,7 +14,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 import { groupApi } from '@/services/api/groupApi';
-import { formatDateKorean } from '../shared/utils';
+import { formatDateKorean } from '@/shared/utils';
 import { cn } from '@/lib/utils';
 
 interface PendingMember {

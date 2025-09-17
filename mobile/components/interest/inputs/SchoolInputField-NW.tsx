@@ -20,7 +20,6 @@ interface SchoolInputFieldProps {
   onNameChange?: (name: string) => void;
   selectedGender?: 'male' | 'female' | 'other';
   onGenderSelect?: (gender: 'male' | 'female' | 'other') => void;
-  colors: any;
   t: (key: string) => string;
 }
 
@@ -45,7 +44,6 @@ export const SchoolInputField: React.FC<SchoolInputFieldProps> = ({
   onNameChange,
   selectedGender = 'male',
   onGenderSelect,
-  colors,
   t,
 }) => {
   const genderOptions = [
@@ -54,46 +52,62 @@ export const SchoolInputField: React.FC<SchoolInputFieldProps> = ({
     { id: 'other' as const, label: t('common:gender.other'), icon: 'help-outline' },
   ];
   return (
-    <View className="container">
-      <Text className="label">
-        {t('interest:schoolLevel')} *
-      </Text>
-      <View className="levelButtons">
-        {SCHOOL_LEVELS.map((level) => (
-          <TouchableOpacity
-            key={level.id}
-            className="levelButton"
-            onPress={() => onLevelSelect(level.id)}
-          >
-            <Text className="levelButtonText">
-              {level.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+    <View className="space-y-4">
+      <View className="space-y-3">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
+          {t('interest:schoolLevel')} *
+        </Text>
+        <View className="flex-row flex-wrap space-x-2">
+          {SCHOOL_LEVELS.map((level) => (
+            <TouchableOpacity
+              key={level.id}
+              onPress={() => onLevelSelect(level.id)}
+              style={{
+                backgroundColor: selectedLevel === level.id ? '#EF4444' : 'transparent',
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: selectedLevel === level.id ? '#EF4444' : '#D1D5DB',
+                marginBottom: 8
+              }}
+            >
+              <Text 
+                style={{
+                  color: selectedLevel === level.id ? '#FFFFFF' : '#6B7280',
+                  fontSize: 14,
+                  fontWeight: '500'
+                }}
+              >
+                {level.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
-      <View className="fieldContainer">
-        <Text className="label">
+      <View className="space-y-2">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
           {t('interest:schoolName')} *
         </Text>
         <CrossPlatformInput
-          className="input"
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
           placeholder={t('interest:schoolPlaceholder')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={schoolName}
           onChangeText={onSchoolNameChange}
         />
       </View>
 
       {(selectedLevel === 'university' || selectedLevel === 'graduate') && major !== undefined && (
-        <View className="fieldContainer">
-          <Text className="label">
+        <View className="space-y-2">
+          <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
             {t('interest:major')}
           </Text>
           <CrossPlatformInput
-            className="input"
+            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
             placeholder={t('interest:majorPlaceholder')}
-            placeholderTextColor={colors.TEXT.LIGHT}
+            placeholderTextColor="#D1D5DB"
             value={major}
             onChangeText={onMajorChange}
           />
@@ -101,41 +115,55 @@ export const SchoolInputField: React.FC<SchoolInputFieldProps> = ({
       )}
 
       {/* 이름 입력 필드 (선택) */}
-      <View className="nameSection">
-        <Text className="label">
+      <View className="space-y-2">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
           {t('interest:labels.nameOptional')}
         </Text>
         <CrossPlatformInput
-          className="input"
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
           placeholder={t('interest:placeholders.nameOptional')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={name}
           onChangeText={onNameChange}
           maxLength={50}
         />
-        <Text className="hint">
+        <Text className="text-sm text-gray-600 dark:text-gray-400">
           {t('interest:hints.nameDescription')}
         </Text>
       </View>
 
       {/* 성별 선택 */}
-      <View className="genderSection">
-        <Text className="label">
-          찾고자 하는 성별 <Text style={{ color: colors.ERROR }}>*</Text>
+      <View className="space-y-3">
+        <Text className="text-base font-medium text-gray-900 dark:text-white">
+          찾고자 하는 성별 <Text className="text-red-500">*</Text>
         </Text>
-        <View className="genderOptions">
+        <View className="flex-row space-x-3">
           {genderOptions.map((option) => (
             <TouchableOpacity
               key={option.id}
-              className="genderOption"
+              className="flex-row items-center space-x-2 flex-1"
               onPress={() => onGenderSelect?.(option.id)}
+              style={{
+                backgroundColor: selectedGender === option.id ? '#EF4444' : 'transparent',
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: selectedGender === option.id ? '#EF4444' : '#D1D5DB'
+              }}
             >
               <Icon 
                 name={option.icon} 
                 size={20} 
-                color={selectedGender === option.id ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                color={selectedGender === option.id ? '#FFFFFF' : '#6B7280'} 
               />
-              <Text className="genderLabel"> 
+              <Text 
+                style={{
+                  color: selectedGender === option.id ? '#FFFFFF' : '#6B7280',
+                  fontSize: 14,
+                  fontWeight: '500'
+                }}
+              >
                 {option.label}
               </Text>
             </TouchableOpacity>
