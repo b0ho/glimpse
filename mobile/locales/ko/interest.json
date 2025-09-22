@@ -95,6 +95,11 @@
     "addDetailsSchool": "상세 정보 추가 (이름, 학과, 생일)"
   },
   "additionalInfo": "추가 정보",
+  "platform": "소셜 플랫폼",
+  "companyName": "회사명",
+  "companyPlaceholder": "회사명을 입력하세요",
+  "department": "부서 (선택)",
+  "departmentPlaceholder": "부서명을 입력하세요",
   "hints": {
     "groupMatch": "같은 그룹에 있는 사람끼리 매칭됩니다",
     "nicknameLength": "최소 2글자 이상 입력하세요",
