@@ -47,7 +47,7 @@ function SettingItem({
   const isPremium = usePremiumStore(premiumSelectors.isPremiumUser());
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { colors, isDark } = useTheme();
-  const { t } = useAndroidSafeTranslation('settings');
+  const { t } = useAndroidSafeTranslation(['settings', 'common']);
 
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
@@ -146,7 +146,7 @@ export function NotificationSettingsScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { currentMode } = useAuthStore();
   const { colors, isDark } = useTheme();
-  const { t } = useAndroidSafeTranslation('settings');
+  const { t } = useAndroidSafeTranslation(['settings', 'common']);
   const {
     settings,
     isInitialized,
@@ -157,7 +157,10 @@ export function NotificationSettingsScreen() {
   } = useNotificationStore();
 
   const isPremium = usePremiumStore(premiumSelectors.isPremiumUser());
-  const modeTexts = MODE_TEXTS[currentMode || AppMode.DATING];
+  const modeTexts = React.useMemo(() => {
+    const mode = currentMode || AppMode.DATING;
+    return MODE_TEXTS[mode] || MODE_TEXTS[AppMode.DATING];
+  }, [currentMode]);
 
   // 애니메이션 값들
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -276,7 +279,7 @@ export function NotificationSettingsScreen() {
           <View className="mt-6 px-5">
             <View className="flex-row items-center mb-3">
               <Text className="text-lg font-bold text-gray-900 dark:text-white">
-                {modeTexts.notificationTypes.match}
+                {modeTexts.notificationTypes?.match || '매칭 알림'}
               </Text>
               <Text className="ml-2 text-2xl">💕</Text>
             </View>
@@ -284,8 +287,8 @@ export function NotificationSettingsScreen() {
             <SettingItem
               title={t('settings:notificationSettings.types.newMatch')}
               description={t('settings:notificationSettings.descriptions.newMatch')}
-              value={settings.newMatch}
-              onToggle={() => toggleNotificationType('newMatch')}
+              value={settings.newMatches}
+              onToggle={() => toggleNotificationType('newMatches')}
               disabled={!settings.pushEnabled}
               icon="heart"
               iconColor="#FF6B6B"
@@ -294,8 +297,8 @@ export function NotificationSettingsScreen() {
             <SettingItem
               title={t('settings:notificationSettings.types.newLike')}
               description={t('settings:notificationSettings.descriptions.newLike')}
-              value={settings.newLike}
-              onToggle={() => toggleNotificationType('newLike')}
+              value={settings.likesReceived}
+              onToggle={() => toggleNotificationType('likesReceived')}
               disabled={!settings.pushEnabled}
               isPremiumFeature={true}
               icon="heart-outline"
@@ -303,10 +306,10 @@ export function NotificationSettingsScreen() {
             />
 
             <SettingItem
-              title={t('settings:notificationSettings.types.missedMatch')}
-              description={t('settings:notificationSettings.descriptions.missedMatch')}
-              value={settings.missedMatch}
-              onToggle={() => toggleNotificationType('missedMatch')}
+              title={t('settings:notificationSettings.types.superLike')}
+              description={t('settings:notificationSettings.descriptions.superLike')}
+              value={settings.superLikes}
+              onToggle={() => toggleNotificationType('superLikes')}
               disabled={!settings.pushEnabled}
               icon="heart-dislike"
               iconColor="#6B7280"
@@ -325,18 +328,18 @@ export function NotificationSettingsScreen() {
             <SettingItem
               title={t('settings:notificationSettings.types.newMessage')}
               description={t('settings:notificationSettings.descriptions.newMessage')}
-              value={settings.newMessage}
-              onToggle={() => toggleNotificationType('newMessage')}
+              value={settings.newMessages}
+              onToggle={() => toggleNotificationType('newMessages')}
               disabled={!settings.pushEnabled}
               icon="chatbubble"
               iconColor="#8B5CF6"
             />
 
             <SettingItem
-              title={t('settings:notificationSettings.types.messagePreview')}
-              description={t('settings:notificationSettings.descriptions.messagePreview')}
-              value={settings.messagePreview}
-              onToggle={() => toggleNotificationType('messagePreview')}
+              title={t('settings:notificationSettings.types.groupInvite')}
+              description={t('settings:notificationSettings.descriptions.groupInvite')}
+              value={settings.groupInvites}
+              onToggle={() => toggleNotificationType('groupInvites')}
               disabled={!settings.pushEnabled}
               icon="eye"
               iconColor="#10B981"
@@ -355,8 +358,8 @@ export function NotificationSettingsScreen() {
             <SettingItem
               title={t('settings:notificationSettings.types.promotions')}
               description={t('settings:notificationSettings.descriptions.promotions')}
-              value={settings.promotions}
-              onToggle={() => toggleNotificationType('promotions')}
+              value={settings.newMessages}
+              onToggle={() => toggleNotificationType('newMessages')}
               disabled={!settings.pushEnabled}
               icon="pricetag"
               iconColor="#F59E0B"
@@ -365,8 +368,8 @@ export function NotificationSettingsScreen() {
             <SettingItem
               title={t('settings:notificationSettings.types.weeklyReport')}
               description={t('settings:notificationSettings.descriptions.weeklyReport')}
-              value={settings.weeklyReport}
-              onToggle={() => toggleNotificationType('weeklyReport')}
+              value={settings.likesReceived}
+              onToggle={() => toggleNotificationType('likesReceived')}
               disabled={!settings.pushEnabled}
               isPremiumFeature={true}
               icon="bar-chart"

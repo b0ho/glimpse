@@ -19,6 +19,7 @@
   },
   "notificationSettings": {
     "title": "알림 설정",
+    "masterSwitch": "전체 알림",
     "reset": "초기화",
     "resetTitle": "알림 설정 초기화",
     "resetMessage": "모든 알림 설정을 기본값으로 초기화하시겠어요?",
@@ -55,6 +56,34 @@
       "groupInvites": "그룹 초대",
       "groupInvitesDescription": "새로운 그룹에 초대받았을 때 알림을 받습니다"
     },
+    "types": {
+      "newMatch": "새로운 매치",
+      "newLike": "받은 좋아요",
+      "superLike": "슈퍼 좋아요",
+      "newMessage": "새 메시지",
+      "messagePreview": "메시지 미리보기",
+      "groupInvite": "그룹 초대",
+      "promotions": "프로모션 알림",
+      "weeklyReport": "주간 리포트"
+    },
+    "descriptions": {
+      "newMatch": "서로 좋아요를 눌렀을 때 알림을 받습니다",
+      "newLike": "누군가 나에게 좋아요를 보냈을 때 알림을 받습니다",
+      "superLike": "슈퍼 좋아요를 받았을 때 알림을 받습니다",
+      "newMessage": "매치된 상대로부터 메시지를 받았을 때 알림을 받습니다",
+      "messagePreview": "알림에서 메시지 내용을 미리 보기합니다",
+      "groupInvite": "새로운 그룹에 초대받았을 때 알림을 받습니다",
+      "promotions": "특별 이벤트와 프로모션 알림을 받습니다",
+      "weeklyReport": "주간 활동 리포트를 받습니다"
+    },
+    "sections": {
+      "messages": "메시지 알림",
+      "marketing": "마케팅 알림"
+    },
+    "actions": {
+      "sendTest": "테스트 알림 보내기",
+      "reset": "설정 초기화"
+    },
     "premium": {
       "title": "프리미엄 알림 기능",
       "description": "프리미엄으로 업그레이드하면 좋아요 받음 알림과 더 많은 기능을 이용할 수 있어요!",
@@ -78,7 +107,8 @@
       "resetTitle": "알림 설정 초기화",
       "resetDescription": "모든 알림 설정을 기본값으로 초기화하시겠어요?",
       "resetComplete": "알림 설정이 초기화되었습니다.",
-      "resetFailed": "설정 초기화에 실패했습니다."
+      "resetFailed": "설정 초기화에 실패했습니다.",
+      "resetSuccess": "알림 설정이 초기화되었습니다."
     },
     "premium": {
       "title": "프리미엄 알림 기능",

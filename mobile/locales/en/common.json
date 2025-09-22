@@ -48,6 +48,8 @@
     "lastSeen": "Last seen: {{time}}",
     "active": "Active",
     "inactive": "Inactive",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
     "pending": "Pending",
     "completed": "Completed",
     "failed": "Failed"
@@ -99,18 +101,18 @@
         "title": "Find Love",
         "description": "A space for those seeking serious relationships and romantic connections",
         "features": {
-          "like": "• Like expression system",
-          "matching": "• 1:1 matching",
-          "anonymous": "• Anonymous profiles"
+          "like": "\u2022 Like expression system",
+          "matching": "\u2022 1:1 matching",
+          "anonymous": "\u2022 Anonymous profiles"
         }
       },
       "friendship": {
         "title": "Find Friends",
         "description": "A space to meet friends who share your hobbies and interests",
         "features": {
-          "community": "• Community boards",
-          "groupChat": "• Group chats",
-          "events": "• Meetups & events"
+          "community": "\u2022 Community boards",
+          "groupChat": "\u2022 Group chats",
+          "events": "\u2022 Meetups & events"
         }
       },
       "note": "You can change the mode later in profile settings"
@@ -180,14 +182,40 @@
       "changeFailed": "Failed to change nickname.",
       "changeError": "An error occurred while changing nickname.",
       "info": {
-        "line1": "• Nickname can be between 1 and 40 characters",
-        "line2": "• Duplicate nicknames are allowed", 
-        "line3": "• Each user is distinguished by unique ID"
+        "line1": "\u2022 Nickname can be between 1 and 40 characters",
+        "line2": "\u2022 Duplicate nicknames are allowed",
+        "line3": "\u2022 Each user is distinguished by unique ID"
       }
     }
   },
   "content": {
-    "imagesCount": "Images ({{count}})"
+    "create": {
+      "title": "New Post",
+      "publishTo": "Publish to Group",
+      "selectGroup": "Please select a group",
+      "contentLabel": "Content",
+      "placeholder": "What's happening?",
+      "characterCount": "{{current}}/{{max}}",
+      "publish": "Publish",
+      "cancel": "Cancel",
+      "addPhotos": "Add Photos ({{current}}/{{max}})",
+      "selectedImages": "Selected Images ({{count}}/5)",
+      "guidelines": {
+        "title": "Post Guidelines",
+        "privacy": "\u2022 Avoid sharing personal information to maintain anonymity",
+        "respect": "\u2022 Be respectful and courteous",
+        "inappropriate": "\u2022 Inappropriate content may be removed",
+        "images": "\u2022 You can upload up to 5 images"
+      }
+    },
+    "validation": {
+      "contentRequired": "Please enter text or select an image.",
+      "groupRequired": "Please select a group to publish to."
+    },
+    "success": {
+      "title": "Post Created! \ud83c\udf89",
+      "message": "Your post has been successfully published to \"{{groupName}}\" group."
+    }
   },
   "accessibility": {
     "likePost": "Like {{name}}'s post",
@@ -204,35 +232,6 @@
     "camera": "Camera access permission is required to take photos.",
     "location": "Location access permission is required to use location services.",
     "notification": "Notification permission is required to receive notifications."
-  },
-  "content": {
-    "create": {
-      "title": "New Post",
-      "publishTo": "Publish to Group",
-      "selectGroup": "Please select a group",
-      "contentLabel": "Content",
-      "placeholder": "What's happening?",
-      "characterCount": "{{current}}/{{max}}",
-      "publish": "Publish",
-      "cancel": "Cancel",
-      "addPhotos": "Add Photos ({{current}}/{{max}})",
-      "selectedImages": "Selected Images ({{count}}/5)",
-      "guidelines": {
-        "title": "Post Guidelines",
-        "privacy": "• Avoid sharing personal information to maintain anonymity",
-        "respect": "• Be respectful and courteous",
-        "inappropriate": "• Inappropriate content may be removed",
-        "images": "• You can upload up to 5 images"
-      }
-    },
-    "validation": {
-      "contentRequired": "Please enter text or select an image.",
-      "groupRequired": "Please select a group to publish to."
-    },
-    "success": {
-      "title": "Post Created! 🎉",
-      "message": "Your post has been successfully published to \"{{groupName}}\" group."
-    }
   },
   "change": "Change",
   "interest": {
@@ -262,11 +261,13 @@
       },
       "social": {
         "instagram": "Instagram",
-        "kakao": "KakaoTalk", 
+        "kakao": "KakaoTalk",
         "facebook": "Facebook",
         "twitter": "Twitter (X)",
         "tiktok": "TikTok"
       }
     }
-  }
+  },
+  "enabled": "Enabled",
+  "disabled": "Disabled"
 }

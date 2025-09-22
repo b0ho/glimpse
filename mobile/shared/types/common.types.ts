@@ -60,4 +60,10 @@ export interface ModeTexts {
   likeButton: string;
   matchMessage: string;
   noMoreProfiles: string;
+  notificationTypes?: {
+    match: string;
+    message: string;
+    like: string;
+    group: string;
+  };
 }

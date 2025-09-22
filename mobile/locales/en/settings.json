@@ -19,6 +19,7 @@
   },
   "notificationSettings": {
     "title": "Notification Settings",
+    "masterSwitch": "All Notifications",
     "reset": "Reset",
     "resetTitle": "Reset Notification Settings",
     "resetMessage": "Do you want to reset all notification settings to default?",
@@ -55,6 +56,34 @@
       "groupInvites": "Group Invites",
       "groupInvitesDescription": "Receive notifications when you're invited to a new group"
     },
+    "types": {
+      "newMatch": "New Match",
+      "newLike": "Likes Received",
+      "superLike": "Super Likes",
+      "newMessage": "New Messages",
+      "messagePreview": "Message Preview",
+      "groupInvite": "Group Invites",
+      "promotions": "Promotion Alerts",
+      "weeklyReport": "Weekly Report"
+    },
+    "descriptions": {
+      "newMatch": "Receive notifications when you match with someone",
+      "newLike": "Receive notifications when someone likes you",
+      "superLike": "Receive notifications when you receive a super like",
+      "newMessage": "Receive notifications when you receive messages from matches",
+      "messagePreview": "Show message preview in notifications",
+      "groupInvite": "Receive notifications when invited to a new group",
+      "promotions": "Receive special event and promotion notifications",
+      "weeklyReport": "Receive weekly activity reports"
+    },
+    "sections": {
+      "messages": "Message Notifications",
+      "marketing": "Marketing Notifications"
+    },
+    "actions": {
+      "sendTest": "Send Test Notification",
+      "reset": "Reset Settings"
+    },
     "premium": {
       "title": "Premium Notification Features",
       "description": "Upgrade to Premium to receive likes notifications and more features!",
@@ -78,7 +107,8 @@
       "resetTitle": "Reset Notification Settings",
       "resetDescription": "Reset all notification settings to default values?",
       "resetComplete": "Notification settings have been reset.",
-      "resetFailed": "Failed to reset settings."
+      "resetFailed": "Failed to reset settings.",
+      "resetSuccess": "Notification settings have been reset."
     },
     "premium": {
       "title": "Premium Notification Features",

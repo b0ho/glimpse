@@ -41,13 +41,25 @@ export const MODE_TEXTS: Record<AppMode, ModeTexts> = {
     subtitle: '연인을 찾아보세요',
     likeButton: '호감있어요',
     matchMessage: '매칭되었습니다',
-    noMoreProfiles: '더 이상 프로필이 없습니다'
+    noMoreProfiles: '더 이상 프로필이 없습니다',
+    notificationTypes: {
+      match: '매칭 알림',
+      message: '메시지 알림',
+      like: '좋아요 알림',
+      group: '그룹 알림'
+    }
   },
   [AppMode.FRIENDSHIP]: {
     title: '친구찾기',
     subtitle: '새로운 친구를 만나보세요',
     likeButton: '친해지고 싶어요',
     matchMessage: '친구가 되었습니다',
-    noMoreProfiles: '더 이상 친구 추천이 없습니다'
+    noMoreProfiles: '더 이상 친구 추천이 없습니다',
+    notificationTypes: {
+      match: '친구 연결 알림',
+      message: '메시지 알림',
+      like: '관심 표시 알림',
+      group: '그룹 알림'
+    }
   }
 };

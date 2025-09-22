@@ -14,9 +14,17 @@ export function useCrossPlatformTranslation(namespace?: string | string[]) {
 
   // 모든 플랫폼에서 동일한 래퍼 함수 (항상 string 반환)
   const t = (key: string | string[], options?: any): string => {
+    // key가 undefined나 null인 경우 빈 문자열 반환
+    if (!key) {
+      return '';
+    }
 
     // 모든 플랫폼에서 동일한 키 변환 처리
     const processKey = (k: string): string => {
+      // k가 문자열이 아닌 경우 빈 문자열 반환
+      if (typeof k !== 'string') {
+        return '';
+      }
       // 이미 네임스페이스가 포함된 경우 그대로 반환
       if (k.includes(':')) {
         return k;
@@ -96,9 +104,14 @@ export function useCrossPlatformTranslation(namespace?: string | string[]) {
       }
       
       // 그래도 실패하면 네임스페이스 없이 시도
-      const lastFallback = originalT(key.split('.').pop() || key, options);
-      if (lastFallback !== key.split('.').pop()) {
-        return String(lastFallback);
+      // key가 문자열이고 점이 포함된 경우에만 split 시도
+      if (typeof key === 'string' && key.includes('.')) {
+        const parts = key.split('.');
+        const lastPart = parts[parts.length - 1];
+        const lastFallback = originalT(lastPart, options);
+        if (lastFallback !== lastPart) {
+          return String(lastFallback);
+        }
       }
     }
     
