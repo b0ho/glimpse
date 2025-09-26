@@ -74,6 +74,10 @@
   "joinInvite": {
     "title": "Group Invitation",
     "inviteCode": "Invite Code",
+    "inviteCodePlaceholder": "Enter invite code",
+    "searchPlaceholder": "Search by group name or description",
+    "inviteCodeRequired": "Please enter the invite code",
+    "invalidInviteCode": "Invalid invite code",
     "currentMembers": "{{count}} members currently participating",
     "confirmMessage": "Do you want to join this group?\nAfter joining, you can anonymously match with group members.",
     "cancel": "Cancel",
@@ -335,5 +339,36 @@
   "picker": {
     "title": "Select Group",
     "cancel": "Cancel"
+  },
+  "joinInvite": {
+    "title": "Join with Invite Code",
+    "inviteCode": "Invite Code",
+    "inviteCodePlaceholder": "Enter invite code",
+    "searchPlaceholder": "Search group name or description",
+    "inviteCodeRequired": "Please enter invite code",
+    "invalidInviteCode": "Invalid invite code",
+    "currentMembers": "{{count}} members currently joined",
+    "confirmMessage": "Would you like to join this group?\nAfter joining, you can anonymously match with group members.",
+    "cancel": "Cancel",
+    "joinButton": "Join",
+    "confirm": "Confirm",
+    "pendingApprovalTitle": "Join Request Submitted",
+    "pendingApprovalMessage": "Waiting for group admin approval.",
+    "successTitle": "Join Complete! 🎉",
+    "successMessage": "Successfully joined {{groupName}} group!",
+    "goToGroup": "Go to Group",
+    "error": "Error",
+    "defaultError": "Failed to join group.",
+    "noticeTitle": "Notice",
+    "noticeText": "• Group joining is free\n• You can leave the group anytime\n• Inappropriate behavior may result in group removal",
+    "searchResults": "Search Results",
+    "noResults": "No search results found",
+    "searchButton": "Search"
+  },
+  "categories": {
+    "all": "All",
+    "hobby": "Hobby",
+    "study": "Study",
+    "sports": "Sports"
   }
 }

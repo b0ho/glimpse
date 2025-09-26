@@ -35,7 +35,7 @@ interface GroupDetailScreenProps {
 export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) => {
   const navigation = useNavigation<any>();
   const { colors } = useTheme();
-  const { t } = useAndroidSafeTranslation('group');
+  const { t } = useAndroidSafeTranslation(['group', 'common']);
   const { groupId } = route.params;
   const { groups, joinGroup, leaveGroup, getOrCreateInviteCode, isUserInGroup } = useGroupStore();
   
@@ -163,7 +163,7 @@ export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) =
           setServerConnectionError(false);
           loadGroupDetail();
         }}
-        message="그룹 정보를 불러올 수 없습니다"
+        message={t('common:errors.loadErrors.groupDetail')}
       />
     );
   }

@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { useTheme } from '@/hooks/useTheme';
+import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useProfileEditForm } from '@/hooks/profile/useProfileEditForm';
 import { useSocialAccounts } from '@/hooks/profile/useSocialAccounts';
 import { BasicInfoSection } from '@/components/profile/edit/BasicInfoSection';
@@ -25,6 +26,7 @@ import { SocialAccountsSection } from '@/components/profile/edit/SocialAccountsS
 export const ProfileEditScreen: React.FC = () => {
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { t } = useAndroidSafeTranslation(['profile', 'common']);
   
   const {
     // Basic info
@@ -183,14 +185,14 @@ export const ProfileEditScreen: React.FC = () => {
                   <View key={index} style={styles.socialIdContainer}>
                     <CrossPlatformInput
                       style={[styles.socialInput, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                      placeholder="플랫폼 (유튜브, 트위치 등)"
+                      placeholder={t('profile:edit.placeholders.platform')}
                       placeholderTextColor={colors.TEXT.TERTIARY}
                       value={platform.platform}
                       onChangeText={(value) => updatePlatformId(index, 'platform', value)}
                     />
                     <CrossPlatformInput
                       style={[styles.socialInput, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                      placeholder="아이디"
+                      placeholder={t('profile:edit.placeholders.platformId')}
                       placeholderTextColor={colors.TEXT.TERTIARY}
                       value={platform.id}
                       onChangeText={(value) => updatePlatformId(index, 'id', value)}
@@ -232,14 +234,14 @@ export const ProfileEditScreen: React.FC = () => {
                   <View key={index} style={styles.socialIdContainer}>
                     <CrossPlatformInput
                       style={[styles.socialInput, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                      placeholder="게임 (롤, 배그 등)"
+                      placeholder={t('profile:edit.placeholders.game')}
                       placeholderTextColor={colors.TEXT.TERTIARY}
                       value={game.game}
                       onChangeText={(value) => updateGameId(index, 'game', value)}
                     />
                     <CrossPlatformInput
                       style={[styles.socialInput, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                      placeholder="닉네임"
+                      placeholder={t('profile:edit.placeholders.gameNickname')}
                       placeholderTextColor={colors.TEXT.TERTIARY}
                       value={game.id}
                       onChangeText={(value) => updateGameId(index, 'id', value)}
@@ -272,7 +274,7 @@ export const ProfileEditScreen: React.FC = () => {
               </Text>
               <CrossPlatformInput
                 style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                placeholder="회사명을 입력하세요"
+                placeholder={t('profile:edit.placeholders.company')}
                 placeholderTextColor={colors.TEXT.TERTIARY}
                 value={companyName}
                 onChangeText={setCompanyName}
@@ -285,7 +287,7 @@ export const ProfileEditScreen: React.FC = () => {
               </Text>
               <CrossPlatformInput
                 style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                placeholder="학교명을 입력하세요"
+                placeholder={t('profile:edit.placeholders.school')}
                 placeholderTextColor={colors.TEXT.TERTIARY}
                 value={school}
                 onChangeText={setSchool}
@@ -298,7 +300,7 @@ export const ProfileEditScreen: React.FC = () => {
               </Text>
               <CrossPlatformInput
                 style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                placeholder="전공을 입력하세요"
+                placeholder={t('profile:edit.placeholders.major')}
                 placeholderTextColor={colors.TEXT.TERTIARY}
                 value={major}
                 onChangeText={setMajor}
@@ -329,7 +331,7 @@ export const ProfileEditScreen: React.FC = () => {
                   </Text>
                   <CrossPlatformInput
                     style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                    placeholder="예: 스타벅스 강남점"
+                    placeholder={t('profile:edit.placeholders.partTimePlace')}
                     placeholderTextColor={colors.TEXT.TERTIARY}
                     value={partTimeJobPlace}
                     onChangeText={setPartTimeJobPlace}
@@ -342,7 +344,7 @@ export const ProfileEditScreen: React.FC = () => {
                   </Text>
                   <CrossPlatformInput
                     style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                    placeholder="예: 바리스타"
+                    placeholder={t('profile:edit.placeholders.partTimeRole')}
                     placeholderTextColor={colors.TEXT.TERTIARY}
                     value={partTimeJobPosition}
                     onChangeText={setPartTimeJobPosition}
@@ -355,7 +357,7 @@ export const ProfileEditScreen: React.FC = () => {
                   </Text>
                   <CrossPlatformInput
                     style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                    placeholder="예: 평일 저녁 6-10시"
+                    placeholder={t('profile:edit.placeholders.partTimeSchedule')}
                     placeholderTextColor={colors.TEXT.TERTIARY}
                     value={partTimeJobHours}
                     onChangeText={setPartTimeJobHours}
@@ -377,7 +379,7 @@ export const ProfileEditScreen: React.FC = () => {
               </Text>
               <CrossPlatformInput
                 style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                placeholder="거주 지역"
+                placeholder={t('profile:edit.placeholders.location')}
                 placeholderTextColor={colors.TEXT.TERTIARY}
                 value={location}
                 onChangeText={setLocation}
@@ -390,7 +392,7 @@ export const ProfileEditScreen: React.FC = () => {
               </Text>
               <CrossPlatformInput
                 style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
-                placeholder="예: 안경 착용, 긴 머리"
+                placeholder={t('profile:edit.placeholders.appearance')}
                 placeholderTextColor={colors.TEXT.TERTIARY}
                 value={appearance}
                 onChangeText={setAppearance}

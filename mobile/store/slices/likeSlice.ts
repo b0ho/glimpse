@@ -368,9 +368,9 @@ export const useLikeStore = create<LikeStore>()(
         return {
           id: userId,
           anonymousId: `anon_${userId}`,
-          displayName: isMatched ? '매칭된 사용자' : '익명 사용자',
-          nickname: '익명 사용자',
-          realName: isMatched ? '매칭된 사용자' : undefined,
+          displayName: isMatched ? 'Matched User' : 'Anonymous User',
+          nickname: 'Anonymous User',
+          realName: isMatched ? 'Matched User' : undefined,
           isMatched,
           gender: 'OTHER' as const,
         };

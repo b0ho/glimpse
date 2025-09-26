@@ -88,5 +88,23 @@
   "footer": {
     "version": "Glimpse v0.1.0",
     "tagline": "A new beginning for anonymous dating"
+  },
+  "edit": {
+    "placeholders": {
+      "email": "example@email.com",
+      "phone": "010-0000-0000",
+      "platform": "Platform (YouTube, Twitch, etc.)",
+      "platformId": "ID",
+      "game": "Game (LoL, PUBG, etc.)",
+      "gameNickname": "Nickname",
+      "company": "Enter company name",
+      "school": "Enter school name",
+      "major": "Enter your major",
+      "partTimePlace": "e.g., Starbucks Gangnam",
+      "partTimeRole": "e.g., Barista",
+      "partTimeSchedule": "e.g., Weekdays 6-10 PM",
+      "location": "Residential area",
+      "appearance": "e.g., Glasses, long hair"
+    }
   }
 }

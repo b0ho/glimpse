@@ -132,6 +132,17 @@
       "description": "An unexpected error occurred.",
       "support": "If the problem persists, please contact support.",
       "developerInfo": "Developer Info:"
+    },
+    "loadErrors": {
+      "homeFeed": "Unable to load home feed",
+      "post": "Unable to load post",
+      "groups": "Unable to load groups",
+      "groupDetail": "Unable to load group details",
+      "matches": "Unable to load match information",
+      "groupChat": "Unable to load group chats",
+      "community": "Unable to load community posts",
+      "nearbyGroups": "Unable to load nearby groups",
+      "accountStatus": "Unable to load account deletion status"
     }
   },
   "actions": {

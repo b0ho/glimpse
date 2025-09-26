@@ -25,7 +25,8 @@
     "text": "Loading match information..."
   },
   "user": {
-    "anonymous": "Anonymous User"
+    "anonymous": "Anonymous User",
+    "matched": "Matched User"
   },
   "mismatch": {
     "reportTitle": "Report Mismatch",

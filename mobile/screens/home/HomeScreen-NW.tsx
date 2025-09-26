@@ -51,7 +51,7 @@ export const HomeScreen = () => {
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
   const { colors } = useTheme();
-  const { t } = useAndroidSafeTranslation(['navigation']);
+  const { t } = useAndroidSafeTranslation(['navigation', 'home']);
   const navigation = useNavigation() as any;
   const { isSignedIn, isLoaded } = useAuth();
 
@@ -177,7 +177,7 @@ export const HomeScreen = () => {
       <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
         <ServerConnectionError 
           onRetry={() => loadContents(true)}
-          message="홈 피드를 불러올 수 없습니다"
+          message={t('common:errors.loadErrors.homeFeed')}
         />
       </SafeAreaView>
     );
@@ -297,8 +297,8 @@ export const HomeScreen = () => {
         )}
         onPress={() => navigation.navigate('CreateContent' as never)}
         activeOpacity={0.9}
-        accessibilityLabel="게시물 작성"
-        accessibilityHint="새로운 게시물을 작성할 수 있는 화면으로 이동합니다"
+        accessibilityLabel={t('home:createPost')}
+        accessibilityHint={t('home:fab.createPost')}
         accessibilityRole="button"
       >
         <Icon name={ACTION_ICONS.CREATE} color="white" size={28} />

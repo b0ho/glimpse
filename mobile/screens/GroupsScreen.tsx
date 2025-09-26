@@ -34,7 +34,7 @@ import { ServerConnectionError } from '@/components/ServerConnectionError';
  */
 export const GroupsScreen = () => {
   const isFocused = useIsFocused();
-  const { t } = useAndroidSafeTranslation('group');
+  const { t } = useAndroidSafeTranslation(['group', 'common']);
   const { colors } = useTheme();
   
   // 그룹 데이터 관리 훅
@@ -82,7 +82,7 @@ export const GroupsScreen = () => {
         onRetry={() => {
           loadGroups(true);
         }}
-        message="그룹 목록을 불러올 수 없습니다"
+        message={t('common:errors.loadErrors.groups')}
       />
     );
   }

@@ -53,7 +53,7 @@ export const HomeScreen = () => {
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
   const { colors } = useTheme();
-  const { t } = useAndroidSafeTranslation(['navigation']);
+  const { t } = useAndroidSafeTranslation(['navigation', 'common']);
   const navigation = useNavigation() as any;
   const { isSignedIn, isLoaded } = useAuth();
 
@@ -178,7 +178,7 @@ export const HomeScreen = () => {
     return (
       <ServerConnectionError 
         onRetry={() => loadContents(true)}
-        message="홈 피드를 불러올 수 없습니다"
+        message={t('common:errors.loadErrors.homeFeed')}
       />
     );
   }

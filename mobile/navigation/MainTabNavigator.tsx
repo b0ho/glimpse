@@ -52,7 +52,7 @@ export function MainTabNavigator() {
         component={HomeStackNavigator} 
         options={{ 
           tabBarLabel: t('navigation:tabs.home'),
-          tabBarAccessibilityLabel: '홈 화면으로 이동',
+          tabBarAccessibilityLabel: t('navigation:tabs.home'),
         }} 
       />
       <Tab.Screen 
@@ -60,7 +60,7 @@ export function MainTabNavigator() {
         component={GroupsStackNavigator} 
         options={{ 
           tabBarLabel: t('navigation:tabs.groups'),
-          tabBarAccessibilityLabel: '그룹 화면으로 이동',
+          tabBarAccessibilityLabel: t('navigation:tabs.groups'),
         }} 
       />
       <Tab.Screen 
@@ -68,7 +68,7 @@ export function MainTabNavigator() {
         component={InterestStackNavigator} 
         options={{ 
           tabBarLabel: t('navigation:tabs.interest'),
-          tabBarAccessibilityLabel: '관심상대 찾기',
+          tabBarAccessibilityLabel: t('navigation:tabs.interest'),
         }} 
       />
       <Tab.Screen 
@@ -76,7 +76,7 @@ export function MainTabNavigator() {
         component={MatchesStackNavigator} 
         options={{ 
           tabBarLabel: t('navigation:tabs.matches'),
-          tabBarAccessibilityLabel: '채팅',
+          tabBarAccessibilityLabel: t('navigation:tabs.matches'),
         }} 
       />
       <Tab.Screen 
@@ -84,7 +84,7 @@ export function MainTabNavigator() {
         component={ProfileStackNavigator} 
         options={{ 
           tabBarLabel: t('navigation:tabs.profile'),
-          tabBarAccessibilityLabel: '프로필 화면으로 이동',
+          tabBarAccessibilityLabel: t('navigation:tabs.profile'),
         }} 
       />
     </Tab.Navigator>

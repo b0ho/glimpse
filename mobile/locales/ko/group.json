@@ -302,6 +302,10 @@
   "joinInvite": {
     "title": "그룹 초대",
     "inviteCode": "초대 코드",
+    "inviteCodePlaceholder": "초대 코드 입력",
+    "searchPlaceholder": "그룹 이름 또는 설명 검색",
+    "inviteCodeRequired": "초대 코드를 입력해주세요",
+    "invalidInviteCode": "유효하지 않은 초대 코드입니다",
     "currentMembers": "현재 {{count}}명 참여 중",
     "confirmMessage": "이 그룹에 가입하시겠습니까?\n가입 후 그룹 멤버들과 익명으로 매칭될 수 있습니다.",
     "cancel": "취소",
@@ -315,7 +319,10 @@
     "error": "오류",
     "defaultError": "그룹 가입에 실패했습니다.",
     "noticeTitle": "안내사항",
-    "noticeText": "• 그룹 가입은 무료입니다\n• 언제든지 그룹을 나갈 수 있습니다\n• 부적절한 행동 시 그룹에서 제외될 수 있습니다"
+    "noticeText": "• 그룹 가입은 무료입니다\n• 언제든지 그룹을 나갈 수 있습니다\n• 부적절한 행동 시 그룹에서 제외될 수 있습니다",
+    "searchResults": "검색 결과",
+    "noResults": "검색 결과가 없습니다",
+    "searchButton": "검색"
   },
   "myGroups": {
     "title": "내 그룹",
@@ -467,5 +474,11 @@
       "reapply": "• 거절된 사용자는 다시 가입 신청할 수 있습니다",
       "inappropriate": "• 부적절한 프로필의 사용자는 거절해주세요"
     }
+  },
+  "categories": {
+    "all": "전체",
+    "hobby": "취미",
+    "study": "스터디", 
+    "sports": "운동"
   }
 }

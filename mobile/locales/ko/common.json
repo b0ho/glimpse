@@ -126,6 +126,17 @@
       "description": "예상치 못한 오류가 발생했습니다.",
       "support": "문제가 지속되면 고객지원에 문의해주세요.",
       "developerInfo": "개발자 정보:"
+    },
+    "loadErrors": {
+      "homeFeed": "홈 피드를 불러올 수 없습니다",
+      "post": "게시물을 불러올 수 없습니다",
+      "groups": "그룹 목록을 불러올 수 없습니다",
+      "groupDetail": "그룹 정보를 불러올 수 없습니다",
+      "matches": "매칭 정보를 불러올 수 없습니다",
+      "groupChat": "그룹 채팅 목록을 불러올 수 없습니다",
+      "community": "커뮤니티 게시글을 불러올 수 없습니다",
+      "nearbyGroups": "근처 그룹을 불러올 수 없습니다",
+      "accountStatus": "계정 삭제 상태를 불러올 수 없습니다"
     }
   },
   "actions": {

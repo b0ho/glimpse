@@ -38,7 +38,7 @@ export const MatchesScreen = React.memo(() => {
   const likeStore = useLikeStore();
   const { user } = useAuthStore();
   const { colors } = useTheme();
-  const { t } = useAndroidSafeTranslation('matches');
+  const { t } = useAndroidSafeTranslation(['matches', 'common']);
 
   /**
    * 매칭 데이터 로드
@@ -264,7 +264,7 @@ export const MatchesScreen = React.memo(() => {
           };
           await loadMatches();
         }}
-        message="매칭 정보를 불러올 수 없습니다"
+        message={t('common:errors.loadErrors.matches')}
       />
     );
   }

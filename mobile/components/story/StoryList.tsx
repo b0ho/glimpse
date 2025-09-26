@@ -165,7 +165,7 @@ export const StoryList= ({
             <Ionicons name="add" size={28} color={colors.TEXT.WHITE} />
           </View>
         </View>
-        <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>스토리 추가</Text>
+        <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>{t('home:story.addStory')}</Text>
       </TouchableOpacity>
     );
   };

@@ -205,5 +205,10 @@
   },
   "footer": {
     "version": "Version 1.0.0"
+  },
+  "support": {
+    "title": "Support",
+    "searchPlaceholder": "Search feedback...",
+    "feedbackPlaceholder": "What features would you like? Feel free to share your thoughts."
   }
 }

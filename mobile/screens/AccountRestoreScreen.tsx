@@ -30,7 +30,7 @@ interface DeletionStatus {
 export const AccountRestoreScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuthStore();
-  const { t } = useAndroidSafeTranslation();
+  const { t } = useAndroidSafeTranslation(['settings', 'common']);
   const { colors } = useTheme();
   
   const [deletionStatus, setDeletionStatus] = useState<DeletionStatus | null>(null);
@@ -135,7 +135,7 @@ export const AccountRestoreScreen = () => {
           setServerConnectionError(false);
           fetchDeletionStatus();
         }}
-        message="계정 삭제 상태를 불러올 수 없습니다"
+        message={t('common:errors.loadErrors.accountStatus')}
       />
     );
   }

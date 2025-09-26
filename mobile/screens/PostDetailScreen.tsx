@@ -60,7 +60,7 @@ export const PostDetailScreen = () => {
   const route = useRoute();
   const { postId } = route.params as { postId: string };
   const { colors } = useTheme();
-  const { t } = useAndroidSafeTranslation('post');
+  const { t } = useAndroidSafeTranslation(['post', 'common']);
   const { user } = useAuthStore();
   
   const [post, setPost] = useState<Post | null>(null);
@@ -256,7 +256,7 @@ export const PostDetailScreen = () => {
           setServerConnectionError(false);
           loadPostDetail();
         }}
-        message="게시글을 불러올 수 없습니다"
+        message={t('common:errors.loadErrors.post')}
       />
     );
   }
@@ -276,7 +276,7 @@ export const PostDetailScreen = () => {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
         <View style={styles.errorContainer}>
           <Text style={[styles.errorText, { color: colors.TEXT.PRIMARY }]}>
-            게시물을 찾을 수 없습니다.
+            {t('post:detail.notFound')}
           </Text>
         </View>
       </SafeAreaView>
@@ -326,10 +326,10 @@ export const PostDetailScreen = () => {
 
             <View style={styles.postStats}>
               <Text style={[styles.statText, { color: colors.TEXT.TERTIARY }]}>
-                조회 {post.viewCount}
+                {t('post:detail.stats.views')} {post.viewCount}
               </Text>
               <Text style={[styles.statText, { color: colors.TEXT.TERTIARY }]}>
-                댓글 {post.commentCount}
+                {t('post:detail.stats.comments')} {post.commentCount}
               </Text>
             </View>
 
@@ -348,7 +348,7 @@ export const PostDetailScreen = () => {
               <TouchableOpacity style={styles.actionButton}>
                 <Icon name="share-social-outline" size={20} color={colors.TEXT.SECONDARY} />
                 <Text style={[styles.actionText, { color: colors.TEXT.SECONDARY }]}>
-                  공유
+                  {t('post:detail.actions.share')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -357,7 +357,7 @@ export const PostDetailScreen = () => {
           {/* 댓글 목록 */}
           <View style={styles.commentsSection}>
             <Text style={[styles.commentsSectionTitle, { color: colors.TEXT.PRIMARY }]}>
-              댓글 {comments.length}
+              {t('post:detail.stats.comments')} {comments.length}
             </Text>
             
             {comments.length > 0 ? (
@@ -371,7 +371,7 @@ export const PostDetailScreen = () => {
             ) : (
               <View style={styles.emptyComments}>
                 <Text style={[styles.emptyCommentsText, { color: colors.TEXT.TERTIARY }]}>
-                  첫 번째 댓글을 작성해보세요!
+                  {t('post:detail.emptyComments')}
                 </Text>
               </View>
             )}

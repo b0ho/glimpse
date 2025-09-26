@@ -22,7 +22,7 @@ export const HomeEmptyState: React.FC<HomeEmptyStateProps> = ({ t }) => {
         {t('home:empty.subtitle')}
       </Text>
       <View className="mt-6 px-12 py-3 bg-primary rounded-full">
-        <Text className="text-white font-semibold">시작하기</Text>
+        <Text className="text-white font-semibold">{t('home:emptyState.getStarted')}</Text>
       </View>
     </View>
   );

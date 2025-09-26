@@ -23,7 +23,8 @@
     "text": "매칭 정보를 불러오는 중..."
   },
   "user": {
-    "anonymous": "익명사용자"
+    "anonymous": "익명사용자",
+    "matched": "매칭된 사용자"
   },
   "mismatch": {
     "reportTitle": "미스매치 신고",

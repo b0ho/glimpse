@@ -91,5 +91,23 @@
   "footer": {
     "version": "Glimpse v0.1.0",
     "tagline": "익명 데이팅의 새로운 시작"
+  },
+  "edit": {
+    "placeholders": {
+      "email": "example@email.com",
+      "phone": "010-0000-0000",
+      "platform": "플랫폼 (유튜브, 트위치 등)",
+      "platformId": "아이디",
+      "game": "게임 (롤, 배그 등)",
+      "gameNickname": "닉네임",
+      "company": "회사명을 입력하세요",
+      "school": "학교명을 입력하세요",
+      "major": "전공을 입력하세요",
+      "partTimePlace": "예: 스타벅스 강남점",
+      "partTimeRole": "예: 바리스타",
+      "partTimeSchedule": "예: 평일 저녁 6-10시",
+      "location": "거주 지역",
+      "appearance": "예: 안경 착용, 긴 머리"
+    }
   }
 }

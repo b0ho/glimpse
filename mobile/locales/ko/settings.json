@@ -231,5 +231,10 @@
   },
   "footer": {
     "version": "Version 1.0.0"
+  },
+  "support": {
+    "title": "고객지원",
+    "searchPlaceholder": "피드백 검색...",
+    "feedbackPlaceholder": "어떤 기능이 있으면 좋을까요? 자유롭게 의견을 남겨주세요."
   }
 }

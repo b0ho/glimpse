@@ -28,18 +28,11 @@ interface GroupInfo {
   memberCount?: number;
 }
 
-const CATEGORIES = [
-  { id: 'all', name: '전체', icon: 'apps-outline' },
-  { id: GroupType.OFFICIAL, name: '공식', icon: 'business-outline' },
-  { id: GroupType.CREATED, name: '일반', icon: 'people-outline' },
-  { id: GroupType.LOCATION, name: '장소', icon: 'location-outline' },
-  { id: 'hobby', name: '취미', icon: 'heart-outline' },
-  { id: 'study', name: '스터디', icon: 'school-outline' },
-  { id: 'sports', name: '운동', icon: 'fitness-outline' },
-];
+// Categories will be translated in the component render
 
 export const JoinGroupScreen = () => {
   const { t } = useAndroidSafeTranslation('group');
+  const { t: tCommon } = useAndroidSafeTranslation('common');
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { inviteCode: initialCode } = route.params as { inviteCode: string };
@@ -99,7 +92,7 @@ export const JoinGroupScreen = () => {
 
   const handleJoinGroupByCode = async () => {
     if (!inviteCode.trim()) {
-      Alert.alert('오류', '초대 코드를 입력해주세요');
+      Alert.alert(tCommon('errors.error'), t('joinInvite.inviteCodeRequired'));
       return;
     }
     
@@ -112,18 +105,18 @@ export const JoinGroupScreen = () => {
       groupStore.joinGroup(group);
 
       Alert.alert(
-        '성공',
-        `${result.group.name} 그룹에 참여했습니다!`,
+        tCommon('actions.success'),
+        t('joinInvite.successMessage', { groupName: result.group.name }),
         [
           {
-            text: '확인',
+            text: tCommon('buttons.confirm'),
             onPress: () => navigation.navigate('GroupDetail' as never, { groupId: result.group.id } as never),
           },
         ]
       );
     } catch (error: any) {
       console.error('Join group error:', error);
-      Alert.alert('오류', '유효하지 않은 초대 코드입니다');
+      Alert.alert(tCommon('errors.error'), t('joinInvite.invalidInviteCode'));
     } finally {
       setIsJoining(false);
     }
@@ -150,7 +143,7 @@ export const JoinGroupScreen = () => {
         <View style={styles.groupCardInfo}>
           <Text style={[styles.groupCardName, { color: colors.TEXT.PRIMARY }]}>{item.name}</Text>
           <Text style={[styles.groupCardMembers, { color: colors.TEXT.SECONDARY }]}>
-            {item.memberCount}명 참여중
+            {t('list.members', { count: item.memberCount })}
           </Text>
         </View>
       </View>
@@ -170,12 +163,12 @@ export const JoinGroupScreen = () => {
           <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
             <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>그룹 찾기</Text>
+          <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('main.actions.findGroup')}</Text>
         </View>
 
         {/* 초대 코드 섹션 */}
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
-          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>초대 코드로 참여</Text>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('joinInvite.title')}</Text>
           <View style={styles.inviteCodeContainer}>
             <TextInput
               style={[styles.inviteCodeInput, { 
@@ -183,7 +176,7 @@ export const JoinGroupScreen = () => {
                 color: colors.TEXT.PRIMARY,
                 borderColor: colors.BORDER 
               }]}
-              placeholder="초대 코드 입력"
+              placeholder={t('joinInvite.inviteCodePlaceholder')}
               placeholderTextColor={colors.TEXT.SECONDARY}
               value={inviteCode}
               onChangeText={setInviteCode}
@@ -197,7 +190,7 @@ export const JoinGroupScreen = () => {
               {isJoining ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
-                <Text style={styles.joinCodeButtonText}>참여</Text>
+                <Text style={styles.joinCodeButtonText}>{t('joinInvite.joinButton')}</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -205,7 +198,7 @@ export const JoinGroupScreen = () => {
 
         {/* 검색 섹션 */}
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
-          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>그룹 검색</Text>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('list.searchPlaceholder')}</Text>
           
           {/* 카테고리 */}
           <ScrollView 
@@ -213,7 +206,15 @@ export const JoinGroupScreen = () => {
             showsHorizontalScrollIndicator={false}
             style={styles.categoryContainer}
           >
-            {CATEGORIES.map(category => (
+            {[
+              { id: 'all', name: t('categories.all'), icon: 'apps-outline' },
+              { id: GroupType.OFFICIAL, name: t('groupTypes.official'), icon: 'business-outline' },
+              { id: GroupType.CREATED, name: t('groupTypes.created'), icon: 'people-outline' },
+              { id: GroupType.LOCATION, name: t('groupTypes.location'), icon: 'location-outline' },
+              { id: 'hobby', name: t('categories.hobby'), icon: 'heart-outline' },
+              { id: 'study', name: t('categories.study'), icon: 'school-outline' },
+              { id: 'sports', name: t('categories.sports'), icon: 'fitness-outline' },
+            ].map(category => (
               <TouchableOpacity
                 key={category.id}
                 style={[
@@ -249,7 +250,7 @@ export const JoinGroupScreen = () => {
               <Icon name="search" size={20} color={colors.TEXT.SECONDARY} />
               <TextInput
                 style={[styles.searchInput, { color: colors.TEXT.PRIMARY }]}
-                placeholder="그룹 이름 또는 설명 검색"
+                placeholder={t('joinInvite.searchPlaceholder')}
                 placeholderTextColor={colors.TEXT.SECONDARY}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
@@ -260,7 +261,7 @@ export const JoinGroupScreen = () => {
               style={[styles.searchButton, { backgroundColor: colors.PRIMARY }]}
               onPress={handleSearch}
             >
-              <Text style={styles.searchButtonText}>검색</Text>
+              <Text style={styles.searchButtonText}>{t('joinInvite.searchButton')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -269,7 +270,7 @@ export const JoinGroupScreen = () => {
         {hasSearched && (
           <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
             <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
-              검색 결과 {searchResults.length > 0 && `(${searchResults.length})`}
+              {t('joinInvite.searchResults')} {searchResults.length > 0 && `(${searchResults.length})`}
             </Text>
             {searchResults.length > 0 ? (
               <FlatList
@@ -283,7 +284,7 @@ export const JoinGroupScreen = () => {
               <View style={styles.emptySearchResult}>
                 <Icon name="search-outline" size={48} color={colors.TEXT.TERTIARY} />
                 <Text style={[styles.emptySearchTitle, { color: colors.TEXT.PRIMARY }]}>
-                  검색 결과가 없습니다
+                  {t('joinInvite.noResults')}
                 </Text>
                 <Text style={[styles.emptySearchDesc, { color: colors.TEXT.SECONDARY }]}>
                   '{searchQuery}'에 대한 그룹을 찾을 수 없습니다.{'\n'}
@@ -296,7 +297,7 @@ export const JoinGroupScreen = () => {
 
         {/* 인기 그룹 */}
         <View style={[styles.section, { backgroundColor: colors.SURFACE }]}>
-          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>인기 그룹</Text>
+          <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('list.recommendedGroups')}</Text>
           {popularGroups.length > 0 ? (
             <FlatList
               data={popularGroups}
@@ -307,7 +308,7 @@ export const JoinGroupScreen = () => {
             />
           ) : (
             <Text style={[styles.emptyText, { color: colors.TEXT.SECONDARY }]}>
-              인기 그룹을 불러오는 중...
+              {t('loading.groups')}
             </Text>
           )}
         </View>

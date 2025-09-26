@@ -50,5 +50,12 @@
   },
   "persona": {
     "setupButton": "Setup My Persona"
-  }
+  },
+  "story": {
+    "addStory": "Add Story"
+  },
+  "emptyState": {
+    "getStarted": "Get Started"
+  },
+  "createPost": "Create Post"
 }
