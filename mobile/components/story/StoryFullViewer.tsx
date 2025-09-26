@@ -198,7 +198,7 @@ export const StoryFullViewer: React.FC<StoryFullViewerProps> = ({
             <View style={styles.userDetails}>
               <Text style={styles.username}>{currentUser.nickname}</Text>
               <Text style={styles.timeText}>
-                {formatTimeAgo(new Date(currentStory.createdAt))}
+                {formatTimeAgo(currentStory.createdAt)}
               </Text>
             </View>
           </View>

@@ -38,11 +38,26 @@ const safeT = (key: string, options?: any): string => {
 
 /**
  * 주어진 날짜로부터 현재까지의 시간을 현재 언어로 표현
- * @param date - 계산할 기준 날짜
+ * @param dateInput - 계산할 기준 날짜 (Date 객체, timestamp, 또는 날짜 문자열)
  * @returns 시간 표현 (예: "방금 전", "5분 전", "2시간 전")
  */
-export const formatTimeAgo = (date: Date): string => {
+export const formatTimeAgo = (dateInput: Date | number | string): string => {
   const now = new Date();
+  
+  // dateInput을 Date 객체로 변환
+  let date: Date;
+  if (dateInput instanceof Date) {
+    date = dateInput;
+  } else {
+    date = new Date(dateInput);
+  }
+  
+  // Invalid date 체크
+  if (isNaN(date.getTime())) {
+    console.warn('Invalid date input:', dateInput);
+    return safeT('common:time.justNow');
+  }
+  
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) {

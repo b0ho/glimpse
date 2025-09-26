@@ -125,7 +125,7 @@ export const ContentItem: React.FC<ContentItemProps> = React.memo(({
                 <Text style={[styles.groupName, { color: colors.TEXT.SECONDARY }]}>그룹명 없음</Text>
               </View>
             )}
-            <Text style={[styles.timeText, { color: colors.TEXT.SECONDARY }]}>{formatTimeAgo(new Date(item.createdAt))}</Text>
+            <Text style={[styles.timeText, { color: colors.TEXT.SECONDARY }]}>{formatTimeAgo(item.createdAt)}</Text>
           </View>
         </View>
         

@@ -171,7 +171,7 @@ export const MatchesScreen = React.memo(() => {
             <View>
               <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>{displayName}</Text>
               <Text style={[styles.matchTime, { color: colors.TEXT.SECONDARY }]}>
-                {formatTimeAgo(new Date(item.matchedAt || item.createdAt))}
+                {formatTimeAgo(item.matchedAt || item.createdAt)}
               </Text>
             </View>
           </View>

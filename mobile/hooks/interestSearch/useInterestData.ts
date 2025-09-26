@@ -31,19 +31,19 @@ export const useInterestData = (selectedTab: 'interest' | 'friend') => {
   const [localMergedSearches, setLocalMergedSearches] = useState<any[]>([]);
   const [serverConnectionError, setServerConnectionError] = useState(false);
 
-  // 로컬과 서버 데이터가 병합된 searches 사용
-  const allSearches = localMergedSearches.length > 0 ? localMergedSearches : searches;
+  // 로컬과 서버 데이터가 병합된 searches 사용 - 배열 검증 추가
+  const allSearches = localMergedSearches.length > 0 ? localMergedSearches : (Array.isArray(searches) ? searches : []);
 
-  // 탭에 따라 필터링된 데이터
-  const filteredSearches = allSearches.filter(search => {
+  // 탭에 따라 필터링된 데이터 - 배열 체크 추가
+  const filteredSearches = Array.isArray(allSearches) ? allSearches.filter(search => {
     const relationshipIntent = search.metadata?.relationshipIntent?.toLowerCase() || 'romantic';
     return relationshipIntent === (selectedTab === 'interest' ? 'romantic' : 'friend');
-  });
+  }) : [];
 
-  const filteredMatches = matches.filter(match => {
+  const filteredMatches = Array.isArray(matches) ? matches.filter(match => {
     const relationshipIntent = match.metadata?.relationshipIntent?.toLowerCase();
     return relationshipIntent === (selectedTab === 'interest' ? 'romantic' : 'friend');
-  });
+  }) : [];
 
   const loadData = useCallback(async (forceRefresh = true) => {
     try {

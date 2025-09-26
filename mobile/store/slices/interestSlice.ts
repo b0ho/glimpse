@@ -72,10 +72,15 @@ export const useInterestStore = create<InterestState>()(
           if (Array.isArray(response)) {
             console.log('[interestSlice] Response is array, setting searches:', response);
             set({ searches: response, loading: false });
-          } else if (response && (response as any).success) {
-            set({ searches: (response as any).data || [], loading: false });
+          } else if (response && (response as any).success && (response as any).data) {
+            // data 객체 안에 searches 배열이 있는 경우
+            const data = (response as any).data;
+            const searchesArray = data.searches || data || [];
+            console.log('[interestSlice] Response has data.searches:', searchesArray);
+            set({ searches: Array.isArray(searchesArray) ? searchesArray : [], loading: false });
           } else if (response && (response as any).data) {
-            set({ searches: (response as any).data, loading: false });
+            const data = (response as any).data;
+            set({ searches: Array.isArray(data) ? data : [], loading: false });
           } else {
             console.warn('Unexpected response format:', response);
             set({ searches: [], loading: false });
@@ -106,10 +111,15 @@ export const useInterestStore = create<InterestState>()(
           if (Array.isArray(response)) {
             console.log('[interestSlice] Response is array, setting matches:', response);
             set({ matches: response, loading: false });
-          } else if (response && (response as any).success) {
-            set({ matches: (response as any).data || [], loading: false });
+          } else if (response && (response as any).success && (response as any).data) {
+            // data 객체 안에 matches 배열이 있는 경우
+            const data = (response as any).data;
+            const matchesArray = data.matches || data || [];
+            console.log('[interestSlice] Response has data.matches:', matchesArray);
+            set({ matches: Array.isArray(matchesArray) ? matchesArray : [], loading: false });
           } else if (response && (response as any).data) {
-            set({ matches: (response as any).data, loading: false });
+            const data = (response as any).data;
+            set({ matches: Array.isArray(data) ? data : [], loading: false });
           } else {
             console.warn('Unexpected matches response format:', response);
             set({ matches: [], loading: false });
