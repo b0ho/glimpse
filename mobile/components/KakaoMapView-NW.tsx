@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View Platform, Alert } from 'react-native';
+import { View, Platform, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { COLORS } from '@/utils/constants';
 

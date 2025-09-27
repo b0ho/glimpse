@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { View, Text TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';

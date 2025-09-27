@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text
+  Text,
   Modal,
   TextInput,
   ScrollView,

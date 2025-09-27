@@ -4,7 +4,7 @@
 import React, { useRef, useCallback } from 'react';
 import {
   View,
-  Text
+  Text,
   TouchableOpacity,
   Animated,
   PanResponder,

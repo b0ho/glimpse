@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View,
-  TouchableOpacity
+  TouchableOpacity,
   Alert,
   ActionSheetIOS,
   Platform,

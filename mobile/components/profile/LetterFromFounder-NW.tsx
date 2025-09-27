@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text
+  Text,
   TouchableOpacity,
   ScrollView,
   Modal,

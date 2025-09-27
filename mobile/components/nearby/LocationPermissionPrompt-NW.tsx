@@ -2,7 +2,7 @@
  * 위치 권한 요청 프롬프트 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { shadowStyles } from '@/utils/shadowStyles';
 

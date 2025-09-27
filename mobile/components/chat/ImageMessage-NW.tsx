@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   View,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
   Dimensions,
   ActivityIndicator,
   Modal,

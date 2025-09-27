@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   View,
-  Text
+  Text,
   TouchableOpacity,
   Animated,
   Dimensions,

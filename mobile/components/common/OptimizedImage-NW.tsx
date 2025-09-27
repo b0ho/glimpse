@@ -3,7 +3,7 @@ import {
   Image,
   ImageProps,
   View,
-  ActivityIndicator
+  ActivityIndicator,
   Dimensions,
 } from 'react-native';
 

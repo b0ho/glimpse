@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity
+  TouchableOpacity,
   ScrollView,
   Alert,
 } from 'react-native';

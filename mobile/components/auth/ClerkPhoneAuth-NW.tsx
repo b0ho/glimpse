@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator Alert, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, TextInput } from 'react-native';
 import { useSignIn, useSignUp, useAuth } from '@clerk/clerk-expo';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';

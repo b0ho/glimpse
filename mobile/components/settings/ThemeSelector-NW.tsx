@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity
+  TouchableOpacity,
   Modal,
   Alert,
   Animated,

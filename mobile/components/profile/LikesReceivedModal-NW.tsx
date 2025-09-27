@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import {
   View,
-  Text
+  Text,
   Modal,
   TouchableOpacity,
   FlatList,
