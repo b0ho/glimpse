@@ -2,34 +2,35 @@ package com.glimpse.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+    DataSourceAutoConfiguration.class,
+    HibernateJpaAutoConfiguration.class
+})
 @RestController
 @CrossOrigin(origins = "*")
-public class SimpleApplicationFixed {
+public class SimpleRestServer {
+    
+    // In-memory storage for chat messages
+    private static final List<Map<String, Object>> chatMessages = Collections.synchronizedList(new ArrayList<>());
     
     public static void main(String[] args) {
         System.setProperty("server.port", "3001");
-        SpringApplication.run(SimpleApplicationFixed.class, args);
+        SpringApplication.run(SimpleRestServer.class, args);
     }
     
     @GetMapping("/api/v1/health")
     public Map<String, Object> health(@RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "ok");
-        response.put("message", "Spring Boot server is running");
-        response.put("server", "server2-fixed");
+        response.put("message", "Spring Boot REST server is running");
+        response.put("server", "server2-rest");
         response.put("devMode", "true".equals(devAuth));
         response.put("timestamp", System.currentTimeMillis());
         return response;
@@ -48,7 +49,6 @@ public class SimpleApplicationFixed {
             return response;
         }
         
-        // Sample groups data - FIXED format to match client expectations
         List<Map<String, Object>> groups = new ArrayList<>();
         
         Map<String, Object> group1 = new HashMap<>();
@@ -89,29 +89,8 @@ public class SimpleApplicationFixed {
         ));
         groups.add(group2);
         
-        Map<String, Object> group3 = new HashMap<>();
-        group3.put("id", "group-3");
-        group3.put("name", "연세대학교 경영학과");
-        group3.put("type", "OFFICIAL");
-        group3.put("memberCount", 456);
-        group3.put("maleCount", 234);
-        group3.put("femaleCount", 222);
-        group3.put("description", "연세대학교 경영학과 학생들의 공식 그룹");
-        group3.put("isMatchingActive", true);
-        group3.put("createdAt", "2025-01-12T08:00:00Z");
-        group3.put("updatedAt", "2025-01-12T08:00:00Z");
-        group3.put("creatorId", "admin2");
-        group3.put("location", Map.of(
-            "address", "서울 서대문구 연세로",
-            "latitude", 37.5668,
-            "longitude", 126.9387
-        ));
-        groups.add(group3);
-        
-        // CRITICAL FIX: Client expects response.data to be an array directly
         response.put("success", true);
         response.put("data", groups);
-        
         return response;
     }
     
@@ -129,7 +108,7 @@ public class SimpleApplicationFixed {
         Map<String, Object> group = new HashMap<>();
         group.put("id", groupId);
         group.put("name", "서강대학교 IT학과");
-        group.put("description", "서강대학교 IT학과 학생들의 모임입니다. 코딩, 공모전, 취업 정보를 공유합니다.");
+        group.put("description", "서강대학교 IT학과 학생들의 모임입니다");
         group.put("type", "OFFICIAL");
         group.put("memberCount", 46);
         group.put("isMatchingActive", true);
@@ -146,9 +125,7 @@ public class SimpleApplicationFixed {
     
     @GetMapping("/api/v1/contents")
     public Map<String, Object> getContents(
-            @RequestHeader(value = "x-dev-auth", required = false) String devAuth,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "limit", defaultValue = "10") int limit) {
+            @RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
         Map<String, Object> response = new HashMap<>();
         
         if (!"true".equals(devAuth)) {
@@ -162,22 +139,12 @@ public class SimpleApplicationFixed {
         content1.put("id", "content-1");
         content1.put("type", "POST");
         content1.put("author", Map.of("id", "user-1", "nickname", "김철수"));
-        content1.put("content", "오늘 날씨가 정말 좋네요! 다들 행복한 하루 보내세요 😊");
+        content1.put("content", "오늘 날씨가 정말 좋네요!");
         content1.put("likeCount", 12);
         content1.put("commentCount", 3);
         content1.put("createdAt", System.currentTimeMillis());
         contents.add(content1);
         
-        Map<String, Object> content2 = new HashMap<>();
-        content2.put("id", "content-2");
-        content2.put("type", "STORY");
-        content2.put("author", Map.of("id", "user-2", "nickname", "이영희"));
-        content2.put("imageUrl", "https://example.com/story.jpg");
-        content2.put("viewCount", 45);
-        content2.put("createdAt", System.currentTimeMillis() - 3600000);
-        contents.add(content2);
-        
-        // Mobile app expects data to be an array directly
         response.put("success", true);
         response.put("data", contents);
         return response;
@@ -185,9 +152,7 @@ public class SimpleApplicationFixed {
     
     @GetMapping("/api/v1/matching/matches")
     public Map<String, Object> getMatches(
-            @RequestHeader(value = "x-dev-auth", required = false) String devAuth,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "limit", defaultValue = "20") int limit) {
+            @RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
         Map<String, Object> response = new HashMap<>();
         
         if (!"true".equals(devAuth)) {
@@ -212,7 +177,7 @@ public class SimpleApplicationFixed {
         Map<String, Object> data = new HashMap<>();
         data.put("matches", matches);
         data.put("total", 1);
-        data.put("page", page);
+        data.put("page", 1);
         data.put("hasMore", false);
         
         response.put("success", true);
@@ -238,12 +203,94 @@ public class SimpleApplicationFixed {
         profile.put("premiumType", "MONTHLY");
         profile.put("credits", 10);
         profile.put("joinedGroups", 5);
-        profile.put("sentLikes", 23);
-        profile.put("receivedLikes", 17);
-        profile.put("matches", 8);
         
         response.put("success", true);
         response.put("data", profile);
+        return response;
+    }
+    
+    @GetMapping("/api/v1/users/me")
+    public Map<String, Object> getCurrentUser(@RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
+        Map<String, Object> response = new HashMap<>();
+        
+        if (!"true".equals(devAuth)) {
+            response.put("error", "Unauthorized");
+            response.put("message", "Development authentication required");
+            return response;
+        }
+        
+        response.put("id", "test-user-001");
+        response.put("nickname", "테스트 사용자");
+        response.put("phoneNumber", "+821012345678");
+        response.put("isVerified", true);
+        response.put("credits", 10);
+        response.put("isPremium", false);
+        response.put("success", true);
+        
+        return response;
+    }
+    
+    // Chat endpoints - 서버 메모리 기반
+    @GetMapping("/api/v1/chat/messages/{matchId}")
+    public Map<String, Object> getMessages(
+            @PathVariable String matchId,
+            @RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
+        Map<String, Object> response = new HashMap<>();
+        
+        if (!"true".equals(devAuth)) {
+            response.put("error", "Unauthorized");
+            return response;
+        }
+        
+        // 해당 matchId의 메시지들 필터링
+        List<Map<String, Object>> matchMessages = chatMessages.stream()
+            .filter(msg -> matchId.equals(msg.get("matchId")))
+            .collect(ArrayList::new, (list, msg) -> list.add(msg), ArrayList::addAll);
+        
+        response.put("success", true);
+        response.put("data", matchMessages);
+        return response;
+    }
+    
+    @PostMapping("/api/v1/chat/messages/{matchId}/send")
+    public Map<String, Object> sendMessage(
+            @PathVariable String matchId,
+            @RequestBody Map<String, Object> message,
+            @RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
+        Map<String, Object> response = new HashMap<>();
+        
+        if (!"true".equals(devAuth)) {
+            response.put("error", "Unauthorized");
+            return response;
+        }
+        
+        // 메시지 저장
+        message.put("matchId", matchId);
+        message.put("id", "msg_" + System.currentTimeMillis());
+        message.put("createdAt", new Date());
+        chatMessages.add(message);
+        
+        response.put("success", true);
+        response.put("data", message);
+        return response;
+    }
+    
+    @DeleteMapping("/api/v1/chat/{matchId}/leave")
+    public Map<String, Object> leaveChat(
+            @PathVariable String matchId,
+            @RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
+        Map<String, Object> response = new HashMap<>();
+        
+        if (!"true".equals(devAuth)) {
+            response.put("error", "Unauthorized");
+            return response;
+        }
+        
+        // 해당 매치의 메시지 삭제
+        chatMessages.removeIf(msg -> matchId.equals(msg.get("matchId")));
+        
+        response.put("success", true);
+        response.put("message", "Successfully left chat");
         return response;
     }
     
@@ -301,27 +348,6 @@ public class SimpleApplicationFixed {
         
         response.put("success", true);
         response.put("data", data);
-        return response;
-    }
-    
-    @GetMapping("/api/v1/users/me")
-    public Map<String, Object> getCurrentUser(@RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
-        Map<String, Object> response = new HashMap<>();
-        
-        if (!"true".equals(devAuth)) {
-            response.put("error", "Unauthorized");
-            response.put("message", "Development authentication required");
-            return response;
-        }
-        
-        response.put("id", "test-user-001");
-        response.put("nickname", "테스트 사용자");
-        response.put("phoneNumber", "+821012345678");
-        response.put("isVerified", true);
-        response.put("credits", 10);
-        response.put("isPremium", false);
-        response.put("success", true);
-        
         return response;
     }
     

@@ -14,7 +14,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import * as ImagePicker from 'expo-image-picker';
-import { Video, ResizeMode } from 'expo-av';
+import { Video, ResizeMode } from 'expo-video';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { API_BASE_URL } from '@/services/api/config';
 import { useAuthService } from '@/services/auth/auth-service';

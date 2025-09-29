@@ -47,61 +47,33 @@ export const ChatScreenSimple = () => {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  // 메시지를 AsyncStorage에 저장하는 함수
-  const saveMessages = async (messagesToSave: Message[]) => {
-    try {
-      const key = `chat_messages_${matchId}`;
-      await AsyncStorage.setItem(key, JSON.stringify(messagesToSave));
-      console.log('[ChatScreenSimple] 메시지 저장됨:', messagesToSave.length, '개');
-    } catch (error) {
-      console.error('Failed to save messages:', error);
-    }
-  };
+  // Server-only approach: No localStorage for messages
+  // Messages must always be fetched from the server
 
-  // AsyncStorage에서 메시지를 불러오는 함수
-  const loadStoredMessages = async (): Promise<Message[]> => {
-    try {
-      const key = `chat_messages_${matchId}`;
-      const storedData = await AsyncStorage.getItem(key);
-      if (storedData) {
-        const parsedMessages = JSON.parse(storedData);
-        console.log('[ChatScreenSimple] 저장된 메시지 불러옴:', parsedMessages.length, '개');
-        return parsedMessages;
-      }
-      return [];
-    } catch (error) {
-      console.error('Failed to load stored messages:', error);
-      return [];
-    }
-  };
-
-  // Load messages from API or stored messages
+  // Load messages from API only - no localStorage fallback
   useEffect(() => {
     const loadMessages = async () => {
       try {
         setIsLoading(true);
         
-        // 먼저 저장된 메시지가 있는지 확인
-        const storedMessages = await loadStoredMessages();
-        
-        if (storedMessages.length > 0) {
-          // 저장된 메시지가 있으면 사용
-          setMessages(storedMessages);
-        }
-        
-        // API에서 실제 메시지 가져오기
-        try {
-          const apiMessages = await chatService.getMessages(matchId);
-          if (apiMessages && apiMessages.length > 0) {
-            setMessages(apiMessages);
-            await saveMessages(apiMessages);
-          }
-        } catch (apiError) {
-          console.log('[ChatScreenSimple] API 호출 실패, 저장된 메시지 사용:', apiError);
-          // API 실패 시 저장된 메시지 유지
+        // API에서 실제 메시지 가져오기 (서버 연동 필수)
+        const apiMessages = await chatService.getMessages(matchId);
+        if (apiMessages && apiMessages.length > 0) {
+          setMessages(apiMessages);
+          console.log('[ChatScreenSimple] 서버에서 메시지 로드 성공:', apiMessages.length, '개');
+        } else {
+          setMessages([]);
+          console.log('[ChatScreenSimple] 메시지가 없습니다');
         }
       } catch (error) {
-        console.error('Failed to load messages:', error);
+        console.error('[ChatScreenSimple] 서버 메시지 로드 실패:', error);
+        // Show error to user instead of using localStorage
+        Alert.alert(
+          t('errors.serverError'),
+          t('errors.loadMessagesFailed'),
+          [{ text: t('common:ok') }]
+        );
+        setMessages([]);
       } finally {
         setIsLoading(false);
       }
@@ -122,19 +94,9 @@ export const ChatScreenSimple = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              // 메시지 삭제
-              const key = `chat_messages_${matchId}`;
-              await AsyncStorage.removeItem(key);
-              console.log('[ChatScreenSimple] 채팅 메시지 삭제 완료');
-              
-              // 채팅방 목록에서도 제거
-              const roomsStr = await AsyncStorage.getItem('chat-rooms');
-              if (roomsStr) {
-                const rooms = JSON.parse(roomsStr);
-                const updatedRooms = rooms.filter((room: any) => room.matchId !== matchId);
-                await AsyncStorage.setItem('chat-rooms', JSON.stringify(updatedRooms));
-                console.log('[ChatScreenSimple] 채팅방 목록에서 제거 완료');
-              }
+              // Notify server about leaving the chat
+              await chatService.leaveChat(matchId);
+              console.log('[ChatScreenSimple] 서버에 채팅 나가기 알림');
               
               // 이전 화면으로 돌아가기
               navigation.goBack();
@@ -183,13 +145,23 @@ export const ChatScreenSimple = () => {
       updatedAt: new Date(),
     };
 
-    const updatedMessages = [...messages, newMessage];
-    setMessages(updatedMessages);
-    setInputText('');
-    
-    // 새 메시지를 AsyncStorage에 저장
-    await saveMessages(updatedMessages);
-    console.log('[ChatScreenSimple] 새 메시지 전송 및 저장:', newMessage.content);
+    try {
+      // Send message to server
+      await chatService.sendMessage(matchId, newMessage);
+      
+      // Update UI optimistically
+      const updatedMessages = [...messages, newMessage];
+      setMessages(updatedMessages);
+      setInputText('');
+      console.log('[ChatScreenSimple] 메시지 서버 전송 성공:', newMessage.content);
+    } catch (error) {
+      console.error('[ChatScreenSimple] 메시지 전송 실패:', error);
+      Alert.alert(
+        t('errors.sendFailed'),
+        t('errors.messageSendFailed'),
+        [{ text: t('common:ok') }]
+      );
+    }
   };
 
   const renderMessageItem = ({ item }: { item: Message }) => {
