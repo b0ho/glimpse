@@ -20,6 +20,7 @@ export type AuthStackParamList = {
 export type InterestStackParamList = {
   InterestSearchScreen: undefined;
   AddInterest: undefined;
+  MyInfoRegister: undefined;
   MyInfo: undefined;
   Chat: {
     roomId: string;

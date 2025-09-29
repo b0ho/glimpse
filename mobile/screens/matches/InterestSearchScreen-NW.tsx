@@ -98,13 +98,17 @@ export const InterestSearchScreen: React.FC = () => {
   };
 
   const handleAddInterest = (registrationType: 'MY_INFO' | 'LOOKING_FOR' = 'LOOKING_FOR') => {
-    // TESTING: Completely bypass ALL subscription checks for comprehensive testing
-    console.log('[InterestSearchScreen] Subscription check COMPLETELY BYPASSED for testing all 12 types');
-    
-    navigation.navigate('AddInterest', { 
-      type: registrationType,
-      relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend'
-    });
+    // MY_INFO인 경우 간단한 프로필 수정 화면으로
+    if (registrationType === 'MY_INFO') {
+      navigation.navigate('MyInfoRegister');
+    } else {
+      // LOOKING_FOR인 경우 기존 복잡한 양식 화면으로
+      console.log('[InterestSearchScreen] Navigating to AddInterest for LOOKING_FOR');
+      navigation.navigate('AddInterest', { 
+        type: registrationType,
+        relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend'
+      });
+    }
   };
 
   const renderSearchItem = ({ item }: { item: any }) => (

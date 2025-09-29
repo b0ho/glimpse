@@ -11,6 +11,7 @@ import { InterestStackParamList } from '@/types/navigation';
 // Screens
 import { InterestSearchScreen } from '@/screens/matches/InterestSearchScreen-NW';
 import { AddInterestScreen } from '@/screens/matches/AddInterestScreen-NW';
+import { MyInfoRegisterScreen } from '@/screens/matches/MyInfoRegisterScreen-NW';
 import { MyInfoScreen } from '@/screens/profile/MyInfoScreen-NW';
 import { ChatScreen } from '@/screens/chat/ChatScreen-NW';
 
@@ -43,6 +44,14 @@ export function InterestStackNavigator() {
         component={AddInterestScreen} 
         options={{ 
           title: t('navigation:screens.addInterest'),
+          headerShown: false,
+        }}
+      />
+      <InterestStack.Screen 
+        name="MyInfoRegister" 
+        component={MyInfoRegisterScreen} 
+        options={{ 
+          title: t('navigation:screens.myInfoRegister'),
           headerShown: false,
         }}
       />

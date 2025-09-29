@@ -34,6 +34,10 @@ interface InterestState {
   getSearchLimitByType: (type: InterestType, premiumLevel: PremiumLevel) => number;
   getExpirationDate: (premiumLevel: PremiumLevel) => Date | null;
   canRegisterInterest: (type: InterestType, premiumLevel: PremiumLevel) => boolean;
+  
+  // My Info functions
+  getMyInfo: () => Promise<any>;
+  updateMyInfo: (info: any) => Promise<void>;
 }
 
 const initialState = {
@@ -326,6 +330,34 @@ export const useInterestStore = create<InterestState>()(
        * 상태 초기화
        */
       reset: () => set(initialState),
+      
+      /**
+       * 내 정보 조회
+       */
+      getMyInfo: async () => {
+        try {
+          const response = await apiClient.get('/interest/my-info');
+          if ((response as any).success) {
+            return (response as any).data;
+          }
+          return null;
+        } catch (error) {
+          console.log('[interestSlice] Failed to get my info:', error);
+          return null;
+        }
+      },
+      
+      /**
+       * 내 정보 업데이트
+       */
+      updateMyInfo: async (info: any) => {
+        try {
+          await apiClient.put('/interest/my-info', info);
+        } catch (error) {
+          console.error('[interestSlice] Failed to update my info:', error);
+          throw error;
+        }
+      },
     }),
     {
       name: 'interest-storage',

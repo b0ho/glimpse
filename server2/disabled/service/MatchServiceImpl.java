@@ -43,7 +43,7 @@ public class MatchServiceImpl {
             matchData.put("unreadCount", unreadCount);
             matchData.put("lastMessage", lastMessage);
             matchData.put("lastMessageTime", lastMessageTime);
-            matchData.put("isActive", MatchStatus.ACTIVE.equals(match.getStatus()));
+            matchData.put("isActive", MatchStatus.MATCHED.equals(match.getStatus()));
             
             matches.add(matchData);
         }
@@ -90,7 +90,7 @@ public class MatchServiceImpl {
         
         // 새 매치 생성
         Match match = Match.builder()
-            .status(MatchStatus.ACTIVE)
+            .status(MatchStatus.MATCHED)
             .build();
         
         match = matchRepository.save(match);
