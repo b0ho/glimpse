@@ -65,7 +65,7 @@ export const useLikeStore = create<LikeStore>()(
       setReceivedLikes: (receivedLikes) => set({ receivedLikes }),
       setMatches: (matches) => set({ matches }),
       createMatch: (match) => set((state) => ({ 
-        matches: [...state.matches, match] 
+        matches: [...(state.matches || []), match] 
       })),
       
       // Like Calculation Actions
@@ -338,7 +338,7 @@ export const useLikeStore = create<LikeStore>()(
         try {
           await apiClient.delete(`/matches/${matchId}`);
           set((state) => ({
-            matches: state.matches.filter(match => match.id !== matchId),
+            matches: (state.matches || []).filter(match => match.id !== matchId),
           }));
           return true;
         } catch (error) {
@@ -350,6 +350,10 @@ export const useLikeStore = create<LikeStore>()(
       // Match Helper Actions
       isMatchedWith: (userId) => {
         const state = get();
+        // matches가 undefined거나 null인 경우 빈 배열로 처리
+        if (!state.matches || !Array.isArray(state.matches)) {
+          return false;
+        }
         return state.matches.some(
           (match) => match.user1Id === userId || match.user2Id === userId
         );
@@ -463,13 +467,13 @@ export const useLikeStore = create<LikeStore>()(
       name: 'like-store',
       storage: createJSONStorage(() => secureStorageAdapter),
       partialize: (state) => ({
-        sentLikes: state.sentLikes,
-        receivedLikes: state.receivedLikes,
-        matches: state.matches,
-        dailyLikesUsed: state.dailyLikesUsed,
+        sentLikes: state.sentLikes || [],
+        receivedLikes: state.receivedLikes || [],
+        matches: state.matches || [],
+        dailyLikesUsed: state.dailyLikesUsed || 0,
         lastResetDate: state.lastResetDate,
-        premiumLikesRemaining: state.premiumLikesRemaining,
-        superLikesUsed: state.superLikesUsed,
+        premiumLikesRemaining: state.premiumLikesRemaining || 0,
+        superLikesUsed: state.superLikesUsed || 0,
       }),
     }
   )

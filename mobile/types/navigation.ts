@@ -19,7 +19,11 @@ export type AuthStackParamList = {
 // Interest Stack
 export type InterestStackParamList = {
   InterestSearchScreen: undefined;
-  AddInterest: undefined;
+  AddInterest: {
+    type?: 'MY_INFO' | 'LOOKING_FOR';
+    relationshipType?: 'romantic' | 'friend';
+    editItem?: any;
+  } | undefined;
   MyInfoRegister: undefined;
   MyInfo: undefined;
   Chat: {

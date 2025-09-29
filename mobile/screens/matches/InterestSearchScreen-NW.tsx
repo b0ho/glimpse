@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { InterestStackParamList } from '@/types/navigation';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
@@ -34,9 +36,11 @@ import { EmptySection } from '@/components/interestSearch/EmptySection';
 // Utils
 import { showDeleteConfirm, getSearchInfo } from '@/utils/interestSearch/interestHelpers';
 
+type InterestSearchScreenNavigationProp = StackNavigationProp<InterestStackParamList, 'InterestSearchScreen'>;
+
 export const InterestSearchScreen: React.FC = () => {
   const isFocused = useIsFocused();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<InterestSearchScreenNavigationProp>();
   const { colors, isDark } = useTheme();
   const { t } = useAndroidSafeTranslation('interest');
   const { user, getSubscriptionTier, getSubscriptionFeatures } = useAuthStore();
@@ -98,17 +102,12 @@ export const InterestSearchScreen: React.FC = () => {
   };
 
   const handleAddInterest = (registrationType: 'MY_INFO' | 'LOOKING_FOR' = 'LOOKING_FOR') => {
-    // MY_INFO인 경우 간단한 프로필 수정 화면으로
-    if (registrationType === 'MY_INFO') {
-      navigation.navigate('MyInfoRegister');
-    } else {
-      // LOOKING_FOR인 경우 기존 복잡한 양식 화면으로
-      console.log('[InterestSearchScreen] Navigating to AddInterest for LOOKING_FOR');
-      navigation.navigate('AddInterest', { 
-        type: registrationType,
-        relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend'
-      });
-    }
+    // 모두 AddInterest 화면으로 이동, type 파라미터로 구분
+    console.log(`[InterestSearchScreen] Navigating to AddInterest with type: ${registrationType}`);
+    navigation.navigate('AddInterest', { 
+      type: registrationType,
+      relationshipType: selectedTab === 'interest' ? 'romantic' : 'friend'
+    });
   };
 
   const renderSearchItem = ({ item }: { item: any }) => (
@@ -319,7 +318,7 @@ export const InterestSearchScreen: React.FC = () => {
             {subscriptionTier === 'FREE' && (
               <TouchableOpacity
                 className="bg-red-500 px-3 py-1.5 rounded-full"
-                onPress={() => navigation.navigate('PricingScreen')}
+                onPress={() => navigation.navigate('PricingScreen' as any)}
               >
                 <Text className="text-xs text-white font-semibold">
                   업그레이드
