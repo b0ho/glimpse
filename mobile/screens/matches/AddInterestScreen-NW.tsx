@@ -295,64 +295,29 @@ export const AddInterestScreen: React.FC = () => {
           className="px-4 pb-24"
           showsVerticalScrollIndicator={false}
         >
-          {/* MY_INFO 모드일 때 간단한 프로필 폼 */}
-          {isMyInfoMode ? (
-            <View className="mt-4">
+          {/* MY_INFO 모드일 때도 동일한 타입 선택 제공 */}
+          {isMyInfoMode && !selectedType ? (
+            <>
               {/* 안내 메시지 */}
-              <View className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 mb-6">
+              <View className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 mb-6 mt-4">
                 <View className="flex-row items-center mb-2">
                   <Icon name="information-circle-outline" size={24} color="#3B82F6" />
                   <Text className="ml-2 text-blue-900 dark:text-blue-200 font-semibold">
-                    내 정보 안내
+                    내 정보 등록
                   </Text>
                 </View>
                 <Text className="text-sm text-blue-800 dark:text-blue-300 leading-5">
-                  등록한 정보는 암호화되어 저장되며, 상대방도 같은 정보를 등록했을 때만 매칭됩니다.
+                  다양한 방법으로 내 정보를 등록하세요. 상대방이 동일한 정보로 검색하면 서로 매칭됩니다.
                 </Text>
               </View>
               
-              {/* 전화번호 필드 (기본값 설정) */}
-              <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-3">
-                <Text className="text-sm text-gray-600 dark:text-gray-400 mb-2">전화번호</Text>
-                <Text className="text-base text-gray-900 dark:text-white">
-                  {user?.phoneNumber || '전화번호 없음'}
-                </Text>
-              </View>
-              
-              {/* 닉네임 필드 */}
-              <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-3">
-                <Text className="text-sm text-gray-600 dark:text-gray-400 mb-2">닉네임</Text>
-                <Text className="text-base text-gray-900 dark:text-white">
-                  {user?.nickname || '닉네임 없음'}
-                </Text>
-              </View>
-              
-              {/* 추가 정보 안내 */}
-              <TouchableOpacity
-                className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 flex-row items-center justify-between"
-                onPress={() => {
-                  // 프로필 편집 화면으로 이동
-                  navigation.navigate('Profile');
-                }}
-              >
-                <Text className="text-gray-700 dark:text-gray-300">
-                  추가 정보를 입력하려면 프로필을 수정하세요
-                </Text>
-                <Icon name="chevron-forward" size={20} color="#6B7280" />
-              </TouchableOpacity>
-              
-              {/* 완료 버튼 */}
-              <TouchableOpacity
-                className="py-4 rounded-xl items-center mt-6 bg-blue-500 dark:bg-blue-600"
-                onPress={() => {
-                  navigation.goBack();
-                }}
-              >
-                <Text className="text-white text-base font-semibold">
-                  완료
-                </Text>
-              </TouchableOpacity>
-            </View>
+              {/* 타입 선택 - 관심상대 찾기와 동일 */}
+              <InterestTypeSelector
+                selectedType={selectedType}
+                onTypeSelect={setSelectedType}
+                t={t}
+              />
+            </>
           ) : !selectedType ? (
             <InterestTypeSelector
               selectedType={selectedType}
@@ -408,7 +373,7 @@ export const AddInterestScreen: React.FC = () => {
                   <ActivityIndicator color="white" />
                 ) : (
                   <Text className="text-white text-base font-semibold">
-                    {t('interest:buttons.register')}
+                    {isMyInfoMode ? '내 정보 등록' : t('interest:buttons.register')}
                   </Text>
                 )}
               </TouchableOpacity>
