@@ -44,9 +44,9 @@ export const useContentData = () => {
         userId: 'user1',
         authorId: 'user1',
         authorNickname: i18n.language === 'ko' ? '커피러버' : 'Coffee Lover',
-        type: 'text',
-        text: i18n.language === 'ko' 
-          ? `오늘 날씨가 너무 좋네요! 다들 좋은 하루 되세요 ☀️ (Page ${page})` 
+        type: 'POST',
+        text: i18n.language === 'ko'
+          ? `오늘 날씨가 너무 좋네요! 다들 좋은 하루 되세요 ☀️ (Page ${page})`
           : `The weather is so nice today! Have a great day everyone ☀️ (Page ${page})`,
         imageUrls: [],
         likes: 12,
@@ -55,15 +55,15 @@ export const useContentData = () => {
         isPublic: true,
         isLikedByUser: false,
         groupId: 'group1',
-        createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000),
+        updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000),
       },
       {
         id: `test-${page}-2`,
         userId: 'user2',
         authorId: 'user2',
         authorNickname: i18n.language === 'ko' ? '개발자' : 'Developer',
-        type: 'text',
+        type: 'POST',
         text: i18n.language === 'ko'
           ? `새로운 프로젝트 시작했습니다! 화이팅 💪 (Page ${page})`
           : `Started a new project! Fighting 💪 (Page ${page})`,
@@ -74,15 +74,15 @@ export const useContentData = () => {
         isPublic: true,
         isLikedByUser: false,
         groupId: 'group2',
-        createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 60 * 60 * 1000),
+        updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 60 * 60 * 1000),
       },
       {
         id: `test-${page}-3`,
         userId: 'user3',
         authorId: 'user3',
         authorNickname: i18n.language === 'ko' ? '운동매니아' : 'Fitness Enthusiast',
-        type: 'text',
+        type: 'POST',
         text: i18n.language === 'ko'
           ? `오늘도 헬스장 다녀왔습니다! 운동하면 기분이 좋아져요 🏋️ (Page ${page})`
           : `Went to the gym today! Exercise makes me feel good 🏋️ (Page ${page})`,
@@ -93,8 +93,8 @@ export const useContentData = () => {
         isPublic: true,
         isLikedByUser: true,
         groupId: 'group3',
-        createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 2 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 2 * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 2 * 60 * 60 * 1000),
+        updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 2 * 60 * 60 * 1000),
       },
     ];
   };
