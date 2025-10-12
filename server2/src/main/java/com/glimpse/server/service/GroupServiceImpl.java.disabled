@@ -1,0 +1,332 @@
+package com.glimpse.server.service;
+
+import com.glimpse.server.dto.group.CreateGroupDto;
+import com.glimpse.server.dto.group.GroupDto;
+import com.glimpse.server.dto.group.UpdateGroupDto;
+import com.glimpse.server.entity.Group;
+import com.glimpse.server.entity.User;
+import com.glimpse.server.entity.enums.GroupCategory;
+import com.glimpse.server.entity.enums.GroupType;
+import com.glimpse.server.repository.GroupRepository;
+import com.glimpse.server.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+/**
+ * Group Service Implementation
+ *
+ * @author Glimpse Team
+ * @version 1.0
+ * @since 2025-01-14
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class GroupServiceImpl implements GroupService {
+
+    private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
+
+    @Override
+    @Transactional
+    public GroupDto createGroup(CreateGroupDto createGroupDto, String creatorId) {
+        log.info("Creating new group: {} by user: {}", createGroupDto.getName(), creatorId);
+
+        // 그룹 이름 중복 체크
+        if (groupRepository.existsByName(createGroupDto.getName())) {
+            throw new IllegalArgumentException("이미 존재하는 그룹 이름입니다: " + createGroupDto.getName());
+        }
+
+        // 생성자 조회
+        User creator = userRepository.findById(creatorId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + creatorId));
+
+        // 초대 코드 생성
+        String inviteCode = generateInviteCode();
+
+        // Group 엔티티 생성
+        Group group = Group.builder()
+                .name(createGroupDto.getName())
+                .description(createGroupDto.getDescription())
+                .type(createGroupDto.getType())
+                .category(createGroupDto.getCategory())
+                .profileImage(createGroupDto.getProfileImage())
+                .coverImage(createGroupDto.getCoverImage())
+                .verificationRequired(createGroupDto.getVerificationRequired() != null ? createGroupDto.getVerificationRequired() : false)
+                .verificationMethod(createGroupDto.getVerificationMethod())
+                .maxMembers(createGroupDto.getMaxMembers())
+                .isPublic(createGroupDto.getIsPublic() != null ? createGroupDto.getIsPublic() : true)
+                .isActive(true)
+                .isOfficial(false)
+                .location(createGroupDto.getLocation())
+                .latitude(createGroupDto.getLatitude())
+                .longitude(createGroupDto.getLongitude())
+                .radius(createGroupDto.getRadius())
+                .inviteCode(inviteCode)
+                .creator(creator)
+                .memberCount(0)
+                .totalLikes(0)
+                .totalMatches(0)
+                .dailyActiveUsers(0)
+                .weeklyActiveUsers(0)
+                .build();
+
+        // 태그 설정
+        if (createGroupDto.getTags() != null) {
+            group.setTags(createGroupDto.getTags());
+        }
+
+        Group savedGroup = groupRepository.save(group);
+        log.info("Group created successfully with ID: {}", savedGroup.getId());
+
+        return convertToDto(savedGroup);
+    }
+
+    @Override
+    public Optional<GroupDto> getGroupById(String id) {
+        log.debug("Getting group by ID: {}", id);
+        return groupRepository.findById(id)
+                .map(this::convertToDto);
+    }
+
+    @Override
+    public Optional<Group> getGroupEntityById(String id) {
+        log.debug("Getting group entity by ID: {}", id);
+        return groupRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public GroupDto updateGroup(String id, UpdateGroupDto updateGroupDto) {
+        log.info("Updating group: {}", id);
+
+        Group group = groupRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("그룹을 찾을 수 없습니다: " + id));
+
+        // 업데이트할 필드들 설정
+        if (updateGroupDto.getName() != null) {
+            group.setName(updateGroupDto.getName());
+        }
+        if (updateGroupDto.getDescription() != null) {
+            group.setDescription(updateGroupDto.getDescription());
+        }
+        if (updateGroupDto.getProfileImage() != null) {
+            group.setProfileImage(updateGroupDto.getProfileImage());
+        }
+        if (updateGroupDto.getCoverImage() != null) {
+            group.setCoverImage(updateGroupDto.getCoverImage());
+        }
+        if (updateGroupDto.getVerificationRequired() != null) {
+            group.setVerificationRequired(updateGroupDto.getVerificationRequired());
+        }
+        if (updateGroupDto.getVerificationMethod() != null) {
+            group.setVerificationMethod(updateGroupDto.getVerificationMethod());
+        }
+        if (updateGroupDto.getMaxMembers() != null) {
+            group.setMaxMembers(updateGroupDto.getMaxMembers());
+        }
+        if (updateGroupDto.getIsPublic() != null) {
+            group.setIsPublic(updateGroupDto.getIsPublic());
+        }
+        if (updateGroupDto.getLocation() != null) {
+            group.setLocation(updateGroupDto.getLocation());
+        }
+        if (updateGroupDto.getTags() != null) {
+            group.setTags(updateGroupDto.getTags());
+        }
+
+        Group updatedGroup = groupRepository.save(group);
+        log.info("Group updated successfully: {}", id);
+
+        return convertToDto(updatedGroup);
+    }
+
+    @Override
+    @Transactional
+    public void deleteGroup(String id) {
+        log.info("Deleting group: {}", id);
+
+        Group group = groupRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("그룹을 찾을 수 없습니다: " + id));
+
+        groupRepository.delete(group);
+        log.info("Group deleted successfully: {}", id);
+    }
+
+    @Override
+    public List<GroupDto> getPublicGroups() {
+        log.debug("Getting all public groups");
+        return groupRepository.findByIsPublicTrueAndIsActiveTrue()
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<GroupDto> getPublicGroupsPage(Pageable pageable) {
+        log.debug("Getting public groups page");
+        return groupRepository.findByIsPublicTrueAndIsActiveTrue(pageable)
+                .map(this::convertToDto);
+    }
+
+    @Override
+    public List<GroupDto> getOfficialGroups() {
+        log.debug("Getting official groups");
+        return groupRepository.findOfficialGroups()
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<GroupDto> getGroupsByType(GroupType type) {
+        log.debug("Getting groups by type: {}", type);
+        return groupRepository.findByType(type)
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<GroupDto> getGroupsByCategory(GroupCategory category) {
+        log.debug("Getting groups by category: {}", category);
+        return groupRepository.findByCategory(category)
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<GroupDto> getGroupsByCreator(String userId) {
+        log.debug("Getting groups by creator: {}", userId);
+        return groupRepository.findByCreatorId(userId)
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<GroupDto> getGroupsByUserId(String userId) {
+        log.debug("Getting groups by user ID: {}", userId);
+        return groupRepository.findGroupsByUserId(userId)
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<GroupDto> searchGroups(String keyword, Pageable pageable) {
+        log.debug("Searching groups with keyword: {}", keyword);
+        return groupRepository.searchGroups(keyword, pageable)
+                .map(this::convertToDto);
+    }
+
+    @Override
+    public List<GroupDto> getNearbyGroups(double latitude, double longitude, double radiusKm) {
+        log.debug("Getting nearby groups at ({}, {}) within {}km", latitude, longitude, radiusKm);
+
+        // 위도/경도의 대략적인 범위 계산 (1도 ≈ 111km)
+        double latDelta = radiusKm / 111.0;
+        double lngDelta = radiusKm / (111.0 * Math.cos(Math.toRadians(latitude)));
+
+        double minLat = latitude - latDelta;
+        double maxLat = latitude + latDelta;
+        double minLng = longitude - lngDelta;
+        double maxLng = longitude + lngDelta;
+
+        return groupRepository.findNearbyGroups(minLat, maxLat, minLng, maxLng)
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<GroupDto> getGroupByInviteCode(String inviteCode) {
+        log.debug("Getting group by invite code: {}", inviteCode);
+        return groupRepository.findByInviteCode(inviteCode)
+                .map(this::convertToDto);
+    }
+
+    @Override
+    public long countActiveMembers(String groupId) {
+        return groupRepository.countActiveMembers(groupId);
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return groupRepository.existsByName(name);
+    }
+
+    @Override
+    @Transactional
+    public void updateMemberCount(String groupId, boolean increment) {
+        log.debug("Updating member count for group: {}, increment: {}", groupId, increment);
+
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("그룹을 찾을 수 없습니다: " + groupId));
+
+        if (increment) {
+            group.incrementMemberCount();
+        } else {
+            group.decrementMemberCount();
+        }
+
+        groupRepository.save(group);
+    }
+
+    /**
+     * 초대 코드를 생성합니다.
+     *
+     * @return 생성된 초대 코드
+     */
+    private String generateInviteCode() {
+        return "GRP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+
+    /**
+     * Group 엔티티를 GroupDto로 변환합니다.
+     *
+     * @param group Group 엔티티
+     * @return GroupDto
+     */
+    private GroupDto convertToDto(Group group) {
+        return GroupDto.builder()
+                .id(group.getId())
+                .name(group.getName())
+                .description(group.getDescription())
+                .type(group.getType())
+                .category(group.getCategory())
+                .profileImage(group.getProfileImage())
+                .coverImage(group.getCoverImage())
+                .verificationRequired(group.getVerificationRequired())
+                .verificationMethod(group.getVerificationMethod())
+                .memberCount(group.getMemberCount())
+                .maxMembers(group.getMaxMembers())
+                .isPublic(group.getIsPublic())
+                .isActive(group.getIsActive())
+                .isOfficial(group.getIsOfficial())
+                .location(group.getLocation())
+                .latitude(group.getLatitude())
+                .longitude(group.getLongitude())
+                .radius(group.getRadius())
+                .inviteCode(group.getInviteCode())
+                .inviteCodeExpiresAt(group.getInviteCodeExpiresAt())
+                .creatorId(group.getCreator() != null ? group.getCreator().getId() : null)
+                .tags(group.getTags())
+                .totalLikes(group.getTotalLikes())
+                .totalMatches(group.getTotalMatches())
+                .createdAt(group.getCreatedAt())
+                .updatedAt(group.getUpdatedAt())
+                .build();
+    }
+}

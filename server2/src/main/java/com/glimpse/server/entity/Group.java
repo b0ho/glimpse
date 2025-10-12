@@ -39,7 +39,7 @@ import java.util.List;
  * @since 2025-01-14
  */
 @Entity
-@Table(name = "Group")
+@Table(name = "groups")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -41,7 +41,7 @@ import java.util.*;
  * @since 2025-01-14
  */
 @Entity
-@Table(name = "User")
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor

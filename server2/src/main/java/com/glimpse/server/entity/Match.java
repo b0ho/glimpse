@@ -37,7 +37,7 @@ import java.util.List;
  * @since 2025-01-14
  */
 @Entity
-@Table(name = "Match")
+@Table(name = "matches")
 @Getter
 @Setter
 @NoArgsConstructor
