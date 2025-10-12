@@ -50,7 +50,7 @@ import { cn } from '@/lib/utils';
  * ```
  */
 export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   const { setUser, setToken } = useAuthStore();
   const navigation = useNavigation<any>();
   
@@ -196,10 +196,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
   };
   
   return (
-    <View 
-      className="flex-1 bg-white dark:bg-gray-900"
-      style={{ backgroundColor: colors.BACKGROUND }}
-    >
+    <View className="flex-1 bg-white dark:bg-gray-900">
       {renderCurrentStep()}
     </View>
   );

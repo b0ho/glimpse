@@ -59,7 +59,7 @@ import { cn } from '@/lib/utils';
 export const LikeHistoryScreen = () => {
   const navigation = useNavigation();
   const { t, i18n } = useAndroidSafeTranslation('matching');
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   const { currentMode } = useAuthStore();
   const {
     sentLikes,

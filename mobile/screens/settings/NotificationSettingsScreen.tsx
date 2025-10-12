@@ -80,7 +80,7 @@ function SettingItem({
 }: SettingItemProps) {
   const isPremium = usePremiumStore(premiumSelectors.isPremiumUser());
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation(['settings', 'common']);
 
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
@@ -164,11 +164,11 @@ function SettingItem({
             onValueChange={handleToggle}
             disabled={disabled || (isPremiumFeature && !isPremium)}
             trackColor={{
-              false: isDark ? '#374151' : '#E5E7EB',
+              false: '#E5E7EB',
               true: '#FF6B6B',
             }}
-            thumbColor={value ? '#FFFFFF' : isDark ? '#9CA3AF' : '#FFFFFF'}
-            ios_backgroundColor={isDark ? '#374151' : '#E5E7EB'}
+            thumbColor="#FFFFFF"
+            ios_backgroundColor="#E5E7EB"
           />
         </View>
       </TouchableOpacity>
@@ -215,7 +215,7 @@ function SettingItem({
 export function NotificationSettingsScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { currentMode } = useAuthStore();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation(['settings', 'common']);
   const {
     settings,
@@ -299,7 +299,7 @@ export function NotificationSettingsScreen() {
       {/* 헤더 */}
       <View className="flex-row items-center justify-between px-5 py-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <TouchableOpacity onPress={() => navigation.goBack()} className="p-2">
-          <Icon name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
+          <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
         <Text className="text-xl font-bold text-gray-900 dark:text-white">
           {t('settings:notificationSettings.title')}
@@ -335,11 +335,11 @@ export function NotificationSettingsScreen() {
                   value={settings.pushEnabled}
                   onValueChange={() => toggleNotificationType('pushEnabled')}
                   trackColor={{
-                    false: isDark ? '#374151' : '#E5E7EB',
+                    false: '#E5E7EB',
                     true: '#FF6B6B',
                   }}
                   thumbColor="#FFFFFF"
-                  ios_backgroundColor={isDark ? '#374151' : '#E5E7EB'}
+                  ios_backgroundColor="#E5E7EB"
                 />
               </View>
             </View>
@@ -466,7 +466,7 @@ export function NotificationSettingsScreen() {
               className="bg-gray-200 dark:bg-gray-700 rounded-2xl py-4"
             >
               <View className="flex-row items-center justify-center">
-                <Icon name="refresh" size={20} color={isDark ? '#FFFFFF' : '#6B7280'} />
+                <Icon name="refresh" size={20} color={colors.TEXT.SECONDARY} />
                 <Text className="ml-2 text-gray-600 dark:text-gray-300 font-bold text-base">
                   {t('settings:notificationSettings.actions.reset')}
                 </Text>

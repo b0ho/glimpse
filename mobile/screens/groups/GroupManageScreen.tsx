@@ -69,7 +69,7 @@ export const GroupManageScreen = () => {
   const route = useRoute();
   const { groupId } = route.params as { groupId: string };
   const { t } = useAndroidSafeTranslation();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
 
   const [pendingMembers, setPendingMembers] = useState<PendingMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);

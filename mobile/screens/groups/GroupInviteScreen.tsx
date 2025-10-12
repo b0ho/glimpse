@@ -71,7 +71,7 @@ export const GroupInviteScreen = () => {
   const route = useRoute();
   const { groupId } = route.params as { groupId: string };
   const { t } = useAndroidSafeTranslation();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
 
   const [inviteLink, setInviteLink] = useState<string>('');
   const [invites, setInvites] = useState<GroupInvite[]>([]);

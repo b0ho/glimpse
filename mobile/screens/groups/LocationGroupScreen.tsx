@@ -20,7 +20,6 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
-import { useTheme } from '@/store/slices/themeSlice';
 // BarCodeScanner를 조건부로 import (Expo Go 호환성)
 let BarCodeScanner: any = null;
 try {
@@ -94,7 +93,6 @@ const LocationGroupScreen = () => {
   const [hasPermission, setHasPermission] = useState(false);
   const [scanning, setScanning] = useState(false);
   const { t } = useAndroidSafeTranslation('location');
-  const { isDarkMode } = useTheme();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
     name: '',

@@ -91,7 +91,7 @@ export const MapScreen = React.memo(() => {
   const { t } = useAndroidSafeTranslation('map');
   const { user } = useAuthStore();
   const { groups } = useGroupStore();
-  const { isDarkMode } = useTheme();
+  const { colors } = useTheme();
   
   const [currentLocation, setCurrentLocation] = useState<LocationData>({
     latitude: 37.5665, // 서울 기본 좌표
@@ -319,9 +319,7 @@ export const MapScreen = React.memo(() => {
             "flex-row items-center px-4 py-2 mr-2 rounded-full",
             mapType === key
               ? "bg-blue-500"
-              : isDarkMode
-              ? "bg-gray-700"
-              : "bg-gray-100"
+              : "bg-gray-100 dark:bg-gray-700"
           )}
           onPress={() => setMapType(key as any)}
         >
@@ -335,9 +333,7 @@ export const MapScreen = React.memo(() => {
               "text-sm font-medium ml-1",
               mapType === key
                 ? "text-white font-semibold"
-                : isDarkMode
-                ? "text-gray-300"
-                : "text-gray-600"
+                : "text-gray-600 dark:text-gray-300"
             )}
           >
             {label}

@@ -57,7 +57,7 @@ import { cn } from '@/lib/utils';
  */
 export const PrivacyPolicyScreen = () => {
   const navigation = useNavigation();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation('legal');
 
   return (
@@ -68,154 +68,112 @@ export const PrivacyPolicyScreen = () => {
           <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
         
-        <Text 
-          className="text-xl font-semibold ml-4"
-          style={{ color: colors.TEXT.PRIMARY }}
-        >
+        <Text className="text-xl font-semibold ml-4 text-gray-900 dark:text-white">
           개인정보 처리방침
         </Text>
       </View>
 
       <ScrollView className="flex-1 px-4 py-6">
-        <Text 
-          className="text-base leading-7 mb-6"
-          style={{ color: colors.TEXT.PRIMARY }}
-        >
+        <Text className="text-base leading-7 mb-6 text-gray-900 dark:text-white">
           Glimpse(이하 "회사")는 개인정보보호법에 따라 이용자의 개인정보 보호 및 권익을 보호하고 개인정보와 관련된 이용자의 고충을 원활하게 처리할 수 있도록 다음과 같은 처리방침을 두고 있습니다.
         </Text>
 
         <View className="mb-6">
-          <Text 
-            className="text-lg font-semibold mb-3"
-            style={{ color: colors.TEXT.PRIMARY }}
-          >
+          <Text className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
             1. 개인정보의 처리목적
           </Text>
-          <Text 
-            className="text-base leading-6 mb-3"
-            style={{ color: colors.TEXT.SECONDARY }}
-          >
+          <Text className="text-base leading-6 mb-3 text-gray-600 dark:text-gray-400">
             회사는 다음의 목적을 위하여 개인정보를 처리합니다:
           </Text>
           <View className="ml-4">
-            <Text className="text-base leading-6 mb-2" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-base leading-6 mb-2 text-gray-600 dark:text-gray-400">
               • 회원가입 및 관리
             </Text>
-            <Text className="text-base leading-6 mb-2" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-base leading-6 mb-2 text-gray-600 dark:text-gray-400">
               • 서비스 제공 및 계약 이행
             </Text>
-            <Text className="text-base leading-6 mb-2" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-base leading-6 mb-2 text-gray-600 dark:text-gray-400">
               • 회원제 서비스 이용에 따른 본인확인
             </Text>
-            <Text className="text-base leading-6 mb-2" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-base leading-6 mb-2 text-gray-600 dark:text-gray-400">
               • 매칭 서비스 제공
             </Text>
           </View>
         </View>
 
         <View className="mb-6">
-          <Text 
-            className="text-lg font-semibold mb-3"
-            style={{ color: colors.TEXT.PRIMARY }}
-          >
+          <Text className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
             2. 개인정보의 처리 및 보유기간
           </Text>
-          <Text 
-            className="text-base leading-6"
-            style={{ color: colors.TEXT.SECONDARY }}
-          >
+          <Text className="text-base leading-6 text-gray-600 dark:text-gray-400">
             회사는 법령에 따른 개인정보 보유·이용기간 또는 정보주체로부터 개인정보를 수집 시에 동의받은 개인정보 보유·이용기간 내에서 개인정보를 처리·보유합니다.
           </Text>
         </View>
 
         <View className="mb-6">
-          <Text 
-            className="text-lg font-semibold mb-3"
-            style={{ color: colors.TEXT.PRIMARY }}
-          >
+          <Text className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
             3. 정보주체의 권리·의무 및 행사방법
           </Text>
-          <Text 
-            className="text-base leading-6"
-            style={{ color: colors.TEXT.SECONDARY }}
-          >
+          <Text className="text-base leading-6 text-gray-600 dark:text-gray-400">
             이용자는 개인정보주체로서 다음과 같은 권리를 행사할 수 있습니다:
           </Text>
           <View className="ml-4 mt-3">
-            <Text className="text-base leading-6 mb-2" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-base leading-6 mb-2 text-gray-600 dark:text-gray-400">
               • 개인정보 처리현황 통지요구
             </Text>
-            <Text className="text-base leading-6 mb-2" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-base leading-6 mb-2 text-gray-600 dark:text-gray-400">
               • 개인정보 열람요구
             </Text>
-            <Text className="text-base leading-6 mb-2" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-base leading-6 mb-2 text-gray-600 dark:text-gray-400">
               • 개인정보 정정·삭제요구
             </Text>
-            <Text className="text-base leading-6 mb-2" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-base leading-6 mb-2 text-gray-600 dark:text-gray-400">
               • 개인정보 처리정지요구
             </Text>
           </View>
         </View>
 
         <View className="mb-6">
-          <Text 
-            className="text-lg font-semibold mb-3"
-            style={{ color: colors.TEXT.PRIMARY }}
-          >
+          <Text className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
             4. 개인정보의 안전성 확보조치
           </Text>
-          <Text 
-            className="text-base leading-6"
-            style={{ color: colors.TEXT.SECONDARY }}
-          >
+          <Text className="text-base leading-6 text-gray-600 dark:text-gray-400">
             회사는 개인정보의 안전성 확보를 위해 다음과 같은 조치를 취하고 있습니다:
           </Text>
           <View className="ml-4 mt-3">
-            <Text className="text-base leading-6 mb-2" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-base leading-6 mb-2 text-gray-600 dark:text-gray-400">
               • 관리적 조치: 내부관리계획 수립·시행, 정기적 직원 교육
             </Text>
-            <Text className="text-base leading-6 mb-2" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-base leading-6 mb-2 text-gray-600 dark:text-gray-400">
               • 기술적 조치: 개인정보처리시스템 등의 접근권한 관리, 암호화
             </Text>
-            <Text className="text-base leading-6 mb-2" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-base leading-6 mb-2 text-gray-600 dark:text-gray-400">
               • 물리적 조치: 전산실, 자료보관실 등의 접근통제
             </Text>
           </View>
         </View>
 
         <View className="mb-8">
-          <Text 
-            className="text-lg font-semibold mb-3"
-            style={{ color: colors.TEXT.PRIMARY }}
-          >
+          <Text className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
             5. 개인정보 보호책임자
           </Text>
-          <Text 
-            className="text-base leading-6 mb-3"
-            style={{ color: colors.TEXT.SECONDARY }}
-          >
+          <Text className="text-base leading-6 mb-3 text-gray-600 dark:text-gray-400">
             회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 정보주체의 불만처리 및 피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.
           </Text>
-          <View 
-            className="p-4 rounded-lg"
-            style={{ backgroundColor: colors.SURFACE }}
-          >
-            <Text className="text-base font-medium mb-2" style={{ color: colors.TEXT.PRIMARY }}>
+          <View className="p-4 rounded-lg bg-white dark:bg-gray-800">
+            <Text className="text-base font-medium mb-2 text-gray-900 dark:text-white">
               개인정보 보호책임자
             </Text>
-            <Text className="text-sm mb-1" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-sm mb-1 text-gray-600 dark:text-gray-400">
               이메일: privacy@glimpse.app
             </Text>
-            <Text className="text-sm" style={{ color: colors.TEXT.SECONDARY }}>
+            <Text className="text-sm text-gray-600 dark:text-gray-400">
               전화번호: 1588-0000
             </Text>
           </View>
         </View>
 
-        <Text 
-          className="text-sm text-center"
-          style={{ color: colors.TEXT.LIGHT }}
-        >
+        <Text className="text-sm text-center text-gray-500 dark:text-gray-500">
           본 방침은 2025년 1월 1일부터 시행됩니다.
         </Text>
       </ScrollView>

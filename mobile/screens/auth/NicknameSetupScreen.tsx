@@ -69,7 +69,7 @@ export const NicknameSetupScreen = ({
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const authStore = useAuthStore();
   const { t } = useAndroidSafeTranslation();
-  const { isDarkMode } = useTheme();
+  useTheme(); // Hook for potential theme access
 
   const validateNickname = (text: string): boolean => {
     return REGEX.NICKNAME.test(text);

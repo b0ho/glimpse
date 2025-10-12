@@ -82,7 +82,7 @@ export const HomeScreen = () => {
   const likeStore = useLikeStore();
   const groupStore = useGroupStore();
   const { colors } = useTheme();
-  const { t } = useAndroidSafeTranslation(['navigation', 'home']);
+  const { t } = useAndroidSafeTranslation(['navigation', 'home', 'common']);
   const navigation = useNavigation() as any;
   const { isSignedIn, isLoaded } = useAuth();
 

@@ -84,7 +84,7 @@ export const ChatScreen = () => {
   const { roomId, matchId, otherUserNickname } = route.params;
   const { initiateCall, isInCall } = useCall();
   const { colors } = useTheme();
-  const { t } = useAndroidSafeTranslation('chat');
+  const { t } = useAndroidSafeTranslation(['chat', 'common']);
 
   // Store states
   const authStore = useAuthStore();
@@ -494,7 +494,7 @@ export const ChatScreen = () => {
         {t('chat:emptyState.title')}
       </Text>
       <Text className="text-center text-gray-600 dark:text-gray-400">
-        {t('emptyState:emptyState.subtitle', { name: otherUserNickname })}
+        {t('chat:emptyState.subtitle', { name: otherUserNickname })}
       </Text>
     </View>
   );

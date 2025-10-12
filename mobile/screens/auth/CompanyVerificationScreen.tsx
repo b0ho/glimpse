@@ -72,7 +72,7 @@ export const CompanyVerificationScreen = ({
   const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useAndroidSafeTranslation();
-  const { isDarkMode } = useTheme();
+  useTheme(); // Hook for potential theme access
 
   // 이메일 도메인에서 회사명 추출
   const extractCompanyFromEmail = (emailAddress: string): string => {

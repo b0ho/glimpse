@@ -15,15 +15,17 @@ export const matchApi = {
   /**
    * 매칭 목록 조회
    * @async
-   * @param {number} [page=1] - 페이지 번호
-   * @param {number} [limit=20] - 페이지당 항목 수
+   * @param {string} userId - 사용자 ID
+   * @param {number} [page=0] - 페이지 번호 (서버는 0부터 시작)
+   * @param {number} [size=20] - 페이지당 항목 수
    * @returns {Promise<Match[]>} 매칭 목록
    */
-  async getMatches(page: number = 1, limit: number = 20): Promise<Match[]> {
+  async getMatches(userId: string, page: number = 0, size: number = 20): Promise<Match[]> {
 
-    const response = await apiClient.get<Match[]>('/matching/matches', {
+    const response = await apiClient.get<Match[]>('/matches', {
+      userId,
       page,
-      limit
+      size
     });
     
     // 서버에서 직접 배열을 반환하는 경우
@@ -49,7 +51,7 @@ export const matchApi = {
    * @returns {Promise<Match>} 매칭 정보
    */
   async getMatchById(matchId: string): Promise<Match> {
-    const response = await apiClient.get<{ success: boolean; data: Match }>(`/matching/matches/${matchId}`);
+    const response = await apiClient.get<{ success: boolean; data: Match }>(`/matches/${matchId}`);
     if (response.success && response.data) {
       return response.data;
     }
@@ -63,7 +65,7 @@ export const matchApi = {
    * @returns {Promise<void>}
    */
   async unmatch(matchId: string): Promise<void> {
-    const response = await apiClient.delete<{ success: boolean }>(`/matching/matches/${matchId}`);
+    const response = await apiClient.delete<{ success: boolean }>(`/matches/${matchId}`);
     if (!response.success) {
       throw new Error('언매칭 실패');
     }
@@ -78,7 +80,7 @@ export const matchApi = {
    * @returns {Promise<any[]>} 추천 사용자 목록
    */
   async getRecommendations(groupId: string, page: number = 1, limit: number = 10): Promise<any[]> {
-    const response = await apiClient.get<{ success: boolean; data: any[] }>('/matching/recommendations', {
+    const response = await apiClient.get<{ success: boolean; data: any[] }>('/recommendations', {
       groupId,
       page,
       limit
@@ -99,7 +101,7 @@ export const matchApi = {
    */
   async reportMismatch(matchId: string, reason?: string): Promise<void> {
     const response = await apiClient.post<{ success: boolean; message: string }>(
-      `/matching/matches/${matchId}/mismatch`,
+      `/matches/${matchId}/mismatch`,
       { reason }
     );
     if (!response.success) {

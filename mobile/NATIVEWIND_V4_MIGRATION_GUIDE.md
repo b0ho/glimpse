@@ -33,32 +33,32 @@
 - ✅ OnboardingScreen.tsx (306줄) - 2025-01-14 완료
 - ✅ GroupChatListScreen.tsx (264줄) - 기존 완료
 - ✅ NearbyGroupsScreen.tsx (320줄) - 기존 완료
+- ✅ TermsOfServiceScreen.tsx (185줄) - 2025-01-14 완료
+- ✅ PrivacyPolicyScreen.tsx (181줄) - 2025-01-14 완료
+- ✅ StoryUploadScreen.tsx (296줄) - 기존 완료
+- ✅ ProfileSettingsScreen.tsx (358줄) - 기존 완료
+- ✅ PremiumScreen.tsx (428줄) - 기존 완료
+- ✅ ModeSelectionScreen.tsx (169줄) - 2025-01-14 완료
+- ✅ NotificationSettingsScreen.tsx (509줄) - 2025-01-14 완료
+- ✅ MatchChatListScreen.tsx (254줄) - 기존 완료
+- ✅ LocationGroupScreen.tsx (504줄) - 2025-01-15 완료
+- ✅ GroupManageScreen.tsx (317줄) - 2025-01-15 완료
+- ✅ GroupInviteScreen.tsx (364줄) - 2025-01-15 완료
+- ✅ MapScreen.tsx (505줄) - 2025-01-15 완료
+- ✅ LikeHistoryScreen.tsx (437줄) - 2025-01-15 완료
+- ✅ ChatScreenSimple.tsx (273줄) - 2025-01-15 완료
+- ✅ CompanyVerificationScreen.tsx (383줄) - 2025-01-15 완료
+- ✅ AuthScreen.tsx (206줄) - 2025-01-15 완료
+- ✅ CreateGroupScreen.tsx (563줄) - 2025-01-15 완료
+- ✅ DeleteAccountScreen.tsx (433줄) - 2025-01-15 완료
+- ✅ PhoneVerificationScreen.tsx (406줄) - 2025-01-15 완료
+- ✅ NicknameSetupScreen.tsx (300줄) - 2025-01-15 완료
 
-## 전환이 필요한 파일 목록 (23개)
+## 백업/원본 파일 (선택적 삭제)
 
-### Screens
-1. NearbyGroupsScreen.backup.tsx (백업 파일, 삭제 검토)
-2. TermsOfServiceScreen.tsx
-3. StoryUploadScreen.tsx
-4. ProfileSettingsScreen.tsx
-5. PrivacyPolicyScreen.tsx
-6. PremiumScreen.tsx
-7. NotificationSettingsScreen.tsx
-8. ModeSelectionScreen.tsx
-9. MatchChatListScreen.tsx
-10. MapScreen.tsx
-11. LocationGroupScreen.tsx
-12. LikeHistoryScreen.tsx
-13. GroupManageScreen.tsx
-14. GroupInviteScreen.tsx
-15. DeleteAccountScreen.tsx
-16. CreateGroupScreen.tsx
-17. CompanyVerificationScreen.tsx
-18. ChatScreenSimple.tsx
-19. HomeScreen.original.tsx (원본 파일, 삭제 검토)
-
-### Components
-20. components/common/ScreenHeader.old.tsx (구버전, 삭제 검토)
+~~1. screens/nearby/NearbyGroupsScreen.backup.tsx~~ (이미 삭제됨)
+~~2. screens/home/HomeScreen.original.tsx~~ (이미 삭제됨)
+3. components/common/ScreenHeader.old.tsx - **사용되지 않음, 삭제 가능**
 
 ## 전환 단계
 
@@ -391,18 +391,36 @@ const styles = StyleSheet\.create\(\{[\s\S]*?\}\);
 
 ---
 
-**Last Updated**: 2025-01-14
-**Status**: 29/52 screens completed (55.8%)
-**Progress**: +5 screens converted/verified
-- MyGroupsScreen (390→333줄, 14.6% 감소)
-- SupportScreen (450→394줄, 12.4% 감소)
-- OnboardingScreen (380→306줄, 19.5% 감소)
-- GroupChatListScreen (264줄, 기존 완료)
-- NearbyGroupsScreen (320줄, 기존 완료)
+**Last Updated**: 2025-01-15
+**Status**: 49/49 actual screens completed (100%) 🎉🎉🎉
 
-**Session Summary**:
-- 3개 화면 직접 변환 (187줄 감소)
-- 2개 화면 완료 확인
-- 총 29개 화면 완료 (55.8%)
+**Session 3 (2025-01-15) - +7 screens**:
+- ChatScreenSimple.tsx (273줄, 100% 확인) ✅
+- CompanyVerificationScreen.tsx (383줄, isDarkMode 제거) ✅
+- AuthScreen.tsx (206줄, isDarkMode + inline style 제거) ✅
+- CreateGroupScreen.tsx (563줄, 100% 확인) ✅
+- DeleteAccountScreen.tsx (433줄, isDarkMode + inline style 제거) ✅
+- PhoneVerificationScreen.tsx (406줄, 100% 확인) ✅
+- NicknameSetupScreen.tsx (300줄, isDarkMode 제거) ✅
 
-**Next Target**: TermsOfServiceScreen.tsx, StoryUploadScreen.tsx, ProfileSettingsScreen.tsx
+**Session 2 (2025-01-15) - +5 screens**:
+- LocationGroupScreen.tsx (506→504줄, useTheme import 제거) ✅
+- GroupManageScreen.tsx (317줄, isDarkMode 제거) ✅
+- GroupInviteScreen.tsx (364줄, isDarkMode 제거) ✅
+- MapScreen.tsx (510→505줄, isDarkMode 조건문 제거) ✅
+- LikeHistoryScreen.tsx (437줄, isDarkMode 제거) ✅
+
+**Session 1 (2025-01-14) - +8 screens**:
+- TermsOfServiceScreen (245→185줄, 24.5% 감소)
+- PrivacyPolicyScreen (224→181줄, 19.2% 감소)
+- ModeSelectionScreen (207→169줄, 18.4% 감소)
+- NotificationSettingsScreen (510→509줄, isDark 제거)
+- 4개 화면 완료 확인 (MatchChatList, StoryUpload, ProfileSettings, Premium)
+
+**Overall Summary**:
+- **실제 화면: 49/49 (100%) 완료!** 🎉🎉🎉
+- 백업/원본 파일: 2개 이미 삭제됨, 1개 선택적 삭제 가능
+- 주요 작업: isDarkMode 제거, dark: prefix 적용, 중복 inline style 제거
+- **NativeWind v4 전환 프로젝트 완료!**
+
+**Optional**: ScreenHeader.old.tsx 삭제 (사용되지 않음)

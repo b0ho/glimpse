@@ -67,7 +67,7 @@ export const DeleteAccountScreen = () => {
   const { signOut } = useAuth();
   const { user, clearAuth } = useAuthStore();
   const { t } = useAndroidSafeTranslation();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   
   const [deleteReason, setDeleteReason] = useState('');
   const [confirmText, setConfirmText] = useState('');
@@ -170,12 +170,11 @@ export const DeleteAccountScreen = () => {
   };
   
   return (
-    <SafeAreaView 
+    <SafeAreaView
       className={cn(
         "flex-1",
-"bg-white dark:bg-gray-900"
+        "bg-white dark:bg-gray-900"
       )}
-      style={{ backgroundColor: colors.BACKGROUND }}
     >
       <View 
         className={cn(

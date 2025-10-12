@@ -57,8 +57,17 @@ export const MatchesScreen = React.memo(() => {
     const loadMatches = async () => {
       try {
         console.log('[MatchesScreen] API에서 매칭 데이터 로드 시작');
+
+        // userId 확인
+        if (!user?.id) {
+          console.error('[MatchesScreen] user.id가 없습니다');
+          setServerConnectionError(true);
+          setIsLoading(false);
+          return;
+        }
+
         setServerConnectionError(false);
-        const matchData = await matchApi.getMatches();
+        const matchData = await matchApi.getMatches(user.id);
         console.log('[MatchesScreen] 매칭 데이터 로드 성공:', matchData.length);
         setMatches(matchData);
         likeStore.setMatches(matchData);
@@ -250,7 +259,13 @@ export const MatchesScreen = React.memo(() => {
           setIsLoading(true);
           const loadMatches = async () => {
             try {
-              const matchData = await matchApi.getMatches();
+              if (!user?.id) {
+                console.error('[MatchesScreen] user.id가 없습니다');
+                setServerConnectionError(true);
+                setIsLoading(false);
+                return;
+              }
+              const matchData = await matchApi.getMatches(user.id);
               setMatches(matchData);
               likeStore.setMatches(matchData);
               setIsLoading(false);

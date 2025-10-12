@@ -62,7 +62,7 @@ interface ChatRoom {
  */
 export const MatchChatListScreen: React.FC = () => {
   const navigation = useNavigation<any>();
-  const { t } = useAndroidSafeTranslation();
+  const { t } = useAndroidSafeTranslation(['chat', 'common']);
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
