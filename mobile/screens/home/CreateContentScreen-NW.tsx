@@ -1,8 +1,41 @@
 /**
- * 콘텐츠 생성 화면 - NativeWind 버전
- * 
- * 데이팅 앱의 스토리/포스트 작성 화면
- * 이미지와 텍스트로 자신을 표현하고 매력을 어필하는 공간
+ * 콘텐츠 생성 화면 (Create Content Screen)
+ *
+ * @screen
+ * @description 새 게시물을 작성하거나 기존 게시물을 수정하는 화면
+ * - 텍스트 + 이미지 (최대 5장) 지원
+ * - 그룹 선택 필수
+ * - 애니메이션 효과 적용
+ */
+
+/**
+ * 콘텐츠 생성 화면 컴포넌트
+ *
+ * @component
+ * @param {object} route - 라우트 파라미터 (editingContent 포함 시 수정 모드)
+ * @returns {JSX.Element} 게시물 작성/수정 화면 UI
+ *
+ * @description
+ * 사용자가 그룹에 게시물을 작성하는 화면
+ * - 텍스트 입력: 500자 제한, 자동 높이 조절
+ * - 이미지 업로드: 갤러리에서 선택, 최대 5장
+ * - 그룹 선택: 가입한 그룹 목록에서 선택 (필수)
+ * - 수정 모드: 기존 게시물 편집 가능
+ * - 애니메이션: 페이드인, 슬라이드, 이미지 추가 애니메이션
+ * - 개발 모드: 자동 그룹 가입 지원
+ *
+ * @navigation
+ * - From: HomeScreen FAB 버튼, ContentItem 수정 버튼
+ * - To: HomeTab (작성 완료 후)
+ *
+ * @example
+ * ```tsx
+ * // 새 게시물 작성
+ * navigation.navigate('CreateContent');
+ *
+ * // 기존 게시물 수정
+ * navigation.navigate('CreateContent', { editingContent: content });
+ * ```
  */
 import React, { useState, useEffect, useRef } from 'react';
 import {

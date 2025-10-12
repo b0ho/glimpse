@@ -1,3 +1,9 @@
+/**
+ * 주변 그룹 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 현재 위치 기반 주변 그룹을 표시하고 관리하는 화면
+ */
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -26,6 +32,32 @@ import { useNearbyGroupsData } from '@/hooks/nearbyGroups/useNearbyGroupsData';
 // Components
 import { NearbyGroupItem } from '@/components/nearbyGroups/NearbyGroupItem';
 
+/**
+ * 주변 그룹 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 주변 그룹 목록 화면 UI
+ *
+ * @description
+ * 사용자의 현재 위치를 기반으로 주변 그룹을 검색하고 표시합니다.
+ * - 위치 권한 요청 및 관리
+ * - 검색 반경 설정 (1km, 2km, 5km, 10km)
+ * - 그룹 참여/탈퇴 기능
+ * - 새로운 위치 기반 그룹 생성
+ * - 실시간 거리 계산 및 표시
+ *
+ * @navigation
+ * - From: HomeScreen, TabNavigator
+ * - To: CreateLocationGroup, GroupDetail
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('NearbyGroups');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Nearby
+ */
 export const NearbyGroupsScreen = React.memo(() => {
   const navigation = useNavigation();
   const { t } = useAndroidSafeTranslation(['nearbygroups', 'navigation', 'common']);

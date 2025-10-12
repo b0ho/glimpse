@@ -1,3 +1,10 @@
+/**
+ * 앱 모드 선택 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 사용자가 데이팅 모드와 친구 찾기 모드 중 하나를 선택하는 온보딩 화면
+ */
+
 import React from 'react';
 import {
   View,
@@ -16,6 +23,40 @@ import { cn } from '@/lib/utils';
 
 const { width } = Dimensions.get('window');
 
+/**
+ * 앱 모드 선택 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 데이팅/친구 찾기 모드 선택 카드
+ *
+ * @description
+ * 사용자가 앱을 처음 사용할 때 데이팅 모드 또는 친구 찾기 모드를 선택하는 온보딩 화면입니다.
+ * - 데이팅 모드: 좋아요, 매칭, 익명 시스템 기반 연애 매칭
+ * - 친구 찾기 모드: 커뮤니티, 그룹 채팅, 이벤트 기반 친구 찾기
+ * - 각 모드별 주요 기능 설명 표시
+ * - 선택 후 메인 앱으로 자동 이동 (navigation.reset)
+ * - 나중에 설정에서 모드 변경 가능 안내
+ * - 아이콘과 색상으로 명확한 구분
+ * - 다크모드 완벽 지원
+ *
+ * @navigation
+ * - From: 앱 최초 실행 시 자동 표시 (인증 완료 후)
+ * - To: Main (모드 선택 후 reset으로 이동)
+ *
+ * @example
+ * ```tsx
+ * // 온보딩 플로우에서 자동 표시
+ * if (!user.appMode) {
+ *   navigation.navigate('ModeSelection');
+ * }
+ *
+ * // 설정에서 모드 변경 시
+ * navigation.push('ModeSelection');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Onboarding
+ */
 export const ModeSelectionScreen = () => {
   const navigation = useNavigation() as any;
   const { t } = useAndroidSafeTranslation('common');

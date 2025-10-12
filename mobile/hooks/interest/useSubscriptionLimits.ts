@@ -1,5 +1,26 @@
 /**
  * 구독 제한 관련 커스텀 훅
+ *
+ * @description 사용자의 구독 티어에 따른 관심상대 등록 제한을 관리합니다.
+ * 무료/고급/프리미엄 구독자별로 다른 제한 정책을 적용하며, 로컬 및 서버 데이터를 모두 고려합니다.
+ *
+ * @returns {Object} 구독 제한 관련 상태 및 함수들
+ * @returns {SubscriptionTier} subscriptionTier - 현재 구독 티어
+ * @returns {Object} features - 구독 티어별 기능 제한
+ * @returns {Function} getDefaultExpiryDate - 구독별 기본 만료일 반환
+ * @returns {Function} getInitialDuration - 초기 기간 설정 반환
+ * @returns {Function} checkSubscriptionLimits - 타입별 등록 가능 여부 확인
+ * @returns {Function} getRemainingSlots - 남은 등록 가능 슬롯 수 반환
+ * @returns {Function} getLimitMessage - 제한 도달 메시지 반환
+ * @returns {Function} getUpgradeMessage - 업그레이드 안내 메시지 반환
+ *
+ * @example
+ * ```tsx
+ * const { checkSubscriptionLimits, getRemainingSlots } = useSubscriptionLimits();
+ *
+ * const canRegister = await checkSubscriptionLimits(InterestType.PHONE);
+ * const remaining = await getRemainingSlots();
+ * ```
  */
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useInterestStore } from '@/store/slices/interestSlice';

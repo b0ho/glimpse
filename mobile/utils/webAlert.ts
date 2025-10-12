@@ -1,17 +1,64 @@
+/**
+ * 크로스 플랫폼 Alert 유틸리티
+ * @module utils/webAlert
+ * @description Web과 Native 플랫폼 모두에서 작동하는 통합 Alert 인터페이스
+ *
+ * 주요 기능:
+ * - Web: window.alert / window.confirm 사용
+ * - Native: React Native Alert API 사용
+ * - 플랫폼별 차이를 추상화한 일관된 API
+ *
+ * @example
+ * import { showAlert } from '@/utils/webAlert';
+ *
+ * // 단순 알림
+ * showAlert('알림', '저장되었습니다');
+ *
+ * // 확인/취소 버튼
+ * showAlert('확인', '삭제하시겠습니까?', [
+ *   { text: '취소', style: 'cancel' },
+ *   { text: '삭제', style: 'destructive', onPress: () => handleDelete() }
+ * ]);
+ */
 import { Alert, Platform } from 'react-native';
 
+/**
+ * Alert 버튼 인터페이스
+ * @interface AlertButton
+ */
 interface AlertButton {
+  /** 버튼 텍스트 */
   text?: string;
+  /** 버튼 클릭 시 콜백 함수 */
   onPress?: () => void;
+  /** 버튼 스타일 (기본, 취소, 파괴적 액션) */
   style?: 'default' | 'cancel' | 'destructive';
 }
 
 /**
- * 웹 플랫폼 호환 Alert 유틸리티
- * 웹에서는 브라우저 기본 confirm/alert 사용
- * 네이티브에서는 React Native Alert 사용
+ * 웹 호환 Alert 객체
+ * @namespace WebCompatibleAlert
+ * @description Web과 Native에서 통일된 Alert API 제공
  */
 export const WebCompatibleAlert = {
+  /**
+   * 플랫폼에 맞는 Alert를 표시합니다
+   *
+   * @description
+   * Web에서는 최대 2개의 버튼(confirm/cancel)만 지원.
+   * Native에서는 React Native Alert API 사용.
+   *
+   * @param {string} title - Alert 제목
+   * @param {string} [message] - Alert 메시지
+   * @param {AlertButton[]} [buttons] - 버튼 배열
+   * @param {any} [options] - Native Alert 옵션
+   *
+   * @example
+   * WebCompatibleAlert.alert('저장', '변경사항을 저장하시겠습니까?', [
+   *   { text: '취소', style: 'cancel' },
+   *   { text: '저장', onPress: () => save() }
+   * ]);
+   */
   alert: (
     title: string,
     message?: string,
@@ -67,5 +114,13 @@ export const WebCompatibleAlert = {
   },
 };
 
-// 기본 Alert 대체
+/**
+ * WebCompatibleAlert.alert의 단축 함수
+ * @function showAlert
+ * @description 더 간단하게 사용할 수 있는 Alert 함수 별칭
+ *
+ * @example
+ * import { showAlert } from '@/utils/webAlert';
+ * showAlert('알림', '완료되었습니다');
+ */
 export const showAlert = WebCompatibleAlert.alert;

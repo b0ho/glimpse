@@ -1,3 +1,11 @@
+/**
+ * Notifications Management Hook
+ *
+ * @module hooks/useNotifications
+ * @description 푸시 알림의 초기화, 수신, 상호작용을 관리합니다.
+ * 로그인한 사용자에 대해 자동으로 알림을 초기화하고, foreground/background 알림을 처리합니다.
+ */
+
 import { useEffect, useRef } from 'react';
 import { useNotificationStore } from '@/store/slices/notificationSlice';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
@@ -13,6 +21,39 @@ try {
   console.warn('Notifications not available in useNotifications hook');
 }
 
+/**
+ * 알림 관리 훅
+ *
+ * @hook
+ * @returns {Object} 알림 관련 상태 및 함수들
+ * @returns {boolean} returns.isInitialized - 알림 시스템 초기화 여부
+ * @returns {Object} returns.settings - 알림 설정 (pushEnabled 등)
+ * @returns {Function} returns.handleNotificationPress - 알림 탭 핸들러
+ *
+ * @description
+ * 푸시 알림 전체 라이프사이클을 관리합니다.
+ * - 자동 초기화 (로그인 시)
+ * - Foreground 알림 수신 처리
+ * - Background 알림 상호작용 처리
+ * - 알림 타입별 네비게이션 라우팅
+ * - 프리미엄 사용자 전용 알림 처리
+ *
+ * @example
+ * ```tsx
+ * const { isInitialized, settings, handleNotificationPress } = useNotifications();
+ *
+ * if (isInitialized && settings.pushEnabled) {
+ *   // 알림 기능 사용 가능
+ * }
+ *
+ * // 수동 알림 처리
+ * handleNotificationPress({
+ *   type: 'new_message',
+ *   messageId: '123',
+ *   roomId: 'room-456'
+ * });
+ * ```
+ */
 export function useNotifications() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const notificationListener = useRef<any>(null);
@@ -76,6 +117,25 @@ export function useNotifications() {
     };
   }, [isInitialized, settings.pushEnabled]);
 
+  /**
+   * 알림 프레스 핸들러
+   *
+   * @param {Object} data - 알림 데이터
+   * @param {string} data.type - 알림 타입 ('new_match' | 'new_message' | 'like_received' | 'super_like' | 'group_invite')
+   * @param {string} [data.userId] - 사용자 ID (선택적)
+   * @param {string} [data.groupId] - 그룹 ID (선택적)
+   * @param {string} [data.matchId] - 매칭 ID (선택적)
+   * @param {string} [data.messageId] - 메시지 ID (선택적)
+   * @param {string} [data.roomId] - 채팅방 ID (선택적)
+   *
+   * @description
+   * 알림 타입에 따라 적절한 화면으로 네비게이션합니다.
+   * - new_match: 매칭 화면
+   * - new_message: 채팅 화면
+   * - like_received: 매칭 화면 (프리미엄 전용)
+   * - super_like: 매칭 화면
+   * - group_invite: 그룹 화면
+   */
   const handleNotificationPress = (data: { type: string; userId?: string; groupId?: string; matchId?: string; messageId?: string; roomId?: string }) => {
     try {
       switch (data.type) {

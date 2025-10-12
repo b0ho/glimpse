@@ -19,16 +19,46 @@ import { useLikeStore } from '@/store/slices/likeSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { cn } from '@/lib/utils';
 
+/**
+ * 컨텐츠 아이템 컴포넌트 Props
+ *
+ * @interface ContentItemProps
+ */
 interface ContentItemProps {
+  /** 컨텐츠 아이템 데이터 */
   item: Content;
+  /** 현재 사용자 ID */
   currentUserId?: string;
+  /** 남은 좋아요 수 */
   remainingLikes: number;
+  /** 좋아요 토글 핸들러 */
   onLikeToggle: (contentId: string, authorId: string) => void;
+  /** 콘텐츠 수정 핸들러 */
   onEdit?: (content: Content) => void;
+  /** 콘텐츠 삭제 핸들러 */
   onDelete?: (contentId: string) => void;
+  /** 그룹명 */
   groupName?: string;
 }
 
+/**
+ * 홈 피드 컨텐츠 아이템 컴포넌트 (NativeWind 버전)
+ *
+ * @description NativeWind v4를 사용한 컨텐츠 카드 컴포넌트.
+ *              다크모드 자동 지원 및 플랫폼별 최적화된 스타일링 제공.
+ *
+ * @component Feature
+ * @props ContentItemProps
+ * @usage HomeScreen, GroupDetailScreen (NativeWind 마이그레이션 버전)
+ *
+ * @example
+ * <ContentItem
+ *   item={contentData}
+ *   currentUserId="user123"
+ *   remainingLikes={5}
+ *   onLikeToggle={handleLike}
+ * />
+ */
 export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   item,
   currentUserId,

@@ -5,6 +5,7 @@ import { COLORS } from '@/utils/constants';
 
 /**
  * 위치 정보 인터페이스
+ *
  * @interface Location
  */
 interface Location {
@@ -12,16 +13,17 @@ interface Location {
   latitude: number;
   /** 경도 */
   longitude: number;
-  /** 주소 */
+  /** 주소 (선택) */
   address?: string;
 }
 
 /**
  * 지도 마커 인터페이스
+ *
  * @interface MapMarker
  */
 interface MapMarker {
-  /** 마커 ID */
+  /** 마커 고유 ID */
   id: string;
   /** 위도 */
   latitude: number;
@@ -31,39 +33,53 @@ interface MapMarker {
   title: string;
   /** 마커 설명 */
   description?: string;
-  /** 마커 타입 */
+  /** 마커 타입 (색상 결정) */
   type: 'user' | 'group' | 'place';
   /** 추가 데이터 */
   data?: any;
 }
 
 /**
- * KakaoMapView 컴포넌트 Props
+ * KakaoMapView Props
+ *
  * @interface KakaoMapViewProps
  */
 interface KakaoMapViewProps {
   /** 지도 중심 위치 */
   center: Location;
-  /** 마커 배열 */
+  /** 표시할 마커 배열 */
   markers?: MapMarker[];
-  /** 마커 클릭 핸들러 */
+  /** 마커 클릭 콜백 */
   onMarkerPress?: (marker: MapMarker) => void;
-  /** 지도 클릭 핸들러 */
+  /** 지도 클릭 콜백 */
   onMapPress?: (location: Location) => void;
-  /** 컴포넌트 스타일 */
+  /** 스타일 */
   style?: any;
-  /** 지도 줌 레벨 */
+  /** 줌 레벨 (1-14, 낮을수록 넓은 범위) */
   zoom?: number;
-  /** 현재 위치 표시 여부 */
+  /** 현재 위치 마커 표시 여부 */
   showCurrentLocation?: boolean;
 }
 
 /**
- * 카카오 맵 뷰 컴포넌트 - WebView를 통한 카카오맵 표시
- * @component
- * @param {KakaoMapViewProps} props - 컴포넌트 속성
- * @returns {JSX.Element} 카카오 맵 UI
- * @description 카카오맵 API를 사용하여 지도 표시, 마커 및 상호작용 기능 제공
+ * 카카오 맵 뷰 컴포넌트
+ *
+ * @description WebView를 통해 카카오맵 JavaScript API를 렌더링.
+ *              마커 표시, 클릭 이벤트, 중심점 업데이트 기능 제공.
+ *              React Native와 WebView 간 양방향 통신 구현.
+ *
+ * @component Feature
+ * @props KakaoMapViewProps
+ * @usage NearbyUsersScreen, NearbyGroupsScreen, LocationInputField
+ *
+ * @example
+ * <KakaoMapView
+ *   center={{ latitude: 37.5665, longitude: 126.9780 }}
+ *   markers={nearbyUsers}
+ *   onMarkerPress={(marker) => handleUserSelect(marker)}
+ *   zoom={3}
+ *   showCurrentLocation={true}
+ * />
  */
 export const KakaoMapView= ({
   center,

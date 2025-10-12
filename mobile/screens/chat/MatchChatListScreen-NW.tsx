@@ -1,3 +1,10 @@
+/**
+ * 매칭 채팅 목록 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 매칭된 사용자와의 1:1 채팅방 목록 화면. 최근 대화 순으로 정렬
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -24,6 +31,35 @@ interface ChatRoom {
   isOnline: boolean;
 }
 
+/**
+ * 매칭 채팅 목록 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 매칭 채팅 목록 UI
+ *
+ * @description
+ * 매칭이 성사된 사용자와의 1:1 채팅방 목록 화면
+ * - AsyncStorage 기반 채팅방 로드
+ * - 마지막 메시지 시간 순 정렬
+ * - 안읽은 메시지 개수 표시
+ * - 온라인 상태 표시
+ * - 상대 시간 표시 (오늘/어제/N일 전)
+ * - Pull-to-refresh 지원
+ * - 빈 상태 안내 (관심사/그룹 탐색 유도)
+ * - 프로필 화면과 동일한 헤더 스타일
+ *
+ * @navigation
+ * - From: ChatTab (하단 탭 네비게이션)
+ * - To: Chat (1:1 채팅방), Interest (관심사 탐색), Groups (그룹 탐색)
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('MatchChatList');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Chat
+ */
 export const MatchChatListScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { t } = useAndroidSafeTranslation();

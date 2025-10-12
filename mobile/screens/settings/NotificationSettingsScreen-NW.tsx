@@ -1,3 +1,10 @@
+/**
+ * 알림 설정 화면
+ *
+ * @screen
+ * @description 푸시 알림, 매칭 알림, 메시지 알림, 마케팅 알림 등 모든 알림 설정을 관리하는 화면
+ */
+
 import React from 'react';
 import {
   View,
@@ -23,6 +30,19 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { LinearGradient } from 'expo-linear-gradient';
 import { cn } from '@/lib/utils';
 
+/**
+ * 알림 설정 항목 Props 인터페이스
+ *
+ * @interface SettingItemProps
+ * @property {string} title - 설정 항목 제목
+ * @property {string} [description] - 설정 항목 설명
+ * @property {boolean} value - 현재 활성화 상태
+ * @property {() => void} onToggle - 토글 핸들러
+ * @property {boolean} [disabled] - 비활성화 상태
+ * @property {boolean} [isPremiumFeature] - 프리미엄 기능 여부
+ * @property {string} [icon] - 아이콘 이름
+ * @property {string} [iconColor] - 아이콘 색상
+ */
 interface SettingItemProps {
   title: string;
   description?: string;
@@ -34,6 +54,20 @@ interface SettingItemProps {
   iconColor?: string;
 }
 
+/**
+ * 알림 설정 개별 항목 컴포넌트
+ *
+ * @component
+ * @param {SettingItemProps} props
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 알림 설정 화면의 개별 항목을 렌더링합니다.
+ * - 토글 스위치
+ * - 프리미엄 기능 배지
+ * - 애니메이션 효과
+ * - 프리미엄 업그레이드 유도
+ */
 function SettingItem({
   title,
   description,
@@ -142,6 +176,42 @@ function SettingItem({
   );
 }
 
+/**
+ * 알림 설정 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 모든 알림 설정을 세밀하게 관리할 수 있는 화면입니다.
+ * - 마스터 스위치 (전체 알림 ON/OFF)
+ * - 매칭 알림: 새 매칭, 새 좋아요, 슈퍼 좋아요
+ * - 메시지 알림: 새 메시지, 그룹 초대
+ * - 마케팅 알림: 프로모션, 주간 리포트
+ *
+ * @features
+ * - 카테고리별 알림 설정 (매칭/메시지/마케팅)
+ * - 프리미엄 전용 알림 기능 표시
+ * - 테스트 알림 발송 기능
+ * - 설정 초기화 기능
+ * - FCM 푸시 알림 연동
+ * - 부드러운 진입 애니메이션
+ *
+ * @premium
+ * - 좋아요 받은 사람 알림
+ * - 주간 활동 리포트
+ * - PRO 배지 표시
+ *
+ * @navigation
+ * - From: SettingsScreen (설정 화면)
+ * - To: Premium (프리미엄 업그레이드)
+ *
+ * @example
+ * ```tsx
+ * // 설정 화면에서 이동
+ * navigation.navigate('NotificationSettings');
+ * ```
+ */
 export function NotificationSettingsScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { currentMode } = useAuthStore();

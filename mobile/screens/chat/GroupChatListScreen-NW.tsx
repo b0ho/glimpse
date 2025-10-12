@@ -1,3 +1,10 @@
+/**
+ * 그룹 채팅 목록 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 사용자가 참여 중인 그룹 채팅방 목록 및 공개 채팅방 탐색 화면
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -75,6 +82,35 @@ const ChatItem = ({ chat, onPress }: ChatItemProps) => {
   );
 };
 
+/**
+ * 그룹 채팅 목록 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 그룹 채팅 목록 UI
+ *
+ * @description
+ * 사용자가 참여 중인 그룹 채팅방 목록과 공개 채팅방 탐색 기능 제공
+ * - 참여 중인 그룹 채팅방 목록 표시
+ * - 마지막 메시지 및 시간 표시
+ * - 안읽은 메시지 개수 표시
+ * - 채팅방 검색 기능
+ * - 공개 채팅방 탐색 버튼
+ * - 새 그룹 채팅 생성 버튼 (FAB)
+ * - Pull-to-refresh 지원
+ * - 서버 연결 에러 처리
+ *
+ * @navigation
+ * - From: ChatTab (하단 탭 네비게이션)
+ * - To: GroupChat (그룹 채팅방), CreateGroupChat (채팅방 생성), PublicChatList (공개 채팅 목록)
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('GroupChatList');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Chat
+ */
 export const GroupChatListScreen = () => {
   const navigation = useNavigation() as any;
   const { user } = useAuthStore();

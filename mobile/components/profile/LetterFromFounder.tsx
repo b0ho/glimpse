@@ -1,3 +1,10 @@
+/**
+ * LetterFromFounder 컴포넌트 (StyleSheet 버전)
+ *
+ * @module LetterFromFounder
+ * @description 프로필 화면에서 창업자의 편지를 보여주는 인터랙티브 카드 및 모달 컴포넌트 (StyleSheet 스타일링 적용)
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -16,19 +23,51 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+/**
+ * LetterFromFounder Props 인터페이스
+ *
+ * @interface LetterFromFounderProps
+ */
 interface LetterFromFounderProps {
+  /** 카드 클릭 시 실행될 선택적 핸들러 */
   onPress?: () => void;
 }
 
+/**
+ * LetterFromFounder 컴포넌트
+ *
+ * @component
+ * @param {LetterFromFounderProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 창업자 편지 카드 및 모달 UI
+ *
+ * @description
+ * 프로필 화면에 표시되는 그라디언트 카드로, 클릭하면 창업자의 편지를 전체 화면 모달로 보여줍니다. (StyleSheet 버전)
+ * - 그라디언트 배경의 인터랙티브 카드
+ * - BlurView 배경의 편지 모달
+ * - 한국어/영어 번역 지원
+ * - 데코레이션 요소 (스탬프, 하트 등)
+ * - 스크롤 가능한 편지 내용
+ * - 반응형 디자인 (화면 크기에 맞춤)
+ *
+ * @example
+ * ```tsx
+ * <LetterFromFounder onPress={() => console.log('Letter opened')} />
+ * ```
+ *
+ * @category Component
+ * @subcategory Profile
+ */
 export const LetterFromFounder: React.FC<LetterFromFounderProps> = ({ onPress }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { t } = useAndroidSafeTranslation();
 
+  /** 카드 클릭 핸들러 - 모달 열기 */
   const handlePress = () => {
     setIsModalVisible(true);
     onPress?.();
   };
 
+  /** 모달 닫기 핸들러 */
   const closeModal = () => {
     setIsModalVisible(false);
   };

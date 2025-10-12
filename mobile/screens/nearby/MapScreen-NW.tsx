@@ -1,3 +1,9 @@
+/**
+ * 지도 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 주변 그룹, 사용자, 장소를 지도에 마커로 표시하는 화면
+ */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -19,12 +25,22 @@ import { Group, GroupType, User } from '@/types';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/store/slices/themeSlice';
 
+/**
+ * 위치 데이터 인터페이스
+ *
+ * @interface LocationData
+ */
 interface LocationData {
   latitude: number;
   longitude: number;
   address?: string;
 }
 
+/**
+ * 지도 마커 인터페이스
+ *
+ * @interface MapMarker
+ */
 interface MapMarker {
   id: string;
   latitude: number;
@@ -35,11 +51,41 @@ interface MapMarker {
   data?: Group | User | any;
 }
 
+/**
+ * 선택된 마커 데이터 인터페이스
+ *
+ * @interface SelectedMarkerData
+ */
 interface SelectedMarkerData {
   marker: MapMarker;
   position: { x: number; y: number };
 }
 
+/**
+ * 지도 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 지도 화면 UI
+ *
+ * @description
+ * Kakao Map API를 사용하여 주변의 그룹, 사용자, 장소를 지도에 표시합니다.
+ * - 현재 위치 기반 지도 표시
+ * - 그룹/사용자/장소 타입 전환
+ * - 마커 클릭으로 상세 정보 표시
+ * - 그룹 참여, 좋아요 보내기, 그룹 만들기 액션
+ *
+ * @navigation
+ * - From: HomeScreen, NearbyGroupsScreen
+ * - To: CreateGroup (장소 기반 그룹 생성)
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('Map');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Nearby
+ */
 export const MapScreen = React.memo(() => {
   const navigation = useNavigation();
   const { t } = useAndroidSafeTranslation('map');

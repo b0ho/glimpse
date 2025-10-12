@@ -1,3 +1,13 @@
+/**
+ * SMS 인증 화면 (SMS Verification Screen)
+ *
+ * @screen
+ * @description SMS로 받은 6자리 인증번호를 입력하는 화면
+ * - 자동 포커스 이동 및 자동 제출
+ * - 타이머 기반 만료 처리
+ * - 재전송 기능 제공
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -20,6 +30,14 @@ import { useTheme } from '@/hooks/useTheme';
 import { SECURITY } from '@/utils/constants';
 import { cn } from '@/lib/utils';
 
+/**
+ * Props 인터페이스
+ *
+ * @interface SMSVerificationScreenProps
+ * @property {string} phoneNumber - 인증 대상 전화번호
+ * @property {() => void} onVerificationSuccess - 인증 성공 시 호출되는 콜백
+ * @property {() => void} onBack - 뒤로가기 버튼 클릭 시 호출되는 콜백
+ */
 interface SMSVerificationScreenProps {
   phoneNumber: string;
   onVerificationSuccess: () => void;
@@ -28,6 +46,36 @@ interface SMSVerificationScreenProps {
 
 const { width } = Dimensions.get('window');
 
+/**
+ * SMS 인증 화면 컴포넌트
+ *
+ * @component
+ * @param {SMSVerificationScreenProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} SMS 인증번호 입력 화면 UI
+ *
+ * @description
+ * 전송된 SMS 인증번호 6자리를 입력받아 검증하는 화면
+ * - 6자리 OTP: 각 자리별 개별 입력 필드
+ * - 자동 포커스: 입력 시 다음 필드로 자동 이동
+ * - 자동 제출: 6자리 완성 시 자동으로 인증 시도
+ * - 만료 타이머: 3분 카운트다운 표시
+ * - 재전송: 만료 후 또는 코드 미수신 시 재전송 가능
+ * - 애니메이션: 오류 시 흔들림 효과, 페이드인 효과
+ * - Backspace 처리: 삭제 시 이전 필드로 자동 이동
+ *
+ * @navigation
+ * - From: PhoneVerificationScreen (SMS 전송 후)
+ * - To: NicknameSetupScreen (인증 성공 후)
+ *
+ * @example
+ * ```tsx
+ * <SMSVerificationScreen
+ *   phoneNumber="01012345678"
+ *   onVerificationSuccess={() => setCurrentStep('nickname')}
+ *   onBack={() => setCurrentStep('phone')}
+ * />
+ * ```
+ */
 export const SMSVerificationScreen = ({
   phoneNumber,
   onVerificationSuccess,

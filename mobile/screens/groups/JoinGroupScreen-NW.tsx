@@ -1,3 +1,10 @@
+/**
+ * 그룹 참여 화면
+ *
+ * @screen
+ * @description 초대 코드 입력 또는 그룹 검색을 통해 그룹에 참여하는 화면
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -39,6 +46,37 @@ const CATEGORIES = [
   { id: 'sports', name: '운동', icon: 'fitness-outline', gradient: ['#a8edea', '#fed6e3'] },
 ];
 
+/**
+ * 그룹 참여 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 초대 코드 또는 검색을 통해 그룹에 참여하는 화면
+ * - 초대 코드 입력 및 즉시 참여
+ * - 카테고리별 그룹 검색 (전체, 공식, 일반, 장소, 취미, 스터디, 운동)
+ * - 그룹 이름/설명 검색
+ * - 인기 그룹 목록 표시
+ * - 검색 결과 목록
+ * - 부드러운 애니메이션 효과
+ * - 그룹 상세로 이동
+ *
+ * @navigation
+ * - From: 그룹 목록 화면의 참여 버튼, 초대 링크
+ * - To: 그룹 상세 화면
+ *
+ * @example
+ * ```tsx
+ * // 초대 코드와 함께 호출
+ * navigation.navigate('JoinGroup', {
+ *   inviteCode: 'ABC123'
+ * });
+ *
+ * // 검색 모드로 호출
+ * navigation.navigate('JoinGroup');
+ * ```
+ */
 export const JoinGroupScreen = () => {
   const { t } = useAndroidSafeTranslation('group');
   const navigation = useNavigation<any>();

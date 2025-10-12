@@ -1,5 +1,8 @@
 /**
  * 관심상대 찾기 메인 화면 - NativeWind 버전
+ *
+ * @screen
+ * @description 사용자가 관심상대나 친구를 찾기 위해 검색 조건을 등록하고 관리하는 화면
  */
 import React, { useCallback, useState } from 'react';
 import {
@@ -36,8 +39,45 @@ import { EmptySection } from '@/components/interestSearch/EmptySection';
 // Utils
 import { showDeleteConfirm, getSearchInfo } from '@/utils/interestSearch/interestHelpers';
 
+/**
+ * 네비게이션 타입 정의
+ *
+ * @type
+ */
 type InterestSearchScreenNavigationProp = StackNavigationProp<InterestStackParamList, 'InterestSearchScreen'>;
 
+/**
+ * 관심상대 찾기 메인 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 관심사 기반 매칭 시스템의 핵심 화면으로, 다음 기능을 제공합니다:
+ * - 내 정보 등록 (연락처, 위치, 그룹 등)
+ * - 찾고자 하는 상대방 조건 등록
+ * - 등록된 검색 목록 관리
+ * - 매칭된 상대 목록 확인
+ * - 연애/친구 모드 전환
+ *
+ * @features
+ * - 연애/친구 탭 전환으로 목적별 검색 분리
+ * - 검색 조건: 전화번호, 장소, 그룹, 학교/회사 등
+ * - 실시간 매칭 알림
+ * - 구독 상태에 따른 검색 제한 (무료: 3개, 프리미엄: 무제한)
+ * - Pull-to-refresh로 데이터 갱신
+ *
+ * @navigation
+ * - From: MainTabs (찾기 탭)
+ * - To: AddInterest (검색 추가/수정)
+ * - To: Chat (매칭 후 채팅 시작)
+ * - To: PricingScreen (구독 업그레이드)
+ *
+ * @example
+ * ```tsx
+ * <Tab.Screen name="InterestSearch" component={InterestSearchScreen} />
+ * ```
+ */
 export const InterestSearchScreen: React.FC = () => {
   const isFocused = useIsFocused();
   const navigation = useNavigation<InterestSearchScreenNavigationProp>();

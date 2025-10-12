@@ -1,3 +1,10 @@
+/**
+ * CreateStoryModal 컴포넌트 (NativeWind v4 버전)
+ *
+ * @module CreateStoryModal
+ * @description 매칭 성공 후 사용자들이 자신의 스토리를 작성하고 공유할 수 있는 모달 컴포넌트입니다.
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -15,16 +22,61 @@ import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 
+/**
+ * CreateStoryModal 컴포넌트 Props 인터페이스
+ * @interface CreateStoryModalProps
+ */
 interface CreateStoryModalProps {
+  /** 모달 표시 여부 */
   visible: boolean;
+  /** 모달 닫기 핸들러 */
   onClose: () => void;
+  /** 스토리 제출 핸들러 (스토리 내용, 태그 배열, 익명 여부) */
   onSubmit: (story: string, tags: string[], isAnonymous: boolean) => void;
+  /** 매칭 관련 정보 */
   matchInfo: {
+    /** 매칭 파트너 닉네임 */
     partnerNickname: string;
+    /** 매칭 ID */
     matchId: string;
   };
 }
 
+/**
+ * CreateStoryModal 컴포넌트
+ *
+ * @component
+ * @param {CreateStoryModalProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 스토리 작성 모달 UI
+ *
+ * @description
+ * 매칭에 성공한 커플이 자신들의 특별한 순간을 공유할 수 있는 스토리 작성 모달입니다.
+ * - 최소 20자 이상의 스토리 입력 필수 (최대 500자)
+ * - 8개의 사전 정의된 태그 중 1~3개 선택 가능
+ * - 익명 작성 옵션 제공 (닉네임 대신 '행복한 커플'로 표시)
+ * - 그라데이션 헤더 디자인
+ * - 실시간 글자 수 카운터
+ * - 유효성 검증 및 피드백 알림
+ * - 키보드 자동 회피 처리
+ *
+ * @example
+ * ```tsx
+ * <CreateStoryModal
+ *   visible={isModalVisible}
+ *   onClose={() => setModalVisible(false)}
+ *   onSubmit={(story, tags, isAnonymous) => {
+ *     console.log('스토리 제출:', { story, tags, isAnonymous });
+ *   }}
+ *   matchInfo={{
+ *     partnerNickname: '철수',
+ *     matchId: 'match-123'
+ *   }}
+ * />
+ * ```
+ *
+ * @category Component
+ * @subcategory SuccessStory
+ */
 export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
   visible,
   onClose,

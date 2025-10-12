@@ -1,3 +1,13 @@
+/**
+ * 스토리 업로드 화면 (Story Upload Screen)
+ *
+ * @screen
+ * @description 24시간 제한 스토리를 업로드하는 화면
+ * - 카메라 촬영 또는 갤러리 선택
+ * - 이미지/비디오 지원
+ * - 캡션 추가 기능
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -19,6 +29,30 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { API_BASE_URL } from '@/services/api/config';
 import { useAuthService } from '@/services/auth/auth-service';
 
+/**
+ * 스토리 업로드 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 스토리 업로드 화면 UI
+ *
+ * @description
+ * Instagram/Snapchat 스타일의 24시간 제한 스토리 업로드
+ * - 미디어 선택: 카메라 촬영(사진/동영상) 또는 갤러리 선택
+ * - 이미지: JPEG 형식, 9:16 비율, 편집 가능
+ * - 비디오: MP4 형식, 최대 30초, 편집 가능
+ * - 캡션: 최대 200자 텍스트
+ * - 미리보기: 업로드 전 미디어 확인 및 수정
+ * - 권한 처리: 카메라/갤러리 접근 권한 요청
+ *
+ * @navigation
+ * - From: HomeScreen StoryList 추가 버튼
+ * - To: HomeScreen (업로드 완료 후)
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('StoryUpload');
+ * ```
+ */
 export const StoryUploadScreen = () => {
   const { t } = useAndroidSafeTranslation('story');
   const navigation = useNavigation();

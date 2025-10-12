@@ -1,3 +1,12 @@
+/**
+ * 회사 인증 화면 (Company Verification Screen)
+ *
+ * @screen
+ * @description 회사/대학교 인증을 통한 소속 그룹 가입 화면
+ * - 이메일 도메인 인증 또는 초대 코드 인증 지원
+ * - 자동 회사명 추출 및 수동 입력 가능
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -15,11 +24,44 @@ import { CompanyVerification, VerificationStatus, VerificationMethod } from '@/t
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/store/slices/themeSlice';
 
+/**
+ * Props 인터페이스
+ *
+ * @interface CompanyVerificationScreenProps
+ * @property {() => void} onVerificationSubmitted - 인증 제출 완료 시 호출되는 콜백
+ * @property {() => void} [onSkip] - 건너뛰기 버튼 클릭 시 호출되는 선택적 콜백
+ */
 interface CompanyVerificationScreenProps {
   onVerificationSubmitted: () => void;
   onSkip?: () => void;
 }
 
+/**
+ * 회사 인증 화면 컴포넌트
+ *
+ * @component
+ * @param {CompanyVerificationScreenProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 회사 인증 화면 UI
+ *
+ * @description
+ * 사용자의 회사/대학교 소속을 인증하는 화면
+ * - 이메일 도메인 인증: 회사 이메일 주소로 인증 (예: @samsung.com)
+ * - 초대 코드 인증: 8자리 영숫자 초대 코드로 인증
+ * - 자동 회사명 추출: 주요 도메인 자동 매핑 (네이버, 카카오, 삼성 등)
+ * - 건너뛰기 가능: 선택적 인증 단계
+ *
+ * @navigation
+ * - From: AuthScreen (닉네임 설정 완료 후)
+ * - To: Main (인증 완료 또는 건너뛰기)
+ *
+ * @example
+ * ```tsx
+ * <CompanyVerificationScreen
+ *   onVerificationSubmitted={() => navigation.navigate('Main')}
+ *   onSkip={() => navigation.navigate('Main')}
+ * />
+ * ```
+ */
 export const CompanyVerificationScreen = ({
   onVerificationSubmitted,
   onSkip,

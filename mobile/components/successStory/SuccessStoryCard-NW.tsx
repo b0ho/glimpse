@@ -1,3 +1,10 @@
+/**
+ * SuccessStoryCard 컴포넌트 (NativeWind v4 버전)
+ *
+ * @module SuccessStoryCard
+ * @description 매칭 성공 스토리를 표시하고 축하 기능을 제공하는 카드 컴포넌트입니다.
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -10,12 +17,60 @@ import { useTheme } from '@/hooks/useTheme';
 import { SuccessStory } from '@/types/successStory';
 import { LinearGradient } from 'expo-linear-gradient';
 
+/**
+ * SuccessStoryCard 컴포넌트 Props 인터페이스
+ * @interface SuccessStoryCardProps
+ */
 interface SuccessStoryCardProps {
+  /** 표시할 성공 스토리 데이터 */
   story: SuccessStory;
+  /** 축하 버튼 클릭 시 호출되는 핸들러 */
   onCelebrate: (storyId: string) => void;
+  /** 사용자가 이미 축하했는지 여부 (기본값: false) */
   hasCelebrated?: boolean;
 }
 
+/**
+ * SuccessStoryCard 컴포넌트
+ *
+ * @component
+ * @param {SuccessStoryCardProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 성공 스토리 카드 UI
+ *
+ * @description
+ * 매칭 성공 커플의 스토리를 보기 좋게 표시하고 다른 사용자들이 축하할 수 있는 카드 컴포넌트입니다.
+ * - 그라데이션 배경 (핑크 계열)
+ * - 커플 이름 또는 익명 표시 ('행복한 커플')
+ * - 상대적 시간 표시 (방금 전, n시간 전, n일 전)
+ * - 매칭 타입 배지 (옵션)
+ * - 스토리 내용 및 태그 표시
+ * - 축하 버튼 (하트 아이콘 + Spring 애니메이션)
+ * - 축하 카운트 표시
+ * - 공유 버튼
+ * - 장식 이모지 (✨💕)
+ *
+ * @example
+ * ```tsx
+ * <SuccessStoryCard
+ *   story={{
+ *     id: 'story-1',
+ *     userNickname: '영희',
+ *     partnerNickname: '철수',
+ *     story: '우리는 첫눈에 반했어요...',
+ *     tags: ['첫눈에 반함 💕', '운명적 만남 ✨'],
+ *     celebrationCount: 42,
+ *     isAnonymous: false,
+ *     matchType: '회사 그룹',
+ *     createdAt: '2025-01-14T10:00:00Z'
+ *   }}
+ *   onCelebrate={(storyId) => console.log('축하:', storyId)}
+ *   hasCelebrated={false}
+ * />
+ * ```
+ *
+ * @category Component
+ * @subcategory SuccessStory
+ */
 export const SuccessStoryCard: React.FC<SuccessStoryCardProps> = ({
   story,
   onCelebrate,

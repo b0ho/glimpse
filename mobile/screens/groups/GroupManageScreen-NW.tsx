@@ -1,3 +1,10 @@
+/**
+ * 그룹 관리 화면
+ *
+ * @screen
+ * @description 그룹 관리자가 가입 대기 중인 멤버를 승인하거나 거부하는 화면
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -31,6 +38,32 @@ interface PendingMember {
   joinedAt: Date;
 }
 
+/**
+ * 그룹 관리 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 그룹 관리자가 가입 대기 중인 멤버를 관리하는 화면
+ * - 가입 신청 대기 목록 표시
+ * - 각 신청자의 프로필 정보 (닉네임, 나이, 성별, 자기소개)
+ * - 승인/거부 버튼
+ * - 신청 날짜 표시
+ * - Pull-to-refresh 기능
+ * - 권한 검증 (관리자만 접근 가능)
+ *
+ * @navigation
+ * - From: 그룹 상세 화면의 관리 버튼 (관리자만)
+ * - To: 승인/거부 후 그룹 목록으로 이동
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('GroupManage', {
+ *   groupId: 'group-123'
+ * });
+ * ```
+ */
 export const GroupManageScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();

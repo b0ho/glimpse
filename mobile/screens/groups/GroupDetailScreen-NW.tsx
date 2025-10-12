@@ -1,3 +1,10 @@
+/**
+ * 그룹 상세 정보 화면
+ *
+ * @screen
+ * @description 선택한 그룹의 상세 정보를 표시하고, 참여/탈퇴, 채팅, 초대 기능을 제공하는 화면
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -31,7 +38,32 @@ interface GroupDetailScreenProps {
 }
 
 /**
- * 그룹 상세 화면 - NativeWind 버전
+ * 그룹 상세 화면 컴포넌트
+ *
+ * @component
+ * @param {GroupDetailScreenProps} props - 컴포넌트 props
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 그룹의 상세 정보를 표시하는 화면
+ * - 그룹 커버 이미지 및 기본 정보
+ * - 참여/탈퇴 버튼 (상태에 따라)
+ * - 그룹 채팅방 입장 (참여자만)
+ * - 초대 코드 생성 및 공유 (참여자만)
+ * - 활성 멤버 목록 표시
+ * - 최근 게시물 목록
+ * - 부드러운 애니메이션 효과
+ *
+ * @navigation
+ * - From: 그룹 목록, 검색 결과, 알림
+ * - To: 그룹 채팅방, 공유 화면
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('GroupDetail', {
+ *   groupId: 'group-123'
+ * });
+ * ```
  */
 export const GroupDetailScreen: React.FC<GroupDetailScreenProps> = ({ route }) => {
   const navigation = useNavigation<any>();

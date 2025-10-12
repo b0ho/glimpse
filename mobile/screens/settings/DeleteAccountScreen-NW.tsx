@@ -1,3 +1,10 @@
+/**
+ * 계정 삭제 화면
+ *
+ * @screen
+ * @description 사용자가 계정을 영구적으로 삭제할 수 있는 화면. 7일 대기 기간을 가진 안전한 삭제 프로세스를 제공합니다.
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -20,6 +27,41 @@ import { authService } from '@/services/api/authService';
 import { accountDeletionService } from '@/services/api/accountDeletionService';
 import { cn } from '@/lib/utils';
 
+/**
+ * 계정 삭제 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 사용자가 계정을 안전하게 삭제할 수 있는 화면입니다.
+ * - 삭제 사유 선택 (5가지 옵션)
+ * - 삭제 확인 텍스트 입력
+ * - 7일 대기 기간 안내
+ * - 복구 가능 기간 명시
+ *
+ * @features
+ * - 다단계 확인 프로세스
+ * - 삭제 사유 수집 (서비스 개선용)
+ * - "탈퇴하기" 텍스트 정확히 입력해야 삭제 가능
+ * - 삭제 경고 및 안내 메시지
+ * - 플랫폼별 Alert/Confirm 처리 (Web/Native)
+ *
+ * @safety
+ * - 즉시 삭제되지 않고 7일 대기
+ * - 대기 기간 중 복구 가능
+ * - 프로필, 매칭, 크레딧, 채팅 모두 삭제됨을 명확히 안내
+ *
+ * @navigation
+ * - From: SettingsScreen (설정 화면)
+ * - To: 이전 화면으로 복귀 (삭제 요청 완료 시)
+ *
+ * @example
+ * ```tsx
+ * // 설정 화면에서 이동
+ * navigation.navigate('DeleteAccount');
+ * ```
+ */
 export const DeleteAccountScreen = () => {
   const navigation = useNavigation();
   const { signOut } = useAuth();

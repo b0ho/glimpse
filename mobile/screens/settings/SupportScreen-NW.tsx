@@ -1,3 +1,10 @@
+/**
+ * 사용자 피드백 화면
+ *
+ * @screen
+ * @description 사용자들이 기능 개선 의견을 제출하고 투표할 수 있는 피드백 커뮤니티 화면
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -20,6 +27,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { cn } from '@/lib/utils';
 
+/**
+ * 피드백 데이터 인터페이스
+ *
+ * @interface Feedback
+ * @property {string} id - 피드백 고유 ID
+ * @property {string} content - 피드백 내용
+ * @property {number} voteCount - 투표 수
+ * @property {boolean} hasVoted - 현재 사용자 투표 여부
+ * @property {Date} createdAt - 작성 일시
+ */
 interface Feedback {
   id: string;
   content: string;
@@ -28,6 +45,45 @@ interface Feedback {
   createdAt: Date;
 }
 
+/**
+ * 사용자 피드백 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 사용자들이 서비스 개선 의견을 자유롭게 제출하고 투표할 수 있는 커뮤니티 화면입니다.
+ * - 피드백 목록 조회
+ * - 새 피드백 작성
+ * - 피드백 투표 (좋아요)
+ * - 검색 및 정렬 기능
+ *
+ * @features
+ * - 피드백 검색 (키워드 기반)
+ * - 정렬 옵션: 인기순/최신순
+ * - 투표 시스템 (토글 가능)
+ * - 모달 기반 피드백 작성
+ * - AsyncStorage 로컬 저장
+ * - 최소 10자 이상 입력 검증
+ *
+ * @data
+ * - 로컬 스토리지 기반 (AsyncStorage)
+ * - 샘플 데이터 5개 제공
+ * - 실시간 투표 반영
+ *
+ * @navigation
+ * - From: SettingsScreen (설정 화면)
+ * - Modal: 피드백 작성 화면
+ *
+ * @example
+ * ```tsx
+ * // 설정 화면에서 이동
+ * navigation.navigate('Support');
+ *
+ * // 피드백 작성 모달 열기
+ * setShowCreateModal(true);
+ * ```
+ */
 export const SupportScreen = () => {
   const navigation = useNavigation();
   const { colors, isDarkMode } = useTheme();

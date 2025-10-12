@@ -1,5 +1,8 @@
 /**
- * 간단한 채팅 화면 - NativeWind 버전
+ * 간단한 1:1 채팅 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 기본적인 채팅 기능만 제공하는 간소화된 채팅 화면. 실시간 기능 없이 서버 기반 메시지 송수신
  */
 
 import React, { useState, useEffect } from 'react';
@@ -35,6 +38,37 @@ type RootStackParamList = {
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreenSimple'>;
 
+/**
+ * 간단한 채팅 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 기본 채팅 UI
+ *
+ * @description
+ * 실시간 기능 없이 기본적인 채팅 송수신만 제공하는 간소화된 버전
+ * - 서버 API 기반 메시지 로드
+ * - 메시지 전송 및 표시
+ * - 채팅방 나가기 기능
+ * - localStorage 미사용 (서버 중심)
+ * - 읽음 표시, 입력 중 표시 없음
+ * - Socket.IO 연결 없음
+ *
+ * @navigation
+ * - From: MatchChatListScreen (채팅 목록)
+ * - To: Previous screen (채팅방 나가기)
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('ChatScreenSimple', {
+ *   roomId: 'room-123',
+ *   matchId: 'match-456',
+ *   otherUserNickname: '수지'
+ * });
+ * ```
+ *
+ * @category Screen
+ * @subcategory Chat
+ */
 export const ChatScreenSimple = () => {
   const route = useRoute<ChatScreenRouteProp>();
   const navigation = useNavigation();

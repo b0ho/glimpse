@@ -1,3 +1,10 @@
+/**
+ * 내 그룹 화면
+ *
+ * @screen
+ * @description 사용자가 참여한 그룹과 생성한 그룹을 관리하는 화면
+ */
+
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -15,6 +22,37 @@ import { useTheme } from '@/hooks/useTheme';
 import { Group, GroupType } from '@/types';
 import { cn } from '@/lib/utils';
 
+/**
+ * 내 그룹 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 사용자가 참여하거나 생성한 그룹을 관리하는 화면
+ * - 참여한 그룹 탭: 내가 참여한 모든 그룹
+ * - 생성한 그룹 탭: 내가 만든 그룹 (관리자)
+ * - 각 그룹의 정보 (이름, 설명, 멤버 수, 매칭 상태)
+ * - 그룹 타입 아이콘 표시
+ * - 생성자 배지 표시
+ * - 그룹 탈퇴 기능 (일반 멤버)
+ * - 그룹 관리 기능 (생성자)
+ * - Pull-to-refresh 기능
+ * - 빈 상태 UI 및 안내
+ *
+ * @navigation
+ * - From: 프로필 탭의 내 그룹 버튼
+ * - To: 그룹 상세, 그룹 관리, 그룹 탐색, 그룹 생성
+ *
+ * @example
+ * ```tsx
+ * <Stack.Screen
+ *   name="MyGroups"
+ *   component={MyGroupsScreen}
+ *   options={{ title: '내 그룹' }}
+ * />
+ * ```
+ */
 export const MyGroupsScreen = () => {
   const { t } = useAndroidSafeTranslation('mygroups');
   const [isRefreshing, setIsRefreshing] = useState(false);

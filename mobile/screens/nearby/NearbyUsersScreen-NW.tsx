@@ -1,5 +1,8 @@
 /**
- * 주변 사용자 화면 - NativeWind 버전
+ * 주변 사용자 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 현재 위치 기반 주변 사용자를 표시하고 익명 매칭 기능을 제공하는 화면
  */
 import React, { useState, useCallback } from 'react';
 import {
@@ -39,6 +42,33 @@ import { EmptyState } from '@/components/common';
 // 타입
 import { NearbyUser } from '@/types';
 
+/**
+ * 주변 사용자 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 주변 사용자 목록 화면 UI
+ *
+ * @description
+ * 사용자의 현재 위치를 기반으로 주변 사용자를 검색하고 익명 매칭을 제공합니다.
+ * - 위치 권한 요청 및 관리
+ * - 검색 반경 설정
+ * - 익명 좋아요 보내기 (구독 티어에 따른 제한)
+ * - 매칭 시 채팅 시작
+ * - 페르소나 기반 위치 추적
+ * - 실시간 거리 계산 및 표시
+ *
+ * @navigation
+ * - From: HomeScreen, TabNavigator
+ * - To: Chat, Premium, PersonaSettings
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('NearbyUsers');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Nearby
+ */
 export const NearbyUsersScreen = React.memo(() => {
   const isFocused = useIsFocused();
   const navigation = useNavigation<any>();

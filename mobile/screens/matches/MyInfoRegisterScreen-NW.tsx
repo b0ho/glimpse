@@ -1,8 +1,8 @@
 /**
  * 내 정보 등록 화면 - NativeWind 버전
- * 
- * 찾기 탭에서 "내 정보"를 간단히 등록/수정하는 화면
- * 복잡한 양식이 아닌 간단한 프로필 수정 형태
+ *
+ * @screen
+ * @description 찾기 탭에서 내 정보를 등록/수정하는 간소화된 프로필 편집 화면
  */
 import React, { useState, useEffect } from 'react';
 import {
@@ -25,6 +25,17 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useInterestStore } from '@/store/slices/interestSlice';
 
+/**
+ * 프로필 필드 인터페이스
+ *
+ * @interface
+ * @property {string} id - 필드 식별자
+ * @property {string} label - 필드 레이블
+ * @property {string} value - 필드 값
+ * @property {string} icon - 아이콘 이름
+ * @property {string} placeholder - 플레이스홀더 텍스트
+ * @property {boolean} editable - 수정 가능 여부
+ */
 interface ProfileField {
   id: string;
   label: string;
@@ -34,6 +45,35 @@ interface ProfileField {
   editable: boolean;
 }
 
+/**
+ * 내 정보 등록 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 관심상대 찾기 기능을 위해 내 정보를 등록하는 화면입니다:
+ * - 닉네임, 전화번호, 회사, 학교 등 기본 정보
+ * - 생년월일, 자기소개 등 추가 정보
+ * - 편집 모드 전환으로 안전한 수정
+ * - 프리미엄 업그레이드 안내
+ *
+ * @features
+ * - 인라인 편집: 편집 버튼으로 모드 전환
+ * - 필드별 수정 가능 여부 제어
+ * - 전화번호는 수정 불가 (보안)
+ * - 키보드 회피 레이아웃
+ * - 다크모드 지원
+ *
+ * @navigation
+ * - From: InterestSearchScreen ("내 정보 등록하기" 버튼)
+ * - To: Subscription (프리미엄 업그레이드)
+ *
+ * @example
+ * ```tsx
+ * <Stack.Screen name="MyInfoRegister" component={MyInfoRegisterScreen} />
+ * ```
+ */
 export const MyInfoRegisterScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { t } = useAndroidSafeTranslation();

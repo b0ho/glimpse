@@ -1,3 +1,9 @@
+/**
+ * 관심사 기반 매칭 상태 관리 Zustand 슬라이스
+ * @module interestSlice
+ * @description 관심상대 검색, 매칭, 내 정보 등록 기능
+ */
+
 import { create, persist, createJSONStorage } from '../zustandCompat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiClient } from '@/services/api/config';
@@ -14,32 +20,58 @@ import {
 import { PremiumLevel } from '@/shared/types';
 import { useAuthStore } from './authSlice';
 
+/**
+ * 관심사 상태 인터페이스
+ * @interface InterestState
+ * @description 관심상대 검색 및 매칭 상태 정보
+ */
 interface InterestState {
+  /** 내가 등록한 관심상대 검색 목록 */
   searches: InterestSearch[];
+  /** 매칭된 목록 */
   matches: InterestMatch[];
+  /** 로딩 상태 */
   loading: boolean;
+  /** 에러 메시지 */
   error: string | null;
 
   // Actions
+  /** 관심상대 검색 목록 조회 */
   fetchSearches: (query?: GetInterestSearchesQuery) => Promise<void>;
+  /** 매칭된 목록 조회 */
   fetchMatches: () => Promise<void>;
+  /** 관심상대 검색 등록 */
   createSearch: (dto: CreateInterestSearchDto) => Promise<InterestSearch>;
+  /** 관심상대 검색 업데이트 */
   updateSearch: (id: string, dto: UpdateInterestSearchDto) => Promise<InterestSearch>;
+  /** 관심상대 검색 삭제 */
   deleteSearch: (id: string) => Promise<void>;
+  /** 즉시 매칭 확인 */
   checkMatch: (dto: CheckMatchDto) => Promise<InterestMatch | null>;
+  /** 에러 초기화 */
   clearError: () => void;
+  /** 상태 초기화 */
   reset: () => void;
-  
+
   // Helper functions
+  /** 프리미엄 레벨별 유형당 검색 제한 개수 */
   getSearchLimitByType: (type: InterestType, premiumLevel: PremiumLevel) => number;
+  /** 프리미엄 레벨별 검색 유효기간 */
   getExpirationDate: (premiumLevel: PremiumLevel) => Date | null;
+  /** 관심상대 등록 가능 여부 */
   canRegisterInterest: (type: InterestType, premiumLevel: PremiumLevel) => boolean;
-  
+
   // My Info functions
+  /** 내 정보 조회 */
   getMyInfo: () => Promise<any>;
+  /** 내 정보 업데이트 */
   updateMyInfo: (info: any) => Promise<void>;
 }
 
+/**
+ * 관심사 초기 상태
+ * @constant initialState
+ */
 const initialState = {
   searches: [],
   matches: [],
@@ -49,6 +81,12 @@ const initialState = {
 
 /**
  * 관심상대 찾기 상태 관리 스토어
+ * @constant useInterestStore
+ * @description 관심사 기반 매칭, 검색 등록, 내 정보 관리를 관리하는 Zustand 스토어
+ * @example
+ * ```typescript
+ * const { searches, createSearch, checkMatch } = useInterestStore();
+ * ```
  */
 export const useInterestStore = create<InterestState>()(
   persist(
@@ -57,6 +95,10 @@ export const useInterestStore = create<InterestState>()(
 
       /**
        * 내 관심상대 검색 목록 조회
+       * @async
+       * @param {GetInterestSearchesQuery} [query] - 검색 필터 (type, status)
+       * @returns {Promise<void>}
+       * @description 내가 등록한 관심상대 검색 목록을 조회
        */
       fetchSearches: async (query?: GetInterestSearchesQuery) => {
         set({ loading: true, error: null });
@@ -102,6 +144,9 @@ export const useInterestStore = create<InterestState>()(
 
       /**
        * 매칭된 목록 조회
+       * @async
+       * @returns {Promise<void>}
+       * @description 현재까지 발생한 모든 매칭 목록을 조회
        */
       fetchMatches: async () => {
         set({ loading: true, error: null });
@@ -141,6 +186,11 @@ export const useInterestStore = create<InterestState>()(
 
       /**
        * 프리미엄 레벨별 유형당 검색 제한 개수 반환
+       * @function getSearchLimitByType
+       * @param {InterestType} type - 관심사 유형
+       * @param {PremiumLevel} premiumLevel - 프리미엄 레벨
+       * @returns {number} 유형별 등록 가능 개수
+       * @description FREE: 1개, BASIC: 3개, UPPER: 무제한
        */
       getSearchLimitByType: (type: InterestType, premiumLevel: PremiumLevel): number => {
         switch (premiumLevel) {
@@ -157,6 +207,10 @@ export const useInterestStore = create<InterestState>()(
 
       /**
        * 프리미엄 레벨별 검색 유효기간 계산
+       * @function getExpirationDate
+       * @param {PremiumLevel} premiumLevel - 프리미엄 레벨
+       * @returns {Date | null} 유효 만료 날짜 (UPPER는 null - 무제한)
+       * @description FREE: 1주일, BASIC: 1개월, UPPER: 무제한
        */
       getExpirationDate: (premiumLevel: PremiumLevel): Date | null => {
         const now = new Date();
@@ -177,6 +231,11 @@ export const useInterestStore = create<InterestState>()(
 
       /**
        * 특정 유형의 관심상대를 등록할 수 있는지 확인
+       * @function canRegisterInterest
+       * @param {InterestType} type - 관심사 유형
+       * @param {PremiumLevel} premiumLevel - 프리미엄 레벨
+       * @returns {boolean} 등록 가능 여부
+       * @description 현재 활성 검색 수가 제한 미만인지 확인
        */
       canRegisterInterest: (type: InterestType, premiumLevel: PremiumLevel): boolean => {
         const state = get();
@@ -189,6 +248,11 @@ export const useInterestStore = create<InterestState>()(
 
       /**
        * 관심상대 검색 등록
+       * @async
+       * @param {CreateInterestSearchDto} dto - 검색 등록 정보
+       * @returns {Promise<InterestSearch>} 등록된 검색 정보
+       * @throws {Error} 등록 제한 초과 또는 API 오류 시
+       * @description 새로운 관심상대 검색을 등록하고 제한 확인
        */
       createSearch: async (dto: CreateInterestSearchDto) => {
         set({ loading: true, error: null });
@@ -235,6 +299,11 @@ export const useInterestStore = create<InterestState>()(
 
       /**
        * 관심상대 검색 업데이트
+       * @async
+       * @param {string} id - 검색 ID
+       * @param {UpdateInterestSearchDto} dto - 업데이트할 정보
+       * @returns {Promise<InterestSearch>} 업데이트된 검색 정보
+       * @throws {Error} API 오류 시
        */
       updateSearch: async (id: string, dto: UpdateInterestSearchDto) => {
         set({ loading: true, error: null });
@@ -261,6 +330,10 @@ export const useInterestStore = create<InterestState>()(
 
       /**
        * 관심상대 검색 삭제
+       * @async
+       * @param {string} id - 삭제할 검색 ID
+       * @returns {Promise<void>}
+       * @description 등록한 관심상대 검색을 삭제
        */
       deleteSearch: async (id: string) => {
         set({ loading: true, error: null });
@@ -286,6 +359,10 @@ export const useInterestStore = create<InterestState>()(
 
       /**
        * 즉시 매칭 확인
+       * @async
+       * @param {CheckMatchDto} dto - 매칭 확인 정보
+       * @returns {Promise<InterestMatch | null>} 매칭 정보 또는 null
+       * @description 내 정보와 매칭되는 상대가 있는지 즉시 확인
        */
       checkMatch: async (dto: CheckMatchDto) => {
         set({ loading: true, error: null });
@@ -323,16 +400,21 @@ export const useInterestStore = create<InterestState>()(
 
       /**
        * 에러 초기화
+       * @description 에러 메시지를 초기화
        */
       clearError: () => set({ error: null }),
 
       /**
        * 상태 초기화
+       * @description 모든 관심사 상태를 초기값으로 리셋
        */
       reset: () => set(initialState),
-      
+
       /**
        * 내 정보 조회
+       * @async
+       * @returns {Promise<any>} 내 정보 또는 null
+       * @description 관심사 매칭에 사용되는 내 정보 조회
        */
       getMyInfo: async () => {
         try {
@@ -346,9 +428,14 @@ export const useInterestStore = create<InterestState>()(
           return null;
         }
       },
-      
+
       /**
        * 내 정보 업데이트
+       * @async
+       * @param {any} info - 업데이트할 내 정보
+       * @returns {Promise<void>}
+       * @throws {Error} 업데이트 실패 시
+       * @description 관심사 매칭에 사용되는 내 정보를 업데이트
        */
       updateMyInfo: async (info: any) => {
         try {

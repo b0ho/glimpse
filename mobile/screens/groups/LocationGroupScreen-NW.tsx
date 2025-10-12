@@ -1,3 +1,10 @@
+/**
+ * 위치 기반 그룹 화면
+ *
+ * @screen
+ * @description GPS를 활용하여 주변 그룹을 탐색하고 QR 코드로 참여하는 화면
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -52,9 +59,32 @@ interface LocationGroup {
 
 /**
  * 위치 기반 그룹 화면 컴포넌트
+ *
  * @component
- * @returns {JSX.Element} 위치 그룹 화면 UI
- * @description GPS 기반 주변 그룹 탐색, QR 코드 스캔, 그룹 생성 기능을 제공하는 화면
+ * @returns {JSX.Element}
+ *
+ * @description
+ * GPS를 활용하여 주변 그룹을 탐색하고 참여하는 화면
+ * - 현재 위치 기반 5km 반경 내 그룹 검색
+ * - 각 그룹까지의 거리 표시 (m/km)
+ * - QR 코드 스캔을 통한 그룹 참여
+ * - 현재 위치에서 새 위치 그룹 생성
+ * - 위치 권한 요청 및 관리
+ * - 카메라 권한 요청 (QR 스캔용)
+ * - Pull-to-refresh 기능
+ *
+ * @navigation
+ * - From: 그룹 탭의 위치 그룹 버튼
+ * - To: 그룹 상세 화면, QR 스캐너
+ *
+ * @example
+ * ```tsx
+ * <Stack.Screen
+ *   name="LocationGroup"
+ *   component={LocationGroupScreen}
+ *   options={{ title: '주변 그룹' }}
+ * />
+ * ```
  */
 const LocationGroupScreen = () => {
   const navigation = useNavigation();

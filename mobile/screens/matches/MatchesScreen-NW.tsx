@@ -22,9 +22,32 @@ import { cn } from '@/lib/utils';
 
 /**
  * 매칭 화면 컴포넌트 - NativeWind 버전
+ *
  * @component
- * @returns {JSX.Element} 매칭 화면 UI
- * @description 서로 좋아요를 보내 매칭된 사용자 목록을 표시하고 채팅을 시작할 수 있는 화면
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 서로 좋아요를 보내 매칭된 사용자 목록을 표시하고 채팅을 시작할 수 있는 화면입니다:
+ * - 매칭된 상대방 목록 표시
+ * - 채팅 시작 기능
+ * - 미스매치 신고 기능
+ * - 매칭 통계 정보
+ *
+ * @features
+ * - 익명성 해제: 매칭 후 상대방 닉네임 공개
+ * - 실시간 매칭 데이터 로드
+ * - 서버 연결 에러 핸들링
+ * - 매칭 통계 (총 매칭 수, 받은 좋아요 수)
+ * - 다크모드 지원
+ *
+ * @navigation
+ * - From: MainTabs (매칭 탭)
+ * - To: Chat (채팅 화면)
+ *
+ * @example
+ * ```tsx
+ * <Tab.Screen name="Matches" component={MatchesScreen} />
+ * ```
  */
 export const MatchesScreen = React.memo(() => {
   console.log('[MatchesScreen] 컴포넌트 렌더링');

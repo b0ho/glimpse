@@ -1,19 +1,42 @@
+/**
+ * Button 컴포넌트
+ *
+ * @module Button
+ * @description NativeWind v4를 사용한 범용 버튼 컴포넌트. 다양한 스타일 변형과 크기를 지원합니다.
+ */
+
 import React from 'react'
 import { TouchableOpacity, Text, ActivityIndicator, View } from 'react-native'
 import { cn } from '@/lib/utils'
 import { LinearGradient } from 'expo-linear-gradient'
 
+/**
+ * Button Props 인터페이스
+ *
+ * @interface ButtonProps
+ */
 export interface ButtonProps {
+  /** 버튼 내부에 표시될 콘텐츠 */
   children: React.ReactNode
+  /** 버튼 클릭 시 실행될 핸들러 */
   onPress?: () => void
+  /** 버튼 비활성화 여부 */
   disabled?: boolean
+  /** 로딩 상태 표시 여부 (ActivityIndicator 표시) */
   loading?: boolean
+  /** 버튼 스타일 변형 */
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'gradient'
+  /** 버튼 크기 */
   size?: 'sm' | 'md' | 'lg' | 'xl'
+  /** 추가 Tailwind 클래스 */
   className?: string
+  /** 텍스트에 적용될 추가 Tailwind 클래스 */
   textClassName?: string
+  /** 좌측에 표시될 아이콘 */
   leftIcon?: React.ReactNode
+  /** 우측에 표시될 아이콘 */
   rightIcon?: React.ReactNode
+  /** gradient 변형 사용 시 적용될 색상 배열 */
   gradientColors?: string[]
 }
 
@@ -47,6 +70,43 @@ const textVariantClasses = {
   gradient: 'text-white',
 }
 
+/**
+ * Button 컴포넌트
+ *
+ * @component
+ * @param {ButtonProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 버튼 UI
+ *
+ * @description
+ * NativeWind v4를 사용하여 구현된 범용 버튼 컴포넌트입니다.
+ * - 5가지 스타일 변형 (primary, secondary, outline, ghost, gradient)
+ * - 4가지 크기 옵션 (sm, md, lg, xl)
+ * - 로딩 상태 및 비활성화 상태 지원
+ * - 좌/우 아이콘 지원
+ * - gradient 변형은 LinearGradient를 사용하여 그라디언트 배경 제공
+ *
+ * @example
+ * ```tsx
+ * // 기본 버튼
+ * <Button onPress={handleClick}>확인</Button>
+ *
+ * // 로딩 상태
+ * <Button loading>처리 중...</Button>
+ *
+ * // 아이콘이 있는 버튼
+ * <Button leftIcon={<Icon name="heart" />} variant="outline">
+ *   좋아요
+ * </Button>
+ *
+ * // 그라디언트 버튼
+ * <Button variant="gradient" gradientColors={['#FF6B6B', '#FF5252']}>
+ *   프리미엄 가입
+ * </Button>
+ * ```
+ *
+ * @category Component
+ * @subcategory UI
+ */
 export const Button: React.FC<ButtonProps> = ({
   children,
   onPress,

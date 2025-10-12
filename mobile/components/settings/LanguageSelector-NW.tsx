@@ -1,3 +1,10 @@
+/**
+ * LanguageSelector 컴포넌트 (NativeWind v4 버전)
+ *
+ * @module LanguageSelector
+ * @description 앱 내 언어 설정을 관리하는 컴포넌트입니다. 8개 언어를 지원하며 모달 방식의 선택 인터페이스를 제공합니다.
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -10,13 +17,25 @@ import {
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
-// Types from shared - copied for now
+
+/**
+ * 지원되는 언어 코드 타입
+ * @typedef {('ko'|'en'|'ja'|'zh'|'vi'|'th'|'es'|'fr')} SupportedLanguage
+ */
 type SupportedLanguage = 'ko' | 'en' | 'ja' | 'zh' | 'vi' | 'th' | 'es' | 'fr';
 
+/**
+ * 언어 정보 인터페이스
+ * @interface LanguageInfo
+ */
 interface LanguageInfo {
+  /** 언어 코드 (예: 'ko', 'en') */
   code: SupportedLanguage;
+  /** 영문 언어명 (예: 'Korean', 'English') */
   name: string;
+  /** 현지어 언어명 (예: '한국어', 'English') */
   nativeName: string;
+  /** 국기 이모지 */
   flag: string;
 }
 
@@ -33,10 +52,43 @@ const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageInfo> = {
 import { changeLanguage, getCurrentLanguage } from '../../services/i18n/i18n';
 import { SPACING, FONT_SIZES } from '@/utils/constants';
 
+/**
+ * LanguageSelector 컴포넌트 Props 인터페이스
+ * @interface LanguageSelectorProps
+ */
 interface LanguageSelectorProps {
+  /** 언어 변경 시 호출되는 콜백 함수 */
   onLanguageChange?: (language: SupportedLanguage) => void;
 }
 
+/**
+ * LanguageSelector 컴포넌트
+ *
+ * @component
+ * @param {LanguageSelectorProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 언어 선택기 UI
+ *
+ * @description
+ * 다국어 지원 앱에서 사용자가 선호하는 언어를 선택할 수 있게 합니다.
+ * - 8개 언어 지원 (한국어, 영어, 일본어, 중국어, 베트남어, 태국어, 스페인어, 프랑스어)
+ * - 모달 기반 선택 인터페이스
+ * - 국기 이모지와 현지어 표시
+ * - 선택된 언어 체크 표시
+ * - 성공/실패 피드백 알림
+ * - 비동기 언어 변경 처리
+ *
+ * @example
+ * ```tsx
+ * <LanguageSelector
+ *   onLanguageChange={(language) => {
+ *     console.log('언어 변경:', language);
+ *   }}
+ * />
+ * ```
+ *
+ * @category Component
+ * @subcategory Settings
+ */
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ 
   onLanguageChange 
 }) => {

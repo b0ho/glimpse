@@ -1,3 +1,13 @@
+/**
+ * 게시물 상세 화면 (Post Detail Screen)
+ *
+ * @screen
+ * @description 게시물의 전체 내용과 댓글을 표시하는 화면
+ * - 게시물 본문 및 메타데이터
+ * - 댓글 목록 및 작성
+ * - 좋아요 인터랙션
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -20,6 +30,9 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
 import { cn } from '@/lib/utils';
 
+/**
+ * 댓글 인터페이스
+ */
 interface Comment {
   id: string;
   content: string;
@@ -33,6 +46,9 @@ interface Comment {
   likeCount: number;
 }
 
+/**
+ * 게시물 인터페이스
+ */
 interface Post {
   id: string;
   title: string;
@@ -54,6 +70,29 @@ interface Post {
   comments: Comment[];
 }
 
+/**
+ * 게시물 상세 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 게시물 상세 화면 UI
+ *
+ * @description
+ * 단일 게시물의 상세 정보와 댓글을 표시
+ * - 게시물 본문: 제목, 내용, 작성자, 그룹, 작성일
+ * - 인터랙션: 좋아요, 댓글, 조회수
+ * - 댓글 시스템: 댓글 작성/조회, 댓글 좋아요
+ * - 실시간 업데이트: 좋아요/댓글 즉시 반영
+ * - 에러 처리: 서버 연결 오류 시 재시도 UI
+ *
+ * @navigation
+ * - From: HomeScreen ContentItem 클릭
+ * - To: 없음 (모달 형태)
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('PostDetail', { postId: 'post123' });
+ * ```
+ */
 export const PostDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();

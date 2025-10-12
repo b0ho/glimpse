@@ -1,5 +1,9 @@
 /**
- * 구글 인증 관련 커스텀 훅
+ * Google Authentication Hook
+ *
+ * @module hooks/auth/useGoogleAuth
+ * @description Google OAuth 인증을 처리하는 커스텀 훅입니다.
+ * Clerk OAuth를 사용하며, 개발 환경에서는 빠른 로그인을 지원합니다.
  */
 
 import { useState } from 'react';
@@ -9,6 +13,38 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { OAuthUserInfo } from '@/types/auth.types';
 
+/**
+ * 구글 인증 훅
+ *
+ * @hook
+ * @param {Function} onAuthCompleted - 인증 완료 콜백 함수
+ * @returns {Object} Google 인증 관련 상태 및 함수들
+ * @returns {boolean} returns.isGoogleLoading - 구글 로그인 진행 중 여부
+ * @returns {Function} returns.handleGoogleLogin - 구글 로그인 핸들러
+ * @returns {Function} returns.handleQuickDevLogin - 개발 환경 빠른 로그인 핸들러
+ *
+ * @description
+ * Google OAuth 인증 플로우를 관리합니다.
+ * - 프로덕션: Clerk OAuth 사용
+ * - 개발 환경: 빠른 로그인 지원 (OAuth 우회)
+ * - 네트워크 오류 처리 (Cloudflare 등)
+ * - 사용자 정보 자동 매핑
+ *
+ * @example
+ * ```tsx
+ * const { isGoogleLoading, handleGoogleLogin } = useGoogleAuth(() => {
+ *   console.log('인증 완료!');
+ *   navigation.navigate('Home');
+ * });
+ *
+ * // 구글 로그인 버튼
+ * <Button
+ *   onPress={handleGoogleLogin}
+ *   loading={isGoogleLoading}
+ *   title="Google로 로그인"
+ * />
+ * ```
+ */
 export const useGoogleAuth = (onAuthCompleted: () => void) => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });

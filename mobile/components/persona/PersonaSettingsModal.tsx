@@ -1,3 +1,10 @@
+/**
+ * PersonaSettingsModal 컴포넌트 (StyleSheet 버전)
+ *
+ * @module PersonaSettingsModal
+ * @description 사용자의 페르소나(익명 프로필) 정보를 생성 및 편집하는 모달 컴포넌트 (StyleSheet 스타일링 적용)
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -19,21 +26,54 @@ import { useTheme } from '@/hooks/useTheme';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { locationTracker } from '@/services/locationTracker';
 
+/**
+ * PersonaSettingsModal Props 인터페이스
+ *
+ * @interface PersonaSettingsModalProps
+ */
 interface PersonaSettingsModalProps {
+  /** 모달 표시 여부 */
   visible: boolean;
+  /** 모달 닫기 핸들러 */
   onClose: () => void;
 }
 
+/**
+ * PersonaSettingsModal 컴포넌트
+ *
+ * @component
+ * @param {PersonaSettingsModalProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 페르소나 설정 모달 UI
+ *
+ * @description
+ * 사용자의 익명 페르소나 정보를 생성하거나 수정할 수 있는 전체 화면 모달입니다. (StyleSheet 버전)
+ * - 닉네임 (필수), 나이, 자기소개, 관심사, 직업, 키, MBTI, 음주, 흡연 정보 입력
+ * - 위치 공유 토글 기능
+ * - 폼 유효성 검사 및 에러 처리
+ * - 키보드 회피 기능 (iOS/Android)
+ * - 동적 테마 색상 적용
+ *
+ * @example
+ * ```tsx
+ * <PersonaSettingsModal
+ *   visible={isModalVisible}
+ *   onClose={() => setIsModalVisible(false)}
+ * />
+ * ```
+ *
+ * @category Component
+ * @subcategory Persona
+ */
 export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visible, onClose }) => {
   const { t } = useAndroidSafeTranslation('persona');
   const { colors } = useTheme();
-  const { 
-    myPersona, 
-    createOrUpdatePersona, 
-    isLoading, 
+  const {
+    myPersona,
+    createOrUpdatePersona,
+    isLoading,
     fetchMyPersona,
     locationSharingEnabled,
-    setLocationSharing 
+    setLocationSharing
   } = usePersonaStore();
 
   const [nickname, setNickname] = useState('');
@@ -68,6 +108,10 @@ export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visi
     }
   }, [myPersona]);
 
+  /**
+   * 페르소나 정보 저장 핸들러
+   * 필수 필드(닉네임) 검증 후 API 호출 및 위치 공유 설정 업데이트
+   */
   const handleSave = async () => {
     if (!nickname.trim()) {
       Alert.alert(t('error'), t('nicknameRequired'));

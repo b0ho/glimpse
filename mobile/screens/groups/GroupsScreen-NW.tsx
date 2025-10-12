@@ -1,6 +1,10 @@
 /**
- * 그룹 탐색 화면 컴포넌트 - NativeWind 버전
+ * 그룹 탐색 화면
+ *
+ * @screen
+ * @description 다양한 타입의 그룹 목록을 탐색하고 검색하는 메인 화면
  */
+
 import React, { useEffect } from 'react';
 import {
   View,
@@ -26,7 +30,33 @@ import { GroupsFooter } from '@/components/groups/GroupsFooter';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
 
 /**
- * 그룹 탐색 화면 - 다양한 타입의 그룹 목록 표시
+ * 그룹 탐색 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 다양한 타입의 그룹을 탐색하고 검색하는 메인 화면
+ * - 모든 그룹 목록 표시 (공식, 일반, 장소, 이벤트)
+ * - 무한 스크롤 페이지네이션
+ * - Pull-to-refresh 기능
+ * - 서버 연결 에러 처리
+ * - 빈 상태 UI
+ * - 로딩 상태 표시
+ * - 그룹 카드 컴포넌트로 구성
+ *
+ * @navigation
+ * - From: 하단 탭 바의 Groups 탭
+ * - To: 그룹 상세 화면, 그룹 생성 화면
+ *
+ * @example
+ * ```tsx
+ * <Tab.Screen
+ *   name="Groups"
+ *   component={GroupsScreen}
+ *   options={{ title: '그룹' }}
+ * />
+ * ```
  */
 export const GroupsScreen = () => {
   const isFocused = useIsFocused();

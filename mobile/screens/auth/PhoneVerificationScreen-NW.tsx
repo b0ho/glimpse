@@ -1,3 +1,13 @@
+/**
+ * 전화번호 인증 화면 (Phone Verification Screen)
+ *
+ * @screen
+ * @description 전화번호 입력 및 SMS 인증 요청 화면
+ * - 한국 전화번호 형식 자동 포맷팅
+ * - 로그인/회원가입 모드 지원
+ * - 애니메이션 효과 적용
+ */
+
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -20,6 +30,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { validatePhoneNumber as validatePhone } from '@/services/auth/clerk-config';
 import { cn } from '@/lib/utils';
 
+/**
+ * Props 인터페이스
+ *
+ * @interface PhoneVerificationScreenProps
+ * @property {(phoneNumber: string) => void} onVerificationSent - SMS 전송 완료 시 호출되는 콜백
+ * @property {'signin' | 'signup'} [authMode='signin'] - 인증 모드 (로그인/회원가입)
+ * @property {() => void} [onBack] - 뒤로가기 버튼 클릭 시 호출되는 선택적 콜백
+ */
 interface PhoneVerificationScreenProps {
   onVerificationSent: (phoneNumber: string) => void;
   authMode?: 'signin' | 'signup';
@@ -28,6 +46,34 @@ interface PhoneVerificationScreenProps {
 
 const { width } = Dimensions.get('window');
 
+/**
+ * 전화번호 인증 화면 컴포넌트
+ *
+ * @component
+ * @param {PhoneVerificationScreenProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 전화번호 입력 화면 UI
+ *
+ * @description
+ * 전화번호를 입력받아 SMS 인증번호를 전송하는 화면
+ * - 자동 포맷팅: 010-1234-5678 형식으로 자동 변환
+ * - 실시간 검증: 한국 전화번호 형식 검증 (010, 011, 016, 017, 018, 019)
+ * - 애니메이션: 페이드인, 스케일, 입력 포커스 효과
+ * - 플랫폼 대응: Web/iOS/Android 각각 최적화된 UI
+ * - 로그인/회원가입: authMode에 따라 다른 문구 표시
+ *
+ * @navigation
+ * - From: AuthScreen (Welcome 단계 후)
+ * - To: SMSVerificationScreen (SMS 전송 성공 후)
+ *
+ * @example
+ * ```tsx
+ * <PhoneVerificationScreen
+ *   onVerificationSent={(phone) => setPhoneNumber(phone)}
+ *   authMode="signup"
+ *   onBack={() => setCurrentStep('welcome')}
+ * />
+ * ```
+ */
 export const PhoneVerificationScreen = ({
   onVerificationSent,
   authMode = 'signin',

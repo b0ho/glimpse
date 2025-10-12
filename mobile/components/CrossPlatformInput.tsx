@@ -1,13 +1,35 @@
 import React, { useRef, useEffect } from 'react';
 import { Platform, TextInput, TextInputProps, View } from 'react-native';
 
+/**
+ * CrossPlatformInput Props
+ *
+ * @interface CrossPlatformInputProps
+ * @extends TextInputProps
+ */
 interface CrossPlatformInputProps extends TextInputProps {
+  /** Web에서 사용할 HTML input type (email, tel, url 등) */
   webInputType?: string;
 }
 
 /**
- * Cross-platform input component that works on web, iOS, and Android
- * Uses HTML input on web and React Native TextInput on native platforms
+ * 크로스 플랫폼 입력 컴포넌트
+ *
+ * @description Web, iOS, Android에서 동일하게 작동하는 input 컴포넌트.
+ *              Web에서는 HTML input/textarea 사용, Native에서는 TextInput 사용.
+ *              플랫폼별 키보드 타입 자동 매핑.
+ *
+ * @component UI
+ * @props CrossPlatformInputProps
+ * @usage 모든 화면의 폼 입력 필드
+ *
+ * @example
+ * <CrossPlatformInput
+ *   placeholder="이메일 입력"
+ *   keyboardType="email-address"
+ *   value={email}
+ *   onChangeText={setEmail}
+ * />
  */
 export const CrossPlatformInput: React.FC<CrossPlatformInputProps> = ({
   style,

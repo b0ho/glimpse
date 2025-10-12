@@ -13,7 +13,9 @@ import { cn } from '../lib/utils';
 
 /**
  * ErrorBoundary 컴포넌트 Props
+ *
  * @interface Props
+ * @extends WithTranslation
  */
 interface Props extends WithTranslation {
   /** 자식 컴포넌트 */
@@ -24,6 +26,7 @@ interface Props extends WithTranslation {
 
 /**
  * ErrorBoundary 컴포넌트 State
+ *
  * @interface State
  */
 interface State {
@@ -36,10 +39,22 @@ interface State {
 }
 
 /**
- * 에러 바운더리 컴포넌트 - React 컴포넌트 트리에서 발생한 에러 처리
+ * 에러 바운더리 컴포넌트
+ *
+ * @description React 컴포넌트 트리에서 발생한 JavaScript 에러를 포착하여
+ *              전체 앱 충돌을 방지하고 사용자 친화적인 에러 화면을 표시.
+ *              Sentry로 에러 리포팅 자동 전송.
+ *
+ * @component Layout
+ * @usage App.tsx에서 최상위 래퍼로 사용
+ *
+ * @example
+ * <ErrorBoundary fallback={<CustomErrorScreen />}>
+ *   <App />
+ * </ErrorBoundary>
+ *
  * @class ErrorBoundaryComponent
  * @extends {Component<Props, State>}
- * @description 자식 컴포넌트에서 발생한 JavaScript 에러를 포착하여 전체 앱 충돌 방지
  */
 class ErrorBoundaryComponent extends Component<Props, State> {
   public state: State = {

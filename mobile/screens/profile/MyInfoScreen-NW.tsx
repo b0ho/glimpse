@@ -1,9 +1,10 @@
 /**
- * 내 정보 등록/수정 화면 - NativeWind 버전
- * 
- * 이 파일은 1,300줄에서 약 250줄로 리팩토링된 것의 NativeWind 버전입니다.
- * 모든 비즈니스 로직과 컴포넌트가 분리되었습니다.
+ * 내 정보 등록/수정 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 매칭을 위한 상세 개인정보를 등록하고 관리하는 화면 - 전화번호, 이메일, SNS, 학교, 회사 등 다양한 정보 카테고리 지원
  */
+
 import React from 'react';
 import {
   View,
@@ -31,6 +32,41 @@ import { MyInfoModal } from '@/components/myInfo/MyInfoModal';
 import { InfoFieldKey } from '@/types/myInfo';
 import { cn } from '@/lib/utils';
 
+/**
+ * 내 정보 등록/수정 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 정보 등록 폼 화면
+ *
+ * @description
+ * 다른 사용자가 나를 찾을 수 있도록 다양한 개인정보를 등록하는 화면입니다.
+ * - 기본 정보: 실명, 프로필 닉네임
+ * - 연락처: 전화번호, 이메일
+ * - SNS 계정: 인스타그램, 페이스북 등
+ * - 생년월일
+ * - 회사/학교: 직장명, 학교명, 아르바이트처
+ * - 거주 지역
+ * - 플랫폼 ID: 카카오톡, 라인 등
+ * - 게임 ID: 롤, 배그 등
+ * - 각 정보마다 대상 성별과 관계 의도 설정 가능
+ *
+ * @navigation
+ * - From: ProfileScreen 또는 온보딩 프로세스
+ * - To: 정보 저장 후 이전 화면으로 복귀
+ *
+ * @example
+ * ```tsx
+ * // ProfileScreen에서 네비게이션
+ * navigation.navigate('MyInfo');
+ * ```
+ *
+ * @remarks
+ * 이 파일은 1,300줄에서 약 250줄로 리팩토링된 모듈화 버전입니다.
+ * 모든 비즈니스 로직은 커스텀 훅으로, UI 컴포넌트는 별도 파일로 분리되었습니다.
+ *
+ * @category Screen
+ * @subcategory Profile
+ */
 export const MyInfoScreen: React.FC = () => {
   const navigation = useNavigation();
   

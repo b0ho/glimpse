@@ -1,3 +1,10 @@
+/**
+ * 즉석 미팅 현황 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 현재 참가 중인 즉석 미팅의 상태를 실시간으로 모니터링하고 관리하는 화면
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -13,6 +20,37 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useInstantMeetingStore } from '@/store/instantMeetingStore';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
+/**
+ * 즉석 미팅 현황 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 실시간 미팅 상태 대시보드
+ *
+ * @description
+ * 사용자가 참가한 즉석 미팅의 현재 상태를 확인하고 관리할 수 있는 화면입니다.
+ * - 실시간 참가자 수 표시 및 남은 시간 카운트다운
+ * - 자동 매칭 시스템 상태 모니터링
+ * - 매칭 성공 현황 및 통계 확인
+ * - 특징 정보 업데이트 기능
+ * - 매칭된 사람들 목록 조회
+ * - 미팅 나가기 기능 (확인 Alert 포함)
+ *
+ * @navigation
+ * - From: JoinInstantMeetingScreen (참가 완료 후), InstantTab (미팅 목록에서)
+ * - To: UpdateFeatures (특징 수정), InstantMatches (매칭 목록), 이전 화면 (나가기)
+ *
+ * @example
+ * ```tsx
+ * // 즉석 미팅 참가 후 자동 이동
+ * navigation.replace('InstantMeeting');
+ *
+ * // 미팅 목록에서 선택하여 이동
+ * navigation.navigate('InstantMeeting');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Instant
+ */
 export function InstantMeetingScreen() {
   const navigation = useNavigation<RootNavigationProp>();
   const { t } = useAndroidSafeTranslation();

@@ -1,7 +1,38 @@
 /**
- * 홈 스크린 컴포넌트 - NativeWind 버전
- * 
- * Tailwind CSS 클래스를 사용하여 스타일링된 버전
+ * 홈 화면 (Home Screen)
+ *
+ * @screen
+ * @description 메인 피드 및 스토리를 표시하는 메인 홈 화면
+ * - 무한 스크롤 피드
+ * - 상단 스토리 리스트
+ * - Pull-to-refresh 기능
+ * - 좋아요/댓글/공유 인터랙션
+ */
+
+/**
+ * 홈 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 홈 피드 화면 UI
+ *
+ * @description
+ * 사용자의 메인 피드를 표시하는 핵심 화면
+ * - 스토리 리스트: 24시간 제한, 이미지/비디오 스토리
+ * - 콘텐츠 피드: 그룹별 게시물, 무한 스크롤
+ * - 성공 스토리: 매칭 성공 사례 표시
+ * - 좋아요 시스템: 일일 무료 좋아요 제한, 프리미엄 무제한
+ * - Pull-to-refresh: 최신 콘텐츠 갱신
+ * - FAB 버튼: 새 게시물 작성
+ *
+ * @navigation
+ * - From: Main Tab Navigator (기본 홈 탭)
+ * - To: CreateContent, PostDetail, Profile 등
+ *
+ * @example
+ * ```tsx
+ * // Tab Navigator에서 사용
+ * <Tab.Screen name="HomeTab" component={HomeScreen} />
+ * ```
  */
 import React, { useEffect, useCallback } from 'react';
 import {

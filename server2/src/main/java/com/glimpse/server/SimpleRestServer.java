@@ -9,6 +9,35 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.time.Instant;
 
+/**
+ * Glimpse 간소화 REST API 서버
+ *
+ * <p>데이터베이스 없이 메모리 기반으로 동작하는 개발용 Mock API 서버입니다.
+ * 모바일 앱 개발 시 백엔드 서버 구축 전에 빠르게 프로토타입을 테스트할 수 있습니다.</p>
+ *
+ * <p>주요 특징:</p>
+ * <ul>
+ *   <li>DataSource와 JPA 자동 구성 제외 (메모리 기반 운영)</li>
+ *   <li>CORS 전체 허용 (개발 환경용)</li>
+ *   <li>개발 모드 인증 (x-dev-auth: true 헤더)</li>
+ *   <li>포트 3001에서 실행</li>
+ * </ul>
+ *
+ * <p>제공하는 API 카테고리:</p>
+ * <ul>
+ *   <li>인증 (로그인)</li>
+ *   <li>사용자 프로필</li>
+ *   <li>그룹 조회</li>
+ *   <li>콘텐츠 관리</li>
+ *   <li>매칭 시스템</li>
+ *   <li>채팅 (메모리 기반)</li>
+ *   <li>관심사 매칭</li>
+ * </ul>
+ *
+ * @author Glimpse Team
+ * @version 1.0
+ * @since 2025-01-14
+ */
 @SpringBootApplication(exclude = {
     DataSourceAutoConfiguration.class,
     HibernateJpaAutoConfiguration.class
@@ -16,15 +45,28 @@ import java.time.Instant;
 @RestController
 @CrossOrigin(origins = "*")
 public class SimpleRestServer {
-    
-    // In-memory storage for chat messages
+
+    /** 채팅 메시지 메모리 저장소 (서버 재시작 시 초기화됨) */
     private static final List<Map<String, Object>> chatMessages = Collections.synchronizedList(new ArrayList<>());
-    
+
+    /**
+     * Spring Boot 애플리케이션 진입점
+     *
+     * <p>포트 3001에서 서버를 시작합니다.</p>
+     *
+     * @param args 명령줄 인수
+     */
     public static void main(String[] args) {
         System.setProperty("server.port", "3001");
         SpringApplication.run(SimpleRestServer.class, args);
     }
     
+    /**
+     * 서버 헬스 체크 엔드포인트
+     *
+     * @param devAuth 개발 모드 인증 헤더 (x-dev-auth)
+     * @return 서버 상태 정보
+     */
     @GetMapping("/api/v1/health")
     public Map<String, Object> health(@RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
         Map<String, Object> response = new HashMap<>();
@@ -36,6 +78,14 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 그룹 목록 조회 (Mock 데이터)
+     *
+     * @param devAuth 개발 모드 인증 헤더
+     * @param page 페이지 번호 (기본값: 1)
+     * @param limit 페이지당 항목 수 (기본값: 10)
+     * @return 그룹 목록 및 페이징 정보
+     */
     @GetMapping("/api/v1/groups")
     public Map<String, Object> getGroups(
             @RequestHeader(value = "x-dev-auth", required = false) String devAuth,
@@ -94,6 +144,13 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 특정 그룹 상세 정보 조회 (Mock 데이터)
+     *
+     * @param groupId 조회할 그룹 ID
+     * @param devAuth 개발 모드 인증 헤더
+     * @return 그룹 상세 정보
+     */
     @GetMapping("/api/v1/groups/{groupId}")
     public Map<String, Object> getGroupDetail(
             @PathVariable String groupId,
@@ -123,6 +180,12 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 콘텐츠 목록 조회 (Mock 데이터)
+     *
+     * @param devAuth 개발 모드 인증 헤더
+     * @return 콘텐츠 리스트
+     */
     @GetMapping("/api/v1/contents")
     public Map<String, Object> getContents(
             @RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
@@ -150,6 +213,12 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 매칭 목록 조회 (Mock 데이터)
+     *
+     * @param devAuth 개발 모드 인증 헤더
+     * @return 매칭된 사용자 리스트 및 페이징 정보
+     */
     @GetMapping("/api/v1/matching/matches")
     public Map<String, Object> getMatches(
             @RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
@@ -185,6 +254,12 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 사용자 프로필 조회 (Mock 데이터)
+     *
+     * @param devAuth 개발 모드 인증 헤더
+     * @return 사용자 프로필 정보
+     */
     @GetMapping("/api/v1/users/profile")
     public Map<String, Object> getUserProfile(
             @RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
@@ -209,6 +284,12 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 현재 로그인한 사용자 정보 조회 (Mock 데이터)
+     *
+     * @param devAuth 개발 모드 인증 헤더
+     * @return 현재 사용자 정보
+     */
     @GetMapping("/api/v1/users/me")
     public Map<String, Object> getCurrentUser(@RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
         Map<String, Object> response = new HashMap<>();
@@ -230,7 +311,13 @@ public class SimpleRestServer {
         return response;
     }
     
-    // Chat endpoints - 서버 메모리 기반
+    /**
+     * 매칭별 채팅 메시지 조회 (메모리 기반)
+     *
+     * @param matchId 매칭 ID
+     * @param devAuth 개발 모드 인증 헤더
+     * @return 해당 매칭의 메시지 리스트
+     */
     @GetMapping("/api/v1/chat/messages/{matchId}")
     public Map<String, Object> getMessages(
             @PathVariable String matchId,
@@ -252,6 +339,14 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 채팅 메시지 전송 (메모리에 저장)
+     *
+     * @param matchId 매칭 ID
+     * @param message 전송할 메시지 데이터
+     * @param devAuth 개발 모드 인증 헤더
+     * @return 저장된 메시지 정보
+     */
     @PostMapping("/api/v1/chat/messages/{matchId}/send")
     public Map<String, Object> sendMessage(
             @PathVariable String matchId,
@@ -275,6 +370,13 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 채팅방 나가기 (해당 매칭의 메시지 삭제)
+     *
+     * @param matchId 매칭 ID
+     * @param devAuth 개발 모드 인증 헤더
+     * @return 성공 메시지
+     */
     @DeleteMapping("/api/v1/chat/{matchId}/leave")
     public Map<String, Object> leaveChat(
             @PathVariable String matchId,
@@ -294,6 +396,12 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 관심사 기반 검색 결과 조회 (Mock 데이터)
+     *
+     * @param devAuth 개발 모드 인증 헤더
+     * @return 관심사 검색 결과
+     */
     @GetMapping("/api/v1/interest/searches")
     public Map<String, Object> getInterestSearches(
             @RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
@@ -313,6 +421,12 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 관심사 기반 매칭 결과 조회 (Mock 데이터)
+     *
+     * @param devAuth 개발 모드 인증 헤더
+     * @return 관심사 매칭 결과
+     */
     @GetMapping("/api/v1/interest/matches")
     public Map<String, Object> getInterestMatches(
             @RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
@@ -332,6 +446,12 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 사용자의 관심사 검색 상태 조회 (Mock 데이터)
+     *
+     * @param devAuth 개발 모드 인증 헤더
+     * @return 남은 검색 횟수 등 상태 정보
+     */
     @GetMapping("/api/v1/interest/secure/my-status")
     public Map<String, Object> getInterestStatus(
             @RequestHeader(value = "x-dev-auth", required = false) String devAuth) {
@@ -351,6 +471,12 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * 로그인 (Mock 인증)
+     *
+     * @param request 로그인 요청 데이터 (phoneNumber 등)
+     * @return 액세스 토큰 및 사용자 정보
+     */
     @PostMapping("/api/v1/auth/login")
     public Map<String, Object> login(@RequestBody Map<String, String> request) {
         Map<String, Object> response = new HashMap<>();
@@ -367,6 +493,13 @@ public class SimpleRestServer {
         return response;
     }
     
+    /**
+     * FCM 푸시 알림 토큰 등록
+     *
+     * @param devAuth 개발 모드 인증 헤더
+     * @param request FCM 토큰 데이터
+     * @return 등록 성공 메시지
+     */
     @PostMapping("/api/v1/users/fcm/token")
     public Map<String, Object> registerFcmToken(
             @RequestHeader(value = "x-dev-auth", required = false) String devAuth,

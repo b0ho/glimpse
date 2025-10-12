@@ -43,8 +43,12 @@ class WebSocketService {
 
   /**
    * WebSocket 연결 초기화
-   * @param userId - 현재 사용자 ID
-   * @param authToken - 인증 토큰
+   * @async
+   * @param {string} userId - 현재 사용자 ID
+   * @param {string} authToken - 인증 토큰
+   * @returns {Promise<void>}
+   * @throws {Error} 연결 실패 시
+   * @description Socket.IO 서버에 연결하고 인증 수행
    */
   async connect(userId: string, authToken: string): Promise<void> {
     if (this.isConnected && this.socket) {
@@ -97,6 +101,7 @@ class WebSocketService {
 
   /**
    * WebSocket 연결 해제
+   * @description 소켓 연결을 종료하고 모든 리스너 정리
    */
   disconnect(): void {
     if (this.socket) {

@@ -1,3 +1,10 @@
+/**
+ * 커뮤니티 게시판 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 그룹 내 사용자들이 작성한 커뮤니티 게시글을 탐색하고 관리하는 화면
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -25,15 +32,15 @@ interface PostItemProps {
 
 const PostItem = ({ post, onPress }: PostItemProps) => {
   const { t } = useAndroidSafeTranslation();
-  
+
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       className="bg-white dark:bg-gray-800 mx-4 my-2 p-4 rounded-xl shadow-sm active:opacity-70"
       onPress={onPress}
     >
       {/* Author Info */}
       <View className="flex-row items-center mb-3">
-        <Image 
+        <Image
           source={{ uri: post.author?.profileImage || 'https://via.placeholder.com/40' }}
           className="w-10 h-10 rounded-full mr-3"
         />
@@ -93,6 +100,39 @@ const PostItem = ({ post, onPress }: PostItemProps) => {
   );
 };
 
+/**
+ * 커뮤니티 게시판 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 게시글 목록 및 카테고리 필터링 UI
+ *
+ * @description
+ * 그룹 내 사용자들이 작성한 커뮤니티 게시글을 조회하고 상호작용할 수 있는 화면입니다.
+ * - 카테고리별 게시글 필터링 (전체, 인기, 최신, 내 글)
+ * - 게시글 미리보기 (제목, 내용, 이미지, 통계)
+ * - Pull-to-Refresh 기능으로 최신 데이터 갱신
+ * - 고정된 게시글 (Pin) 표시
+ * - 작성자 프로필 이미지 및 닉네임 표시
+ * - 조회수, 좋아요, 댓글 수 통계
+ * - Floating Action Button으로 새 게시글 작성
+ * - 서버 연결 오류 시 재시도 UI
+ *
+ * @navigation
+ * - From: HomeTab 하단 네비게이션
+ * - To: PostDetail (게시글 상세), CreatePost (글 작성)
+ *
+ * @example
+ * ```tsx
+ * // 하단 탭 네비게이션에서 접근
+ * <Tab.Screen name="Community" component={CommunityScreen} />
+ *
+ * // 직접 네비게이션
+ * navigation.navigate('Community');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Community
+ */
 export const CommunityScreen = () => {
   const navigation = useNavigation() as any;
   const { user } = useAuthStore();

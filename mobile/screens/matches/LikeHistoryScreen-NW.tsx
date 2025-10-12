@@ -1,3 +1,9 @@
+/**
+ * 좋아요 보낸 내역 화면 - NativeWind 버전
+ *
+ * @screen
+ * @description 사용자가 다른 사람에게 보낸 좋아요 내역을 관리하는 화면
+ */
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -20,6 +26,36 @@ import { useLikeStore } from '@/store/slices/likeSlice';
 import { Like, AppMode, MODE_TEXTS } from '@/shared/types';
 import { cn } from '@/lib/utils';
 
+/**
+ * 좋아요 보낸 내역 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 사용자가 보낸 좋아요 내역을 표시하고 관리하는 화면입니다:
+ * - 보낸 좋아요 목록 확인
+ * - 24시간 이내 좋아요 취소 기능
+ * - 다중 선택으로 내역 삭제
+ * - 일반 좋아요 / 슈퍼 좋아요 구분
+ * - 연애/친구 모드별 내역 분리
+ *
+ * @features
+ * - 익명성 유지: 상대방 정보는 매칭 전까지 비공개
+ * - 24시간 이내 좋아요 취소 가능
+ * - 장문 선택 모드로 다중 삭제
+ * - Pull-to-refresh로 최신 상태 갱신
+ * - 슈퍼 좋아요는 별 아이콘으로 표시
+ *
+ * @navigation
+ * - From: ProfileScreen (프로필 화면에서 "보낸 좋아요" 메뉴)
+ * - From: MatchesScreen (매칭 화면에서 내역 확인)
+ *
+ * @example
+ * ```tsx
+ * <Stack.Screen name="LikeHistory" component={LikeHistoryScreen} />
+ * ```
+ */
 export const LikeHistoryScreen = () => {
   const navigation = useNavigation();
   const { t, i18n } = useAndroidSafeTranslation('matching');

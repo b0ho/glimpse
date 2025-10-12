@@ -1,3 +1,10 @@
+/**
+ * 즉석 미팅 참가 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 즉석 미팅 참가 코드를 입력받고 사용자의 특징 정보를 3단계로 수집하는 온보딩 화면
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -21,6 +28,37 @@ interface FeatureOption {
   value: string;
 }
 
+/**
+ * 즉석 미팅 참가 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 3단계 특징 입력 폼
+ *
+ * @description
+ * 즉석 미팅에 참가하기 위한 정보를 3단계로 수집하는 화면입니다.
+ * - Step 1: 닉네임 입력 (미팅 내에서 사용할 별명)
+ * - Step 2: 내 특징 입력 (상의/하의 색상, 안경 착용 여부, 특별한 특징)
+ * - Step 3: 찾는 사람 특징 입력 (상대방의 옷차림 및 특징)
+ * - 각 단계별 유효성 검증 및 필수 항목 확인
+ * - KeyboardAvoidingView로 모바일 키보드 대응
+ * - 제출 시 자동 매칭 시스템에 등록
+ *
+ * @navigation
+ * - From: InstantTab (QR 코드 스캔 또는 코드 입력)
+ * - To: InstantMeeting (참가 완료 후 replace)
+ *
+ * @example
+ * ```tsx
+ * // QR 코드 스캔 후 이동
+ * navigation.navigate('JoinInstantMeeting', { code: 'MEETING123' });
+ *
+ * // 수동 코드 입력 후 이동
+ * navigation.navigate('JoinInstantMeeting', { code: enteredCode });
+ * ```
+ *
+ * @category Screen
+ * @subcategory Instant
+ */
 export function JoinInstantMeetingScreen() {
   const navigation = useNavigation<RootNavigationProp>();
   const route = useRoute<JoinInstantMeetingScreenProps['route']>();

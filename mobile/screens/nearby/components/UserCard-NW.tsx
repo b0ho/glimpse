@@ -1,3 +1,9 @@
+/**
+ * 사용자 카드 컴포넌트 (NativeWind v4 버전)
+ *
+ * @module UserCard
+ * @description 주변 사용자 정보를 표시하고 상호작용할 수 있는 카드 컴포넌트
+ */
 import React from 'react';
 import {
   View,
@@ -11,14 +17,54 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 import { cn } from '@/lib/utils';
 
+/**
+ * UserCard Props 인터페이스
+ *
+ * @interface UserCardProps
+ */
 interface UserCardProps {
+  /** 표시할 사용자 정보 */
   user: NearbyUser;
+  /** 현재 로그인한 사용자 ID */
   currentUserId: string;
+  /** 좋아요 전송 여부 */
   hasLiked: boolean;
+  /** 좋아요 버튼 클릭 콜백 함수 */
   onLike: () => void;
+  /** 메시지 버튼 클릭 콜백 함수 */
   onMessage: () => void;
 }
 
+/**
+ * 사용자 카드 컴포넌트
+ *
+ * @component
+ * @param {UserCardProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 사용자 정보 카드 UI
+ *
+ * @description
+ * 주변 사용자의 정보를 카드 형태로 표시하고 좋아요/메시지 기능을 제공합니다.
+ * - 프로필 이미지, 닉네임, 나이, 거리 표시
+ * - 인증 배지 및 프리미엄 배지 표시
+ * - 공통 그룹 수 표시
+ * - 좋아요/메시지 버튼
+ * - 매칭 여부에 따른 UI 변경
+ * - 다크모드 지원
+ *
+ * @example
+ * ```tsx
+ * <UserCard
+ *   user={nearbyUser}
+ *   currentUserId="user123"
+ *   hasLiked={false}
+ *   onLike={() => sendLike(user.id)}
+ *   onMessage={() => startChat(user.id)}
+ * />
+ * ```
+ *
+ * @category Component
+ * @subcategory Nearby
+ */
 export const UserCard = ({
   user,
   currentUserId,

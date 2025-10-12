@@ -1,3 +1,10 @@
+/**
+ * 프로필 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 사용자 프로필 정보, 활동 통계, 프리미엄 구독 상태, 앱 설정을 관리하는 메인 프로필 화면
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -23,10 +30,34 @@ import { LikeSystemStatus } from '@/components/profile/LikeSystemStatus';
 import { cn } from '@/lib/utils';
 
 /**
- * 프로필 화면 컴포넌트 - NativeWind 버전
+ * 프로필 화면 컴포넌트
+ *
  * @component
- * @returns {JSX.Element} 프로필 화면 UI
- * @description 사용자 프로필, 통계, 프리미엄 상태, 설정 기능을 제공하는 화면
+ * @returns {JSX.Element} 프로필 관리 화면
+ *
+ * @description
+ * 사용자의 프로필 정보와 활동 통계를 보여주고, 앱 설정을 관리하는 화면입니다.
+ * - 프리미엄 구독 상태 및 업그레이드 옵션 표시
+ * - 가입한 그룹, 보낸/받은 좋아요, 매칭 수 등 활동 통계
+ * - 좋아요 시스템 상태 (일일 한도, 남은 크레딧)
+ * - 앱 설정 (언어, 테마, 알림, 그룹 관리)
+ * - 계정 관리 (로그아웃, 계정 삭제)
+ *
+ * @navigation
+ * - From: BottomTabNavigator의 "Profile" 탭
+ * - To: MyGroups, NotificationSettings, PrivacyPolicy, TermsOfService, Support 등
+ *
+ * @example
+ * ```tsx
+ * // BottomTabNavigator에서 사용
+ * <Tab.Screen name="Profile" component={ProfileScreen} />
+ *
+ * // 코드에서 네비게이션
+ * navigation.navigate('Profile');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Profile
  */
 export const ProfileScreen = () => {
   const isFocused = useIsFocused();

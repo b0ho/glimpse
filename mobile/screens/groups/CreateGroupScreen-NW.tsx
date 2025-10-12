@@ -1,3 +1,10 @@
+/**
+ * 그룹 생성 화면
+ *
+ * @screen
+ * @description 사용자가 새로운 그룹을 생성할 수 있는 화면으로, 그룹 이름, 설명, 유형, 최소 인원, 비공개 여부 등을 설정
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -45,9 +52,31 @@ interface GroupFormData {
 
 /**
  * 그룹 생성 화면 컴포넌트
+ *
  * @component
- * @returns {JSX.Element} 그룹 생성 화면 UI
- * @description 새로운 그룹을 생성하기 위한 폼 화면
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 새로운 그룹을 생성하기 위한 폼 화면
+ * - 그룹 이름 및 설명 입력 (필수)
+ * - 그룹 타입 선택 (일반/장소/이벤트)
+ * - 최소 참여 인원 설정 (4-100명)
+ * - 비공개 그룹 여부 설정
+ * - 장소 그룹의 경우 위치 정보 입력
+ * - 실시간 입력 유효성 검사 및 피드백
+ *
+ * @navigation
+ * - From: 그룹 탭, 그룹 목록 화면의 그룹 생성 버튼
+ * - To: 생성 완료 후 그룹 목록 화면으로 이동
+ *
+ * @example
+ * ```tsx
+ * <Stack.Screen
+ *   name="CreateGroup"
+ *   component={CreateGroupScreen}
+ *   options={{ title: '그룹 만들기' }}
+ * />
+ * ```
  */
 export const CreateGroupScreen = () => {
   const [formData, setFormData] = useState<GroupFormData>({

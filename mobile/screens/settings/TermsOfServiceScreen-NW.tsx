@@ -1,3 +1,10 @@
+/**
+ * 서비스 이용약관 화면
+ *
+ * @screen
+ * @description Glimpse 서비스 이용약관을 표시하는 법적 문서 화면
+ */
+
 import React from 'react';
 import {
   View,
@@ -12,6 +19,43 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { cn } from '@/lib/utils';
 
+/**
+ * 서비스 이용약관 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * Glimpse의 서비스 이용약관을 상세히 표시하는 화면입니다.
+ * - 약관의 목적 및 정의
+ * - 약관의 효력 및 변경
+ * - 서비스의 제공 및 변경
+ * - 회원가입 절차
+ * - 회원탈퇴 및 자격 상실
+ * - 개인정보보호 정책
+ *
+ * @legal
+ * - 전자상거래법 준수
+ * - 약관 변경 시 7일 전 공지
+ * - 시행일자 명시
+ *
+ * @content
+ * - 익명 매칭 서비스 정의
+ * - 그룹 기반 네트워킹
+ * - 실시간 채팅 서비스
+ * - 회원 권리 및 의무
+ * - 서비스 이용 제한 사유
+ *
+ * @navigation
+ * - From: SettingsScreen (설정 화면)
+ * - From: 회원가입 화면 (약관 동의 시)
+ *
+ * @example
+ * ```tsx
+ * // 설정 화면에서 이동
+ * navigation.navigate('TermsOfService');
+ * ```
+ */
 export const TermsOfServiceScreen = () => {
   const navigation = useNavigation();
   const { colors, isDarkMode } = useTheme();

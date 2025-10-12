@@ -1,3 +1,9 @@
+/**
+ * 반경 선택 컴포넌트 (NativeWind v4 버전)
+ *
+ * @module RadiusSelector
+ * @description 주변 검색 반경을 선택할 수 있는 컴포넌트
+ */
 import React from 'react';
 import {
   View,
@@ -9,12 +15,46 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
 import { cn } from '@/lib/utils';
 
+/**
+ * RadiusSelector Props 인터페이스
+ *
+ * @interface RadiusSelectorProps
+ */
 interface RadiusSelectorProps {
+  /** 선택 가능한 반경 옵션 배열 (km 단위) */
   radiusOptions: number[];
+  /** 현재 선택된 반경 (km) */
   selectedRadius: number;
+  /** 반경 변경 콜백 함수 */
   onRadiusChange: (radius: number) => void;
 }
 
+/**
+ * 반경 선택 컴포넌트
+ *
+ * @component
+ * @param {RadiusSelectorProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 반경 선택 UI
+ *
+ * @description
+ * 주변 검색 반경을 선택할 수 있는 수평 스크롤 가능한 버튼 그룹을 제공합니다.
+ * - 여러 반경 옵션 표시 (예: 1km, 2km, 5km, 10km)
+ * - 선택된 반경 강조 표시
+ * - 수평 스크롤 지원
+ * - 다크모드 지원
+ *
+ * @example
+ * ```tsx
+ * <RadiusSelector
+ *   radiusOptions={[1, 2, 5, 10]}
+ *   selectedRadius={2}
+ *   onRadiusChange={(radius) => setRadius(radius)}
+ * />
+ * ```
+ *
+ * @category Component
+ * @subcategory Nearby
+ */
 export const RadiusSelector = ({
   radiusOptions,
   selectedRadius,

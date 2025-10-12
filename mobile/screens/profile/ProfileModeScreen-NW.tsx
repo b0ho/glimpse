@@ -1,3 +1,10 @@
+/**
+ * 프로필 모드 설정 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 실제 프로필과 페르소나 프로필 간 전환을 관리하는 화면 - 익명성 보호를 위한 가상 프로필 생성 및 관리
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -23,6 +30,33 @@ interface PersonaProfile {
   profileImage?: string;
 }
 
+/**
+ * 프로필 모드 설정 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 프로필 모드 관리 화면
+ *
+ * @description
+ * 사용자가 실제 프로필과 페르소나(가상) 프로필 중 선택하여 사용할 수 있는 화면입니다.
+ * - 실제 프로필 모드: 등록된 실명과 정보 표시
+ * - 페르소나 프로필 모드: 가상의 닉네임, 나이, 자기소개 사용
+ * - 페르소나 프로필 생성 및 편집 기능
+ * - 익명성 보호가 필요한 상황에서 활용
+ * - 위치 기반 매칭 시 프라이버시 보호
+ *
+ * @navigation
+ * - From: ProfileScreen의 설정 메뉴
+ * - To: 모드 변경 후 이전 화면으로 복귀
+ *
+ * @example
+ * ```tsx
+ * // ProfileScreen에서 네비게이션
+ * navigation.navigate('ProfileMode');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Profile
+ */
 export const ProfileModeScreen = React.memo(() => {
   const navigation = useNavigation();
   const { user, updateUser } = useAuthStore();

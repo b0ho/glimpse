@@ -1,3 +1,10 @@
+/**
+ * QR 코드 그룹 참여 화면
+ *
+ * @screen
+ * @description QR 코드를 스캔하거나 생성하여 그룹에 참여하는 화면
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -32,6 +39,37 @@ interface QRGroupData {
   };
 }
 
+/**
+ * QR 코드 그룹 참여 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * QR 코드를 스캔하거나 생성하여 그룹에 참여하는 화면
+ * - QR 코드 스캔 모드: 다른 사람의 QR 코드를 스캔하여 참여
+ * - QR 코드 생성 모드: 내 그룹의 QR 코드 생성 및 표시
+ * - 카메라 권한 요청 및 관리
+ * - QR 코드 유효성 검증 (5분 타임아웃)
+ * - 그룹 정보 표시 (이름, 멤버 수, 타입)
+ * - QR 코드 재생성 기능
+ * - 참여 확인 다이얼로그
+ *
+ * @navigation
+ * - From: 그룹 탭의 QR 스캔 버튼, 그룹 상세의 QR 생성
+ * - To: 그룹 목록 화면 (참여 성공 시)
+ *
+ * @example
+ * ```tsx
+ * // QR 스캔 모드
+ * navigation.navigate('QRGroupJoin');
+ *
+ * // QR 생성 모드
+ * navigation.navigate('QRGroupJoin', {
+ *   groupId: 'group-123'
+ * });
+ * ```
+ */
 export const QRGroupJoinScreen = () => {
   const { t } = useAndroidSafeTranslation('group');
   const navigation = useNavigation();

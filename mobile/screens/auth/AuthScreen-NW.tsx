@@ -1,5 +1,11 @@
 /**
- * 인증 화면 컴포넌트 - 모듈화된 버전 (NativeWind)
+ * 인증 화면 (Authentication Screen)
+ *
+ * @screen
+ * @description 다단계 인증 프로세스를 관리하는 메인 인증 화면
+ * - 웰컴 → 전화번호 → SMS → 닉네임 → 회사인증 순서로 진행
+ * - 각 단계를 개별 컴포넌트로 분리하여 관리
+ * - 개발 환경에서는 빠른 로그인 기능 제공
  */
 
 import React from 'react';
@@ -19,7 +25,29 @@ import { AuthScreenProps, QuickDevUser } from '@/types/auth.types';
 import { cn } from '@/lib/utils';
 
 /**
- * 인증 화면 컴포넌트 - 다단계 인증 프로세스 관리
+ * 인증 화면 컴포넌트
+ *
+ * @component
+ * @param {AuthScreenProps} props - 컴포넌트 속성
+ * @param {() => void} props.onAuthCompleted - 인증 완료 시 호출되는 콜백
+ * @returns {JSX.Element} 현재 단계에 맞는 인증 화면
+ *
+ * @description
+ * 5단계 인증 프로세스를 관리하는 오케스트레이터 컴포넌트
+ * - Welcome: 로그인/회원가입 선택, Google 로그인, 개발자 빠른 로그인
+ * - Phone: 전화번호 입력 및 SMS 전송
+ * - SMS: 인증번호 6자리 입력 및 확인
+ * - Nickname: 닉네임 및 성별 설정
+ * - Company: 회사/대학교 인증 (선택사항)
+ *
+ * @navigation
+ * - From: App 초기 진입점 (앱 실행 시 미인증 상태)
+ * - To: Main (인증 완료 후 메인 탭 화면으로 이동)
+ *
+ * @example
+ * ```tsx
+ * <AuthScreen onAuthCompleted={() => navigation.navigate('Main')} />
+ * ```
  */
 export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
   const { colors, isDarkMode } = useTheme();

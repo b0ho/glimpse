@@ -1,3 +1,10 @@
+/**
+ * 계정 복구 화면
+ *
+ * @screen
+ * @description 삭제 예정인 계정을 복구할 수 있는 화면. 7일 대기 기간 내에 계정 삭제를 취소하고 복구할 수 있습니다.
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -16,6 +23,16 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { authService } from '@/services/api/authService';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
 
+/**
+ * 계정 삭제 상태 인터페이스
+ *
+ * @interface DeletionStatus
+ * @property {boolean} isScheduledForDeletion - 삭제 예약 여부
+ * @property {string} [deletionRequestedAt] - 삭제 요청 일시
+ * @property {string} [scheduledDeletionAt] - 삭제 예정 일시
+ * @property {number} [daysRemaining] - 남은 일수
+ * @property {string} [reason] - 삭제 사유
+ */
 interface DeletionStatus {
   isScheduledForDeletion: boolean;
   deletionRequestedAt?: string;
@@ -24,6 +41,35 @@ interface DeletionStatus {
   reason?: string;
 }
 
+/**
+ * 계정 복구 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 삭제 예정인 계정의 상태를 확인하고 복구할 수 있는 화면입니다.
+ * - 삭제 예정 상태 조회 및 표시
+ * - 남은 복구 기간 표시 (7일 이내)
+ * - 계정 복구 실행
+ * - 복구 불가능한 경우 안내
+ *
+ * @features
+ * - 삭제 상태 자동 조회
+ * - 남은 일수에 따른 색상 표시 (긴급도)
+ * - 복구 확인 다이얼로그
+ * - 서버 연결 에러 처리
+ *
+ * @navigation
+ * - From: SettingsScreen (설정 화면)
+ * - To: 이전 화면으로 복귀 (복구 완료 시)
+ *
+ * @example
+ * ```tsx
+ * // 설정 화면에서 이동
+ * navigation.navigate('AccountRestore');
+ * ```
+ */
 export const AccountRestoreScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuthStore();

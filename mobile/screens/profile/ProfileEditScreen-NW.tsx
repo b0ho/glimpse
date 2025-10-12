@@ -1,5 +1,8 @@
 /**
- * 프로필 편집 화면 - 모듈화된 버전 (NativeWind)
+ * 프로필 편집 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 사용자 프로필 상세 정보를 편집하는 화면 - 기본 정보, SNS 계정, 회사/학교 정보, 외모 정보 등을 관리
  */
 
 import React from 'react';
@@ -22,6 +25,35 @@ import { BasicInfoSection } from '@/components/profile/edit/BasicInfoSection';
 import { SocialAccountsSection } from '@/components/profile/edit/SocialAccountsSection';
 import { cn } from '@/lib/utils';
 
+/**
+ * 프로필 편집 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 프로필 편집 폼 화면
+ *
+ * @description
+ * 사용자의 상세 프로필 정보를 편집할 수 있는 화면입니다.
+ * - 기본 정보: 닉네임, 실명, 성별, 생년월일, 자기소개
+ * - 연락처 정보: 이메일, 전화번호
+ * - SNS 계정: 인스타그램, 페이스북 등 소셜 미디어 ID
+ * - 플랫폼 ID: 카카오톡, 라인 등 메신저 ID
+ * - 게임 ID: 롤, 배그 등 게임 닉네임
+ * - 회사/학교 정보: 직장, 학교, 전공, 거주 지역
+ * - 외모 정보: 키, 몸무게, 외모 특징 등
+ *
+ * @navigation
+ * - From: ProfileScreen의 설정 메뉴 또는 프로필 영역
+ * - To: 저장 후 이전 화면으로 복귀
+ *
+ * @example
+ * ```tsx
+ * // ProfileScreen에서 네비게이션
+ * navigation.navigate('ProfileEdit');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Profile
+ */
 export const ProfileEditScreen: React.FC = () => {
   const navigation = useNavigation();
   const { colors, isDarkMode } = useTheme();

@@ -1,3 +1,10 @@
+/**
+ * 프로필 설정 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 계정 설정, 프라이버시 설정, 알림 설정, 기타 앱 설정을 종합적으로 관리하는 화면
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -28,6 +35,33 @@ interface SettingItem {
   route?: string;
 }
 
+/**
+ * 프로필 설정 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 종합 설정 관리 화면
+ *
+ * @description
+ * 앱의 모든 설정을 관리하는 종합 설정 화면입니다.
+ * - 계정 설정: 프로필 편집, 비밀번호 변경, 전화번호 변경
+ * - 프라이버시 설정: 프로필 공개, 온라인 상태, 최근 접속 시간, 친구 요청 허용
+ * - 알림 설정: 좋아요, 매칭, 메시지, 친구 요청 알림 제어
+ * - 기타 설정: 이용약관, 개인정보처리방침, 고객센터, 앱 정보
+ * - 계정 삭제 기능
+ *
+ * @navigation
+ * - From: ProfileScreen의 설정 버튼
+ * - To: ProfileEdit, ChangePassword, ChangePhone, BlockedUsers, Terms, Privacy, Support, AppInfo, DeleteAccount
+ *
+ * @example
+ * ```tsx
+ * // ProfileScreen에서 네비게이션
+ * navigation.navigate('ProfileSettings');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Profile
+ */
 const ProfileSettingsScreen = () => {
   const { t } = useAndroidSafeTranslation('settings');
   const navigation = useNavigation();

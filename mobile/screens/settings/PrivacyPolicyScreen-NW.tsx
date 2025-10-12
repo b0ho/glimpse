@@ -1,3 +1,10 @@
+/**
+ * 개인정보 처리방침 화면
+ *
+ * @screen
+ * @description 개인정보보호법에 따른 개인정보 처리방침을 표시하는 법적 문서 화면
+ */
+
 import React from 'react';
 import {
   View,
@@ -12,6 +19,42 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { cn } from '@/lib/utils';
 
+/**
+ * 개인정보 처리방침 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * Glimpse의 개인정보 처리방침을 상세히 표시하는 화면입니다.
+ * - 개인정보의 처리목적
+ * - 개인정보의 처리 및 보유기간
+ * - 정보주체의 권리·의무 및 행사방법
+ * - 개인정보의 안전성 확보조치
+ * - 개인정보 보호책임자 정보
+ *
+ * @legal
+ * - 개인정보보호법 준수
+ * - GDPR 호환
+ * - 시행일자 명시
+ *
+ * @content
+ * - 회원가입 및 관리 목적
+ * - 매칭 서비스 제공
+ * - 개인정보 열람/정정/삭제 권리
+ * - 암호화 및 접근통제 조치
+ * - 보호책임자 연락처
+ *
+ * @navigation
+ * - From: SettingsScreen (설정 화면)
+ * - From: 회원가입 화면 (약관 동의 시)
+ *
+ * @example
+ * ```tsx
+ * // 설정 화면에서 이동
+ * navigation.navigate('PrivacyPolicy');
+ * ```
+ */
 export const PrivacyPolicyScreen = () => {
   const navigation = useNavigation();
   const { colors, isDarkMode } = useTheme();

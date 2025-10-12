@@ -1,3 +1,10 @@
+/**
+ * 그룹 초대 화면
+ *
+ * @screen
+ * @description 그룹 초대 링크 및 QR 코드를 생성하고 공유하는 화면, SMS 초대 기능 포함
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -33,6 +40,32 @@ interface GroupInvite {
   link: string;
 }
 
+/**
+ * 그룹 초대 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 그룹 멤버를 초대하는 다양한 방법을 제공하는 화면
+ * - QR 코드 생성 및 표시
+ * - 초대 링크 생성 및 복사
+ * - SNS 공유 기능
+ * - SMS 초대 발송 (전화번호 입력)
+ * - 활성 초대 목록 관리
+ * - 초대 코드 삭제 기능
+ *
+ * @navigation
+ * - From: 그룹 상세 화면의 초대 버튼
+ * - To: 공유 화면, SMS 앱
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('GroupInvite', {
+ *   groupId: 'group-123'
+ * });
+ * ```
+ */
 export const GroupInviteScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();

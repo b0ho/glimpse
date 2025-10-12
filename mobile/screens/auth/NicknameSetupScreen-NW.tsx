@@ -1,3 +1,12 @@
+/**
+ * 닉네임 설정 화면 (Nickname Setup Screen)
+ *
+ * @screen
+ * @description 사용자 닉네임 및 성별을 설정하는 화면
+ * - 실시간 닉네임 유효성 검증 및 중복 확인
+ * - 남성/여성 성별 선택
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -16,10 +25,41 @@ import { Gender } from '@/types';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/store/slices/themeSlice';
 
+/**
+ * Props 인터페이스
+ *
+ * @interface NicknameSetupScreenProps
+ * @property {() => void} onNicknameSet - 닉네임 설정 완료 시 호출되는 콜백
+ */
 interface NicknameSetupScreenProps {
   onNicknameSet: () => void;
 }
 
+/**
+ * 닉네임 설정 화면 컴포넌트
+ *
+ * @component
+ * @param {NicknameSetupScreenProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 닉네임 설정 화면 UI
+ *
+ * @description
+ * SMS 인증 완료 후 사용자 프로필 기본 정보를 설정하는 화면
+ * - 닉네임 입력: 2-20자, 한글/영문/숫자 조합
+ * - 실시간 검증: 형식 검증 및 중복 확인 (디바운싱 적용)
+ * - 성별 선택: 남성/여성 필수 선택
+ * - 익명 매칭: 실명이 아닌 닉네임 기반 시스템
+ *
+ * @navigation
+ * - From: AuthScreen (SMS 인증 완료 후)
+ * - To: CompanyVerificationScreen 또는 Main
+ *
+ * @example
+ * ```tsx
+ * <NicknameSetupScreen
+ *   onNicknameSet={() => navigation.navigate('CompanyVerification')}
+ * />
+ * ```
+ */
 export const NicknameSetupScreen = ({
   onNicknameSet,
 }: NicknameSetupScreenProps) => {

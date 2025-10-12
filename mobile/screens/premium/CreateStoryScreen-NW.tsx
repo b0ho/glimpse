@@ -1,3 +1,10 @@
+/**
+ * 스토리 생성 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 사용자가 24시간 동안 표시될 이미지 기반 스토리를 생성하는 프리미엄 기능 화면
+ */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -19,6 +26,39 @@ import { useTheme } from '@/hooks/useTheme';
 import { apiClient } from '@/services/api/config';
 import { cn } from '@/lib/utils';
 
+/**
+ * 스토리 생성 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 이미지 선택 및 업로드 UI
+ *
+ * @description
+ * 사용자가 이미지를 선택하여 24시간 동안 표시되는 스토리를 생성하는 화면입니다.
+ * - expo-image-picker를 통한 갤러리 이미지 선택
+ * - 미디어 라이브러리 권한 요청 및 처리
+ * - 9:16 세로 비율 스토리 이미지 (Instagram 스타일)
+ * - 이미지 품질 최적화 (0.8 quality)
+ * - 선택 후 이미지 미리보기 및 변경 기능
+ * - 스토리 작성 가이드라인 표시
+ * - 서버 API 연동 및 로컬 저장소 백업
+ * - 업로드 중 로딩 상태 표시
+ *
+ * @navigation
+ * - From: HomeScreen (스토리 추가 버튼), ProfileScreen (내 스토리 관리)
+ * - To: HomeTab (업로드 완료 후 자동 이동)
+ *
+ * @example
+ * ```tsx
+ * // 홈 화면에서 스토리 추가
+ * navigation.navigate('CreateStory');
+ *
+ * // 프로필에서 스토리 재생성
+ * navigation.navigate('CreateStory');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Premium
+ */
 export const CreateStoryScreen = () => {
   const { t } = useAndroidSafeTranslation('story');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);

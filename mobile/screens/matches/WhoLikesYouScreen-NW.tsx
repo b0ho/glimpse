@@ -1,3 +1,9 @@
+/**
+ * 좋아요 받은 사람 화면 - NativeWind 버전
+ *
+ * @screen
+ * @description 나에게 좋아요를 보낸 사람들을 확인하고 답장할 수 있는 프리미엄 전용 화면
+ */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -20,6 +26,17 @@ import { User } from '@/types';
 import { likeApi } from '@/services/api/likeApi';
 import { cn } from '@/lib/utils';
 
+/**
+ * 좋아요 정보 인터페이스
+ *
+ * @interface
+ * @property {string} id - 좋아요 ID
+ * @property {User} fromUser - 좋아요를 보낸 사용자
+ * @property {string} groupId - 그룹 ID
+ * @property {string} groupName - 그룹 이름
+ * @property {Date} likedAt - 좋아요 보낸 시각
+ * @property {boolean} isSuper - 슈퍼 좋아요 여부
+ */
 interface LikeInfo {
   id: string;
   fromUser: User;
@@ -29,6 +46,41 @@ interface LikeInfo {
   isSuper: boolean;
 }
 
+/**
+ * 좋아요 받은 사람 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element}
+ *
+ * @description
+ * 나에게 좋아요를 보낸 사람들의 목록을 확인하고 답장할 수 있는 프리미엄 기능 화면입니다:
+ * - 받은 좋아요 목록 확인 (프리미엄 전용)
+ * - 일반 좋아요로 답장
+ * - 슈퍼 좋아요로 답장 (프리미엄)
+ * - 즉시 매칭 성사
+ *
+ * @features
+ * - 프리미엄 전용: 무료 사용자는 업그레이드 안내 화면 표시
+ * - 익명 유지: 매칭 전까지 상대방 닉네임 비공개
+ * - 슈퍼 좋아요 사용 횟수 제한 표시
+ * - Pull-to-refresh로 실시간 갱신
+ * - 빈 상태 안내 메시지
+ *
+ * @navigation
+ * - From: MatchesScreen (프리미엄 기능 접근)
+ * - From: ProfileScreen ("좋아요 받은 사람" 메뉴)
+ * - To: Premium (프리미엄 구독 화면)
+ * - To: Chat (매칭 성사 후 채팅)
+ *
+ * @premium
+ * - 무료 사용자: 업그레이드 안내 화면
+ * - 프리미엄 사용자: 받은 좋아요 목록 및 답장 기능
+ *
+ * @example
+ * ```tsx
+ * <Stack.Screen name="WhoLikesYou" component={WhoLikesYouScreen} />
+ * ```
+ */
 export const WhoLikesYouScreen = () => {
   const { t } = useAndroidSafeTranslation('premium');
   const navigation = useNavigation();

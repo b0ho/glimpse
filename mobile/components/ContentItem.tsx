@@ -22,7 +22,8 @@ import { useTheme } from '@/hooks/useTheme';
 import { shadowPresets } from '@/utils/styles/platformStyles';
 
 /**
- * ContentItem 컴포넌트 Props
+ * 컨텐츠 아이템 컴포넌트 Props
+ *
  * @interface ContentItemProps
  */
 interface ContentItemProps {
@@ -43,11 +44,26 @@ interface ContentItemProps {
 }
 
 /**
- * 컨텐츠 아이템 컴포넌트 - 피드의 각 컨텐츠 표시
- * @component
- * @param {ContentItemProps} props - 컴포넌트 속성
- * @returns {JSX.Element} 컨텐츠 아이템 UI
- * @description 사용자 게시물을 표시하고 좋아요 기능 제공. 익명성 시스템에 따라 작성자 표시
+ * 홈 피드 컨텐츠 아이템 컴포넌트
+ *
+ * @description 사용자 게시물을 카드 형태로 표시하며 좋아요/댓글 기능 제공.
+ *              익명성 시스템에 따라 작성자 정보를 조건부로 표시하고,
+ *              본인 게시물의 경우 수정/삭제 메뉴를 제공.
+ *
+ * @component Feature
+ * @props ContentItemProps
+ * @usage HomeScreen, GroupDetailScreen, PostDetailScreen
+ *
+ * @example
+ * <ContentItem
+ *   item={contentData}
+ *   currentUserId="user123"
+ *   remainingLikes={5}
+ *   onLikeToggle={(contentId, authorId) => handleLike(contentId, authorId)}
+ *   onEdit={(content) => handleEdit(content)}
+ *   onDelete={(id) => handleDelete(id)}
+ *   groupName="서강대학교"
+ * />
  */
 export const ContentItem: React.FC<ContentItemProps> = React.memo(({
   item,

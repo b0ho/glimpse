@@ -1,8 +1,8 @@
 /**
- * 채팅 화면 - NativeWind 버전
- * 
- * 데이팅 앱의 1:1 실시간 채팅 화면
- * 로맨틱한 메시지 버블과 부드러운 애니메이션으로 친밀감 조성
+ * 1:1 실시간 채팅 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 매칭된 사용자와의 실시간 채팅 화면. 로맨틱한 디자인과 부드러운 애니메이션으로 친밀감 조성
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
@@ -44,6 +44,40 @@ type ChatScreenRouteProp = RouteProp<{
   };
 }, 'Chat'>;
 
+/**
+ * 1:1 채팅 화면 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 실시간 채팅 UI
+ *
+ * @description
+ * 매칭된 사용자와의 1:1 실시간 채팅 기능 제공
+ * - Socket.IO 기반 실시간 메시지 송수신
+ * - 입력 중 상태 표시 (Typing Indicator)
+ * - 메시지 읽음 처리 및 상태 표시
+ * - 음성/영상 통화 시작 버튼
+ * - 로맨틱한 그라디언트 메시지 버블
+ * - 부드러운 메시지 입장/퇴장 애니메이션
+ * - 하트 이펙트 애니메이션
+ * - 무한 스크롤 페이지네이션
+ * - 키보드 회피 처리
+ *
+ * @navigation
+ * - From: MatchChatListScreen (채팅 목록에서 특정 채팅방 선택)
+ * - To: CallScreen (음성/영상 통화 시작)
+ *
+ * @example
+ * ```tsx
+ * navigation.navigate('Chat', {
+ *   roomId: 'room-123',
+ *   matchId: 'match-456',
+ *   otherUserNickname: '민지'
+ * });
+ * ```
+ *
+ * @category Screen
+ * @subcategory Chat
+ */
 export const ChatScreen = () => {
   const route = useRoute<ChatScreenRouteProp>();
   const navigation = useNavigation();
