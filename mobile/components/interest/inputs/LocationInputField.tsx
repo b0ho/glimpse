@@ -5,14 +5,15 @@ import React from 'react';
 import { View, Text, TouchableOpacity} from 'react-native';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
+import { Gender } from '@/types';
 
 interface LocationInputFieldProps {
   value: string;
   onChange: (value: string) => void;
   name?: string;
   onNameChange?: (name: string) => void;
-  selectedGender?: 'male' | 'female' | 'other';
-  onGenderSelect?: (gender: 'male' | 'female' | 'other') => void;
+  selectedGender?: Gender;
+  onGenderSelect?: (gender: Gender) => void;
   t: (key: string) => string;
 }
 
@@ -21,14 +22,14 @@ export const LocationInputField: React.FC<LocationInputFieldProps> = ({
   onChange,
   name = '',
   onNameChange,
-  selectedGender = 'male',
+  selectedGender = 'MALE',
   onGenderSelect,
   t,
 }) => {
-  const genderOptions = [
-    { id: 'male' as const, label: t('common:gender.male'), icon: 'male-outline' },
-    { id: 'female' as const, label: t('common:gender.female'), icon: 'female-outline' },
-    { id: 'other' as const, label: t('common:gender.other'), icon: 'help-outline' },
+  const genderOptions: Array<{ id: Gender; label: string; icon: string }> = [
+    { id: 'MALE', label: t('common:gender.male'), icon: 'male-outline' },
+    { id: 'FEMALE', label: t('common:gender.female'), icon: 'female-outline' },
+    { id: 'OTHER', label: t('common:gender.other'), icon: 'help-outline' },
   ];
 
   return (

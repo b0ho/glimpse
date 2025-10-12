@@ -85,7 +85,7 @@ export const WhoLikesYouScreen = () => {
   const { t } = useAndroidSafeTranslation('premium');
   const navigation = useNavigation();
   const { user } = useAuthStore();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   
   const [likesReceived, setLikesReceived] = useState<LikeInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);

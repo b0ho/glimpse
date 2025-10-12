@@ -59,7 +59,7 @@ export const MatchesScreen = React.memo(() => {
   const navigation = useNavigation();
   const likeStore = useLikeStore();
   const { user } = useAuthStore();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation('matches');
 
   /**
