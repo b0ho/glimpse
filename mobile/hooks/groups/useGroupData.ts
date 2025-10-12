@@ -16,16 +16,18 @@ export const useGroupData = () => {
   const [serverConnectionError, setServerConnectionError] = useState(false);
 
   /**
-   * 3일 이내 그룹만 필터링
+   * 최근 그룹만 필터링
+   * @description 개발 환경: 30일 이내, 프로덕션: 3일 이내
    */
   const filterRecentGroups = useCallback((groups: Group[]): Group[] => {
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-    threeDaysAgo.setHours(0, 0, 0, 0);
-    
+    const FILTER_DAYS = __DEV__ ? 30 : 3;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - FILTER_DAYS);
+    cutoffDate.setHours(0, 0, 0, 0);
+
     return groups.filter(group => {
       const groupDate = new Date(group.createdAt);
-      return groupDate >= threeDaysAgo;
+      return groupDate >= cutoffDate;
     });
   }, []);
 
@@ -130,16 +132,17 @@ export const useGroupData = () => {
         console.log('[useGroupData] 테스트 데이터 사용, 그룹 수:', groupsToSet.length);
       }
       
-      // 3일 이내 그룹만 필터링
+      // 최근 그룹 필터링 (개발 환경: 30일, 프로덕션: 3일)
       const recentGroups = filterRecentGroups(groupsToSet);
-      
+      console.log('[useGroupData] 필터링 전 그룹 수:', groupsToSet.length, '필터링 후:', recentGroups.length);
+
       // 페이지네이션 처리
       if (page === 1) {
         setGroups(recentGroups);
       } else {
         setGroups(prev => [...prev, ...recentGroups]);
       }
-      
+
       // 더 이상 데이터가 없으면 hasMoreData를 false로 설정
       if (recentGroups.length < 10) {
         setHasMoreData(false);

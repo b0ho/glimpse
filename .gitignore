@@ -66,6 +66,11 @@ logs/
 combined.log
 error.log
 
+# Development output logs
+*-output.log
+server2-output.log
+mobile-output.log
+
 # =====================================================
 # DATABASE & CACHE
 # =====================================================

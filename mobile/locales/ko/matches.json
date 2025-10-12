@@ -6,7 +6,13 @@
     "subtitle": "매칭된 사람들과 대화를 시작하세요"
   },
   "stats": {
+    "totalMatches_zero": "총 매칭: 0명",
+    "totalMatches_one": "총 매칭: {{count}}명",
+    "totalMatches_other": "총 매칭: {{count}}명",
     "totalMatches": "총 매칭: {{count}}명",
+    "receivedLikes_zero": "받은 좋아요: 0개",
+    "receivedLikes_one": "받은 좋아요: {{count}}개",
+    "receivedLikes_other": "받은 좋아요: {{count}}개",
     "receivedLikes": "받은 좋아요: {{count}}개"
   },
   "actions": {

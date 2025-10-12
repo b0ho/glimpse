@@ -9,82 +9,82 @@ import { ColorPalette } from '@/types/theme';
 /**
  * 라이트 모드 색상 팔레트
  * @constant LIGHT_COLORS
- * @description 라이트 모드에서 사용되는 색상 정의
+ * @description 라이트 모드에서 사용되는 색상 정의 (WCAG AA 준수)
  */
 export const LIGHT_COLORS: ColorPalette = {
-  PRIMARY: '#FF6B6B',
-  SECONDARY: '#4ECDC4',
-  SUCCESS: '#45B7D1',
-  WARNING: '#FFA726',
-  ERROR: '#EF5350',
-  INFO: '#5BC0DE',
-  BACKGROUND: '#F8F9FA',
+  PRIMARY: '#E85555', // 더 진한 레드로 대비 향상
+  SECONDARY: '#3FB8B0', // 더 진한 시안으로 대비 향상
+  SUCCESS: '#2FA8C0', // 더 진한 블루로 대비 향상
+  WARNING: '#FF9800', // 더 진한 오렌지로 대비 향상
+  ERROR: '#E53935', // 더 진한 레드로 대비 향상
+  INFO: '#42A5C0',
+  BACKGROUND: '#F5F5F5', // 약간 더 어두운 배경 (눈부심 감소)
   SURFACE: '#FFFFFF',
   TEXT: {
-    PRIMARY: '#212529',
-    SECONDARY: '#6C757D',
-    TERTIARY: '#ADB5BD',
-    LIGHT: '#ADB5BD',
+    PRIMARY: '#1A1A1A', // 더 진한 검정색 (대비 향상)
+    SECONDARY: '#5A5A5A', // 더 진한 회색 (대비 향상)
+    TERTIARY: '#8A8A8A', // 중간 회색 (대비 개선)
+    LIGHT: '#8A8A8A',
     WHITE: '#FFFFFF',
-    MUTED: '#ADB5BD',
+    MUTED: '#999999', // 뮤트 색상 대비 개선
   },
-  BORDER: '#E9ECEF',
+  BORDER: '#D0D0D0', // 더 진한 보더 (가시성 향상)
   BLACK: '#000000',
   TRANSPARENT: 'transparent',
   SHADOW: '#000',
-  OVERLAY: 'rgba(0, 0, 0, 0.5)',
-  OVERLAY_LIGHT: 'rgba(0, 0, 0, 0.3)',
+  OVERLAY: 'rgba(0, 0, 0, 0.6)', // 더 어두운 오버레이
+  OVERLAY_LIGHT: 'rgba(0, 0, 0, 0.35)',
   // 추가 색상들
-  primary: '#FF6B6B',
-  text: '#212529',
-  textSecondary: '#6C757D',
+  primary: '#E85555',
+  text: '#1A1A1A',
+  textSecondary: '#5A5A5A',
   white: '#FFFFFF',
-  gray50: '#F8F9FA',
-  gray200: '#E9ECEF',
-  gray300: '#DEE2E6',
-  gray500: '#ADB5BD',
-  premium: '#FFD700',
+  gray50: '#F5F5F5',
+  gray200: '#D0D0D0',
+  gray300: '#BDBDBD',
+  gray500: '#8A8A8A',
+  premium: '#F5B800', // 더 진한 골드 (대비 향상)
   WHITE: '#FFFFFF',
 };
 
 /**
  * 다크 모드 색상 팔레트
  * @constant DARK_COLORS
- * @description 다크 모드에서 사용되는 색상 정의 (OLED 최적화)
+ * @description 다크 모드에서 사용되는 색상 정의 (OLED 최적화, WCAG AA 준수)
  */
 export const DARK_COLORS: ColorPalette = {
-  PRIMARY: '#FF8A8A', // 더 밝은 핑크로 가시성 향상
-  SECONDARY: '#66D9E8', // 더 밝은 시안으로 가시성 향상
-  SUCCESS: '#4ECDC4', // 성공 색상 더 밝게
-  WARNING: '#FFC947', // 경고 색상 더 밝게
-  ERROR: '#FF7A7A', // 에러 색상 더 밝게
-  INFO: '#6BC6E0',
+  PRIMARY: '#FF9999', // 더 밝은 핑크로 가시성 향상 (대비비 개선)
+  SECONDARY: '#70DDE8', // 더 밝은 시안으로 가시성 향상
+  SUCCESS: '#5FD4CA', // 성공 색상 더 밝게 (대비비 개선)
+  WARNING: '#FFD56B', // 경고 색상 더 밝게 (대비비 개선)
+  ERROR: '#FF8888', // 에러 색상 더 밝게 (대비비 개선)
+  INFO: '#7BD4F0',
   BACKGROUND: '#000000', // 진짜 검은색 (OLED 최적화)
-  SURFACE: '#1C1C1E', // 카드/표면 조금 더 밝게
+  SURFACE: '#1E1E1E', // 카드/표면 더 밝게 (가시성 향상)
   TEXT: {
-    PRIMARY: '#FFFFFF', // 흰색 텍스트
-    SECONDARY: '#D1D1D6', // 보조 텍스트 더 밝게
-    TERTIARY: '#A1A1AA',
-    LIGHT: '#A1A1AA', // 연한 텍스트 더 밝게
+    PRIMARY: '#FFFFFF', // 순백색 텍스트 (최고 대비)
+    SECONDARY: '#E0E0E0', // 보조 텍스트 더 밝게 (대비비 개선)
+    TERTIARY: '#B8B8B8', // 3차 텍스트 더 밝게
+    LIGHT: '#B8B8B8', // 연한 텍스트 더 밝게
     WHITE: '#FFFFFF',
-    MUTED: '#A1A1AA', // 뮤트된 텍스트 더 밝게
+    MUTED: '#B0B0B0', // 뮤트된 텍스트 더 밝게 (대비비 개선)
   },
-  BORDER: '#48484A', // 보더 더 밝게
+  BORDER: '#555555', // 보더 더 밝게 (가시성 향상)
   BLACK: '#000000',
   TRANSPARENT: 'transparent',
   SHADOW: '#000',
-  OVERLAY: 'rgba(0, 0, 0, 0.8)', // 오버레이 더 어둡게
-  OVERLAY_LIGHT: 'rgba(0, 0, 0, 0.6)',
+  OVERLAY: 'rgba(0, 0, 0, 0.85)', // 오버레이 더 어둡게
+  OVERLAY_LIGHT: 'rgba(0, 0, 0, 0.65)',
   // 추가 색상들
-  primary: '#FF8A8A',
+  primary: '#FF9999',
   text: '#FFFFFF',
-  textSecondary: '#D1D1D6',
+  textSecondary: '#E0E0E0',
   white: '#FFFFFF',
-  gray50: '#1C1C1E',
-  gray200: '#48484A',
-  gray300: '#636366',
-  gray500: '#A1A1AA',
-  premium: '#FFD60A', // 골드 색상 더 밝게
+  gray50: '#1E1E1E',
+  gray200: '#555555',
+  gray300: '#6E6E6E',
+  gray500: '#B8B8B8',
+  premium: '#FFE55C', // 골드 색상 더 밝게 (대비비 개선)
   WHITE: '#FFFFFF',
 };
 

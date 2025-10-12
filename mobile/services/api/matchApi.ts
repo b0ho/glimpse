@@ -33,7 +33,9 @@ export const matchApi = {
     
     // 서버에서 success 구조로 반환하는 경우
     if (response && typeof response === 'object' && 'data' in response) {
-      return (response as any).data || [];
+      const data = (response as any).data;
+      // data.matches가 있으면 그것을 반환, 없으면 data 자체가 배열인지 확인
+      return data.matches || (Array.isArray(data) ? data : []);
     }
     
     // 빈 배열 반환
