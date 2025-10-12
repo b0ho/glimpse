@@ -5,7 +5,6 @@ import {
   login,
   logout,
   unlink,
-  isKakaoTalkLoginUrl,
 } from '@react-native-seoul/kakao-login';
 import { ApiResponse } from '@/types';
 import Constants from 'expo-constants';
@@ -63,7 +62,7 @@ export interface KakaoAuthService {
  */
 const transformKakaoProfile = (profile: KakaoProfile): KakaoUserProfile => {
   return {
-    id: profile.id,
+    id: String(profile.id),
     nickname: profile.nickname || '',
     email: profile.email || undefined,
     profileImageUrl: profile.profileImageUrl || undefined,
@@ -97,9 +96,7 @@ export const useKakaoAuthService = (): KakaoAuthService => {
         console.log('❌ 카카오 앱 키가 설정되지 않음');
         return {
           success: false,
-          error: {
-            message: '카카오 앱 키가 설정되지 않았습니다. 개발자에게 문의하세요.',
-          },
+          error: '카카오 앱 키가 설정되지 않았습니다. 개발자에게 문의하세요.',
         };
       }
 
@@ -138,9 +135,7 @@ export const useKakaoAuthService = (): KakaoAuthService => {
       if (error.message?.includes('cancelled') || error.message?.includes('canceled')) {
         return {
           success: false,
-          error: {
-            message: '로그인이 취소되었습니다.',
-          },
+          error: '로그인이 취소되었습니다.',
         };
       }
 
@@ -148,17 +143,13 @@ export const useKakaoAuthService = (): KakaoAuthService => {
       if (error.message?.includes('network') || error.message?.includes('timeout')) {
         return {
           success: false,
-          error: {
-            message: '네트워크 오류가 발생했습니다. 다시 시도해주세요.',
-          },
+          error: '네트워크 오류가 발생했습니다. 다시 시도해주세요.',
         };
       }
 
       return {
         success: false,
-        error: {
-          message: error.message || '카카오 로그인 중 오류가 발생했습니다.',
-        },
+        error: error.message || '카카오 로그인 중 오류가 발생했습니다.',
       };
     }
   };
@@ -183,9 +174,7 @@ export const useKakaoAuthService = (): KakaoAuthService => {
       console.error('❌ 카카오 로그아웃 실패:', error);
       return {
         success: false,
-        error: {
-          message: error.message || '카카오 로그아웃 중 오류가 발생했습니다.',
-        },
+        error: error.message || '카카오 로그아웃 중 오류가 발생했습니다.',
       };
     }
   };
@@ -210,9 +199,7 @@ export const useKakaoAuthService = (): KakaoAuthService => {
       console.error('❌ 카카오 연결 해제 실패:', error);
       return {
         success: false,
-        error: {
-          message: error.message || '카카오 연결 해제 중 오류가 발생했습니다.',
-        },
+        error: error.message || '카카오 연결 해제 중 오류가 발생했습니다.',
       };
     }
   };
@@ -243,9 +230,7 @@ export const useKakaoAuthService = (): KakaoAuthService => {
       console.error('❌ 카카오 프로필 조회 실패:', error);
       return {
         success: false,
-        error: {
-          message: error.message || '프로필 정보를 가져올 수 없습니다.',
-        },
+        error: error.message || '프로필 정보를 가져올 수 없습니다.',
       };
     }
   };
