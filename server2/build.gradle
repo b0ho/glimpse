@@ -54,7 +54,7 @@ tasks.named('test') {
 }
 
 springBoot {
-    mainClass = 'com.glimpse.server.SimpleRestServer'
+    mainClass = 'com.glimpse.server.GlimpseApplication'
 }
 
 bootRun {

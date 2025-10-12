@@ -99,31 +99,31 @@ export const LetterFromFounder: React.FC<LetterFromFounderProps> = ({ onPress })
 
   return (
     <>
-      <TouchableOpacity className="container" onPress={handlePress} activeOpacity={0.8}>
+      <TouchableOpacity className="mx-4 my-4 rounded-2xl overflow-hidden shadow-lg" onPress={handlePress} activeOpacity={0.8}>
         <LinearGradient
           colors={['#8B5CF6', '#7C3AED', '#6D28D9']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          className="gradientContainer"
+          className="flex-row items-center p-5 relative"
         >
-          <View className="iconContainer">
-            <View className="iconBackground">
+          <View className="mr-4">
+            <View className="w-12 h-12 rounded-full bg-white/20 items-center justify-center">
               <MaterialCommunityIcons name="email-outline" size={24} color="#FFFFFF" />
             </View>
           </View>
-          
-          <View className="textContainer">
-            <Text className="title">{t('profile:profile.letterFromFounder')}</Text>
-            <Text className="subtitle">{t('profile:profile.letterSubtitle')}</Text>
+
+          <View className="flex-1">
+            <Text className="text-white font-bold text-base mb-1">{t('profile:profile.letterFromFounder')}</Text>
+            <Text className="text-white/80 text-sm">{t('profile:profile.letterSubtitle')}</Text>
           </View>
-          
-          <View className="arrowContainer">
+
+          <View className="ml-2">
             <Ionicons name="chevron-forward" size={20} color="rgba(255, 255, 255, 0.8)" />
           </View>
 
           {/* Decorative Elements */}
-          <View className="decorativeCircle1" />
-          <View className="decorativeCircle2" />
+          <View className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white/10" />
+          <View className="absolute -left-4 -bottom-4 w-16 h-16 rounded-full bg-white/10" />
         </LinearGradient>
       </TouchableOpacity>
 
@@ -133,60 +133,60 @@ export const LetterFromFounder: React.FC<LetterFromFounderProps> = ({ onPress })
         transparent={true}
         onRequestClose={closeModal}
       >
-        <View className="modalOverlay">
+        <View className="flex-1 justify-center items-center bg-black/50">
           <BlurView intensity={100} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
             <TouchableOpacity
-              className="modalBackground"
+              className="flex-1 justify-center items-center p-5"
               activeOpacity={1}
               onPress={closeModal}
             >
               <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-                <View className="letterContainer">
+                <View className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl" style={{ width: Math.min(SCREEN_WIDTH * 0.9, 500) }}>
                   {/* Letter Header */}
                   <LinearGradient
                     colors={['#8B5CF6', '#7C3AED']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
-                    className="letterHeader"
+                    className="p-6 flex-row items-center justify-between relative"
                   >
-                    <View className="stampContainer">
-                      <View className="stamp">
+                    <View className="absolute top-4 right-4">
+                      <View className="w-16 h-16 rounded-full border-2 border-white/30 items-center justify-center">
                         <MaterialCommunityIcons name="heart" size={20} color="#FFFFFF" />
                       </View>
                     </View>
-                    <Text className="letterTitle">💌 {t('profile:profile.letterFromFounder')}</Text>
-                    <TouchableOpacity className="closeButton" onPress={closeModal}>
+                    <Text className="text-white text-xl font-bold flex-1">💌 {t('profile:profile.letterFromFounder')}</Text>
+                    <TouchableOpacity className="w-10 h-10 rounded-full bg-white/20 items-center justify-center" onPress={closeModal}>
                       <Ionicons name="close" size={24} color="#FFFFFF" />
                     </TouchableOpacity>
                   </LinearGradient>
 
                   {/* Letter Content */}
                   <ScrollView
-                    className="letterScrollView"
+                    className="max-h-96"
                     contentContainerStyle={{ padding: 20 }}
                     showsVerticalScrollIndicator={false}
                   >
-                    <View className="letterPaper">
-                      <Text className="greeting">{content.greeting}</Text>
-                      <Text className="letterText">{content.intro}</Text>
-                      <Text className="letterText">{content.body1}</Text>
-                      <Text className="letterText">{content.body2}</Text>
-                      <Text className="letterText">{content.body3}</Text>
-                      <Text className="letterText">{content.closing}</Text>
-                      
-                      <View className="signatureContainer">
-                        <Text className="signature">{content.signature}</Text>
+                    <View className="bg-amber-50 dark:bg-gray-800 rounded-2xl p-6">
+                      <Text className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-4">{content.greeting}</Text>
+                      <Text className="text-base text-gray-700 dark:text-gray-300 leading-6 mb-3">{content.intro}</Text>
+                      <Text className="text-base text-gray-700 dark:text-gray-300 leading-6 mb-3">{content.body1}</Text>
+                      <Text className="text-base text-gray-700 dark:text-gray-300 leading-6 mb-3">{content.body2}</Text>
+                      <Text className="text-base text-gray-700 dark:text-gray-300 leading-6 mb-3">{content.body3}</Text>
+                      <Text className="text-base text-gray-700 dark:text-gray-300 leading-6 mb-4">{content.closing}</Text>
+
+                      <View className="mt-6 pt-4 border-t border-purple-200 dark:border-purple-800">
+                        <Text className="text-base text-gray-800 dark:text-gray-200 text-right italic">{content.signature}</Text>
                       </View>
 
-                      <View className="psContainer">
-                        <Text className="ps">{content.ps}</Text>
+                      <View className="mt-6 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+                        <Text className="text-sm text-purple-600 dark:text-purple-400 italic">{content.ps}</Text>
                       </View>
 
                       {/* Decorative Bottom */}
-                      <View className="letterDecoration">
-                        <View className="decorativeLine" />
+                      <View className="flex-row items-center justify-center mt-6 gap-x-3">
+                        <View className="flex-1 h-px bg-purple-300 dark:bg-purple-700" />
                         <MaterialCommunityIcons name="heart-multiple" size={24} color="#8B5CF6" />
-                        <View className="decorativeLine" />
+                        <View className="flex-1 h-px bg-purple-300 dark:bg-purple-700" />
                       </View>
                     </View>
                   </ScrollView>

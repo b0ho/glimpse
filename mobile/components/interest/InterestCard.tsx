@@ -3,18 +3,12 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Animated,
-  Dimensions,
   ColorValue,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { InterestType, SearchStatus } from '@/types/interest';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { shadowStyles } from '@/utils/shadowStyles';
-
-const { width } = Dimensions.get('window');
 
 interface InterestCardProps {
   item: any;
@@ -110,35 +104,15 @@ export const InterestCard: React.FC<InterestCardProps> = ({
   const isActive = item.status === SearchStatus.ACTIVE;
   const isMatched = item.status === SearchStatus.MATCHED || isMatch;
 
-  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>) => {
-    if (!onDelete || isMatch) return null;
-
-    const translateX = progress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [100, 0],
-    });
-
-    return (
-      <Animated.View style={[styles.deleteAction, { transform: [{ translateX }] }]}>
-        <TouchableOpacity
-          className="deleteButton"
-          onPress={onDelete}
-        >
-          <Icon name="trash-outline" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  };
-
   // 카드 클릭 핸들러 - 모든 카드는 onPress 실행 (편집 또는 채팅으로 이동)
   const handleCardPress = () => {
     onPress?.();
   };
 
-  const content = (
-    <View className="card">
+  return (
+    <View className="mb-3">
       <TouchableOpacity
-        className="cardContent"
+        className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden flex-row"
         onPress={handleCardPress}
         activeOpacity={0.9}
       >
@@ -146,54 +120,54 @@ export const InterestCard: React.FC<InterestCardProps> = ({
           colors={typeConfig.gradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          className="gradient"
+          className="w-20 items-center justify-center"
         >
-          <View className="iconContainer">
+          <View className="w-14 h-14 rounded-full bg-white/20 items-center justify-center">
             <Icon name={typeConfig.icon} size={28} color="#FFFFFF" />
           </View>
         </LinearGradient>
 
-        <View className="content">
-          <View className="header">
-            <Text className="type">
+        <View className="flex-1 p-3">
+          <View className="flex-row items-center justify-between mb-2">
+            <Text className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {getTypeLabel(item.type || item.matchType)}
             </Text>
             {isMatched && (
-              <View className="badge">
+              <View className="flex-row items-center bg-green-500 px-2 py-1 rounded-full">
                 <Icon name="checkmark-circle" size={16} color="#FFFFFF" />
-                <Text className="badgeText">매칭됨</Text>
+                <Text className="text-xs text-white font-semibold ml-1">매칭됨</Text>
               </View>
             )}
             {!isMatch && isSecure && item.deviceInfo === 'other' && (
-              <View className="badge">
-                <Icon name="phone-portrait-outline" size={14} color={colors.INFO} />
-                <Text className="badgeText">다른 기기</Text>
+              <View className="flex-row items-center bg-blue-500 px-2 py-1 rounded-full">
+                <Icon name="phone-portrait-outline" size={14} color="#FFFFFF" />
+                <Text className="text-xs text-white font-semibold ml-1">다른 기기</Text>
               </View>
             )}
           </View>
 
-          <View className="valueContainer">
+          <View className="mb-2">
             {item.hasLocalData && item.displayValue ? (
               // 로컬 데이터가 있는 경우 - 상세 정보 표시
-              <Text className="value" numberOfLines={2}>
+              <Text className="text-base text-gray-900 dark:text-gray-100 font-medium" numberOfLines={2}>
                 {item.displayValue}
               </Text>
             ) : (
               // 로컬 데이터가 없는 경우 - 유형만 표시
-              <Text className="value" numberOfLines={2}>
-                {item.deviceInfo === 'other' 
-                  ? '다른 기기에서 등록됨' 
+              <Text className="text-base text-gray-900 dark:text-gray-100 font-medium" numberOfLines={2}>
+                {item.deviceInfo === 'other'
+                  ? '다른 기기에서 등록됨'
                   : (item.value || '등록된 정보')}
               </Text>
             )}
             {isSecure && (
-              <View className="secureIndicator">
-                <Icon 
-                  name={item.hasLocalData ? "lock-closed" : "lock-open"} 
-                  size={12} 
-                  color={item.hasLocalData ? colors.SUCCESS : colors.WARNING} 
+              <View className="flex-row items-center mt-1">
+                <Icon
+                  name={item.hasLocalData ? "lock-closed" : "lock-open"}
+                  size={12}
+                  color={item.hasLocalData ? colors.SUCCESS : colors.WARNING}
                 />
-                <Text className="secureText">
+                <Text className="text-xs text-gray-500 dark:text-gray-400 ml-1">
                   {item.hasLocalData ? '암호화' : '원격'}
                 </Text>
               </View>
@@ -201,26 +175,26 @@ export const InterestCard: React.FC<InterestCardProps> = ({
           </View>
 
           {item.metadata?.platform && (
-            <View className="metadata">
+            <View className="flex-row items-center mb-1">
               <Icon
                 name={item.metadata.platform === 'instagram' ? 'logo-instagram' : 'chatbubble-ellipses-outline'}
                 size={14}
                 color={colors.TEXT.SECONDARY}
               />
-              <Text className="metadataText">
+              <Text className="text-xs text-gray-500 dark:text-gray-400 ml-1">
                 {item.metadata.platform}
               </Text>
             </View>
           )}
 
           {item.metadata?.birthdate && (
-            <View className="metadata">
+            <View className="flex-row items-center mb-1">
               <Icon
                 name="calendar-outline"
                 size={14}
                 color={colors.TEXT.SECONDARY}
               />
-              <Text className="metadataText">
+              <Text className="text-xs text-gray-500 dark:text-gray-400 ml-1">
                 생일: {item.metadata.birthdate}
               </Text>
             </View>
@@ -230,17 +204,17 @@ export const InterestCard: React.FC<InterestCardProps> = ({
           {(item.type === InterestType.COMPANY || item.matchType === InterestType.COMPANY) && (
             <>
               {item.metadata?.employeeName && (
-                <View className="metadata">
+                <View className="flex-row items-center mb-1">
                   <Icon name="person-outline" size={14} color={colors.TEXT.SECONDARY} />
-                  <Text className="metadataText">
+                  <Text className="text-xs text-gray-500 dark:text-gray-400 ml-1">
                     {item.metadata.employeeName}
                   </Text>
                 </View>
               )}
               {item.metadata?.department && (
-                <View className="metadata">
+                <View className="flex-row items-center mb-1">
                   <Icon name="briefcase-outline" size={14} color={colors.TEXT.SECONDARY} />
-                  <Text className="metadataText">
+                  <Text className="text-xs text-gray-500 dark:text-gray-400 ml-1">
                     {item.metadata.department}
                   </Text>
                 </View>
@@ -252,17 +226,17 @@ export const InterestCard: React.FC<InterestCardProps> = ({
           {(item.type === InterestType.SCHOOL || item.matchType === InterestType.SCHOOL) && (
             <>
               {item.metadata?.studentName && (
-                <View className="metadata">
+                <View className="flex-row items-center mb-1">
                   <Icon name="person-outline" size={14} color={colors.TEXT.SECONDARY} />
-                  <Text className="metadataText">
+                  <Text className="text-xs text-gray-500 dark:text-gray-400 ml-1">
                     {item.metadata.studentName}
                   </Text>
                 </View>
               )}
               {item.metadata?.major && (
-                <View className="metadata">
+                <View className="flex-row items-center mb-1">
                   <Icon name="book-outline" size={14} color={colors.TEXT.SECONDARY} />
-                  <Text className="metadataText">
+                  <Text className="text-xs text-gray-500 dark:text-gray-400 ml-1">
                     {item.metadata.major}
                   </Text>
                 </View>
@@ -271,55 +245,51 @@ export const InterestCard: React.FC<InterestCardProps> = ({
           )}
 
           {isMatched && item.matchedUser && (
-            <View className="matchInfo">
-              <View className="avatar">
-                <Text className="avatarText">
+            <View className="flex-row items-center bg-gray-50 dark:bg-gray-700 rounded-lg p-2 mt-2">
+              <View className="w-8 h-8 rounded-full bg-purple-500 items-center justify-center">
+                <Text className="text-white font-bold text-sm">
                   {item.matchedUser.nickname?.[0] || '?'}
                 </Text>
               </View>
-              <Text className="matchedName">
+              <Text className="text-sm font-semibold text-gray-900 dark:text-gray-100 ml-2">
                 {item.matchedUser.nickname}
               </Text>
               {item.matchedAt && (
-                <Text className="matchedTime">
+                <Text className="text-xs text-gray-500 dark:text-gray-400 ml-1">
                   • {formatRelativeTime(item.matchedAt)}
                 </Text>
               )}
             </View>
           )}
 
-          <View className="footer">
-            <View className="footerLeft">
-              <Text className="date">
+          <View className="flex-row items-center justify-between mt-2">
+            <View className="flex-row items-center">
+              <Text className="text-xs text-gray-500 dark:text-gray-400">
                 {formatDate(item.createdAt)}
               </Text>
               {item.expiresAt && !isMatched && (
-                <Text className="expires">
-                  {new Date(item.expiresAt) < new Date() 
-                    ? `만료됨 (${formatDate(item.expiresAt)})` 
+                <Text className="text-xs text-red-500 ml-2">
+                  {new Date(item.expiresAt) < new Date()
+                    ? `만료됨 (${formatDate(item.expiresAt)})`
                     : `만료: ${formatDate(item.expiresAt)}`}
                 </Text>
               )}
             </View>
             {isMatched && onMismatch && (
-              <View className="footerRight">
-                <TouchableOpacity 
-                  className="mismatchButton"
-                  onPress={onMismatch}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <Icon name="warning-outline" size={20} color={colors.WARNING} />
-                  <Text className="mismatchText">미스매치</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                className="flex-row items-center px-2 py-1"
+                onPress={onMismatch}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Icon name="warning-outline" size={18} color={colors.WARNING} />
+                <Text className="text-xs text-orange-500 font-semibold ml-1">미스매치</Text>
+              </TouchableOpacity>
             )}
           </View>
         </View>
       </TouchableOpacity>
     </View>
   );
-
-  return content;
 };
 
 function getTypeLabel(type: InterestType): string {
@@ -378,4 +348,3 @@ function formatRelativeTime(date: string | Date): string {
   if (hours < 24) return `${hours}시간 전`;
   return formatDate(date);
 }
-

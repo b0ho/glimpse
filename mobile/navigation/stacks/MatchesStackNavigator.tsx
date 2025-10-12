@@ -8,8 +8,8 @@ import { useTheme } from '@/hooks/useTheme';
 import { MatchesStackParamList } from '@/types/navigation';
 
 // Screens
-import { MatchesScreen } from '@/screens/matches/MatchesScreen-NW';
-import { ChatScreen } from '@/screens/chat/ChatScreen-NW';
+import { MatchesScreen } from '@/screens/matches/MatchesScreen';
+import { ChatScreen } from '@/screens/chat/ChatScreen';
 
 const MatchesStack = createStackNavigator<MatchesStackParamList>();
 

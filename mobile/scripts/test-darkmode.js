@@ -12,27 +12,27 @@ const chalk = require('chalk');
 
 // 테스트 대상 화면 목록
 const TEST_SCREENS = [
-  'HomeScreen-NW',
-  'ProfileScreen-NW', 
-  'MatchesScreen-NW',
-  'ChatScreen-NW',
-  'GroupsScreen-NW',
-  'NearbyUsersScreen-NW',
-  'InterestSearchScreen-NW',
-  'SettingsScreen-NW'
+  'HomeScreen',
+  'ProfileScreen', 
+  'MatchesScreen',
+  'ChatScreen',
+  'GroupsScreen',
+  'NearbyUsersScreen',
+  'InterestSearchScreen',
+  'SettingsScreen'
 ];
 
 // 테스트 대상 컴포넌트
 const TEST_COMPONENTS = [
   'ErrorBoundary',
-  'LoadingScreen-NW',
-  'EmptyState-NW',
+  'LoadingScreen',
+  'EmptyState',
   'ServerConnectionError',
-  'EditNicknameModal-NW',
-  'MessageBubble-NW',
-  'MessageInput-NW',
-  'StoryViewer-NW',
-  'PaymentModal-NW'
+  'EditNicknameModal',
+  'MessageBubble',
+  'MessageInput',
+  'StoryViewer',
+  'PaymentModal'
 ];
 
 class DarkModeTestRunner {
@@ -80,7 +80,7 @@ class DarkModeTestRunner {
     ];
 
     for (const rule of rules) {
-      if (rule.onlyForNW && !fileName.includes('-NW')) continue;
+      if (rule.onlyForNW && !fileName.includes('')) continue;
       
       const matches = content.match(rule.pattern);
       const hasMatches = matches && matches.length > 0;

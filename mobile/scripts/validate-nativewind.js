@@ -49,7 +49,7 @@ function validateFile(filePath) {
   const issues = [];
   
   // NW 파일인지 확인
-  const isNWFile = fileName.includes('-NW');
+  const isNWFile = fileName.includes('');
   
   // 검증 규칙
   if (isNWFile) {

@@ -26,8 +26,8 @@ import { ScreenHeader } from '@/components/common';
 import { useInterestForm } from '@/hooks/interest/useInterestForm';
 
 // 컴포넌트
-import { InterestTypeSelector } from '@/components/interest/InterestTypeSelector-NW';
-import { DurationSelector } from '@/components/interest/DurationSelector-NW';
+import { InterestTypeSelector } from '@/components/interest/InterestTypeSelector';
+import { DurationSelector } from '@/components/interest/DurationSelector';
 import {
   PhoneInputField,
   EmailInputField,
