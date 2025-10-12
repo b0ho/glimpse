@@ -1,15 +1,9 @@
-// Re-export all i18n utilities
+// Re-export i18n utilities that are actually exported from i18n.ts
 export {
   initI18n,
   changeLanguage,
   getCurrentLanguage,
-  formatNumber,
-  formatCurrency,
-  formatDate,
-  formatRelativeTime,
   ensureI18nReady,
-  safeTranslate,
-  default
 } from './i18n';
 
 // Export i18n instance as default
