@@ -3,12 +3,12 @@ import {
   View,
   Text,
   FlatList,
-  StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
   Alert,
   Platform,
 } from 'react-native';
+import { cn } from '@/utils/cn';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
@@ -16,7 +16,6 @@ import { useLikeStore } from '@/store/slices/likeSlice';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { Match } from '@/types';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { matchApi } from '@/services/api/matchApi';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
@@ -160,40 +159,40 @@ export const MatchesScreen = React.memo(() => {
       : t('matches:user.anonymous');
 
     return (
-      <View style={[styles.matchItem, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
-        <View style={styles.matchHeader}>
-          <View style={styles.userInfo}>
-            <View style={[styles.avatar, { backgroundColor: colors.PRIMARY }]}>
-              <Text style={[styles.avatarText, { color: colors.TEXT.WHITE }]}>
+      <View className="mx-4 my-2 rounded-xl p-4 bg-white dark:bg-gray-800 shadow-sm">
+        <View className="flex-row justify-between items-center mb-3">
+          <View className="flex-row items-center flex-1">
+            <View className="w-[50px] h-[50px] rounded-full items-center justify-center mr-4 bg-primary">
+              <Text className="text-lg font-bold text-white">
                 {displayName.charAt(0)}
               </Text>
             </View>
             <View>
-              <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>{displayName}</Text>
-              <Text style={[styles.matchTime, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="text-lg font-bold text-gray-900 dark:text-white mb-0.5">{displayName}</Text>
+              <Text className="text-sm text-gray-600 dark:text-gray-400">
                 {formatTimeAgo(item.matchedAt || item.createdAt)}
               </Text>
             </View>
           </View>
-          
-          <View style={styles.actionButtons}>
+
+          <View className="flex-row items-center gap-2">
             <TouchableOpacity
-              style={[styles.chatButton, { backgroundColor: colors.PRIMARY }]}
+              className="px-4 py-2 rounded-lg bg-primary"
               onPress={() => handleStartChat(item.id, displayName)}
             >
-              <Text style={[styles.chatButtonText, { color: colors.TEXT.WHITE }]}>{t('matches:actions.startChat')}</Text>
+              <Text className="text-sm font-semibold text-white">{t('matches:actions.startChat')}</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
-              style={[styles.mismatchButton, { backgroundColor: colors.ERROR }]}
+              className="w-9 h-9 rounded-full items-center justify-center bg-red-500"
               onPress={() => handleReportMismatch(item.id, displayName)}
             >
-              <Text style={[styles.mismatchButtonText, { color: colors.TEXT.WHITE }]}>⚠️</Text>
+              <Text className="text-base text-white">⚠️</Text>
             </TouchableOpacity>
           </View>
         </View>
-        
-        <Text style={[styles.matchDescription, { color: colors.TEXT.SECONDARY }]}>
+
+        <Text className="text-sm leading-5 text-center italic text-gray-600 dark:text-gray-400">
           {t('matches:messages.matchDescription')}
         </Text>
       </View>
@@ -206,16 +205,16 @@ export const MatchesScreen = React.memo(() => {
    * @description 매칭 통계와 안내 메시지를 표시
    */
   const renderHeader = () => (
-    <View style={[styles.header, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
-      <Text style={[styles.headerTitle, { color: colors.PRIMARY }]}>{t('matches:header.title')}</Text>
-      <Text style={[styles.headerSubtitle, { color: colors.TEXT.SECONDARY }]}>
+    <View className="px-6 py-6 border-b bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+      <Text className="text-2xl font-bold mb-1 text-primary">{t('matches:header.title')}</Text>
+      <Text className="text-base mb-4 text-gray-600 dark:text-gray-400">
         {t('matches:header.subtitle')}
       </Text>
-      <View style={styles.statsContainer}>
-        <Text style={[styles.statsText, { color: colors.TEXT.PRIMARY }]}>
+      <View className="flex-row justify-between">
+        <Text className="text-sm font-medium text-gray-900 dark:text-white">
           {t('matches:stats.totalMatches', { count: matches.length })}
         </Text>
-        <Text style={[styles.statsText, { color: colors.TEXT.PRIMARY }]}>
+        <Text className="text-sm font-medium text-gray-900 dark:text-white">
           {t('matches:stats.receivedLikes', { count: likeStore.getReceivedLikesCount() })}
         </Text>
       </View>
@@ -228,10 +227,10 @@ export const MatchesScreen = React.memo(() => {
    * @description 매칭이 없을 때 표시되는 안내 UI
    */
   const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <Text style={styles.emptyStateEmoji}>💬</Text>
-      <Text style={[styles.emptyStateTitle, { color: colors.PRIMARY }]}>{t('matches:emptyState.title')}</Text>
-      <Text style={[styles.emptyStateSubtitle, { color: colors.TEXT.SECONDARY }]}>
+    <View className="flex-1 justify-center items-center px-8">
+      <Text className="text-6xl mb-6">💬</Text>
+      <Text className="text-lg font-bold mb-2 text-center text-primary">{t('matches:emptyState.title')}</Text>
+      <Text className="text-base text-center leading-5.5 text-gray-600 dark:text-gray-400">
         {t('matches:emptyState.subtitle')}
       </Text>
     </View>
@@ -239,13 +238,13 @@ export const MatchesScreen = React.memo(() => {
 
   // 웹에서 포커스되지 않은 경우 빈 View 반환
   if (Platform.OS === 'web' && !isFocused) {
-    return <View style={styles.container} />;
+    return <View className="flex-1" />;
   }
 
   // 서버 연결 에러 시 에러 화면 표시
   if (serverConnectionError) {
     return (
-      <ServerConnectionError 
+      <ServerConnectionError
         onRetry={async () => {
           setServerConnectionError(false);
           setIsLoading(true);
@@ -271,21 +270,21 @@ export const MatchesScreen = React.memo(() => {
 
   if (isLoading) {
     return (
-      <SafeAreaView 
-        style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
+      <SafeAreaView
+        className="flex-1 bg-gray-50 dark:bg-gray-900"
         edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
       >
-        <View style={styles.loadingContainer}>
+        <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={colors.PRIMARY} />
-          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>{t('common:loading.text')}</Text>
+          <Text className="mt-4 text-base text-gray-900 dark:text-white">{t('common:loading.text')}</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView 
-      style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
+    <SafeAreaView
+      className="flex-1 bg-gray-50 dark:bg-gray-900"
       edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
     >
       <FlatList
@@ -295,140 +294,8 @@ export const MatchesScreen = React.memo(() => {
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={matches.length === 0 ? styles.emptyContainer : undefined}
+        contentContainerStyle={matches.length === 0 ? { flexGrow: 1 } : undefined}
       />
     </SafeAreaView>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: SPACING.MD,
-    fontSize: FONT_SIZES.MD,
-  },
-  header: {
-    paddingHorizontal: SPACING.LG,
-    paddingVertical: SPACING.LG,
-    borderBottomWidth: 1,
-  },
-  headerTitle: {
-    fontSize: FONT_SIZES.XXL,
-    fontWeight: 'bold',
-    marginBottom: SPACING.XS,
-  },
-  headerSubtitle: {
-    fontSize: FONT_SIZES.MD,
-    marginBottom: SPACING.MD,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statsText: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: '500',
-  },
-  matchItem: {
-    marginVertical: SPACING.XS,
-    marginHorizontal: SPACING.MD,
-    borderRadius: 12,
-    padding: SPACING.MD,
-    elevation: 2,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  matchHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.SM,
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.MD,
-  },
-  avatarText: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-  },
-  nickname: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-    marginBottom: 2,
-  },
-  matchTime: {
-    fontSize: FONT_SIZES.SM,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.SM,
-  },
-  chatButton: {
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    borderRadius: 8,
-  },
-  chatButtonText: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: '600',
-  },
-  mismatchButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mismatchButtonText: {
-    fontSize: FONT_SIZES.MD,
-  },
-  matchDescription: {
-    fontSize: FONT_SIZES.SM,
-    lineHeight: 20,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  emptyContainer: {
-    flexGrow: 1,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.XL,
-  },
-  emptyStateEmoji: {
-    fontSize: 64,
-    marginBottom: SPACING.LG,
-  },
-  emptyStateTitle: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-    marginBottom: SPACING.SM,
-    textAlign: 'center',
-  },
-  emptyStateSubtitle: {
-    fontSize: FONT_SIZES.MD,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
 });

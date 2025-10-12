@@ -9,7 +9,6 @@ import {
   View,
   Text,
   FlatList,
-  StyleSheet,
   RefreshControl,
   ActivityIndicator,
   Platform,
@@ -72,13 +71,13 @@ export const GroupsScreen = () => {
 
   // 웹에서 포커스되지 않은 경우 빈 View 반환
   if (Platform.OS === 'web' && !isFocused) {
-    return <View style={styles.container} />;
+    return <View className="flex-1" />;
   }
 
   // 서버 연결 에러 시 에러 화면 표시
   if (serverConnectionError) {
     return (
-      <ServerConnectionError 
+      <ServerConnectionError
         onRetry={() => {
           loadGroups(true);
         }}
@@ -90,13 +89,13 @@ export const GroupsScreen = () => {
   // 초기 로딩 상태
   if (isLoading && groups.length === 0) {
     return (
-      <SafeAreaView 
-        style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
+      <SafeAreaView
+        className="flex-1 bg-gray-50 dark:bg-gray-900"
         edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
       >
-        <View style={styles.loadingContainer}>
+        <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={colors.PRIMARY} />
-          <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>
+          <Text className="mt-3 text-base text-gray-900 dark:text-white">
             {t('group:loading.groups')}
           </Text>
         </View>
@@ -105,8 +104,8 @@ export const GroupsScreen = () => {
   }
 
   return (
-    <SafeAreaView 
-      style={[styles.container, { backgroundColor: colors.BACKGROUND }]} 
+    <SafeAreaView
+      className="flex-1 bg-gray-50 dark:bg-gray-900"
       edges={Platform.OS === 'android' ? ['top'] : ['top', 'bottom']}
     >
       <FlatList
@@ -141,30 +140,9 @@ export const GroupsScreen = () => {
         }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        contentContainerStyle={groups.length === 0 ? styles.emptyContainer : styles.contentContainer}
+        contentContainerStyle={groups.length === 0 ? { flexGrow: 1 } : { paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-  },
-  contentContainer: {
-    paddingBottom: 20,
-  },
-  emptyContainer: {
-    flexGrow: 1,
-  },
-});

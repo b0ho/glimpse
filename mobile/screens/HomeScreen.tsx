@@ -9,12 +9,12 @@ import {
   View,
   Text,
   FlatList,
-  StyleSheet,
   RefreshControl,
   ActivityIndicator,
   Platform,
   TouchableOpacity,
 } from 'react-native';
+import { cn } from '@/utils/cn';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation, useIsFocused } from '@react-navigation/native';
 import { useAuth } from '@/hooks/useAuth';
@@ -26,7 +26,6 @@ import { useGroupStore } from '@/store/slices/groupSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { Content } from '@/types';
 import { ACTION_ICONS } from '@/utils/icons';
-import { shadowPresets } from '@/utils/styles/platformStyles';
 
 // Custom hooks
 import { useContentData } from '@/hooks/home/useContentData';
@@ -286,14 +285,15 @@ export const HomeScreen = () => {
       
       {/* FAB - 게시물 작성 버튼 */}
       <TouchableOpacity
-        className="absolute bottom-5 right-4 w-14 h-14 bg-primary rounded-full items-center justify-center"
-        style={{
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-          elevation: 5,
-        }}
+        className={cn(
+          "absolute bottom-5 right-4 w-14 h-14 rounded-full items-center justify-center",
+          "bg-primary",
+          Platform.select({
+            ios: "shadow-lg",
+            android: "elevation-5",
+            web: "shadow-lg"
+          })
+        )}
         onPress={() => navigation.navigate('CreateContent' as never)}
         activeOpacity={0.8}
         accessibilityLabel="게시물 작성"
@@ -305,32 +305,3 @@ export const HomeScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-  },
-  emptyContainer: {
-    flexGrow: 1,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...shadowPresets.fab,
-  },
-});
