@@ -234,42 +234,42 @@ class FCMService {
       case 'message':
         // Navigate to chat screen
         if (data.matchId && data.roomId) {
-          navigationService.navigate('Chat', { 
-            matchId: data.matchId, 
+          navigationService.navigate('Chat' as never, {
+            matchId: data.matchId,
             roomId: data.roomId,
             otherUserNickname: data.fromUserNickname || '매치된 사용자'
-          });
+          } as never);
         }
         break;
-        
+
       case 'MATCH_CREATED':
       case 'match':
         // Navigate to matches screen
-        navigationService.navigate('Matches');
+        navigationService.navigate('Matches' as never);
         break;
-        
+
       case 'LIKE_RECEIVED':
       case 'like':
         // Navigate to who likes you screen (premium)
-        navigationService.navigate('WhoLikesYou');
+        navigationService.navigate('WhoLikesYou' as never);
         break;
-        
+
       case 'GROUP_INVITATION':
       case 'group_invite':
         // Navigate to join group screen
         if (data.inviteCode) {
-          navigationService.navigate('JoinGroup', { inviteCode: data.inviteCode });
+          navigationService.navigate('JoinGroup' as never, { inviteCode: data.inviteCode } as never);
         }
         break;
 
       case 'PAYMENT_SUCCESS':
         // Navigate to premium screen
-        navigationService.navigate('Premium');
+        navigationService.navigate('Premium' as never);
         break;
-        
+
       default:
         // Navigate to home
-        navigationService.navigate('Home');
+        navigationService.navigate('Home' as never);
         break;
     }
   }
