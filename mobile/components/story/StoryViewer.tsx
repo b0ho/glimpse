@@ -15,7 +15,7 @@ import { Video, ResizeMode } from 'expo-video';
 import { AVPlaybackStatus } from 'expo-audio';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 

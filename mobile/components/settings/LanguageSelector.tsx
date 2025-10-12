@@ -17,6 +17,7 @@ import {
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
+import { cn } from '@/lib/utils';
 
 /**
  * 지원되는 언어 코드 타입
@@ -50,7 +51,6 @@ const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageInfo> = {
   fr: { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
 };
 import { changeLanguage, getCurrentLanguage } from '../../services/i18n/i18n';
-import { SPACING, FONT_SIZES } from '@/utils/constants';
 
 /**
  * LanguageSelector 컴포넌트 Props 인터페이스
@@ -89,8 +89,8 @@ interface LanguageSelectorProps {
  * @category Component
  * @subcategory Settings
  */
-export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ 
-  onLanguageChange 
+export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
+  onLanguageChange
 }) => {
   const { t, i18n } = useAndroidSafeTranslation();
   const { colors } = useTheme();
@@ -108,12 +108,12 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
     setIsChanging(true);
     const success = await changeLanguage(language);
-    
+
     if (success) {
       setCurrentLanguage(language);
       setIsModalVisible(false);
       onLanguageChange?.(language);
-      
+
       // Show success message
       Alert.alert(
         t('settings:language.changeSuccess'),
@@ -127,42 +127,47 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         [{ text: t('common:buttons.retry') }]
       );
     }
-    
+
     setIsChanging(false);
   };
 
   const renderLanguageItem = ({ item }: { item: LanguageInfo }) => {
     const isSelected = item.code === currentLanguage;
-    
+
     return (
       <TouchableOpacity
-        style={[
-          styles.languageItem,
-          isSelected && [styles.selectedLanguageItem, { backgroundColor: colors.PRIMARY + '20' }],
-        ]}
+        className={cn(
+          "flex-row items-center justify-between p-4 rounded-lg",
+          isSelected && "bg-opacity-20"
+        )}
+        style={isSelected ? { backgroundColor: colors.PRIMARY + '20' } : undefined}
         onPress={() => handleLanguageSelect(item.code)}
         disabled={isChanging}
       >
-        <View className="languageInfo">
-          <Text className="flag">{item.flag}</Text>
-          <View className="languageText">
-            <Text style={[
-              styles.languageName,
-              { color: colors.TEXT.PRIMARY },
-              isSelected && [styles.selectedText, { color: colors.PRIMARY }],
-            ]}>
+        <View className="flex-row items-center">
+          <Text className="text-3xl mr-3">{item.flag}</Text>
+          <View className="flex-col">
+            <Text
+              className={cn(
+                "text-base font-medium",
+                isSelected && "font-semibold"
+              )}
+              style={{
+                color: isSelected ? colors.PRIMARY : colors.TEXT.PRIMARY
+              }}
+            >
               {item.nativeName}
             </Text>
-            <Text className="languageNameEnglish">
+            <Text className="text-sm text-gray-500 dark:text-gray-400">
               {item.name}
             </Text>
           </View>
         </View>
         {isSelected && (
-          <Ionicons 
-            name="checkmark-circle" 
-            size={24} 
-            color={colors.PRIMARY} 
+          <Ionicons
+            name="checkmark-circle"
+            size={24}
+            color={colors.PRIMARY}
           />
         )}
       </TouchableOpacity>
@@ -174,22 +179,22 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   return (
     <>
       <TouchableOpacity
-        className="selector"
+        className="flex-row items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg"
         onPress={() => setIsModalVisible(true)}
       >
-        <View className="selectorContent">
+        <View className="flex-row items-center">
           <Ionicons name="language" size={20} color={colors.TEXT.PRIMARY} />
-          <Text className="label">
+          <Text className="ml-3 text-base text-gray-900 dark:text-white">
             {t('settings:language.title', 'Language')}
           </Text>
         </View>
-        <View className="selectedValue">
-          <Text className="selectedFlag">{currentLangInfo.flag}</Text>
-          <Text className="selectedLanguage">
+        <View className="flex-row items-center">
+          <Text className="text-xl mr-2">{currentLangInfo.flag}</Text>
+          <Text className="text-base text-gray-700 dark:text-gray-300 mr-2">
             {currentLangInfo.nativeName}
           </Text>
+          <Text className="text-gray-400 dark:text-gray-500">{'>'}</Text>
         </View>
-        <Text className="arrow">{'>'}</Text>
       </TouchableOpacity>
 
       <Modal
@@ -198,26 +203,26 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         transparent={true}
         onRequestClose={() => setIsModalVisible(false)}
       >
-        <View className="modalOverlay">
-          <View className="modalContent">
-            <View className="modalHeader">
-              <Text className="modalTitle">
+        <View className="flex-1 justify-end bg-black/50">
+          <View className="bg-white dark:bg-gray-900 rounded-t-3xl max-h-3/4">
+            <View className="flex-row items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <Text className="text-xl font-semibold text-gray-900 dark:text-white">
                 {t('settings:language.selectLanguage', 'Select Language')}
               </Text>
               <TouchableOpacity
                 onPress={() => setIsModalVisible(false)}
-                className="closeButton"
+                className="p-2"
               >
                 <Ionicons name="close" size={24} color={colors.TEXT.PRIMARY} />
               </TouchableOpacity>
             </View>
-            
+
             <FlatList
               data={Object.values(SUPPORTED_LANGUAGES)}
               keyExtractor={(item) => item.code}
               renderItem={renderLanguageItem}
-              ItemSeparatorComponent={() => <View className="separator" />}
-              contentContainerStyle={styles.languageList}
+              ItemSeparatorComponent={() => <View className="h-2" />}
+              contentContainerClassName="p-4"
             />
           </View>
         </View>
@@ -225,4 +230,3 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     </>
   );
 };
-

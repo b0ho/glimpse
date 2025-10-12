@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { StoryUser, Story, markStoryAsViewed } from '@/utils/storyData';
 import { formatTimeAgo } from '@/utils/dateUtils';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 const { width, height } = Dimensions.get('window');
 

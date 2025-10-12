@@ -18,7 +18,7 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@/hooks/useTheme';
 import { ThemeMode } from '@/types/theme';
-import { SPACING, FONT_SIZES } from '@/utils/constants';
+import { cn } from '@/lib/utils';
 
 /**
  * 테마 선택 컴포넌트 Props
@@ -62,7 +62,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     {
       mode: 'dark',
       titleKey: 'theme.dark',
-      descriptionKey: 'theme.darkDescription', 
+      descriptionKey: 'theme.darkDescription',
       icon: 'moon',
     },
     {
@@ -140,39 +140,46 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
    */
   const renderThemeOption = (option: ThemeOption) => {
     const isSelected = mode === option.mode;
-    
+
     return (
       <TouchableOpacity
         key={option.mode}
-        className="themeOption"
+        className={cn(
+          "flex-row items-center p-4 rounded-lg mb-2",
+          isSelected && "bg-primary-100 dark:bg-primary-900"
+        )}
         onPress={() => handleThemeChange(option.mode)}
       >
-        <View className="themeOptionContent">
-          <View className="themeIconContainer">
-            <Ionicons
-              name={option.icon as any}
-              size={24}
-              color={isSelected ? colors.TEXT.WHITE : colors.TEXT.PRIMARY}
-            />
-          </View>
-          
-          <View className="themeTextContainer">
-            <Text className="themeTitle">
-              {t(`settings:${option.titleKey}`, option.mode)}
-            </Text>
-            <Text className="themeDescription">
-              {t(`settings:${option.descriptionKey}`, '')}
-            </Text>
-          </View>
-          
-          {isSelected && (
-            <Ionicons
-              name="checkmark-circle"
-              size={20}
-              color={colors.PRIMARY}
-            />
-          )}
+        <View className={cn(
+          "w-10 h-10 rounded-full items-center justify-center mr-3",
+          isSelected ? "bg-primary-500" : "bg-gray-200 dark:bg-gray-700"
+        )}>
+          <Ionicons
+            name={option.icon as any}
+            size={24}
+            color={isSelected ? colors.TEXT.WHITE : colors.TEXT.PRIMARY}
+          />
         </View>
+
+        <View className="flex-1">
+          <Text className={cn(
+            "text-base font-medium mb-1",
+            isSelected ? "text-primary-600 dark:text-primary-400" : "text-gray-900 dark:text-white"
+          )}>
+            {t(`settings:${option.titleKey}`, option.mode)}
+          </Text>
+          <Text className="text-sm text-gray-500 dark:text-gray-400">
+            {t(`settings:${option.descriptionKey}`, '')}
+          </Text>
+        </View>
+
+        {isSelected && (
+          <Ionicons
+            name="checkmark-circle"
+            size={20}
+            color={colors.PRIMARY}
+          />
+        )}
       </TouchableOpacity>
     );
   };
@@ -181,25 +188,25 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     <>
       {/* 테마 설정 항목 */}
       <TouchableOpacity
-        className="settingItem"
+        className="flex-row items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg"
         onPress={openModal}
       >
-        <View className="settingContent">
+        <View className="flex-row items-center">
           <Ionicons
             name={isDark ? 'moon' : 'sunny'}
             size={20}
             color={colors.TEXT.PRIMARY}
           />
-          <Text className="settingText">
+          <Text className="ml-3 text-base text-gray-900 dark:text-white">
             {t('settings:theme.title', '테마')}
           </Text>
         </View>
-        <View className="selectedValue">
-          <Text className="settingValue">
+        <View className="flex-row items-center">
+          <Text className="text-base text-gray-700 dark:text-gray-300 mr-2">
             {getCurrentThemeText(mode)}
           </Text>
+          <Text className="text-gray-400 dark:text-gray-500">{'>'}</Text>
         </View>
-        <Text className="settingArrow">{'>'}</Text>
       </TouchableOpacity>
 
       {/* 테마 선택 모달 */}
@@ -210,38 +217,36 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
         onRequestClose={closeModal}
       >
         <TouchableOpacity
-          className="modalOverlay"
+          className="flex-1 justify-center items-center bg-black/50"
           activeOpacity={1}
           onPress={closeModal}
         >
           <Animated.View
-            style={[
-              styles.modalContent,
-              { 
-                backgroundColor: colors.BACKGROUND,
-                transform: [{ scale: scaleAnim }]
-              }
-            ]}
+            className="w-4/5 max-w-md rounded-2xl p-6"
+            style={{
+              backgroundColor: colors.BACKGROUND,
+              transform: [{ scale: scaleAnim }]
+            }}
           >
             <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-              <View className="modalHeader">
-                <Text className="modalTitle">
+              <View className="flex-row items-center justify-between mb-4">
+                <Text className="text-xl font-semibold text-gray-900 dark:text-white">
                   {t('settings:theme.selectTheme', '테마 선택')}
                 </Text>
                 <TouchableOpacity
-                  className="closeButton"
+                  className="p-2"
                   onPress={closeModal}
                 >
                   <Ionicons name="close" size={20} color={colors.TEXT.PRIMARY} />
                 </TouchableOpacity>
               </View>
-              
-              <View className="themeOptionsContainer">
+
+              <View className="mb-4">
                 {themeOptions.map(renderThemeOption)}
               </View>
-              
-              <View className="modalFooter">
-                <Text className="footerText">
+
+              <View className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Text className="text-sm text-center text-gray-500 dark:text-gray-400">
                   {t('settings:theme.footerNote', '시스템 기본값은 기기 설정을 따릅니다')}
                 </Text>
               </View>
@@ -252,4 +257,3 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     </>
   );
 };
-

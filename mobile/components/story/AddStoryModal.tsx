@@ -14,7 +14,7 @@ import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import * as ImagePicker from 'expo-image-picker';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 interface AddStoryModalProps {
   visible: boolean;

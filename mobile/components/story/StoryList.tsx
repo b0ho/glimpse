@@ -12,7 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { StoryUser as StoryUserType } from '@/utils/storyData';
 import { useTheme } from '@/hooks/useTheme';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 /**
  * StoryList 컴포넌트 Props

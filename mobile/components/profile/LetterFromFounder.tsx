@@ -134,10 +134,10 @@ export const LetterFromFounder: React.FC<LetterFromFounderProps> = ({ onPress })
         onRequestClose={closeModal}
       >
         <View className="modalOverlay">
-          <BlurView intensity={100} style={StyleSheet.absoluteFillObject}>
-            <TouchableOpacity 
-              className="modalBackground" 
-              activeOpacity={1} 
+          <BlurView intensity={100} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+            <TouchableOpacity
+              className="modalBackground"
+              activeOpacity={1}
               onPress={closeModal}
             >
               <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
@@ -161,9 +161,9 @@ export const LetterFromFounder: React.FC<LetterFromFounderProps> = ({ onPress })
                   </LinearGradient>
 
                   {/* Letter Content */}
-                  <ScrollView 
+                  <ScrollView
                     className="letterScrollView"
-                    contentContainerStyle={styles.letterContentContainer}
+                    contentContainerStyle={{ padding: 20 }}
                     showsVerticalScrollIndicator={false}
                   >
                     <View className="letterPaper">

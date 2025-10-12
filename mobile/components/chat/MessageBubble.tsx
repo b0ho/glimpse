@@ -16,7 +16,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { Message } from '@/types';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { STATE_ICONS } from '@/utils/icons';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 /**
  * MessageBubble 컴포넌트 Props
