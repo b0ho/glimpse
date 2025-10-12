@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { LocationData, LocationGroup, NewGroupFormData } from '@/types/nearbyGroups';
+import { ApiResponse } from '@/types';
 import apiClient from '@/services/api/config';
 import { WebCompatibleAlert } from '@/utils/webAlert';
 
@@ -93,7 +94,7 @@ export const useNearbyGroupsData = (
       }
 
       // 실제 API 호출
-      const response = await apiClient.get('/location-groups/nearby', {
+      const response = await apiClient.get<ApiResponse<LocationGroup[]>>('/location-groups/nearby', {
         params: {
           latitude: currentLocation.latitude,
           longitude: currentLocation.longitude,
@@ -120,7 +121,7 @@ export const useNearbyGroupsData = (
     try {
       WebCompatibleAlert.alert(
         t('nearbygroups:alerts.join.title'),
-        t('nearbygroups:alerts.join.message', { name: group.name }),
+        t('nearbygroups:alerts.join.message'),
         [
           {
             text: t('common:cancel'),
@@ -131,21 +132,21 @@ export const useNearbyGroupsData = (
             onPress: async () => {
               try {
                 // 위치 기반 그룹 전용 API 호출
-                const response = await apiClient.post(`/location-groups/${group.id}/join`);
-                
+                const response = await apiClient.post<ApiResponse<any>>(`/location-groups/${group.id}/join`);
+
                 if (response.success) {
                   // 상태 업데이트
-                  setNearbyGroups(prev => 
-                    prev.map(g => 
-                      g.id === group.id 
+                  setNearbyGroups(prev =>
+                    prev.map(g =>
+                      g.id === group.id
                         ? { ...g, isJoined: true, memberCount: g.memberCount + 1 }
                         : g
                     )
                   );
-                  
+
                   WebCompatibleAlert.alert(
                     t('nearbygroups:alerts.join.successTitle'),
-                    t('nearbygroups:alerts.join.successMessage', { name: group.name })
+                    t('nearbygroups:alerts.join.successMessage')
                   );
                 }
               } catch (error) {
@@ -171,7 +172,7 @@ export const useNearbyGroupsData = (
     try {
       WebCompatibleAlert.alert(
         t('nearbygroups:alerts.leave.title'),
-        t('nearbygroups:alerts.leave.message', { name: group.name }),
+        t('nearbygroups:alerts.leave.message'),
         [
           {
             text: t('common:cancel'),
@@ -222,8 +223,8 @@ export const useNearbyGroupsData = (
   ): Promise<boolean> => {
     try {
       setIsLoading(true);
-      
-      const response = await apiClient.post('/location-groups', {
+
+      const response = await apiClient.post<ApiResponse<any>>('/location-groups', {
         name: formData.name,
         description: formData.description,
         latitude: location.latitude,
@@ -267,8 +268,8 @@ export const useNearbyGroupsData = (
    */
   const deleteLocationGroup = useCallback(async (groupId: string): Promise<boolean> => {
     try {
-      const response = await apiClient.delete(`/location-groups/${groupId}`);
-      
+      const response = await apiClient.delete<ApiResponse<void>>(`/location-groups/${groupId}`);
+
       if (response.success) {
         setNearbyGroups(prev => prev.filter(g => g.id !== groupId));
         return true;
