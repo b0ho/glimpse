@@ -141,39 +141,39 @@ export function useNotifications() {
       switch (data.type) {
         case 'new_match':
           if (data.matchId) {
-            navigation.navigate('Matches');
+            navigation.navigate('Matches' as never);
           }
           break;
-          
+
         case 'new_message':
           if (data.messageId) {
             // Navigate to specific chat
-navigation.navigate('Chat', { 
+            navigation.navigate('Chat' as never, {
               roomId: data.roomId || '',
               matchId: data.matchId || data.userId || '',
               otherUserNickname: '익명사용자'
-            });
+            } as never);
           }
           break;
-          
+
         case 'like_received':
           if (isPremium) {
-            navigation.navigate('Matches');
+            navigation.navigate('Matches' as never);
           }
           break;
-          
+
         case 'super_like':
-          navigation.navigate('Matches');
+          navigation.navigate('Matches' as never);
           break;
-          
+
         case 'group_invite':
           if (data.groupId) {
-            navigation.navigate('Groups');
+            navigation.navigate('Groups' as never);
           }
           break;
-          
+
         default:
-  navigation.navigate('Home');
+          navigation.navigate('Home' as never);
       }
     } catch (error) {
       console.error('Error handling notification press:', error);
