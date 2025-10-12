@@ -47,9 +47,7 @@ export const useAuthService = (): AuthService => {
       if (!validatePhoneNumber(phoneNumber)) {
         return {
           success: false,
-          error: {
-            message: 'Invalid phone number format',
-          },
+          error: 'Invalid phone number format',
         };
       }
 
@@ -58,9 +56,7 @@ export const useAuthService = (): AuthService => {
       if (!signInLoaded) {
         return {
           success: false,
-          error: {
-            message: 'Authentication service not ready',
-          },
+          error: 'Authentication service not ready',
         };
       }
 
@@ -88,17 +84,13 @@ export const useAuthService = (): AuthService => {
 
       return {
         success: false,
-        error: {
-          message: 'User not found or unable to sign in',
-        },
+        error: 'User not found or unable to sign in',
       };
     } catch (error) {
       console.error('Phone sign in error:', error);
       return {
         success: false,
-        error: {
-          message: 'Failed to sign in with phone number',
-        },
+        error: 'Failed to sign in with phone number',
       };
     }
   };
@@ -119,9 +111,7 @@ export const useAuthService = (): AuthService => {
         console.log('❌ Phone validation failed for:', phoneNumber);
         return {
           success: false,
-          error: {
-            message: 'Invalid phone number format',
-          },
+          error: 'Invalid phone number format',
         };
       }
 
@@ -131,9 +121,7 @@ export const useAuthService = (): AuthService => {
       if (!signUpLoaded) {
         return {
           success: false,
-          error: {
-            message: 'Authentication service not ready',
-          },
+          error: 'Authentication service not ready',
         };
       }
 
@@ -154,17 +142,13 @@ export const useAuthService = (): AuthService => {
 
       return {
         success: false,
-        error: {
-          message: 'Unable to create account',
-        },
+        error: 'Unable to create account',
       };
     } catch (error) {
       console.error('Phone sign up error:', error);
       return {
         success: false,
-        error: {
-          message: 'Failed to create account with phone number',
-        },
+        error: 'Failed to create account with phone number',
       };
     }
   };
@@ -188,9 +172,7 @@ export const useAuthService = (): AuthService => {
         console.log('❌ Auth service not ready');
         return {
           success: false,
-          error: {
-            message: 'Authentication service not ready',
-          },
+          error: 'Authentication service not ready',
         };
       }
 
@@ -243,18 +225,14 @@ export const useAuthService = (): AuthService => {
       
       return {
         success: false,
-        error: {
-          message: 'Invalid verification code or session state',
-        },
+        error: 'Invalid verification code or session state',
       };
     } catch (error) {
       console.error('🔥 Phone verification error:', error);
       console.error('Error details:', JSON.stringify(error, null, 2));
       return {
         success: false,
-        error: {
-          message: 'Failed to verify phone code',
-        },
+        error: 'Failed to verify phone code',
       };
     }
   };
