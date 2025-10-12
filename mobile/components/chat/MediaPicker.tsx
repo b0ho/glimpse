@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   ActionSheetIOS,
   Platform,
@@ -154,7 +153,7 @@ export const MediaPicker= ({
 
   return (
     <TouchableOpacity
-      style={[styles.button, disabled && styles.buttonDisabled]}
+      className="button"
       onPress={showMediaOptions}
       disabled={disabled || isProcessing}
     >
@@ -167,14 +166,3 @@ export const MediaPicker= ({
   );
 };
 
-const styles = StyleSheet.create({
-  button: {
-    width: 48,
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-});

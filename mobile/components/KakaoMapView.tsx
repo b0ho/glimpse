@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Platform, Alert } from 'react-native';
+import { View, Platform, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { COLORS } from '@/utils/constants';
 
 /**
  * 위치 정보 인터페이스
- *
  * @interface Location
  */
 interface Location {
@@ -13,17 +12,16 @@ interface Location {
   latitude: number;
   /** 경도 */
   longitude: number;
-  /** 주소 (선택) */
+  /** 주소 */
   address?: string;
 }
 
 /**
  * 지도 마커 인터페이스
- *
  * @interface MapMarker
  */
 interface MapMarker {
-  /** 마커 고유 ID */
+  /** 마커 ID */
   id: string;
   /** 위도 */
   latitude: number;
@@ -33,53 +31,39 @@ interface MapMarker {
   title: string;
   /** 마커 설명 */
   description?: string;
-  /** 마커 타입 (색상 결정) */
+  /** 마커 타입 */
   type: 'user' | 'group' | 'place';
   /** 추가 데이터 */
   data?: any;
 }
 
 /**
- * KakaoMapView Props
- *
+ * KakaoMapView 컴포넌트 Props
  * @interface KakaoMapViewProps
  */
 interface KakaoMapViewProps {
   /** 지도 중심 위치 */
   center: Location;
-  /** 표시할 마커 배열 */
+  /** 마커 배열 */
   markers?: MapMarker[];
-  /** 마커 클릭 콜백 */
+  /** 마커 클릭 핸들러 */
   onMarkerPress?: (marker: MapMarker) => void;
-  /** 지도 클릭 콜백 */
+  /** 지도 클릭 핸들러 */
   onMapPress?: (location: Location) => void;
-  /** 스타일 */
+  /** 컴포넌트 스타일 */
   style?: any;
-  /** 줌 레벨 (1-14, 낮을수록 넓은 범위) */
+  /** 지도 줌 레벨 */
   zoom?: number;
-  /** 현재 위치 마커 표시 여부 */
+  /** 현재 위치 표시 여부 */
   showCurrentLocation?: boolean;
 }
 
 /**
- * 카카오 맵 뷰 컴포넌트
- *
- * @description WebView를 통해 카카오맵 JavaScript API를 렌더링.
- *              마커 표시, 클릭 이벤트, 중심점 업데이트 기능 제공.
- *              React Native와 WebView 간 양방향 통신 구현.
- *
- * @component Feature
- * @props KakaoMapViewProps
- * @usage NearbyUsersScreen, NearbyGroupsScreen, LocationInputField
- *
- * @example
- * <KakaoMapView
- *   center={{ latitude: 37.5665, longitude: 126.9780 }}
- *   markers={nearbyUsers}
- *   onMarkerPress={(marker) => handleUserSelect(marker)}
- *   zoom={3}
- *   showCurrentLocation={true}
- * />
+ * 카카오 맵 뷰 컴포넌트 - WebView를 통한 카카오맵 표시
+ * @component
+ * @param {KakaoMapViewProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 카카오 맵 UI
+ * @description 카카오맵 API를 사용하여 지도 표시, 마커 및 상호작용 기능 제공
  */
 export const KakaoMapView= ({
   center,
@@ -340,11 +324,11 @@ export const KakaoMapView= ({
   }, [center, isMapReady]);
 
   return (
-    <View style={[styles.container, style]}>
+    <View className="container">
       <WebView
         ref={webViewRef}
         source={{ html: kakaoMapHTML }}
-        style={styles.webView}
+        className="webView"
         onMessage={handleWebViewMessage}
         javaScriptEnabled={true}
         domStorageEnabled={true}
@@ -365,12 +349,3 @@ export const KakaoMapView= ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
-  },
-  webView: {
-    flex: 1,
-  },
-});

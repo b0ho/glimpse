@@ -1,8 +1,14 @@
+/**
+ * CreateStoryModal 컴포넌트 (NativeWind v4 버전)
+ *
+ * @module CreateStoryModal
+ * @description 매칭 성공 후 사용자들이 자신의 스토리를 작성하고 공유할 수 있는 모달 컴포넌트입니다.
+ */
+
 import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Modal,
   TouchableOpacity,
   TextInput,
@@ -16,16 +22,61 @@ import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 
+/**
+ * CreateStoryModal 컴포넌트 Props 인터페이스
+ * @interface CreateStoryModalProps
+ */
 interface CreateStoryModalProps {
+  /** 모달 표시 여부 */
   visible: boolean;
+  /** 모달 닫기 핸들러 */
   onClose: () => void;
+  /** 스토리 제출 핸들러 (스토리 내용, 태그 배열, 익명 여부) */
   onSubmit: (story: string, tags: string[], isAnonymous: boolean) => void;
+  /** 매칭 관련 정보 */
   matchInfo: {
+    /** 매칭 파트너 닉네임 */
     partnerNickname: string;
+    /** 매칭 ID */
     matchId: string;
   };
 }
 
+/**
+ * CreateStoryModal 컴포넌트
+ *
+ * @component
+ * @param {CreateStoryModalProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 스토리 작성 모달 UI
+ *
+ * @description
+ * 매칭에 성공한 커플이 자신들의 특별한 순간을 공유할 수 있는 스토리 작성 모달입니다.
+ * - 최소 20자 이상의 스토리 입력 필수 (최대 500자)
+ * - 8개의 사전 정의된 태그 중 1~3개 선택 가능
+ * - 익명 작성 옵션 제공 (닉네임 대신 '행복한 커플'로 표시)
+ * - 그라데이션 헤더 디자인
+ * - 실시간 글자 수 카운터
+ * - 유효성 검증 및 피드백 알림
+ * - 키보드 자동 회피 처리
+ *
+ * @example
+ * ```tsx
+ * <CreateStoryModal
+ *   visible={isModalVisible}
+ *   onClose={() => setModalVisible(false)}
+ *   onSubmit={(story, tags, isAnonymous) => {
+ *     console.log('스토리 제출:', { story, tags, isAnonymous });
+ *   }}
+ *   matchInfo={{
+ *     partnerNickname: '철수',
+ *     matchId: 'match-123'
+ *   }}
+ * />
+ * ```
+ *
+ * @category Component
+ * @subcategory SuccessStory
+ */
 export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
   visible,
   onClose,
@@ -93,44 +144,37 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
       onRequestClose={onClose}
     >
       <KeyboardAvoidingView
-        style={styles.modalContainer}
+        className="modalContainer"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={[styles.modalContent, { backgroundColor: colors.SURFACE }]}>
+        <View className="modalContent">
           <LinearGradient
             colors={['#FF6B6B', '#FF8E53']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.header}
+            className="header"
           >
-            <View style={styles.headerContent}>
+            <View className="headerContent">
               <View>
-                <Text style={styles.headerTitle}>💑 매칭 성공 스토리</Text>
-                <Text style={styles.headerSubtitle}>
+                <Text className="headerTitle">💑 매칭 성공 스토리</Text>
+                <Text className="headerSubtitle">
                   {matchInfo.partnerNickname}님과의 특별한 순간을 공유해주세요
                 </Text>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <TouchableOpacity onPress={onClose} className="closeButton">
                 <Icon name="close" size={24} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
           </LinearGradient>
 
-          <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <ScrollView className="scrollContent" showsVerticalScrollIndicator={false}>
             {/* 스토리 입력 */}
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+            <View className="section">
+              <Text className="sectionTitle">
                 우리의 이야기 <Text style={{ color: colors.ERROR }}>*</Text>
               </Text>
               <TextInput
-                style={[
-                  styles.storyInput,
-                  { 
-                    color: colors.TEXT.PRIMARY,
-                    backgroundColor: colors.BACKGROUND,
-                    borderColor: colors.BORDER,
-                  }
-                ]}
+                className="storyInput"
                 placeholder="어떻게 만나게 되었나요? 첫 인상은 어땠나요? 특별했던 순간을 자유롭게 작성해주세요."
                 placeholderTextColor={colors.TEXT.TERTIARY}
                 multiline
@@ -139,45 +183,28 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
                 onChangeText={setStory}
                 textAlignVertical="top"
               />
-              <Text style={[styles.charCount, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="charCount">
                 {story.length}/500
               </Text>
             </View>
 
             {/* 태그 선택 */}
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+            <View className="section">
+              <Text className="sectionTitle">
                 우리 사이를 표현하는 태그 <Text style={{ color: colors.ERROR }}>*</Text>
               </Text>
-              <Text style={[styles.sectionHint, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="sectionHint">
                 최대 3개까지 선택 가능
               </Text>
-              <View style={styles.tagContainer}>
+              <View className="tagContainer">
                 {availableTags.map((tag) => (
                   <TouchableOpacity
                     key={tag}
-                    style={[
-                      styles.tag,
-                      {
-                        backgroundColor: selectedTags.includes(tag) 
-                          ? colors.PRIMARY 
-                          : colors.BACKGROUND,
-                        borderColor: selectedTags.includes(tag) 
-                          ? colors.PRIMARY 
-                          : colors.BORDER,
-                      }
-                    ]}
+                    className="tag"
                     onPress={() => toggleTag(tag)}
                   >
                     <Text
-                      style={[
-                        styles.tagText,
-                        {
-                          color: selectedTags.includes(tag) 
-                            ? '#FFFFFF' 
-                            : colors.TEXT.PRIMARY,
-                        }
-                      ]}
+                      className="tagText"
                     >
                       {tag}
                     </Text>
@@ -187,39 +214,33 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
             </View>
 
             {/* 익명 설정 */}
-            <View style={styles.section}>
+            <View className="section">
               <TouchableOpacity
-                style={styles.anonymousOption}
+                className="anonymousOption"
                 onPress={() => setIsAnonymous(!isAnonymous)}
               >
-                <View style={styles.checkboxContainer}>
+                <View className="checkboxContainer">
                   <View
-                    style={[
-                      styles.checkbox,
-                      {
-                        backgroundColor: isAnonymous ? colors.PRIMARY : colors.BACKGROUND,
-                        borderColor: isAnonymous ? colors.PRIMARY : colors.BORDER,
-                      }
-                    ]}
+                    className="checkbox"
                   >
                     {isAnonymous && (
                       <Icon name="checkmark" size={16} color="#FFFFFF" />
                     )}
                   </View>
-                  <Text style={[styles.anonymousText, { color: colors.TEXT.PRIMARY }]}>
+                  <Text className="anonymousText">
                     익명으로 작성하기
                   </Text>
                 </View>
-                <Text style={[styles.anonymousHint, { color: colors.TEXT.SECONDARY }]}>
+                <Text className="anonymousHint">
                   닉네임 대신 '행복한 커플'로 표시됩니다
                 </Text>
               </TouchableOpacity>
             </View>
 
             {/* 안내 메시지 */}
-            <View style={[styles.infoBox, { backgroundColor: colors.INFO + '10' }]}>
+            <View className="infoBox">
               <Icon name="information-circle" size={20} color={colors.INFO} />
-              <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="infoText">
                 작성하신 스토리는 다른 사용자들에게 공개되며, 일주일 동안 표시됩니다.
                 부적절한 내용은 관리자에 의해 삭제될 수 있습니다.
               </Text>
@@ -227,27 +248,21 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
           </ScrollView>
 
           {/* 하단 버튼 */}
-          <View style={styles.footer}>
+          <View className="footer">
             <TouchableOpacity
-              style={[styles.cancelButton, { borderColor: colors.BORDER }]}
+              className="cancelButton"
               onPress={onClose}
             >
-              <Text style={[styles.cancelButtonText, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="cancelButtonText">
                 취소
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                styles.submitButton,
-                { backgroundColor: colors.PRIMARY },
-                (loading || story.trim().length < 20 || selectedTags.length === 0) && {
-                  opacity: 0.5,
-                }
-              ]}
+              className="submitButton"
               onPress={handleSubmit}
               disabled={loading || story.trim().length < 20 || selectedTags.length === 0}
             >
-              <Text style={styles.submitButtonText}>
+              <Text className="submitButtonText">
                 {loading ? '등록 중...' : '스토리 공유하기'}
               </Text>
             </TouchableOpacity>
@@ -258,150 +273,3 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '90%',
-  },
-  header: {
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#FFFFFF',
-    opacity: 0.9,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  scrollContent: {
-    padding: 20,
-    maxHeight: 400,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  sectionHint: {
-    fontSize: 12,
-    marginBottom: 8,
-  },
-  storyInput: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-    minHeight: 120,
-    fontSize: 15,
-  },
-  charCount: {
-    fontSize: 12,
-    textAlign: 'right',
-    marginTop: 4,
-  },
-  tagContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginHorizontal: -4,
-  },
-  tag: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    margin: 4,
-  },
-  tagText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  anonymousOption: {
-    paddingVertical: 8,
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  anonymousText: {
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  anonymousHint: {
-    fontSize: 12,
-    marginTop: 4,
-    marginLeft: 30,
-  },
-  infoBox: {
-    flexDirection: 'row',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 18,
-    marginLeft: 8,
-  },
-  footer: {
-    flexDirection: 'row',
-    padding: 20,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginRight: 8,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  submitButton: {
-    flex: 2,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});

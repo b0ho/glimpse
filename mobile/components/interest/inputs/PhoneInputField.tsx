@@ -2,7 +2,7 @@
  * 전화번호 입력 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity} from 'react-native';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { formatPhoneNumber } from '@/utils/interest/formValidation';
@@ -15,7 +15,6 @@ interface PhoneInputFieldProps {
   onNameChange?: (name: string) => void;
   selectedGender?: 'male' | 'female' | 'other';
   onGenderSelect?: (gender: 'male' | 'female' | 'other') => void;
-  colors: any;
   t: (key: string) => string;
 }
 
@@ -27,7 +26,6 @@ export const PhoneInputField: React.FC<PhoneInputFieldProps> = ({
   onNameChange,
   selectedGender = 'male',
   onGenderSelect,
-  colors,
   t,
 }) => {
   const handleChange = (text: string) => {
@@ -42,21 +40,14 @@ export const PhoneInputField: React.FC<PhoneInputFieldProps> = ({
   ];
 
   return (
-    <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+    <View className="space-y-4">
+      <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
         {t('interest:placeholders.phone')}
       </Text>
       <CrossPlatformInput
-        style={[
-          styles.input,
-          { 
-            backgroundColor: colors.BACKGROUND, 
-            color: colors.TEXT.PRIMARY,
-            borderColor: colors.BORDER,
-          }
-        ]}
+        className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
         placeholder="010-1234-5678"
-        placeholderTextColor={colors.TEXT.LIGHT}
+        placeholderTextColor="#9CA3AF"
         value={value}
         onChangeText={handleChange}
         keyboardType="phone-pad"
@@ -65,76 +56,62 @@ export const PhoneInputField: React.FC<PhoneInputFieldProps> = ({
       />
       {onContactPress && (
         <TouchableOpacity
-          style={[styles.contactButton, { backgroundColor: colors.PRIMARY + '10' }]}
+          className="flex-row items-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg mt-2"
           onPress={onContactPress}
         >
-          <Icon name="person-add-outline" size={20} color={colors.PRIMARY} />
-          <Text style={[styles.contactButtonText, { color: colors.PRIMARY }]}>
+          <Icon name="person-add-outline" size={20} color="#EF4444" />
+          <Text className="text-red-600 dark:text-red-400 ml-2 font-medium">
             {t('interest:selectContact')}
           </Text>
         </TouchableOpacity>
       )}
       
       {/* 이름 입력 필드 (선택) */}
-      <View style={styles.nameSection}>
-        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+      <View className="mt-4">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
           {t('interest:labels.nameOptional')}
         </Text>
         <CrossPlatformInput
-          style={[
-            styles.input,
-            { 
-              backgroundColor: colors.BACKGROUND, 
-              color: colors.TEXT.PRIMARY,
-              borderColor: colors.BORDER,
-            }
-          ]}
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
           placeholder={t('interest:placeholders.nameOptional')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#9CA3AF"
           value={name}
           onChangeText={onNameChange}
           maxLength={50}
         />
-        <Text style={[styles.hint, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {t('interest:hints.nameDescription')}
         </Text>
       </View>
 
       {/* 성별 선택 */}
-      <View style={styles.genderSection}>
-        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
-          찾고자 하는 성별 <Text style={{ color: colors.ERROR }}>*</Text>
+      <View className="mt-4">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
+          찾고자 하는 성별 <Text className="text-red-500">*</Text>
         </Text>
-        <View style={styles.genderOptions}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {genderOptions.map((option) => (
             <TouchableOpacity
               key={option.id}
-              style={[
-                styles.genderOption,
-                {
-                  backgroundColor: selectedGender === option.id 
-                    ? colors.PRIMARY + '20' 
-                    : colors.SURFACE,
-                  borderColor: selectedGender === option.id 
-                    ? colors.PRIMARY 
-                    : colors.BORDER,
-                }
-              ]}
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: selectedGender === option.id ? '#FEE2E2' : '#FFFFFF',
+                borderWidth: 1,
+                borderColor: selectedGender === option.id ? '#EF4444' : '#D1D5DB',
+                borderRadius: 8,
+                paddingVertical: 12
+              }}
               onPress={() => onGenderSelect?.(option.id)}
             >
               <Icon 
                 name={option.icon} 
                 size={20} 
-                color={selectedGender === option.id ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                color={selectedGender === option.id ? "#EF4444" : "#6B7280"} 
               />
-              <Text style={[
-                styles.genderLabel,
-                { 
-                  color: selectedGender === option.id 
-                    ? colors.PRIMARY 
-                    : colors.TEXT.PRIMARY 
-                }
-              ]}>
+              <Text className="ml-2 text-gray-900 dark:text-white font-medium">
                 {option.label}
               </Text>
             </TouchableOpacity>
@@ -145,63 +122,3 @@ export const PhoneInputField: React.FC<PhoneInputFieldProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    marginBottom: 12,
-  },
-  contactButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  contactButtonText: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  nameSection: {
-    marginTop: 20,
-  },
-  hint: {
-    fontSize: 12,
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  genderSection: {
-    marginTop: 20,
-  },
-  genderOptions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  genderOption: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: 8,
-  },
-  genderLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-});

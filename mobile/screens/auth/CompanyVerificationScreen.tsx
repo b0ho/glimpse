@@ -1,10 +1,18 @@
+/**
+ * 회사 인증 화면 (Company Verification Screen)
+ *
+ * @screen
+ * @description 회사/대학교 인증을 통한 소속 그룹 가입 화면
+ * - 이메일 도메인 인증 또는 초대 코드 인증 지원
+ * - 자동 회사명 추출 및 수동 입력 가능
+ */
+
 import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -12,24 +20,59 @@ import {
   ScrollView,
 } from 'react-native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { CompanyVerification, VerificationStatus, VerificationMethod } from '@/types';
+import { cn } from '@/lib/utils';
+import { useTheme } from '@/store/slices/themeSlice';
 
+/**
+ * Props 인터페이스
+ *
+ * @interface CompanyVerificationScreenProps
+ * @property {() => void} onVerificationSubmitted - 인증 제출 완료 시 호출되는 콜백
+ * @property {() => void} [onSkip] - 건너뛰기 버튼 클릭 시 호출되는 선택적 콜백
+ */
 interface CompanyVerificationScreenProps {
   onVerificationSubmitted: () => void;
   onSkip?: () => void;
 }
 
-export const CompanyVerificationScreen= ({
+/**
+ * 회사 인증 화면 컴포넌트
+ *
+ * @component
+ * @param {CompanyVerificationScreenProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 회사 인증 화면 UI
+ *
+ * @description
+ * 사용자의 회사/대학교 소속을 인증하는 화면
+ * - 이메일 도메인 인증: 회사 이메일 주소로 인증 (예: @samsung.com)
+ * - 초대 코드 인증: 8자리 영숫자 초대 코드로 인증
+ * - 자동 회사명 추출: 주요 도메인 자동 매핑 (네이버, 카카오, 삼성 등)
+ * - 건너뛰기 가능: 선택적 인증 단계
+ *
+ * @navigation
+ * - From: AuthScreen (닉네임 설정 완료 후)
+ * - To: Main (인증 완료 또는 건너뛰기)
+ *
+ * @example
+ * ```tsx
+ * <CompanyVerificationScreen
+ *   onVerificationSubmitted={() => navigation.navigate('Main')}
+ *   onSkip={() => navigation.navigate('Main')}
+ * />
+ * ```
+ */
+export const CompanyVerificationScreen = ({
   onVerificationSubmitted,
   onSkip,
-}) => {
+}: CompanyVerificationScreenProps) => {
   const [selectedMethod, setSelectedMethod] = useState<VerificationMethod | null>(null);
   const [email, setEmail] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useAndroidSafeTranslation();
+  const { isDarkMode } = useTheme();
 
   // 이메일 도메인에서 회사명 추출
   const extractCompanyFromEmail = (emailAddress: string): string => {
@@ -154,56 +197,68 @@ export const CompanyVerificationScreen= ({
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container}
+      className="flex-1 bg-white dark:bg-gray-900"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.content}>
-          <Text style={styles.title}>{t('auth:companyVerification.title')}</Text>
-          <Text style={styles.subtitle}>
+      <ScrollView className="flex-grow">
+        <View className="flex-1 justify-center px-6 py-8">
+          <Text className="text-2xl font-bold text-center mb-2 text-gray-900 dark:text-white">
+            {t('auth:companyVerification.title')}
+          </Text>
+          <Text className="text-base text-center leading-6 mb-8 text-gray-600 dark:text-gray-300">
             {t('auth:companyVerification.subtitle')}
           </Text>
           
-          <View style={styles.form}>
+          <View className="mb-8">
             {/* 인증 방법 선택 */}
-            <Text style={styles.label}>{t('auth:companyVerification.methodSelection.label')}</Text>
-            <Text style={styles.description}>
+            <Text className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
+              {t('auth:companyVerification.methodSelection.label')}
+            </Text>
+            <Text className="text-sm leading-5 mb-6 text-gray-600 dark:text-gray-300">
               {t('auth:companyVerification.methodSelection.description')}
             </Text>
             
-            <View style={styles.methodContainer}>
+            <View className="mb-8">
               <TouchableOpacity
-                style={[
-                  styles.methodButton,
-                  selectedMethod === VerificationMethod.EMAIL_DOMAIN && styles.methodButtonSelected,
-                ]}
+                className={cn(
+                  "border-2 rounded-xl p-4 mb-4",
+                  selectedMethod === VerificationMethod.EMAIL_DOMAIN
+                    ? "bg-blue-50 border-blue-500"
+                    : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600"
+                )}
                 onPress={() => setSelectedMethod(VerificationMethod.EMAIL_DOMAIN)}
               >
-                <Text style={[
-                  styles.methodButtonText,
-                  selectedMethod === VerificationMethod.EMAIL_DOMAIN && styles.methodButtonTextSelected,
-                ]}>
+                <Text className={cn(
+                  "text-base font-semibold mb-1",
+                  selectedMethod === VerificationMethod.EMAIL_DOMAIN
+                    ? "text-blue-600"
+                    : "text-gray-600 dark:text-gray-300"
+                )}>
                   {t('auth:companyVerification.methods.email.title')}
                 </Text>
-                <Text style={styles.methodDescription}>
+                <Text className="text-sm text-gray-500 dark:text-gray-400">
                   {t('auth:companyVerification.methods.email.description')}
                 </Text>
               </TouchableOpacity>
               
               <TouchableOpacity
-                style={[
-                  styles.methodButton,
-                  selectedMethod === VerificationMethod.INVITE_CODE && styles.methodButtonSelected,
-                ]}
+                className={cn(
+                  "border-2 rounded-xl p-4 mb-4",
+                  selectedMethod === VerificationMethod.INVITE_CODE
+                    ? "bg-blue-50 border-blue-500"
+                    : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600"
+                )}
                 onPress={() => setSelectedMethod(VerificationMethod.INVITE_CODE)}
               >
-                <Text style={[
-                  styles.methodButtonText,
-                  selectedMethod === VerificationMethod.INVITE_CODE && styles.methodButtonTextSelected,
-                ]}>
+                <Text className={cn(
+                  "text-base font-semibold mb-1",
+                  selectedMethod === VerificationMethod.INVITE_CODE
+                    ? "text-blue-600"
+                    : "text-gray-600 dark:text-gray-300"
+                )}>
                   {t('auth:companyVerification.methods.inviteCode.title')}
                 </Text>
-                <Text style={styles.methodDescription}>
+                <Text className="text-sm text-gray-500 dark:text-gray-400">
                   {t('auth:companyVerification.methods.inviteCode.description')}
                 </Text>
               </TouchableOpacity>
@@ -211,11 +266,14 @@ export const CompanyVerificationScreen= ({
 
             {/* 이메일 인증 폼 */}
             {selectedMethod === VerificationMethod.EMAIL_DOMAIN && (
-              <View style={styles.inputSection}>
-                <Text style={styles.inputLabel}>{t('auth:companyVerification.form.emailLabel')}</Text>
+              <View className="mb-6">
+                <Text className="text-base font-medium mb-2 mt-4 text-gray-900 dark:text-white">
+                  {t('auth:companyVerification.form.emailLabel')}
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  className="border-2 rounded-xl px-4 py-4 text-base mb-2 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                   placeholder="company@example.com"
+                  placeholderTextColor="#6B7280"
                   value={email}
                   onChangeText={handleEmailChange}
                   keyboardType="email-address"
@@ -224,16 +282,23 @@ export const CompanyVerificationScreen= ({
                 />
                 
                 {companyName && (
-                  <View style={styles.companyPreview}>
-                    <Text style={styles.companyPreviewLabel}>{t('auth:companyVerification.form.detectedCompany')}</Text>
-                    <Text style={styles.companyPreviewText}>{companyName}</Text>
+                  <View className="flex-row items-center mb-4 p-2 bg-green-50 rounded-lg">
+                    <Text className="text-sm mr-2 text-gray-600 dark:text-gray-300">
+                      {t('auth:companyVerification.form.detectedCompany')}
+                    </Text>
+                    <Text className="text-sm font-semibold text-green-600">
+                      {companyName}
+                    </Text>
                   </View>
                 )}
                 
-                <Text style={styles.inputLabel}>{t('auth:companyVerification.form.companyNameLabel')}</Text>
+                <Text className="text-base font-medium mb-2 mt-4 text-gray-900 dark:text-white">
+                  {t('auth:companyVerification.form.companyNameLabel')}
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  className="border-2 rounded-xl px-4 py-4 text-base mb-2 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                   placeholder={t('auth:companyVerification.form.companyNamePlaceholder')}
+                  placeholderTextColor="#6B7280"
                   value={companyName}
                   onChangeText={setCompanyName}
                 />
@@ -242,11 +307,14 @@ export const CompanyVerificationScreen= ({
 
             {/* 초대 코드 인증 폼 */}
             {selectedMethod === VerificationMethod.INVITE_CODE && (
-              <View style={styles.inputSection}>
-                <Text style={styles.inputLabel}>{t('auth:companyVerification.form.inviteCodeLabel')}</Text>
+              <View className="mb-6">
+                <Text className="text-base font-medium mb-2 mt-4 text-gray-900 dark:text-white">
+                  {t('auth:companyVerification.form.inviteCodeLabel')}
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  className="border-2 rounded-xl px-4 py-4 text-base mb-2 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                   placeholder="ABC12345"
+                  placeholderTextColor="#6B7280"
                   value={inviteCode}
                   onChangeText={(text) => setInviteCode(text.toUpperCase())}
                   maxLength={8}
@@ -254,10 +322,13 @@ export const CompanyVerificationScreen= ({
                   autoCorrect={false}
                 />
                 
-                <Text style={styles.inputLabel}>{t('auth:companyVerification.form.companyNameLabel')}</Text>
+                <Text className="text-base font-medium mb-2 mt-4 text-gray-900 dark:text-white">
+                  {t('auth:companyVerification.form.companyNameLabel')}
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  className="border-2 rounded-xl px-4 py-4 text-base mb-2 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                   placeholder={t('auth:companyVerification.form.companyNamePlaceholder')}
+                  placeholderTextColor="#6B7280"
                   value={companyName}
                   onChangeText={setCompanyName}
                 />
@@ -265,38 +336,44 @@ export const CompanyVerificationScreen= ({
             )}
             
             <TouchableOpacity
-              style={[
-                styles.button,
-                (!selectedMethod || isLoading) && styles.buttonDisabled,
-              ]}
+              className={cn(
+                "rounded-xl py-4 items-center mt-6",
+                (!selectedMethod || isLoading)
+                  ? "bg-gray-300 dark:bg-gray-700"
+                  : "bg-blue-500"
+              )}
               onPress={handleSubmitVerification}
               disabled={!selectedMethod || isLoading}
             >
               {isLoading ? (
-                <View style={styles.buttonContent}>
-                  <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
-                  <Text style={[styles.buttonText, { marginLeft: SPACING.SM }]}>
+                <View className="flex-row items-center justify-center">
+                  <ActivityIndicator size="small" color="white" />
+                  <Text className="text-white text-base font-semibold ml-2">
                     {t('auth:companyVerification.form.submitting')}
                   </Text>
                 </View>
               ) : (
-                <Text style={styles.buttonText}>{t('auth:companyVerification.form.submitButton')}</Text>
+                <Text className="text-white text-base font-semibold">
+                  {t('auth:companyVerification.form.submitButton')}
+                </Text>
               )}
             </TouchableOpacity>
 
             {/* 건너뛰기 버튼 */}
             {onSkip && (
               <TouchableOpacity
-                style={styles.skipButton}
+                className="mt-4 py-4 items-center"
                 onPress={onSkip}
                 disabled={isLoading}
               >
-                <Text style={styles.skipButtonText}>{t('auth:companyVerification.form.skipButton')}</Text>
+                <Text className="text-base font-medium underline text-gray-600 dark:text-gray-300">
+                  {t('auth:companyVerification.form.skipButton')}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
           
-          <Text style={styles.notice}>
+          <Text className="text-xs text-center leading-5 text-gray-500 dark:text-gray-400">
             {t('auth:companyVerification.notice')}
           </Text>
         </View>
@@ -304,151 +381,3 @@ export const CompanyVerificationScreen= ({
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: SPACING.LG,
-    paddingVertical: SPACING.XL,
-  },
-  title: {
-    fontSize: FONT_SIZES.XXL,
-    fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
-    textAlign: 'center',
-    marginBottom: SPACING.SM,
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: SPACING.XXL,
-  },
-  form: {
-    marginBottom: SPACING.XL,
-  },
-  label: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
-    marginBottom: SPACING.SM,
-  },
-  description: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
-    lineHeight: 20,
-    marginBottom: SPACING.LG,
-  },
-  methodContainer: {
-    marginBottom: SPACING.XL,
-  },
-  methodButton: {
-    backgroundColor: COLORS.SURFACE,
-    borderWidth: 2,
-    borderColor: COLORS.BORDER,
-    borderRadius: 12,
-    padding: SPACING.MD,
-    marginBottom: SPACING.MD,
-  },
-  methodButtonSelected: {
-    backgroundColor: COLORS.PRIMARY + '10',
-    borderColor: COLORS.PRIMARY,
-  },
-  methodButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    color: COLORS.TEXT.SECONDARY,
-    marginBottom: 4,
-  },
-  methodButtonTextSelected: {
-    color: COLORS.PRIMARY,
-  },
-  methodDescription: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.LIGHT,
-  },
-  inputSection: {
-    marginBottom: SPACING.LG,
-  },
-  inputLabel: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '500',
-    color: COLORS.TEXT.PRIMARY,
-    marginBottom: SPACING.SM,
-    marginTop: SPACING.MD,
-  },
-  input: {
-    backgroundColor: COLORS.SURFACE,
-    borderWidth: 2,
-    borderColor: COLORS.BORDER,
-    borderRadius: 12,
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.MD,
-    fontSize: FONT_SIZES.MD,
-    marginBottom: SPACING.SM,
-  },
-  companyPreview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.MD,
-    padding: SPACING.SM,
-    backgroundColor: COLORS.SUCCESS + '10',
-    borderRadius: 8,
-  },
-  companyPreviewLabel: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
-    marginRight: SPACING.SM,
-  },
-  companyPreviewText: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: '600',
-    color: COLORS.SUCCESS,
-  },
-  button: {
-    backgroundColor: COLORS.PRIMARY,
-    borderRadius: 12,
-    paddingVertical: SPACING.MD,
-    alignItems: 'center',
-    marginTop: SPACING.LG,
-  },
-  buttonDisabled: {
-    backgroundColor: COLORS.TEXT.LIGHT,
-  },
-  buttonText: {
-    color: COLORS.TEXT.WHITE,
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  notice: {
-    fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  skipButton: {
-    marginTop: SPACING.MD,
-    paddingVertical: SPACING.MD,
-    alignItems: 'center',
-  },
-  skipButtonText: {
-    color: COLORS.TEXT.SECONDARY,
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '500',
-    textDecorationLine: 'underline',
-  },
-});

@@ -2,7 +2,7 @@
  * 그룹 카드 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Group } from '@/types';
 import { useTheme } from '@/hooks/useTheme';
@@ -80,22 +80,22 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group }) => {
 
   return (
     <TouchableOpacity
-      style={[styles.groupCard, { backgroundColor: colors.SURFACE }]}
+      className="groupCard"
       onPress={handleGroupPress}
       activeOpacity={0.8}
     >
-      <View style={styles.groupHeader}>
-        <View style={styles.groupInfo}>
-          <Text style={[styles.groupName, { color: colors.TEXT.PRIMARY }]}>{group.name}</Text>
-          <View style={styles.groupMeta}>
-            <View style={[styles.groupTypeBadge, { backgroundColor: getGroupTypeColor(group.type) + '20' }]}>
-              <Text style={[styles.groupTypeText, { color: getGroupTypeColor(group.type) }]}>
+      <View className="groupHeader">
+        <View className="groupInfo">
+          <Text className="groupName">{group.name}</Text>
+          <View className="groupMeta">
+            <View className="groupTypeBadge">
+              <Text className="groupTypeText">
                 {getGroupTypeLabel(group.type)}
               </Text>
             </View>
-            <View style={styles.memberCount}>
+            <View className="memberCount">
               <Icon name="people-outline" size={16} color={colors.TEXT.SECONDARY} />
-              <Text style={[styles.memberCountText, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="memberCountText">
                 {group.memberCount}명
               </Text>
             </View>
@@ -103,43 +103,40 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group }) => {
         </View>
 
         {isCreator && (
-          <View style={[styles.creatorBadge, { backgroundColor: colors.PRIMARY + '20' }]}>
+          <View className="creatorBadge">
             <Icon name="star" size={14} color={colors.PRIMARY} />
-            <Text style={[styles.creatorText, { color: colors.PRIMARY }]}>내 그룹</Text>
+            <Text className="creatorText">내 그룹</Text>
           </View>
         )}
       </View>
 
       {group.description && (
         <Text 
-          style={[styles.groupDescription, { color: colors.TEXT.SECONDARY }]}
+          className="groupDescription"
           numberOfLines={2}
         >
           {group.description}
         </Text>
       )}
 
-      <View style={styles.groupFooter}>
-        <View style={styles.statusInfo}>
+      <View className="groupFooter">
+        <View className="statusInfo">
           {group.location && (
-            <Text style={[styles.locationText, { color: colors.TEXT.TERTIARY }]}>
+            <Text className="locationText">
               📍 {group.location.address}
             </Text>
           )}
           
           {group.expiresAt && (
-            <Text style={[styles.expiryText, { color: colors.TEXT.TERTIARY }]}>
+            <Text className="expiryText">
               ⏰ {new Date(group.expiresAt).toLocaleDateString()}
             </Text>
           )}
         </View>
 
-        <View style={styles.groupActions}>
+        <View className="groupActions">
           <TouchableOpacity
-            style={[
-              styles.likeButton, 
-              groupStore.isGroupLiked(group.id) && { backgroundColor: colors.ERROR + '20' }
-            ]}
+            className="likeButton"
             onPress={handleLikePress}
           >
             <Icon 
@@ -150,21 +147,10 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group }) => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.joinButton,
-              isCreator && { backgroundColor: colors.ERROR + '20', borderWidth: 1, borderColor: colors.ERROR },
-              groupStore.isUserInGroup(group.id) && !isCreator && styles.joinButtonDisabled,
-              !group.isMatchingActive && styles.joinButtonInactive,
-              { backgroundColor: colors.PRIMARY }
-            ]}
+            className="joinButton"
             onPress={handleJoinPress}
           >
-            <Text style={[
-              styles.joinButtonText,
-              isCreator && { color: colors.ERROR },
-              groupStore.isUserInGroup(group.id) && !isCreator && styles.joinButtonTextDisabled,
-              { color: colors.TEXT.WHITE }
-            ]}>
+            <Text className="joinButtonText">
               {isCreator 
                 ? t('main.actions.leaveGroup') 
                 : (groupStore.isUserInGroup(group.id) 
@@ -178,111 +164,3 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  groupCard: {
-    padding: 16,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    borderRadius: 12,
-    ...shadowStyles.card,
-  },
-  groupHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  groupInfo: {
-    flex: 1,
-  },
-  groupName: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  groupMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  groupTypeBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  groupTypeText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  memberCount: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  memberCountText: {
-    fontSize: 12,
-  },
-  creatorBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    gap: 4,
-  },
-  creatorText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  groupDescription: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  groupFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  statusInfo: {
-    flex: 1,
-    gap: 4,
-  },
-  locationText: {
-    fontSize: 12,
-  },
-  expiryText: {
-    fontSize: 12,
-  },
-  groupActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  likeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  joinButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  joinButtonDisabled: {
-    opacity: 0.5,
-  },
-  joinButtonInactive: {
-    opacity: 0.7,
-  },
-  joinButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  joinButtonTextDisabled: {
-    opacity: 0.5,
-  },
-});

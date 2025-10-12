@@ -1,10 +1,19 @@
+/**
+ * SMS 인증 화면 (SMS Verification Screen)
+ *
+ * @screen
+ * @description SMS로 받은 6자리 인증번호를 입력하는 화면
+ * - 자동 포커스 이동 및 자동 제출
+ * - 타이머 기반 만료 처리
+ * - 재전송 기능 제공
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -18,9 +27,17 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthService } from '@/services/auth/auth-service';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
-import { LIGHT_COLORS, DARK_COLORS } from '@/constants/theme';
 import { SECURITY } from '@/utils/constants';
+import { cn } from '@/lib/utils';
 
+/**
+ * Props 인터페이스
+ *
+ * @interface SMSVerificationScreenProps
+ * @property {string} phoneNumber - 인증 대상 전화번호
+ * @property {() => void} onVerificationSuccess - 인증 성공 시 호출되는 콜백
+ * @property {() => void} onBack - 뒤로가기 버튼 클릭 시 호출되는 콜백
+ */
 interface SMSVerificationScreenProps {
   phoneNumber: string;
   onVerificationSuccess: () => void;
@@ -29,11 +46,41 @@ interface SMSVerificationScreenProps {
 
 const { width } = Dimensions.get('window');
 
-export const SMSVerificationScreen= ({
+/**
+ * SMS 인증 화면 컴포넌트
+ *
+ * @component
+ * @param {SMSVerificationScreenProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} SMS 인증번호 입력 화면 UI
+ *
+ * @description
+ * 전송된 SMS 인증번호 6자리를 입력받아 검증하는 화면
+ * - 6자리 OTP: 각 자리별 개별 입력 필드
+ * - 자동 포커스: 입력 시 다음 필드로 자동 이동
+ * - 자동 제출: 6자리 완성 시 자동으로 인증 시도
+ * - 만료 타이머: 3분 카운트다운 표시
+ * - 재전송: 만료 후 또는 코드 미수신 시 재전송 가능
+ * - 애니메이션: 오류 시 흔들림 효과, 페이드인 효과
+ * - Backspace 처리: 삭제 시 이전 필드로 자동 이동
+ *
+ * @navigation
+ * - From: PhoneVerificationScreen (SMS 전송 후)
+ * - To: NicknameSetupScreen (인증 성공 후)
+ *
+ * @example
+ * ```tsx
+ * <SMSVerificationScreen
+ *   phoneNumber="01012345678"
+ *   onVerificationSuccess={() => setCurrentStep('nickname')}
+ *   onBack={() => setCurrentStep('phone')}
+ * />
+ * ```
+ */
+export const SMSVerificationScreen = ({
   phoneNumber,
   onVerificationSuccess,
   onBack,
-}) => {
+}: SMSVerificationScreenProps) => {
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [remainingTime, setRemainingTime] = useState(SECURITY.OTP_EXPIRY_MINUTES * 60);
@@ -42,7 +89,7 @@ export const SMSVerificationScreen= ({
   const authStore = useAuthStore();
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const { t } = useAndroidSafeTranslation();
-  const { colors, isDarkMode } = useTheme();
+  const { colors: themeColors } = useTheme();
   
   // 애니메이션 값
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -242,84 +289,92 @@ export const SMSVerificationScreen= ({
 
   return (
     <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor: isDarkMode ? DARK_COLORS.BACKGROUND : LIGHT_COLORS.BACKGROUND }]}
+      className="flex-1 bg-gray-50 dark:bg-black"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <Animated.View 
-        style={[
-          styles.content,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
+        className={cn(
+          "flex-1 px-6",
+          Platform.OS === 'ios' ? "pt-20" : "pt-15"
+        )}
+        style={{
+          opacity: fadeAnim,
+          transform: [{ scale: scaleAnim }],
+        }}
       >
         {/* 헤더 */}
         <TouchableOpacity 
-          style={styles.backButton} 
+          className="flex-row items-center py-2 px-3 rounded-[20px] bg-red-100 dark:bg-red-100/10 self-start mb-8"
           onPress={onBack}
           activeOpacity={0.7}
         >
           <Ionicons 
             name="arrow-back" 
             size={24} 
-            color={isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY} 
+            color={themeColors.TEXT.PRIMARY} 
           />
-          <Text style={[styles.backButtonText, { color: isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY }]}>
+          <Text className="text-base font-medium ml-1 text-gray-900 dark:text-white">
             {t('common:buttons.back')}
           </Text>
         </TouchableOpacity>
 
         {/* 타이틀 섹션 */}
-        <View style={styles.titleSection}>
-          <View style={styles.iconContainer}>
+        <View className="items-center mb-10">
+          <View className="mb-6">
             <LinearGradient
-              colors={isDarkMode ? ['#FF8A8A', '#FF6B6B'] : ['#FF6B6B', '#FF5252']}
-              style={styles.gradientIcon}
+              colors={['#FF8A8A', '#FF6B6B']}
+              className={cn(
+                "w-20 h-20 rounded-full justify-center items-center",
+                Platform.select({
+                  ios: "shadow-lg",
+                  android: "elevation-10",
+                  web: ""
+                })
+              )}
+              style={Platform.OS === 'web' ? {
+                boxShadow: '0px 8px 24px rgba(255, 107, 107, 0.3)'
+              } : undefined}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
               <Ionicons name="lock-closed" size={32} color="white" />
             </LinearGradient>
           </View>
-          <Text style={[styles.title, { color: isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY }]}>
+          <Text className="text-3xl font-bold text-center mb-2 text-gray-900 dark:text-white">
             {t('auth:smsVerification.title')}
           </Text>
-          <Text style={[styles.subtitle, { color: isDarkMode ? DARK_COLORS.TEXT.SECONDARY : LIGHT_COLORS.TEXT.SECONDARY }]}>
+          <Text className="text-base text-center leading-6 px-5 text-gray-600 dark:text-gray-400">
             {t('auth:smsVerification.subtitle', { phoneNumber: formatPhoneNumber(phoneNumber) })}
           </Text>
         </View>
         
         {/* 코드 입력 필드 */}
         <Animated.View 
-          style={[
-            styles.form,
-            {
-              transform: [{ translateX: shakeAnim }],
-            },
-          ]}
+          className="mb-8"
+          style={{
+            transform: [{ translateX: shakeAnim }],
+          }}
         >
-          <View style={styles.codeContainer}>
+          <View className="flex-row justify-between mb-6 px-5">
             {[...Array(SECURITY.OTP_LENGTH)].map((_, index) => (
               <View
                 key={index}
-                style={[
-                  styles.codeBox,
-                  {
-                    backgroundColor: isDarkMode ? DARK_COLORS.SURFACE : LIGHT_COLORS.SURFACE,
-                    borderColor: code[index] 
-                      ? (isDarkMode ? DARK_COLORS.PRIMARY : LIGHT_COLORS.PRIMARY)
-                      : (isDarkMode ? DARK_COLORS.BORDER : LIGHT_COLORS.BORDER),
-                    borderWidth: code[index] ? 2 : 1,
-                  },
-                ]}
+                className={cn(
+                  "w-11 h-14 rounded-xl justify-center items-center bg-white dark:bg-gray-800",
+                  Platform.select({
+                    ios: "shadow-sm",
+                    android: "elevation-2",
+                    web: ""
+                  }),
+                  code[index] ? "border-2 border-red-500 dark:border-red-400" : "border border-gray-200 dark:border-gray-600"
+                )}
+                style={Platform.OS === 'web' ? {
+                  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
+                } : undefined}
               >
                 <TextInput
                   ref={(ref) => (inputRefs.current[index] = ref)}
-                  style={[
-                    styles.codeInput,
-                    { color: isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY },
-                  ]}
+                  className="text-2xl font-semibold w-full h-full text-center text-gray-900 dark:text-white"
                   value={code[index] || ''}
                   onChangeText={(text) => handleCodeChange(text, index)}
                   onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
@@ -332,23 +387,21 @@ export const SMSVerificationScreen= ({
           </View>
           
           {/* 타이머 */}
-          <View style={styles.timerContainer}>
+          <View className="flex-row items-center justify-center mb-6">
             <Ionicons 
               name="time-outline" 
               size={16} 
               color={remainingTime > 30 
-                ? (isDarkMode ? DARK_COLORS.SUCCESS : LIGHT_COLORS.SUCCESS)
-                : (isDarkMode ? DARK_COLORS.WARNING : LIGHT_COLORS.WARNING)
+                ? themeColors.SUCCESS
+                : themeColors.WARNING
               } 
             />
-            <Text style={[
-              styles.timerText,
-              { 
-                color: remainingTime > 30 
-                  ? (isDarkMode ? DARK_COLORS.TEXT.SECONDARY : LIGHT_COLORS.TEXT.SECONDARY)
-                  : (isDarkMode ? DARK_COLORS.WARNING : LIGHT_COLORS.WARNING)
-              },
-            ]}>
+            <Text className={cn(
+              "text-sm ml-1.5",
+              remainingTime > 30 
+                ? "text-gray-600 dark:text-gray-400"
+                : "text-amber-600 dark:text-amber-400"
+            )}>
               {remainingTime > 0 
                 ? t('auth:smsVerification.timer.expires', { time: formatTime(remainingTime) }) 
                 : t('auth:smsVerification.timer.expired')
@@ -372,24 +425,36 @@ export const SMSVerificationScreen= ({
             <LinearGradient
               colors={
                 code.length !== SECURITY.OTP_LENGTH || isLoading
-                  ? isDarkMode ? ['#48484A', '#48484A'] : ['#CED4DA', '#CED4DA']
-                  : isDarkMode ? ['#FF8A8A', '#FF6B6B'] : ['#FF6B6B', '#FF5252']
+                  ? ['#CED4DA', '#CED4DA']
+                  : ['#FF6B6B', '#FF5252']
               }
-              style={styles.gradientButton}
+              className={cn(
+                "rounded-2xl py-4.5 items-center justify-center mb-4",
+                Platform.select({
+                  ios: "shadow-lg",
+                  android: "elevation-8",
+                  web: ""
+                })
+              )}
+              style={Platform.OS === 'web' && (code.length === SECURITY.OTP_LENGTH && !isLoading) ? {
+                boxShadow: '0px 4px 16px rgba(255, 107, 107, 0.25)'
+              } : undefined}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
               {isLoading ? (
-                <View style={styles.buttonContent}>
+                <View className="flex-row items-center justify-center">
                   <ActivityIndicator size="small" color="white" />
-                  <Text style={[styles.buttonText, { marginLeft: 8 }]}>
+                  <Text className="text-white text-base font-semibold ml-2">
                     {t('auth:smsVerification.verifying')}
                   </Text>
                 </View>
               ) : (
-                <View style={styles.buttonContent}>
+                <View className="flex-row items-center justify-center">
                   <Ionicons name="checkmark-circle" size={20} color="white" style={{ marginRight: 8 }} />
-                  <Text style={styles.buttonText}>{t('auth:smsVerification.verifyButton')}</Text>
+                  <Text className="text-white text-base font-semibold">
+                    {t('auth:smsVerification.verifyButton')}
+                  </Text>
                 </View>
               )}
             </LinearGradient>
@@ -397,31 +462,29 @@ export const SMSVerificationScreen= ({
           
           {/* 재전송 버튼 */}
           <TouchableOpacity
-            style={[
-              styles.resendButton,
-              !canResend && styles.resendButtonDisabled,
-            ]}
+            className={cn(
+              "items-center py-3",
+              !canResend && "opacity-50"
+            )}
             onPress={handleResendCode}
             disabled={!canResend || isLoading}
             activeOpacity={0.7}
           >
-            <View style={styles.resendButtonContent}>
+            <View className="flex-row items-center justify-center">
               <Ionicons 
                 name="refresh" 
                 size={18} 
                 color={canResend 
-                  ? (isDarkMode ? DARK_COLORS.PRIMARY : LIGHT_COLORS.PRIMARY)
-                  : (isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY)
+                  ? themeColors.PRIMARY
+                  : themeColors.TEXT.TERTIARY
                 } 
               />
-              <Text style={[
-                styles.resendButtonText,
-                {
-                  color: canResend 
-                    ? (isDarkMode ? DARK_COLORS.PRIMARY : LIGHT_COLORS.PRIMARY)
-                    : (isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY)
-                },
-              ]}>
+              <Text className={cn(
+                "text-base font-medium ml-1.5",
+                canResend 
+                  ? "text-red-500 dark:text-red-400"
+                  : "text-gray-400 dark:text-gray-500"
+              )}>
                 {t('auth:smsVerification.resendButton')}
               </Text>
             </View>
@@ -429,13 +492,13 @@ export const SMSVerificationScreen= ({
         </Animated.View>
         
         {/* 도움말 */}
-        <View style={styles.helpContainer}>
+        <View className="flex-row items-center justify-center mt-8 px-5">
           <Ionicons 
             name="information-circle-outline" 
             size={16} 
-            color={isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY} 
+            color={themeColors.TEXT.TERTIARY} 
           />
-          <Text style={[styles.description, { color: isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY }]}>
+          <Text className="text-xs text-center leading-4.5 ml-1.5 flex-1 text-gray-500 dark:text-gray-400">
             {t('auth:smsVerification.help')}
           </Text>
         </View>
@@ -443,178 +506,3 @@ export const SMSVerificationScreen= ({
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: Platform.OS === 'ios' ? 80 : 60,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 107, 107, 0.1)',
-    alignSelf: 'flex-start',
-    marginBottom: 32,
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 4,
-  },
-  titleSection: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  iconContainer: {
-    marginBottom: 24,
-  },
-  gradientIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#FF6B6B',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.3,
-        shadowRadius: 16,
-      },
-      android: {
-        elevation: 10,
-      },
-      web: {
-        boxShadow: '0px 8px 24px rgba(255, 107, 107, 0.3)',
-      } as any,
-    }),
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: 20,
-  },
-  form: {
-    marginBottom: 32,
-  },
-  codeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-    paddingHorizontal: 20,
-  },
-  codeBox: {
-    width: 45,
-    height: 56,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-      web: {
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
-      } as any,
-    }),
-  },
-  codeInput: {
-    fontSize: 24,
-    fontWeight: '600',
-    width: '100%',
-    height: '100%',
-    textAlign: 'center',
-  },
-  timerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  timerText: {
-    fontSize: 14,
-    marginLeft: 6,
-  },
-  gradientButton: {
-    borderRadius: 16,
-    paddingVertical: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#FF6B6B',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.25,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 8,
-      },
-      web: {
-        boxShadow: '0px 4px 16px rgba(255, 107, 107, 0.25)',
-      } as any,
-    }),
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  resendButton: {
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  resendButtonDisabled: {
-    opacity: 0.5,
-  },
-  resendButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  resendButtonText: {
-    fontSize: 15,
-    fontWeight: '500',
-    marginLeft: 6,
-  },
-  helpContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 32,
-    paddingHorizontal: 20,
-  },
-  description: {
-    fontSize: 13,
-    textAlign: 'center',
-    lineHeight: 18,
-    marginLeft: 6,
-    flex: 1,
-  },
-});

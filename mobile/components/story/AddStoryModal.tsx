@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Modal,
   TouchableOpacity,
   Image,
@@ -15,8 +14,7 @@ import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import * as ImagePicker from 'expo-image-picker';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { shadowStyles } from '@/utils/shadowStyles';
+import { cn } from '@/utils/cn';
 
 interface AddStoryModalProps {
   visible: boolean;
@@ -161,27 +159,27 @@ export const AddStoryModal: React.FC<AddStoryModalProps> = ({
       transparent={false}
       onRequestClose={handleClose}
     >
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <SafeAreaView className="flex-1 bg-white dark:bg-black">
         {/* 헤더 */}
-        <View style={[styles.header, { borderBottomColor: colors.BORDER }]}>
-          <TouchableOpacity onPress={handleClose} style={styles.headerButton}>
+        <View className="flex-row items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+          <TouchableOpacity onPress={handleClose} className="p-1">
             <Icon name="close" size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>
+          <Text className="text-lg font-semibold text-gray-900 dark:text-white">
             {t('addStory.title') || '스토리 추가'}
           </Text>
           <TouchableOpacity 
             onPress={handleUpload} 
-            style={styles.headerButton}
+            className="p-1"
             disabled={!selectedImage || isSubmitting}
           >
             {isSubmitting ? (
               <ActivityIndicator size="small" color={colors.PRIMARY} />
             ) : (
-              <Text style={[
-                styles.uploadButton,
-                { color: selectedImage ? colors.PRIMARY : colors.TEXT.DISABLED }
-              ]}>
+              <Text className={cn(
+                "text-base font-semibold",
+                selectedImage ? "text-blue-500" : "text-gray-400"
+              )}>
                 {t('addStory.upload') || '올리기'}
               </Text>
             )}
@@ -189,13 +187,20 @@ export const AddStoryModal: React.FC<AddStoryModalProps> = ({
         </View>
 
         {/* 컨텐츠 */}
-        <View style={styles.content}>
+        <View className="flex-1 p-4">
           {selectedImage ? (
             // 선택된 이미지 표시
-            <View style={styles.previewContainer}>
-              <Image source={{ uri: selectedImage }} style={styles.previewImage} />
+            <View className="flex-1 relative">
+              <Image 
+                source={{ uri: selectedImage }} 
+                className="w-full h-full rounded-lg"
+                resizeMode="contain"
+              />
               <TouchableOpacity 
-                style={[styles.changeButton, { backgroundColor: colors.SURFACE }]}
+                className={cn(
+                  "absolute top-4 right-4 p-1 rounded-full",
+                  "bg-white dark:bg-gray-800"
+                )}
                 onPress={() => setSelectedImage(null)}
               >
                 <Icon name="close-circle" size={24} color={colors.TEXT.PRIMARY} />
@@ -203,23 +208,39 @@ export const AddStoryModal: React.FC<AddStoryModalProps> = ({
             </View>
           ) : (
             // 이미지 선택 옵션
-            <View style={styles.optionsContainer}>
+            <View className="flex-1 justify-center items-center gap-8">
               <TouchableOpacity 
-                style={[styles.optionButton, { backgroundColor: colors.PRIMARY }]}
+                className={cn(
+                  "w-48 h-48 rounded-xl justify-center items-center gap-4",
+                  "bg-blue-500 shadow-lg",
+                  Platform.select({
+                    ios: "shadow-sm",
+                    android: "elevation-4",
+                    web: "shadow-md"
+                  })
+                )}
                 onPress={handleSelectImage}
               >
-                <Icon name="images" size={32} color={COLORS.WHITE} />
-                <Text style={styles.optionText}>
+                <Icon name="images" size={32} color="#FFFFFF" />
+                <Text className="text-white text-base font-semibold">
                   {t('addStory.selectPhoto') || '갤러리에서 선택'}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={[styles.optionButton, { backgroundColor: colors.SECONDARY || colors.PRIMARY }]}
+                className={cn(
+                  "w-48 h-48 rounded-xl justify-center items-center gap-4",
+                  "bg-green-500 shadow-lg",
+                  Platform.select({
+                    ios: "shadow-sm", 
+                    android: "elevation-4",
+                    web: "shadow-md"
+                  })
+                )}
                 onPress={handleTakePhoto}
               >
-                <Icon name="camera" size={32} color={COLORS.WHITE} />
-                <Text style={styles.optionText}>
+                <Icon name="camera" size={32} color="#FFFFFF" />
+                <Text className="text-white text-base font-semibold">
                   {t('addStory.takePhoto') || '사진 촬영'}
                 </Text>
               </TouchableOpacity>
@@ -230,69 +251,3 @@ export const AddStoryModal: React.FC<AddStoryModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    borderBottomWidth: 1,
-  },
-  headerButton: {
-    padding: SPACING.XS,
-  },
-  headerTitle: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '600',
-  },
-  uploadButton: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-  },
-  content: {
-    flex: 1,
-    padding: SPACING.MD,
-  },
-  optionsContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: SPACING.XL,
-  },
-  optionButton: {
-    width: 200,
-    height: 200,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: SPACING.MD,
-    ...shadowStyles.medium,
-  },
-  optionText: {
-    color: COLORS.WHITE,
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-  },
-  previewContainer: {
-    flex: 1,
-    position: 'relative',
-  },
-  previewImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-    borderRadius: 10,
-  },
-  changeButton: {
-    position: 'absolute',
-    top: SPACING.MD,
-    right: SPACING.MD,
-    borderRadius: 20,
-    padding: SPACING.XS,
-  },
-});

@@ -9,7 +9,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Modal,
   Alert,
   Animated,
@@ -145,21 +144,11 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     return (
       <TouchableOpacity
         key={option.mode}
-        style={[
-          styles.themeOption,
-          { 
-            backgroundColor: colors.SURFACE,
-            borderColor: isSelected ? colors.PRIMARY : colors.BORDER,
-            borderWidth: isSelected ? 2 : 1,
-          }
-        ]}
+        className="themeOption"
         onPress={() => handleThemeChange(option.mode)}
       >
-        <View style={styles.themeOptionContent}>
-          <View style={[
-            styles.themeIconContainer,
-            { backgroundColor: isSelected ? colors.PRIMARY : colors.BACKGROUND }
-          ]}>
+        <View className="themeOptionContent">
+          <View className="themeIconContainer">
             <Ionicons
               name={option.icon as any}
               size={24}
@@ -167,20 +156,11 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
             />
           </View>
           
-          <View style={styles.themeTextContainer}>
-            <Text style={[
-              styles.themeTitle,
-              { 
-                color: colors.TEXT.PRIMARY,
-                fontWeight: isSelected ? 'bold' : 'normal'
-              }
-            ]}>
+          <View className="themeTextContainer">
+            <Text className="themeTitle">
               {t(`settings:${option.titleKey}`, option.mode)}
             </Text>
-            <Text style={[
-              styles.themeDescription,
-              { color: colors.TEXT.SECONDARY }
-            ]}>
+            <Text className="themeDescription">
               {t(`settings:${option.descriptionKey}`, '')}
             </Text>
           </View>
@@ -201,25 +181,25 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     <>
       {/* 테마 설정 항목 */}
       <TouchableOpacity
-        style={[styles.settingItem, { borderBottomColor: colors.BORDER }]}
+        className="settingItem"
         onPress={openModal}
       >
-        <View style={styles.settingContent}>
+        <View className="settingContent">
           <Ionicons
             name={isDark ? 'moon' : 'sunny'}
             size={20}
             color={colors.TEXT.PRIMARY}
           />
-          <Text style={[styles.settingText, { color: colors.TEXT.PRIMARY }]}>
+          <Text className="settingText">
             {t('settings:theme.title', '테마')}
           </Text>
         </View>
-        <View style={styles.selectedValue}>
-          <Text style={[styles.settingValue, { color: colors.TEXT.SECONDARY }]}>
+        <View className="selectedValue">
+          <Text className="settingValue">
             {getCurrentThemeText(mode)}
           </Text>
         </View>
-        <Text style={[styles.settingArrow, { color: colors.TEXT.SECONDARY }]}>{'>'}</Text>
+        <Text className="settingArrow">{'>'}</Text>
       </TouchableOpacity>
 
       {/* 테마 선택 모달 */}
@@ -230,7 +210,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
         onRequestClose={closeModal}
       >
         <TouchableOpacity
-          style={[styles.modalOverlay, { backgroundColor: colors.OVERLAY }]}
+          className="modalOverlay"
           activeOpacity={1}
           onPress={closeModal}
         >
@@ -244,24 +224,24 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
             ]}
           >
             <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-              <View style={styles.modalHeader}>
-                <Text style={[styles.modalTitle, { color: colors.TEXT.PRIMARY }]}>
+              <View className="modalHeader">
+                <Text className="modalTitle">
                   {t('settings:theme.selectTheme', '테마 선택')}
                 </Text>
                 <TouchableOpacity
-                  style={[styles.closeButton, { backgroundColor: colors.SURFACE }]}
+                  className="closeButton"
                   onPress={closeModal}
                 >
                   <Ionicons name="close" size={20} color={colors.TEXT.PRIMARY} />
                 </TouchableOpacity>
               </View>
               
-              <View style={styles.themeOptionsContainer}>
+              <View className="themeOptionsContainer">
                 {themeOptions.map(renderThemeOption)}
               </View>
               
-              <View style={[styles.modalFooter, { borderTopColor: colors.BORDER }]}>
-                <Text style={[styles.footerText, { color: colors.TEXT.SECONDARY }]}>
+              <View className="modalFooter">
+                <Text className="footerText">
                   {t('settings:theme.footerNote', '시스템 기본값은 기기 설정을 따릅니다')}
                 </Text>
               </View>
@@ -273,116 +253,3 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
   );
 };
 
-const styles = StyleSheet.create({
-  // 설정 항목 스타일 (ProfileScreen과 일관성 맞춤)
-  settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.MD,
-    borderBottomWidth: 1,
-  },
-  settingContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  settingText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '500',
-    marginLeft: SPACING.SM,
-  },
-  selectedValue: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 'auto',
-    marginRight: SPACING.SM,
-  },
-  settingValue: {
-    fontSize: FONT_SIZES.SM,
-  },
-  settingArrow: {
-    fontSize: 18,
-    fontWeight: '300',
-  },
-
-  // 모달 스타일
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: '90%',
-    maxWidth: 400,
-    borderRadius: 16,
-    padding: SPACING.LG,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.LG,
-  },
-  modalTitle: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  // 테마 옵션 스타일
-  themeOptionsContainer: {
-    gap: SPACING.MD,
-  },
-  themeOption: {
-    borderRadius: 12,
-    padding: SPACING.MD,
-  },
-  themeOptionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  themeIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.MD,
-  },
-  themeTextContainer: {
-    flex: 1,
-  },
-  themeTitle: {
-    fontSize: FONT_SIZES.MD,
-    marginBottom: 2,
-  },
-  themeDescription: {
-    fontSize: FONT_SIZES.SM,
-    lineHeight: 18,
-  },
-
-  // 모달 푸터 스타일
-  modalFooter: {
-    marginTop: SPACING.LG,
-    paddingTop: SPACING.MD,
-    borderTopWidth: 1,
-  },
-  footerText: {
-    fontSize: FONT_SIZES.SM,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-});

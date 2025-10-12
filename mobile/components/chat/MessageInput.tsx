@@ -1,5 +1,5 @@
 /**
- * 채팅 메시지 입력 컴포넌트
+ * 채팅 메시지 입력 컴포넌트 (NativeWind v4)
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
@@ -8,7 +8,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   Keyboard,
   Platform,
@@ -16,8 +15,8 @@ import {
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { ACTION_ICONS, UI_ICONS } from '@/utils/icons';
+import { cn } from '@/lib/utils';
 
 /**
  * MessageInput 컴포넌트 Props
@@ -35,7 +34,7 @@ interface MessageInputProps {
 }
 
 /**
- * 메시지 입력 컴포넌트 - 채팅 메시지 입력 및 전송
+ * 메시지 입력 컴포넌트 - 채팅 메시지 입력 및 전송 (NativeWind v4)
  * @component
  * @param {MessageInputProps} props - 컴포넌트 속성
  * @returns {JSX.Element} 메시지 입력 UI
@@ -226,25 +225,29 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
     if (!showAttachmentOptions) return null;
 
     return (
-      <View style={styles.attachmentOptions}>
+      <View className="flex-row px-4 py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
         <TouchableOpacity
-          style={styles.attachmentOption}
+          className="items-center mr-8"
           onPress={handleCamera}
           accessibilityRole="button"
           accessibilityLabel={t('chat:attachment.takePhoto')}
         >
-          <Icon name={UI_ICONS.CAMERA} size={24} color={COLORS.PRIMARY} />
-          <Text style={styles.attachmentOptionText}>{t('chat:attachment.camera')}</Text>
+          <Icon name={UI_ICONS.CAMERA} size={24} color="#14B8A6" />
+          <Text className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+            {t('chat:attachment.camera')}
+          </Text>
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={styles.attachmentOption}
+          className="items-center"
           onPress={handleImagePicker}
           accessibilityRole="button"
           accessibilityLabel={t('chat:attachment.selectPhoto')}
         >
-          <Icon name={UI_ICONS.IMAGE} size={24} color={COLORS.PRIMARY} />
-          <Text style={styles.attachmentOptionText}>{t('chat:attachment.gallery')}</Text>
+          <Icon name={UI_ICONS.IMAGE} size={24} color="#14B8A6" />
+          <Text className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+            {t('chat:attachment.gallery')}
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -253,13 +256,17 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
   const canSend = message.trim().length > 0 && !isSending && !disabled;
 
   return (
-    <View style={styles.container}>
+    <View className="bg-white dark:bg-gray-900 pb-3">
       {renderAttachmentOptions()}
       
-      <View style={styles.inputContainer}>
+      <View className="flex-row items-end px-4 py-3">
         {/* 첨부파일 버튼 */}
         <TouchableOpacity
-          style={styles.attachmentButton}
+          className={cn(
+            "w-10 h-10 rounded-full items-center justify-center mr-3",
+            "bg-gray-100 dark:bg-gray-800",
+            disabled && "opacity-50"
+          )}
           onPress={toggleAttachmentOptions}
           disabled={disabled}
           accessibilityRole="button"
@@ -269,18 +276,24 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
           <Icon
             name={showAttachmentOptions ? UI_ICONS.CLOSE : ACTION_ICONS.ADD}
             size={24}
-            color={disabled ? COLORS.TEXT.LIGHT : COLORS.PRIMARY}
+            color={disabled ? "#9CA3AF" : "#14B8A6"}
           />
         </TouchableOpacity>
 
         {/* 텍스트 입력 */}
         <TextInput
           ref={textInputRef}
-          style={[styles.textInput, disabled && styles.disabledInput]}
+          className={cn(
+            "flex-1 min-h-[40px] max-h-[100px] border border-gray-200 dark:border-gray-700",
+            "rounded-[20px] px-4 py-3 mr-3 text-base",
+            "bg-white dark:bg-gray-800 text-gray-900 dark:text-white",
+            "text-center android:text-left", // Platform-specific text alignment
+            disabled && "opacity-60 bg-gray-200 dark:bg-gray-700"
+          )}
           value={message}
           onChangeText={handleTextChange}
           placeholder={placeholderText}
-          placeholderTextColor={COLORS.TEXT.LIGHT}
+          placeholderTextColor="#9CA3AF"
           multiline
           maxLength={1000}
           editable={!disabled}
@@ -292,10 +305,12 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
 
         {/* 전송 버튼 */}
         <TouchableOpacity
-          style={[
-            styles.sendButton,
-            canSend ? styles.sendButtonActive : styles.sendButtonInactive,
-          ]}
+          className={cn(
+            "w-10 h-10 rounded-full items-center justify-center",
+            canSend 
+              ? "bg-teal-400 dark:bg-teal-500" 
+              : "bg-gray-300 dark:bg-gray-600"
+          )}
           onPress={handleSendMessage}
           disabled={!canSend}
           accessibilityRole="button"
@@ -305,81 +320,10 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
           <Icon
             name={isSending ? 'hourglass' : UI_ICONS.SEND}
             size={20}
-            color={canSend ? COLORS.TEXT.WHITE : COLORS.TEXT.LIGHT}
+            color={canSend ? "white" : "#9CA3AF"}
           />
         </TouchableOpacity>
       </View>
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: COLORS.SURFACE,
-    paddingBottom: SPACING.SM,
-  },
-  attachmentOptions: {
-    flexDirection: 'row',
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    backgroundColor: COLORS.BACKGROUND,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.BORDER,
-  },
-  attachmentOption: {
-    alignItems: 'center',
-    marginRight: SPACING.XL,
-  },
-  attachmentOptionText: {
-    fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.SECONDARY,
-    marginTop: SPACING.XS,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-  },
-  attachmentButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.BACKGROUND,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.SM,
-  },
-  textInput: {
-    flex: 1,
-    minHeight: 40,
-    maxHeight: 100,
-    borderWidth: 1,
-    borderColor: COLORS.BORDER,
-    borderRadius: 20,
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
-    backgroundColor: COLORS.BACKGROUND,
-    marginRight: SPACING.SM,
-    textAlignVertical: 'center',
-  },
-  disabledInput: {
-    opacity: 0.6,
-    backgroundColor: COLORS.TEXT.LIGHT,
-  },
-  sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sendButtonActive: {
-    backgroundColor: COLORS.PRIMARY,
-  },
-  sendButtonInactive: {
-    backgroundColor: COLORS.BORDER,
-  },
 });

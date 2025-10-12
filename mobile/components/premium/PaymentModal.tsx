@@ -1,5 +1,5 @@
 /**
- * 결제 모달 컴포넌트
+ * 결제 모달 컴포넌트 (NativeWind v4)
  * Stripe 결제 처리
  */
 
@@ -7,7 +7,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Modal,
   TouchableOpacity,
   Alert,
@@ -20,10 +19,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { PaymentProduct } from '@/services/payment/premium-service';
 import { usePremiumStore } from '@/store/slices/premiumSlice';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { UI_ICONS } from '@/utils/icons';
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
+import { cn } from '@/lib/utils';
 
 /**
  * PaymentModal 컴포넌트 Props
@@ -43,13 +42,13 @@ interface PaymentModalProps {
 }
 
 /**
- * 결제 모달 컴포넌트 - Stripe 결제 처리
+ * 결제 모달 컴포넌트 - Stripe 결제 처리 (NativeWind v4)
  * @component
  * @param {PaymentModalProps} props - 컴포넌트 속성
  * @returns {JSX.Element} 결제 모달 UI
  * @description Stripe를 사용한 프리미엄 구독 및 좋아요 결제 처리 모달
  */
-export const PaymentModal = ({
+export const PaymentModal: React.FC<PaymentModalProps> = ({
   visible,
   product,
   onClose,
@@ -184,34 +183,44 @@ export const PaymentModal = ({
     if (!product) return null;
 
     return (
-      <View style={styles.productDetails}>
-        <Text style={[styles.productName, { color: colors.TEXT.PRIMARY }]}>{product.name}</Text>
-        <Text style={[styles.productDescription, { color: colors.TEXT.SECONDARY }]}>{product.description}</Text>
+      <View className="mb-8">
+        <Text className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-3">
+          {product.name}
+        </Text>
+        <Text className="text-base text-gray-600 dark:text-gray-400 text-center mb-6">
+          {product.description}
+        </Text>
         
-        <View style={styles.priceContainer}>
-          <Text style={[styles.price, { color: colors.PRIMARY }]}>{formatPrice(product.price)}</Text>
+        <View className="flex-row items-baseline justify-center mb-6">
+          <Text className="text-4xl font-bold text-teal-400 dark:text-teal-300">
+            {formatPrice(product.price)}
+          </Text>
           {product.type === 'subscription' && (
-            <Text style={[styles.period, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="text-lg text-gray-600 dark:text-gray-400 ml-1">
               {product.id.includes('yearly') ? '/년' : '/월'}
             </Text>
           )}
         </View>
 
         {/* 혜택 목록 */}
-        <View style={[styles.benefitsContainer, { backgroundColor: colors.SURFACE }]}>
-          <Text style={[styles.benefitsTitle, { color: colors.TEXT.PRIMARY }]}>포함된 혜택:</Text>
+        <View className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl mb-6">
+          <Text className="text-base font-semibold text-gray-900 dark:text-white mb-3">
+            포함된 혜택:
+          </Text>
           {product.benefits.map((benefit, index) => (
-            <View key={index} style={styles.benefitRow}>
-              <Icon name="checkmark-circle" size={16} color={colors.SUCCESS} />
-              <Text style={[styles.benefitText, { color: colors.TEXT.PRIMARY }]}>{benefit}</Text>
+            <View key={index} className="flex-row items-center mb-3 last:mb-0">
+              <Icon name="checkmark-circle" size={16} color="#10B981" />
+              <Text className="text-sm text-gray-900 dark:text-white ml-3 flex-1">
+                {benefit}
+              </Text>
             </View>
           ))}
         </View>
 
         {/* 구독 안내 */}
         {product.type === 'subscription' && (
-          <View style={[styles.subscriptionInfo, { backgroundColor: colors.BACKGROUND, borderLeftColor: colors.PRIMARY }]}>
-            <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
+          <View className="bg-white dark:bg-gray-900 border-l-4 border-teal-400 p-4 rounded-lg">
+            <Text className="text-sm text-gray-600 dark:text-gray-400 leading-5">
               • 언제든지 취소 가능합니다{'\n'}
               • 취소 후에도 구독 기간 종료까지 서비스 이용 가능{'\n'}
               • 자동 갱신되며, 갱신 24시간 전까지 취소 가능
@@ -231,32 +240,36 @@ export const PaymentModal = ({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
         {/* 헤더 */}
-        <View style={[styles.header, { borderBottomColor: colors.BORDER }]}>
+        <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <TouchableOpacity
             onPress={onClose}
-            style={styles.closeButton}
+            className="w-10 h-10 items-center justify-center"
             accessibilityRole="button"
             accessibilityLabel="닫기"
           >
             <Icon name={UI_ICONS.CLOSE} size={24} color={colors.TEXT.PRIMARY} />
           </TouchableOpacity>
           
-          <Text style={[styles.headerTitle, { color: colors.TEXT.PRIMARY }]}>결제하기</Text>
+          <Text className="text-lg font-bold text-gray-900 dark:text-white">
+            결제하기
+          </Text>
           
-          <View style={styles.placeholder} />
+          <View className="w-10" />
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
           {renderProductDetails()}
 
           {/* 보안 안내 */}
-          <View style={[styles.securityInfo, { backgroundColor: colors.SUCCESS + '20' }]}>
-            <Icon name="shield-checkmark" size={24} color={colors.SUCCESS} />
-            <View style={styles.securityText}>
-              <Text style={[styles.securityTitle, { color: colors.SUCCESS }]}>안전한 결제</Text>
-              <Text style={[styles.securityDescription, { color: colors.TEXT.SECONDARY }]}>
+          <View className="flex-row items-center bg-green-50 dark:bg-green-900/20 p-4 rounded-xl mt-6">
+            <Icon name="shield-checkmark" size={24} color="#10B981" />
+            <View className="ml-4 flex-1">
+              <Text className="text-base font-semibold text-green-700 dark:text-green-400 mb-1">
+                안전한 결제
+              </Text>
+              <Text className="text-sm text-gray-600 dark:text-gray-400 leading-5">
                 Stripe를 통한 안전한 결제 처리{'\n'}
                 카드 정보는 저장되지 않습니다
               </Text>
@@ -265,31 +278,34 @@ export const PaymentModal = ({
         </ScrollView>
 
         {/* 결제 버튼 */}
-        <View style={[styles.footer, { borderTopColor: colors.BORDER }]}>
+        <View className="p-6 border-t border-gray-200 dark:border-gray-700">
           <TouchableOpacity
-            style={[
-              styles.paymentButton,
-              { backgroundColor: colors.PRIMARY },
-              (!isInitialized || isProcessingPayment) && [styles.disabledButton, { backgroundColor: colors.TEXT.LIGHT }],
-            ]}
+            className={cn(
+              "py-4 rounded-xl items-center justify-center min-h-[56px]",
+              (!isInitialized || isProcessingPayment)
+                ? "bg-gray-300 dark:bg-gray-600 opacity-60"
+                : "bg-teal-400 dark:bg-teal-500"
+            )}
             onPress={handlePayment}
             disabled={!isInitialized || isProcessingPayment}
             accessibilityRole="button"
             accessibilityLabel="결제하기"
           >
             {isProcessingPayment ? (
-              <ActivityIndicator color={colors.TEXT.WHITE} />
+              <ActivityIndicator color="white" />
             ) : (
-              <Text style={[styles.paymentButtonText, { color: colors.TEXT.WHITE }]}>
+              <Text className="text-lg font-bold text-white">
                 {formatPrice(product.price)} 결제하기
               </Text>
             )}
           </TouchableOpacity>
 
           {!isInitialized && !isProcessingPayment && (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator color={colors.PRIMARY} />
-              <Text style={[styles.loadingText, { color: colors.TEXT.SECONDARY }]}>결제 준비 중...</Text>
+            <View className="items-center mt-4">
+              <ActivityIndicator color="#14B8A6" />
+              <Text className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                결제 준비 중...
+              </Text>
             </View>
           )}
         </View>
@@ -297,137 +313,3 @@ export const PaymentModal = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.LG,
-    paddingVertical: SPACING.MD,
-    borderBottomWidth: 1,
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-  },
-  placeholder: {
-    width: 40,
-  },
-  content: {
-    flex: 1,
-    padding: SPACING.LG,
-  },
-  productDetails: {
-    marginBottom: SPACING.XL,
-  },
-  productName: {
-    fontSize: FONT_SIZES.XXL,
-    fontWeight: 'bold',
-    marginBottom: SPACING.SM,
-    textAlign: 'center',
-  },
-  productDescription: {
-    fontSize: FONT_SIZES.MD,
-    textAlign: 'center',
-    marginBottom: SPACING.LG,
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'baseline',
-    marginBottom: SPACING.LG,
-  },
-  price: {
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  period: {
-    fontSize: FONT_SIZES.LG,
-    marginLeft: 4,
-  },
-  benefitsContainer: {
-    padding: SPACING.LG,
-    borderRadius: 12,
-    marginBottom: SPACING.LG,
-  },
-  benefitsTitle: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    marginBottom: SPACING.SM,
-  },
-  benefitRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.SM,
-  },
-  benefitText: {
-    fontSize: FONT_SIZES.SM,
-    marginLeft: SPACING.SM,
-    flex: 1,
-  },
-  subscriptionInfo: {
-    padding: SPACING.MD,
-    borderRadius: 8,
-    borderLeftWidth: 3,
-  },
-  infoText: {
-    fontSize: FONT_SIZES.SM,
-    lineHeight: 20,
-  },
-  securityInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.MD,
-    borderRadius: 12,
-    marginTop: SPACING.LG,
-  },
-  securityText: {
-    marginLeft: SPACING.MD,
-    flex: 1,
-  },
-  securityTitle: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  securityDescription: {
-    fontSize: FONT_SIZES.SM,
-    lineHeight: 18,
-  },
-  footer: {
-    padding: SPACING.LG,
-    borderTopWidth: 1,
-  },
-  paymentButton: {
-    paddingVertical: SPACING.LG,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  paymentButtonText: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    marginTop: SPACING.MD,
-  },
-  loadingText: {
-    fontSize: FONT_SIZES.SM,
-    marginTop: SPACING.SM,
-  },
-});

@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -64,20 +64,20 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   ];
   
   return (
-    <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>
+    <View className="container">
+      <View className="logoContainer">
+        <Text className="title">
           {t('welcome.title')}
         </Text>
-        <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="subtitle">
           {t('welcome.subtitle')}
         </Text>
       </View>
       
-      <View style={styles.authButtonsContainer}>
+      <View className="authButtonsContainer">
         {/* 구글 로그인 버튼 */}
         <TouchableOpacity
-          style={[styles.googleButton, { backgroundColor: '#fff' }]}
+          className="googleButton"
           onPress={onGoogleLogin}
           disabled={isGoogleLoading}
         >
@@ -90,7 +90,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 size={20} 
                 color="#4285F4" 
               />
-              <Text style={[styles.googleButtonText, { color: '#4285F4' }]}>
+              <Text className="googleButtonText">
                 {t('welcome.continueWithGoogle')}
               </Text>
             </>
@@ -99,7 +99,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         
         {/* 전화번호 로그인 버튼 - 모든 환경에서 표시 */}
         <TouchableOpacity
-          style={[styles.authButton, { backgroundColor: colors.PRIMARY }]}
+          className="authButton"
           onPress={onSignInMode}
         >
           <MaterialCommunityIcons 
@@ -107,14 +107,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             size={20} 
             color="#fff" 
           />
-          <Text style={[styles.authButtonText, { color: '#fff', marginLeft: SPACING.SM }]}>
+          <Text className="authButtonText">
             {t('welcome.loginWithPhone')}
           </Text>
         </TouchableOpacity>
         
         {/* 회원가입 버튼 */}
         <TouchableOpacity
-          style={[styles.authButton, { backgroundColor: colors.SURFACE, borderColor: colors.BORDER, borderWidth: 1 }]}
+          className="authButton"
           onPress={onSignUpMode}
         >
           <MaterialCommunityIcons 
@@ -122,23 +122,23 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             size={20} 
             color={colors.TEXT.PRIMARY} 
           />
-          <Text style={[styles.authButtonText, { color: colors.TEXT.PRIMARY, marginLeft: SPACING.SM }]}>
+          <Text className="authButtonText">
             {t('welcome.signUpWithPhone')}
           </Text>
         </TouchableOpacity>
         
         {/* 또는 구분선 */}
-        <View style={styles.dividerContainer}>
-          <View style={[styles.divider, { backgroundColor: colors.BORDER }]} />
-          <Text style={[styles.dividerText, { color: colors.TEXT.TERTIARY }]}>
+        <View className="dividerContainer">
+          <View className="divider" />
+          <Text className="dividerText">
             또는
           </Text>
-          <View style={[styles.divider, { backgroundColor: colors.BORDER }]} />
+          <View className="divider" />
         </View>
         
         {/* Clerk 전화번호 인증 버튼 (신규) */}
         <TouchableOpacity
-          style={[styles.authButton, { backgroundColor: '#00D632' }]}
+          className="authButton"
           onPress={onSignUpMode}
         >
           <MaterialCommunityIcons 
@@ -146,7 +146,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             size={20} 
             color="#fff" 
           />
-          <Text style={[styles.authButtonText, { color: '#fff', marginLeft: SPACING.SM }]}>
+          <Text className="authButtonText">
             SMS로 빠른 시작
           </Text>
         </TouchableOpacity>
@@ -154,22 +154,22 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       
       {/* 개발 환경 빠른 로그인 */}
       {__DEV__ && isDevelopment && (
-        <View style={styles.devSection}>
-          <Text style={[styles.devTitle, { color: colors.TEXT.SECONDARY }]}>
+        <View className="devSection">
+          <Text className="devTitle">
             🔧 개발 환경 빠른 로그인
           </Text>
-          <View style={styles.quickLoginGrid}>
+          <View className="quickLoginGrid">
             {quickDevUsers.map((user) => (
               <TouchableOpacity
                 key={user.id}
-                style={[styles.quickLoginButton, { backgroundColor: colors.SURFACE }]}
+                className="quickLoginButton"
                 onPress={() => onQuickDevLogin(user)}
               >
-                <Text style={[styles.quickLoginText, { color: colors.TEXT.PRIMARY }]}>
+                <Text className="quickLoginText">
                   {user.nickname}
                 </Text>
                 {user.isPremium && (
-                  <Text style={[styles.premiumBadge, { color: colors.WARNING }]}>
+                  <Text className="premiumBadge">
                     ⭐
                   </Text>
                 )}
@@ -180,10 +180,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           {/* 온보딩 초기화 버튼 */}
           {onResetOnboarding && (
             <TouchableOpacity
-              style={[styles.resetButton, { backgroundColor: colors.ERROR + '20' }]}
+              className="resetButton"
               onPress={onResetOnboarding}
             >
-              <Text style={[styles.resetButtonText, { color: colors.ERROR }]}>
+              <Text className="resetButtonText">
                 🔄 온보딩 초기화
               </Text>
             </TouchableOpacity>
@@ -192,8 +192,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       )}
       
       {/* 약관 동의 문구 */}
-      <View style={styles.termsContainer}>
-        <Text style={[styles.termsTextSimple, { color: colors.TEXT.TERTIARY }]}>
+      <View className="termsContainer">
+        <Text className="termsTextSimple">
           로그인 시 개인정보처리방침과 서비스 이용약관에 동의하게 됩니다.
         </Text>
       </View>
@@ -201,127 +201,3 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: SPACING.LG,
-    justifyContent: 'center',
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: SPACING.XL * 2,
-  },
-  title: {
-    fontSize: FONT_SIZES.XL,
-    fontWeight: 'bold',
-    marginBottom: SPACING.SM,
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.MD,
-    textAlign: 'center',
-  },
-  authButtonsContainer: {
-    gap: SPACING.MD,
-    marginBottom: SPACING.XL,
-  },
-  authButton: {
-    flexDirection: 'row',
-    paddingVertical: SPACING.MD,
-    paddingHorizontal: SPACING.LG,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  authButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-  },
-  googleButton: {
-    flexDirection: 'row',
-    paddingVertical: SPACING.MD,
-    paddingHorizontal: SPACING.LG,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shadowStyles.small,
-  },
-  googleButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    marginLeft: SPACING.SM,
-  },
-  devSection: {
-    paddingVertical: SPACING.LG,
-    borderTopWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  devTitle: {
-    fontSize: FONT_SIZES.SM,
-    textAlign: 'center',
-    marginBottom: SPACING.MD,
-  },
-  quickLoginGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.SM,
-    justifyContent: 'center',
-  },
-  quickLoginButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.SM,
-    paddingHorizontal: SPACING.MD,
-    borderRadius: 8,
-  },
-  quickLoginText: {
-    fontSize: FONT_SIZES.SM,
-  },
-  premiumBadge: {
-    marginLeft: SPACING.XS,
-  },
-  resetButton: {
-    marginTop: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    paddingHorizontal: SPACING.MD,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  resetButtonText: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: '600',
-  },
-  termsContainer: {
-    marginTop: SPACING.XL,
-    alignItems: 'center',
-  },
-  termsText: {
-    fontSize: FONT_SIZES.XS,
-    textAlign: 'center',
-  },
-  termsLinks: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  termsLink: {
-    fontSize: FONT_SIZES.XS,
-    textDecorationLine: 'underline',
-  },
-  termsTextSimple: {
-    fontSize: FONT_SIZES.XS,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: SPACING.MD,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-  },
-  dividerText: {
-    marginHorizontal: SPACING.MD,
-    fontSize: FONT_SIZES.SM,
-  },
-});

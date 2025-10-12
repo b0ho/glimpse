@@ -2,23 +2,19 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   Image,
   Modal,
   Dimensions,
   StatusBar,
   Alert,
-  ViewStyle,
-  TextStyle,
-  ImageStyle,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { StoryUser, Story, markStoryAsViewed } from '@/utils/storyData';
 import { formatTimeAgo } from '@/utils/dateUtils';
+import { cn } from '@/utils/cn';
 
 const { width, height } = Dimensions.get('window');
 
@@ -151,76 +147,77 @@ export const StoryFullViewer: React.FC<StoryFullViewerProps> = ({
       onRequestClose={onClose}
     >
       <StatusBar barStyle="light-content" backgroundColor="black" />
-      <View style={styles.container}>
+      <View className="flex-1 bg-black">
         {/* 배경 이미지 */}
         <Image
           source={{ uri: currentStory.imageUri }}
-          style={styles.storyImage}
+          className="absolute w-full h-full"
+          style={{ width, height }}
           resizeMode="cover"
         />
 
         {/* 그라데이션 오버레이 */}
         <LinearGradient
           colors={['rgba(0,0,0,0.5)', 'transparent', 'rgba(0,0,0,0.5)']}
-          style={styles.overlay}
+          className="absolute inset-0"
         />
 
         {/* 상단 프로그레스 바 */}
-        <View style={styles.progressContainer}>
+        <View className="flex-row px-2 gap-1" style={{ paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight + 8 : 32 }}>
           {currentUser.stories?.map((_, index) => (
-            <View key={index} style={styles.progressBarBackground}>
+            <View key={index} className="flex-1 h-1 bg-white/30 rounded-sm">
               <View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    width: `${
-                      index < currentStoryIndex
-                        ? 100
-                        : index === currentStoryIndex
-                        ? progress
-                        : 0
-                    }%`,
-                  },
-                ]}
+                className="h-1 bg-white rounded-sm"
+                style={{
+                  width: `${
+                    index < currentStoryIndex
+                      ? 100
+                      : index === currentStoryIndex
+                      ? progress
+                      : 0
+                  }%`,
+                }}
               />
             </View>
           )) || null}
         </View>
 
         {/* 상단 헤더 */}
-        <View style={styles.header}>
-          <View style={styles.userInfo}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
+        <View className="flex-row items-center justify-between px-4 py-2">
+          <View className="flex-row items-center">
+            <View className="w-10 h-10 rounded-full bg-blue-500 justify-center items-center mr-2">
+              <Text className="text-base font-bold text-white">
                 {currentUser.nickname.charAt(0).toUpperCase()}
               </Text>
             </View>
-            <View style={styles.userDetails}>
-              <Text style={styles.username}>{currentUser.nickname}</Text>
-              <Text style={styles.timeText}>
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-white">
+                {currentUser.nickname}
+              </Text>
+              <Text className="text-xs text-white/80">
                 {formatTimeAgo(currentStory.createdAt)}
               </Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Icon name="close" size={24} color={COLORS.TEXT.WHITE} />
+          <TouchableOpacity className="p-2" onPress={onClose}>
+            <Icon name="close" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 
         {/* 터치 영역 */}
-        <View style={styles.touchArea}>
+        <View className="absolute inset-0 flex-row" style={{ top: 100 }}>
           <TouchableOpacity
-            style={styles.leftTouch}
+            className="flex-1"
             onPress={handlePrevStory}
             activeOpacity={1}
           />
           <TouchableOpacity
-            style={styles.centerTouch}
+            className="flex-1"
             onPress={() => setIsPaused(!isPaused)}
             activeOpacity={1}
           />
           <TouchableOpacity
-            style={styles.rightTouch}
+            className="flex-1"
             onPress={handleNextStory}
             activeOpacity={1}
           />
@@ -228,14 +225,21 @@ export const StoryFullViewer: React.FC<StoryFullViewerProps> = ({
 
         {/* 일시정지 표시 */}
         {isPaused && (
-          <View style={styles.pausedIndicator}>
-            <Icon name="pause" size={48} color={COLORS.TEXT.WHITE} />
+          <View 
+            className="absolute w-12 h-12 bg-black/50 rounded-full justify-center items-center"
+            style={{ 
+              top: '50%', 
+              left: '50%', 
+              transform: [{ translateX: -24 }, { translateY: -24 }] 
+            }}
+          >
+            <Icon name="pause" size={48} color="#FFFFFF" />
           </View>
         )}
 
         {/* 하단 정보 */}
-        <View style={styles.bottomInfo}>
-          <Text style={styles.storyCounter}>
+        <View className="absolute bottom-8 left-4 right-4 items-center">
+          <Text className="text-sm text-white/80">
             {currentStoryIndex + 1} / {currentUser.stories.length}
           </Text>
         </View>
@@ -243,136 +247,3 @@ export const StoryFullViewer: React.FC<StoryFullViewerProps> = ({
     </Modal>
   );
 };
-
-interface Styles {
-  container: ViewStyle;
-  storyImage: ImageStyle;
-  overlay: ViewStyle;
-  progressContainer: ViewStyle;
-  progressBarBackground: ViewStyle;
-  progressBarFill: ViewStyle;
-  header: ViewStyle;
-  userInfo: ViewStyle;
-  avatar: ViewStyle;
-  avatarText: TextStyle;
-  userDetails: ViewStyle;
-  username: TextStyle;
-  timeText: TextStyle;
-  closeButton: ViewStyle;
-  touchArea: ViewStyle;
-  leftTouch: ViewStyle;
-  centerTouch: ViewStyle;
-  rightTouch: ViewStyle;
-  pausedIndicator: ViewStyle;
-  bottomInfo: ViewStyle;
-  storyCounter: TextStyle;
-}
-
-const styles = StyleSheet.create<Styles>({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
-  storyImage: {
-    width: width,
-    height: height,
-    position: 'absolute',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: SPACING.SM,
-    paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight + SPACING.SM : SPACING.XL,
-    gap: 2,
-  },
-  progressBarBackground: {
-    flex: 1,
-    height: 2,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 1,
-  },
-  progressBarFill: {
-    height: 2,
-    backgroundColor: COLORS.TEXT.WHITE,
-    borderRadius: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.PRIMARY,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.SM,
-  },
-  avatarText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: 'bold',
-    color: COLORS.TEXT.WHITE,
-  },
-  userDetails: {
-    flex: 1,
-  },
-  username: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    color: COLORS.TEXT.WHITE,
-  },
-  timeText: {
-    fontSize: FONT_SIZES.XS,
-    color: 'rgba(255,255,255,0.8)',
-  },
-  closeButton: {
-    padding: SPACING.SM,
-  },
-  touchArea: {
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: 'row',
-    top: 100, // 헤더 영역 제외
-  },
-  leftTouch: {
-    flex: 1,
-  },
-  centerTouch: {
-    flex: 1,
-  },
-  rightTouch: {
-    flex: 1,
-  },
-  pausedIndicator: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -24 }, { translateY: -24 }],
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 24,
-    width: 48,
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bottomInfo: {
-    position: 'absolute',
-    bottom: SPACING.XL,
-    left: SPACING.MD,
-    right: SPACING.MD,
-    alignItems: 'center',
-  },
-  storyCounter: {
-    fontSize: FONT_SIZES.SM,
-    color: 'rgba(255,255,255,0.8)',
-  },
-});

@@ -2,7 +2,7 @@
  * 내 정보 항목 카드 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity} from 'react-native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { InfoItem } from '@/types/myInfo';
 
@@ -26,7 +26,7 @@ export const InfoItemCard: React.FC<InfoItemCardProps> = ({
     
     if (item.value) {
       details.push(
-        <Text key="value" style={[styles.itemMainText, { color: colors.TEXT.PRIMARY }]}>
+        <Text key="value" className="itemMainText">
           {item.value}
         </Text>
       );
@@ -37,14 +37,14 @@ export const InfoItemCard: React.FC<InfoItemCardProps> = ({
       if (type === 'company') {
         if (item.metadata.employeeName) {
           details.push(
-            <Text key="name" style={[styles.itemSubText, { color: colors.TEXT.SECONDARY }]}>
+            <Text key="name" className="itemSubText">
               이름: {item.metadata.employeeName}
             </Text>
           );
         }
         if (item.metadata.department) {
           details.push(
-            <Text key="dept" style={[styles.itemSubText, { color: colors.TEXT.SECONDARY }]}>
+            <Text key="dept" className="itemSubText">
               부서: {item.metadata.department}
             </Text>
           );
@@ -61,14 +61,14 @@ export const InfoItemCard: React.FC<InfoItemCardProps> = ({
             graduate: '대학원',
           };
           details.push(
-            <Text key="level" style={[styles.itemSubText, { color: colors.TEXT.SECONDARY }]}>
+            <Text key="level" className="itemSubText">
               {levelLabels[item.metadata.level] || item.metadata.level}
             </Text>
           );
         }
         if (item.metadata.major) {
           details.push(
-            <Text key="major" style={[styles.itemSubText, { color: colors.TEXT.SECONDARY }]}>
+            <Text key="major" className="itemSubText">
               전공: {item.metadata.major}
             </Text>
           );
@@ -78,7 +78,7 @@ export const InfoItemCard: React.FC<InfoItemCardProps> = ({
       // 소셜 계정
       if (type === 'socialId' && item.metadata.platform) {
         details.push(
-          <Text key="platform" style={[styles.itemSubText, { color: colors.TEXT.SECONDARY }]}>
+          <Text key="platform" className="itemSubText">
             {item.metadata.platform}
           </Text>
         );
@@ -87,7 +87,7 @@ export const InfoItemCard: React.FC<InfoItemCardProps> = ({
       // 게임 ID
       if (type === 'gameId' && item.metadata.game) {
         details.push(
-          <Text key="game" style={[styles.itemSubText, { color: colors.TEXT.SECONDARY }]}>
+          <Text key="game" className="itemSubText">
             {item.metadata.game}
           </Text>
         );
@@ -96,7 +96,7 @@ export const InfoItemCard: React.FC<InfoItemCardProps> = ({
       // 플랫폼
       if (type === 'platform' && item.metadata.platformName) {
         details.push(
-          <Text key="platform" style={[styles.itemSubText, { color: colors.TEXT.SECONDARY }]}>
+          <Text key="platform" className="itemSubText">
             {item.metadata.platformName}
           </Text>
         );
@@ -105,15 +105,15 @@ export const InfoItemCard: React.FC<InfoItemCardProps> = ({
       // 성별과 관계 의도 (공통)
       if (item.metadata.gender && item.metadata.gender !== 'all') {
         details.push(
-          <View key="tags" style={styles.tagContainer}>
-            <View style={[styles.tag, { backgroundColor: colors.PRIMARY + '20' }]}>
-              <Text style={[styles.tagText, { color: colors.PRIMARY }]}>
+          <View key="tags" className="tagContainer">
+            <View className="tag">
+              <Text className="tagText">
                 {item.metadata.gender === 'male' ? '남성' : '여성'}
               </Text>
             </View>
             {item.metadata.relationshipIntent && (
-              <View style={[styles.tag, { backgroundColor: colors.SECONDARY + '20' }]}>
-                <Text style={[styles.tagText, { color: colors.SECONDARY }]}>
+              <View className="tag">
+                <Text className="tagText">
                   {item.metadata.relationshipIntent === 'friend' ? '친구' : '연애'}
                 </Text>
               </View>
@@ -127,15 +127,15 @@ export const InfoItemCard: React.FC<InfoItemCardProps> = ({
   };
 
   return (
-    <View style={[styles.itemCard, { backgroundColor: colors.SURFACE }]}>
-      <View style={styles.itemContent}>
+    <View className="itemCard">
+      <View className="itemContent">
         {renderItemDetails()}
       </View>
-      <View style={styles.itemActions}>
-        <TouchableOpacity onPress={onEdit} style={styles.actionButton}>
+      <View className="itemActions">
+        <TouchableOpacity onPress={onEdit} className="actionButton">
           <Icon name="pencil-outline" size={18} color={colors.TEXT.SECONDARY} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={onDelete} style={styles.actionButton}>
+        <TouchableOpacity onPress={onDelete} className="actionButton">
           <Icon name="trash-outline" size={18} color={colors.ERROR} />
         </TouchableOpacity>
       </View>
@@ -143,44 +143,3 @@ export const InfoItemCard: React.FC<InfoItemCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  itemCard: {
-    flexDirection: 'row',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  itemContent: {
-    flex: 1,
-  },
-  itemMainText: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  itemSubText: {
-    fontSize: 12,
-    marginBottom: 2,
-  },
-  itemActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  actionButton: {
-    padding: 4,
-  },
-  tagContainer: {
-    flexDirection: 'row',
-    gap: 4,
-    marginTop: 4,
-  },
-  tag: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  tagText: {
-    fontSize: 10,
-    fontWeight: '500',
-  },
-});

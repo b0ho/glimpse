@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   Image,
   Dimensions,
@@ -12,11 +11,11 @@ import {
   FlatList,
   Animated,
 } from 'react-native';
-import { Video, ResizeMode } from 'expo-av';
+import { Video, ResizeMode } from 'expo-video';
 import { AVPlaybackStatus } from 'expo-audio';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
-import { COLORS, FONTS, SIZES } from '../../constants/theme';
+import { cn } from '@/utils/cn';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -31,7 +30,7 @@ interface Story {
   mediaUrl: string;
   /** 미디어 타입 */
   mediaType: 'IMAGE' | 'VIDEO';
-  /** 캐픍션 */
+  /** 캐픽션 */
   caption?: string;
   /** 생성 시간 */
   createdAt: string;
@@ -98,7 +97,7 @@ interface StoryViewerProps {
  * @returns {JSX.Element} 스토리 뷰어 UI
  * @description 인스타그램 스타일의 전체 화면 스토리 뷰어로 자동 재생 및 터치 제어 포함
  */
-export const StoryViewer= ({
+export const StoryViewer = ({
   storyGroups,
   initialGroupIndex = 0,
   initialStoryIndex = 0,
@@ -106,7 +105,7 @@ export const StoryViewer= ({
   onViewStory,
   onEndReached,
   currentUserId,
-}) => {
+}: StoryViewerProps) => {
   const { t } = useAndroidSafeTranslation();
   const [currentGroupIndex, setCurrentGroupIndex] = useState(initialGroupIndex);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(initialStoryIndex);
@@ -285,24 +284,22 @@ export const StoryViewer= ({
    */
   const renderProgressBars = () => {
     return (
-      <View style={styles.progressContainer}>
+      <View className="flex-row px-2 pt-2 gap-1">
         {currentGroup.stories.map((_, index) => (
-          <View key={index} style={styles.progressBarContainer}>
-            <View style={styles.progressBarBackground} />
+          <View key={index} className="flex-1 h-1 relative">
+            <View className="absolute w-full h-full bg-white/30 rounded-sm" />
             {index < currentStoryIndex && (
-              <View style={[styles.progressBarFill, { width: '100%' }]} />
+              <View className="absolute w-full h-full bg-white rounded-sm" />
             )}
             {index === currentStoryIndex && (
               <Animated.View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    width: progressAnimation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ['0%', '100%'],
-                    }),
-                  },
-                ]}
+                className="absolute h-full bg-white rounded-sm"
+                style={{
+                  width: progressAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0%', '100%'],
+                  }),
+                }}
               />
             )}
           </View>
@@ -316,13 +313,13 @@ export const StoryViewer= ({
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-black">
       <StatusBar barStyle="light-content" backgroundColor="#000" />
       
       {/* Story Content */}
       <TouchableOpacity
         activeOpacity={1}
-        style={styles.storyContainer}
+        className="flex-1 flex-row"
         onPress={() => handleTap('right')}
         onLongPress={handleLongPress}
         onPressOut={handlePressOut}
@@ -330,7 +327,8 @@ export const StoryViewer= ({
       >
         {/* Left tap area */}
         <TouchableOpacity
-          style={styles.tapArea}
+          className="absolute top-0 bottom-0 z-10"
+          style={{ width: SCREEN_WIDTH * 0.3 }}
           onPress={() => handleTap('left')}
           activeOpacity={1}
         />
@@ -339,7 +337,8 @@ export const StoryViewer= ({
         {currentStory.mediaType === 'IMAGE' ? (
           <Image
             source={{ uri: currentStory.mediaUrl }}
-            style={styles.media}
+            className="w-full h-full"
+            style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
             resizeMode="cover"
             onLoadEnd={() => setIsLoading(false)}
           />
@@ -347,7 +346,7 @@ export const StoryViewer= ({
           <Video
             ref={videoRef}
             source={{ uri: currentStory.mediaUrl }}
-            style={styles.media}
+            style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
             resizeMode={ResizeMode.COVER}
             shouldPlay={!isPaused}
             isLooping={false}
@@ -357,193 +356,87 @@ export const StoryViewer= ({
 
         {/* Loading indicator */}
         {isLoading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.white} />
+          <View className="absolute inset-0 justify-center items-center bg-black/70">
+            <ActivityIndicator size="large" color="#FFFFFF" />
           </View>
         )}
 
         {/* Right tap area */}
         <TouchableOpacity
-          style={styles.tapArea}
+          className="absolute top-0 bottom-0 right-0 z-10"
+          style={{ width: SCREEN_WIDTH * 0.3 }}
           onPress={() => handleTap('right')}
           activeOpacity={1}
         />
       </TouchableOpacity>
 
       {/* Overlay UI */}
-      <SafeAreaView style={styles.overlay}>
+      <SafeAreaView className="absolute inset-0 pointer-events-none">
         {/* Progress bars */}
         {renderProgressBars()}
 
         {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.userInfo}>
+        <View className="flex-row justify-between items-center px-4 py-4 pointer-events-auto">
+          <View className="flex-row items-center">
             {currentGroup.user.profileImage ? (
-              <Image source={{ uri: currentGroup.user.profileImage }} style={styles.profileImage} />
+              <Image 
+                source={{ uri: currentGroup.user.profileImage }} 
+                className="w-10 h-10 rounded-full mr-3"
+              />
             ) : (
-              <View style={styles.profileImagePlaceholder}>
-                <Text style={styles.profileImageText}>
+              <View className="w-10 h-10 rounded-full bg-blue-500 justify-center items-center mr-3">
+                <Text className="text-white text-sm font-semibold">
                   {currentGroup.user.nickname.charAt(0).toUpperCase()}
                 </Text>
               </View>
             )}
-            <View style={styles.userTextInfo}>
-              <Text style={styles.nickname}>{currentGroup.user.nickname}</Text>
-              <Text style={styles.timeAgo}>{formatTimeAgo(currentStory.createdAt)}</Text>
+            <View className="justify-center">
+              <Text className="text-white text-sm font-semibold">
+                {currentGroup.user.nickname}
+              </Text>
+              <Text className="text-gray-300 text-xs">
+                {formatTimeAgo(currentStory.createdAt)}
+              </Text>
             </View>
           </View>
 
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={28} color={COLORS.white} />
+          <TouchableOpacity onPress={onClose} className="p-2">
+            <Ionicons name="close" size={28} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 
         {/* Caption */}
         {currentStory.caption && (
-          <View style={styles.captionContainer}>
-            <Text style={styles.caption}>{currentStory.caption}</Text>
+          <View 
+            className="absolute left-4 right-4 pointer-events-none"
+            style={{ bottom: 100 }}
+          >
+            <Text 
+              className="text-white text-sm"
+              style={{
+                textShadowColor: 'rgba(0, 0, 0, 0.75)',
+                textShadowOffset: { width: 0, height: 1 },
+                textShadowRadius: 3,
+              }}
+            >
+              {currentStory.caption}
+            </Text>
           </View>
         )}
 
         {/* View count (for own stories) */}
         {isOwnStory && currentStory.viewCount !== undefined && (
-          <View style={styles.viewCountContainer}>
-            <Ionicons name="eye" size={16} color={COLORS.white} />
-            <Text style={styles.viewCount}>{currentStory.viewCount}</Text>
+          <View 
+            className="absolute left-4 flex-row items-center bg-black/50 px-3 py-2 rounded-lg"
+            style={{ bottom: 40 }}
+          >
+            <Ionicons name="eye" size={16} color="#FFFFFF" />
+            <Text className="text-white text-sm ml-2">
+              {currentStory.viewCount}
+            </Text>
           </View>
         )}
       </SafeAreaView>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.black,
-  },
-  storyContainer: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  tapArea: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: SCREEN_WIDTH * 0.3,
-    zIndex: 1,
-  },
-  media: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-  },
-  loadingContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    pointerEvents: 'box-none',
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: SIZES.base,
-    paddingTop: SIZES.base,
-    gap: 4,
-  },
-  progressBarContainer: {
-    flex: 1,
-    height: 3,
-    position: 'relative',
-  },
-  progressBarBackground: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
-  },
-  progressBarFill: {
-    position: 'absolute',
-    height: '100%',
-    backgroundColor: COLORS.white,
-    borderRadius: 2,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SIZES.padding,
-    paddingVertical: SIZES.padding,
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: SIZES.base,
-  },
-  profileImagePlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SIZES.base,
-  },
-  profileImageText: {
-    ...FONTS.body3,
-    color: COLORS.white,
-    fontWeight: '600',
-  },
-  userTextInfo: {
-    justifyContent: 'center',
-  },
-  nickname: {
-    ...FONTS.body3,
-    color: COLORS.white,
-    fontWeight: '600',
-  },
-  timeAgo: {
-    ...FONTS.body5,
-    color: COLORS.lightGray,
-  },
-  closeButton: {
-    padding: SIZES.base,
-  },
-  captionContainer: {
-    position: 'absolute',
-    bottom: 100,
-    left: SIZES.padding,
-    right: SIZES.padding,
-  },
-  caption: {
-    ...FONTS.body3,
-    color: COLORS.white,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-  },
-  viewCountContainer: {
-    position: 'absolute',
-    bottom: 40,
-    left: SIZES.padding,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    paddingHorizontal: SIZES.padding,
-    paddingVertical: SIZES.base,
-    borderRadius: SIZES.radius,
-  },
-  viewCount: {
-    ...FONTS.body4,
-    color: COLORS.white,
-    marginLeft: SIZES.base,
-  },
-});

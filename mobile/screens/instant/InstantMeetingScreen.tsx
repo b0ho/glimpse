@@ -1,8 +1,14 @@
+/**
+ * 즉석 미팅 현황 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 현재 참가 중인 즉석 미팅의 상태를 실시간으로 모니터링하고 관리하는 화면
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
   Alert,
@@ -12,9 +18,39 @@ import { useNavigation } from '@react-navigation/native';
 import { RootNavigationProp } from '@/types/navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useInstantMeetingStore } from '@/store/instantMeetingStore';
-import { COLORS_EXTENDED as COLORS, FONTS, SIZES } from '@/utils/constants';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 
+/**
+ * 즉석 미팅 현황 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 실시간 미팅 상태 대시보드
+ *
+ * @description
+ * 사용자가 참가한 즉석 미팅의 현재 상태를 확인하고 관리할 수 있는 화면입니다.
+ * - 실시간 참가자 수 표시 및 남은 시간 카운트다운
+ * - 자동 매칭 시스템 상태 모니터링
+ * - 매칭 성공 현황 및 통계 확인
+ * - 특징 정보 업데이트 기능
+ * - 매칭된 사람들 목록 조회
+ * - 미팅 나가기 기능 (확인 Alert 포함)
+ *
+ * @navigation
+ * - From: JoinInstantMeetingScreen (참가 완료 후), InstantTab (미팅 목록에서)
+ * - To: UpdateFeatures (특징 수정), InstantMatches (매칭 목록), 이전 화면 (나가기)
+ *
+ * @example
+ * ```tsx
+ * // 즉석 미팅 참가 후 자동 이동
+ * navigation.replace('InstantMeeting');
+ *
+ * // 미팅 목록에서 선택하여 이동
+ * navigation.navigate('InstantMeeting');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Instant
+ */
 export function InstantMeetingScreen() {
   const navigation = useNavigation<RootNavigationProp>();
   const { t } = useAndroidSafeTranslation();
@@ -89,49 +125,57 @@ export function InstantMeetingScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
+      <View className="flex-row items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color={COLORS.text} />
+          <Icon name="arrow-back" size={24} className="text-gray-900 dark:text-white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{currentMeeting.name}</Text>
+        <Text className="text-gray-900 dark:text-white text-lg font-semibold">{currentMeeting.name}</Text>
         <TouchableOpacity onPress={handleLeaveMeeting}>
-          <Icon name="exit-outline" size={24} color={COLORS.error} />
+          <Icon name="exit-outline" size={24} className="text-red-500 dark:text-red-400" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView className="flex-1 p-4">
         {/* 참가자 현황 */}
-        <View style={styles.statsCard}>
-          <Text style={styles.statsTitle}>{t('instant:meeting.participants')}</Text>
-          <Text style={styles.statsValue}>{t('instant:meeting.participantsCount', { count: participantCount })}</Text>
-          <Text style={styles.timeLeft}>{t('instant:meeting.timeLeft', { time: timeLeft })}</Text>
+        <View className="bg-white dark:bg-gray-800 rounded-xl p-6 items-center mb-4 shadow-sm">
+          <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">{t('instant:meeting.participants')}</Text>
+          <Text className="text-gray-900 dark:text-white text-3xl font-bold mb-2">
+            {t('instant:meeting.participantsCount', { count: participantCount })}
+          </Text>
+          <Text className="text-blue-500 dark:text-blue-400 text-sm">
+            {t('instant:meeting.timeLeft', { time: timeLeft })}
+          </Text>
         </View>
 
         {/* 자동 매칭 상태 */}
-        <View style={styles.matchingCard}>
-          <Icon name="sync" size={32} color={COLORS.primary} />
-          <Text style={styles.matchingTitle}>{t('instant:meeting.autoMatching')}</Text>
-          <Text style={styles.matchingSubtext}>
+        <View className="bg-white dark:bg-gray-800 rounded-xl p-6 items-center mb-4 shadow-sm">
+          <Icon name="sync" size={32} className="text-blue-500 dark:text-blue-400" />
+          <Text className="text-gray-900 dark:text-white text-lg font-semibold mt-3">
+            {t('instant:meeting.autoMatching')}
+          </Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-sm mt-2 text-center">
             {t('instant:meeting.matchingDescription')}
           </Text>
           {myStats.matches === 0 && (
             <TouchableOpacity 
-              style={styles.updateButton}
+              className="bg-blue-500 dark:bg-blue-600 px-6 py-3 rounded-lg mt-4"
               onPress={handleUpdateFeatures}
             >
-              <Text style={styles.updateButtonText}>{t('instant:meeting.updateFeatures')}</Text>
+              <Text className="text-white text-sm font-semibold">{t('instant:meeting.updateFeatures')}</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {/* 내 매칭 현황 */}
-        <View style={styles.activityCard}>
-          <Text style={styles.activityTitle}>{t('instant:meeting.myMatches')}</Text>
-          <View style={styles.activityStats}>
-            <View style={styles.statItem}>
-              <Text style={styles.statLabel}>{t('instant:meeting.matchCount')}</Text>
-              <Text style={styles.statValue}>{myStats.matches}</Text>
+        <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 shadow-sm">
+          <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-4">
+            {t('instant:meeting.myMatches')}
+          </Text>
+          <View className="flex-row justify-around">
+            <View className="flex-1 items-center">
+              <Text className="text-gray-600 dark:text-gray-400 text-xs mb-1">{t('instant:meeting.matchCount')}</Text>
+              <Text className="text-gray-900 dark:text-white text-lg font-semibold">{myStats.matches}</Text>
             </View>
           </View>
         </View>
@@ -139,141 +183,16 @@ export function InstantMeetingScreen() {
         {/* 매칭 확인 버튼 */}
         {myStats.matches > 0 && (
           <TouchableOpacity 
-            style={styles.matchButton}
+            className="bg-white dark:bg-gray-800 rounded-xl p-4 flex-row items-center justify-between shadow-sm"
             onPress={handleViewMatches}
           >
-            <Text style={styles.matchButtonText}>
+            <Text className="text-blue-500 dark:text-blue-400 text-base font-semibold">
               {t('instant:meeting.viewMatches', { count: myStats.matches })}
             </Text>
-            <Icon name="chevron-forward" size={20} color={COLORS.primary} />
+            <Icon name="chevron-forward" size={20} className="text-blue-500 dark:text-blue-400" />
           </TouchableOpacity>
         )}
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SIZES.padding,
-    paddingVertical: SIZES.padding * 0.5,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  headerTitle: {
-    ...FONTS.h3,
-    color: COLORS.text,
-  },
-  content: {
-    flex: 1,
-    padding: SIZES.padding,
-  },
-  statsCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: SIZES.radius,
-    padding: SIZES.padding,
-    alignItems: 'center',
-    marginBottom: SIZES.padding,
-    ...SIZES.shadow,
-  },
-  statsTitle: {
-    ...FONTS.body3,
-    color: COLORS.textLight,
-    marginBottom: SIZES.base / 2,
-  },
-  statsValue: {
-    ...FONTS.h1,
-    color: COLORS.text,
-    marginBottom: SIZES.base / 2,
-  },
-  timeLeft: {
-    ...FONTS.body4,
-    color: COLORS.primary,
-  },
-  matchingCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: SIZES.radius,
-    padding: SIZES.padding * 1.5,
-    alignItems: 'center',
-    marginBottom: SIZES.padding,
-    ...SIZES.shadow,
-  },
-  matchingTitle: {
-    ...FONTS.h3,
-    color: COLORS.text,
-    marginTop: SIZES.base,
-  },
-  matchingSubtext: {
-    ...FONTS.body4,
-    color: COLORS.textLight,
-    marginTop: SIZES.base / 2,
-    textAlign: 'center',
-  },
-  updateButton: {
-    marginTop: SIZES.padding,
-    paddingVertical: SIZES.padding * 0.75,
-    paddingHorizontal: SIZES.padding * 1.5,
-    backgroundColor: COLORS.primary,
-    borderRadius: SIZES.radius,
-  },
-  updateButtonText: {
-    ...FONTS.body3,
-    color: COLORS.white,
-    fontWeight: '600',
-  },
-  activityCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: SIZES.radius,
-    padding: SIZES.padding,
-    marginBottom: SIZES.padding,
-    ...SIZES.shadow,
-  },
-  activityTitle: {
-    ...FONTS.h4,
-    color: COLORS.text,
-    marginBottom: SIZES.padding,
-  },
-  activityStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statLabel: {
-    ...FONTS.body4,
-    color: COLORS.textLight,
-    marginBottom: SIZES.base / 2,
-  },
-  statValue: {
-    ...FONTS.h3,
-    color: COLORS.text,
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: SIZES.base,
-  },
-  matchButton: {
-    backgroundColor: COLORS.white,
-    borderRadius: SIZES.radius,
-    padding: SIZES.padding,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    ...SIZES.shadow,
-  },
-  matchButtonText: {
-    ...FONTS.body2,
-    color: COLORS.primary,
-    fontWeight: '600',
-  },
-});

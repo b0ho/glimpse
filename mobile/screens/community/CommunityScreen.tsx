@@ -1,9 +1,15 @@
+/**
+ * 커뮤니티 게시판 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 그룹 내 사용자들이 작성한 커뮤니티 게시글을 탐색하고 관리하는 화면
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   FlatList,
-  StyleSheet,
   TouchableOpacity,
   RefreshControl,
   SafeAreaView,
@@ -14,77 +20,119 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
-import { CommunityPost } from '../../shared/types';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
+import { CommunityPost } from '@/../shared/types';
 import { formatDistanceToNow } from '@/utils/dateUtils';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
-import { shadowStyles } from '@/utils/shadowStyles';
 
 interface PostItemProps {
   post: CommunityPost;
   onPress: () => void;
 }
 
-const PostItem= ({ post, onPress }) => {
+const PostItem = ({ post, onPress }: PostItemProps) => {
   const { t } = useAndroidSafeTranslation();
-  
+
   return (
-    <TouchableOpacity style={styles.postCard} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity
+      className="bg-white dark:bg-gray-800 mx-4 my-2 p-4 rounded-xl shadow-sm active:opacity-70"
+      onPress={onPress}
+    >
       {/* Author Info */}
-      <View style={styles.authorRow}>
-        <Image 
+      <View className="flex-row items-center mb-3">
+        <Image
           source={{ uri: post.author?.profileImage || 'https://via.placeholder.com/40' }}
-          style={styles.authorAvatar}
+          className="w-10 h-10 rounded-full mr-3"
         />
-        <View style={styles.authorInfo}>
-          <Text style={styles.authorName}>{post.author?.nickname || t('community:post.anonymous')}</Text>
-          <Text style={styles.postTime}>
+        <View className="flex-1">
+          <Text className="text-gray-900 dark:text-white text-sm font-semibold">
+            {post.author?.nickname || t('community:post.anonymous')}
+          </Text>
+          <Text className="text-gray-500 dark:text-gray-500 text-xs mt-0.5">
             {formatDistanceToNow(post.createdAt)} • {post.group?.name}
           </Text>
         </View>
         {post.isPinned && (
-          <Icon name="pin" size={20} color={COLORS.PRIMARY} style={styles.pinIcon} />
+          <Icon name="pin" size={20} className="text-blue-500 dark:text-blue-400 ml-3" />
         )}
       </View>
 
       {/* Post Content */}
-      <Text style={styles.postTitle} numberOfLines={2}>{post.title}</Text>
-      <Text style={styles.postContent} numberOfLines={3}>{post.content}</Text>
+      <Text className="text-gray-900 dark:text-white text-base font-semibold mb-2" numberOfLines={2}>
+        {post.title}
+      </Text>
+      <Text className="text-gray-600 dark:text-gray-400 text-sm leading-5 mb-3" numberOfLines={3}>
+        {post.content}
+      </Text>
 
       {/* Post Images */}
       {post.imageUrls && post.imageUrls.length > 0 && (
-        <View style={styles.imageContainer}>
+        <View className="flex-row mt-3 mb-3">
           {post.imageUrls.slice(0, 3).map((url, index) => (
-            <Image key={index} source={{ uri: url }} style={styles.postImage} />
+            <Image key={index} source={{ uri: url }} className="w-20 h-20 rounded-lg mr-2" />
           ))}
           {post.imageUrls.length > 3 && (
-            <View style={[styles.postImage, styles.moreImagesOverlay]}>
-              <Text style={styles.moreImagesText}>{t('community:post.moreImages', { count: post.imageUrls.length - 3 })}</Text>
+            <View className="w-20 h-20 rounded-lg bg-black/50 justify-center items-center">
+              <Text className="text-white text-lg font-bold">
+                +{post.imageUrls.length - 3}
+              </Text>
             </View>
           )}
         </View>
       )}
 
       {/* Post Stats */}
-      <View style={styles.statsRow}>
-        <View style={styles.statItem}>
-          <Icon name="eye-outline" size={16} color={COLORS.TEXT.MUTED} />
-          <Text style={styles.statText}>{post.viewCount}</Text>
+      <View className="flex-row mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+        <View className="flex-row items-center mr-6">
+          <Icon name="eye-outline" size={16} className="text-gray-500 dark:text-gray-500" />
+          <Text className="text-gray-500 dark:text-gray-500 text-xs ml-1">{post.viewCount}</Text>
         </View>
-        <View style={styles.statItem}>
-          <Icon name="heart-outline" size={16} color={COLORS.TEXT.MUTED} />
-          <Text style={styles.statText}>{post.likeCount}</Text>
+        <View className="flex-row items-center mr-6">
+          <Icon name="heart-outline" size={16} className="text-gray-500 dark:text-gray-500" />
+          <Text className="text-gray-500 dark:text-gray-500 text-xs ml-1">{post.likeCount}</Text>
         </View>
-        <View style={styles.statItem}>
-          <Icon name="chatbubble-outline" size={16} color={COLORS.TEXT.MUTED} />
-          <Text style={styles.statText}>{post.commentCount}</Text>
+        <View className="flex-row items-center">
+          <Icon name="chatbubble-outline" size={16} className="text-gray-500 dark:text-gray-500" />
+          <Text className="text-gray-500 dark:text-gray-500 text-xs ml-1">{post.commentCount}</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 };
 
+/**
+ * 커뮤니티 게시판 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 게시글 목록 및 카테고리 필터링 UI
+ *
+ * @description
+ * 그룹 내 사용자들이 작성한 커뮤니티 게시글을 조회하고 상호작용할 수 있는 화면입니다.
+ * - 카테고리별 게시글 필터링 (전체, 인기, 최신, 내 글)
+ * - 게시글 미리보기 (제목, 내용, 이미지, 통계)
+ * - Pull-to-Refresh 기능으로 최신 데이터 갱신
+ * - 고정된 게시글 (Pin) 표시
+ * - 작성자 프로필 이미지 및 닉네임 표시
+ * - 조회수, 좋아요, 댓글 수 통계
+ * - Floating Action Button으로 새 게시글 작성
+ * - 서버 연결 오류 시 재시도 UI
+ *
+ * @navigation
+ * - From: HomeTab 하단 네비게이션
+ * - To: PostDetail (게시글 상세), CreatePost (글 작성)
+ *
+ * @example
+ * ```tsx
+ * // 하단 탭 네비게이션에서 접근
+ * <Tab.Screen name="Community" component={CommunityScreen} />
+ *
+ * // 직접 네비게이션
+ * navigation.navigate('Community');
+ * ```
+ *
+ * @category Screen
+ * @subcategory Community
+ */
 export const CommunityScreen = () => {
   const navigation = useNavigation() as any;
   const { user } = useAuthStore();
@@ -152,23 +200,25 @@ export const CommunityScreen = () => {
   };
 
   const renderHeader = () => (
-    <View style={styles.header}>
+    <View className="bg-white dark:bg-gray-800 pb-3 border-b border-gray-200 dark:border-gray-700">
       {/* Category Tabs */}
-      <View style={styles.categoryContainer}>
+      <View className="flex-row px-4 pt-4">
         {categories.map((category) => (
           <TouchableOpacity
             key={category.id}
-            style={[
-              styles.categoryTab,
-              selectedCategory === category.id && styles.categoryTabActive,
-            ]}
+            className={`px-4 py-2 mr-3 rounded-full ${
+              selectedCategory === category.id 
+                ? 'bg-blue-500 dark:bg-blue-600' 
+                : 'bg-gray-100 dark:bg-gray-700'
+            }`}
             onPress={() => setSelectedCategory(category.id)}
           >
             <Text
-              style={[
-                styles.categoryText,
-                selectedCategory === category.id && styles.categoryTextActive,
-              ]}
+              className={`text-sm font-medium ${
+                selectedCategory === category.id 
+                  ? 'text-white' 
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
             >
               {category.name}
             </Text>
@@ -193,14 +243,14 @@ export const CommunityScreen = () => {
 
   if (isLoading && !isRefreshing) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-900">
+        <ActivityIndicator size="large" className="text-blue-500" />
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id}
@@ -209,183 +259,30 @@ export const CommunityScreen = () => {
         )}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Icon name="newspaper-outline" size={60} color={COLORS.TEXT.MUTED} />
-            <Text style={styles.emptyText}>{t('community:empty.title')}</Text>
-            <Text style={styles.emptySubtext}>{t('community:empty.subtitle')}</Text>
+          <View className="flex-1 justify-center items-center py-24">
+            <Icon name="newspaper-outline" size={60} className="text-gray-400 dark:text-gray-600" />
+            <Text className="text-gray-600 dark:text-gray-400 text-base mt-4">{t('community:empty.title')}</Text>
+            <Text className="text-gray-500 dark:text-gray-500 text-sm mt-2">{t('community:empty.subtitle')}</Text>
           </View>
         }
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={handleRefresh}
-            colors={[COLORS.PRIMARY]}
+            tintColor="#3B82F6"
+            colors={["#3B82F6"]}
           />
         }
-        contentContainerStyle={posts.length === 0 ? styles.emptyListContent : null}
+        contentContainerStyle={posts.length === 0 ? { flexGrow: 1 } : undefined}
       />
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} onPress={handleCreatePost}>
-        <Icon name="create-outline" size={24} color={COLORS.WHITE} />
+      <TouchableOpacity 
+        className="absolute right-4 bottom-6 w-14 h-14 bg-blue-500 dark:bg-blue-600 rounded-full justify-center items-center shadow-lg"
+        onPress={handleCreatePost}
+      >
+        <Icon name="create-outline" size={24} className="text-white" />
       </TouchableOpacity>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    backgroundColor: COLORS.WHITE,
-    paddingBottom: SPACING.SM,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
-  },
-  categoryContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: SPACING.MD,
-    paddingTop: SPACING.MD,
-  },
-  categoryTab: {
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    marginRight: SPACING.SM,
-    borderRadius: 20,
-    backgroundColor: COLORS.BACKGROUND,
-  },
-  categoryTabActive: {
-    backgroundColor: COLORS.PRIMARY,
-  },
-  categoryText: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
-    fontWeight: '500',
-  },
-  categoryTextActive: {
-    color: COLORS.WHITE,
-  },
-  postCard: {
-    backgroundColor: COLORS.WHITE,
-    marginHorizontal: SPACING.MD,
-    marginVertical: SPACING.SM,
-    padding: SPACING.MD,
-    borderRadius: 12,
-    ...shadowStyles.card,
-  },
-  authorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.SM,
-  },
-  authorAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: SPACING.SM,
-  },
-  authorInfo: {
-    flex: 1,
-  },
-  authorName: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
-  },
-  postTime: {
-    fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.MUTED,
-    marginTop: 2,
-  },
-  pinIcon: {
-    marginLeft: SPACING.SM,
-  },
-  postTitle: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
-    marginBottom: SPACING.XS,
-  },
-  postContent: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
-    lineHeight: 20,
-    marginBottom: SPACING.SM,
-  },
-  imageContainer: {
-    flexDirection: 'row',
-    marginTop: SPACING.SM,
-    marginBottom: SPACING.SM,
-  },
-  postImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: SPACING.XS,
-  },
-  moreImagesOverlay: {
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  moreImagesText: {
-    color: COLORS.WHITE,
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-  },
-  statsRow: {
-    flexDirection: 'row',
-    marginTop: SPACING.SM,
-    paddingTop: SPACING.SM,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.BORDER,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: SPACING.LG,
-  },
-  statText: {
-    fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.MUTED,
-    marginLeft: 4,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.XXL * 2,
-  },
-  emptyText: {
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
-    marginTop: SPACING.MD,
-  },
-  emptySubtext: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.MUTED,
-    marginTop: SPACING.XS,
-  },
-  emptyListContent: {
-    flexGrow: 1,
-  },
-  fab: {
-    position: 'absolute',
-    right: SPACING.MD,
-    bottom: SPACING.XL,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: COLORS.PRIMARY,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...shadowStyles.large,
-  },
-});

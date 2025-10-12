@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Alert, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, TextInput } from 'react-native';
 import { useSignIn, useSignUp, useAuth } from '@clerk/clerk-expo';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
@@ -203,28 +203,28 @@ export const ClerkPhoneAuth: React.FC<ClerkPhoneAuthProps> = ({ mode, onSuccess,
   };
 
   return (
-    <View style={styles.container}>
+    <View className="container">
       {!pendingVerification ? (
         // 전화번호 입력 화면
         <>
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>
+          <View className="header">
+            <Text className="title">
               {mode === 'signup' ? '회원가입' : '로그인'}
             </Text>
-            <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="subtitle">
               전화번호를 입력해주세요
             </Text>
           </View>
 
-          <View style={styles.inputContainer}>
+          <View className="inputContainer">
             <MaterialCommunityIcons 
               name="phone" 
               size={20} 
               color={colors.TEXT.SECONDARY} 
-              style={styles.inputIcon}
+              className="inputIcon"
             />
             <TextInput
-              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              className="input"
               placeholder="010-0000-0000"
               placeholderTextColor={colors.TEXT.TERTIARY}
               value={phoneNumber}
@@ -235,23 +235,23 @@ export const ClerkPhoneAuth: React.FC<ClerkPhoneAuthProps> = ({ mode, onSuccess,
           </View>
 
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: colors.PRIMARY }]}
+            className="button"
             onPress={handleSendOTP}
             disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Text style={styles.buttonText}>인증번호 받기</Text>
+              <Text className="buttonText">인증번호 받기</Text>
             )}
           </TouchableOpacity>
 
           {onBack && (
             <TouchableOpacity
-              style={[styles.backButton, { borderColor: colors.BORDER }]}
+              className="backButton"
               onPress={onBack}
             >
-              <Text style={[styles.backButtonText, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="backButtonText">
                 돌아가기
               </Text>
             </TouchableOpacity>
@@ -260,24 +260,24 @@ export const ClerkPhoneAuth: React.FC<ClerkPhoneAuthProps> = ({ mode, onSuccess,
       ) : (
         // 인증번호 입력 화면
         <>
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>
+          <View className="header">
+            <Text className="title">
               인증번호 입력
             </Text>
-            <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="subtitle">
               {phoneNumber}로 전송된 6자리 코드를 입력해주세요
             </Text>
           </View>
 
-          <View style={styles.inputContainer}>
+          <View className="inputContainer">
             <MaterialCommunityIcons 
               name="message-text" 
               size={20} 
               color={colors.TEXT.SECONDARY} 
-              style={styles.inputIcon}
+              className="inputIcon"
             />
             <TextInput
-              style={[styles.input, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+              className="input"
               placeholder="000000"
               placeholderTextColor={colors.TEXT.TERTIARY}
               value={verificationCode}
@@ -288,22 +288,22 @@ export const ClerkPhoneAuth: React.FC<ClerkPhoneAuthProps> = ({ mode, onSuccess,
           </View>
 
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: colors.PRIMARY }]}
+            className="button"
             onPress={handleVerifyOTP}
             disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Text style={styles.buttonText}>인증하기</Text>
+              <Text className="buttonText">인증하기</Text>
             )}
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.backButton, { borderColor: colors.BORDER }]}
+            className="backButton"
             onPress={() => setPendingVerification(false)}
           >
-            <Text style={[styles.backButtonText, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="backButtonText">
               전화번호 다시 입력
             </Text>
           </TouchableOpacity>
@@ -313,62 +313,3 @@ export const ClerkPhoneAuth: React.FC<ClerkPhoneAuthProps> = ({ mode, onSuccess,
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: SPACING.LG,
-    justifyContent: 'center',
-  },
-  header: {
-    marginBottom: SPACING.XL * 2,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: FONT_SIZES.XL,
-    fontWeight: 'bold',
-    marginBottom: SPACING.SM,
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.MD,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.LG,
-  },
-  inputIcon: {
-    marginRight: SPACING.MD,
-  },
-  input: {
-    flex: 1,
-    fontSize: FONT_SIZES.MD,
-    paddingVertical: SPACING.MD,
-    paddingHorizontal: SPACING.MD,
-    borderWidth: 1,
-    borderRadius: 12,
-  },
-  button: {
-    paddingVertical: SPACING.MD,
-    paddingHorizontal: SPACING.LG,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: SPACING.MD,
-  },
-  buttonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  backButton: {
-    paddingVertical: SPACING.MD,
-    paddingHorizontal: SPACING.LG,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  backButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-  },
-});

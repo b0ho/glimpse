@@ -6,17 +6,17 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   Image,
+  Platform,
 } from 'react-native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@/hooks/useTheme';
 import { Message } from '@/types';
-import { SPACING, FONT_SIZES } from '@/utils/constants';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { STATE_ICONS } from '@/utils/icons';
+import { cn } from '@/utils/cn';
 
 /**
  * MessageBubble 컴포넌트 Props
@@ -54,6 +54,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
 }) => {
   const { t } = useAndroidSafeTranslation('chat');
   const { colors } = useTheme();
+  
   /**
    * 메시지 컨텐츠 렌더링
    * @returns {JSX.Element | null} 메시지 타입에 따른 컨텐츠
@@ -63,12 +64,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
       case 'text':
         return (
           <Text 
-            style={[
-              styles.messageText,
-              {
-                color: isOwnMessage ? colors.TEXT.WHITE : colors.TEXT.PRIMARY,
-              },
-            ]}
+            className={cn(
+              "text-base leading-5",
+              isOwnMessage ? "text-white" : "text-gray-900 dark:text-white"
+            )}
             accessibilityLabel={`${t('common:accessibility.messageText')} ${message.content}`}
           >
             {message.content}
@@ -85,15 +84,15 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           >
             <Image
               source={{ uri: message.content }}
-              style={styles.messageImage}
+              className="w-50 h-37.5 rounded-lg"
               resizeMode="cover"
             />
-            <View style={[styles.imageOverlay, { backgroundColor: colors.OVERLAY }]}>
+            <View className="absolute top-1 right-1 bg-black/50 rounded-lg p-1">
               <Icon
                 name="expand"
                 size={20}
-                color={colors.TEXT.WHITE}
-                style={styles.expandIcon}
+                color="#FFFFFF"
+                style={{ opacity: 0.8 }}
               />
             </View>
           </TouchableOpacity>
@@ -101,19 +100,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
       
       case 'voice':
         return (
-          <View style={styles.fileMessage}>
+          <View className="flex-row items-center min-w-32">
             <Icon
               name="document-attach"
               size={24}
-              color={isOwnMessage ? colors.TEXT.WHITE : colors.PRIMARY}
+              color={isOwnMessage ? "#FFFFFF" : colors.PRIMARY}
             />
             <Text
-              style={[
-                styles.fileName,
-                {
-                  color: isOwnMessage ? colors.TEXT.WHITE : colors.TEXT.PRIMARY,
-                },
-              ]}
+              className={cn(
+                "ml-2 text-sm flex-1",
+                isOwnMessage ? "text-white" : "text-gray-900 dark:text-white"
+              )}
             >
               {message.content}
             </Text>
@@ -133,8 +130,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
     if (!showAvatar || isOwnMessage) return null;
     
     return (
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>👤</Text>
+      <View className="w-8 h-8 rounded-full justify-center items-center mr-2 self-end">
+        <Text className="text-sm">👤</Text>
       </View>
     );
   };
@@ -147,7 +144,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
     if (!isOwnMessage) return null;
 
     return (
-      <View style={styles.readStatus}>
+      <View className="ml-1">
         <Icon
           name={message.isRead ? STATE_ICONS.LIKED : STATE_ICONS.UNLIKED}
           size={12}
@@ -165,12 +162,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
     if (!showTimestamp) return null;
 
     return (
-      <Text
-        style={[
-          styles.timestamp,
-          { color: colors.TEXT.LIGHT },
-        ]}
-      >
+      <Text className="text-xs text-gray-500 dark:text-gray-400">
         {formatTimeAgo(message.createdAt)}
       </Text>
     );
@@ -178,24 +170,29 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
 
   return (
     <View
-      style={[
-        styles.messageContainer,
-        isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer,
-      ]}
+      className={cn(
+        "flex-row my-1 px-4",
+        isOwnMessage ? "justify-end" : "justify-start"
+      )}
     >
       {/* 상대방 메시지의 아바타 */}
       {renderAvatar()}
       
-      <View style={styles.messageWrapper}>
+      <View className="max-w-3/4">
         {/* 메시지 버블 */}
         <TouchableOpacity
-          style={[
-            styles.messageBubble,
-            {
-              backgroundColor: isOwnMessage ? colors.PRIMARY : colors.SURFACE,
-            },
-            message.type === 'image' && styles.imageMessageBubble,
-          ]}
+          className={cn(
+            "px-4 py-2 rounded-2xl",
+            isOwnMessage 
+              ? "bg-blue-500" 
+              : "bg-gray-100 dark:bg-gray-700",
+            message.type === 'image' && "p-1",
+            Platform.select({
+              ios: "shadow-sm",
+              android: "elevation-1",
+              web: "shadow-sm"
+            })
+          )}
           onLongPress={() => onLongPress?.(message)}
           activeOpacity={0.7}
           accessibilityRole="button"
@@ -206,10 +203,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
         
         {/* 시간 및 읽음 상태 */}
         <View
-          style={[
-            styles.messageInfo,
-            isOwnMessage ? styles.ownMessageInfo : styles.otherMessageInfo,
-          ]}
+          className={cn(
+            "flex-row items-center mt-1",
+            isOwnMessage ? "justify-end" : "justify-start"
+          )}
         >
           {renderTimestamp()}
           {renderReadStatus()}
@@ -217,97 +214,4 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
       </View>
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  messageContainer: {
-    flexDirection: 'row',
-    marginVertical: SPACING.XS,
-    paddingHorizontal: SPACING.MD,
-  },
-  ownMessageContainer: {
-    justifyContent: 'flex-end',
-  },
-  otherMessageContainer: {
-    justifyContent: 'flex-start',
-  },
-  messageWrapper: {
-    maxWidth: '75%',
-  },
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.SM,
-    alignSelf: 'flex-end',
-  },
-  avatarText: {
-    fontSize: FONT_SIZES.SM,
-  },
-  messageBubble: {
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    borderRadius: 18,
-    elevation: 1,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  imageMessageBubble: {
-    padding: 4,
-  },
-  messageText: {
-    fontSize: FONT_SIZES.MD,
-    lineHeight: 20,
-  },
-  messageImage: {
-    width: 200,
-    height: 150,
-    borderRadius: 12,
-  },
-  imageOverlay: {
-    position: 'absolute',
-    top: SPACING.XS,
-    right: SPACING.XS,
-    borderRadius: 12,
-    padding: 4,
-  },
-  expandIcon: {
-    opacity: 0.8,
-  },
-  fileMessage: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minWidth: 120,
-  },
-  fileName: {
-    marginLeft: SPACING.SM,
-    fontSize: FONT_SIZES.SM,
-    flex: 1,
-  },
-  messageInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 2,
-  },
-  ownMessageInfo: {
-    justifyContent: 'flex-end',
-  },
-  otherMessageInfo: {
-    justifyContent: 'flex-start',
-  },
-  timestamp: {
-    fontSize: FONT_SIZES.XS,
-  },
-  ownTimestamp: {
-    marginRight: SPACING.XS,
-  },
-  otherTimestamp: {
-    marginLeft: SPACING.XS,
-  },
-  readStatus: {
-    marginLeft: 2,
-  },
 });

@@ -1,15 +1,14 @@
 /**
- * PersonaSettingsModal 컴포넌트 (StyleSheet 버전)
+ * PersonaSettingsModal 컴포넌트 (NativeWind v4 버전)
  *
- * @module PersonaSettingsModal
- * @description 사용자의 페르소나(익명 프로필) 정보를 생성 및 편집하는 모달 컴포넌트 (StyleSheet 스타일링 적용)
+ * @module PersonaSettingsModal-NW
+ * @description 사용자의 페르소나(익명 프로필) 정보를 생성 및 편집하는 모달 컴포넌트 (NativeWind v4 스타일링 적용)
  */
 
 import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Modal,
   TextInput,
   ScrollView,
@@ -46,12 +45,12 @@ interface PersonaSettingsModalProps {
  * @returns {JSX.Element} 페르소나 설정 모달 UI
  *
  * @description
- * 사용자의 익명 페르소나 정보를 생성하거나 수정할 수 있는 전체 화면 모달입니다. (StyleSheet 버전)
+ * 사용자의 익명 페르소나 정보를 생성하거나 수정할 수 있는 전체 화면 모달입니다. (NativeWind v4 버전)
  * - 닉네임 (필수), 나이, 자기소개, 관심사, 직업, 키, MBTI, 음주, 흡연 정보 입력
  * - 위치 공유 토글 기능
  * - 폼 유효성 검사 및 에러 처리
  * - 키보드 회피 기능 (iOS/Android)
- * - 동적 테마 색상 적용
+ * - 다크모드 자동 지원
  *
  * @example
  * ```tsx
@@ -157,46 +156,46 @@ export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visi
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.modalContainer}
+        className="modalContainer"
       >
-        <View style={[styles.content, { backgroundColor: colors.SURFACE }]}>
+        <View className="content">
           {/* Header */}
-          <View style={[styles.header, { borderBottomColor: colors.BORDER }]}>
-            <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>
+          <View className="header">
+            <Text className="title">
               {t('settingsTitle')}
             </Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <TouchableOpacity onPress={onClose} className="closeButton">
               <Ionicons name="close" size={24} color={colors.TEXT.PRIMARY} />
             </TouchableOpacity>
           </View>
 
           {/* Form */}
-          <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
+          <ScrollView className="form" showsVerticalScrollIndicator={false}>
             {/* Required Field */}
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+            <View className="inputGroup">
+              <Text className="label">
                 {t('nickname')} *
               </Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+                className="input"
                 value={nickname}
                 onChangeText={setNickname}
                 placeholder={t('nicknamePlaceholder')}
                 placeholderTextColor={colors.TEXT.LIGHT}
                 maxLength={20}
               />
-              <Text style={[styles.hint, { color: colors.TEXT.LIGHT }]}>
+              <Text className="hint">
                 {t('nicknameHint')}
               </Text>
             </View>
 
             {/* Optional Fields */}
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+            <View className="inputGroup">
+              <Text className="label">
                 {t('age')}
               </Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+                className="input"
                 value={age}
                 onChangeText={setAge}
                 placeholder={t('agePlaceholder')}
@@ -206,12 +205,12 @@ export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visi
               />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+            <View className="inputGroup">
+              <Text className="label">
                 {t('bio')}
               </Text>
               <TextInput
-                style={[styles.textArea, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+                className="textArea"
                 value={bio}
                 onChangeText={setBio}
                 placeholder={t('bioPlaceholder')}
@@ -222,28 +221,28 @@ export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visi
               />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+            <View className="inputGroup">
+              <Text className="label">
                 {t('interests')}
               </Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+                className="input"
                 value={interests}
                 onChangeText={setInterests}
                 placeholder={t('interestsPlaceholder')}
                 placeholderTextColor={colors.TEXT.LIGHT}
               />
-              <Text style={[styles.hint, { color: colors.TEXT.LIGHT }]}>
+              <Text className="hint">
                 {t('interestsHint')}
               </Text>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+            <View className="inputGroup">
+              <Text className="label">
                 {t('occupation')}
               </Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+                className="input"
                 value={occupation}
                 onChangeText={setOccupation}
                 placeholder={t('occupationPlaceholder')}
@@ -251,12 +250,12 @@ export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visi
               />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+            <View className="inputGroup">
+              <Text className="label">
                 {t('height')}
               </Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+                className="input"
                 value={height}
                 onChangeText={setHeight}
                 placeholder={t('heightPlaceholder')}
@@ -266,12 +265,12 @@ export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visi
               />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+            <View className="inputGroup">
+              <Text className="label">
                 {t('mbti')}
               </Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+                className="input"
                 value={mbti}
                 onChangeText={setMbti}
                 placeholder={t('mbtiPlaceholder')}
@@ -281,12 +280,12 @@ export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visi
               />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+            <View className="inputGroup">
+              <Text className="label">
                 {t('drinking')}
               </Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+                className="input"
                 value={drinking}
                 onChangeText={setDrinking}
                 placeholder={t('drinkingPlaceholder')}
@@ -294,12 +293,12 @@ export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visi
               />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+            <View className="inputGroup">
+              <Text className="label">
                 {t('smoking')}
               </Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+                className="input"
                 value={smoking}
                 onChangeText={setSmoking}
                 placeholder={t('smokingPlaceholder')}
@@ -308,14 +307,14 @@ export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visi
             </View>
 
             {/* 위치 공유 토글 */}
-            <View style={[styles.locationShareGroup, { backgroundColor: colors.PRIMARY + '10', borderColor: colors.PRIMARY + '30' }]}>
-              <View style={styles.locationShareInfo}>
+            <View className="locationShareGroup">
+              <View className="locationShareInfo">
                 <Ionicons name="location" size={20} color={colors.PRIMARY} />
-                <View style={styles.locationShareText}>
-                  <Text style={[styles.locationShareTitle, { color: colors.TEXT.PRIMARY }]}>
+                <View className="locationShareText">
+                  <Text className="locationShareTitle">
                     위치 공유
                   </Text>
-                  <Text style={[styles.locationShareDesc, { color: colors.TEXT.SECONDARY }]}>
+                  <Text className="locationShareDesc">
                     앱 사용 중 5분마다 위치를 업데이트하여 근처 사용자에게 표시됩니다
                   </Text>
                 </View>
@@ -328,22 +327,22 @@ export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visi
               />
             </View>
 
-            <View style={styles.buttonContainer}>
+            <View className="buttonContainer">
               <TouchableOpacity
-                style={[styles.cancelButton, { backgroundColor: colors.BACKGROUND }]}
+                className="cancelButton"
                 onPress={onClose}
               >
-                <Text style={[styles.cancelButtonText, { color: colors.TEXT.PRIMARY }]}>
+                <Text className="cancelButtonText">
                   {t('common:buttons.cancel')}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.saveButton, { backgroundColor: colors.PRIMARY }]}
+                className="saveButton"
                 onPress={handleSave}
                 disabled={isLoading}
               >
-                <Text style={styles.saveButtonText}>
+                <Text className="saveButtonText">
                   {isLoading ? t('common:status.loading') : t('common:buttons.save')}
                 </Text>
               </TouchableOpacity>
@@ -355,111 +354,3 @@ export const PersonaSettingsModal: React.FC<PersonaSettingsModalProps> = ({ visi
   );
 };
 
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  content: {
-    maxHeight: '90%',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: SPACING.MD,
-    borderBottomWidth: 1,
-  },
-  title: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '600',
-  },
-  closeButton: {
-    padding: 4,
-  },
-  form: {
-    padding: SPACING.MD,
-  },
-  inputGroup: {
-    marginBottom: SPACING.MD,
-  },
-  label: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: '500',
-    marginBottom: SPACING.XS,
-  },
-  input: {
-    borderRadius: 8,
-    padding: SPACING.SM,
-    fontSize: FONT_SIZES.MD,
-  },
-  textArea: {
-    borderRadius: 8,
-    padding: SPACING.SM,
-    fontSize: FONT_SIZES.MD,
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  hint: {
-    fontSize: FONT_SIZES.XS,
-    marginTop: 4,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: SPACING.SM,
-    marginTop: SPACING.LG,
-  },
-  cancelButton: {
-    flex: 1,
-    padding: SPACING.MD,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '500',
-  },
-  saveButton: {
-    flex: 1,
-    padding: SPACING.MD,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: 'white',
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-  },
-  locationShareGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: SPACING.MD,
-    marginBottom: SPACING.MD,
-    padding: SPACING.MD,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  locationShareInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  locationShareText: {
-    marginLeft: SPACING.SM,
-    flex: 1,
-  },
-  locationShareTitle: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  locationShareDesc: {
-    fontSize: FONT_SIZES.XS,
-    lineHeight: 16,
-  },
-});

@@ -8,7 +8,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -57,11 +56,11 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
       case 'phone':
         return (
           <View>
-            <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="inputLabel">
               전화번호
             </Text>
             <CrossPlatformInput
-              style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+              className="input"
               placeholder="010-1234-5678"
               value={modalInputs.value || ''}
               onChangeText={(text) => onInputChange('value', text)}
@@ -73,11 +72,11 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
       case 'email':
         return (
           <View>
-            <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="inputLabel">
               이메일
             </Text>
             <CrossPlatformInput
-              style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+              className="input"
               placeholder="example@email.com"
               value={modalInputs.value || ''}
               onChangeText={(text) => onInputChange('value', text)}
@@ -90,20 +89,20 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
       case 'socialId':
         return (
           <View>
-            <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="inputLabel">
               플랫폼
             </Text>
             <CrossPlatformInput
-              style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+              className="input"
               placeholder="Instagram, Twitter 등"
               value={modalInputs.platform || ''}
               onChangeText={(text) => onInputChange('platform', text)}
             />
-            <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="inputLabel">
               계정 ID
             </Text>
             <CrossPlatformInput
-              style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+              className="input"
               placeholder="@username"
               value={modalInputs.value || ''}
               onChangeText={(text) => onInputChange('value', text)}
@@ -115,11 +114,11 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
       case 'birthdate':
         return (
           <View>
-            <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="inputLabel">
               생년월일
             </Text>
             <CrossPlatformInput
-              style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+              className="input"
               placeholder="YYYY-MM-DD"
               value={modalInputs.value || ''}
               onChangeText={(text) => onInputChange('value', text)}
@@ -131,29 +130,29 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
       case 'company':
         return (
           <View>
-            <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="inputLabel">
               회사명
             </Text>
             <CrossPlatformInput
-              style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+              className="input"
               placeholder="회사 이름"
               value={modalInputs.value || ''}
               onChangeText={(text) => onInputChange('value', text)}
             />
-            <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="inputLabel">
               직원 이름
             </Text>
             <CrossPlatformInput
-              style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+              className="input"
               placeholder="홍길동"
               value={modalInputs.employeeName || ''}
               onChangeText={(text) => onInputChange('employeeName', text)}
             />
-            <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="inputLabel">
               부서
             </Text>
             <CrossPlatformInput
-              style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+              className="input"
               placeholder="개발팀"
               value={modalInputs.department || ''}
               onChangeText={(text) => onInputChange('department', text)}
@@ -164,19 +163,14 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
       case 'school':
         return (
           <View>
-            <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="inputLabel">
               학교 구분
             </Text>
-            <View style={styles.levelButtons}>
+            <View className="levelButtons">
               {['middle', 'high', 'university', 'graduate'].map((level) => (
                 <TouchableOpacity
                   key={level}
-                  style={[
-                    styles.levelButton,
-                    {
-                      backgroundColor: modalInputs.level === level ? colors.PRIMARY : colors.SURFACE,
-                    }
-                  ]}
+                  className="levelButton"
                   onPress={() => onInputChange('level', level)}
                 >
                   <Text style={{ color: modalInputs.level === level ? colors.TEXT.WHITE : colors.TEXT.PRIMARY }}>
@@ -190,22 +184,22 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
                 </TouchableOpacity>
               ))}
             </View>
-            <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="inputLabel">
               학교명
             </Text>
             <CrossPlatformInput
-              style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+              className="input"
               placeholder="학교 이름"
               value={modalInputs.value || ''}
               onChangeText={(text) => onInputChange('value', text)}
             />
             {(modalInputs.level === 'university' || modalInputs.level === 'graduate') && (
               <>
-                <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+                <Text className="inputLabel">
                   전공
                 </Text>
                 <CrossPlatformInput
-                  style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+                  className="input"
                   placeholder="컴퓨터공학과"
                   value={modalInputs.major || ''}
                   onChangeText={(text) => onInputChange('major', text)}
@@ -218,11 +212,11 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
       default:
         return (
           <View>
-            <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="inputLabel">
               {getFieldLabel(fieldType)}
             </Text>
             <CrossPlatformInput
-              style={[styles.input, { backgroundColor: colors.BACKGROUND, color: colors.TEXT.PRIMARY }]}
+              className="input"
               placeholder={`${getFieldLabel(fieldType)}을(를) 입력하세요`}
               value={modalInputs.value || ''}
               onChangeText={(text) => onInputChange('value', text)}
@@ -241,11 +235,11 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
     >
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.modalContainer}
+        className="modalContainer"
       >
-        <View style={[styles.modalContent, { backgroundColor: colors.SURFACE }]}>
-          <View style={[styles.modalHeader, { borderBottomColor: colors.BORDER }]}>
-            <Text style={[styles.modalTitle, { color: colors.TEXT.PRIMARY }]}>
+        <View className="modalContent">
+          <View className="modalHeader">
+            <Text className="modalTitle">
               {editMode ? '수정' : '추가'}: {getFieldLabel(fieldType)}
             </Text>
             <TouchableOpacity onPress={onClose}>
@@ -253,25 +247,19 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+          <ScrollView className="modalBody" showsVerticalScrollIndicator={false}>
             {renderModalContent()}
 
             {/* 성별 선택 */}
-            <View style={styles.optionSection}>
-              <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <View className="optionSection">
+              <Text className="inputLabel">
                 대상 성별
               </Text>
-              <View style={styles.genderButtons}>
+              <View className="genderButtons">
                 {['all', 'male', 'female'].map((gender) => (
                   <TouchableOpacity
                     key={gender}
-                    style={[
-                      styles.genderButton,
-                      {
-                        backgroundColor: selectedGender === gender ? colors.PRIMARY : colors.SURFACE,
-                        borderColor: selectedGender === gender ? colors.PRIMARY : colors.BORDER,
-                      }
-                    ]}
+                    className="genderButton"
                     onPress={() => onGenderChange(gender as 'male' | 'female' | 'all')}
                   >
                     <Text style={{ color: selectedGender === gender ? colors.TEXT.WHITE : colors.TEXT.PRIMARY }}>
@@ -287,21 +275,15 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
             </View>
 
             {/* 관계 의도 선택 */}
-            <View style={styles.optionSection}>
-              <Text style={[styles.inputLabel, { color: colors.TEXT.SECONDARY }]}>
+            <View className="optionSection">
+              <Text className="inputLabel">
                 관계 의도
               </Text>
-              <View style={styles.intentButtons}>
+              <View className="intentButtons">
                 {['romantic', 'friend'].map((intent) => (
                   <TouchableOpacity
                     key={intent}
-                    style={[
-                      styles.intentButton,
-                      {
-                        backgroundColor: relationshipIntent === intent ? colors.PRIMARY : colors.SURFACE,
-                        borderColor: relationshipIntent === intent ? colors.PRIMARY : colors.BORDER,
-                      }
-                    ]}
+                    className="intentButton"
                     onPress={() => onRelationshipChange(intent as 'friend' | 'romantic')}
                   >
                     <Text style={{ color: relationshipIntent === intent ? colors.TEXT.WHITE : colors.TEXT.PRIMARY }}>
@@ -313,15 +295,15 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
             </View>
           </ScrollView>
 
-          <View style={[styles.modalFooter, { borderTopColor: colors.BORDER }]}>
+          <View className="modalFooter">
             <TouchableOpacity
-              style={[styles.cancelButton, { backgroundColor: colors.BACKGROUND }]}
+              className="cancelButton"
               onPress={onClose}
             >
               <Text style={{ color: colors.TEXT.SECONDARY }}>취소</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.saveButton, { backgroundColor: colors.PRIMARY }]}
+              className="saveButton"
               onPress={onSave}
             >
               <Text style={{ color: colors.TEXT.WHITE }}>
@@ -335,99 +317,3 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    maxHeight: '80%',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    overflow: 'hidden',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  modalBody: {
-    padding: 16,
-    maxHeight: 400,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    padding: 16,
-    borderTopWidth: 1,
-    gap: 12,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    marginBottom: 12,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 8,
-  },
-  optionSection: {
-    marginTop: 16,
-  },
-  genderButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  genderButton: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  intentButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  intentButton: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  levelButtons: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
-  levelButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  saveButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-});

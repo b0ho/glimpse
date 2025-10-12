@@ -2,7 +2,7 @@
  * 소셜 ID 입력 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { SOCIAL_PLATFORM_OPTIONS } from '@/constants/interest/interestTypes';
@@ -20,7 +20,6 @@ interface SocialInputFieldProps {
   onNameChange?: (name: string) => void;
   selectedGender?: 'male' | 'female' | 'other';
   onGenderSelect?: (gender: 'male' | 'female' | 'other') => void;
-  colors: any;
   t: (key: string) => string;
 }
 
@@ -37,7 +36,6 @@ export const SocialInputField: React.FC<SocialInputFieldProps> = ({
   onNameChange,
   selectedGender = 'male',
   onGenderSelect,
-  colors,
   t,
 }) => {
   const genderOptions = [
@@ -46,39 +44,22 @@ export const SocialInputField: React.FC<SocialInputFieldProps> = ({
     { id: 'other' as const, label: t('common:gender.other'), icon: 'help-outline' },
   ];
   return (
-    <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.TEXT.SECONDARY }]}>
+    <View className="container">
+      <Text className="label">
         {t('interest:platform')} *
       </Text>
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
-        style={styles.platformScroll}
+        className="platformScroll"
       >
         {SOCIAL_PLATFORM_OPTIONS.map((platform) => (
           <TouchableOpacity
             key={platform.id}
-            style={[
-              styles.platformButton,
-              {
-                backgroundColor: selectedPlatform === platform.id 
-                  ? colors.PRIMARY 
-                  : colors.SURFACE,
-                borderColor: selectedPlatform === platform.id 
-                  ? colors.PRIMARY 
-                  : colors.BORDER,
-              }
-            ]}
+            className="platformButton"
             onPress={() => onPlatformSelect(platform.id)}
           >
-            <Text style={[
-              styles.platformButtonText,
-              { 
-                color: selectedPlatform === platform.id 
-                  ? colors.TEXT.WHITE 
-                  : colors.TEXT.PRIMARY 
-              }
-            ]}>
+            <Text className="platformButtonText">
               {platform.name}
             </Text>
           </TouchableOpacity>
@@ -86,95 +67,64 @@ export const SocialInputField: React.FC<SocialInputFieldProps> = ({
       </ScrollView>
 
       <CrossPlatformInput
-        style={[
-          styles.input,
-          { 
-            backgroundColor: colors.BACKGROUND, 
-            color: colors.TEXT.PRIMARY,
-            borderColor: colors.BORDER,
-          }
-        ]}
+        className="input"
         placeholder={selectedPlatform === 'instagram' ? '@username' : 'username'}
-        placeholderTextColor={colors.TEXT.LIGHT}
+        placeholderTextColor="#D1D5DB"
         value={value}
         onChangeText={onChange}
         autoCapitalize="none"
       />
 
       <TouchableOpacity
-        style={[styles.additionalOptionsButton, { backgroundColor: colors.SURFACE }]}
+        className="additionalOptionsButton"
         onPress={onToggleAdditionalOptions}
       >
         <Icon 
           name={showAdditionalOptions ? "chevron-up" : "chevron-down"} 
           size={20} 
-          color={colors.TEXT.SECONDARY} 
+          color="#6B7280" 
         />
-        <Text style={[styles.additionalOptionsText, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="additionalOptionsText">
           {t('interest:additionalInfo')}
         </Text>
       </TouchableOpacity>
 
       {/* 이름 입력 필드 (선택) */}
-      <View style={styles.nameSection}>
-        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+      <View className="nameSection">
+        <Text className="label">
           {t('interest:labels.nameOptional')}
         </Text>
         <CrossPlatformInput
-          style={[
-            styles.input,
-            { 
-              backgroundColor: colors.BACKGROUND, 
-              color: colors.TEXT.PRIMARY,
-              borderColor: colors.BORDER,
-            }
-          ]}
+          className="input"
           placeholder={t('interest:placeholders.nameOptional')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={name}
           onChangeText={onNameChange}
           maxLength={50}
         />
-        <Text style={[styles.hint, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="hint">
           {t('interest:hints.nameDescription')}
         </Text>
       </View>
 
       {/* 성별 선택 */}
-      <View style={styles.genderSection}>
-        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
-          찾고자 하는 성별 <Text style={{ color: colors.ERROR }}>*</Text>
+      <View className="genderSection">
+        <Text className="label">
+          찾고자 하는 성별 <Text style={{ color: "#EF4444" }}>*</Text>
         </Text>
-        <View style={styles.genderOptions}>
+        <View className="genderOptions">
           {genderOptions.map((option) => (
             <TouchableOpacity
               key={option.id}
-              style={[
-                styles.genderOption,
-                {
-                  backgroundColor: selectedGender === option.id 
-                    ? colors.PRIMARY + '20' 
-                    : colors.SURFACE,
-                  borderColor: selectedGender === option.id 
-                    ? colors.PRIMARY 
-                    : colors.BORDER,
-                }
-              ]}
+              className="genderOption"
               onPress={() => onGenderSelect?.(option.id)}
             >
               <Icon 
                 name={option.icon} 
                 size={20} 
-                color={selectedGender === option.id ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                color={selectedGender === option.id ? "#3B82F6" : "#6B7280"} 
               />
-              <Text style={[
-                styles.genderLabel,
-                { 
-                  color: selectedGender === option.id 
-                    ? colors.PRIMARY 
-                    : colors.TEXT.PRIMARY 
-                }
-              ]}>
+              <Text className="genderLabel">
                 {option.label}
               </Text>
             </TouchableOpacity>
@@ -185,78 +135,3 @@ export const SocialInputField: React.FC<SocialInputFieldProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  platformScroll: {
-    marginBottom: 12,
-  },
-  platformButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-    borderWidth: 1,
-  },
-  platformButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    marginBottom: 12,
-  },
-  additionalOptionsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  additionalOptionsText: {
-    marginLeft: 8,
-    fontSize: 14,
-  },
-  additionalContainer: {
-    marginTop: 12,
-  },
-  nameSection: {
-    marginTop: 20,
-  },
-  hint: {
-    fontSize: 12,
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  genderSection: {
-    marginTop: 20,
-  },
-  genderOptions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  genderOption: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: 8,
-  },
-  genderLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-});

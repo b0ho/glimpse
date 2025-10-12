@@ -1,26 +1,71 @@
+/**
+ * 사용자 카드 컴포넌트 (NativeWind v4 버전)
+ *
+ * @module UserCard
+ * @description 주변 사용자 정보를 표시하고 상호작용할 수 있는 카드 컴포넌트
+ */
 import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { NearbyUser } from '@/types';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { shadowStyles } from '@/utils/shadowStyles';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
+import { useTheme } from '@/hooks/useTheme';
+import { cn } from '@/lib/utils';
 
+/**
+ * UserCard Props 인터페이스
+ *
+ * @interface UserCardProps
+ */
 interface UserCardProps {
+  /** 표시할 사용자 정보 */
   user: NearbyUser;
+  /** 현재 로그인한 사용자 ID */
   currentUserId: string;
+  /** 좋아요 전송 여부 */
   hasLiked: boolean;
+  /** 좋아요 버튼 클릭 콜백 함수 */
   onLike: () => void;
+  /** 메시지 버튼 클릭 콜백 함수 */
   onMessage: () => void;
 }
 
-export const UserCard= ({
+/**
+ * 사용자 카드 컴포넌트
+ *
+ * @component
+ * @param {UserCardProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 사용자 정보 카드 UI
+ *
+ * @description
+ * 주변 사용자의 정보를 카드 형태로 표시하고 좋아요/메시지 기능을 제공합니다.
+ * - 프로필 이미지, 닉네임, 나이, 거리 표시
+ * - 인증 배지 및 프리미엄 배지 표시
+ * - 공통 그룹 수 표시
+ * - 좋아요/메시지 버튼
+ * - 매칭 여부에 따른 UI 변경
+ * - 다크모드 지원
+ *
+ * @example
+ * ```tsx
+ * <UserCard
+ *   user={nearbyUser}
+ *   currentUserId="user123"
+ *   hasLiked={false}
+ *   onLike={() => sendLike(user.id)}
+ *   onMessage={() => startChat(user.id)}
+ * />
+ * ```
+ *
+ * @category Component
+ * @subcategory Nearby
+ */
+export const UserCard = ({
   user,
   currentUserId,
   hasLiked,
@@ -28,7 +73,9 @@ export const UserCard= ({
   onMessage,
 }) => {
   const { t } = useAndroidSafeTranslation();
+  const { isDarkMode } = useTheme();
   const isMatch = false; // TODO: Check if user is matched with current user
+  
   const formatDistance = (meters: number) => {
     if (meters < 1000) {
       return `${Math.round(meters)}m`;
@@ -37,60 +84,86 @@ export const UserCard= ({
   };
 
   return (
-    <View style={styles.userCard}>
+    <View className="flex-row p-3 mx-5 my-2 rounded-xl shadow-sm bg-white dark:bg-gray-900">
       <Image
         source={{ uri: user.profileImage || 'https://via.placeholder.com/150' }}
-        style={styles.profileImage}
+        className="w-20 h-20 rounded-full bg-gray-200"
       />
       
-      <View style={styles.userInfo}>
-        <View style={styles.nameRow}>
-          <Text style={styles.nickname}>{user.nickname}</Text>
+      <View className="flex-1 ml-3 justify-center">
+        <View className="flex-row items-center mb-1">
+          <Text className="text-lg font-semibold mr-1 text-gray-900 dark:text-white">
+            {user.nickname}
+          </Text>
           {user.isVerified && (
-            <Icon name="checkmark-circle" size={16} color={COLORS.PRIMARY} />
+            <Icon name="checkmark-circle" size={16} color="#3B82F6" />
           )}
           {user.isPremium && (
-            <Icon name="star" size={16} color={COLORS.premium} style={styles.premiumIcon} />
+            <Icon name="star" size={16} color="#F59E0B" style={{ marginLeft: 4 }} />
           )}
         </View>
         
-        <View style={styles.details}>
-          <Text style={styles.detailText}>{t('nearbyusers:user.age', { age: user.age || '??' })}</Text>
-          <Text style={styles.separator}>•</Text>
-          <Text style={styles.detailText}>{formatDistance(user.distance)}</Text>
+        <View className="flex-row items-center mb-2">
+          <Text className="text-sm text-gray-600 dark:text-gray-400">
+            {t('nearbyusers:user.age', { age: user.age || '??' })}
+          </Text>
+          <Text className="mx-1 text-gray-400 dark:text-gray-500">
+            •
+          </Text>
+          <Text className="text-sm text-gray-600 dark:text-gray-400">
+            {formatDistance(user.distance)}
+          </Text>
           {user.commonGroups && user.commonGroups.length > 0 && (
             <>
-              <Text style={styles.separator}>•</Text>
-              <Text style={styles.detailText}>{t('nearbyusers:user.commonGroups', { count: user.commonGroups.length })}</Text>
+              <Text className={cn(
+                "mx-1",
+                "text-gray-400 dark:text-gray-500"
+              )}>
+                •
+              </Text>
+              <Text className={cn(
+                "text-sm",
+                "text-gray-600 dark:text-gray-400"
+              )}>
+                {t('nearbyusers:user.commonGroups', { count: user.commonGroups.length })}
+              </Text>
             </>
           )}
         </View>
         
         {user.bio && (
-          <Text style={styles.bio} numberOfLines={2}>
+          <Text 
+            className="text-sm leading-5 text-gray-600 dark:text-gray-400"
+            numberOfLines={2}
+          >
             {user.bio}
           </Text>
         )}
       </View>
       
-      <View style={styles.actions}>
+      <View className="justify-center pl-3">
         {isMatch ? (
-          <TouchableOpacity style={styles.messageButton} onPress={onMessage}>
-            <Icon name="chatbubble-ellipses" size={20} color={COLORS.WHITE} />
+          <TouchableOpacity 
+            className="w-12 h-12 rounded-full bg-blue-500 justify-center items-center"
+            onPress={onMessage}
+          >
+            <Icon name="chatbubble-ellipses" size={20} color="white" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={[
-              styles.likeButton,
-              hasLiked && styles.likeButtonActive,
-            ]}
+            className={cn(
+              "w-12 h-12 rounded-full justify-center items-center",
+              hasLiked 
+                ? "bg-blue-500" 
+                : "bg-blue-100 dark:bg-blue-500/20"
+            )}
             onPress={onLike}
             disabled={hasLiked}
           >
             <Icon
               name={hasLiked ? "heart" : "heart-outline"}
               size={24}
-              color={hasLiked ? COLORS.WHITE : COLORS.PRIMARY}
+              color={hasLiked ? "white" : "#3B82F6"}
             />
           </TouchableOpacity>
         )}
@@ -98,81 +171,3 @@ export const UserCard= ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  userCard: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.WHITE,
-    padding: SPACING.md,
-    marginHorizontal: SPACING.lg,
-    marginVertical: SPACING.sm,
-    borderRadius: 12,
-    ...shadowStyles.card,
-  },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: COLORS.gray200,
-  },
-  userInfo: {
-    flex: 1,
-    marginLeft: SPACING.md,
-    justifyContent: 'center',
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.xs,
-  },
-  nickname: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
-    marginRight: SPACING.xs,
-  },
-  premiumIcon: {
-    marginLeft: SPACING.xs,
-  },
-  details: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  detailText: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
-  },
-  separator: {
-    marginHorizontal: SPACING.xs,
-    color: COLORS.TEXT.LIGHT,
-  },
-  bio: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
-    lineHeight: 20,
-  },
-  actions: {
-    justifyContent: 'center',
-    paddingLeft: SPACING.md,
-  },
-  likeButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.PRIMARY + '20',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  likeButtonActive: {
-    backgroundColor: COLORS.PRIMARY,
-  },
-  messageButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.PRIMARY,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

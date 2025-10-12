@@ -1,10 +1,18 @@
+/**
+ * 닉네임 설정 화면 (Nickname Setup Screen)
+ *
+ * @screen
+ * @description 사용자 닉네임 및 성별을 설정하는 화면
+ * - 실시간 닉네임 유효성 검증 및 중복 확인
+ * - 남성/여성 성별 선택
+ */
+
 import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -12,13 +20,46 @@ import {
 } from 'react-native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthStore } from '@/store/slices/authSlice';
-import { COLORS, SPACING, FONT_SIZES, REGEX } from '@/utils/constants';
+import { REGEX } from '@/utils/constants';
 import { Gender } from '@/types';
+import { cn } from '@/lib/utils';
+import { useTheme } from '@/store/slices/themeSlice';
 
+/**
+ * Props 인터페이스
+ *
+ * @interface NicknameSetupScreenProps
+ * @property {() => void} onNicknameSet - 닉네임 설정 완료 시 호출되는 콜백
+ */
 interface NicknameSetupScreenProps {
   onNicknameSet: () => void;
 }
 
+/**
+ * 닉네임 설정 화면 컴포넌트
+ *
+ * @component
+ * @param {NicknameSetupScreenProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 닉네임 설정 화면 UI
+ *
+ * @description
+ * SMS 인증 완료 후 사용자 프로필 기본 정보를 설정하는 화면
+ * - 닉네임 입력: 2-20자, 한글/영문/숫자 조합
+ * - 실시간 검증: 형식 검증 및 중복 확인 (디바운싱 적용)
+ * - 성별 선택: 남성/여성 필수 선택
+ * - 익명 매칭: 실명이 아닌 닉네임 기반 시스템
+ *
+ * @navigation
+ * - From: AuthScreen (SMS 인증 완료 후)
+ * - To: CompanyVerificationScreen 또는 Main
+ *
+ * @example
+ * ```tsx
+ * <NicknameSetupScreen
+ *   onNicknameSet={() => navigation.navigate('CompanyVerification')}
+ * />
+ * ```
+ */
 export const NicknameSetupScreen = ({
   onNicknameSet,
 }: NicknameSetupScreenProps) => {
@@ -28,6 +69,7 @@ export const NicknameSetupScreen = ({
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const authStore = useAuthStore();
   const { t } = useAndroidSafeTranslation();
+  const { isDarkMode } = useTheme();
 
   const validateNickname = (text: string): boolean => {
     return REGEX.NICKNAME.test(text);
@@ -108,74 +150,93 @@ export const NicknameSetupScreen = ({
   };
 
   const getInputBorderColor = (): string => {
-    if (!nickname) return COLORS.BORDER;
-    if (isAvailable === true) return COLORS.SUCCESS;
-    if (isAvailable === false) return COLORS.ERROR;
-    return COLORS.PRIMARY;
+    if (!nickname) return 'border-gray-200 dark:border-gray-600';
+    if (isAvailable === true) return 'border-green-500';
+    if (isAvailable === false) return 'border-red-500';
+    return 'border-blue-500';
   };
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container}
+      className="flex-1 bg-white dark:bg-gray-900"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={styles.content}>
-        <Text style={styles.title}>{t('auth:nicknameSetup.title')}</Text>
-        <Text style={styles.subtitle}>
+      <View className="flex-1 justify-center px-6">
+        <Text className="text-2xl font-bold text-center mb-2 text-gray-900 dark:text-white">
+          {t('auth:nicknameSetup.title')}
+        </Text>
+        <Text className="text-base text-center leading-6 mb-8 text-gray-600 dark:text-gray-300">
           {t('auth:nicknameSetup.subtitle')}
         </Text>
         
-        <View style={styles.form}>
+        <View className="mb-8">
           {/* 성별 선택 */}
-          <Text style={styles.label}>{t('auth:nicknameSetup.gender.label')}</Text>
-          <Text style={styles.description}>
+          <Text className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
+            {t('auth:nicknameSetup.gender.label')}
+          </Text>
+          <Text className="text-sm leading-5 mb-6 text-gray-600 dark:text-gray-300">
             {t('auth:nicknameSetup.gender.description')}
           </Text>
           
-          <View style={styles.genderContainer}>
+          <View className="flex-row mb-6 space-x-4">
             <TouchableOpacity
-              style={[
-                styles.genderButton,
-                gender === 'MALE' && styles.genderButtonSelected,
-              ]}
+              className={cn(
+                "flex-1 border-2 rounded-xl py-4 items-center",
+                gender === 'MALE'
+                  ? "bg-blue-50 border-blue-500"
+                  : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600"
+              )}
               onPress={() => setGender('MALE')}
             >
-              <Text style={[
-                styles.genderButtonText,
-                gender === 'MALE' && styles.genderButtonTextSelected,
-              ]}>
+              <Text className={cn(
+                "text-base font-medium",
+                gender === 'MALE'
+                  ? "text-blue-600 font-semibold"
+                  : "text-gray-600 dark:text-gray-300"
+              )}>
                 {t('common:gender.male')}
               </Text>
             </TouchableOpacity>
             
             <TouchableOpacity
-              style={[
-                styles.genderButton,
-                gender === 'FEMALE' && styles.genderButtonSelected,
-              ]}
+              className={cn(
+                "flex-1 border-2 rounded-xl py-4 items-center",
+                gender === 'FEMALE'
+                  ? "bg-blue-50 border-blue-500"
+                  : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600"
+              )}
               onPress={() => setGender('FEMALE')}
             >
-              <Text style={[
-                styles.genderButtonText,
-                gender === 'FEMALE' && styles.genderButtonTextSelected,
-              ]}>
+              <Text className={cn(
+                "text-base font-medium",
+                gender === 'FEMALE'
+                  ? "text-blue-600 font-semibold"
+                  : "text-gray-600 dark:text-gray-300"
+              )}>
                 {t('common:gender.female')}
               </Text>
             </TouchableOpacity>
           </View>
 
           {/* 닉네임 입력 */}
-          <Text style={[styles.label, { marginTop: SPACING.XL }]}>{t('auth:nicknameSetup.nickname.label')}</Text>
-          <Text style={styles.description}>
+          <Text className={cn(
+            "text-lg font-semibold mb-2 mt-8",
+            "text-gray-900 dark:text-white"
+          )}>
+            {t('auth:nicknameSetup.nickname.label')}
+          </Text>
+          <Text className="text-sm leading-5 mb-6 text-gray-600 dark:text-gray-300">
             {t('auth:nicknameSetup.nickname.description')}
           </Text>
           
           <TextInput
-            style={[
-              styles.input,
-              { borderColor: getInputBorderColor() }
-            ]}
+            className={cn(
+              "border-2 rounded-xl px-4 py-4 text-base mb-2",
+              getInputBorderColor(),
+              "bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
+            )}
             placeholder={t('auth:nicknameSetup.nickname.placeholder')}
+            placeholderTextColor="#6B7280"
             value={nickname}
             onChangeText={handleNicknameChange}
             maxLength={20}
@@ -184,15 +245,19 @@ export const NicknameSetupScreen = ({
           />
           
           {nickname && (
-            <View style={styles.validationContainer}>
+            <View className="mb-6">
               {isAvailable === null && nickname.length >= 2 && (
-                <Text style={styles.checkingText}>{t('auth:nicknameSetup.nickname.checking')}</Text>
+                <Text className="text-sm text-gray-600 dark:text-gray-300">
+                  {t('auth:nicknameSetup.nickname.checking')}
+                </Text>
               )}
               {isAvailable === true && (
-                <Text style={styles.availableText}>✓ {t('auth:nicknameSetup.nickname.available')}</Text>
+                <Text className="text-sm text-green-600 font-medium">
+                  ✓ {t('auth:nicknameSetup.nickname.available')}
+                </Text>
               )}
               {isAvailable === false && (
-                <Text style={styles.unavailableText}>
+                <Text className="text-sm text-red-500 font-medium">
                   {validateNickname(nickname) 
                     ? t('auth:nicknameSetup.errors.nicknameInUse') 
                     : t('auth:nicknameSetup.errors.invalidNicknameFormat')
@@ -203,149 +268,34 @@ export const NicknameSetupScreen = ({
           )}
           
           <TouchableOpacity
-            style={[
-              styles.button,
-              (!nickname.trim() || !gender || isLoading || isAvailable === false) && styles.buttonDisabled,
-            ]}
+            className={cn(
+              "rounded-xl py-4 items-center",
+              (!nickname.trim() || !gender || isLoading || isAvailable === false)
+                ? "bg-gray-300 dark:bg-gray-700"
+                : "bg-blue-500"
+            )}
             onPress={handleSetNickname}
             disabled={!nickname.trim() || !gender || isLoading || isAvailable === false}
           >
             {isLoading ? (
-              <View style={styles.buttonContent}>
-                <ActivityIndicator size="small" color={COLORS.TEXT.WHITE} />
-                <Text style={[styles.buttonText, { marginLeft: SPACING.SM }]}>
+              <View className="flex-row items-center justify-center">
+                <ActivityIndicator size="small" color="white" />
+                <Text className="text-white text-base font-semibold ml-2">
                   {t('auth:nicknameSetup.settingUp')}
                 </Text>
               </View>
             ) : (
-              <Text style={styles.buttonText}>{t('auth:nicknameSetup.submitButton')}</Text>
+              <Text className="text-white text-base font-semibold">
+                {t('auth:nicknameSetup.submitButton')}
+              </Text>
             )}
           </TouchableOpacity>
         </View>
         
-        <Text style={styles.notice}>
+        <Text className="text-xs text-center leading-4 text-gray-500 dark:text-gray-400">
           {t('auth:nicknameSetup.notice')}
         </Text>
       </View>
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: SPACING.LG,
-  },
-  title: {
-    fontSize: FONT_SIZES.XXL,
-    fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
-    textAlign: 'center',
-    marginBottom: SPACING.SM,
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: SPACING.XXL,
-  },
-  form: {
-    marginBottom: SPACING.XXL,
-  },
-  label: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
-    marginBottom: SPACING.SM,
-  },
-  description: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
-    lineHeight: 20,
-    marginBottom: SPACING.LG,
-  },
-  input: {
-    backgroundColor: COLORS.SURFACE,
-    borderWidth: 2,
-    borderRadius: 12,
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.MD,
-    fontSize: FONT_SIZES.MD,
-    marginBottom: SPACING.SM,
-  },
-  validationContainer: {
-    marginBottom: SPACING.LG,
-  },
-  checkingText: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
-  },
-  availableText: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.SUCCESS,
-    fontWeight: '500',
-  },
-  unavailableText: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.ERROR,
-    fontWeight: '500',
-  },
-  button: {
-    backgroundColor: COLORS.PRIMARY,
-    borderRadius: 12,
-    paddingVertical: SPACING.MD,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    backgroundColor: COLORS.TEXT.LIGHT,
-  },
-  buttonText: {
-    color: COLORS.TEXT.WHITE,
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  notice: {
-    fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
-    textAlign: 'center',
-    lineHeight: 16,
-  },
-  genderContainer: {
-    flexDirection: 'row',
-    marginBottom: SPACING.LG,
-    gap: SPACING.MD,
-  },
-  genderButton: {
-    flex: 1,
-    backgroundColor: COLORS.SURFACE,
-    borderWidth: 2,
-    borderColor: COLORS.BORDER,
-    borderRadius: 12,
-    paddingVertical: SPACING.MD,
-    alignItems: 'center',
-  },
-  genderButtonSelected: {
-    backgroundColor: COLORS.PRIMARY + '10',
-    borderColor: COLORS.PRIMARY,
-  },
-  genderButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '500',
-    color: COLORS.TEXT.SECONDARY,
-  },
-  genderButtonTextSelected: {
-    color: COLORS.PRIMARY,
-    fontWeight: '600',
-  },
-});

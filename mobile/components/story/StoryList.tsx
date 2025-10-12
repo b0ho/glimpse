@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   Image,
   FlatList,
@@ -11,9 +10,9 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { StoryUser as StoryUserType } from '@/utils/storyData';
 import { useTheme } from '@/hooks/useTheme';
+import { cn } from '@/utils/cn';
 
 /**
  * StoryList 컴포넌트 Props
@@ -43,7 +42,7 @@ interface StoryListProps {
  * @returns {JSX.Element} 스토리 리스트 UI
  * @description 사용자 스토리를 가로 스크롤 리스트로 표시하고 미확인 스토리 강조
  */
-export const StoryList= ({
+export const StoryList = ({
   stories,
   onStoryPress,
   onAddStoryPress,
@@ -51,7 +50,7 @@ export const StoryList= ({
   isLoading = false,
   onRefresh,
   refreshing = false,
-}) => {
+}: StoryListProps) => {
   const { t } = useAndroidSafeTranslation();
   const { colors } = useTheme();
   
@@ -79,23 +78,26 @@ export const StoryList= ({
     
     return (
       <TouchableOpacity
-        style={styles.storyItem}
+        className="items-center mr-4"
         onPress={() => onStoryPress(actualIndex)}
       >
-        <View style={styles.storyImageContainer}>
+        <View className="mb-2 relative">
           {item.hasUnviewedStories ? (
             <LinearGradient
               colors={[colors.PRIMARY, colors.SECONDARY || colors.PRIMARY]}
-              style={styles.storyRing}
+              className="w-18 h-18 rounded-full p-1"
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <View style={[styles.storyRingInner, { backgroundColor: colors.SURFACE }]}>
+              <View className="flex-1 rounded-full p-1 bg-white dark:bg-gray-900">
                 {latestStory?.imageUri ? (
-                  <Image source={{ uri: latestStory.imageUri }} style={styles.profileImage} />
+                  <Image 
+                    source={{ uri: latestStory.imageUri }} 
+                    className="w-full h-full rounded-full"
+                  />
                 ) : (
-                  <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.PRIMARY }]}>
-                    <Text style={[styles.profileImageText, { color: colors.TEXT.WHITE }]}>
+                  <View className="w-full h-full rounded-full justify-center items-center bg-blue-500">
+                    <Text className="text-white text-lg font-bold">
                       {item.nickname?.charAt(0)?.toUpperCase() || '?'}
                     </Text>
                   </View>
@@ -103,12 +105,15 @@ export const StoryList= ({
               </View>
             </LinearGradient>
           ) : (
-            <View style={[styles.viewedStoryContainer, { borderColor: colors.BORDER }]}>
+            <View className="w-18 h-18 rounded-full p-1 border-2 border-gray-300 dark:border-gray-600 relative">
               {latestStory?.imageUri ? (
-                <Image source={{ uri: latestStory.imageUri }} style={styles.profileImage} />
+                <Image 
+                  source={{ uri: latestStory.imageUri }} 
+                  className="w-full h-full rounded-full"
+                />
               ) : (
-                <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.PRIMARY }]}>
-                  <Text style={[styles.profileImageText, { color: colors.TEXT.WHITE }]}>
+                <View className="w-full h-full rounded-full justify-center items-center bg-blue-500">
+                  <Text className="text-white text-lg font-bold">
                     {item.nickname?.charAt(0)?.toUpperCase() || '?'}
                   </Text>
                 </View>
@@ -116,7 +121,10 @@ export const StoryList= ({
             </View>
           )}
         </View>
-        <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]} numberOfLines={1}>
+        <Text 
+          className="text-gray-900 dark:text-white text-xs text-center w-18" 
+          numberOfLines={1}
+        >
           {item.nickname || '익명'}
         </Text>
       </TouchableOpacity>
@@ -132,25 +140,31 @@ export const StoryList= ({
       const latestStory = myStories.stories[0];
       
       return (
-        <TouchableOpacity style={styles.storyItem} onPress={() => onStoryPress(0)}>
-          <View style={styles.storyImageContainer}>
-            <View style={[styles.viewedStoryContainer, { borderColor: colors.BORDER }]}>
+        <TouchableOpacity className="items-center mr-4" onPress={() => onStoryPress(0)}>
+          <View className="mb-2 relative">
+            <View className="w-18 h-18 rounded-full p-1 border-2 border-gray-300 dark:border-gray-600 relative">
               {latestStory?.imageUri ? (
-                <Image source={{ uri: latestStory.imageUri }} style={styles.profileImage} />
+                <Image 
+                  source={{ uri: latestStory.imageUri }} 
+                  className="w-full h-full rounded-full"
+                />
               ) : (
-                <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.PRIMARY }]}>
-                  <Text style={[styles.profileImageText, { color: colors.TEXT.WHITE }]}>
+                <View className="w-full h-full rounded-full justify-center items-center bg-blue-500">
+                  <Text className="text-white text-lg font-bold">
                     {myStories.nickname?.charAt(0)?.toUpperCase() || '?'}
                   </Text>
                 </View>
               )}
               {/* 내 스토리에 + 아이콘 추가 */}
-              <View style={[styles.addIconOverlay, { backgroundColor: colors.SURFACE }]}>
+              <View className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-900 rounded-full p-1">
                 <Ionicons name="add-circle" size={20} color={colors.PRIMARY} />
               </View>
             </View>
           </View>
-          <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]} numberOfLines={1}>
+          <Text 
+            className="text-gray-900 dark:text-white text-xs text-center w-18" 
+            numberOfLines={1}
+          >
             내 스토리
           </Text>
         </TouchableOpacity>
@@ -159,27 +173,29 @@ export const StoryList= ({
 
     // Add story button
     return (
-      <TouchableOpacity style={styles.storyItem} onPress={onAddStoryPress}>
-        <View style={styles.addStoryContainer}>
-          <View style={[styles.addStoryButton, { backgroundColor: colors.TEXT.SECONDARY }]}>
-            <Ionicons name="add" size={28} color={colors.TEXT.WHITE} />
+      <TouchableOpacity className="items-center mr-4" onPress={onAddStoryPress}>
+        <View className="w-18 h-18 rounded-full p-1">
+          <View className="flex-1 rounded-full justify-center items-center bg-gray-600 dark:bg-gray-700">
+            <Ionicons name="add" size={28} color="#FFFFFF" />
           </View>
         </View>
-        <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>{t('home:story.addStory')}</Text>
+        <Text className="text-gray-900 dark:text-white text-xs text-center w-18 mt-2">
+          스토리 추가
+        </Text>
       </TouchableOpacity>
     );
   };
 
   if (isLoading && safeStories.length === 0) {
     return (
-      <View style={styles.loadingContainer}>
+      <View className="h-30 justify-center items-center">
         <ActivityIndicator size="small" color={colors.PRIMARY} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+    <View className="py-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -187,92 +203,10 @@ export const StoryList= ({
         renderItem={renderStoryItem}
         keyExtractor={(item) => item.userId}
         ListHeaderComponent={renderMyStory}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
         onRefresh={onRefresh}
         refreshing={refreshing}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: SPACING.MD,
-    borderBottomWidth: 1,
-  },
-  loadingContainer: {
-    height: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  listContent: {
-    paddingHorizontal: SPACING.MD,
-  },
-  storyItem: {
-    alignItems: 'center',
-    marginRight: SPACING.MD,
-  },
-  storyImageContainer: {
-    marginBottom: SPACING.SM,
-    position: 'relative',
-  },
-  storyRing: {
-    width: 74,
-    height: 74,
-    borderRadius: 37,
-    padding: 3,
-  },
-  storyRingInner: {
-    flex: 1,
-    borderRadius: 34,
-    padding: 3,
-  },
-  viewedStoryContainer: {
-    width: 74,
-    height: 74,
-    borderRadius: 37,
-    padding: 3,
-    borderWidth: 2,
-    position: 'relative',
-  },
-  addStoryContainer: {
-    width: 74,
-    height: 74,
-    borderRadius: 37,
-    padding: 3,
-  },
-  addStoryButton: {
-    flex: 1,
-    borderRadius: 34,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addIconOverlay: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    borderRadius: 12,
-    padding: 2,
-  },
-  profileImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 31,
-  },
-  profileImagePlaceholder: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 31,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileImageText: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-  },
-  nickname: {
-    fontSize: FONT_SIZES.XS,
-    width: 74,
-    textAlign: 'center',
-  },
-});

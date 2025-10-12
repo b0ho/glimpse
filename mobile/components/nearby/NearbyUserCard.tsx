@@ -5,7 +5,6 @@ import React, { useRef, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   Animated,
   PanResponder,
@@ -112,43 +111,43 @@ export const NearbyUserCard: React.FC<NearbyUserCardProps> = ({
     >
       <LinearGradient
         colors={['transparent', 'rgba(0,0,0,0.7)']}
-        style={styles.gradient}
+        className="gradient"
       >
-        <View style={styles.userInfo}>
-          <View style={styles.header}>
-            <Text style={[styles.nickname, { color: colors.TEXT.WHITE }]}>
+        <View className="userInfo">
+          <View className="header">
+            <Text className="nickname">
               {user.nickname}
             </Text>
-            <View style={[styles.distanceBadge, { backgroundColor: colors.PRIMARY }]}>
+            <View className="distanceBadge">
               <Icon name="location-outline" size={14} color={colors.TEXT.WHITE} />
-              <Text style={[styles.distance, { color: colors.TEXT.WHITE }]}>
+              <Text className="distance">
                 {formatDistance(user.distance)}
               </Text>
             </View>
           </View>
 
           {user.persona && (
-            <View style={styles.personaInfo}>
-              <Text style={[styles.bio, { color: colors.TEXT.WHITE }]}>
+            <View className="personaInfo">
+              <Text className="bio">
                 {user.persona.bio}
               </Text>
-              <View style={styles.tags}>
+              <View className="tags">
                 {user.persona.interests?.map((interest, index) => (
-                  <View key={index} style={[styles.tag, { backgroundColor: colors.PRIMARY + '40' }]}>
-                    <Text style={[styles.tagText, { color: colors.TEXT.WHITE }]}>
+                  <View key={index} className="tag">
+                    <Text className="tagText">
                       {interest}
                     </Text>
                   </View>
                 ))}
               </View>
-              <View style={styles.metadata}>
+              <View className="metadata">
                 {user.persona.ageRange && (
-                  <Text style={[styles.metaText, { color: colors.TEXT.LIGHT }]}>
+                  <Text className="metaText">
                     {user.persona.ageRange}
                   </Text>
                 )}
                 {user.persona.occupation && (
-                  <Text style={[styles.metaText, { color: colors.TEXT.LIGHT }]}>
+                  <Text className="metaText">
                     {user.persona.occupation}
                   </Text>
                 )}
@@ -157,34 +156,30 @@ export const NearbyUserCard: React.FC<NearbyUserCardProps> = ({
           )}
 
           {user.mutualGroups && user.mutualGroups.length > 0 && (
-            <View style={styles.mutualGroups}>
+            <View className="mutualGroups">
               <Icon name="people-outline" size={14} color={colors.TEXT.LIGHT} />
-              <Text style={[styles.mutualGroupsText, { color: colors.TEXT.LIGHT }]}>
+              <Text className="mutualGroupsText">
                 {t('location:mutualGroups', { count: user.mutualGroups.length })}
               </Text>
             </View>
           )}
         </View>
 
-        <View style={styles.actions}>
+        <View className="actions">
           <TouchableOpacity
-            style={[styles.actionButton, styles.hideButton]}
+            className="actionButton hideButton"
             onPress={onHide}
           >
             <Icon name="close" size={28} color="#FF4458" />
           </TouchableOpacity>
 
           {isLiked ? (
-            <View style={[styles.actionButton, styles.likedButton]}>
+            <View className="actionButton likedButton">
               <Icon name="heart" size={28} color="#4FC3F7" />
             </View>
           ) : (
             <TouchableOpacity
-              style={[
-                styles.actionButton,
-                styles.likeButton,
-                !canLike && styles.disabledButton
-              ]}
+              className="actionButton likeButton"
               onPress={canLike ? onLike : undefined}
               disabled={!canLike}
             >
@@ -193,7 +188,7 @@ export const NearbyUserCard: React.FC<NearbyUserCardProps> = ({
           )}
 
           <TouchableOpacity
-            style={[styles.actionButton, styles.chatButton]}
+            className="actionButton chatButton"
             onPress={onChat}
           >
             <Icon name="chatbubble-outline" size={28} color="#9C27B0" />
@@ -204,107 +199,3 @@ export const NearbyUserCard: React.FC<NearbyUserCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    flex: 1,
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginHorizontal: 16,
-    marginVertical: 8,
-    ...shadowStyles.card,
-  },
-  gradient: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    padding: 20,
-  },
-  userInfo: {
-    marginBottom: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  nickname: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  distanceBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  distance: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  personaInfo: {
-    marginTop: 12,
-  },
-  bio: {
-    fontSize: 16,
-    lineHeight: 22,
-    marginBottom: 12,
-  },
-  tags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 8,
-  },
-  tag: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 16,
-  },
-  tagText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  metadata: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  metaText: {
-    fontSize: 14,
-  },
-  mutualGroups: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  mutualGroupsText: {
-    fontSize: 12,
-    marginLeft: 4,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.2)',
-  },
-  actionButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...shadowStyles.button,
-  },
-  hideButton: {},
-  likeButton: {},
-  likedButton: {
-    backgroundColor: 'rgba(79, 195, 247, 0.2)',
-  },
-  chatButton: {},
-  disabledButton: {
-    opacity: 0.5,
-  },
-});

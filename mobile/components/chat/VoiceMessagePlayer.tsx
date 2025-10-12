@@ -3,14 +3,13 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Slider from '@react-native-community/slider';
 import { audioService } from '../../services/audioService';
-import { COLORS, FONTS, SIZES } from '../../constants/theme';
 import { AVPlaybackStatus } from 'expo-audio';
+import { cn } from '@/utils/cn';
 
 /**
  * VoiceMessagePlayer 컴포넌트 Props
@@ -32,11 +31,11 @@ interface VoiceMessagePlayerProps {
  * @returns {JSX.Element} 음성 메시지 플레이어 UI
  * @description 음성 메시지를 재생하고 진행 상황을 표시하는 플레이어 컴포넌트
  */
-export const VoiceMessagePlayer= ({
+export const VoiceMessagePlayer = ({
   uri,
   duration,
   isOwnMessage = false,
-}) => {
+}: VoiceMessagePlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPosition, setCurrentPosition] = useState(0);
@@ -114,88 +113,49 @@ export const VoiceMessagePlayer= ({
   };
 
   return (
-    <View style={[
-      styles.container,
-      isOwnMessage ? styles.ownMessage : styles.otherMessage,
-    ]}>
+    <View className={cn(
+      "flex-row items-center p-4 rounded-xl min-w-64 max-w-4/5",
+      isOwnMessage 
+        ? "bg-blue-500 self-end" 
+        : "bg-gray-200 dark:bg-gray-700 self-start"
+    )}>
       <TouchableOpacity
         onPress={handlePlayPause}
-        style={styles.playButton}
+        className="w-9 h-9 rounded-full bg-black/10 justify-center items-center mr-2"
         disabled={isLoading}
       >
         {isLoading ? (
-          <ActivityIndicator size="small" color={isOwnMessage ? COLORS.white : COLORS.primary} />
+          <ActivityIndicator 
+            size="small" 
+            color={isOwnMessage ? "#FFFFFF" : "#3B82F6"} 
+          />
         ) : (
           <Ionicons
             name={isPlaying ? 'pause' : 'play'}
             size={20}
-            color={isOwnMessage ? COLORS.white : COLORS.primary}
+            color={isOwnMessage ? "#FFFFFF" : "#3B82F6"}
           />
         )}
       </TouchableOpacity>
 
-      <View style={styles.waveformContainer}>
+      <View className="flex-1">
         <Slider
-          style={styles.slider}
+          style={{ height: 40 }}
           minimumValue={0}
           maximumValue={playbackDuration}
           value={currentPosition}
           onSlidingComplete={handleSliderValueChange}
-          minimumTrackTintColor={isOwnMessage ? COLORS.white : COLORS.primary}
-          maximumTrackTintColor={isOwnMessage ? 'rgba(255,255,255,0.3)' : COLORS.lightGray}
-          thumbTintColor={isOwnMessage ? COLORS.white : COLORS.primary}
+          minimumTrackTintColor={isOwnMessage ? "#FFFFFF" : "#3B82F6"}
+          maximumTrackTintColor={isOwnMessage ? "rgba(255,255,255,0.3)" : "#D1D5DB"}
+          thumbTintColor={isOwnMessage ? "#FFFFFF" : "#3B82F6"}
         />
-        <Text style={[
-          styles.duration,
-          isOwnMessage ? styles.ownMessageText : styles.otherMessageText,
-        ]}>
+        <Text className={cn(
+          "text-xs -mt-2",
+          isOwnMessage ? "text-white" : "text-gray-600 dark:text-gray-300"
+        )}>
           {formatTime(currentPosition)} / {formatTime(playbackDuration)}
         </Text>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SIZES.padding,
-    borderRadius: SIZES.radius,
-    minWidth: 250,
-    maxWidth: '80%',
-  },
-  ownMessage: {
-    backgroundColor: COLORS.primary,
-    alignSelf: 'flex-end',
-  },
-  otherMessage: {
-    backgroundColor: COLORS.lightGray,
-    alignSelf: 'flex-start',
-  },
-  playButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SIZES.base,
-  },
-  waveformContainer: {
-    flex: 1,
-  },
-  slider: {
-    height: 40,
-  },
-  duration: {
-    ...FONTS.body5,
-    marginTop: -8,
-  },
-  ownMessageText: {
-    color: COLORS.white,
-  },
-  otherMessageText: {
-    color: COLORS.gray,
-  },
-});

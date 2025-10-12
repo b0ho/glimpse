@@ -2,12 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Animated,
 } from 'react-native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useTheme } from '@/hooks/useTheme';
-import { FONTS, SIZES } from '../../constants/theme';
 
 /**
  * TypingIndicator 컴포넌트 Props
@@ -95,66 +93,55 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
 
   return (
     <Animated.View
-      style={[
-        styles.container,
-        {
-          opacity: fadeAnim,
-        },
-      ]}
+      className="px-4 py-2"
+      style={{
+        opacity: fadeAnim,
+      }}
     >
-      <View style={styles.bubbleContainer}>
-        <View style={[styles.textContainer, { backgroundColor: colors.SURFACE }]}>
-          <Text style={[styles.typingText, { color: colors.TEXT.SECONDARY }]}>
+      <View className="flex-row items-center self-start">
+        <View className="flex-row items-center px-4 py-2 rounded-2xl bg-gray-100 dark:bg-gray-800">
+          <Text className="text-sm mr-2 text-gray-600 dark:text-gray-400">
             {userName ? t('notifications:notifications.typing', { name: userName }) : t('notification:notifications.typingDefault')}
           </Text>
-          <View style={styles.dotsContainer}>
+          <View className="flex-row items-center">
             <Animated.View
-              style={[
-                styles.dot,
-                { backgroundColor: colors.TEXT.SECONDARY },
-                {
-                  transform: [
-                    {
-                      translateY: dot1.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, -5],
-                      }),
-                    },
-                  ],
-                },
-              ]}
+              className="w-1 h-1 rounded-full mx-0.5 bg-gray-600 dark:bg-gray-400"
+              style={{
+                transform: [
+                  {
+                    translateY: dot1.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -5],
+                    }),
+                  },
+                ],
+              }}
             />
             <Animated.View
-              style={[
-                styles.dot,
-                { backgroundColor: colors.TEXT.SECONDARY },
-                {
-                  transform: [
-                    {
-                      translateY: dot2.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, -5],
-                      }),
-                    },
-                  ],
-                },
-              ]}
+              className="w-1 h-1 rounded-full mx-0.5 bg-gray-600 dark:bg-gray-400"
+              style={{
+                transform: [
+                  {
+                    translateY: dot2.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -5],
+                    }),
+                  },
+                ],
+              }}
             />
             <Animated.View
-              style={[
-                styles.dot,
-                { backgroundColor: colors.TEXT.SECONDARY },
-                {
-                  transform: [
-                    {
-                      translateY: dot3.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, -5],
-                      }),
-                    },
-                  ],
-                },
-              ]}
+              className="w-1 h-1 rounded-full mx-0.5 bg-gray-600 dark:bg-gray-400"
+              style={{
+                transform: [
+                  {
+                    translateY: dot3.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -5],
+                    }),
+                  },
+                ],
+              }}
             />
           </View>
         </View>
@@ -162,36 +149,3 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
     </Animated.View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: SIZES.padding,
-    paddingVertical: SIZES.base,
-  },
-  bubbleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-  },
-  textContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SIZES.padding,
-    paddingVertical: SIZES.base,
-    borderRadius: SIZES.radius,
-  },
-  typingText: {
-    ...FONTS.body4,
-    marginRight: SIZES.base,
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    marginHorizontal: 2,
-  },
-});

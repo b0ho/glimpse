@@ -1,25 +1,26 @@
 /**
- * 공통 로딩 스크린 컴포넌트
+ * 공통 로딩 스크린 컴포넌트 - NativeWind v4
  */
 import React from 'react';
-import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../../hooks/useTheme';
 
 interface LoadingScreenProps {
   message?: string;
-  colors: any;
 }
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   message,
-  colors,
 }) => {
+  const { colors } = useTheme();
+  
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      <View style={styles.content}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
+      <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color={colors.PRIMARY} />
         {message && (
-          <Text style={[styles.message, { color: colors.TEXT.SECONDARY }]}>
+          <Text className="mt-4 text-sm text-gray-600 dark:text-gray-400">
             {message}
           </Text>
         )}
@@ -27,18 +28,3 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  message: {
-    marginTop: 16,
-    fontSize: 14,
-  },
-});

@@ -2,7 +2,7 @@
  * 정보 필드 섹션 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity} from 'react-native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { InfoItem, InfoFieldKey } from '@/types/myInfo';
 import { InfoItemCard } from './InfoItemCard';
@@ -30,14 +30,14 @@ export const InfoFieldSection: React.FC<InfoFieldSectionProps> = ({
   const fieldColor = getFieldColor(fieldKey);
 
   return (
-    <View style={styles.section}>
-      <View style={styles.sectionHeader}>
+    <View className="section">
+      <View className="sectionHeader">
         <Icon name={icon} size={20} color={fieldColor} />
-        <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+        <Text className="sectionTitle">
           {label}
         </Text>
         <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: colors.PRIMARY }]}
+          className="addButton"
           onPress={onAddItem}
         >
           <Icon name="add" size={16} color={colors.TEXT.WHITE} />
@@ -45,11 +45,11 @@ export const InfoFieldSection: React.FC<InfoFieldSectionProps> = ({
       </View>
 
       {items.length === 0 ? (
-        <Text style={[styles.emptyText, { color: colors.TEXT.LIGHT }]}>
+        <Text className="emptyText">
           등록된 {label} 정보가 없습니다
         </Text>
       ) : (
-        <View style={styles.itemsList}>
+        <View className="itemsList">
           {items.map((item, index) => (
             <InfoItemCard
               key={index}
@@ -66,34 +66,3 @@ export const InfoFieldSection: React.FC<InfoFieldSectionProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  section: {
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-    flex: 1,
-  },
-  addButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    fontSize: 14,
-    textAlign: 'center',
-    paddingVertical: 16,
-  },
-  itemsList: {
-    gap: 8,
-  },
-});

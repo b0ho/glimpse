@@ -1,16 +1,15 @@
 /**
- * NearbyGroupItem 컴포넌트 (StyleSheet 버전)
+ * NearbyGroupItem 컴포넌트 (NativeWind v4 버전)
  *
- * @module NearbyGroupItem
- * @description 근처 그룹 목록에서 개별 그룹을 표시하는 카드 컴포넌트 (StyleSheet 스타일링 적용)
+ * @module NearbyGroupItem-NW
+ * @description 근처 그룹 목록에서 개별 그룹을 표시하는 카드 컴포넌트 (NativeWind v4 스타일링 적용)
  */
 
 import React from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
-  StyleSheet,
+  TouchableOpacity
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { LocationGroup } from '@/types/nearbyGroups';
@@ -46,11 +45,11 @@ interface NearbyGroupItemProps {
  * @returns {JSX.Element} 그룹 카드 UI
  *
  * @description
- * 근처 그룹 화면에서 개별 그룹 정보를 카드 형태로 표시합니다. (StyleSheet 버전)
+ * 근처 그룹 화면에서 개별 그룹 정보를 카드 형태로 표시합니다. (NativeWind v4 버전)
  * - 그룹 이름, 설명, 가입 상태 표시
  * - 거리, 멤버 수, 만료 시간 표시
  * - 가입/탈퇴 액션 버튼 제공
- * - 동적 테마 색상 적용
+ * - 다크모드 자동 지원 (dark: prefix 사용)
  *
  * @example
  * ```tsx
@@ -101,39 +100,39 @@ export const NearbyGroupItem: React.FC<NearbyGroupItemProps> = ({
 
   return (
     <TouchableOpacity
-      style={[styles.groupCard, { backgroundColor: colors.SURFACE }]}
+      className="groupCard"
       onPress={() => onPress(group)}
       activeOpacity={0.7}
     >
-      <View style={styles.groupHeader}>
-        <View style={styles.groupInfo}>
-          <Text style={[styles.groupName, { color: colors.TEXT.PRIMARY }]}>
+      <View className="groupHeader">
+        <View className="groupInfo">
+          <Text className="groupName">
             {group.name}
           </Text>
-          <Text style={[styles.groupDescription, { color: colors.TEXT.SECONDARY }]}>
+          <Text className="groupDescription">
             {group.description}
           </Text>
         </View>
         {group.isJoined && (
-          <View style={[styles.joinedBadge, { backgroundColor: colors.SUCCESS + '20' }]}>
-            <Text style={[styles.joinedText, { color: colors.SUCCESS }]}>
+          <View className="joinedBadge">
+            <Text className="joinedText">
               {t('nearbygroups:joined')}
             </Text>
           </View>
         )}
       </View>
 
-      <View style={styles.groupStats}>
-        <View style={styles.statItem}>
+      <View className="groupStats">
+        <View className="statItem">
           <Icon name="location-outline" size={16} color={colors.TEXT.SECONDARY} />
-          <Text style={[styles.statText, { color: colors.TEXT.SECONDARY }]}>
+          <Text className="statText">
             {formatDistance(group.distance || 0)}
           </Text>
         </View>
         
-        <View style={styles.statItem}>
+        <View className="statItem">
           <Icon name="people-outline" size={16} color={colors.TEXT.SECONDARY} />
-          <Text style={[styles.statText, { color: colors.TEXT.SECONDARY }]}>
+          <Text className="statText">
             {t('nearbygroups:memberCount', { 
               count: group.activeMembers,
               total: group.memberCount 
@@ -142,31 +141,31 @@ export const NearbyGroupItem: React.FC<NearbyGroupItemProps> = ({
         </View>
         
         {group.expiresAt && (
-          <View style={styles.statItem}>
+          <View className="statItem">
             <Icon name="time-outline" size={16} color={colors.TEXT.SECONDARY} />
-            <Text style={[styles.statText, { color: colors.TEXT.SECONDARY }]}>
+            <Text className="statText">
               {getRemainingTime()}
             </Text>
           </View>
         )}
       </View>
 
-      <View style={styles.groupActions}>
+      <View className="groupActions">
         {group.isJoined ? (
           <TouchableOpacity
-            style={[styles.actionButton, styles.leaveButton]}
+            className="actionButton leaveButton"
             onPress={() => onLeave(group)}
           >
-            <Text style={[styles.actionButtonText, { color: colors.ERROR }]}>
+            <Text className="actionButtonText">
               {t('nearbygroups:leave')}
             </Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={[styles.actionButton, styles.joinButton, { backgroundColor: colors.PRIMARY }]}
+            className="actionButton joinButton"
             onPress={() => onJoin(group)}
           >
-            <Text style={[styles.actionButtonText, { color: colors.WHITE }]}>
+            <Text className="actionButtonText">
               {t('nearbygroups:join')}
             </Text>
           </TouchableOpacity>
@@ -176,76 +175,3 @@ export const NearbyGroupItem: React.FC<NearbyGroupItemProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  groupCard: {
-    padding: SPACING.MD,
-    marginHorizontal: SPACING.MD,
-    marginVertical: SPACING.SM,
-    borderRadius: 12,
-    ...shadowStyles.medium,
-  },
-  groupHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.SM,
-  },
-  groupInfo: {
-    flex: 1,
-  },
-  groupName: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  groupDescription: {
-    fontSize: FONT_SIZES.SM,
-  },
-  joinedBadge: {
-    paddingHorizontal: SPACING.SM,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginLeft: SPACING.SM,
-  },
-  joinedText: {
-    fontSize: FONT_SIZES.XS,
-    fontWeight: '600',
-  },
-  groupStats: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: SPACING.MD,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: SPACING.MD,
-    marginVertical: 4,
-  },
-  statText: {
-    fontSize: FONT_SIZES.SM,
-    marginLeft: 4,
-  },
-  groupActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  actionButton: {
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    borderRadius: 8,
-  },
-  joinButton: {
-    minWidth: 80,
-    alignItems: 'center',
-  },
-  leaveButton: {
-    borderWidth: 1,
-    borderColor: '#FF4444',
-  },
-  actionButtonText: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-});

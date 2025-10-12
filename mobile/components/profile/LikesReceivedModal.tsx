@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Modal,
   TouchableOpacity,
   FlatList,
@@ -60,7 +59,7 @@ export const LikesReceivedModal = ({
     
     return (
       <TouchableOpacity 
-        style={[styles.likeItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}
+        className="likeItem"
         onPress={() => onLikePress(item)}
       >
         <Image
@@ -68,20 +67,20 @@ export const LikesReceivedModal = ({
             ? { uri: item.fromUser.profileImage }
             : require('@/assets/default-profile.png')
           }
-          style={styles.profileImage}
+          className="profileImage"
         />
         
-        <View style={styles.likeInfo}>
-          <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>
+        <View className="likeInfo">
+          <Text className="nickname">
             {item.fromUser?.nickname || '익명'}
           </Text>
-          <Text style={[styles.groupName, { color: colors.TEXT.SECONDARY }]}>
+          <Text className="groupName">
             {item.group?.name || '그룹 정보 없음'}
           </Text>
-          <Text style={[styles.timeAgo, { color: colors.TEXT.LIGHT }]}>{timeAgo}</Text>
+          <Text className="timeAgo">{timeAgo}</Text>
         </View>
         
-        <View style={styles.likeType}>
+        <View className="likeType">
           {item.isSuper ? (
             <MaterialCommunityIcons name="star" size={24} color="#FFD700" />
           ) : (
@@ -120,22 +119,22 @@ export const LikesReceivedModal = ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={[styles.modalOverlay, { backgroundColor: colors.OVERLAY || 'rgba(0,0,0,0.5)' }]}>
-        <View style={[styles.modalContent, { backgroundColor: colors.BACKGROUND }]}>
-          <View style={[styles.header, { borderBottomColor: colors.BORDER }]}>
-            <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>받은 좋아요</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+      <View className="modalOverlay">
+        <View className="modalContent">
+          <View className="header">
+            <Text className="title">받은 좋아요</Text>
+            <TouchableOpacity onPress={onClose} className="closeButton">
               <MaterialCommunityIcons name="close" size={24} color={colors.TEXT.PRIMARY} />
             </TouchableOpacity>
           </View>
           
           {loading ? (
-            <View style={styles.loadingContainer}>
+            <View className="loadingContainer">
               <ActivityIndicator size="large" color={colors.PRIMARY} />
             </View>
           ) : likesReceived && likesReceived.length > 0 ? (
             <>
-              <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="subtitle">
                 {likesReceived.length}명이 당신에게 관심을 보였습니다
               </Text>
               
@@ -148,10 +147,10 @@ export const LikesReceivedModal = ({
               />
             </>
           ) : (
-            <View style={styles.emptyContainer}>
+            <View className="emptyContainer">
               <MaterialCommunityIcons name="heart-off-outline" size={64} color={colors.TEXT.LIGHT} />
-              <Text style={[styles.emptyText, { color: colors.TEXT.PRIMARY }]}>아직 받은 좋아요가 없습니다</Text>
-              <Text style={[styles.emptySubtext, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="emptyText">아직 받은 좋아요가 없습니다</Text>
+              <Text className="emptySubtext">
                 그룹에 참여하고 프로필을 완성하면{'\n'}더 많은 관심을 받을 수 있어요!
               </Text>
             </View>
@@ -162,107 +161,3 @@ export const LikesReceivedModal = ({
   );
 };
 
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: COLORS.BACKGROUND,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: '80%',
-    paddingBottom: SPACING.LG,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: SPACING.LG,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
-  },
-  title: {
-    fontSize: FONT_SIZES.XL,
-    fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
-  },
-  closeButton: {
-    padding: SPACING.XS,
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
-    textAlign: 'center',
-    marginVertical: SPACING.MD,
-  },
-  listContainer: {
-    paddingHorizontal: SPACING.LG,
-  },
-  likeItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.SURFACE,
-    borderRadius: 12,
-    padding: SPACING.MD,
-    marginBottom: SPACING.SM,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: SPACING.MD,
-  },
-  likeInfo: {
-    flex: 1,
-  },
-  nickname: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
-    marginBottom: 2,
-  },
-  groupName: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
-    marginBottom: 2,
-  },
-  timeAgo: {
-    fontSize: FONT_SIZES.XS,
-    color: COLORS.TEXT.LIGHT,
-  },
-  likeType: {
-    marginLeft: SPACING.SM,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.XXL,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.XXL,
-  },
-  emptyText: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
-    marginTop: SPACING.MD,
-    marginBottom: SPACING.SM,
-  },
-  emptySubtext: {
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.SECONDARY,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-});

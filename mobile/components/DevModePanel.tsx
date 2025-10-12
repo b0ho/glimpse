@@ -9,7 +9,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   ScrollView,
   Alert,
 } from 'react-native';
@@ -77,45 +76,41 @@ export const DevModePanel = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="container">
       <TouchableOpacity
-        style={[styles.toggleButton, { backgroundColor: colors.WARNING }]}
+        className="toggleButton"
         onPress={() => setIsExpanded(!isExpanded)}
       >
-        <Text style={[styles.toggleText, { color: colors.TEXT.WHITE }]}>
+        <Text className="toggleText">
           🛠️ Dev Mode ({currentAccount?.nickname})
         </Text>
       </TouchableOpacity>
 
       {isExpanded && (
-        <View style={[styles.panel, { backgroundColor: colors.SURFACE }]}>
-          <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('devModePanel', { ns: 'dev' })}</Text>
+        <View className="panel">
+          <Text className="title">{t('devModePanel', { ns: 'dev' })}</Text>
           
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('currentAccount', { ns: 'dev' })}</Text>
-            <Text style={[styles.info, { color: colors.TEXT.SECONDARY }]}>{t('type', { ns: 'dev' })}: {currentAccountType}</Text>
-            <Text style={[styles.info, { color: colors.TEXT.SECONDARY }]}>{t('email', { ns: 'dev' })}: {currentAccount?.email}</Text>
-            <Text style={[styles.info, { color: colors.TEXT.SECONDARY }]}>{t('premium', { ns: 'dev' })}: {currentAccount?.isPremium ? 'Yes' : 'No'}</Text>
-            <Text style={[styles.info, { color: colors.TEXT.SECONDARY }]}>{t('admin', { ns: 'dev' })}: {currentAccount?.isAdmin ? 'Yes' : 'No'}</Text>
+          <View className="section">
+            <Text className="sectionTitle">{t('currentAccount', { ns: 'dev' })}</Text>
+            <Text className="info">{t('type', { ns: 'dev' })}: {currentAccountType}</Text>
+            <Text className="info">{t('email', { ns: 'dev' })}: {currentAccount?.email}</Text>
+            <Text className="info">{t('premium', { ns: 'dev' })}: {currentAccount?.isPremium ? 'Yes' : 'No'}</Text>
+            <Text className="info">{t('admin', { ns: 'dev' })}: {currentAccount?.isAdmin ? 'Yes' : 'No'}</Text>
           </View>
 
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('accountSwitch', { ns: 'dev' })}</Text>
+          <View className="section">
+            <Text className="sectionTitle">{t('accountSwitch', { ns: 'dev' })}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {Object.entries(SUPER_ACCOUNTS).map(([type, account]) => (
                 <TouchableOpacity
                   key={type}
-                  style={[
-                    styles.accountButton,
-                    { backgroundColor: colors.BACKGROUND },
-                    currentAccountType === type && { backgroundColor: colors.PRIMARY },
-                  ]}
+                  className="accountButton"
                   onPress={() => handleAccountSwitch(type)}
                 >
-                  <Text style={[styles.accountButtonText, { color: colors.TEXT.PRIMARY }]}>
+                  <Text className="accountButtonText">
                     {account.nickname}
                   </Text>
-                  <Text style={[styles.accountButtonSubtext, { color: colors.TEXT.SECONDARY }]}>
+                  <Text className="accountButtonSubtext">
                     {type}
                   </Text>
                 </TouchableOpacity>
@@ -123,27 +118,27 @@ export const DevModePanel = () => {
             </ScrollView>
           </View>
 
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>{t('debugInfo', { ns: 'dev' })}</Text>
-            <Text style={[styles.info, { color: colors.TEXT.SECONDARY }]}>{t('environment', { ns: 'dev' })}: development</Text>
-            <Text style={[styles.info, { color: colors.TEXT.SECONDARY }]}>API: http://localhost:3001/api/v1</Text>
-            <Text style={[styles.info, { color: colors.TEXT.SECONDARY }]}>{t('mockApi', { ns: 'dev' })}: {DEV_CONFIG.mockApiCalls ? 'ON' : 'OFF'}</Text>
+          <View className="section">
+            <Text className="sectionTitle">{t('debugInfo', { ns: 'dev' })}</Text>
+            <Text className="info">{t('environment', { ns: 'dev' })}: development</Text>
+            <Text className="info">API: http://localhost:3001/api/v1</Text>
+            <Text className="info">{t('mockApi', { ns: 'dev' })}: {DEV_CONFIG.mockApiCalls ? 'ON' : 'OFF'}</Text>
           </View>
 
-          <View style={styles.section}>
+          <View className="section">
             <TouchableOpacity
-              style={[styles.resetButton, { backgroundColor: colors.WARNING }]}
+              className="resetButton"
               onPress={handleResetOnboarding}
             >
-              <Text style={[styles.resetButtonText, { color: colors.TEXT.WHITE }]}>🔄 온보딩 초기화</Text>
+              <Text className="resetButtonText">🔄 온보딩 초기화</Text>
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={[styles.closeButton, { backgroundColor: colors.ERROR }]}
+            className="closeButton"
             onPress={() => setIsExpanded(false)}
           >
-            <Text style={[styles.closeButtonText, { color: colors.TEXT.WHITE }]}>{t('actions:actions.close', { ns: 'common' })}</Text>
+            <Text className="closeButtonText">{t('actions:actions.close', { ns: 'common' })}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -151,91 +146,3 @@ export const DevModePanel = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    bottom: 100,
-    right: 20,
-    zIndex: 9999,
-  },
-  toggleButton: {
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  toggleText: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: 'bold',
-  },
-  panel: {
-    position: 'absolute',
-    bottom: 50,
-    right: 0,
-    width: 300,
-    borderRadius: 10,
-    padding: SPACING.MD,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  title: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-    marginBottom: SPACING.MD,
-  },
-  section: {
-    marginBottom: SPACING.MD,
-  },
-  sectionTitle: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    marginBottom: SPACING.SM,
-  },
-  info: {
-    fontSize: FONT_SIZES.SM,
-    marginBottom: 2,
-  },
-  accountButton: {
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.SM,
-    borderRadius: 8,
-    marginRight: SPACING.SM,
-    alignItems: 'center',
-  },
-  accountButtonActive: {},
-  accountButtonText: {
-    fontSize: FONT_SIZES.SM,
-    fontWeight: '600',
-  },
-  accountButtonSubtext: {
-    fontSize: FONT_SIZES.XS,
-    marginTop: 2,
-  },
-  closeButton: {
-    paddingVertical: SPACING.SM,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: SPACING.SM,
-  },
-  closeButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-  },
-  resetButton: {
-    paddingVertical: SPACING.SM,
-    paddingHorizontal: SPACING.MD,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  resetButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-  },
-});

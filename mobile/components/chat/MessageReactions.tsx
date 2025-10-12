@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Modal,
   FlatList,
   Dimensions,
@@ -97,18 +96,12 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
   const renderReaction = (reaction: Reaction) => (
     <TouchableOpacity
       key={reaction.emoji}
-      style={[
-        styles.reactionBubble,
-        reaction.hasReacted && styles.reactionBubbleActive,
-      ]}
+      className="reactionBubble"
       onPress={() => handleReactionPress(reaction)}
     >
-      <Text style={styles.reactionEmoji}>{reaction.emoji}</Text>
+      <Text className="reactionEmoji">{reaction.emoji}</Text>
       {reaction.count > 1 && (
-        <Text style={[
-          styles.reactionCount,
-          reaction.hasReacted && styles.reactionCountActive,
-        ]}>
+        <Text className="reactionCount">
           {reaction.count}
         </Text>
       )}
@@ -117,14 +110,14 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
 
   return (
     <>
-      <View style={styles.container}>
+      <View className="container">
         {reactions.map(renderReaction)}
         
         <TouchableOpacity
-          style={styles.addReactionButton}
+          className="addReactionButton"
           onPress={() => setShowAllReactions(true)}
         >
-          <Text style={styles.addReactionText}>+</Text>
+          <Text className="addReactionText">+</Text>
         </TouchableOpacity>
       </View>
 
@@ -136,24 +129,24 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
         onRequestClose={() => setShowAllReactions(false)}
       >
         <TouchableOpacity
-          style={styles.modalOverlay}
+          className="modalOverlay"
           activeOpacity={1}
           onPress={() => setShowAllReactions(false)}
         >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('common:reactions.addReaction')}</Text>
+          <View className="modalContent">
+            <View className="modalHeader">
+              <Text className="modalTitle">{t('common:reactions.addReaction')}</Text>
             </View>
 
             {/* 빠른 선택 */}
-            <View style={styles.quickReactionsContainer}>
+            <View className="quickReactionsContainer">
               {QUICK_REACTIONS.map((emoji) => (
                 <TouchableOpacity
                   key={emoji}
-                  style={styles.quickReactionButton}
+                  className="quickReactionButton"
                   onPress={() => handleEmojiSelect(emoji)}
                 >
-                  <Text style={styles.quickReactionEmoji}>{emoji}</Text>
+                  <Text className="quickReactionEmoji">{emoji}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -163,16 +156,16 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
               data={ALL_REACTIONS}
               keyExtractor={(item) => item.category}
               renderItem={({ item }) => (
-                <View style={styles.categoryContainer}>
-                  <Text style={styles.categoryTitle}>{t(`reactions.categories.${item.category}`)}</Text>
-                  <View style={styles.emojiGrid}>
+                <View className="categoryContainer">
+                  <Text className="categoryTitle">{t(`reactions.categories.${item.category}`)}</Text>
+                  <View className="emojiGrid">
                     {item.emojis.map((emoji) => (
                       <TouchableOpacity
                         key={emoji}
-                        style={styles.emojiButton}
+                        className="emojiButton"
                         onPress={() => handleEmojiSelect(emoji)}
                       >
-                        <Text style={styles.emoji}>{emoji}</Text>
+                        <Text className="emoji">{emoji}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -188,109 +181,3 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
 
 const { width } = Dimensions.get('window');
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: SIZES.base / 2,
-    marginHorizontal: -2,
-  },
-  reactionBubble: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.lightGray,
-    paddingHorizontal: SIZES.base,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginHorizontal: 2,
-    marginVertical: 2,
-  },
-  reactionBubbleActive: {
-    backgroundColor: COLORS.primaryLight,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
-  },
-  reactionEmoji: {
-    fontSize: 14,
-  },
-  reactionCount: {
-    ...FONTS.body5,
-    color: COLORS.gray,
-    marginLeft: 4,
-  },
-  reactionCountActive: {
-    color: COLORS.primary,
-    fontWeight: '600',
-  },
-  addReactionButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: COLORS.lightGray,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 2,
-    marginVertical: 2,
-  },
-  addReactionText: {
-    fontSize: 16,
-    color: COLORS.gray,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: SIZES.radius * 2,
-    borderTopRightRadius: SIZES.radius * 2,
-    maxHeight: '70%',
-    paddingBottom: 20,
-  },
-  modalHeader: {
-    alignItems: 'center',
-    paddingVertical: SIZES.padding,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.lightGray,
-  },
-  modalTitle: {
-    ...FONTS.h3,
-    color: COLORS.black,
-  },
-  quickReactionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: SIZES.padding,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.lightGray,
-  },
-  quickReactionButton: {
-    padding: SIZES.base,
-  },
-  quickReactionEmoji: {
-    fontSize: 28,
-  },
-  categoryContainer: {
-    paddingHorizontal: SIZES.padding,
-    paddingVertical: SIZES.padding,
-  },
-  categoryTitle: {
-    ...FONTS.body3,
-    color: COLORS.gray,
-    marginBottom: SIZES.base,
-  },
-  emojiGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  emojiButton: {
-    width: (width - SIZES.padding * 2) / 8,
-    aspectRatio: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emoji: {
-    fontSize: 24,
-  },
-});

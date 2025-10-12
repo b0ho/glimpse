@@ -2,7 +2,7 @@
  * 그룹 리스트 풋터 컴포넌트 (무한 스크롤)
  */
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator} from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 
 interface GroupsFooterProps {
@@ -22,9 +22,9 @@ export const GroupsFooter: React.FC<GroupsFooterProps> = ({
 
   if (isLoadingMore) {
     return (
-      <View style={styles.loadingFooter}>
+      <View className="loadingFooter">
         <ActivityIndicator size="small" color={colors.PRIMARY} />
-        <Text style={[styles.loadingText, { color: colors.TEXT.PRIMARY }]}>
+        <Text className="loadingText">
           {t('group:loading.moreGroups')}
         </Text>
       </View>
@@ -33,11 +33,11 @@ export const GroupsFooter: React.FC<GroupsFooterProps> = ({
   
   if (!hasMoreData && groupsLength > 0) {
     return (
-      <View style={styles.endReachedFooter}>
-        <Text style={[styles.endReachedText, { color: colors.TEXT.SECONDARY }]}>
+      <View className="endReachedFooter">
+        <Text className="endReachedText">
           {t('group:loading.endReached')}
         </Text>
-        <Text style={[styles.endReachedSubtext, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="endReachedSubtext">
           {t('group:loading.noMoreGroups')}
         </Text>
       </View>
@@ -47,24 +47,3 @@ export const GroupsFooter: React.FC<GroupsFooterProps> = ({
   return null;
 };
 
-const styles = StyleSheet.create({
-  loadingFooter: {
-    paddingVertical: 20,
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 14,
-  },
-  endReachedFooter: {
-    paddingVertical: 30,
-    alignItems: 'center',
-  },
-  endReachedText: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  endReachedSubtext: {
-    fontSize: 12,
-  },
-});

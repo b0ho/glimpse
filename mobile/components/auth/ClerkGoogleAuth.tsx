@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useOAuth, useAuth } from '@clerk/clerk-expo';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
@@ -140,14 +140,14 @@ export const ClerkGoogleAuth: React.FC<ClerkGoogleAuthProps> = ({ onSuccess }) =
 
   return (
     <TouchableOpacity
-      style={[styles.button, { backgroundColor: colors.PRIMARY }]}
+      className="button"
       onPress={handleGoogleOAuth}
       disabled={isLoading}
     >
       {isLoading ? (
         <>
           <ActivityIndicator size="small" color="#FFFFFF" />
-          <Text style={[styles.buttonText, { marginLeft: SPACING.MD }]}>
+          <Text className="buttonText">
             로그인 중...
           </Text>
         </>
@@ -158,7 +158,7 @@ export const ClerkGoogleAuth: React.FC<ClerkGoogleAuthProps> = ({ onSuccess }) =
             size={24} 
             color="#FFFFFF" 
           />
-          <Text style={[styles.buttonText, { marginLeft: SPACING.MD }]}>
+          <Text className="buttonText">
             Google로 시작하기
           </Text>
         </>
@@ -167,19 +167,3 @@ export const ClerkGoogleAuth: React.FC<ClerkGoogleAuthProps> = ({ onSuccess }) =
   );
 };
 
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.MD,
-    paddingHorizontal: SPACING.LG,
-    borderRadius: 12,
-    marginVertical: SPACING.SM,
-  },
-  buttonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-});

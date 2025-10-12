@@ -4,7 +4,6 @@ import {
   ImageProps,
   View,
   ActivityIndicator,
-  StyleSheet,
   Dimensions,
 } from 'react-native';
 
@@ -135,10 +134,10 @@ export const OptimizedImage= ({
   const renderImage = () => {
     if (error) {
       return (
-        <View style={[styles.placeholder, style]}>
+        <View className="placeholder">
           <Image
             source={require('../../assets/images/image-placeholder.png')}
-            style={styles.placeholderImage}
+            className="placeholderImage"
             resizeMode="contain"
           />
         </View>
@@ -151,7 +150,7 @@ export const OptimizedImage= ({
         {loading && enableBlur && blurUri && (
           <Image
             source={{ uri: blurUri }}
-            style={[styles.absolute, style]}
+            className="absolute"
             blurRadius={20}
           />
         )}
@@ -167,7 +166,7 @@ export const OptimizedImage= ({
         
         {/* Loading indicator */}
         {loading && showLoading && (
-          <View style={[styles.absolute, styles.loadingContainer]}>
+          <View className="absolute loadingContainer">
             <ActivityIndicator size="small" color="#fff" />
           </View>
         )}
@@ -176,7 +175,7 @@ export const OptimizedImage= ({
   };
 
   return (
-    <View style={[{ width, height }, style]}>
+    <View className="">
       {renderImage()}
     </View>
   );
@@ -231,27 +230,3 @@ export const getOptimalImageUrl = (
   return sortedVariants[sortedVariants.length - 1].url;
 };
 
-const styles = StyleSheet.create({
-  absolute: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-  },
-  placeholder: {
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderImage: {
-    width: 50,
-    height: 50,
-    opacity: 0.5,
-  },
-});

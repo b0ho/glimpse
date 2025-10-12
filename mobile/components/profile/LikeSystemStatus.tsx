@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -72,64 +71,55 @@ export const LikeSystemStatus: React.FC<LikeSystemStatusProps> = ({ isPremiumUse
   };
 
   return (
-    <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+    <View className="section">
+      <Text className="sectionTitle">
         {t('profile:likeSystem.title')}
       </Text>
       
-      <View style={[styles.likeSystemCard, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
-        <View style={[styles.likeSystemItem, { borderBottomColor: colors.BORDER }]}>
-          <Text style={[styles.likeSystemLabel, { color: colors.TEXT.PRIMARY }]}>
+      <View className="likeSystemCard">
+        <View className="likeSystemItem">
+          <Text className="likeSystemLabel">
             {t('profile:likeSystem.dailyFreeLikes')}
           </Text>
-          <Text style={[styles.likeSystemValue, { color: colors.TEXT.PRIMARY }]}>
+          <Text className="likeSystemValue">
             {likeStore.getRemainingFreeLikes()} / 1
           </Text>
         </View>
         
-        <View style={[styles.likeSystemItem, { borderBottomColor: colors.BORDER }]}>
-          <Text style={[styles.likeSystemLabel, { color: colors.TEXT.PRIMARY }]}>
+        <View className="likeSystemItem">
+          <Text className="likeSystemLabel">
             {t('profile:likeSystem.premiumLikes')}
           </Text>
-          <Text style={[styles.likeSystemValue, { color: colors.TEXT.PRIMARY }]}>
+          <Text className="likeSystemValue">
             {t('profile:likeSystem.premiumLikesCount', { count: likeStore.premiumLikesRemaining })}
           </Text>
         </View>
         
-        <View style={[styles.likeSystemItem, { borderBottomColor: colors.BORDER }]}>
-          <Text style={[styles.likeSystemLabel, { color: colors.TEXT.PRIMARY }]}>
+        <View className="likeSystemItem">
+          <Text className="likeSystemLabel">
             {t('profile:likeSystem.premiumStatus')}
           </Text>
-          <Text style={[
-            styles.likeSystemValue,
-            { color: colors.TEXT.PRIMARY },
-            isPremiumUser ? { color: colors.SUCCESS } : { color: colors.TEXT.SECONDARY }
-          ]}>
+          <Text className="likeSystemValue">
             {isPremiumUser ? t('profile:likeSystem.active') : t('profile:likeSystem.inactive')}
           </Text>
         </View>
         
         {isPremiumUser && (
           <>
-            <View style={[styles.likeSystemItem, { borderBottomColor: colors.BORDER }]}>
-              <Text style={[styles.likeSystemLabel, { color: colors.TEXT.PRIMARY }]}>
+            <View className="likeSystemItem">
+              <Text className="likeSystemLabel">
                 ⭐ {t('profile:likeSystem.superLikes')}
               </Text>
-              <Text style={[styles.likeSystemValue, { color: colors.WARNING, fontWeight: '600' }]}>
+              <Text className="likeSystemValue">
                 {likeStore.getRemainingSuperLikes()} / {likeStore.dailySuperLikesLimit}
               </Text>
             </View>
             
-            <View style={[styles.likeSystemItem, { borderBottomColor: colors.BORDER }]}>
-              <Text style={[styles.likeSystemLabel, { color: colors.TEXT.PRIMARY }]}>
+            <View className="likeSystemItem">
+              <Text className="likeSystemLabel">
                 ↩️ {t('profile:likeSystem.rewind')}
               </Text>
-              <Text style={[
-                styles.likeSystemValue,
-                likeStore.canRewindLike() 
-                  ? { color: colors.SUCCESS, fontWeight: '600' }
-                  : { color: colors.TEXT.LIGHT, fontWeight: '500' }
-              ]}>
+              <Text className="likeSystemValue">
                 {likeStore.canRewindLike() ? t('profile:likeSystem.available') : t('profile:likeSystem.unavailable')}
               </Text>
             </View>
@@ -139,10 +129,10 @@ export const LikeSystemStatus: React.FC<LikeSystemStatusProps> = ({ isPremiumUse
       
       {!isPremiumUser && (
         <TouchableOpacity 
-          style={[styles.upgradeButton, { backgroundColor: colors.PRIMARY }]}
+          className="upgradeButton"
           onPress={() => navigation.navigate('Premium' as never)}
         >
-          <Text style={[styles.upgradeButtonText, { color: colors.TEXT.WHITE }]}>
+          <Text className="upgradeButtonText">
             {t('profile:premium.upgrade')}
           </Text>
         </TouchableOpacity>
@@ -150,10 +140,10 @@ export const LikeSystemStatus: React.FC<LikeSystemStatusProps> = ({ isPremiumUse
       
       {isPremiumUser && likeStore.canRewindLike() && (
         <TouchableOpacity 
-          style={[styles.rewindButton, { backgroundColor: colors.WARNING }]}
+          className="rewindButton"
           onPress={handleRewindLike}
         >
-          <Text style={[styles.rewindButtonText, { color: colors.TEXT.WHITE }]}>
+          <Text className="rewindButtonText">
             {t('profile:likeSystem.rewind')}
           </Text>
         </TouchableOpacity>
@@ -162,53 +152,3 @@ export const LikeSystemStatus: React.FC<LikeSystemStatusProps> = ({ isPremiumUse
   );
 };
 
-const styles = StyleSheet.create({
-  section: {
-    marginHorizontal: SPACING.MD,
-    marginTop: SPACING.MD,
-    marginBottom: SPACING.MD,
-  },
-  sectionTitle: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-    marginBottom: SPACING.MD,
-  },
-  likeSystemCard: {
-    borderRadius: 12,
-    ...shadowStyles.card,
-  },
-  likeSystemItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.MD,
-    borderBottomWidth: 1,
-  },
-  likeSystemLabel: {
-    fontSize: FONT_SIZES.MD,
-  },
-  likeSystemValue: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '500',
-  },
-  upgradeButton: {
-    marginTop: SPACING.MD,
-    padding: SPACING.MD,
-    borderRadius: 20,
-    alignItems: 'center',
-  },
-  upgradeButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-  },
-  rewindButton: {
-    marginTop: SPACING.MD,
-    padding: SPACING.MD,
-    borderRadius: 20,
-    alignItems: 'center',
-  },
-  rewindButtonText: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-  },
-});

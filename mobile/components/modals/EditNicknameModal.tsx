@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Modal,
   TextInput,
   TouchableOpacity,
@@ -13,11 +12,11 @@ import {
 } from 'react-native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { COLORS, SPACING, TYPOGRAPHY } from '@/utils/constants';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { authService } from '@/services/api/authService';
 import apiClient from '@/services/api/config';
+import { cn } from '@/lib/utils';
 
 /**
  * EditNicknameModal 컴포넌트 Props
@@ -33,7 +32,7 @@ interface EditNicknameModalProps {
 }
 
 /**
- * 닉네임 수정 모달 컴포넌트 - 사용자 닉네임 변경
+ * 닉네임 수정 모달 컴포넌트 - 사용자 닉네임 변경 (NativeWind v4)
  * @component
  * @param {EditNicknameModalProps} props - 컴포넌트 속성
  * @returns {JSX.Element} 닉네임 수정 모달 UI
@@ -43,7 +42,7 @@ export const EditNicknameModal = ({
   visible,
   onClose,
   onSuccess,
-}) => {
+}: EditNicknameModalProps) => {
   const { t } = useAndroidSafeTranslation('common');
   const { user, updateUserProfile } = useAuthStore();
   const { colors } = useTheme();
@@ -158,34 +157,42 @@ export const EditNicknameModal = ({
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+        className="flex-1 justify-end"
       >
         <TouchableOpacity
-          style={[styles.backdrop, { backgroundColor: colors.OVERLAY || 'rgba(0, 0, 0, 0.5)' }]}
+          className="absolute inset-0 bg-black/50 dark:bg-black/60"
           activeOpacity={1}
           onPress={onClose}
         />
         
-        <View style={[styles.modalContent, { backgroundColor: colors.BACKGROUND }]}>
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>{t('common:modals.editNickname.title')}</Text>
+        <View className="bg-white dark:bg-gray-900 rounded-t-[20px] pt-4 pb-6 ios:pb-8">
+          {/* Header */}
+          <View className="flex-row items-center justify-between px-6 mb-6">
+            <Text className="text-xl font-bold text-gray-900 dark:text-white">
+              {t('common:modals.editNickname.title')}
+            </Text>
             <TouchableOpacity
               onPress={onClose}
-              style={styles.closeButton}
+              className="w-8 h-8 items-center justify-center"
             >
               <Ionicons name="close" size={24} color={colors.TEXT.PRIMARY} />
             </TouchableOpacity>
           </View>
           
-          <View style={styles.body}>
-            <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>{t('common:modals.editNickname.newNickname')}</Text>
-            <View style={styles.inputContainer}>
+          {/* Body */}
+          <View className="px-6 mb-6">
+            <Text className="text-base font-semibold text-gray-900 dark:text-white mb-3">
+              {t('common:modals.editNickname.newNickname')}
+            </Text>
+            
+            {/* Input Container */}
+            <View className="relative mb-4">
               <TextInput
-                style={[styles.input, { 
-                  backgroundColor: colors.SURFACE, 
-                  color: colors.TEXT.PRIMARY,
-                  borderColor: colors.BORDER
-                }]}
+                className={cn(
+                  "text-base border border-gray-200 dark:border-gray-700 rounded-xl",
+                  "px-4 py-4 pr-16 bg-gray-50 dark:bg-gray-800",
+                  "text-gray-900 dark:text-white"
+                )}
                 value={nickname}
                 onChangeText={handleTextChange}
                 placeholder={t('common:modals.editNickname.placeholder')}
@@ -194,22 +201,26 @@ export const EditNicknameModal = ({
                 maxLength={40}
                 editable={!isLoading}
               />
-              <Text style={[
-                styles.charCount,
-                { color: colors.TEXT.SECONDARY },
-                charCount > 35 && { color: colors.WARNING }
-              ]}>
+              
+              <Text className={cn(
+                "absolute right-4 top-1/2 -translate-y-1/2 text-xs",
+                charCount > 35 
+                  ? "text-orange-500 dark:text-orange-400" 
+                  : "text-gray-500 dark:text-gray-400"
+              )}>
                 {charCount}/40
               </Text>
             </View>
             
-            <View style={[styles.infoContainer, { backgroundColor: colors.SURFACE }]}>
+            {/* Info Container */}
+            <View className="flex-row bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
               <Ionicons 
                 name="information-circle" 
                 size={16} 
-                color={colors.TEXT.SECONDARY} 
+                color={colors.TEXT.SECONDARY}
+                style={{ marginTop: 2 }}
               />
-              <Text style={[styles.infoText, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="text-sm text-gray-600 dark:text-gray-400 ml-2 flex-1 leading-5">
                 {t('common:modals.editNickname.info.line1')}{`\n`}
                 {t('common:modals.editNickname.info.line2')}{`\n`}
                 {t('common:modals.editNickname.info.line3')}
@@ -217,28 +228,36 @@ export const EditNicknameModal = ({
             </View>
           </View>
           
-          <View style={styles.footer}>
+          {/* Footer */}
+          <View className="flex-row px-6 gap-3">
+            {/* Cancel Button */}
             <TouchableOpacity
-              style={[styles.cancelButton, { backgroundColor: colors.TEXT.LIGHT }]}
+              className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-xl py-4 items-center"
               onPress={onClose}
               disabled={isLoading}
             >
-              <Text style={[styles.cancelButtonText, { color: colors.TEXT.PRIMARY }]}>{t('common:actions.cancel')}</Text>
+              <Text className="text-base font-semibold text-gray-900 dark:text-white">
+                {t('common:actions.cancel')}
+              </Text>
             </TouchableOpacity>
             
+            {/* Save Button */}
             <TouchableOpacity
-              style={[
-                styles.saveButton,
-                { backgroundColor: colors.PRIMARY },
-                (isLoading || nickname.trim().length === 0) && [styles.saveButtonDisabled, { backgroundColor: colors.TEXT.LIGHT }]
-              ]}
+              className={cn(
+                "flex-1 rounded-xl py-4 items-center",
+                (isLoading || nickname.trim().length === 0)
+                  ? "bg-gray-300 dark:bg-gray-600"
+                  : "bg-teal-400 dark:bg-teal-500"
+              )}
               onPress={handleSave}
               disabled={isLoading || nickname.trim().length === 0}
             >
               {isLoading ? (
-                <ActivityIndicator size="small" color={colors.TEXT.WHITE} />
+                <ActivityIndicator size="small" color="white" />
               ) : (
-                <Text style={[styles.saveButtonText, { color: colors.TEXT.WHITE }]}>{t('common:actions.save')}</Text>
+                <Text className="text-base font-semibold text-white">
+                  {t('common:actions.save')}
+                </Text>
               )}
             </TouchableOpacity>
           </View>
@@ -247,102 +266,3 @@ export const EditNicknameModal = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  modalContent: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: SPACING.md,
-    paddingBottom: Platform.OS === 'ios' ? SPACING.xl : SPACING.lg,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.lg,
-  },
-  title: {
-    ...TYPOGRAPHY.h2,
-  },
-  closeButton: {
-    padding: SPACING.xs,
-  },
-  body: {
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.lg,
-  },
-  label: {
-    ...TYPOGRAPHY.body,
-    fontWeight: '600',
-    marginBottom: SPACING.sm,
-  },
-  inputContainer: {
-    position: 'relative',
-    marginBottom: SPACING.md,
-  },
-  input: {
-    ...TYPOGRAPHY.body,
-    borderRadius: 12,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
-    paddingRight: 60,
-    borderWidth: 1,
-  },
-  charCount: {
-    ...TYPOGRAPHY.caption,
-    position: 'absolute',
-    right: SPACING.md,
-    top: '50%',
-    transform: [{ translateY: -8 }],
-  },
-  charCountWarning: {
-    // Applied dynamically in component
-  },
-  infoContainer: {
-    flexDirection: 'row',
-    borderRadius: 8,
-    padding: SPACING.sm,
-    gap: SPACING.xs,
-  },
-  infoText: {
-    ...TYPOGRAPHY.caption,
-    flex: 1,
-    lineHeight: 18,
-  },
-  footer: {
-    flexDirection: 'row',
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.sm,
-  },
-  cancelButton: {
-    flex: 1,
-    borderRadius: 12,
-    paddingVertical: SPACING.md,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    ...TYPOGRAPHY.body,
-    fontWeight: '600',
-  },
-  saveButton: {
-    flex: 1,
-    borderRadius: 12,
-    paddingVertical: SPACING.md,
-    alignItems: 'center',
-  },
-  saveButtonDisabled: {
-    // Applied dynamically in component
-  },
-  saveButtonText: {
-    ...TYPOGRAPHY.body,
-    fontWeight: '600',
-  },
-});

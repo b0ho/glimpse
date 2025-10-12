@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Modal,
   TouchableOpacity,
   FlatList,
@@ -116,35 +115,35 @@ export const FriendRequestsModal = ({
     const timeAgo = getTimeAgo(new Date(item.createdAt));
     
     return (
-      <View style={[styles.requestItem, { backgroundColor: colors.SURFACE, shadowColor: colors.SHADOW }]}>
+      <View className="requestItem">
         <Image
           source={item.fromUser?.profileImage 
             ? { uri: item.fromUser.profileImage }
             : require('@/assets/default-profile.png')
           }
-          style={styles.profileImage}
+          className="profileImage"
         />
         
-        <View style={styles.requestInfo}>
-          <Text style={[styles.nickname, { color: colors.TEXT.PRIMARY }]}>
+        <View className="requestInfo">
+          <Text className="nickname">
             {item.fromUser?.nickname || '익명'}
           </Text>
-          <Text style={[styles.message, { color: colors.TEXT.SECONDARY }]}>
+          <Text className="message">
             {item.message || '친구가 되고 싶어요!'}
           </Text>
-          <Text style={[styles.timeAgo, { color: colors.TEXT.LIGHT }]}>{timeAgo}</Text>
+          <Text className="timeAgo">{timeAgo}</Text>
         </View>
         
-        <View style={styles.actionButtons}>
+        <View className="actionButtons">
           <TouchableOpacity 
-            style={[styles.actionButton, styles.acceptButton, { backgroundColor: colors.SUCCESS }]}
+            className="actionButton acceptButton"
             onPress={() => handleAccept(item.id)}
           >
             <MaterialCommunityIcons name="check" size={20} color={colors.TEXT.WHITE} />
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.actionButton, styles.rejectButton, { backgroundColor: colors.ERROR }]}
+            className="actionButton rejectButton"
             onPress={() => handleReject(item.id)}
           >
             <MaterialCommunityIcons name="close" size={20} color={colors.TEXT.WHITE} />
@@ -182,22 +181,22 @@ export const FriendRequestsModal = ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={[styles.modalOverlay, { backgroundColor: colors.OVERLAY || 'rgba(0,0,0,0.5)' }]}>
-        <View style={[styles.modalContent, { backgroundColor: colors.BACKGROUND }]}>
-          <View style={[styles.header, { borderBottomColor: colors.BORDER }]}>
-            <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>친구 요청</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+      <View className="modalOverlay">
+        <View className="modalContent">
+          <View className="header">
+            <Text className="title">친구 요청</Text>
+            <TouchableOpacity onPress={onClose} className="closeButton">
               <MaterialCommunityIcons name="close" size={24} color={colors.TEXT.PRIMARY} />
             </TouchableOpacity>
           </View>
           
           {loading ? (
-            <View style={styles.loadingContainer}>
+            <View className="loadingContainer">
               <ActivityIndicator size="large" color={colors.PRIMARY} />
             </View>
           ) : friendRequests && friendRequests.length > 0 ? (
             <>
-              <Text style={[styles.subtitle, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="subtitle">
                 {friendRequests.length}개의 새로운 친구 요청
               </Text>
               
@@ -210,10 +209,10 @@ export const FriendRequestsModal = ({
               />
             </>
           ) : (
-            <View style={styles.emptyContainer}>
+            <View className="emptyContainer">
               <MaterialCommunityIcons name="account-question-outline" size={64} color={colors.TEXT.LIGHT} />
-              <Text style={[styles.emptyText, { color: colors.TEXT.PRIMARY }]}>친구 요청이 없습니다</Text>
-              <Text style={[styles.emptySubtext, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="emptyText">친구 요청이 없습니다</Text>
+              <Text className="emptySubtext">
                 커뮤니티 모드에서 새로운 친구를 만나보세요!
               </Text>
             </View>
@@ -224,109 +223,3 @@ export const FriendRequestsModal = ({
   );
 };
 
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: '80%',
-    paddingBottom: SPACING.LG,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: SPACING.LG,
-    borderBottomWidth: 1,
-  },
-  title: {
-    fontSize: FONT_SIZES.XL,
-    fontWeight: 'bold',
-  },
-  closeButton: {
-    padding: SPACING.XS,
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.MD,
-    textAlign: 'center',
-    marginVertical: SPACING.MD,
-  },
-  listContainer: {
-    paddingHorizontal: SPACING.LG,
-  },
-  requestItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    padding: SPACING.MD,
-    marginBottom: SPACING.SM,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: SPACING.MD,
-  },
-  requestInfo: {
-    flex: 1,
-  },
-  nickname: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  message: {
-    fontSize: FONT_SIZES.SM,
-    marginBottom: 2,
-  },
-  timeAgo: {
-    fontSize: FONT_SIZES.XS,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    gap: SPACING.XS,
-  },
-  actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  acceptButton: {
-    // Applied dynamically in component
-  },
-  rejectButton: {
-    // Applied dynamically in component
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.XXL,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.XXL,
-  },
-  emptyText: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: '600',
-    marginTop: SPACING.MD,
-    marginBottom: SPACING.SM,
-  },
-  emptySubtext: {
-    fontSize: FONT_SIZES.MD,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-});

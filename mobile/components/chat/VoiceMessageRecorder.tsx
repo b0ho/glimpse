@@ -3,14 +3,15 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Animated,
   Alert,
+  Platform,
 } from 'react-native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { audioService } from '../../services/audioService';
-import { COLORS, FONTS, SIZES } from '../../constants/theme';
+import { useTheme } from '@/hooks/useTheme';
+import { cn } from '@/lib/utils';
 
 /**
  * VoiceMessageRecorder 컴포넌트 Props
@@ -35,6 +36,7 @@ export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
   onCancel,
 }) => {
   const { t } = useAndroidSafeTranslation('chat');
+  const { colors } = useTheme();
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -183,136 +185,78 @@ export const VoiceMessageRecorder: React.FC<VoiceMessageRecorderProps> = ({
 
   if (!isRecording) {
     return (
-      <TouchableOpacity style={styles.recordButton} onPress={startRecording}>
-        <Ionicons name="mic" size={24} color={COLORS.white} />
+      <TouchableOpacity 
+        className="w-12 h-12 rounded-full bg-blue-500 justify-center items-center"
+        onPress={startRecording}
+      >
+        <Ionicons name="mic" size={24} color="#FFFFFF" />
       </TouchableOpacity>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.recordingContainer}>
-        <TouchableOpacity onPress={cancelRecording} style={styles.cancelButton}>
-          <Ionicons name="close" size={24} color={COLORS.error} />
+    <View className="p-4">
+      <View className="flex-row items-center justify-between mb-4">
+        <TouchableOpacity 
+          onPress={cancelRecording} 
+          className="p-2"
+        >
+          <Ionicons name="close" size={24} color={colors.ERROR} />
         </TouchableOpacity>
 
-        <View style={styles.recordingInfo}>
+        <View className="flex-row items-center flex-1 justify-center">
           <Animated.View
-            style={[
-              styles.recordingIndicator,
-              {
-                transform: [{ scale: animatedValue }],
-              },
-            ]}
+            className="w-3 h-3 rounded-full bg-red-500 mr-2"
+            style={{
+              transform: [{ scale: animatedValue }],
+            }}
           />
-          <Text style={styles.duration}>{formatDuration(recordingDuration)}</Text>
+          <Text className="text-base text-gray-900 dark:text-white">
+            {formatDuration(recordingDuration)}
+          </Text>
         </View>
 
-        <View style={styles.controls}>
+        <View className="flex-row items-center gap-2">
           {isPaused ? (
-            <TouchableOpacity onPress={resumeRecording} style={styles.controlButton}>
-              <Ionicons name="play" size={20} color={COLORS.primary} />
+            <TouchableOpacity 
+              onPress={resumeRecording} 
+              className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 justify-center items-center"
+            >
+              <Ionicons name="play" size={20} color={colors.PRIMARY} />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={pauseRecording} style={styles.controlButton}>
-              <Ionicons name="pause" size={20} color={COLORS.primary} />
+            <TouchableOpacity 
+              onPress={pauseRecording} 
+              className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 justify-center items-center"
+            >
+              <Ionicons name="pause" size={20} color={colors.PRIMARY} />
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity onPress={stopRecording} style={styles.sendButton}>
-            <Ionicons name="send" size={20} color={COLORS.white} />
+          <TouchableOpacity 
+            onPress={stopRecording} 
+            className="w-9 h-9 rounded-full bg-blue-500 justify-center items-center"
+          >
+            <Ionicons name="send" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* 음성 파형 시각화 (간단한 버전) */}
-      <View style={styles.waveform}>
+      <View className="flex-row items-center justify-around h-10 px-4">
         {[...Array(20)].map((_, index) => (
           <View
             key={index}
-            style={[
-              styles.waveBar,
-              {
-                height: Math.random() * 30 + 10,
-                opacity: isRecording && !isPaused ? 1 : 0.3,
-              },
-            ]}
+            className={cn(
+              "w-0.5 bg-blue-500 rounded-sm",
+              isRecording && !isPaused ? "opacity-100" : "opacity-30"
+            )}
+            style={{
+              height: Math.random() * 30 + 10,
+            }}
           />
         ))}
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    padding: SIZES.padding,
-  },
-  recordButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  recordingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: SIZES.padding,
-  },
-  cancelButton: {
-    padding: SIZES.base,
-  },
-  recordingInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  recordingIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: COLORS.error,
-    marginRight: SIZES.base,
-  },
-  duration: {
-    ...FONTS.body3,
-    color: COLORS.black,
-  },
-  controls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SIZES.base,
-  },
-  controlButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.lightGray,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sendButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  waveform: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    height: 40,
-    paddingHorizontal: SIZES.padding,
-  },
-  waveBar: {
-    width: 3,
-    backgroundColor: COLORS.primary,
-    borderRadius: 1.5,
-  },
-});

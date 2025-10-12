@@ -1,16 +1,16 @@
 /**
- * 공통 빈 상태 컴포넌트
+ * 공통 빈 상태 컴포넌트 - NativeWind v4
  */
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
+import { useTheme } from '@/hooks/useTheme';
 
 interface EmptyStateProps {
   icon?: string;
   title: string;
   description?: string;
   action?: React.ReactNode;
-  colors: any;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -18,48 +18,25 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
   action,
-  colors,
 }) => {
+  const { colors } = useTheme();
+  
   return (
-    <View style={styles.container}>
+    <View className="flex-1 justify-center items-center p-8">
       <Icon name={icon} size={64} color={colors.TEXT.LIGHT} />
-      <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>
+      <Text className="text-lg font-semibold mt-4 text-center text-gray-900 dark:text-white">
         {title}
       </Text>
       {description && (
-        <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="text-sm mt-2 text-center leading-5 text-gray-600 dark:text-gray-400">
           {description}
         </Text>
       )}
       {action && (
-        <View style={styles.actionContainer}>
+        <View className="mt-6">
           {action}
         </View>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  description: {
-    fontSize: 14,
-    marginTop: 8,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  actionContainer: {
-    marginTop: 24,
-  },
-});

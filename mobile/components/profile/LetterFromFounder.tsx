@@ -1,15 +1,14 @@
 /**
- * LetterFromFounder 컴포넌트 (StyleSheet 버전)
+ * LetterFromFounder 컴포넌트 (NativeWind v4 버전)
  *
- * @module LetterFromFounder
- * @description 프로필 화면에서 창업자의 편지를 보여주는 인터랙티브 카드 및 모달 컴포넌트 (StyleSheet 스타일링 적용)
+ * @module LetterFromFounder-NW
+ * @description 프로필 화면에서 창업자의 편지를 보여주는 인터랙티브 카드 및 모달 컴포넌트 (NativeWind v4 스타일링 적용)
  */
 
 import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
   Modal,
@@ -41,13 +40,13 @@ interface LetterFromFounderProps {
  * @returns {JSX.Element} 창업자 편지 카드 및 모달 UI
  *
  * @description
- * 프로필 화면에 표시되는 그라디언트 카드로, 클릭하면 창업자의 편지를 전체 화면 모달로 보여줍니다. (StyleSheet 버전)
+ * 프로필 화면에 표시되는 그라디언트 카드로, 클릭하면 창업자의 편지를 전체 화면 모달로 보여줍니다. (NativeWind v4 버전)
  * - 그라디언트 배경의 인터랙티브 카드
  * - BlurView 배경의 편지 모달
  * - 한국어/영어 번역 지원
  * - 데코레이션 요소 (스탬프, 하트 등)
  * - 스크롤 가능한 편지 내용
- * - 반응형 디자인 (화면 크기에 맞춤)
+ * - 다크모드 자동 지원
  *
  * @example
  * ```tsx
@@ -100,31 +99,31 @@ export const LetterFromFounder: React.FC<LetterFromFounderProps> = ({ onPress })
 
   return (
     <>
-      <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.8}>
+      <TouchableOpacity className="container" onPress={handlePress} activeOpacity={0.8}>
         <LinearGradient
           colors={['#8B5CF6', '#7C3AED', '#6D28D9']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.gradientContainer}
+          className="gradientContainer"
         >
-          <View style={styles.iconContainer}>
-            <View style={styles.iconBackground}>
+          <View className="iconContainer">
+            <View className="iconBackground">
               <MaterialCommunityIcons name="email-outline" size={24} color="#FFFFFF" />
             </View>
           </View>
           
-          <View style={styles.textContainer}>
-            <Text style={styles.title}>{t('profile:profile.letterFromFounder')}</Text>
-            <Text style={styles.subtitle}>{t('profile:profile.letterSubtitle')}</Text>
+          <View className="textContainer">
+            <Text className="title">{t('profile:profile.letterFromFounder')}</Text>
+            <Text className="subtitle">{t('profile:profile.letterSubtitle')}</Text>
           </View>
           
-          <View style={styles.arrowContainer}>
+          <View className="arrowContainer">
             <Ionicons name="chevron-forward" size={20} color="rgba(255, 255, 255, 0.8)" />
           </View>
 
           {/* Decorative Elements */}
-          <View style={styles.decorativeCircle1} />
-          <View style={styles.decorativeCircle2} />
+          <View className="decorativeCircle1" />
+          <View className="decorativeCircle2" />
         </LinearGradient>
       </TouchableOpacity>
 
@@ -134,60 +133,60 @@ export const LetterFromFounder: React.FC<LetterFromFounderProps> = ({ onPress })
         transparent={true}
         onRequestClose={closeModal}
       >
-        <View style={styles.modalOverlay}>
+        <View className="modalOverlay">
           <BlurView intensity={100} style={StyleSheet.absoluteFillObject}>
             <TouchableOpacity 
-              style={styles.modalBackground} 
+              className="modalBackground" 
               activeOpacity={1} 
               onPress={closeModal}
             >
               <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-                <View style={styles.letterContainer}>
+                <View className="letterContainer">
                   {/* Letter Header */}
                   <LinearGradient
                     colors={['#8B5CF6', '#7C3AED']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
-                    style={styles.letterHeader}
+                    className="letterHeader"
                   >
-                    <View style={styles.stampContainer}>
-                      <View style={styles.stamp}>
+                    <View className="stampContainer">
+                      <View className="stamp">
                         <MaterialCommunityIcons name="heart" size={20} color="#FFFFFF" />
                       </View>
                     </View>
-                    <Text style={styles.letterTitle}>💌 {t('profile:profile.letterFromFounder')}</Text>
-                    <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                    <Text className="letterTitle">💌 {t('profile:profile.letterFromFounder')}</Text>
+                    <TouchableOpacity className="closeButton" onPress={closeModal}>
                       <Ionicons name="close" size={24} color="#FFFFFF" />
                     </TouchableOpacity>
                   </LinearGradient>
 
                   {/* Letter Content */}
                   <ScrollView 
-                    style={styles.letterScrollView}
+                    className="letterScrollView"
                     contentContainerStyle={styles.letterContentContainer}
                     showsVerticalScrollIndicator={false}
                   >
-                    <View style={styles.letterPaper}>
-                      <Text style={styles.greeting}>{content.greeting}</Text>
-                      <Text style={styles.letterText}>{content.intro}</Text>
-                      <Text style={styles.letterText}>{content.body1}</Text>
-                      <Text style={styles.letterText}>{content.body2}</Text>
-                      <Text style={styles.letterText}>{content.body3}</Text>
-                      <Text style={styles.letterText}>{content.closing}</Text>
+                    <View className="letterPaper">
+                      <Text className="greeting">{content.greeting}</Text>
+                      <Text className="letterText">{content.intro}</Text>
+                      <Text className="letterText">{content.body1}</Text>
+                      <Text className="letterText">{content.body2}</Text>
+                      <Text className="letterText">{content.body3}</Text>
+                      <Text className="letterText">{content.closing}</Text>
                       
-                      <View style={styles.signatureContainer}>
-                        <Text style={styles.signature}>{content.signature}</Text>
+                      <View className="signatureContainer">
+                        <Text className="signature">{content.signature}</Text>
                       </View>
 
-                      <View style={styles.psContainer}>
-                        <Text style={styles.ps}>{content.ps}</Text>
+                      <View className="psContainer">
+                        <Text className="ps">{content.ps}</Text>
                       </View>
 
                       {/* Decorative Bottom */}
-                      <View style={styles.letterDecoration}>
-                        <View style={styles.decorativeLine} />
+                      <View className="letterDecoration">
+                        <View className="decorativeLine" />
                         <MaterialCommunityIcons name="heart-multiple" size={24} color="#8B5CF6" />
-                        <View style={styles.decorativeLine} />
+                        <View className="decorativeLine" />
                       </View>
                     </View>
                   </ScrollView>
@@ -201,186 +200,3 @@ export const LetterFromFounder: React.FC<LetterFromFounderProps> = ({ onPress })
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: 20,
-    marginVertical: 10,
-    borderRadius: 16,
-    overflow: 'hidden',
-    elevation: 4,
-    shadowColor: '#8B5CF6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-  },
-  gradientContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    position: 'relative',
-  },
-  iconContainer: {
-    marginRight: 12,
-  },
-  iconBackground: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  textContainer: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
-  arrowContainer: {
-    padding: 4,
-  },
-  decorativeCircle1: {
-    position: 'absolute',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    top: -20,
-    right: -20,
-  },
-  decorativeCircle2: {
-    position: 'absolute',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    bottom: -10,
-    left: 60,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  letterContainer: {
-    width: SCREEN_WIDTH - 40,
-    maxWidth: 400,
-    maxHeight: SCREEN_HEIGHT * 0.8,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    overflow: 'hidden',
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-  },
-  letterHeader: {
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  stampContainer: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-  },
-  stamp: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    transform: [{ rotate: '-15deg' }],
-  },
-  letterTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    padding: 4,
-  },
-  letterScrollView: {
-    flex: 1,
-  },
-  letterContentContainer: {
-    padding: 20,
-  },
-  letterPaper: {
-    backgroundColor: '#FDFBF7',
-    borderRadius: 12,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#F0E6D6',
-  },
-  greeting: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2D3748',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  letterText: {
-    fontSize: 15,
-    lineHeight: 24,
-    color: '#4A5568',
-    marginBottom: 12,
-    textAlign: 'justify',
-  },
-  signatureContainer: {
-    marginTop: 20,
-    alignItems: 'flex-end',
-  },
-  signature: {
-    fontSize: 14,
-    fontStyle: 'italic',
-    color: '#718096',
-    textAlign: 'right',
-  },
-  psContainer: {
-    marginTop: 20,
-    padding: 12,
-    backgroundColor: 'rgba(139, 92, 246, 0.05)',
-    borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: '#8B5CF6',
-  },
-  ps: {
-    fontSize: 13,
-    lineHeight: 20,
-    color: '#6B46C1',
-    fontStyle: 'italic',
-  },
-  letterDecoration: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 24,
-    paddingTop: 16,
-  },
-  decorativeLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E2E8F0',
-    marginHorizontal: 12,
-  },
-});

@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
@@ -39,33 +38,33 @@ export const InterestEmptyState: React.FC<InterestEmptyStateProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.iconContainer, { backgroundColor: colors.PRIMARY + '20' }]}>
+    <View className="container">
+      <View className="iconContainer">
         <Icon name={config.icon} size={60} color={colors.PRIMARY} />
       </View>
 
-      <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>
+      <Text className="title">
         {config.title}
       </Text>
 
-      <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
+      <Text className="description">
         {config.description}
       </Text>
 
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: colors.PRIMARY }]}
+        className="button"
         onPress={onAddPress}
       >
         <Icon name="add-circle-outline" size={20} color="#FFFFFF" />
-        <Text style={styles.buttonText}>{config.buttonText}</Text>
+        <Text className="buttonText">{config.buttonText}</Text>
       </TouchableOpacity>
 
       {type === 'searches' && (
-        <View style={styles.tipsContainer}>
-          <Text style={[styles.tipsTitle, { color: colors.TEXT.PRIMARY }]}>
+        <View className="tipsContainer">
+          <Text className="tipsTitle">
             💡 검색 팁
           </Text>
-          <View style={styles.tipsList}>
+          <View className="tipsList">
             <TipItem
               icon="call-outline"
               text="연락처의 전화번호로 아는 사람 찾기"
@@ -93,73 +92,9 @@ const TipItem: React.FC<{ icon: string; text: string; color: string }> = ({
   text,
   color,
 }) => (
-  <View style={styles.tipItem}>
+  <View className="tipItem">
     <Icon name={icon} size={16} color={color} />
-    <Text style={[styles.tipText, { color }]}>{text}</Text>
+    <Text className="tipText">{text}</Text>
   </View>
 );
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-    paddingTop: 50,
-  },
-  iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 10,
-  },
-  description: {
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 30,
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 25,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  tipsContainer: {
-    marginTop: 50,
-    width: '100%',
-  },
-  tipsTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  tipsList: {
-    gap: 10,
-  },
-  tipItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  tipText: {
-    fontSize: 14,
-    marginLeft: 10,
-    flex: 1,
-  },
-});

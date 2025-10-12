@@ -1,10 +1,19 @@
+/**
+ * 전화번호 인증 화면 (Phone Verification Screen)
+ *
+ * @screen
+ * @description 전화번호 입력 및 SMS 인증 요청 화면
+ * - 한국 전화번호 형식 자동 포맷팅
+ * - 로그인/회원가입 모드 지원
+ * - 애니메이션 효과 적용
+ */
+
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -15,11 +24,20 @@ import {
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthService } from '@/services/auth/auth-service';
 import { useTheme } from '@/hooks/useTheme';
-import { LIGHT_COLORS, DARK_COLORS, SIZES } from '@/constants/theme';
+import { colors } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { validatePhoneNumber as validatePhone } from '@/services/auth/clerk-config';
+import { cn } from '@/lib/utils';
 
+/**
+ * Props 인터페이스
+ *
+ * @interface PhoneVerificationScreenProps
+ * @property {(phoneNumber: string) => void} onVerificationSent - SMS 전송 완료 시 호출되는 콜백
+ * @property {'signin' | 'signup'} [authMode='signin'] - 인증 모드 (로그인/회원가입)
+ * @property {() => void} [onBack] - 뒤로가기 버튼 클릭 시 호출되는 선택적 콜백
+ */
 interface PhoneVerificationScreenProps {
   onVerificationSent: (phoneNumber: string) => void;
   authMode?: 'signin' | 'signup';
@@ -28,6 +46,34 @@ interface PhoneVerificationScreenProps {
 
 const { width } = Dimensions.get('window');
 
+/**
+ * 전화번호 인증 화면 컴포넌트
+ *
+ * @component
+ * @param {PhoneVerificationScreenProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 전화번호 입력 화면 UI
+ *
+ * @description
+ * 전화번호를 입력받아 SMS 인증번호를 전송하는 화면
+ * - 자동 포맷팅: 010-1234-5678 형식으로 자동 변환
+ * - 실시간 검증: 한국 전화번호 형식 검증 (010, 011, 016, 017, 018, 019)
+ * - 애니메이션: 페이드인, 스케일, 입력 포커스 효과
+ * - 플랫폼 대응: Web/iOS/Android 각각 최적화된 UI
+ * - 로그인/회원가입: authMode에 따라 다른 문구 표시
+ *
+ * @navigation
+ * - From: AuthScreen (Welcome 단계 후)
+ * - To: SMSVerificationScreen (SMS 전송 성공 후)
+ *
+ * @example
+ * ```tsx
+ * <PhoneVerificationScreen
+ *   onVerificationSent={(phone) => setPhoneNumber(phone)}
+ *   authMode="signup"
+ *   onBack={() => setCurrentStep('welcome')}
+ * />
+ * ```
+ */
 export const PhoneVerificationScreen = ({
   onVerificationSent,
   authMode = 'signin',
@@ -38,7 +84,7 @@ export const PhoneVerificationScreen = ({
   const [isFocused, setIsFocused] = useState(false);
   const authService = useAuthService();
   const { t } = useAndroidSafeTranslation('auth');
-  const { colors, isDarkMode } = useTheme();
+  const { colors: themeColors } = useTheme();
   
   // 애니메이션 값
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -78,7 +124,6 @@ export const PhoneVerificationScreen = ({
     if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
     return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
   };
-
 
   const handleSendVerification = async (): Promise<void> => {
     console.log('🔍 handleSendVerification called');
@@ -159,22 +204,29 @@ export const PhoneVerificationScreen = ({
 
   return (
     <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor: colors.BACKGROUND }]}
+      className={cn(
+        "flex-1",
+        "bg-gray-50 dark:bg-black"
+      )}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {onBack && (
-        <View style={styles.header}>
+        <View className={cn(
+          "px-5",
+          Platform.OS === 'ios' ? "pt-15" : "pt-10",
+          "pb-5"
+        )}>
           <TouchableOpacity
-            style={styles.backButton}
+            className="flex-row items-center py-2 px-3 rounded-[20px] bg-red-100 dark:bg-red-100/10 self-start"
             onPress={onBack}
             activeOpacity={0.7}
           >
             <Ionicons 
               name="arrow-back" 
               size={24} 
-              color={isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY} 
+              color={themeColors.TEXT.PRIMARY} 
             />
-            <Text style={[styles.backButtonText, { color: isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY }]}>
+            <Text className="text-base font-medium ml-1 text-gray-900 dark:text-white">
               뒤로가기
             </Text>
           </TouchableOpacity>
@@ -182,90 +234,101 @@ export const PhoneVerificationScreen = ({
       )}
       
       <Animated.View 
-        style={[
-          styles.content,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
+        className="flex-1 px-6 pt-5"
+        style={{
+          opacity: fadeAnim,
+          transform: [{ scale: scaleAnim }],
+        }}
       >
         {/* 타이틀 섹션 */}
-        <View style={styles.titleSection}>
-          <View style={styles.iconContainer}>
+        <View className="items-center mb-10">
+          <View className="mb-6">
             <LinearGradient
-              colors={isDarkMode ? ['#FF8A8A', '#FF6B6B'] : ['#FF6B6B', '#FF5252']}
-              style={styles.gradientIcon}
+              colors={['#FF8A8A', '#FF6B6B']}
+              className={cn(
+                "w-20 h-20 rounded-full justify-center items-center",
+                Platform.select({
+                  ios: "shadow-lg",
+                  android: "elevation-10",
+                  web: "" // Shadow handled via style
+                })
+              )}
+              style={Platform.OS === 'web' ? {
+                boxShadow: '0px 8px 24px rgba(255, 107, 107, 0.3)'
+              } : undefined}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
               <Ionicons name="phone-portrait" size={32} color="white" />
             </LinearGradient>
           </View>
-          <Text style={[styles.title, { color: isDarkMode ? DARK_COLORS.PRIMARY : LIGHT_COLORS.PRIMARY }]}>
+          <Text className="text-3xl font-bold text-center mb-2 text-red-500 dark:text-red-400">
             {authMode === 'signup' ? t('auth:phoneVerification.signup.title') : t('auth:phoneVerification.title')}
           </Text>
-          <Text style={[styles.subtitle, { color: isDarkMode ? DARK_COLORS.TEXT.SECONDARY : LIGHT_COLORS.TEXT.SECONDARY }]}>
+          <Text className="text-base text-center leading-6 px-5 text-gray-600 dark:text-gray-400">
             {authMode === 'signup' ? t('auth:phoneVerification.signup.subtitle') : t('auth:phoneVerification.subtitle')}
           </Text>
         </View>
         
         {/* 폼 섹션 */}
-        <View style={styles.form}>
-          <View style={styles.labelContainer}>
-            <Text style={[styles.label, { color: isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY }]}>
+        <View className="mb-8">
+          <View className="flex-row items-center mb-2">
+            <Text className="text-base font-semibold text-gray-900 dark:text-white">
               {t('auth:phoneVerification.phoneLabel')}
             </Text>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>필수</Text>
+            <View className="ml-2 px-2 py-0.5 bg-red-100 dark:bg-red-100/20 rounded-xl">
+              <Text className="text-xs font-semibold text-red-500">필수</Text>
             </View>
           </View>
           
-          <Text style={[styles.description, { color: isDarkMode ? DARK_COLORS.TEXT.SECONDARY : LIGHT_COLORS.TEXT.SECONDARY }]}>
+          <Text className="text-sm leading-5 mb-5 text-gray-600 dark:text-gray-400">
             {t('auth:phoneVerification.description')}
           </Text>
           
           {/* 입력 필드 */}
           <Animated.View
-            style={[
-              styles.inputContainer,
-              {
-                borderColor: inputBorderAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [
-                    isDarkMode ? DARK_COLORS.BORDER : LIGHT_COLORS.BORDER,
-                    isDarkMode ? DARK_COLORS.PRIMARY : LIGHT_COLORS.PRIMARY,
-                  ],
-                }),
-                borderWidth: inputBorderAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [1, 2],
-                }),
-              },
-            ]}
+            className={cn(
+              "flex-row items-center rounded-2xl mb-6 overflow-hidden bg-white dark:bg-gray-800",
+              Platform.select({
+                ios: "shadow-sm",
+                android: "elevation-2",
+                web: "" // Shadow handled via style
+              })
+            )}
+            style={{
+              borderColor: inputBorderAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [
+                  themeColors.BORDER,
+                  themeColors.PRIMARY,
+                ],
+              }),
+              borderWidth: inputBorderAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1, 2],
+              }),
+              ...(Platform.OS === 'web' ? {
+                boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)'
+              } : {})
+            }}
           >
-            <View style={styles.inputPrefix}>
+            <View className="flex-row items-center pl-4 pr-2">
               <Ionicons 
                 name="call-outline" 
                 size={20} 
                 color={isFocused 
-                  ? (isDarkMode ? DARK_COLORS.PRIMARY : LIGHT_COLORS.PRIMARY)
-                  : (isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY)
+                  ? themeColors.PRIMARY
+                  : themeColors.TEXT.TERTIARY
                 } 
               />
-              <Text style={[
-                styles.countryCode,
-                { color: isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY }
-              ]}>
+              <Text className="text-base font-medium ml-2 text-gray-900 dark:text-white">
                 +82
               </Text>
             </View>
             <TextInput
-              style={[styles.input, { 
-                color: isDarkMode ? DARK_COLORS.TEXT.PRIMARY : LIGHT_COLORS.TEXT.PRIMARY
-              }]}
+              className="flex-1 text-base py-4.5 pr-4 text-gray-900 dark:text-white"
               placeholder="10-1234-5678"
-              placeholderTextColor={isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY}
+              placeholderTextColor={themeColors.TEXT.TERTIARY}
               value={phoneNumber}
               onChangeText={handlePhoneChange}
               keyboardType="phone-pad"
@@ -291,23 +354,33 @@ export const PhoneVerificationScreen = ({
             <LinearGradient
               colors={
                 !phoneNumber.trim() || isLoading
-                  ? isDarkMode ? ['#48484A', '#48484A'] : ['#CED4DA', '#CED4DA']
-                  : isDarkMode ? ['#FF8A8A', '#FF6B6B'] : ['#FF6B6B', '#FF5252']
+                  ? ['#CED4DA', '#CED4DA']
+                  : ['#FF6B6B', '#FF5252']
               }
-              style={styles.gradientButton}
+              className={cn(
+                "rounded-2xl py-4.5 items-center justify-center",
+                Platform.select({
+                  ios: "shadow-lg",
+                  android: "elevation-8",
+                  web: ""
+                })
+              )}
+              style={Platform.OS === 'web' && !(!phoneNumber.trim() || isLoading) ? {
+                boxShadow: '0px 4px 16px rgba(255, 107, 107, 0.25)'
+              } : undefined}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
               {isLoading ? (
-                <View style={styles.buttonContent}>
+                <View className="flex-row items-center justify-center">
                   <ActivityIndicator size="small" color="white" />
-                  <Text style={[styles.buttonText, { marginLeft: 8 }]}>
+                  <Text className="text-white text-base font-semibold ml-2">
                     {authMode === 'signup' ? t('auth:phoneVerification.signup.sendingButton') : t('auth:phoneVerification.sendingButton')}
                   </Text>
                 </View>
               ) : (
-                <View style={styles.buttonContent}>
-                  <Text style={styles.buttonText}>
+                <View className="flex-row items-center justify-center">
+                  <Text className="text-white text-base font-semibold">
                     {authMode === 'signup' ? t('auth:phoneVerification.signup.sendButton') : t('auth:phoneVerification.sendButton')}
                   </Text>
                   <Ionicons name="arrow-forward" size={20} color="white" style={{ marginLeft: 8 }} />
@@ -318,13 +391,13 @@ export const PhoneVerificationScreen = ({
         </View>
         
         {/* 개인정보 안내 */}
-        <View style={styles.privacyContainer}>
+        <View className="flex-row items-center justify-center mt-6">
           <Ionicons 
             name="shield-checkmark-outline" 
             size={16} 
-            color={isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY} 
+            color={themeColors.TEXT.TERTIARY} 
           />
-          <Text style={[styles.privacy, { color: isDarkMode ? DARK_COLORS.TEXT.TERTIARY : LIGHT_COLORS.TEXT.TERTIARY }]}>
+          <Text className="text-xs text-center leading-4.5 ml-1.5 text-gray-500 dark:text-gray-400">
             {t('auth:phoneVerification.privacyNotice')}
           </Text>
         </View>
@@ -332,181 +405,3 @@ export const PhoneVerificationScreen = ({
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 20,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 107, 107, 0.1)',
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 4,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 20,
-  },
-  titleSection: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  iconContainer: {
-    marginBottom: 24,
-  },
-  gradientIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#FF6B6B',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.3,
-        shadowRadius: 16,
-      },
-      android: {
-        elevation: 10,
-      },
-      web: {
-        boxShadow: '0px 8px 24px rgba(255, 107, 107, 0.3)',
-      } as any,
-    }),
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: 20,
-  },
-  form: {
-    marginBottom: 32,
-  },
-  labelContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  badge: {
-    marginLeft: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    backgroundColor: 'rgba(255, 107, 107, 0.15)',
-    borderRadius: 12,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#FF6B6B',
-  },
-  description: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 16,
-    marginBottom: 24,
-    overflow: 'hidden',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 2,
-      },
-      web: {
-        boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
-      } as any,
-    }),
-  },
-  inputPrefix: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingLeft: 16,
-    paddingRight: 8,
-  },
-  countryCode: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 8,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    paddingVertical: Platform.OS === 'ios' ? 18 : 16,
-    paddingRight: 16,
-  },
-  gradientButton: {
-    borderRadius: 16,
-    paddingVertical: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#FF6B6B',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.25,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 8,
-      },
-      web: {
-        boxShadow: '0px 4px 16px rgba(255, 107, 107, 0.25)',
-      } as any,
-    }),
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  privacyContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 24,
-  },
-  privacy: {
-    fontSize: 13,
-    textAlign: 'center',
-    lineHeight: 18,
-    marginLeft: 6,
-  },
-});

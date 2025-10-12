@@ -2,7 +2,7 @@
  * 관심상대/친구 탭 바 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity} from 'react-native';
 
 interface TabBarProps {
   selectedTab: 'interest' | 'friend';
@@ -16,7 +16,7 @@ export const TabBar: React.FC<TabBarProps> = ({
   colors,
 }) => {
   return (
-    <View style={[styles.tabBar, { backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }]}>
+    <View className="tabBar">
       <TouchableOpacity
         style={[
           styles.tabButton,
@@ -57,26 +57,3 @@ export const TabBar: React.FC<TabBarProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  tabBar: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-  },
-  tabButton: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabButtonActive: {
-    borderBottomWidth: 2,
-  },
-  tabButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  tabButtonTextActive: {
-    fontWeight: '600',
-  },
-});

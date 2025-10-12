@@ -1,8 +1,7 @@
 import React from 'react';
 import {
   View,
-  Text,
-  StyleSheet,
+  Text
 } from 'react-native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -50,75 +49,75 @@ export const ProfileInfoCards= ({
 }) => {
   const { t } = useAndroidSafeTranslation('profile');
   return (
-    <View style={styles.container}>
-      <Text style={styles.sectionTitle}>{t('profile:info.basicInfo')}</Text>
+    <View className="container">
+      <Text className="sectionTitle">{t('profile:info.basicInfo')}</Text>
       
-      <View style={styles.cardsGrid}>
-        <View style={styles.infoCard}>
+      <View className="cardsGrid">
+        <View className="infoCard">
           <MaterialCommunityIcons name="briefcase" size={24} color="#4A90E2" />
-          <Text style={styles.infoCardTitle}>{t('profile:info.company')}</Text>
-          <Text style={styles.infoCardValue}>
+          <Text className="infoCardTitle">{t('profile:info.company')}</Text>
+          <Text className="infoCardValue">
             {companyName || t('common:info.notRegistered')}
           </Text>
         </View>
         
-        <View style={styles.infoCard}>
+        <View className="infoCard">
           <MaterialCommunityIcons name="school" size={24} color="#4A90E2" />
-          <Text style={styles.infoCardTitle}>{t('profile:info.school')}</Text>
-          <Text style={styles.infoCardValue}>
+          <Text className="infoCardTitle">{t('profile:info.school')}</Text>
+          <Text className="infoCardValue">
             {education || t('common:info.notRegistered')}
           </Text>
         </View>
         
-        <View style={styles.infoCard}>
+        <View className="infoCard">
           <MaterialCommunityIcons name="map-marker" size={24} color="#4A90E2" />
-          <Text style={styles.infoCardTitle}>{t('profile:info.location')}</Text>
-          <Text style={styles.infoCardValue}>
+          <Text className="infoCardTitle">{t('profile:info.location')}</Text>
+          <Text className="infoCardValue">
             {location || t('common:info.notRegistered')}
           </Text>
         </View>
         
-        <View style={styles.infoCard}>
+        <View className="infoCard">
           <MaterialCommunityIcons name="human-male-height" size={24} color="#4A90E2" />
-          <Text style={styles.infoCardTitle}>{t('profile:info.height')}</Text>
-          <Text style={styles.infoCardValue}>
+          <Text className="infoCardTitle">{t('profile:info.height')}</Text>
+          <Text className="infoCardValue">
             {height ? `${height}cm` : t('common:info.notRegistered')}
           </Text>
         </View>
       </View>
       
       {interests && interests.length > 0 && (
-        <View style={styles.interestsSection}>
-          <Text style={styles.interestsTitle}>{t('profile:info.interests')}</Text>
-          <View style={styles.interestTags}>
+        <View className="interestsSection">
+          <Text className="interestsTitle">{t('profile:info.interests')}</Text>
+          <View className="interestTags">
             {interests.map((interest, index) => (
-              <View key={index} style={styles.interestTag}>
-                <Text style={styles.interestTagText}>{interest}</Text>
+              <View key={index} className="interestTag">
+                <Text className="interestTagText">{interest}</Text>
               </View>
             ))}
           </View>
         </View>
       )}
       
-      <View style={styles.additionalInfo}>
+      <View className="additionalInfo">
         {mbti && (
-          <View style={styles.additionalItem}>
+          <View className="additionalItem">
             <MaterialCommunityIcons name="brain" size={20} color="#9B59B6" />
-            <Text style={styles.additionalText}>{t('profile:info.mbti')}: {mbti}</Text>
+            <Text className="additionalText">{t('profile:info.mbti')}: {mbti}</Text>
           </View>
         )}
         
         {drinking && (
-          <View style={styles.additionalItem}>
+          <View className="additionalItem">
             <MaterialCommunityIcons name="glass-wine" size={20} color="#E74C3C" />
-            <Text style={styles.additionalText}>{t('profile:info.drinking')}: {drinking}</Text>
+            <Text className="additionalText">{t('profile:info.drinking')}: {drinking}</Text>
           </View>
         )}
         
         {smoking && (
-          <View style={styles.additionalItem}>
+          <View className="additionalItem">
             <MaterialCommunityIcons name="smoking-off" size={20} color="#34495E" />
-            <Text style={styles.additionalText}>{t('profile:info.smoking')}: {smoking}</Text>
+            <Text className="additionalText">{t('profile:info.smoking')}: {smoking}</Text>
           </View>
         )}
       </View>
@@ -126,83 +125,3 @@ export const ProfileInfoCards= ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    padding: SPACING.MD,
-  },
-  sectionTitle: {
-    fontSize: FONT_SIZES.LG,
-    fontWeight: 'bold',
-    color: COLORS.TEXT.PRIMARY,
-    marginBottom: SPACING.MD,
-  },
-  cardsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.SM,
-    marginBottom: SPACING.LG,
-  },
-  infoCard: {
-    backgroundColor: COLORS.SURFACE,
-    borderRadius: 12,
-    padding: SPACING.MD,
-    alignItems: 'center',
-    width: '48%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  infoCardTitle: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.TEXT.SECONDARY,
-    marginTop: SPACING.XS,
-    marginBottom: 4,
-  },
-  infoCardValue: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
-  },
-  interestsSection: {
-    marginBottom: SPACING.LG,
-  },
-  interestsTitle: {
-    fontSize: FONT_SIZES.MD,
-    fontWeight: '600',
-    color: COLORS.TEXT.PRIMARY,
-    marginBottom: SPACING.SM,
-  },
-  interestTags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.XS,
-  },
-  interestTag: {
-    backgroundColor: COLORS.PRIMARY + '20',
-    paddingHorizontal: SPACING.MD,
-    paddingVertical: SPACING.XS,
-    borderRadius: 16,
-  },
-  interestTagText: {
-    fontSize: FONT_SIZES.SM,
-    color: COLORS.PRIMARY,
-    fontWeight: '500',
-  },
-  additionalInfo: {
-    backgroundColor: COLORS.SURFACE,
-    borderRadius: 12,
-    padding: SPACING.MD,
-  },
-  additionalItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.SM,
-    paddingVertical: SPACING.XS,
-  },
-  additionalText: {
-    fontSize: FONT_SIZES.MD,
-    color: COLORS.TEXT.PRIMARY,
-  },
-});

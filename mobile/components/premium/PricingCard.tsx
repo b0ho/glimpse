@@ -6,7 +6,6 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -74,44 +73,36 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
     >
       {/* 인기 배지 */}
       {isPopular && (
-        <View style={[styles.popularBadge, { backgroundColor: colors.PRIMARY }]}>
+        <View className="popularBadge">
           <Icon name="star" size={16} color={colors.TEXT.WHITE} />
-          <Text style={[styles.popularText, { color: colors.TEXT.WHITE }]}>인기</Text>
+          <Text className="popularText">인기</Text>
         </View>
       )}
 
       {/* 선택 표시 */}
       {isSelected && (
-        <View style={styles.selectedIndicator}>
+        <View className="selectedIndicator">
           <Icon name={STATE_ICONS.SUCCESS} size={24} color={colors.SUCCESS} />
         </View>
       )}
 
       {/* 상품 정보 */}
-      <View style={styles.header}>
-        <Text style={[
-          styles.title, 
-          { color: colors.TEXT.PRIMARY },
-          isPopular && { color: colors.PRIMARY }
-        ]}>
+      <View className="header">
+        <Text className="title">
           {product.name}
         </Text>
-        <Text style={[styles.description, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="description">
           {product.description}
         </Text>
       </View>
 
       {/* 가격 정보 */}
-      <View style={styles.priceContainer}>
-        <Text style={[
-          styles.price, 
-          { color: colors.TEXT.PRIMARY },
-          isPopular && { color: colors.PRIMARY }
-        ]}>
+      <View className="priceContainer">
+        <Text className="price">
           {formatPrice(product.price)}
         </Text>
         {isSubscription && (
-          <Text style={[styles.period, { color: colors.TEXT.SECONDARY }]}>
+          <Text className="period">
             {product.id.includes('yearly') ? '/년' : '/월'}
           </Text>
         )}
@@ -119,25 +110,21 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
 
       {/* 할인 정보 (연간 플랜) */}
       {product.id.includes('yearly') && (
-        <View style={[styles.discountBadge, { backgroundColor: colors.SUCCESS }]}>
-          <Text style={[styles.discountText, { color: colors.TEXT.WHITE }]}>2개월 무료</Text>
+        <View className="discountBadge">
+          <Text className="discountText">2개월 무료</Text>
         </View>
       )}
 
       {/* 혜택 목록 */}
-      <View style={styles.benefitsContainer}>
+      <View className="benefitsContainer">
         {product.benefits.map((benefit, index) => (
-          <View key={index} style={styles.benefitRow}>
+          <View key={index} className="benefitRow">
             <Icon 
               name={STATE_ICONS.SUCCESS} 
               size={16} 
               color={isPopular ? colors.SUCCESS : colors.PRIMARY} 
             />
-            <Text style={[
-              styles.benefitText,
-              { color: colors.TEXT.PRIMARY },
-              isPopular && { fontWeight: '500' }
-            ]}>
+            <Text className="benefitText">
               {benefit}
             </Text>
           </View>
@@ -146,8 +133,8 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
 
       {/* 구독 타입별 추가 정보 */}
       {isSubscription && (
-        <View style={[styles.subscriptionInfo, { borderTopColor: colors.BORDER }]}>
-          <Text style={[styles.subscriptionNote, { color: colors.TEXT.SECONDARY }]}>
+        <View className="subscriptionInfo">
+          <Text className="subscriptionNote">
             언제든지 취소 가능
           </Text>
         </View>
@@ -155,8 +142,8 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
 
       {/* 원타임 구매 추가 정보 */}
       {!isSubscription && (
-        <View style={[styles.oneTimeInfo, { borderTopColor: colors.BORDER }]}>
-          <Text style={[styles.oneTimeNote, { color: colors.SUCCESS }]}>
+        <View className="oneTimeInfo">
+          <Text className="oneTimeNote">
             즉시 사용 가능
           </Text>
         </View>
@@ -165,105 +152,3 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
   );
 });
 
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: 16,
-    padding: SPACING.LG,
-    marginVertical: SPACING.SM,
-    marginHorizontal: SPACING.MD,
-    ...shadowPresets.card,
-    borderWidth: 2,
-    position: 'relative',
-  },
-  popularBadge: {
-    position: 'absolute',
-    top: -8,
-    right: SPACING.LG,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.SM,
-    paddingVertical: SPACING.XS,
-    borderRadius: 12,
-    zIndex: 1,
-  },
-  popularText: {
-    fontSize: FONT_SIZES.XS,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  selectedIndicator: {
-    position: 'absolute',
-    top: SPACING.MD,
-    right: SPACING.MD,
-  },
-  header: {
-    marginBottom: SPACING.MD,
-  },
-  title: {
-    fontSize: FONT_SIZES.XL,
-    fontWeight: 'bold',
-    marginBottom: SPACING.XS,
-  },
-  description: {
-    fontSize: FONT_SIZES.SM,
-    lineHeight: 20,
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginBottom: SPACING.SM,
-  },
-  price: {
-    fontSize: FONT_SIZES.XXL,
-    fontWeight: 'bold',
-  },
-  period: {
-    fontSize: FONT_SIZES.MD,
-    marginLeft: 4,
-  },
-  discountBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: SPACING.SM,
-    paddingVertical: SPACING.XS,
-    borderRadius: 12,
-    marginBottom: SPACING.MD,
-  },
-  discountText: {
-    fontSize: FONT_SIZES.XS,
-    fontWeight: '600',
-  },
-  benefitsContainer: {
-    marginVertical: SPACING.MD,
-  },
-  benefitRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.SM,
-  },
-  benefitText: {
-    fontSize: FONT_SIZES.SM,
-    marginLeft: SPACING.SM,
-    flex: 1,
-    lineHeight: 20,
-  },
-  subscriptionInfo: {
-    marginTop: SPACING.MD,
-    paddingTop: SPACING.MD,
-    borderTopWidth: 1,
-  },
-  subscriptionNote: {
-    fontSize: FONT_SIZES.XS,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  oneTimeInfo: {
-    marginTop: SPACING.MD,
-    paddingTop: SPACING.MD,
-    borderTopWidth: 1,
-  },
-  oneTimeNote: {
-    fontSize: FONT_SIZES.XS,
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-});

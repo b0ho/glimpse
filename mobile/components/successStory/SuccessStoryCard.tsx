@@ -1,8 +1,14 @@
+/**
+ * SuccessStoryCard 컴포넌트 (NativeWind v4 버전)
+ *
+ * @module SuccessStoryCard
+ * @description 매칭 성공 스토리를 표시하고 축하 기능을 제공하는 카드 컴포넌트입니다.
+ */
+
 import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   Animated,
 } from 'react-native';
@@ -11,12 +17,60 @@ import { useTheme } from '@/hooks/useTheme';
 import { SuccessStory } from '@/types/successStory';
 import { LinearGradient } from 'expo-linear-gradient';
 
+/**
+ * SuccessStoryCard 컴포넌트 Props 인터페이스
+ * @interface SuccessStoryCardProps
+ */
 interface SuccessStoryCardProps {
+  /** 표시할 성공 스토리 데이터 */
   story: SuccessStory;
+  /** 축하 버튼 클릭 시 호출되는 핸들러 */
   onCelebrate: (storyId: string) => void;
+  /** 사용자가 이미 축하했는지 여부 (기본값: false) */
   hasCelebrated?: boolean;
 }
 
+/**
+ * SuccessStoryCard 컴포넌트
+ *
+ * @component
+ * @param {SuccessStoryCardProps} props - 컴포넌트 속성
+ * @returns {JSX.Element} 성공 스토리 카드 UI
+ *
+ * @description
+ * 매칭 성공 커플의 스토리를 보기 좋게 표시하고 다른 사용자들이 축하할 수 있는 카드 컴포넌트입니다.
+ * - 그라데이션 배경 (핑크 계열)
+ * - 커플 이름 또는 익명 표시 ('행복한 커플')
+ * - 상대적 시간 표시 (방금 전, n시간 전, n일 전)
+ * - 매칭 타입 배지 (옵션)
+ * - 스토리 내용 및 태그 표시
+ * - 축하 버튼 (하트 아이콘 + Spring 애니메이션)
+ * - 축하 카운트 표시
+ * - 공유 버튼
+ * - 장식 이모지 (✨💕)
+ *
+ * @example
+ * ```tsx
+ * <SuccessStoryCard
+ *   story={{
+ *     id: 'story-1',
+ *     userNickname: '영희',
+ *     partnerNickname: '철수',
+ *     story: '우리는 첫눈에 반했어요...',
+ *     tags: ['첫눈에 반함 💕', '운명적 만남 ✨'],
+ *     celebrationCount: 42,
+ *     isAnonymous: false,
+ *     matchType: '회사 그룹',
+ *     createdAt: '2025-01-14T10:00:00Z'
+ *   }}
+ *   onCelebrate={(storyId) => console.log('축하:', storyId)}
+ *   hasCelebrated={false}
+ * />
+ * ```
+ *
+ * @category Component
+ * @subcategory SuccessStory
+ */
 export const SuccessStoryCard: React.FC<SuccessStoryCardProps> = ({
   story,
   onCelebrate,
@@ -71,27 +125,27 @@ export const SuccessStoryCard: React.FC<SuccessStoryCardProps> = ({
       colors={['#FFE5EC', '#FFE5EC']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={styles.cardGradient}
+      className="cardGradient"
     >
-      <View style={[styles.card, { backgroundColor: colors.SURFACE }]}>
+      <View className="card">
         {/* 헤더 */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <View style={styles.avatarContainer}>
-              <Text style={styles.avatarEmoji}>💑</Text>
+        <View className="header">
+          <View className="headerLeft">
+            <View className="avatarContainer">
+              <Text className="avatarEmoji">💑</Text>
             </View>
-            <View style={styles.headerInfo}>
-              <Text style={[styles.coupleNames, { color: colors.TEXT.PRIMARY }]}>
+            <View className="headerInfo">
+              <Text className="coupleNames">
                 {displayNames}
               </Text>
-              <Text style={[styles.timeAgo, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="timeAgo">
                 {getTimeAgo(story.createdAt)}
               </Text>
             </View>
           </View>
           {story.matchType && (
-            <View style={[styles.matchTypeBadge, { backgroundColor: colors.PRIMARY + '20' }]}>
-              <Text style={[styles.matchTypeText, { color: colors.PRIMARY }]}>
+            <View className="matchTypeBadge">
+              <Text className="matchTypeText">
                 {story.matchType}
               </Text>
             </View>
@@ -99,21 +153,21 @@ export const SuccessStoryCard: React.FC<SuccessStoryCardProps> = ({
         </View>
 
         {/* 스토리 내용 */}
-        <View style={styles.storyContent}>
-          <Text style={[styles.storyText, { color: colors.TEXT.PRIMARY }]}>
+        <View className="storyContent">
+          <Text className="storyText">
             {story.story}
           </Text>
         </View>
 
         {/* 태그 */}
         {story.tags && story.tags.length > 0 && (
-          <View style={styles.tagContainer}>
+          <View className="tagContainer">
             {story.tags.map((tag, index) => (
               <View
                 key={index}
-                style={[styles.tag, { backgroundColor: colors.PRIMARY + '15' }]}
+                className="tag"
               >
-                <Text style={[styles.tagText, { color: colors.PRIMARY }]}>
+                <Text className="tagText">
                   {tag}
                 </Text>
               </View>
@@ -122,15 +176,9 @@ export const SuccessStoryCard: React.FC<SuccessStoryCardProps> = ({
         )}
 
         {/* 하단 액션 */}
-        <View style={styles.footer}>
+        <View className="footer">
           <TouchableOpacity
-            style={[
-              styles.celebrateButton,
-              {
-                backgroundColor: celebrated ? colors.PRIMARY : colors.BACKGROUND,
-                borderColor: colors.PRIMARY,
-              }
-            ]}
+            className="celebrateButton"
             onPress={handleCelebrate}
             disabled={celebrated}
           >
@@ -144,160 +192,31 @@ export const SuccessStoryCard: React.FC<SuccessStoryCardProps> = ({
               />
             </Animated.View>
             <Text
-              style={[
-                styles.celebrateText,
-                { color: celebrated ? '#FFFFFF' : colors.PRIMARY }
-              ]}
+              className="celebrateText"
             >
               축하해요
             </Text>
-            <View style={[styles.celebrateCount, { backgroundColor: celebrated ? '#FFFFFF20' : colors.PRIMARY + '20' }]}>
-              <Text style={[styles.countText, { color: celebrated ? '#FFFFFF' : colors.PRIMARY }]}>
+            <View className="celebrateCount">
+              <Text className="countText">
                 {story.celebrationCount + (celebrated && !hasCelebrated ? 1 : 0)}
               </Text>
             </View>
           </TouchableOpacity>
 
-          <View style={styles.shareContainer}>
-            <TouchableOpacity style={styles.shareButton}>
+          <View className="shareContainer">
+            <TouchableOpacity className="shareButton">
               <Icon name="share-social-outline" size={20} color={colors.TEXT.SECONDARY} />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* 장식 요소 */}
-        <View style={styles.decorationContainer}>
-          <Text style={styles.decorationEmoji}>✨</Text>
-          <Text style={styles.decorationEmoji}>💕</Text>
+        <View className="decorationContainer">
+          <Text className="decorationEmoji">✨</Text>
+          <Text className="decorationEmoji">💕</Text>
         </View>
       </View>
     </LinearGradient>
   );
 };
 
-const styles = StyleSheet.create({
-  cardGradient: {
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    padding: 1,
-  },
-  card: {
-    borderRadius: 15,
-    padding: 16,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  avatarContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFE5EC',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarEmoji: {
-    fontSize: 20,
-  },
-  headerInfo: {
-    marginLeft: 10,
-    flex: 1,
-  },
-  coupleNames: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  timeAgo: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  matchTypeBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  matchTypeText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  storyContent: {
-    marginBottom: 12,
-  },
-  storyText: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  tagContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 12,
-    marginHorizontal: -4,
-  },
-  tag: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
-    margin: 4,
-  },
-  tagText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  celebrateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  celebrateText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 6,
-  },
-  celebrateCount: {
-    marginLeft: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  countText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  shareContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  shareButton: {
-    padding: 8,
-  },
-  decorationContainer: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    flexDirection: 'row',
-    opacity: 0.3,
-  },
-  decorationEmoji: {
-    fontSize: 12,
-    marginLeft: 4,
-  },
-});

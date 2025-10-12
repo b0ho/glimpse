@@ -1,8 +1,8 @@
 /**
- * 생년월일 입력 컴포넌트
+ * 생년월일 입력 컴포넌트 - NativeWind 버전
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { formatBirthdate } from '@/utils/interest/formValidation';
@@ -18,7 +18,6 @@ interface BirthdateInputFieldProps {
   onToggleAdditionalOptions: () => void;
   birthdate?: string;
   onBirthdateChange?: (value: string) => void;
-  colors: any;
   t: (key: string) => string;
 }
 
@@ -33,7 +32,6 @@ export const BirthdateInputField: React.FC<BirthdateInputFieldProps> = ({
   onToggleAdditionalOptions,
   birthdate,
   onBirthdateChange,
-  colors,
   t,
 }) => {
   const handleChange = (text: string) => {
@@ -55,194 +53,107 @@ export const BirthdateInputField: React.FC<BirthdateInputFieldProps> = ({
   ];
 
   return (
-    <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+    <View className="space-y-4">
+      <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
         {t('interest:placeholders.birthdate')}
       </Text>
       <CrossPlatformInput
-        style={[
-          styles.input,
-          { 
-            backgroundColor: colors.BACKGROUND, 
-            color: colors.TEXT.PRIMARY,
-            borderColor: colors.BORDER,
-          }
-        ]}
+        className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
         placeholder="YYYY-MM-DD"
-        placeholderTextColor={colors.TEXT.LIGHT}
+        placeholderTextColor="#D1D5DB"
         value={value}
         onChangeText={handleChange}
         keyboardType="numeric"
         maxLength={10}
       />
       
+      {/* 추가 옵션 토글 */}
+      <TouchableOpacity
+        className="flex-row items-center"
+        onPress={onToggleAdditionalOptions}
+      >
+        <Icon 
+          name={showAdditionalOptions ? "chevron-up" : "chevron-down"} 
+          size={20} 
+          color="#6B7280"
+        />
+        <Text className="ml-2 text-gray-600 dark:text-gray-400">
+          {t('interest:additionalInfo')}
+        </Text>
+      </TouchableOpacity>
+
+      {showAdditionalOptions && (
+        <>
+          {/* 본인 생년월일 입력 */}
+          <View className="mt-4">
+            <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
+              {t('interest:myBirthdate')}
+            </Text>
+            <CrossPlatformInput
+              className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor="#D1D5DB"
+              value={birthdate}
+              onChangeText={handleBirthdateChange}
+              keyboardType="numeric"
+              maxLength={10}
+            />
+          </View>
+        </>
+      )}
+      
       {/* 이름 입력 필드 (선택) */}
-      <View style={styles.nameSection}>
-        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+      <View className="mt-4">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
           {t('interest:labels.nameOptional')}
         </Text>
         <CrossPlatformInput
-          style={[
-            styles.input,
-            { 
-              backgroundColor: colors.BACKGROUND, 
-              color: colors.TEXT.PRIMARY,
-              borderColor: colors.BORDER,
-            }
-          ]}
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
           placeholder={t('interest:placeholders.nameOptional')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={name}
           onChangeText={onNameChange}
           maxLength={50}
         />
-        <Text style={[styles.hint, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {t('interest:hints.nameDescription')}
         </Text>
       </View>
-      
+
       {/* 성별 선택 */}
-      <View style={styles.genderSection}>
-        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
-          찾고자 하는 성별 <Text style={{ color: colors.ERROR }}>*</Text>
+      <View className="mt-4">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
+          찾고자 하는 성별 <Text className="text-red-500">*</Text>
         </Text>
-        <View style={styles.genderOptions}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {genderOptions.map((option) => (
             <TouchableOpacity
               key={option.id}
-              style={[
-                styles.genderOption,
-                {
-                  backgroundColor: selectedGender === option.id 
-                    ? colors.PRIMARY + '20' 
-                    : colors.SURFACE,
-                  borderColor: selectedGender === option.id 
-                    ? colors.PRIMARY 
-                    : colors.BORDER,
-                }
-              ]}
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: selectedGender === option.id ? '#FEE2E2' : '#FFFFFF',
+                borderWidth: 1,
+                borderColor: selectedGender === option.id ? '#EF4444' : '#D1D5DB',
+                borderRadius: 8,
+                paddingVertical: 12
+              }}
               onPress={() => onGenderSelect?.(option.id)}
             >
               <Icon 
                 name={option.icon} 
                 size={20} 
-                color={selectedGender === option.id ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                color={selectedGender === option.id ? "#EF4444" : "#6B7280"} 
               />
-              <Text style={[
-                styles.genderLabel,
-                { 
-                  color: selectedGender === option.id 
-                    ? colors.PRIMARY 
-                    : colors.TEXT.PRIMARY 
-                }
-              ]}>
+              <Text className="ml-2 text-gray-900 dark:text-white font-medium">
                 {option.label}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
-
-      <TouchableOpacity
-        style={[styles.additionalOptionsButton, { backgroundColor: colors.SURFACE }]}
-        onPress={onToggleAdditionalOptions}
-      >
-        <Icon 
-          name={showAdditionalOptions ? "chevron-up" : "chevron-down"} 
-          size={20} 
-          color={colors.TEXT.SECONDARY} 
-        />
-        <Text style={[styles.additionalOptionsText, { color: colors.TEXT.SECONDARY }]}>
-          {t('interest:additionalInfo')}
-        </Text>
-      </TouchableOpacity>
-
-      {showAdditionalOptions && birthdate !== undefined && (
-        <View style={styles.additionalContainer}>
-          <Text style={[styles.label, { color: colors.TEXT.SECONDARY }]}>
-            {t('interest:exactBirthdate')}
-          </Text>
-          <CrossPlatformInput
-            style={[
-              styles.input,
-              { 
-                backgroundColor: colors.BACKGROUND, 
-                color: colors.TEXT.PRIMARY,
-                borderColor: colors.BORDER,
-              }
-            ]}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={colors.TEXT.LIGHT}
-            value={birthdate}
-            onChangeText={handleBirthdateChange}
-            keyboardType="numeric"
-            maxLength={10}
-          />
-        </View>
-      )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    marginBottom: 12,
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  nameSection: {
-    marginTop: 20,
-  },
-  hint: {
-    fontSize: 12,
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  genderSection: {
-    marginTop: 20,
-  },
-  genderOptions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  genderOption: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: 8,
-  },
-  genderLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  additionalOptionsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginTop: 12,
-  },
-  additionalOptionsText: {
-    marginLeft: 8,
-    fontSize: 14,
-  },
-  additionalContainer: {
-    marginTop: 12,
-  },
-});

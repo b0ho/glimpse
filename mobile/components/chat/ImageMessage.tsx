@@ -3,7 +3,6 @@ import {
   View,
   Image,
   TouchableOpacity,
-  StyleSheet,
   Dimensions,
   ActivityIndicator,
   Modal,
@@ -75,27 +74,24 @@ export const ImageMessage= ({
   return (
     <>
       <TouchableOpacity
-        style={[
-          styles.container,
-          isOwnMessage ? styles.ownMessage : styles.otherMessage,
-        ]}
+        className="container"
         onPress={openFullScreen}
         activeOpacity={0.8}
       >
         {isLoading && (
-          <View style={styles.loadingContainer}>
+          <View className="loadingContainer">
             <ActivityIndicator size="small" color={COLORS.gray} />
           </View>
         )}
         
         {hasError ? (
-          <View style={styles.errorContainer}>
+          <View className="errorContainer">
             <Ionicons name="image-outline" size={40} color={COLORS.gray} />
           </View>
         ) : (
           <Image
             source={{ uri: imageUrl }}
-            style={styles.image}
+            className="image"
             onLoad={handleImageLoad}
             onError={handleImageError}
             resizeMode="cover"
@@ -111,23 +107,23 @@ export const ImageMessage= ({
         onRequestClose={closeFullScreen}
       >
         <TouchableOpacity
-          style={styles.fullScreenContainer}
+          className="fullScreenContainer"
           activeOpacity={1}
           onPress={closeFullScreen}
         >
           <TouchableOpacity
             activeOpacity={1}
-            style={styles.fullScreenImageWrapper}
+            className="fullScreenImageWrapper"
           >
             <Image
               source={{ uri: imageUrl }}
-              style={styles.fullScreenImage}
+              className="fullScreenImage"
               resizeMode="contain"
             />
           </TouchableOpacity>
           
           <TouchableOpacity
-            style={styles.closeButton}
+            className="closeButton"
             onPress={closeFullScreen}
           >
             <Ionicons name="close" size={30} color={COLORS.white} />
@@ -138,67 +134,3 @@ export const ImageMessage= ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: SIZES.radius,
-    overflow: 'hidden',
-    maxWidth: screenWidth * 0.7,
-    minWidth: 200,
-    minHeight: 150,
-  },
-  ownMessage: {
-    alignSelf: 'flex-end',
-  },
-  otherMessage: {
-    alignSelf: 'flex-start',
-  },
-  image: {
-    width: '100%',
-    minHeight: 150,
-    maxHeight: 300,
-  },
-  loadingContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.lightGray,
-  },
-  errorContainer: {
-    width: '100%',
-    height: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.lightGray,
-  },
-  fullScreenContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fullScreenImageWrapper: {
-    width: screenWidth,
-    height: screenHeight,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fullScreenImage: {
-    width: screenWidth,
-    height: screenHeight,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

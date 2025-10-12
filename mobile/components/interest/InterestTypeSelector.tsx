@@ -2,74 +2,62 @@
  * 관심상대 유형 선택 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { InterestType } from '@/types/interest';
 import { INTEREST_TYPE_CONFIG } from '@/constants/interest/interestTypes';
-import { shadowStyles } from '@/utils/shadowStyles';
+import { cn } from '@/lib/utils';
 
 interface InterestTypeSelectorProps {
   selectedType: InterestType | null;
   onTypeSelect: (type: InterestType) => void;
-  colors: any;
   t: (key: string) => string;
 }
 
 export const InterestTypeSelector: React.FC<InterestTypeSelectorProps> = ({
   selectedType,
   onTypeSelect,
-  colors,
   t,
 }) => {
   return (
-    <View style={styles.container}>
-      <Text style={[styles.title, { color: colors.TEXT.PRIMARY }]}>
+    <View className="mb-6">
+      <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
         {t('interest:selectMethodTitle')}
       </Text>
       <ScrollView 
-        contentContainerStyle={styles.grid}
+        contentContainerClassName="flex-row flex-wrap justify-between"
         showsVerticalScrollIndicator={false}
       >
         {INTEREST_TYPE_CONFIG.map((config) => (
           <TouchableOpacity
             key={config.type}
-            style={[
-              styles.typeCard,
-              {
-                backgroundColor: colors.SURFACE,
-                borderColor: selectedType === config.type ? config.color : colors.BORDER,
-                borderWidth: selectedType === config.type ? 2 : 1,
-              }
-            ]}
+            className={cn(
+              "w-[48%] bg-white dark:bg-gray-800 rounded-xl p-4 mb-3",
+              "border-2",
+              selectedType === config.type
+                ? "border-red-500"
+                : "border-gray-200 dark:border-gray-700"
+            )}
             onPress={() => onTypeSelect(config.type)}
             activeOpacity={0.7}
           >
-            <View style={[
-              styles.iconContainer,
-              { 
-                backgroundColor: `${config.color}20`,
-              }
-            ]}>
-              <Icon
-                name={config.icon}
-                size={24}
-                color={config.color}
-              />
-            </View>
-            <Text style={[
-              styles.typeLabel,
-              { 
-                color: selectedType === config.type ? config.color : colors.TEXT.PRIMARY,
-                fontWeight: selectedType === config.type ? '600' : '500',
-              }
-            ]}>
-              {t(`interest:types.${config.type}`)}
-            </Text>
-            {selectedType === config.type && (
-              <View style={[styles.checkMark, { backgroundColor: config.color }]}>
-                <Icon name="checkmark" size={14} color={colors.TEXT.WHITE} />
+            <View className="items-center">
+              <View className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 items-center justify-center mb-2">
+                <Icon
+                  name={config.icon}
+                  size={24}
+                  color={config.color}
+                />
               </View>
-            )}
+              <Text className="text-sm text-gray-700 dark:text-gray-300 text-center">
+                {t(`interest:types.${config.type}`)}
+              </Text>
+              {selectedType === config.type && (
+                <View className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full items-center justify-center">
+                  <Icon name="checkmark" size={14} color="#FFFFFF" />
+                </View>
+              )}
+            </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -77,54 +65,3 @@ export const InterestTypeSelector: React.FC<InterestTypeSelectorProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 8,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 20,
-    marginTop: 8,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    paddingHorizontal: 2,
-  },
-  typeCard: {
-    width: '31%',
-    paddingVertical: 20,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 12,
-    position: 'relative',
-    ...shadowStyles.small,
-  },
-  iconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  typeLabel: {
-    marginTop: 8,
-    fontSize: 13,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  checkMark: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

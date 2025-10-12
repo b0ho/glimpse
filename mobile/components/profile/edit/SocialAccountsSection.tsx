@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity} from 'react-native';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useTheme } from '@/hooks/useTheme';
@@ -29,9 +29,9 @@ export const SocialAccountsSection: React.FC<SocialAccountsSectionProps> = ({
   const { colors } = useTheme();
   
   return (
-    <View style={styles.section}>
-      <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.TEXT.PRIMARY }]}>
+    <View className="section">
+      <View className="sectionHeader">
+        <Text className="sectionTitle">
           소셜 계정
         </Text>
         <TouchableOpacity onPress={onToggle}>
@@ -46,16 +46,16 @@ export const SocialAccountsSection: React.FC<SocialAccountsSectionProps> = ({
       {showSocialIds && (
         <View>
           {socialIds.map((social, index) => (
-            <View key={index} style={styles.socialIdContainer}>
+            <View key={index} className="socialIdContainer">
               <CrossPlatformInput
-                style={[styles.socialInput, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+                className="socialInput"
                 placeholder="플랫폼 (인스타그램, 트위터 등)"
                 placeholderTextColor={colors.TEXT.TERTIARY}
                 value={social.platform}
                 onChangeText={(value) => onUpdate(index, 'platform', value)}
               />
               <CrossPlatformInput
-                style={[styles.socialInput, { color: colors.TEXT.PRIMARY, borderColor: colors.BORDER }]}
+                className="socialInput"
                 placeholder="아이디"
                 placeholderTextColor={colors.TEXT.TERTIARY}
                 value={social.id}
@@ -67,9 +67,9 @@ export const SocialAccountsSection: React.FC<SocialAccountsSectionProps> = ({
             </View>
           ))}
           
-          <TouchableOpacity style={[styles.addButton, { borderColor: colors.PRIMARY }]} onPress={onAdd}>
+          <TouchableOpacity className="addButton" onPress={onAdd}>
             <Icon name="add" size={24} color={colors.PRIMARY} />
-            <Text style={[styles.addButtonText, { color: colors.PRIMARY }]}>
+            <Text className="addButtonText">
               소셜 계정 추가
             </Text>
           </TouchableOpacity>
@@ -79,46 +79,3 @@ export const SocialAccountsSection: React.FC<SocialAccountsSectionProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  section: {
-    padding: 20,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  socialIdContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 8,
-  },
-  socialInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 14,
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 12,
-    gap: 8,
-  },
-  addButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-});

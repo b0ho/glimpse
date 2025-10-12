@@ -2,7 +2,7 @@
  * 성공 스토리 섹션 컴포넌트
  */
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView} from 'react-native';
 import { SuccessStoryCard } from '@/components/successStory/SuccessStoryCard';
 import { SuccessStory } from '@/types/successStory';
 import { useTheme } from '@/hooks/useTheme';
@@ -27,12 +27,12 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
   }
 
   return (
-    <View style={styles.successStoriesContainer}>
-      <View style={styles.successStoriesHeader}>
-        <Text style={[styles.successStoriesTitle, { color: colors.TEXT.PRIMARY }]}>
+    <View className="successStoriesContainer">
+      <View className="successStoriesHeader">
+        <Text className="successStoriesTitle">
           💑 {t('home:successStories.title')}
         </Text>
-        <Text style={[styles.successStoriesSubtitle, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="successStoriesSubtitle">
           {t('home:successStories.subtitle')}
         </Text>
       </View>
@@ -55,24 +55,3 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  successStoriesContainer: {
-    marginVertical: 16,
-  },
-  successStoriesHeader: {
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  successStoriesTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  successStoriesSubtitle: {
-    fontSize: 13,
-  },
-  successStoriesList: {
-    paddingHorizontal: 16,
-    gap: 12,
-  },
-});

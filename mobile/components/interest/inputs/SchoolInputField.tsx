@@ -2,7 +2,7 @@
  * 학교 정보 입력 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity} from 'react-native';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 
@@ -20,7 +20,6 @@ interface SchoolInputFieldProps {
   onNameChange?: (name: string) => void;
   selectedGender?: 'male' | 'female' | 'other';
   onGenderSelect?: (gender: 'male' | 'female' | 'other') => void;
-  colors: any;
   t: (key: string) => string;
 }
 
@@ -45,7 +44,6 @@ export const SchoolInputField: React.FC<SchoolInputFieldProps> = ({
   onNameChange,
   selectedGender = 'male',
   onGenderSelect,
-  colors,
   t,
 }) => {
   const genderOptions = [
@@ -54,77 +52,62 @@ export const SchoolInputField: React.FC<SchoolInputFieldProps> = ({
     { id: 'other' as const, label: t('common:gender.other'), icon: 'help-outline' },
   ];
   return (
-    <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.TEXT.SECONDARY }]}>
-        {t('interest:schoolLevel')} *
-      </Text>
-      <View style={styles.levelButtons}>
-        {SCHOOL_LEVELS.map((level) => (
-          <TouchableOpacity
-            key={level.id}
-            style={[
-              styles.levelButton,
-              {
-                backgroundColor: selectedLevel === level.id 
-                  ? colors.PRIMARY 
-                  : colors.SURFACE,
-                borderColor: selectedLevel === level.id 
-                  ? colors.PRIMARY 
-                  : colors.BORDER,
-              }
-            ]}
-            onPress={() => onLevelSelect(level.id)}
-          >
-            <Text style={[
-              styles.levelButtonText,
-              { 
-                color: selectedLevel === level.id 
-                  ? colors.TEXT.WHITE 
-                  : colors.TEXT.PRIMARY 
-              }
-            ]}>
-              {level.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+    <View className="space-y-4">
+      <View className="space-y-3">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
+          {t('interest:schoolLevel')} *
+        </Text>
+        <View className="flex-row flex-wrap space-x-2">
+          {SCHOOL_LEVELS.map((level) => (
+            <TouchableOpacity
+              key={level.id}
+              onPress={() => onLevelSelect(level.id)}
+              style={{
+                backgroundColor: selectedLevel === level.id ? '#EF4444' : 'transparent',
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: selectedLevel === level.id ? '#EF4444' : '#D1D5DB',
+                marginBottom: 8
+              }}
+            >
+              <Text 
+                style={{
+                  color: selectedLevel === level.id ? '#FFFFFF' : '#6B7280',
+                  fontSize: 14,
+                  fontWeight: '500'
+                }}
+              >
+                {level.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
-      <View style={styles.fieldContainer}>
-        <Text style={[styles.label, { color: colors.TEXT.SECONDARY }]}>
+      <View className="space-y-2">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
           {t('interest:schoolName')} *
         </Text>
         <CrossPlatformInput
-          style={[
-            styles.input,
-            { 
-              backgroundColor: colors.BACKGROUND, 
-              color: colors.TEXT.PRIMARY,
-              borderColor: colors.BORDER,
-            }
-          ]}
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
           placeholder={t('interest:schoolPlaceholder')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={schoolName}
           onChangeText={onSchoolNameChange}
         />
       </View>
 
       {(selectedLevel === 'university' || selectedLevel === 'graduate') && major !== undefined && (
-        <View style={styles.fieldContainer}>
-          <Text style={[styles.label, { color: colors.TEXT.SECONDARY }]}>
+        <View className="space-y-2">
+          <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
             {t('interest:major')}
           </Text>
           <CrossPlatformInput
-            style={[
-              styles.input,
-              { 
-                backgroundColor: colors.BACKGROUND, 
-                color: colors.TEXT.PRIMARY,
-                borderColor: colors.BORDER,
-              }
-            ]}
+            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
             placeholder={t('interest:majorPlaceholder')}
-            placeholderTextColor={colors.TEXT.LIGHT}
+            placeholderTextColor="#D1D5DB"
             value={major}
             onChangeText={onMajorChange}
           />
@@ -132,65 +115,55 @@ export const SchoolInputField: React.FC<SchoolInputFieldProps> = ({
       )}
 
       {/* 이름 입력 필드 (선택) */}
-      <View style={styles.nameSection}>
-        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+      <View className="space-y-2">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
           {t('interest:labels.nameOptional')}
         </Text>
         <CrossPlatformInput
-          style={[
-            styles.input,
-            { 
-              backgroundColor: colors.BACKGROUND, 
-              color: colors.TEXT.PRIMARY,
-              borderColor: colors.BORDER,
-            }
-          ]}
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
           placeholder={t('interest:placeholders.nameOptional')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={name}
           onChangeText={onNameChange}
           maxLength={50}
         />
-        <Text style={[styles.hint, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="text-sm text-gray-600 dark:text-gray-400">
           {t('interest:hints.nameDescription')}
         </Text>
       </View>
 
       {/* 성별 선택 */}
-      <View style={styles.genderSection}>
-        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
-          찾고자 하는 성별 <Text style={{ color: colors.ERROR }}>*</Text>
+      <View className="space-y-3">
+        <Text className="text-base font-medium text-gray-900 dark:text-white">
+          찾고자 하는 성별 <Text className="text-red-500">*</Text>
         </Text>
-        <View style={styles.genderOptions}>
+        <View className="flex-row space-x-3">
           {genderOptions.map((option) => (
             <TouchableOpacity
               key={option.id}
-              style={[
-                styles.genderOption,
-                {
-                  backgroundColor: selectedGender === option.id 
-                    ? colors.PRIMARY + '20' 
-                    : colors.SURFACE,
-                  borderColor: selectedGender === option.id 
-                    ? colors.PRIMARY 
-                    : colors.BORDER,
-                }
-              ]}
+              className="flex-row items-center space-x-2 flex-1"
               onPress={() => onGenderSelect?.(option.id)}
+              style={{
+                backgroundColor: selectedGender === option.id ? '#EF4444' : 'transparent',
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: selectedGender === option.id ? '#EF4444' : '#D1D5DB'
+              }}
             >
               <Icon 
                 name={option.icon} 
                 size={20} 
-                color={selectedGender === option.id ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                color={selectedGender === option.id ? '#FFFFFF' : '#6B7280'} 
               />
-              <Text style={[
-                styles.genderLabel,
-                { 
-                  color: selectedGender === option.id 
-                    ? colors.PRIMARY 
-                    : colors.TEXT.PRIMARY 
-                }
-              ]}> 
+              <Text 
+                style={{
+                  color: selectedGender === option.id ? '#FFFFFF' : '#6B7280',
+                  fontSize: 14,
+                  fontWeight: '500'
+                }}
+              >
                 {option.label}
               </Text>
             </TouchableOpacity>
@@ -201,68 +174,3 @@ export const SchoolInputField: React.FC<SchoolInputFieldProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-  fieldContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  levelButtons: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 16,
-  },
-  levelButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  levelButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-  },
-  nameSection: {
-    marginTop: 20,
-  },
-  hint: {
-    fontSize: 12,
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  genderSection: {
-    marginTop: 20,
-  },
-  genderOptions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  genderOption: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: 8,
-  },
-  genderLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-});

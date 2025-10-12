@@ -2,7 +2,7 @@
  * 이메일 입력 컴포넌트
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity} from 'react-native';
 import { CrossPlatformInput } from '@/components/CrossPlatformInput';
 import { IconWrapper as Icon } from '@/components/IconWrapper';
 
@@ -13,7 +13,6 @@ interface EmailInputFieldProps {
   onNameChange?: (name: string) => void;
   selectedGender?: 'male' | 'female' | 'other';
   onGenderSelect?: (gender: 'male' | 'female' | 'other') => void;
-  colors: any;
   t: (key: string) => string;
 }
 
@@ -24,7 +23,6 @@ export const EmailInputField: React.FC<EmailInputFieldProps> = ({
   onNameChange,
   selectedGender = 'male',
   onGenderSelect,
-  colors,
   t,
 }) => {
   const genderOptions = [
@@ -33,21 +31,14 @@ export const EmailInputField: React.FC<EmailInputFieldProps> = ({
     { id: 'other' as const, label: t('common:gender.other'), icon: 'help-outline' },
   ];
   return (
-    <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+    <View className="space-y-4">
+      <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
         {t('interest:placeholders.email')}
       </Text>
       <CrossPlatformInput
-        style={[
-          styles.input,
-          { 
-            backgroundColor: colors.BACKGROUND, 
-            color: colors.TEXT.PRIMARY,
-            borderColor: colors.BORDER,
-          }
-        ]}
+        className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
         placeholder="example@email.com"
-        placeholderTextColor={colors.TEXT.LIGHT}
+        placeholderTextColor="#D1D5DB"
         value={value}
         onChangeText={onChange}
         keyboardType="email-address"
@@ -56,65 +47,51 @@ export const EmailInputField: React.FC<EmailInputFieldProps> = ({
       />
       
       {/* 이름 입력 필드 (선택) */}
-      <View style={styles.nameSection}>
-        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
+      <View className="mt-4">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
           {t('interest:labels.nameOptional')}
         </Text>
         <CrossPlatformInput
-          style={[
-            styles.input,
-            { 
-              backgroundColor: colors.BACKGROUND, 
-              color: colors.TEXT.PRIMARY,
-              borderColor: colors.BORDER,
-            }
-          ]}
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white"
           placeholder={t('interest:placeholders.nameOptional')}
-          placeholderTextColor={colors.TEXT.LIGHT}
+          placeholderTextColor="#D1D5DB"
           value={name}
           onChangeText={onNameChange}
           maxLength={50}
         />
-        <Text style={[styles.hint, { color: colors.TEXT.SECONDARY }]}>
+        <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {t('interest:hints.nameDescription')}
         </Text>
       </View>
 
       {/* 성별 선택 */}
-      <View style={styles.genderSection}>
-        <Text style={[styles.label, { color: colors.TEXT.PRIMARY }]}>
-          찾고자 하는 성별 <Text style={{ color: colors.ERROR }}>*</Text>
+      <View className="mt-4">
+        <Text className="text-base font-medium text-gray-900 dark:text-white mb-2">
+          찾고자 하는 성별 <Text className="text-red-500">*</Text>
         </Text>
-        <View style={styles.genderOptions}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {genderOptions.map((option) => (
             <TouchableOpacity
               key={option.id}
-              style={[
-                styles.genderOption,
-                {
-                  backgroundColor: selectedGender === option.id 
-                    ? colors.PRIMARY + '20' 
-                    : colors.SURFACE,
-                  borderColor: selectedGender === option.id 
-                    ? colors.PRIMARY 
-                    : colors.BORDER,
-                }
-              ]}
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: selectedGender === option.id ? '#FEE2E2' : '#FFFFFF',
+                borderWidth: 1,
+                borderColor: selectedGender === option.id ? '#EF4444' : '#D1D5DB',
+                borderRadius: 8,
+                paddingVertical: 12
+              }}
               onPress={() => onGenderSelect?.(option.id)}
             >
               <Icon 
                 name={option.icon} 
                 size={20} 
-                color={selectedGender === option.id ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+                color={selectedGender === option.id ? "#EF4444" : "#6B7280"} 
               />
-              <Text style={[
-                styles.genderLabel,
-                { 
-                  color: selectedGender === option.id 
-                    ? colors.PRIMARY 
-                    : colors.TEXT.PRIMARY 
-                }
-              ]}>
+              <Text className="ml-2 text-gray-900 dark:text-white font-medium">
                 {option.label}
               </Text>
             </TouchableOpacity>
@@ -125,50 +102,3 @@ export const EmailInputField: React.FC<EmailInputFieldProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    marginBottom: 12,
-  },
-  nameSection: {
-    marginTop: 20,
-  },
-  hint: {
-    fontSize: 12,
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  genderSection: {
-    marginTop: 20,
-  },
-  genderOptions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  genderOption: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: 8,
-  },
-  genderLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-});

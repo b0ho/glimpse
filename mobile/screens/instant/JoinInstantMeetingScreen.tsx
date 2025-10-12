@@ -1,8 +1,14 @@
+/**
+ * 즉석 미팅 참가 화면 (NativeWind v4 버전)
+ *
+ * @screen
+ * @description 즉석 미팅 참가 코드를 입력받고 사용자의 특징 정보를 3단계로 수집하는 온보딩 화면
+ */
+
 import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
   TextInput,
@@ -16,16 +22,43 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { RootNavigationProp, JoinInstantMeetingScreenProps } from '@/types/navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useInstantMeetingStore } from '@/store/instantMeetingStore';
-import { COLORS_EXTENDED as COLORS, FONTS, SIZES } from '@/utils/constants';
 
 interface FeatureOption {
   label: string;
   value: string;
 }
 
-// 이 배열들은 컴포넌트 내부에서 번역됩니다.
-
-
+/**
+ * 즉석 미팅 참가 컴포넌트
+ *
+ * @component
+ * @returns {JSX.Element} 3단계 특징 입력 폼
+ *
+ * @description
+ * 즉석 미팅에 참가하기 위한 정보를 3단계로 수집하는 화면입니다.
+ * - Step 1: 닉네임 입력 (미팅 내에서 사용할 별명)
+ * - Step 2: 내 특징 입력 (상의/하의 색상, 안경 착용 여부, 특별한 특징)
+ * - Step 3: 찾는 사람 특징 입력 (상대방의 옷차림 및 특징)
+ * - 각 단계별 유효성 검증 및 필수 항목 확인
+ * - KeyboardAvoidingView로 모바일 키보드 대응
+ * - 제출 시 자동 매칭 시스템에 등록
+ *
+ * @navigation
+ * - From: InstantTab (QR 코드 스캔 또는 코드 입력)
+ * - To: InstantMeeting (참가 완료 후 replace)
+ *
+ * @example
+ * ```tsx
+ * // QR 코드 스캔 후 이동
+ * navigation.navigate('JoinInstantMeeting', { code: 'MEETING123' });
+ *
+ * // 수동 코드 입력 후 이동
+ * navigation.navigate('JoinInstantMeeting', { code: enteredCode });
+ * ```
+ *
+ * @category Screen
+ * @subcategory Instant
+ */
 export function JoinInstantMeetingScreen() {
   const navigation = useNavigation<RootNavigationProp>();
   const route = useRoute<JoinInstantMeetingScreenProps['route']>();
@@ -123,16 +156,18 @@ export function JoinInstantMeetingScreen() {
   };
 
   const renderStep1 = () => (
-    <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>{t('instant:join.step1.title')}</Text>
-      <Text style={styles.stepDescription}>
+    <View className="flex-1 p-4">
+      <Text className="text-gray-900 dark:text-white text-2xl font-bold text-center mb-3">
+        {t('instant:join.step1.title')}
+      </Text>
+      <Text className="text-gray-600 dark:text-gray-400 text-sm text-center mb-8 leading-6">
         {t('instant:join.step1.description')}
       </Text>
       
       <TextInput
-        style={styles.nicknameInput}
+        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-lg text-gray-900 dark:text-white text-center"
         placeholder={t('instant:join.step1.placeholder')}
-        placeholderTextColor={COLORS.textLight}
+        placeholderTextColor="#9CA3AF"
         value={nickname}
         onChangeText={setNickname}
         autoFocus
@@ -141,30 +176,38 @@ export function JoinInstantMeetingScreen() {
   );
 
   const renderStep2 = () => (
-    <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>{t('instant:join.step2.title')}</Text>
-      <Text style={styles.stepDescription}>
+    <View className="flex-1 p-4">
+      <Text className="text-gray-900 dark:text-white text-2xl font-bold text-center mb-3">
+        {t('instant:join.step2.title')}
+      </Text>
+      <Text className="text-gray-600 dark:text-gray-400 text-sm text-center mb-8 leading-6">
         {t('instant:join.step2.description')}
       </Text>
 
-      <ScrollView style={styles.featureContainer}>
+      <ScrollView className="flex-1">
         {/* 상의 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('instant:join.clothing.upperWear')} *</Text>
-          <View style={styles.optionGrid}>
+        <View className="mb-6">
+          <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-4">
+            {t('instant:join.clothing.upperWear')} *
+          </Text>
+          <View className="flex-row flex-wrap -mx-1">
             {UPPER_WEAR_OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.value}
-                style={[
-                  styles.optionButton,
-                  myUpperWear === option.value && styles.optionButtonActive
-                ]}
+                className={`bg-white dark:bg-gray-800 border rounded-lg py-3 px-4 m-1 ${
+                  myUpperWear === option.value 
+                    ? 'border-blue-500 bg-blue-500 dark:bg-blue-600' 
+                    : 'border-gray-200 dark:border-gray-700'
+                }`}
                 onPress={() => setMyUpperWear(option.value)}
               >
-                <Text style={[
-                  styles.optionText,
-                  myUpperWear === option.value && styles.optionTextActive
-                ]}>
+                <Text
+                  className={`text-sm ${
+                    myUpperWear === option.value 
+                      ? 'text-white' 
+                      : 'text-gray-900 dark:text-white'
+                  }`}
+                >
                   {option.label}
                 </Text>
               </TouchableOpacity>
@@ -173,22 +216,26 @@ export function JoinInstantMeetingScreen() {
         </View>
 
         {/* 하의 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>하의 *</Text>
-          <View style={styles.optionGrid}>
+        <View className="mb-6">
+          <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-4">하의 *</Text>
+          <View className="flex-row flex-wrap -mx-1">
             {LOWER_WEAR_OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.value}
-                style={[
-                  styles.optionButton,
-                  myLowerWear === option.value && styles.optionButtonActive
-                ]}
+                className={`bg-white dark:bg-gray-800 border rounded-lg py-3 px-4 m-1 ${
+                  myLowerWear === option.value 
+                    ? 'border-blue-500 bg-blue-500 dark:bg-blue-600' 
+                    : 'border-gray-200 dark:border-gray-700'
+                }`}
                 onPress={() => setMyLowerWear(option.value)}
               >
-                <Text style={[
-                  styles.optionText,
-                  myLowerWear === option.value && styles.optionTextActive
-                ]}>
+                <Text
+                  className={`text-sm ${
+                    myLowerWear === option.value 
+                      ? 'text-white' 
+                      : 'text-gray-900 dark:text-white'
+                  }`}
+                >
                   {option.label}
                 </Text>
               </TouchableOpacity>
@@ -197,34 +244,44 @@ export function JoinInstantMeetingScreen() {
         </View>
 
         {/* 안경 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('instant:join.glasses.title')}</Text>
-          <View style={styles.radioGroup}>
+        <View className="mb-6">
+          <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-4">
+            {t('instant:join.glasses.title')}
+          </Text>
+          <View className="flex-row gap-4">
             <TouchableOpacity
-              style={[
-                styles.radioButton,
-                myGlasses === true && styles.radioButtonActive
-              ]}
+              className={`flex-1 bg-white dark:bg-gray-800 border rounded-lg py-4 items-center ${
+                myGlasses === true 
+                  ? 'border-blue-500 bg-blue-500 dark:bg-blue-600' 
+                  : 'border-gray-200 dark:border-gray-700'
+              }`}
               onPress={() => setMyGlasses(true)}
             >
-              <Text style={[
-                styles.radioText,
-                myGlasses === true && styles.radioTextActive
-              ]}>
+              <Text
+                className={`text-sm ${
+                  myGlasses === true 
+                    ? 'text-white' 
+                    : 'text-gray-900 dark:text-white'
+                }`}
+              >
                 {t('instant:join.glasses.wearing')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                styles.radioButton,
-                myGlasses === false && styles.radioButtonActive
-              ]}
+              className={`flex-1 bg-white dark:bg-gray-800 border rounded-lg py-4 items-center ${
+                myGlasses === false 
+                  ? 'border-blue-500 bg-blue-500 dark:bg-blue-600' 
+                  : 'border-gray-200 dark:border-gray-700'
+              }`}
               onPress={() => setMyGlasses(false)}
             >
-              <Text style={[
-                styles.radioText,
-                myGlasses === false && styles.radioTextActive
-              ]}>
+              <Text
+                className={`text-sm ${
+                  myGlasses === false 
+                    ? 'text-white' 
+                    : 'text-gray-900 dark:text-white'
+                }`}
+              >
                 {t('instant:join.glasses.notWearing')}
               </Text>
             </TouchableOpacity>
@@ -232,12 +289,14 @@ export function JoinInstantMeetingScreen() {
         </View>
 
         {/* 특별한 특징 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('instant:join.features.title')}</Text>
+        <View className="mb-6">
+          <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-4">
+            {t('instant:join.features.title')}
+          </Text>
           <TextInput
-            style={styles.textInput}
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-sm text-gray-900 dark:text-white"
             placeholder={t('instant:join.features.myPlaceholder')}
-            placeholderTextColor={COLORS.textLight}
+            placeholderTextColor="#9CA3AF"
             value={mySpecialFeatures}
             onChangeText={setMySpecialFeatures}
           />
@@ -247,30 +306,38 @@ export function JoinInstantMeetingScreen() {
   );
 
   const renderStep3 = () => (
-    <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>{t('instant:join.step3.title')}</Text>
-      <Text style={styles.stepDescription}>
+    <View className="flex-1 p-4">
+      <Text className="text-gray-900 dark:text-white text-2xl font-bold text-center mb-3">
+        {t('instant:join.step3.title')}
+      </Text>
+      <Text className="text-gray-600 dark:text-gray-400 text-sm text-center mb-8 leading-6">
         {t('instant:join.step3.description')}
       </Text>
 
-      <ScrollView style={styles.featureContainer}>
+      <ScrollView className="flex-1">
         {/* 상의 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('instant:join.clothing.upperWear')} *</Text>
-          <View style={styles.optionGrid}>
+        <View className="mb-6">
+          <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-4">
+            {t('instant:join.clothing.upperWear')} *
+          </Text>
+          <View className="flex-row flex-wrap -mx-1">
             {UPPER_WEAR_OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.value}
-                style={[
-                  styles.optionButton,
-                  lookingUpperWear === option.value && styles.optionButtonActive
-                ]}
+                className={`bg-white dark:bg-gray-800 border rounded-lg py-3 px-4 m-1 ${
+                  lookingUpperWear === option.value 
+                    ? 'border-blue-500 bg-blue-500 dark:bg-blue-600' 
+                    : 'border-gray-200 dark:border-gray-700'
+                }`}
                 onPress={() => setLookingUpperWear(option.value)}
               >
-                <Text style={[
-                  styles.optionText,
-                  lookingUpperWear === option.value && styles.optionTextActive
-                ]}>
+                <Text
+                  className={`text-sm ${
+                    lookingUpperWear === option.value 
+                      ? 'text-white' 
+                      : 'text-gray-900 dark:text-white'
+                  }`}
+                >
                   {option.label}
                 </Text>
               </TouchableOpacity>
@@ -279,22 +346,26 @@ export function JoinInstantMeetingScreen() {
         </View>
 
         {/* 하의 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>하의 *</Text>
-          <View style={styles.optionGrid}>
+        <View className="mb-6">
+          <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-4">하의 *</Text>
+          <View className="flex-row flex-wrap -mx-1">
             {LOWER_WEAR_OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.value}
-                style={[
-                  styles.optionButton,
-                  lookingLowerWear === option.value && styles.optionButtonActive
-                ]}
+                className={`bg-white dark:bg-gray-800 border rounded-lg py-3 px-4 m-1 ${
+                  lookingLowerWear === option.value 
+                    ? 'border-blue-500 bg-blue-500 dark:bg-blue-600' 
+                    : 'border-gray-200 dark:border-gray-700'
+                }`}
                 onPress={() => setLookingLowerWear(option.value)}
               >
-                <Text style={[
-                  styles.optionText,
-                  lookingLowerWear === option.value && styles.optionTextActive
-                ]}>
+                <Text
+                  className={`text-sm ${
+                    lookingLowerWear === option.value 
+                      ? 'text-white' 
+                      : 'text-gray-900 dark:text-white'
+                  }`}
+                >
                   {option.label}
                 </Text>
               </TouchableOpacity>
@@ -303,48 +374,62 @@ export function JoinInstantMeetingScreen() {
         </View>
 
         {/* 안경 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('instant:join.glasses.title')}</Text>
-          <View style={styles.radioGroup}>
+        <View className="mb-6">
+          <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-4">
+            {t('instant:join.glasses.title')}
+          </Text>
+          <View className="flex-row gap-3">
             <TouchableOpacity
-              style={[
-                styles.radioButton,
-                lookingGlasses === true && styles.radioButtonActive
-              ]}
+              className={`flex-1 bg-white dark:bg-gray-800 border rounded-lg py-4 items-center ${
+                lookingGlasses === true 
+                  ? 'border-blue-500 bg-blue-500 dark:bg-blue-600' 
+                  : 'border-gray-200 dark:border-gray-700'
+              }`}
               onPress={() => setLookingGlasses(true)}
             >
-              <Text style={[
-                styles.radioText,
-                lookingGlasses === true && styles.radioTextActive
-              ]}>
+              <Text
+                className={`text-sm ${
+                  lookingGlasses === true 
+                    ? 'text-white' 
+                    : 'text-gray-900 dark:text-white'
+                }`}
+              >
                 {t('instant:join.glasses.wearing')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                styles.radioButton,
-                lookingGlasses === false && styles.radioButtonActive
-              ]}
+              className={`flex-1 bg-white dark:bg-gray-800 border rounded-lg py-4 items-center ${
+                lookingGlasses === false 
+                  ? 'border-blue-500 bg-blue-500 dark:bg-blue-600' 
+                  : 'border-gray-200 dark:border-gray-700'
+              }`}
               onPress={() => setLookingGlasses(false)}
             >
-              <Text style={[
-                styles.radioText,
-                lookingGlasses === false && styles.radioTextActive
-              ]}>
+              <Text
+                className={`text-sm ${
+                  lookingGlasses === false 
+                    ? 'text-white' 
+                    : 'text-gray-900 dark:text-white'
+                }`}
+              >
                 {t('instant:join.glasses.notWearing')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                styles.radioButton,
-                lookingGlasses === null && styles.radioButtonActive
-              ]}
+              className={`flex-1 bg-white dark:bg-gray-800 border rounded-lg py-4 items-center ${
+                lookingGlasses === null 
+                  ? 'border-blue-500 bg-blue-500 dark:bg-blue-600' 
+                  : 'border-gray-200 dark:border-gray-700'
+              }`}
               onPress={() => setLookingGlasses(null)}
             >
-              <Text style={[
-                styles.radioText,
-                lookingGlasses === null && styles.radioTextActive
-              ]}>
+              <Text
+                className={`text-sm ${
+                  lookingGlasses === null 
+                    ? 'text-white' 
+                    : 'text-gray-900 dark:text-white'
+                }`}
+              >
                 {t('instant:join.glasses.doesntMatter')}
               </Text>
             </TouchableOpacity>
@@ -352,12 +437,14 @@ export function JoinInstantMeetingScreen() {
         </View>
 
         {/* 특별한 특징 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('instant:join.features.title')}</Text>
+        <View className="mb-6">
+          <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-4">
+            {t('instant:join.features.title')}
+          </Text>
           <TextInput
-            style={styles.textInput}
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-sm text-gray-900 dark:text-white"
             placeholder={t('instant:join.features.targetPlaceholder')}
-            placeholderTextColor={COLORS.textLight}
+            placeholderTextColor="#9CA3AF"
             value={lookingSpecialFeatures}
             onChangeText={setLookingSpecialFeatures}
           />
@@ -367,17 +454,19 @@ export function JoinInstantMeetingScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
+      <View className="flex-row items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
         <TouchableOpacity onPress={() => step > 1 ? setStep(step - 1) : navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color={COLORS.text} />
+          <Icon name="arrow-back" size={24} className="text-gray-900 dark:text-white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('instant:join.title', { step })}</Text>
-        <View style={{ width: 24 }} />
+        <Text className="text-gray-900 dark:text-white text-lg font-semibold">
+          {t('instant:join.title', { step })}
+        </Text>
+        <View className="w-6" />
       </View>
 
       <KeyboardAvoidingView 
-        style={styles.content}
+        className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {step === 1 && renderStep1()}
@@ -385,158 +474,24 @@ export function JoinInstantMeetingScreen() {
         {step === 3 && renderStep3()}
       </KeyboardAvoidingView>
 
-      <View style={styles.footer}>
+      <View className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <TouchableOpacity
-          style={[
-            styles.nextButton,
-            isSubmitting && styles.nextButtonDisabled
-          ]}
+          className={`bg-blue-500 dark:bg-blue-600 rounded-lg py-4 items-center ${
+            isSubmitting ? 'opacity-50' : ''
+          }`}
           onPress={handleNext}
           disabled={isSubmitting}
         >
-          <Text style={styles.nextButtonText}>
-            {isSubmitting ? t('instant:join.processing') : step === 3 ? t('instant:join.complete') : t('instant:join.next')}
+          <Text className="text-white text-lg font-semibold">
+            {isSubmitting 
+              ? t('instant:join.processing') 
+              : step === 3 
+                ? t('instant:join.complete') 
+                : t('instant:join.next')
+            }
           </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SIZES.padding,
-    paddingVertical: SIZES.padding * 0.5,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  headerTitle: {
-    ...FONTS.h4,
-    color: COLORS.text,
-  },
-  content: {
-    flex: 1,
-  },
-  stepContainer: {
-    flex: 1,
-    padding: SIZES.padding,
-  },
-  stepTitle: {
-    ...FONTS.h2,
-    color: COLORS.text,
-    marginBottom: SIZES.base,
-    textAlign: 'center',
-  },
-  stepDescription: {
-    ...FONTS.body3,
-    color: COLORS.textLight,
-    marginBottom: SIZES.padding * 2,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  nicknameInput: {
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: SIZES.radius,
-    padding: SIZES.padding,
-    ...FONTS.h3,
-    color: COLORS.text,
-    textAlign: 'center',
-  },
-  featureContainer: {
-    flex: 1,
-  },
-  section: {
-    marginBottom: SIZES.padding * 1.5,
-  },
-  sectionTitle: {
-    ...FONTS.h4,
-    color: COLORS.text,
-    marginBottom: SIZES.padding,
-  },
-  optionGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginHorizontal: -SIZES.base / 2,
-  },
-  optionButton: {
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: SIZES.radius,
-    paddingVertical: SIZES.padding * 0.75,
-    paddingHorizontal: SIZES.padding,
-    margin: SIZES.base / 2,
-  },
-  optionButtonActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
-  },
-  optionText: {
-    ...FONTS.body3,
-    color: COLORS.text,
-  },
-  optionTextActive: {
-    color: COLORS.white,
-  },
-  radioGroup: {
-    flexDirection: 'row',
-    gap: SIZES.padding,
-  },
-  radioButton: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: SIZES.radius,
-    paddingVertical: SIZES.padding,
-    alignItems: 'center',
-  },
-  radioButtonActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
-  },
-  radioText: {
-    ...FONTS.body3,
-    color: COLORS.text,
-  },
-  radioTextActive: {
-    color: COLORS.white,
-  },
-  textInput: {
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: SIZES.radius,
-    padding: SIZES.padding,
-    ...FONTS.body3,
-    color: COLORS.text,
-  },
-  footer: {
-    padding: SIZES.padding,
-    backgroundColor: COLORS.white,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-  },
-  nextButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: SIZES.radius,
-    paddingVertical: SIZES.padding,
-    alignItems: 'center',
-  },
-  nextButtonDisabled: {
-    opacity: 0.5,
-  },
-  nextButtonText: {
-    ...FONTS.h4,
-    color: COLORS.white,
-  },
-});

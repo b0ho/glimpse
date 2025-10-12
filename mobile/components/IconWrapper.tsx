@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 /**
@@ -19,34 +19,23 @@ interface IconWrapperProps {
 }
 
 /**
- * 아이콘 래퍼 컴포넌트
+ * 아이콘 래퍼 컴포넌트 (NativeWind 버전)
  *
- * @description Ionicons 아이콘을 래핑하여 포커스 상태에 따른
- *              색상 변경 기능을 제공하는 간단한 래퍼 컴포넌트.
+ * @description NativeWind v4를 사용한 아이콘 래퍼.
+ *              포커스 상태에 따른 색상 변경 기능 제공.
  *
  * @component UI
  * @props IconWrapperProps
- * @usage Tab Navigator 아이콘, 버튼 아이콘
+ * @usage Tab Navigator 아이콘 (NativeWind 마이그레이션 버전)
  *
  * @example
- * <IconWrapper
- *   name="home"
- *   size={24}
- *   color="#666"
- *   focused={isActive}
- * />
+ * <IconWrapper name="home" size={24} focused={isActive} />
  */
 export const IconWrapper = ({ name, size = 24, color = '#000', focused }: IconWrapperProps) => {
   return (
-    <View style={styles.container}>
+    <View className="container">
       <Icon name={name} size={size} color={focused ? '#FF6B6B' : color} />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

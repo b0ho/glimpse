@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   Animated,
   Dimensions,
@@ -122,7 +121,7 @@ export const InterestCard: React.FC<InterestCardProps> = ({
     return (
       <Animated.View style={[styles.deleteAction, { transform: [{ translateX }] }]}>
         <TouchableOpacity
-          style={[styles.deleteButton, { backgroundColor: colors.ERROR }]}
+          className="deleteButton"
           onPress={onDelete}
         >
           <Icon name="trash-outline" size={24} color="#FFFFFF" />
@@ -137,9 +136,9 @@ export const InterestCard: React.FC<InterestCardProps> = ({
   };
 
   const content = (
-    <View style={[styles.card, { backgroundColor: colors.SURFACE }]}>
+    <View className="card">
       <TouchableOpacity
-        style={styles.cardContent}
+        className="cardContent"
         onPress={handleCardPress}
         activeOpacity={0.9}
       >
@@ -147,58 +146,54 @@ export const InterestCard: React.FC<InterestCardProps> = ({
           colors={typeConfig.gradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.gradient}
+          className="gradient"
         >
-          <View style={styles.iconContainer}>
+          <View className="iconContainer">
             <Icon name={typeConfig.icon} size={28} color="#FFFFFF" />
           </View>
         </LinearGradient>
 
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <Text style={[styles.type, { color: typeConfig.color }]}>
+        <View className="content">
+          <View className="header">
+            <Text className="type">
               {getTypeLabel(item.type || item.matchType)}
             </Text>
             {isMatched && (
-              <View style={[styles.badge, { backgroundColor: colors.SUCCESS }]}>
+              <View className="badge">
                 <Icon name="checkmark-circle" size={16} color="#FFFFFF" />
-                <Text style={styles.badgeText}>매칭됨</Text>
+                <Text className="badgeText">매칭됨</Text>
               </View>
             )}
             {!isMatch && isSecure && item.deviceInfo === 'other' && (
-              <View style={[styles.badge, { backgroundColor: colors.INFO + '20' }]}>
+              <View className="badge">
                 <Icon name="phone-portrait-outline" size={14} color={colors.INFO} />
-                <Text style={[styles.badgeText, { color: colors.INFO }]}>다른 기기</Text>
+                <Text className="badgeText">다른 기기</Text>
               </View>
             )}
           </View>
 
-          <View style={styles.valueContainer}>
+          <View className="valueContainer">
             {item.hasLocalData && item.displayValue ? (
               // 로컬 데이터가 있는 경우 - 상세 정보 표시
-              <Text style={[styles.value, { color: colors.TEXT.PRIMARY }]} numberOfLines={2}>
+              <Text className="value" numberOfLines={2}>
                 {item.displayValue}
               </Text>
             ) : (
               // 로컬 데이터가 없는 경우 - 유형만 표시
-              <Text style={[styles.value, { color: colors.TEXT.SECONDARY, fontStyle: 'italic' }]} numberOfLines={2}>
+              <Text className="value" numberOfLines={2}>
                 {item.deviceInfo === 'other' 
                   ? '다른 기기에서 등록됨' 
                   : (item.value || '등록된 정보')}
               </Text>
             )}
             {isSecure && (
-              <View style={[styles.secureIndicator, { 
-                backgroundColor: item.hasLocalData ? colors.SUCCESS + '20' : colors.WARNING + '20' 
-              }]}>
+              <View className="secureIndicator">
                 <Icon 
                   name={item.hasLocalData ? "lock-closed" : "lock-open"} 
                   size={12} 
                   color={item.hasLocalData ? colors.SUCCESS : colors.WARNING} 
                 />
-                <Text style={[styles.secureText, { 
-                  color: item.hasLocalData ? colors.SUCCESS : colors.WARNING 
-                }]}>
+                <Text className="secureText">
                   {item.hasLocalData ? '암호화' : '원격'}
                 </Text>
               </View>
@@ -206,26 +201,26 @@ export const InterestCard: React.FC<InterestCardProps> = ({
           </View>
 
           {item.metadata?.platform && (
-            <View style={styles.metadata}>
+            <View className="metadata">
               <Icon
                 name={item.metadata.platform === 'instagram' ? 'logo-instagram' : 'chatbubble-ellipses-outline'}
                 size={14}
                 color={colors.TEXT.SECONDARY}
               />
-              <Text style={[styles.metadataText, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="metadataText">
                 {item.metadata.platform}
               </Text>
             </View>
           )}
 
           {item.metadata?.birthdate && (
-            <View style={styles.metadata}>
+            <View className="metadata">
               <Icon
                 name="calendar-outline"
                 size={14}
                 color={colors.TEXT.SECONDARY}
               />
-              <Text style={[styles.metadataText, { color: colors.TEXT.SECONDARY }]}>
+              <Text className="metadataText">
                 생일: {item.metadata.birthdate}
               </Text>
             </View>
@@ -235,17 +230,17 @@ export const InterestCard: React.FC<InterestCardProps> = ({
           {(item.type === InterestType.COMPANY || item.matchType === InterestType.COMPANY) && (
             <>
               {item.metadata?.employeeName && (
-                <View style={styles.metadata}>
+                <View className="metadata">
                   <Icon name="person-outline" size={14} color={colors.TEXT.SECONDARY} />
-                  <Text style={[styles.metadataText, { color: colors.TEXT.SECONDARY }]}>
+                  <Text className="metadataText">
                     {item.metadata.employeeName}
                   </Text>
                 </View>
               )}
               {item.metadata?.department && (
-                <View style={styles.metadata}>
+                <View className="metadata">
                   <Icon name="briefcase-outline" size={14} color={colors.TEXT.SECONDARY} />
-                  <Text style={[styles.metadataText, { color: colors.TEXT.SECONDARY }]}>
+                  <Text className="metadataText">
                     {item.metadata.department}
                   </Text>
                 </View>
@@ -257,17 +252,17 @@ export const InterestCard: React.FC<InterestCardProps> = ({
           {(item.type === InterestType.SCHOOL || item.matchType === InterestType.SCHOOL) && (
             <>
               {item.metadata?.studentName && (
-                <View style={styles.metadata}>
+                <View className="metadata">
                   <Icon name="person-outline" size={14} color={colors.TEXT.SECONDARY} />
-                  <Text style={[styles.metadataText, { color: colors.TEXT.SECONDARY }]}>
+                  <Text className="metadataText">
                     {item.metadata.studentName}
                   </Text>
                 </View>
               )}
               {item.metadata?.major && (
-                <View style={styles.metadata}>
+                <View className="metadata">
                   <Icon name="book-outline" size={14} color={colors.TEXT.SECONDARY} />
-                  <Text style={[styles.metadataText, { color: colors.TEXT.SECONDARY }]}>
+                  <Text className="metadataText">
                     {item.metadata.major}
                   </Text>
                 </View>
@@ -276,32 +271,30 @@ export const InterestCard: React.FC<InterestCardProps> = ({
           )}
 
           {isMatched && item.matchedUser && (
-            <View style={styles.matchInfo}>
-              <View style={[styles.avatar, { backgroundColor: typeConfig.color + '20' }]}>
-                <Text style={[styles.avatarText, { color: typeConfig.color }]}>
+            <View className="matchInfo">
+              <View className="avatar">
+                <Text className="avatarText">
                   {item.matchedUser.nickname?.[0] || '?'}
                 </Text>
               </View>
-              <Text style={[styles.matchedName, { color: colors.TEXT.PRIMARY }]}>
+              <Text className="matchedName">
                 {item.matchedUser.nickname}
               </Text>
               {item.matchedAt && (
-                <Text style={[styles.matchedTime, { color: colors.TEXT.TERTIARY }]}>
+                <Text className="matchedTime">
                   • {formatRelativeTime(item.matchedAt)}
                 </Text>
               )}
             </View>
           )}
 
-          <View style={styles.footer}>
-            <View style={styles.footerLeft}>
-              <Text style={[styles.date, { color: colors.TEXT.TERTIARY }]}>
+          <View className="footer">
+            <View className="footerLeft">
+              <Text className="date">
                 {formatDate(item.createdAt)}
               </Text>
               {item.expiresAt && !isMatched && (
-                <Text style={[styles.expires, { 
-                  color: new Date(item.expiresAt) < new Date() ? colors.ERROR : colors.WARNING 
-                }]}>
+                <Text className="expires">
                   {new Date(item.expiresAt) < new Date() 
                     ? `만료됨 (${formatDate(item.expiresAt)})` 
                     : `만료: ${formatDate(item.expiresAt)}`}
@@ -309,14 +302,14 @@ export const InterestCard: React.FC<InterestCardProps> = ({
               )}
             </View>
             {isMatched && onMismatch && (
-              <View style={styles.footerRight}>
+              <View className="footerRight">
                 <TouchableOpacity 
-                  style={[styles.mismatchButton, { backgroundColor: colors.WARNING + '20' }]}
+                  className="mismatchButton"
                   onPress={onMismatch}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <Icon name="warning-outline" size={20} color={colors.WARNING} />
-                  <Text style={[styles.mismatchText, { color: colors.WARNING }]}>미스매치</Text>
+                  <Text className="mismatchText">미스매치</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -386,168 +379,3 @@ function formatRelativeTime(date: string | Date): string {
   return formatDate(date);
 }
 
-const styles = StyleSheet.create({
-  card: {
-    marginBottom: 10,
-    borderRadius: 12,
-    overflow: 'hidden',
-    flexDirection: 'row',
-    ...shadowStyles.card,
-    minHeight: 100,
-    position: 'relative',
-  },
-  cardContent: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  gradient: {
-    width: 70,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    flex: 1,
-    padding: 12,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  type: {
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    marginLeft: 8,
-  },
-  badgeText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  valueContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  value: {
-    fontSize: 15,
-    fontWeight: '600',
-    lineHeight: 20,
-    flex: 1,
-  },
-  secureIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
-  secureText: {
-    fontSize: 10,
-    fontWeight: '600',
-    marginLeft: 3,
-  },
-  metadata: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  metadataText: {
-    fontSize: 12,
-    marginLeft: 5,
-  },
-  matchInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
-  },
-  avatar: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  matchedName: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  matchedTime: {
-    fontSize: 12,
-    marginLeft: 5,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 5,
-  },
-  footerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  moreButton: {
-    padding: 5,
-    marginLeft: 10,
-  },
-  date: {
-    fontSize: 12,
-  },
-  expires: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  deleteAction: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 80,
-  },
-  deleteButton: {
-    position: 'absolute',
-    right: 10,
-    bottom: 10,
-    padding: 5,
-  },
-  footerRight: {
-    marginLeft: 'auto',
-  },
-  mismatchButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
-  },
-  mismatchText: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-});
