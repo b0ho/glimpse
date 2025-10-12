@@ -17,48 +17,48 @@
 - ✅ NearbyUsersScreen.tsx (324줄)
 - ✅ ChatScreen.tsx (597줄)
 - ✅ CreateContentScreen.tsx (566줄)
+- ✅ AddInterestScreen.tsx (401줄)
+- ✅ MyInfoScreen.tsx (243줄)
+- ✅ ProfileModeScreen.tsx (376줄)
+- ✅ CreateStoryScreen.tsx (258줄)
+- ✅ WhoLikesYouScreen.tsx (570줄)
+- ✅ JoinGroupScreen.tsx (433줄)
+- ✅ AccountRestoreScreen.tsx (349줄)
+- ✅ QRGroupJoinScreen.tsx (374줄)
+- ✅ ProfileEditScreen.tsx (385줄) - 완료 확인됨
+- ✅ PostDetailScreen.tsx (436줄) - 완료 확인됨
+- ✅ GroupDetailScreen.tsx (487줄) - 완료 확인됨
 
-## 전환이 필요한 파일 목록 (39개)
+## 전환이 필요한 파일 목록 (28개)
 
 ### Screens
-1. JoinGroupScreen.tsx
-2. ProfileEditScreen.tsx
-3. PostDetailScreen.tsx
-4. AccountRestoreScreen.tsx
-5. GroupDetailScreen.tsx
-6. NearbyGroupsScreen.backup.tsx (백업 파일, 삭제 검토)
-7. MyGroupsScreen.tsx
-8. SupportScreen.tsx
-9. QRGroupJoinScreen.tsx
-10. GroupChatListScreen.tsx
-11. NearbyGroupsScreen.tsx
-12. OnboardingScreen.tsx
-13. AddInterestScreen.tsx
-14. MyInfoScreen.tsx
-15. ProfileModeScreen.tsx
-16. CreateStoryScreen.tsx
-17. WhoLikesYouScreen.tsx
-18. TermsOfServiceScreen.tsx
-19. StoryUploadScreen.tsx
-20. ProfileSettingsScreen.tsx
-21. PrivacyPolicyScreen.tsx
-22. PremiumScreen.tsx
-23. NotificationSettingsScreen.tsx
-24. ModeSelectionScreen.tsx
-25. MatchChatListScreen.tsx
-26. MapScreen.tsx
-27. LocationGroupScreen.tsx
-28. LikeHistoryScreen.tsx
-29. GroupManageScreen.tsx
-30. GroupInviteScreen.tsx
-31. DeleteAccountScreen.tsx
-32. CreateGroupScreen.tsx
-33. CompanyVerificationScreen.tsx
-34. ChatScreenSimple.tsx
-35. HomeScreen.original.tsx (원본 파일, 삭제 검토)
+1. NearbyGroupsScreen.backup.tsx (백업 파일, 삭제 검토)
+2. MyGroupsScreen.tsx
+3. SupportScreen.tsx
+4. GroupChatListScreen.tsx
+5. NearbyGroupsScreen.tsx
+6. OnboardingScreen.tsx
+7. TermsOfServiceScreen.tsx
+8. StoryUploadScreen.tsx
+9. ProfileSettingsScreen.tsx
+10. PrivacyPolicyScreen.tsx
+11. PremiumScreen.tsx
+12. NotificationSettingsScreen.tsx
+13. ModeSelectionScreen.tsx
+14. MatchChatListScreen.tsx
+15. MapScreen.tsx
+16. LocationGroupScreen.tsx
+17. LikeHistoryScreen.tsx
+18. GroupManageScreen.tsx
+19. GroupInviteScreen.tsx
+20. DeleteAccountScreen.tsx
+21. CreateGroupScreen.tsx
+22. CompanyVerificationScreen.tsx
+23. ChatScreenSimple.tsx
+24. HomeScreen.original.tsx (원본 파일, 삭제 검토)
 
 ### Components
-36. components/common/ScreenHeader.old.tsx (구버전, 삭제 검토)
+25. components/common/ScreenHeader.old.tsx (구버전, 삭제 검토)
 
 ## 전환 단계
 
@@ -392,6 +392,9 @@ const styles = StyleSheet\.create\(\{[\s\S]*?\}\);
 ---
 
 **Last Updated**: 2025-01-14
-**Status**: 13/44 screens completed (30%)
-**Progress**: +5 screens converted (ProfileScreen, InterestSearchScreen, NearbyUsersScreen, ChatScreen, CreateContentScreen)
-**Next Target**: AddInterestScreen.tsx, MyInfoScreen.tsx, ProfileModeScreen.tsx
+**Status**: 24/52 screens completed (46.2%)
+**Progress**: +11 screens verified/completed
+- AddInterestScreen, MyInfoScreen, ProfileModeScreen, CreateStoryScreen, WhoLikesYouScreen (5개)
+- JoinGroupScreen, AccountRestoreScreen, QRGroupJoinScreen (3개)
+- ProfileEditScreen, PostDetailScreen, GroupDetailScreen (3개)
+**Next Target**: MyGroupsScreen.tsx, SupportScreen.tsx, GroupChatListScreen.tsx
