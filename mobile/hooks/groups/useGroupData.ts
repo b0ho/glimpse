@@ -47,8 +47,8 @@ export const useGroupData = () => {
         femaleCount: 22,
         isMatchingActive: true,
         creatorId: 'user-creator',
-        createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000),
+        updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000),
         location: {
           address: '서울 마포구 서강대로',
           latitude: 37.5503,
@@ -65,8 +65,8 @@ export const useGroupData = () => {
         femaleCount: 18,
         isMatchingActive: true,
         creatorId: 'user-creator2',
-        createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 60 * 60 * 1000),
+        updatedAt: new Date(now.getTime() - (page - 1) * 60 * 60 * 1000 - 60 * 60 * 1000),
         location: {
           address: '서울 마포구 와우산로',
           latitude: 37.5502,
@@ -83,8 +83,8 @@ export const useGroupData = () => {
         femaleCount: 13,
         isMatchingActive: true,
         creatorId: 'user-creator3',
-        createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
         location: {
           address: '서울 강남구 테헤란로',
           latitude: 37.5013,
