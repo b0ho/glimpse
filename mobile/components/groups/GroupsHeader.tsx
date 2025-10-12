@@ -25,19 +25,19 @@ export const GroupsHeader: React.FC<GroupsHeaderProps> = ({ t }) => {
       {/* 그룹 생성 및 찾기 버튼 */}
       <View className="actionButtons">
         <TouchableOpacity
-          className="actionButton"
+          className="actionButton flex-row items-center"
           onPress={() => navigation.navigate('CreateGroup' as never)}
         >
           <Icon name="add-circle-outline" size={20} color="#FFFFFF" />
-          <Text className="actionButtonText">{t('main.actions.createGroup')}</Text>
+          <Text className="actionButtonText flex-shrink-0">{t('main.actions.createGroup')}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
-          className="actionButton"
+          className="actionButton flex-row items-center"
           onPress={() => navigation.navigate('JoinGroup' as never, { inviteCode: '' } as never)}
         >
           <Icon name="search-outline" size={20} color={colors.PRIMARY} />
-          <Text className="actionButtonText">{t('main.actions.findGroup')}</Text>
+          <Text className="actionButtonText flex-shrink-0">{t('main.actions.findGroup')}</Text>
         </TouchableOpacity>
       </View>
     </View>

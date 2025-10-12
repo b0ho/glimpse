@@ -208,9 +208,9 @@ export const InterestSearchScreen: React.FC = () => {
           className="bg-red-500 flex-row items-center justify-between px-4 py-3 rounded-xl mb-2"
           onPress={() => handleAddInterest('MY_INFO')}
         >
-          <View className="flex-row items-center">
+          <View className="flex-row items-center flex-1">
             <Icon name="person-add" size={20} color="#FFFFFF" />
-            <Text className="text-white font-semibold ml-3">
+            <Text className="text-white font-semibold ml-3 flex-shrink-0">
               내 정보 등록하기
             </Text>
           </View>
@@ -221,9 +221,9 @@ export const InterestSearchScreen: React.FC = () => {
           className="bg-teal-500 flex-row items-center justify-between px-4 py-3 rounded-xl"
           onPress={() => handleAddInterest('LOOKING_FOR')}
         >
-          <View className="flex-row items-center">
+          <View className="flex-row items-center flex-1">
             <Icon name="heart" size={20} color="#FFFFFF" />
-            <Text className="text-white font-semibold ml-3">
+            <Text className="text-white font-semibold ml-3 flex-shrink-0">
               새로운 관심상대 등록하기
             </Text>
           </View>
