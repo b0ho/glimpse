@@ -96,17 +96,14 @@ export const NearbyUserCard: React.FC<NearbyUserCardProps> = ({
 
   return (
     <Animated.View
-      style={[
-        styles.card,
-        {
-          backgroundColor: colors.SURFACE,
-          transform: [
-            { translateX: pan.x },
-            { translateY: pan.y },
-            { rotate: rotateCard },
-          ],
-        },
-      ]}
+      style={{
+        transform: [
+          { translateX: pan.x },
+          { translateY: pan.y },
+          { rotate: rotateCard },
+        ],
+      }}
+      className="mx-4 my-2 rounded-2xl overflow-hidden bg-white dark:bg-gray-800"
       {...panResponder.panHandlers}
     >
       <LinearGradient
@@ -159,7 +156,7 @@ export const NearbyUserCard: React.FC<NearbyUserCardProps> = ({
             <View className="mutualGroups">
               <Icon name="people-outline" size={14} color={colors.TEXT.LIGHT} />
               <Text className="mutualGroupsText">
-                {t('location:mutualGroups', { count: user.mutualGroups.length })}
+                {`${user.mutualGroups.length} ${t('location:mutualGroups')}`}
               </Text>
             </View>
           )}

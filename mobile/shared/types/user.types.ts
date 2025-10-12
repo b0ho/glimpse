@@ -167,6 +167,13 @@ export interface NearbyUser extends User {
   distance: number;
   lastLocationUpdate: Date;
   isVisible: boolean;
+  persona?: {
+    bio?: string;
+    interests?: string[];
+    ageRange?: string;
+    occupation?: string;
+  };
+  mutualGroups?: string[];
 }
 
 /**
