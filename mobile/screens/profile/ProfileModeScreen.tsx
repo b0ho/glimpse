@@ -18,16 +18,22 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { apiClient } from '@/services/api/config';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
+import { COLORS } from '@/constants/theme';
 
 interface PersonaProfile {
   nickname?: string;
   age?: number;
   bio?: string;
   profileImage?: string;
+}
+
+interface ProfileModeResponse {
+  mode: 'real' | 'persona';
+  personaProfile?: PersonaProfile;
 }
 
 /**
@@ -76,8 +82,8 @@ export const ProfileModeScreen = React.memo(() => {
 
     try {
       setIsLoading(true);
-      const data = await apiClient.get('/location/profile-mode');
-      
+      const data = await apiClient.get<ProfileModeResponse>('/location/profile-mode');
+
       setProfileMode(data.mode || 'real');
       if (data.personaProfile) {
         setPersonaProfile(data.personaProfile);
@@ -158,7 +164,7 @@ export const ProfileModeScreen = React.memo(() => {
           className="p-2"
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-back" size={24} className="text-gray-900 dark:text-white" />
+          <Icon name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
         <Text className="text-gray-900 dark:text-white text-lg font-semibold">{t('profilemode:title')}</Text>
         <View className="w-10" />
@@ -177,22 +183,18 @@ export const ProfileModeScreen = React.memo(() => {
 
             <TouchableOpacity
               className={`bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border-2 relative ${
-                profileMode === 'real' 
-                  ? 'border-blue-500 dark:border-blue-400' 
+                profileMode === 'real'
+                  ? 'border-blue-500 dark:border-blue-400'
                   : 'border-gray-200 dark:border-gray-700'
               }`}
               onPress={() => handleModeChange('real')}
               disabled={isLoading}
             >
               <View className="flex-row items-center">
-                <Icon 
-                  name="person-circle" 
-                  size={48} 
-                  className={`${
-                    profileMode === 'real' 
-                      ? 'text-blue-500 dark:text-blue-400' 
-                      : 'text-gray-600 dark:text-gray-400'
-                  }`}
+                <Icon
+                  name="person-circle"
+                  size={48}
+                  color={profileMode === 'real' ? COLORS.info : COLORS.textLight}
                 />
                 <View className="flex-1 ml-4">
                   <Text className="text-gray-900 dark:text-white text-base font-semibold mb-1">
@@ -205,29 +207,25 @@ export const ProfileModeScreen = React.memo(() => {
               </View>
               {profileMode === 'real' && (
                 <View className="absolute top-3 right-3 w-6 h-6 bg-blue-500 dark:bg-blue-600 rounded-full items-center justify-center">
-                  <Icon name="checkmark" size={16} className="text-white" />
+                  <Icon name="checkmark" size={16} color={COLORS.white} />
                 </View>
               )}
             </TouchableOpacity>
 
             <TouchableOpacity
               className={`bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border-2 relative ${
-                profileMode === 'persona' 
-                  ? 'border-blue-500 dark:border-blue-400' 
+                profileMode === 'persona'
+                  ? 'border-blue-500 dark:border-blue-400'
                   : 'border-gray-200 dark:border-gray-700'
               }`}
               onPress={() => handleModeChange('persona')}
               disabled={isLoading}
             >
               <View className="flex-row items-center">
-                <Icon 
-                  name="mask" 
-                  size={48} 
-                  className={`${
-                    profileMode === 'persona' 
-                      ? 'text-blue-500 dark:text-blue-400' 
-                      : 'text-gray-600 dark:text-gray-400'
-                  }`}
+                <Icon
+                  name="mask"
+                  size={48}
+                  color={profileMode === 'persona' ? COLORS.info : COLORS.textLight}
                 />
                 <View className="flex-1 ml-4">
                   <Text className="text-gray-900 dark:text-white text-base font-semibold mb-1">
@@ -240,7 +238,7 @@ export const ProfileModeScreen = React.memo(() => {
               </View>
               {profileMode === 'persona' && (
                 <View className="absolute top-3 right-3 w-6 h-6 bg-blue-500 dark:bg-blue-600 rounded-full items-center justify-center">
-                  <Icon name="checkmark" size={16} className="text-white" />
+                  <Icon name="checkmark" size={16} color={COLORS.white} />
                 </View>
               )}
             </TouchableOpacity>
@@ -258,8 +256,8 @@ export const ProfileModeScreen = React.memo(() => {
                     onPress={() => setIsEditing(true)}
                     className="flex-row items-center bg-blue-500 dark:bg-blue-600 px-3 py-1.5 rounded-lg"
                   >
-                    <Icon name="pencil" size={16} className="text-white mr-1" />
-                    <Text className="text-white text-sm font-semibold">
+                    <Icon name="pencil" size={16} color={COLORS.white} />
+                    <Text className="text-white text-sm font-semibold ml-1">
                       {t('profilemode:buttons.edit')}
                     </Text>
                   </TouchableOpacity>
@@ -341,7 +339,7 @@ export const ProfileModeScreen = React.memo(() => {
                 ) : (
                   <>
                     <View className="w-20 h-20 bg-blue-500 dark:bg-blue-600 rounded-full items-center justify-center mb-4">
-                      <Icon name="mask" size={32} className="text-white" />
+                      <Icon name="mask" size={32} color={COLORS.white} />
                     </View>
                     <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-2">
                       {personaProfile.nickname || t('profilemode:personaProfile.notSet')}
@@ -364,7 +362,9 @@ export const ProfileModeScreen = React.memo(() => {
 
           {/* 안내 섹션 */}
           <View className="flex-row bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mt-4">
-            <Icon name="information-circle" size={20} className="text-blue-500 dark:text-blue-400 mr-3 mt-0.5" />
+            <View className="mr-3 mt-0.5">
+              <Icon name="information-circle" size={20} color={COLORS.info} />
+            </View>
             <Text className="text-gray-600 dark:text-gray-400 text-sm flex-1 leading-5">
               {t('profilemode:info.description')}
             </Text>
