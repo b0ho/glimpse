@@ -17,10 +17,10 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
-import { CommunityPost } from '@/../shared/types';
+import { CommunityPost } from '@/shared/types/community.types';
 import { formatDistanceToNow } from '@/utils/dateUtils';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
@@ -53,7 +53,7 @@ const PostItem = ({ post, onPress }: PostItemProps) => {
           </Text>
         </View>
         {post.isPinned && (
-          <Icon name="pin" size={20} className="text-blue-500 dark:text-blue-400 ml-3" />
+          <Icon name="pin" size={20} color="#3B82F6" />
         )}
       </View>
 
@@ -84,15 +84,15 @@ const PostItem = ({ post, onPress }: PostItemProps) => {
       {/* Post Stats */}
       <View className="flex-row mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
         <View className="flex-row items-center mr-6">
-          <Icon name="eye-outline" size={16} className="text-gray-500 dark:text-gray-500" />
+          <Icon name="eye-outline" size={16} color="#6B7280" />
           <Text className="text-gray-500 dark:text-gray-500 text-xs ml-1">{post.viewCount}</Text>
         </View>
         <View className="flex-row items-center mr-6">
-          <Icon name="heart-outline" size={16} className="text-gray-500 dark:text-gray-500" />
+          <Icon name="heart-outline" size={16} color="#6B7280" />
           <Text className="text-gray-500 dark:text-gray-500 text-xs ml-1">{post.likeCount}</Text>
         </View>
         <View className="flex-row items-center">
-          <Icon name="chatbubble-outline" size={16} className="text-gray-500 dark:text-gray-500" />
+          <Icon name="chatbubble-outline" size={16} color="#6B7280" />
           <Text className="text-gray-500 dark:text-gray-500 text-xs ml-1">{post.commentCount}</Text>
         </View>
       </View>
@@ -138,7 +138,7 @@ export const CommunityScreen = () => {
   const { user } = useAuthStore();
   const { currentGroup } = useGroupStore();
   const { t } = useAndroidSafeTranslation();
-  
+
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -160,7 +160,7 @@ export const CommunityScreen = () => {
     try {
       setIsLoading(true);
       setServerConnectionError(false);
-      
+
       // API 호출로 실제 데이터 가져오기
       // TODO: communityApi가 구현되면 주석 해제
       // try {
@@ -174,7 +174,7 @@ export const CommunityScreen = () => {
       //   setServerConnectionError(true);
       //   setPosts([]);
       // }
-      
+
       // 현재는 빈 배열로 설정 (서버 API 없음)
       setPosts([]);
       setServerConnectionError(true);
@@ -207,16 +207,16 @@ export const CommunityScreen = () => {
           <TouchableOpacity
             key={category.id}
             className={`px-4 py-2 mr-3 rounded-full ${
-              selectedCategory === category.id 
-                ? 'bg-blue-500 dark:bg-blue-600' 
+              selectedCategory === category.id
+                ? 'bg-blue-500 dark:bg-blue-600'
                 : 'bg-gray-100 dark:bg-gray-700'
             }`}
             onPress={() => setSelectedCategory(category.id)}
           >
             <Text
               className={`text-sm font-medium ${
-                selectedCategory === category.id 
-                  ? 'text-white' 
+                selectedCategory === category.id
+                  ? 'text-white'
                   : 'text-gray-600 dark:text-gray-400'
               }`}
             >
@@ -231,7 +231,7 @@ export const CommunityScreen = () => {
   // 서버 연결 에러 시 에러 화면 표시
   if (serverConnectionError) {
     return (
-      <ServerConnectionError 
+      <ServerConnectionError
         onRetry={() => {
           setServerConnectionError(false);
           loadPosts();
@@ -260,7 +260,7 @@ export const CommunityScreen = () => {
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={
           <View className="flex-1 justify-center items-center py-24">
-            <Icon name="newspaper-outline" size={60} className="text-gray-400 dark:text-gray-600" />
+            <Icon name="newspaper-outline" size={60} color="#9CA3AF" />
             <Text className="text-gray-600 dark:text-gray-400 text-base mt-4">{t('community:empty.title')}</Text>
             <Text className="text-gray-500 dark:text-gray-500 text-sm mt-2">{t('community:empty.subtitle')}</Text>
           </View>
@@ -277,11 +277,11 @@ export const CommunityScreen = () => {
       />
 
       {/* Floating Action Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         className="absolute right-4 bottom-6 w-14 h-14 bg-blue-500 dark:bg-blue-600 rounded-full justify-center items-center shadow-lg"
         onPress={handleCreatePost}
       >
-        <Icon name="create-outline" size={24} className="text-white" />
+        <Icon name="create-outline" size={24} color="#FFFFFF" />
       </TouchableOpacity>
     </SafeAreaView>
   );
