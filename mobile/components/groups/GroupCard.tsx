@@ -80,22 +80,25 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group }) => {
 
   return (
     <TouchableOpacity
-      className="groupCard"
+      className="mx-4 my-2 p-4 bg-white dark:bg-gray-800 rounded-xl"
       onPress={handleGroupPress}
       activeOpacity={0.8}
+      style={shadowStyles.medium}
     >
-      <View className="groupHeader">
-        <View className="groupInfo">
-          <Text className="groupName">{group.name}</Text>
-          <View className="groupMeta">
-            <View className="groupTypeBadge">
-              <Text className="groupTypeText">
+      <View className="flex-row items-start justify-between mb-3">
+        <View className="flex-1 mr-2">
+          <Text className="text-base font-bold text-gray-900 dark:text-gray-100 mb-2">
+            {group.name}
+          </Text>
+          <View className="flex-row items-center gap-x-2">
+            <View className="px-2 py-1 rounded-md" style={{ backgroundColor: getGroupTypeColor(group.type) + '20' }}>
+              <Text className="text-xs font-medium" style={{ color: getGroupTypeColor(group.type) }}>
                 {getGroupTypeLabel(group.type)}
               </Text>
             </View>
-            <View className="memberCount">
+            <View className="flex-row items-center">
               <Icon name="people-outline" size={16} color={colors.TEXT.SECONDARY} />
-              <Text className="memberCountText">
+              <Text className="text-xs text-gray-600 dark:text-gray-400 ml-1">
                 {group.memberCount}명
               </Text>
             </View>
@@ -103,58 +106,60 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group }) => {
         </View>
 
         {isCreator && (
-          <View className="creatorBadge">
+          <View className="flex-row items-center px-2 py-1 bg-purple-50 dark:bg-purple-900/20 rounded-md">
             <Icon name="star" size={14} color={colors.PRIMARY} />
-            <Text className="creatorText">내 그룹</Text>
+            <Text className="text-xs font-medium text-purple-600 dark:text-purple-400 ml-1">
+              내 그룹
+            </Text>
           </View>
         )}
       </View>
 
       {group.description && (
-        <Text 
-          className="groupDescription"
+        <Text
+          className="text-sm text-gray-700 dark:text-gray-300 mb-3"
           numberOfLines={2}
         >
           {group.description}
         </Text>
       )}
 
-      <View className="groupFooter">
-        <View className="statusInfo">
+      <View className="flex-row items-center justify-between">
+        <View className="flex-1">
           {group.location && (
-            <Text className="locationText">
+            <Text className="text-xs text-gray-600 dark:text-gray-400 mb-1">
               📍 {group.location.address}
             </Text>
           )}
-          
+
           {group.expiresAt && (
-            <Text className="expiryText">
+            <Text className="text-xs text-gray-600 dark:text-gray-400">
               ⏰ {new Date(group.expiresAt).toLocaleDateString()}
             </Text>
           )}
         </View>
 
-        <View className="groupActions">
+        <View className="flex-row items-center gap-x-2">
           <TouchableOpacity
-            className="likeButton"
+            className="w-10 h-10 items-center justify-center"
             onPress={handleLikePress}
           >
-            <Icon 
-              name={groupStore.isGroupLiked(group.id) ? "heart" : "heart-outline"} 
-              size={20} 
-              color={groupStore.isGroupLiked(group.id) ? colors.ERROR : colors.TEXT.SECONDARY} 
+            <Icon
+              name={groupStore.isGroupLiked(group.id) ? "heart" : "heart-outline"}
+              size={20}
+              color={groupStore.isGroupLiked(group.id) ? colors.ERROR : colors.TEXT.SECONDARY}
             />
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="joinButton"
+            className="px-4 py-2 bg-red-500 rounded-lg"
             onPress={handleJoinPress}
           >
-            <Text className="joinButtonText">
-              {isCreator 
-                ? t('main.actions.leaveGroup') 
-                : (groupStore.isUserInGroup(group.id) 
-                    ? t('main.actions.joined') 
+            <Text className="text-xs font-semibold text-white">
+              {isCreator
+                ? t('main.actions.leaveGroup')
+                : (groupStore.isUserInGroup(group.id)
+                    ? t('main.actions.joined')
                     : t('main.actions.viewDetails'))}
             </Text>
           </TouchableOpacity>

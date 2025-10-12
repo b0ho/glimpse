@@ -28,39 +28,40 @@ export const PremiumSection: React.FC<PremiumSectionProps> = ({
   const { colors } = useTheme();
 
   return (
-    <View className="section">
+    <View className="mb-6 px-4">
       <TouchableOpacity
-        className="premiumCard"
+        className="bg-gradient-to-br from-purple-500 to-pink-500 p-6 rounded-2xl"
         onPress={() => navigation.navigate('Premium' as never)}
+        style={shadowStyles.large}
       >
-        <View className="premiumHeader">
-          <Text className="premiumTitle">
-            {isPremiumUser ? t('profile:premium.active') : t('profile:premium.upgrade')}
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="text-xl font-bold text-white">
+            {isPremiumUser ? '✨ ' + t('profile:premium.active') : t('profile:premium.upgrade')}
           </Text>
           {isPremiumUser && (
-            <View className="premiumBadge">
-              <Text className="premiumBadgeText">
+            <View className="bg-white/20 px-3 py-1 rounded-full">
+              <Text className="text-sm font-semibold text-white">
                 {currentPlan.includes('yearly') ? t('profile:premium.yearly') : t('profile:premium.monthly')}
               </Text>
             </View>
           )}
         </View>
-        
-        <Text className="premiumDescription">
-          {isPremiumUser 
+
+        <Text className="text-base text-white/90 mb-4">
+          {isPremiumUser
             ? t('profile:premium.activeDescription')
             : t('profile:premium.inactiveDescription')
           }
         </Text>
-        
-        <View className="premiumFeatures">
-          <Text className="premiumFeature">
+
+        <View className="space-y-2">
+          <Text className="text-sm text-white">
             💕 {isPremiumUser ? t('profile:premium.features.unlimitedLikes') : t('profile:premium.features.dailyToUnlimited')}
           </Text>
-          <Text className="premiumFeature">
+          <Text className="text-sm text-white">
             👀 {isPremiumUser ? t('profile:premium.features.seeWhoLikedYou') : t('profile:premium.features.seeWhoLikedYouInfo')}
           </Text>
-          <Text className="premiumFeature">
+          <Text className="text-sm text-white">
             ⚡ {isPremiumUser ? t('profile:premium.features.priorityMatching') : t('profile:premium.features.priorityMatchingInfo')}
           </Text>
         </View>

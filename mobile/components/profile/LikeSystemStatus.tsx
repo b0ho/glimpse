@@ -71,79 +71,81 @@ export const LikeSystemStatus: React.FC<LikeSystemStatusProps> = ({ isPremiumUse
   };
 
   return (
-    <View className="section">
-      <Text className="sectionTitle">
+    <View className="mb-6 px-4">
+      <Text className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
         {t('profile:likeSystem.title')}
       </Text>
-      
-      <View className="likeSystemCard">
-        <View className="likeSystemItem">
-          <Text className="likeSystemLabel">
+
+      <View className="bg-white dark:bg-gray-900 rounded-2xl p-4 mb-4" style={shadowStyles.medium}>
+        <View className="flex-row items-center justify-between py-3 border-b border-gray-200 dark:border-gray-800">
+          <Text className="text-sm text-gray-600 dark:text-gray-400">
             {t('profile:likeSystem.dailyFreeLikes')}
           </Text>
-          <Text className="likeSystemValue">
+          <Text className="text-base font-bold text-gray-900 dark:text-white">
             {likeStore.getRemainingFreeLikes()} / 1
           </Text>
         </View>
-        
-        <View className="likeSystemItem">
-          <Text className="likeSystemLabel">
+
+        <View className="flex-row items-center justify-between py-3 border-b border-gray-200 dark:border-gray-800">
+          <Text className="text-sm text-gray-600 dark:text-gray-400">
             {t('profile:likeSystem.premiumLikes')}
           </Text>
-          <Text className="likeSystemValue">
+          <Text className="text-base font-bold text-gray-900 dark:text-white">
             {t('profile:likeSystem.premiumLikesCount', { count: likeStore.premiumLikesRemaining })}
           </Text>
         </View>
-        
-        <View className="likeSystemItem">
-          <Text className="likeSystemLabel">
+
+        <View className="flex-row items-center justify-between py-3 border-b border-gray-200 dark:border-gray-800">
+          <Text className="text-sm text-gray-600 dark:text-gray-400">
             {t('profile:likeSystem.premiumStatus')}
           </Text>
-          <Text className="likeSystemValue">
+          <Text className="text-base font-bold text-gray-900 dark:text-white">
             {isPremiumUser ? t('profile:likeSystem.active') : t('profile:likeSystem.inactive')}
           </Text>
         </View>
-        
+
         {isPremiumUser && (
           <>
-            <View className="likeSystemItem">
-              <Text className="likeSystemLabel">
+            <View className="flex-row items-center justify-between py-3 border-b border-gray-200 dark:border-gray-800">
+              <Text className="text-sm text-gray-600 dark:text-gray-400">
                 ⭐ {t('profile:likeSystem.superLikes')}
               </Text>
-              <Text className="likeSystemValue">
+              <Text className="text-base font-bold text-gray-900 dark:text-white">
                 {likeStore.getRemainingSuperLikes()} / {likeStore.dailySuperLikesLimit}
               </Text>
             </View>
-            
-            <View className="likeSystemItem">
-              <Text className="likeSystemLabel">
+
+            <View className="flex-row items-center justify-between py-3">
+              <Text className="text-sm text-gray-600 dark:text-gray-400">
                 ↩️ {t('profile:likeSystem.rewind')}
               </Text>
-              <Text className="likeSystemValue">
+              <Text className="text-base font-bold text-gray-900 dark:text-white">
                 {likeStore.canRewindLike() ? t('profile:likeSystem.available') : t('profile:likeSystem.unavailable')}
               </Text>
             </View>
           </>
         )}
       </View>
-      
+
       {!isPremiumUser && (
-        <TouchableOpacity 
-          className="upgradeButton"
+        <TouchableOpacity
+          className="bg-purple-500 py-4 rounded-xl items-center"
           onPress={() => navigation.navigate('Premium' as never)}
+          style={shadowStyles.medium}
         >
-          <Text className="upgradeButtonText">
+          <Text className="text-base font-bold text-white">
             {t('profile:premium.upgrade')}
           </Text>
         </TouchableOpacity>
       )}
-      
+
       {isPremiumUser && likeStore.canRewindLike() && (
-        <TouchableOpacity 
-          className="rewindButton"
+        <TouchableOpacity
+          className="bg-orange-500 py-4 rounded-xl items-center"
           onPress={handleRewindLike}
+          style={shadowStyles.medium}
         >
-          <Text className="rewindButtonText">
+          <Text className="text-base font-bold text-white">
             {t('profile:likeSystem.rewind')}
           </Text>
         </TouchableOpacity>
