@@ -24,10 +24,11 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import * as ImagePicker from 'expo-image-picker';
-import { Video, ResizeMode } from 'expo-video';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+// import { Video, ResizeMode } from 'expo-video'; // TODO: Install expo-video package
+import { IconWrapper as Icon } from '@/components/IconWrapper';
 import { API_BASE_URL } from '@/services/api/config';
 import { useAuthService } from '@/services/auth/auth-service';
+import { COLORS } from '@/constants/theme';
 
 /**
  * 스토리 업로드 화면 컴포넌트
@@ -212,7 +213,7 @@ export const StoryUploadScreen = () => {
       <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
         <View className="flex-row justify-between items-center px-4 py-4 bg-white dark:bg-gray-900">
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="close" size={28} className="text-gray-900 dark:text-white" />
+            <Icon name="close" size={28} color={COLORS.TEXT.PRIMARY} />
           </TouchableOpacity>
           <Text className="text-gray-900 dark:text-white text-lg font-semibold">{t('newStory')}</Text>
           <View className="w-7" />
@@ -221,14 +222,14 @@ export const StoryUploadScreen = () => {
         <View className="flex-1 flex-row justify-center items-center gap-10">
           <TouchableOpacity className="items-center" onPress={takePhotoOrVideo}>
             <View className="w-25 h-25 rounded-full bg-blue-100 dark:bg-blue-900/30 justify-center items-center mb-3">
-              <Ionicons name="camera" size={40} className="text-blue-500 dark:text-blue-400" />
+              <Icon name="camera" size={40} color={COLORS.PRIMARY} />
             </View>
             <Text className="text-gray-900 dark:text-white text-base">{t('storyupload:camera.title')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity className="items-center" onPress={pickFromGallery}>
             <View className="w-25 h-25 rounded-full bg-blue-100 dark:bg-blue-900/30 justify-center items-center mb-3">
-              <Ionicons name="images" size={40} className="text-blue-500 dark:text-blue-400" />
+              <Icon name="images" size={40} color={COLORS.PRIMARY} />
             </View>
             <Text className="text-gray-900 dark:text-white text-base">{t('gallery')}</Text>
           </TouchableOpacity>
@@ -246,7 +247,7 @@ export const StoryUploadScreen = () => {
       >
         <View className="flex-row justify-between items-center px-4 py-4 bg-white dark:bg-gray-900">
           <TouchableOpacity onPress={clearMedia}>
-            <Ionicons name="arrow-back" size={28} className="text-gray-900 dark:text-white" />
+            <Icon name="arrow-back" size={28} color={COLORS.TEXT.PRIMARY} />
           </TouchableOpacity>
           <Text className="text-gray-900 dark:text-white text-lg font-semibold">{t('storyupload:preview.title')}</Text>
           <TouchableOpacity
@@ -266,14 +267,19 @@ export const StoryUploadScreen = () => {
           {media.type === 'image' ? (
             <Image source={{ uri: media.uri }} className="flex-1 w-full" resizeMode="cover" />
           ) : (
-            <Video
-              source={{ uri: media.uri }}
-              className="flex-1 w-full"
-              resizeMode={ResizeMode.COVER}
-              shouldPlay
-              isLooping
-              isMuted
-            />
+            <View className="flex-1 w-full bg-gray-800 justify-center items-center">
+              <Icon name="videocam" size={48} color={COLORS.TEXT.SECONDARY} />
+              <Text className="text-white text-base mt-2">Video preview (install expo-video)</Text>
+            </View>
+            // TODO: Install expo-video package to enable video preview
+            // <Video
+            //   source={{ uri: media.uri }}
+            //   className="flex-1 w-full"
+            //   resizeMode={ResizeMode.COVER}
+            //   shouldPlay
+            //   isLooping
+            //   isMuted
+            // />
           )}
 
           <View className="absolute bottom-0 left-0 right-0 bg-black/70 p-4">
