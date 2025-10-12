@@ -24,10 +24,11 @@ try {
 } catch (error) {
   console.warn('BarCodeScanner not available in this environment');
 }
-import Icon from 'react-native-vector-icons/Ionicons';
+import { IconWrapper as Icon } from '@/components/IconWrapper';
 import QRCode from 'react-native-qrcode-svg';
 import { useGroupStore } from '@/store/slices/groupSlice';
 import { Group } from '@/types';
+import { COLORS } from '@/constants/theme';
 
 interface QRGroupData {
   groupId: string;
@@ -216,14 +217,14 @@ export const QRGroupJoinScreen = () => {
             className="p-2"
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-back" size={24} className="text-gray-900 dark:text-white" />
+            <Icon name="arrow-back" size={24} color={COLORS.text} />
           </TouchableOpacity>
           <Text className="text-gray-900 dark:text-white text-lg font-semibold">{t('group:qrJoin.title')}</Text>
           <View className="w-10" />
         </View>
 
         <View className="flex-1 items-center justify-center px-6">
-          <Icon name="camera-outline" size={64} className="text-gray-500 dark:text-gray-500 mb-6" />
+          <Icon name="camera-outline" size={64} color="#6B7280" />
           <Text className="text-gray-900 dark:text-white text-xl font-semibold mb-3">{t('group:qrJoin.permissionRequired')}</Text>
           <Text className="text-gray-600 dark:text-gray-400 text-base text-center leading-6 mb-8">
             {t('group:qrJoin.permissionDescription')}
@@ -249,17 +250,17 @@ export const QRGroupJoinScreen = () => {
           className="p-2"
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-back" size={24} className="text-gray-900 dark:text-white" />
+          <Icon name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
         <Text className="text-gray-900 dark:text-white text-lg font-semibold">{t('group:qrJoin.title')}</Text>
         <TouchableOpacity
           className="p-2"
           onPress={() => setMode(mode === 'scan' ? 'generate' : 'scan')}
         >
-          <Icon 
-            name={mode === 'scan' ? 'qr-code' : 'scan'} 
-            size={20} 
-            className="text-gray-600 dark:text-gray-400"
+          <Icon
+            name={mode === 'scan' ? 'qr-code' : 'scan'}
+            size={20}
+            color="#6B7280"
           />
         </TouchableOpacity>
       </View>
@@ -287,7 +288,7 @@ export const QRGroupJoinScreen = () => {
               </>
             ) : (
               <View className="flex-1 items-center justify-center">
-                <Icon name="camera-off" size={48} className="text-gray-600 dark:text-gray-400 mb-4" />
+                <Icon name="camera-off" size={48} color="#6B7280" />
                 <Text className="text-gray-600 dark:text-gray-400 text-base">
                   카메라를 사용할 수 없습니다
                 </Text>
@@ -348,14 +349,14 @@ export const QRGroupJoinScreen = () => {
                   setSelectedGroup({ ...selectedGroup });
                 }}
               >
-                <Icon name="refresh" size={16} className="text-blue-500 dark:text-blue-400 mr-2" />
-                <Text className="text-blue-500 dark:text-blue-400 text-sm font-semibold">{t('group:qrJoin.regenerate')}</Text>
+                <Icon name="refresh" size={16} color="#3B82F6" />
+                <Text className="text-blue-500 dark:text-blue-400 text-sm font-semibold ml-2">{t('group:qrJoin.regenerate')}</Text>
               </TouchableOpacity>
-            </View>  
+            </View>
           ) : (
             <View className="items-center flex-1 justify-center">
-              <Icon name="people-outline" size={48} className="text-gray-500 dark:text-gray-500 mb-4" />
-              <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-3">{t('group:qrJoin.noGroupSelected')}</Text>
+              <Icon name="people-outline" size={48} color="#6B7280" />
+              <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-3 mt-4">{t('group:qrJoin.noGroupSelected')}</Text>
               <Text className="text-gray-600 dark:text-gray-400 text-sm text-center leading-5 mb-8">
                 {t('group:qrJoin.selectGroupDescription')}
               </Text>
