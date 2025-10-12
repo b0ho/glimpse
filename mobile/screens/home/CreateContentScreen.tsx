@@ -73,7 +73,7 @@ const IMAGE_SIZE = (screenWidth - 48) / 3;
 
 export const CreateContentScreen = ({ route }: any) => {
   const { t } = useAndroidSafeTranslation(['common', 'post']);
-  const { colors, isDarkMode } = useTheme();
+  const { colors, isDark } = useTheme();
   const editingContent = route?.params?.editingContent as Content | undefined;
   const isEditMode = !!editingContent;
   
@@ -239,11 +239,11 @@ export const CreateContentScreen = ({ route }: any) => {
       
       if (!userNickname || !userId) {
         try {
-          const userData = await apiClient.get('/users/profile');
+          const userData = await apiClient.get<{ success: boolean; data: any }>('/users/profile');
           if (userData.success && userData.data) {
             userNickname = userData.data.nickname || '테스트유저';
             userId = userData.data.id || 'current_user';
-            
+
             authStore.setUser({
               ...authStore.user,
               id: userId,
@@ -260,7 +260,7 @@ export const CreateContentScreen = ({ route }: any) => {
 
       const contentData: Partial<Content> = {
         text: contentText.trim() || undefined,
-        type: selectedImages.length > 0 ? 'image' : 'text',
+        type: selectedImages.length > 0 ? 'POST' : 'POST',
         imageUrls: selectedImages.length > 0 ? selectedImages : undefined,
         groupId: selectedGroup.id,
         userId: userId,
@@ -440,10 +440,10 @@ export const CreateContentScreen = ({ route }: any) => {
             >
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center flex-1">
-                  <Ionicons 
-                    name="people-circle" 
-                    size={24} 
-                    color={selectedGroup ? colors.PRIMARY : colors.TEXT.DISABLED} 
+                  <Ionicons
+                    name="people-circle"
+                    size={24}
+                    color={selectedGroup ? colors.PRIMARY : colors.TEXT.MUTED}
                   />
                   <Text className={cn(
                     "ml-3 text-base",

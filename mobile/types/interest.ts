@@ -2,12 +2,9 @@
  * 관심상대 찾기 관련 타입 정의
  */
 
-export enum Gender {
-  MALE = 'MALE',
-  FEMALE = 'FEMALE',
-  OTHER = 'OTHER',
-  PREFER_NOT_TO_SAY = 'PREFER_NOT_TO_SAY',
-}
+import { Gender } from '../shared/types/user.types';
+
+export { Gender };
 
 export enum InterestType {
   PHONE = 'PHONE',

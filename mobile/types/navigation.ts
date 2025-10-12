@@ -49,7 +49,7 @@ export type HomeStackParamList = {
   CreateContent: undefined;
   CreateStory: undefined;
   StoryUpload: undefined;
-  PostDetail: { postId: string };
+  PostDetail: { postId: string; groupName?: string };
   NearbyGroups: undefined;
   NearbyUsers: undefined;
 };
