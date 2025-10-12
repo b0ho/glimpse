@@ -25,6 +25,7 @@ import { saveStory } from '@/utils/storyData';
 import { useTheme } from '@/hooks/useTheme';
 import { apiClient } from '@/services/api/config';
 import { cn } from '@/lib/utils';
+import { ApiResponse } from '@/types';
 
 /**
  * 스토리 생성 컴포넌트
@@ -66,7 +67,7 @@ export const CreateStoryScreen = () => {
   
   const navigation = useNavigation();
   const authStore = useAuthStore();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
 
   const handleImagePicker = async () => {
     try {
@@ -126,12 +127,12 @@ export const CreateStoryScreen = () => {
       if (!userNickname || !userId) {
         try {
           console.log('[CreateStoryScreen] 서버에서 사용자 정보 가져오기');
-          const userData = await apiClient.get('/users/profile');
-          
+          const userData = await apiClient.get<ApiResponse<any>>('/users/profile');
+
           if (userData.success && userData.data) {
               userNickname = userData.data.nickname || '테스트유저';
               userId = userData.data.id || 'current_user';
-              
+
               // authStore 업데이트
               authStore.setUser({
                 ...authStore.user,
