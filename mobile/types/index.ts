@@ -10,6 +10,15 @@ export interface ApiResponse<T = any> {
   data?: T;
   message?: string;
   status?: number;
+  error?: string;
+  errorCode?: string;
+  timestamp?: string;
+  path?: string;
+  statusCode?: number;
+  errors?: {
+    field: string;
+    message: string;
+  }[];
 }
 
 // Mobile UI specific types
