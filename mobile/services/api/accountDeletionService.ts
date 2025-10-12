@@ -1,4 +1,5 @@
 import apiClient from './config';
+import { ApiResponse } from '@/types';
 
 /**
  * 계정 삭제 관련 API 서비스
@@ -16,9 +17,9 @@ export const accountDeletionService = {
    */
   requestDeletion: async (data: { reason?: string }) => {
     try {
-      const response = await apiClient.delete('/users/account', { data });
+      const response = await apiClient.delete<ApiResponse<any>>('/users/account', { data });
       console.log('[AccountDeletionService] API Response:', response.data);
-      
+
       return {
         success: true,
         message: '계정 삭제가 요청되었습니다. 7일 후 완전히 삭제됩니다.',
@@ -42,7 +43,7 @@ export const accountDeletionService = {
    */
   restoreAccount: async () => {
     try {
-      const response = await apiClient.post('/users/account/restore');
+      const response = await apiClient.post<ApiResponse<any>>('/users/account/restore');
       return {
         success: true,
         message: '계정이 성공적으로 복구되었습니다.',
@@ -63,7 +64,7 @@ export const accountDeletionService = {
    */
   getDeletionStatus: async () => {
     try {
-      const response = await apiClient.get('/users/account/deletion-status');
+      const response = await apiClient.get<ApiResponse<any>>('/users/account/deletion-status');
       return {
         success: true,
         data: response.data?.data,
@@ -83,7 +84,7 @@ export const accountDeletionService = {
    */
   isPendingDeletion: async () => {
     try {
-      const response = await apiClient.get('/users/account/pending-deletion');
+      const response = await apiClient.get<ApiResponse<any>>('/users/account/pending-deletion');
       return {
         success: true,
         isPendingDeletion: response.data?.data?.isPendingDeletion || false,
