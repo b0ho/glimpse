@@ -9,6 +9,7 @@ import { apiClient } from '@/services/api/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import { Platform } from 'react-native';
+import { ApiResponse } from '@/types';
 
 // 등록 유형
 export enum RegistrationType {
@@ -101,7 +102,7 @@ class InterestRegistrationService {
       const localRegistration = await this.saveLocalRegistration(dto);
       
       // 2. 서버에 해시값만 전송
-      const response = await apiClient.post('/interest/registration', {
+      const response = await apiClient.post<ApiResponse<any>>('/interest/registration', {
         registrationType: dto.registrationType,
         type: dto.type,
         relationshipIntent: dto.relationshipIntent,
@@ -184,11 +185,11 @@ class InterestRegistrationService {
   async getMyRegistrations(registrationType?: RegistrationType): Promise<any[]> {
     try {
       // 1. 서버 데이터 가져오기
-      const endpoint = registrationType 
+      const endpoint = registrationType
         ? `/interest/registration/${registrationType.toLowerCase()}`
         : '/interest/registration/my';
-      
-      const response = await apiClient.get(endpoint);
+
+      const response = await apiClient.get<ApiResponse<any[]>>(endpoint);
       const serverRegistrations = response.data || [];
       
       // 2. 로컬 데이터 가져오기
@@ -272,7 +273,7 @@ class InterestRegistrationService {
    */
   async getMatches(): Promise<any[]> {
     try {
-      const response = await apiClient.get('/interest/registration/matches');
+      const response = await apiClient.get<ApiResponse<any[]>>('/interest/registration/matches');
       return response.data || [];
     } catch (error) {
       console.error('Failed to get matches:', error);
@@ -285,7 +286,7 @@ class InterestRegistrationService {
    */
   async confirmMatch(matchId: string): Promise<any> {
     try {
-      const response = await apiClient.put(`/interest/registration/matches/${matchId}/confirm`);
+      const response = await apiClient.put<ApiResponse<any>>(`/interest/registration/matches/${matchId}/confirm`);
       return response.data;
     } catch (error) {
       console.error('Failed to confirm match:', error);
