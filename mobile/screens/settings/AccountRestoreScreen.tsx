@@ -17,8 +17,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
-import { useAuth } from '@/hooks/useDevAuth';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { IconWrapper as Icon } from '@/components/IconWrapper';
+import { COLORS } from '@/constants/theme';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { authService } from '@/services/api/authService';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
@@ -199,7 +199,7 @@ export const AccountRestoreScreen = () => {
     return (
       <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
         <View className="flex-1 justify-center items-center p-6">
-          <Ionicons name="checkmark-circle" size={64} className="text-green-500 dark:text-green-400 mb-4" />
+          <Icon name="checkmark-circle" size={64} color="#10B981" />
           <Text className="text-gray-900 dark:text-white text-xl font-semibold mt-4 text-center">
             {t('settings:deleteAccount.restore.notScheduledTitle')}
           </Text>
@@ -226,7 +226,7 @@ export const AccountRestoreScreen = () => {
           onPress={() => navigation.goBack()}
           className="p-1"
         >
-          <Ionicons name="arrow-back" size={24} className="text-gray-900 dark:text-white" />
+          <Icon name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
         <Text className="text-gray-900 dark:text-white text-lg font-semibold">
           {t('settings:deleteAccount.restore.title')}
@@ -247,10 +247,15 @@ export const AccountRestoreScreen = () => {
             : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
         }`}>
           <View className="mb-4">
-            <Ionicons 
-              name="hourglass-outline" 
-              size={32} 
-              className={getDaysRemainingColorClass(deletionStatus.daysRemaining)}
+            <Icon
+              name="hourglass-outline"
+              size={32}
+              color={
+                !deletionStatus.daysRemaining ? "#6B7280" :
+                deletionStatus.daysRemaining <= 1 ? "#EF4444" :
+                deletionStatus.daysRemaining <= 3 ? "#F97316" :
+                "#3B82F6"
+              }
             />
           </View>
           
@@ -296,21 +301,21 @@ export const AccountRestoreScreen = () => {
           
           <View className="space-y-3">
             <View className="flex-row items-start gap-3">
-              <Ionicons name="checkmark-circle" size={20} className="text-green-500 dark:text-green-400 mt-0.5" />
+              <Icon name="checkmark-circle" size={20} color="#10B981" />
               <Text className="text-gray-900 dark:text-white text-base flex-1">
                 {t('settings:deleteAccount.restore.info.1')}
               </Text>
             </View>
-            
+
             <View className="flex-row items-start gap-3">
-              <Ionicons name="checkmark-circle" size={20} className="text-green-500 dark:text-green-400 mt-0.5" />
+              <Icon name="checkmark-circle" size={20} color="#10B981" />
               <Text className="text-gray-900 dark:text-white text-base flex-1">
                 {t('settings:deleteAccount.restore.info.2')}
               </Text>
             </View>
-            
+
             <View className="flex-row items-start gap-3">
-              <Ionicons name="checkmark-circle" size={20} className="text-green-500 dark:text-green-400 mt-0.5" />
+              <Icon name="checkmark-circle" size={20} color="#10B981" />
               <Text className="text-gray-900 dark:text-white text-base flex-1">
                 {t('settings:deleteAccount.restore.info.3')}
               </Text>
@@ -328,8 +333,8 @@ export const AccountRestoreScreen = () => {
             <ActivityIndicator size="small" color="white" />
           ) : (
             <>
-              <Ionicons name="refresh" size={20} className="text-white mr-2" />
-              <Text className="text-white text-base font-bold">
+              <Icon name="refresh" size={20} color="#FFFFFF" />
+              <Text className="text-white text-base font-bold ml-2">
                 {t('settings:deleteAccount.restore.button')}
               </Text>
             </>
@@ -338,8 +343,8 @@ export const AccountRestoreScreen = () => {
 
         {/* 주의사항 */}
         <View className="flex-row items-start bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 mt-6 mx-4 mb-8">
-          <Ionicons name="information-circle" size={24} className="text-orange-500 dark:text-orange-400 mr-3 mt-0.5" />
-          <Text className="text-gray-900 dark:text-white text-base flex-1">
+          <Icon name="information-circle" size={24} color="#F97316" />
+          <Text className="text-gray-900 dark:text-white text-base flex-1 ml-3">
             {t('settings:deleteAccount.restore.warning')}
           </Text>
         </View>
