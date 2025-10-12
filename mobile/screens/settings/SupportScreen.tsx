@@ -86,9 +86,9 @@ interface Feedback {
  */
 export const SupportScreen = () => {
   const navigation = useNavigation();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation('support');
-  
+
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -172,7 +172,7 @@ export const SupportScreen = () => {
         }
         return feedback;
       });
-      
+
       setFeedbacks(updatedFeedbacks);
       await AsyncStorage.setItem('support_feedbacks', JSON.stringify(updatedFeedbacks));
     } catch (error) {
@@ -198,7 +198,7 @@ export const SupportScreen = () => {
       const updatedFeedbacks = [newFeedbackItem, ...feedbacks];
       setFeedbacks(updatedFeedbacks);
       await AsyncStorage.setItem('support_feedbacks', JSON.stringify(updatedFeedbacks));
-      
+
       setNewFeedback('');
       setShowCreateModal(false);
       Alert.alert('피드백이 등록되었습니다', '소중한 의견 감사합니다!');
@@ -209,7 +209,7 @@ export const SupportScreen = () => {
   };
 
   const filteredFeedbacks = feedbacks
-    .filter(feedback => 
+    .filter(feedback =>
       feedback.content.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
@@ -221,48 +221,37 @@ export const SupportScreen = () => {
     });
 
   const renderFeedbackItem = ({ item }: { item: Feedback }) => (
-    <View 
-      className={cn(
-        "p-4 mb-3 rounded-xl border",
-"bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-      )}
-      style={{ backgroundColor: colors.SURFACE, borderColor: colors.BORDER }}
-    >
-      <Text 
-        className="text-base leading-6 mb-3"
-        style={{ color: colors.TEXT.PRIMARY }}
-      >
+    <View className="p-4 mb-3 rounded-xl border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+      <Text className="text-base leading-6 mb-3 text-gray-900 dark:text-white">
         {item.content}
       </Text>
-      
+
       <View className="flex-row items-center justify-between">
-        <Text 
-          className="text-xs"
-          style={{ color: colors.TEXT.LIGHT }}
-        >
+        <Text className="text-xs text-gray-500 dark:text-gray-500">
           {item.createdAt.toLocaleDateString('ko-KR')}
         </Text>
-        
+
         <TouchableOpacity
           className={cn(
             "flex-row items-center px-3 py-2 rounded-lg",
-            item.hasVoted ? "opacity-100" : "opacity-70"
+            item.hasVoted
+              ? "bg-blue-50 dark:bg-blue-900/20"
+              : "bg-gray-100 dark:bg-gray-800"
           )}
-          style={{ 
-            backgroundColor: item.hasVoted ? colors.PRIMARY + '20' : colors.BACKGROUND 
-          }}
           onPress={() => handleVote(item.id)}
         >
-          <Icon 
-            name={item.hasVoted ? "thumbs-up" : "thumbs-up-outline"} 
-            size={16} 
-            color={item.hasVoted ? colors.PRIMARY : colors.TEXT.SECONDARY} 
+          <Icon
+            name={item.hasVoted ? "thumbs-up" : "thumbs-up-outline"}
+            size={16}
+            color={item.hasVoted ? colors.PRIMARY : colors.TEXT.SECONDARY}
           />
-          <Text 
-            className="text-sm font-medium ml-1"
-            style={{ 
-              color: item.hasVoted ? colors.PRIMARY : colors.TEXT.SECONDARY 
-            }}
+          <Text
+            className={cn(
+              "text-sm font-medium ml-1",
+              item.hasVoted
+                ? "text-blue-500"
+                : "text-gray-600 dark:text-gray-400"
+            )}
           >
             {item.voteCount}
           </Text>
@@ -272,32 +261,17 @@ export const SupportScreen = () => {
   );
 
   return (
-    <SafeAreaView 
-      className={cn(
-        "flex-1",
-"bg-gray-50 dark:bg-gray-900"
-      )}
-      style={{ backgroundColor: colors.BACKGROUND }}
-    >
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <View 
-        className={cn(
-          "flex-row items-center justify-between px-4 py-3 border-b",
-  "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-        )}
-        style={{ backgroundColor: colors.SURFACE, borderBottomColor: colors.BORDER }}
-      >
+      <View className="flex-row items-center justify-between px-4 py-3 border-b bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={colors.TEXT.PRIMARY} />
         </TouchableOpacity>
-        
-        <Text 
-          className="text-xl font-semibold"
-          style={{ color: colors.TEXT.PRIMARY }}
-        >
+
+        <Text className="text-xl font-semibold text-gray-900 dark:text-white">
           사용자 피드백
         </Text>
-        
+
         <TouchableOpacity onPress={() => setShowCreateModal(true)}>
           <Icon name="add" size={24} color={colors.PRIMARY} />
         </TouchableOpacity>
@@ -305,17 +279,10 @@ export const SupportScreen = () => {
 
       {/* Search and Sort */}
       <View className="p-4">
-        <View 
-          className={cn(
-            "flex-row items-center px-4 py-3 rounded-lg mb-3",
-"bg-white dark:bg-gray-800"
-          )}
-          style={{ backgroundColor: colors.SURFACE }}
-        >
+        <View className="flex-row items-center px-4 py-3 rounded-lg mb-3 bg-white dark:bg-gray-800">
           <Icon name="search" size={20} color={colors.TEXT.LIGHT} />
           <TextInput
-            className="flex-1 ml-3 text-base"
-            style={{ color: colors.TEXT.PRIMARY }}
+            className="flex-1 ml-3 text-base text-gray-900 dark:text-white"
             placeholder="피드백 검색..."
             placeholderTextColor={colors.TEXT.LIGHT}
             value={searchQuery}
@@ -327,38 +294,40 @@ export const SupportScreen = () => {
           <TouchableOpacity
             className={cn(
               "px-4 py-2 rounded-lg",
-              sortBy === 'popular' ? "opacity-100" : "opacity-60"
+              sortBy === 'popular'
+                ? "bg-blue-500"
+                : "bg-white dark:bg-gray-800 opacity-60"
             )}
-            style={{ 
-              backgroundColor: sortBy === 'popular' ? colors.PRIMARY : colors.SURFACE 
-            }}
             onPress={() => setSortBy('popular')}
           >
-            <Text 
-              className="text-sm font-medium"
-              style={{ 
-                color: sortBy === 'popular' ? colors.TEXT.WHITE : colors.TEXT.PRIMARY 
-              }}
+            <Text
+              className={cn(
+                "text-sm font-medium",
+                sortBy === 'popular'
+                  ? "text-white"
+                  : "text-gray-900 dark:text-white"
+              )}
             >
               인기순
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             className={cn(
               "px-4 py-2 rounded-lg",
-              sortBy === 'recent' ? "opacity-100" : "opacity-60"
+              sortBy === 'recent'
+                ? "bg-blue-500"
+                : "bg-white dark:bg-gray-800 opacity-60"
             )}
-            style={{ 
-              backgroundColor: sortBy === 'recent' ? colors.PRIMARY : colors.SURFACE 
-            }}
             onPress={() => setSortBy('recent')}
           >
-            <Text 
-              className="text-sm font-medium"
-              style={{ 
-                color: sortBy === 'recent' ? colors.TEXT.WHITE : colors.TEXT.PRIMARY 
-              }}
+            <Text
+              className={cn(
+                "text-sm font-medium",
+                sortBy === 'recent'
+                  ? "text-white"
+                  : "text-gray-900 dark:text-white"
+              )}
             >
               최신순
             </Text>
@@ -387,60 +356,35 @@ export const SupportScreen = () => {
         animationType="slide"
         presentationStyle="pageSheet"
       >
-        <SafeAreaView 
-          className={cn(
-            "flex-1",
-"bg-white dark:bg-gray-900"
-          )}
-          style={{ backgroundColor: colors.BACKGROUND }}
-        >
-          <View 
-            className={cn(
-              "flex-row items-center justify-between px-4 py-3 border-b",
-"border-gray-200 dark:border-gray-700"
-            )}
-            style={{ borderBottomColor: colors.BORDER }}
-          >
+        <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
+          <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <TouchableOpacity onPress={() => setShowCreateModal(false)}>
-              <Text style={{ color: colors.TEXT.SECONDARY }}>취소</Text>
+              <Text className="text-gray-600 dark:text-gray-400">취소</Text>
             </TouchableOpacity>
-            
-            <Text 
-              className="text-lg font-semibold"
-              style={{ color: colors.TEXT.PRIMARY }}
-            >
+
+            <Text className="text-lg font-semibold text-gray-900 dark:text-white">
               피드백 작성
             </Text>
-            
+
             <TouchableOpacity onPress={handleCreateFeedback}>
-              <Text 
-                className="font-semibold"
-                style={{ color: colors.PRIMARY }}
-              >
+              <Text className="font-semibold text-blue-500">
                 등록
               </Text>
             </TouchableOpacity>
           </View>
 
-          <KeyboardAvoidingView 
+          <KeyboardAvoidingView
             className="flex-1 p-4"
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
             <TextInput
-              className={cn(
-                "flex-1 p-4 rounded-lg text-base",
-"bg-gray-50 dark:bg-gray-800"
-              )}
-              style={{ 
-                backgroundColor: colors.SURFACE,
-                color: colors.TEXT.PRIMARY,
-                textAlignVertical: 'top'
-              }}
+              className="flex-1 p-4 rounded-lg text-base bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="어떤 기능이 있으면 좋을까요? 자유롭게 의견을 남겨주세요."
               placeholderTextColor={colors.TEXT.LIGHT}
               value={newFeedback}
               onChangeText={setNewFeedback}
               multiline
+              style={{ textAlignVertical: 'top' }}
             />
           </KeyboardAvoidingView>
         </SafeAreaView>

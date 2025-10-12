@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   Alert,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
@@ -57,10 +58,10 @@ export const MyGroupsScreen = () => {
   const { t } = useAndroidSafeTranslation('mygroups');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'joined' | 'created'>('joined');
-  
+
   const navigation = useNavigation();
   const groupStore = useGroupStore();
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -119,16 +120,22 @@ export const MyGroupsScreen = () => {
     const isCreator = item.creatorId === 'current_user'; // TODO: Compare with actual user ID
 
     return (
-      <View 
-        className="rounded-xl p-4 mb-4 shadow-sm bg-white dark:bg-gray-800"
-        style={{ 
-          backgroundColor: colors.SURFACE,
-          shadowColor: colors.SHADOW,
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 3,
-        }}
+      <View
+        className="rounded-xl p-4 mb-4 bg-white dark:bg-gray-800"
+        style={Platform.select({
+          ios: {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          },
+          android: {
+            elevation: 3,
+          },
+          web: {
+            boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+          },
+        })}
       >
         <View className="mb-4">
           <View className="flex-row items-start">
@@ -137,36 +144,23 @@ export const MyGroupsScreen = () => {
             </Text>
             <View className="flex-1">
               <View className="flex-row items-center mb-1">
-                <Text 
-                  className="text-lg font-bold flex-1"
-                  style={{ color: colors.TEXT.PRIMARY }}
-                >
+                <Text className="text-lg font-bold flex-1 text-gray-900 dark:text-white">
                   {item.name}
                 </Text>
                 {isCreator && (
-                  <Text 
-                    className="text-xs px-2 py-0.5 rounded-xl ml-2 overflow-hidden"
-                    style={{ 
-                      color: colors.TEXT.WHITE, 
-                      backgroundColor: colors.SUCCESS 
-                    }}
-                  >
+                  <Text className="text-xs px-2 py-0.5 rounded-xl ml-2 bg-green-500 text-white">
                     {t('myGroups.creatorBadge')}
                   </Text>
                 )}
               </View>
-              <Text 
-                className="text-sm leading-4 mb-1"
-                style={{ color: colors.TEXT.SECONDARY }}
+              <Text
+                className="text-sm leading-4 mb-1 text-gray-600 dark:text-gray-400"
                 numberOfLines={2}
               >
                 {item.description}
               </Text>
-              <Text 
-                className="text-xs"
-                style={{ color: colors.TEXT.LIGHT }}
-              >
-                {t('myGroups.groupStats', { 
+              <Text className="text-xs text-gray-500 dark:text-gray-500">
+                {t('myGroups.groupStats', {
                   memberCount: item.memberCount,
                   matchingStatus: item.isMatchingActive ? t('myGroups.active') : t('myGroups.inactive')
                 })}
@@ -178,44 +172,32 @@ export const MyGroupsScreen = () => {
         <View className="flex-row justify-end space-x-2">
           {isCreator ? (
             <TouchableOpacity
-              className="px-4 py-2 rounded-lg min-w-[70px] items-center"
-              style={{ backgroundColor: colors.PRIMARY }}
+              className="px-4 py-2 rounded-lg min-w-[70px] items-center bg-blue-500 active:opacity-80"
               onPress={() => handleManageGroup(item)}
             >
-              <Text 
-                className="text-sm font-semibold"
-                style={{ color: colors.TEXT.WHITE }}
-              >
+              <Text className="text-sm font-semibold text-white">
                 {t('myGroups.manageButton')}
               </Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              className="px-4 py-2 rounded-lg min-w-[70px] items-center"
-              style={{ backgroundColor: colors.ERROR }}
+              className="px-4 py-2 rounded-lg min-w-[70px] items-center bg-red-500 active:opacity-80"
               onPress={() => handleLeaveGroup(item)}
             >
-              <Text 
-                className="text-sm font-semibold"
-                style={{ color: colors.TEXT.WHITE }}
-              >
+              <Text className="text-sm font-semibold text-white">
                 {t('myGroups.leaveButton')}
               </Text>
             </TouchableOpacity>
           )}
-          
+
           <TouchableOpacity
-            className="px-4 py-2 rounded-lg min-w-[70px] items-center"
-            style={{ backgroundColor: colors.TEXT.LIGHT }}
+            className="px-4 py-2 rounded-lg min-w-[70px] items-center bg-gray-200 dark:bg-gray-700 active:opacity-80"
             onPress={() => {
               // TODO: Navigate to group detail page
               Alert.alert(t('myGroups.viewGroup.title'), t('myGroups.viewGroup.message'));
             }}
           >
-            <Text 
-              className="text-sm font-medium"
-              style={{ color: colors.TEXT.PRIMARY }}
-            >
+            <Text className="text-sm font-medium text-gray-900 dark:text-white">
               {t('myGroups.viewButton')}
             </Text>
           </TouchableOpacity>
@@ -225,54 +207,40 @@ export const MyGroupsScreen = () => {
   };
 
   const renderTabBar = () => (
-    <View 
-      className="flex-row border-b bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-      style={{ 
-        backgroundColor: colors.SURFACE, 
-        borderBottomColor: colors.BORDER 
-      }}
-    >
+    <View className="flex-row border-b bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
       <TouchableOpacity
         className={cn(
           "flex-1 py-4 items-center border-b-2",
-          selectedTab === 'joined' ? "" : "border-transparent"
+          selectedTab === 'joined' ? "border-blue-500" : "border-transparent"
         )}
-        style={{
-          borderBottomColor: selectedTab === 'joined' ? colors.PRIMARY : 'transparent'
-        }}
         onPress={() => setSelectedTab('joined')}
       >
         <Text
           className={cn(
             "text-sm font-medium",
-            selectedTab === 'joined' ? "font-semibold" : ""
+            selectedTab === 'joined'
+              ? "font-semibold text-blue-500"
+              : "text-gray-600 dark:text-gray-400"
           )}
-          style={{
-            color: selectedTab === 'joined' ? colors.PRIMARY : colors.TEXT.SECONDARY
-          }}
         >
           {t('myGroups.joinedTab', { count: groupStore.joinedGroups.length })}
         </Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity
         className={cn(
           "flex-1 py-4 items-center border-b-2",
-          selectedTab === 'created' ? "" : "border-transparent"
+          selectedTab === 'created' ? "border-blue-500" : "border-transparent"
         )}
-        style={{
-          borderBottomColor: selectedTab === 'created' ? colors.PRIMARY : 'transparent'
-        }}
         onPress={() => setSelectedTab('created')}
       >
         <Text
           className={cn(
             "text-sm font-medium",
-            selectedTab === 'created' ? "font-semibold" : ""
+            selectedTab === 'created'
+              ? "font-semibold text-blue-500"
+              : "text-gray-600 dark:text-gray-400"
           )}
-          style={{
-            color: selectedTab === 'created' ? colors.PRIMARY : colors.TEXT.SECONDARY
-          }}
         >
           {t('myGroups.createdTab', { count: groupStore.joinedGroups.filter(g => g.creatorId === 'current_user').length })}
         </Text>
@@ -281,23 +249,11 @@ export const MyGroupsScreen = () => {
   );
 
   const renderHeader = () => (
-    <View 
-      className="px-6 py-6 border-b bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-      style={{ 
-        backgroundColor: colors.SURFACE, 
-        borderBottomColor: colors.BORDER 
-      }}
-    >
-      <Text 
-        className="text-2xl font-bold mb-1"
-        style={{ color: colors.PRIMARY }}
-      >
+    <View className="px-6 py-6 border-b bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+      <Text className="text-2xl font-bold mb-1 text-blue-500">
         {t('myGroups.title')}
       </Text>
-      <Text 
-        className="text-base"
-        style={{ color: colors.TEXT.PRIMARY }}
-      >
+      <Text className="text-base text-gray-900 dark:text-white">
         {t('myGroups.subtitle')}
       </Text>
     </View>
@@ -308,27 +264,20 @@ export const MyGroupsScreen = () => {
       <Text className="text-6xl mb-6">
         {selectedTab === 'joined' ? '👥' : '➕'}
       </Text>
-      <Text 
-        className="text-lg font-bold mb-3 text-center"
-        style={{ color: colors.TEXT.PRIMARY }}
-      >
-        {selectedTab === 'joined' 
+      <Text className="text-lg font-bold mb-3 text-center text-gray-900 dark:text-white">
+        {selectedTab === 'joined'
           ? t('myGroups.emptyJoined.title')
           : t('myGroups.emptyCreated.title')
         }
       </Text>
-      <Text 
-        className="text-base text-center leading-6 mb-8"
-        style={{ color: colors.TEXT.SECONDARY }}
-      >
+      <Text className="text-base text-center leading-6 mb-8 text-gray-600 dark:text-gray-400">
         {selectedTab === 'joined'
           ? t('myGroups.emptyJoined.subtitle')
           : t('myGroups.emptyCreated.subtitle')
         }
       </Text>
       <TouchableOpacity
-        className="px-6 py-4 rounded-lg"
-        style={{ backgroundColor: colors.PRIMARY }}
+        className="px-6 py-4 rounded-lg bg-blue-500 active:opacity-80"
         onPress={() => {
           if (selectedTab === 'joined') {
             navigation.navigate('Groups' as never);
@@ -337,10 +286,7 @@ export const MyGroupsScreen = () => {
           }
         }}
       >
-        <Text 
-          className="text-base font-semibold"
-          style={{ color: colors.TEXT.WHITE }}
-        >
+        <Text className="text-base font-semibold text-white">
           {selectedTab === 'joined' ? t('myGroups.emptyJoined.button') : t('myGroups.emptyCreated.button')}
         </Text>
       </TouchableOpacity>
@@ -358,13 +304,10 @@ export const MyGroupsScreen = () => {
   const currentGroups = getCurrentTabGroups();
 
   return (
-    <SafeAreaView 
-      className="flex-1 bg-gray-50 dark:bg-gray-900"
-      style={{ backgroundColor: colors.BACKGROUND }}
-    >
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       {renderHeader()}
       {renderTabBar()}
-      
+
       <FlatList
         data={currentGroups}
         keyExtractor={(item) => item.id}
@@ -380,8 +323,8 @@ export const MyGroupsScreen = () => {
         }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={
-          currentGroups.length === 0 
-            ? { flexGrow: 1 } 
+          currentGroups.length === 0
+            ? { flexGrow: 1 }
             : { padding: 16 }
         }
       />
