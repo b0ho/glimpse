@@ -25,40 +25,40 @@
 - ✅ JoinGroupScreen.tsx (433줄)
 - ✅ AccountRestoreScreen.tsx (349줄)
 - ✅ QRGroupJoinScreen.tsx (374줄)
-- ✅ ProfileEditScreen.tsx (385줄) - 완료 확인됨
-- ✅ PostDetailScreen.tsx (436줄) - 완료 확인됨
-- ✅ GroupDetailScreen.tsx (487줄) - 완료 확인됨
+- ✅ ProfileEditScreen.tsx (385줄)
+- ✅ PostDetailScreen.tsx (436줄)
+- ✅ GroupDetailScreen.tsx (487줄)
+- ✅ MyGroupsScreen.tsx (333줄) - 2025-01-14 완료
+- ✅ SupportScreen.tsx (394줄) - 2025-01-14 완료
+- ✅ OnboardingScreen.tsx (306줄) - 2025-01-14 완료
+- ✅ GroupChatListScreen.tsx (264줄) - 기존 완료
+- ✅ NearbyGroupsScreen.tsx (320줄) - 기존 완료
 
-## 전환이 필요한 파일 목록 (28개)
+## 전환이 필요한 파일 목록 (23개)
 
 ### Screens
 1. NearbyGroupsScreen.backup.tsx (백업 파일, 삭제 검토)
-2. MyGroupsScreen.tsx
-3. SupportScreen.tsx
-4. GroupChatListScreen.tsx
-5. NearbyGroupsScreen.tsx
-6. OnboardingScreen.tsx
-7. TermsOfServiceScreen.tsx
-8. StoryUploadScreen.tsx
-9. ProfileSettingsScreen.tsx
-10. PrivacyPolicyScreen.tsx
-11. PremiumScreen.tsx
-12. NotificationSettingsScreen.tsx
-13. ModeSelectionScreen.tsx
-14. MatchChatListScreen.tsx
-15. MapScreen.tsx
-16. LocationGroupScreen.tsx
-17. LikeHistoryScreen.tsx
-18. GroupManageScreen.tsx
-19. GroupInviteScreen.tsx
-20. DeleteAccountScreen.tsx
-21. CreateGroupScreen.tsx
-22. CompanyVerificationScreen.tsx
-23. ChatScreenSimple.tsx
-24. HomeScreen.original.tsx (원본 파일, 삭제 검토)
+2. TermsOfServiceScreen.tsx
+3. StoryUploadScreen.tsx
+4. ProfileSettingsScreen.tsx
+5. PrivacyPolicyScreen.tsx
+6. PremiumScreen.tsx
+7. NotificationSettingsScreen.tsx
+8. ModeSelectionScreen.tsx
+9. MatchChatListScreen.tsx
+10. MapScreen.tsx
+11. LocationGroupScreen.tsx
+12. LikeHistoryScreen.tsx
+13. GroupManageScreen.tsx
+14. GroupInviteScreen.tsx
+15. DeleteAccountScreen.tsx
+16. CreateGroupScreen.tsx
+17. CompanyVerificationScreen.tsx
+18. ChatScreenSimple.tsx
+19. HomeScreen.original.tsx (원본 파일, 삭제 검토)
 
 ### Components
-25. components/common/ScreenHeader.old.tsx (구버전, 삭제 검토)
+20. components/common/ScreenHeader.old.tsx (구버전, 삭제 검토)
 
 ## 전환 단계
 
@@ -392,9 +392,17 @@ const styles = StyleSheet\.create\(\{[\s\S]*?\}\);
 ---
 
 **Last Updated**: 2025-01-14
-**Status**: 24/52 screens completed (46.2%)
-**Progress**: +11 screens verified/completed
-- AddInterestScreen, MyInfoScreen, ProfileModeScreen, CreateStoryScreen, WhoLikesYouScreen (5개)
-- JoinGroupScreen, AccountRestoreScreen, QRGroupJoinScreen (3개)
-- ProfileEditScreen, PostDetailScreen, GroupDetailScreen (3개)
-**Next Target**: MyGroupsScreen.tsx, SupportScreen.tsx, GroupChatListScreen.tsx
+**Status**: 29/52 screens completed (55.8%)
+**Progress**: +5 screens converted/verified
+- MyGroupsScreen (390→333줄, 14.6% 감소)
+- SupportScreen (450→394줄, 12.4% 감소)
+- OnboardingScreen (380→306줄, 19.5% 감소)
+- GroupChatListScreen (264줄, 기존 완료)
+- NearbyGroupsScreen (320줄, 기존 완료)
+
+**Session Summary**:
+- 3개 화면 직접 변환 (187줄 감소)
+- 2개 화면 완료 확인
+- 총 29개 화면 완료 (55.8%)
+
+**Next Target**: TermsOfServiceScreen.tsx, StoryUploadScreen.tsx, ProfileSettingsScreen.tsx
