@@ -85,12 +85,9 @@ export const useLikeHandlers = ({ contents, setContents, t }: UseLikeHandlersPro
   /**
    * 콘텐츠 편집 핸들러
    */
-  const handleEditContent = useCallback((contentId: string) => {
-    const content = contents.find(c => c.id === contentId);
-    if (content) {
-      navigation.navigate('CreateContent', { editContent: content });
-    }
-  }, [contents, navigation]);
+  const handleEditContent = useCallback((content: Content) => {
+    navigation.navigate('CreateContent', { editContent: content });
+  }, [navigation]);
 
   /**
    * 콘텐츠 삭제 핸들러

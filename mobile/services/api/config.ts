@@ -312,10 +312,14 @@ class ApiClient {
    * @async
    * @template T
    * @param {string} endpoint - API 엔드포인트
+   * @param {any} [data] - 요청 본문 데이터
    * @returns {Promise<T>} 응답 데이터
    */
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+  async delete<T>(endpoint: string, data?: any): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'DELETE',
+      body: data ? JSON.stringify(data) : undefined,
+    });
   }
 }
 

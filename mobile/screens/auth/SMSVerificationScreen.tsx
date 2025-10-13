@@ -379,7 +379,7 @@ export const SMSVerificationScreen = ({
                 } : undefined}
               >
                 <TextInput
-                  ref={(ref) => (inputRefs.current[index] = ref)}
+                  ref={(ref) => { inputRefs.current[index] = ref; }}
                   className="text-2xl font-semibold w-full h-full text-center text-gray-900 dark:text-white"
                   value={code[index] || ''}
                   onChangeText={(text) => handleCodeChange(text, index)}
