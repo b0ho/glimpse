@@ -48,18 +48,17 @@ export const useStoryData = () => {
       console.log('[useStoryData] Story groups loaded:', storyGroups.length);
       
       const storyUsers: StoryUser[] = storyGroups.map(group => ({
-        id: group.userId,
         userId: group.userId,
-        username: group.userName,
-        profileImage: group.userAvatar,
-        hasUnseenStory: group.hasUnseen,
+        nickname: group.userName,
+        hasUnviewedStories: group.hasUnseen,
         stories: group.stories,
       }));
       
       setStories(storyUsers);
     } catch (error) {
       console.error('[useStoryData] Failed to load stories:', error);
-      setStories(getStoriesByUser());
+      // Fallback to empty array on error (getStoriesByUser needs userId which we may not have)
+      setStories([]);
     } finally {
       setStoriesLoading(false);
     }
