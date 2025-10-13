@@ -28,7 +28,7 @@ export const GroupsHeader: React.FC<GroupsHeaderProps> = ({ t }) => {
       <View className="flex-row gap-x-2 mt-4">
         <TouchableOpacity
           className="flex-1 bg-red-500 flex-row items-center justify-center px-4 py-3 rounded-xl"
-          onPress={() => navigation.navigate('CreateGroup' as never)}
+          onPress={() => (navigation as any).navigate('CreateGroup')}
         >
           <Icon name="add-circle-outline" size={20} color="#FFFFFF" />
           <Text className="text-white font-semibold ml-2 flex-shrink-0">
@@ -38,7 +38,7 @@ export const GroupsHeader: React.FC<GroupsHeaderProps> = ({ t }) => {
 
         <TouchableOpacity
           className="flex-1 bg-white dark:bg-gray-700 flex-row items-center justify-center px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600"
-          onPress={() => navigation.navigate('JoinGroup' as never, { inviteCode: '' } as never)}
+          onPress={() => (navigation as any).navigate('JoinGroup', { inviteCode: '' })}
         >
           <Icon name="search-outline" size={20} color={colors.PRIMARY} />
           <Text className="text-gray-900 dark:text-gray-100 font-semibold ml-2 flex-shrink-0">

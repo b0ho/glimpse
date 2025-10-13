@@ -46,7 +46,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group }) => {
   };
 
   const handleGroupPress = () => {
-    navigation.navigate('GroupDetail' as never, { groupId: group.id } as never);
+    (navigation as any).navigate('GroupDetail', { groupId: group.id });
   };
 
   const handleJoinPress = () => {
@@ -69,7 +69,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group }) => {
       );
     } else {
       // 그룹 상세 화면으로 이동
-      navigation.navigate('GroupDetail' as never, { groupId: group.id } as never);
+      (navigation as any).navigate('GroupDetail', { groupId: group.id });
     }
   };
 
