@@ -86,7 +86,7 @@ export const useProfileData = (t: (key: string) => string) => {
         console.log('[Logout] SignOut completed, navigating to Auth...');
         
         // 네비게이션을 Auth 화면으로 리셋
-        navigation.reset({
+        (navigation as any).reset({
           index: 0,
           routes: [{ name: 'Auth' }],
         });
@@ -123,7 +123,7 @@ export const useProfileData = (t: (key: string) => string) => {
                 await signOut();
                 
                 // 네비게이션을 Auth 화면으로 리셋
-                navigation.reset({
+                (navigation as any).reset({
                   index: 0,
                   routes: [{ name: 'Auth' }],
                 });

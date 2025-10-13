@@ -69,9 +69,9 @@ export const useSubscriptionLimits = () => {
     }
 
     try {
-      // 로컬 저장소의 관심 카드 수 확인
+      // 로컬 저장소의 관심 카드 수 확인 (모든 카드가 현재 사용자 것)
       const localCards = await getLocalInterestCards();
-      const localCardCount = localCards.filter(card => card.userId === 'current_user').length;
+      const localCardCount = localCards.length;
       
       // 서버 + 로컬 카드 총합
       const totalSearches = searches.length + localCardCount;
@@ -109,7 +109,7 @@ export const useSubscriptionLimits = () => {
     
     try {
       const localCards = await getLocalInterestCards();
-      const localCardCount = localCards.filter(card => card.userId === 'current_user').length;
+      const localCardCount = localCards.length;
       const totalSearches = searches.length + localCardCount;
       return Math.max(0, maxSearches - totalSearches);
     } catch (error) {

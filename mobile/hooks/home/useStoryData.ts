@@ -4,7 +4,7 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { storyService } from '@/services/storyService';
-import { getStoriesByUser, StoryUser } from '@/utils/storyData';
+import { getStoriesByUser, StoryUser, Story } from '@/utils/storyData';
 import { SuccessStory } from '@/types/successStory';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
