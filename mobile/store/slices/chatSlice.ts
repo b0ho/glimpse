@@ -53,9 +53,9 @@ export const useChatStore = create<ChatStore>()(
       initializeChat: async (userId: string, authToken: string) => {
         try {
           set({ isLoading: true, error: null });
-          
+
           // WebSocket 연결
-          await socketService.connect(authToken);
+          await socketService.connect(userId, authToken);
           
           // 연결 상태 업데이트
           set({
@@ -104,7 +104,7 @@ export const useChatStore = create<ChatStore>()(
        */
       loadChatRooms: async () => {
         try {
-          const rooms = await chatService.getChatRooms();
+          const rooms = await chatService.getMatches();
           set({ chatRooms: rooms });
         } catch (error: any) {
           set({ error: error.message || '채팅방 목록 로드 실패' });
