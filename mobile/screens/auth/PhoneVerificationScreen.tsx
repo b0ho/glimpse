@@ -24,7 +24,7 @@ import {
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { useAuthService } from '@/services/auth/auth-service';
 import { useTheme } from '@/hooks/useTheme';
-import { colors } from '@/constants/theme';
+import { COLORS } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { validatePhoneNumber as validatePhone } from '@/services/auth/clerk-config';

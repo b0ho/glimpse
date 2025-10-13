@@ -23,7 +23,7 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { REGEX } from '@/utils/constants';
 import { Gender } from '@/types';
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/store/slices/themeSlice';
+import { useTheme } from '@/hooks/useTheme';
 
 /**
  * Props 인터페이스

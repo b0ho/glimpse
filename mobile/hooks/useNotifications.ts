@@ -148,11 +148,11 @@ export function useNotifications() {
         case 'new_message':
           if (data.messageId) {
             // Navigate to specific chat
-            navigation.navigate('Chat' as never, {
+            (navigation as any).navigate('Chat', {
               roomId: data.roomId || '',
               matchId: data.matchId || data.userId || '',
               otherUserNickname: '익명사용자'
-            } as never);
+            });
           }
           break;
 

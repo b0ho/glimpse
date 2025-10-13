@@ -51,9 +51,9 @@ export const useStoryData = () => {
         userId: group.userId,
         nickname: group.userName,
         hasUnviewedStories: group.hasUnseen,
-        stories: group.stories,
+        stories: group.stories as any, // Story 타입이 storyService와 storyData에서 다름
       }));
-      
+
       setStories(storyUsers);
     } catch (error) {
       console.error('[useStoryData] Failed to load stories:', error);
