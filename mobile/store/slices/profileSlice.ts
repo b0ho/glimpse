@@ -113,10 +113,10 @@ export const useProfileStore = create<ProfileState>()(
         set({ loading: true, error: null });
         try {
           const response = await profileService.updateProfile(userId, data);
-          if (response.success && response.data) {
-            set({ 
-              userProfile: response.data, 
-              loading: false 
+          if (response.success && response.user) {
+            set({
+              userProfile: response.user,
+              loading: false
             });
             return response;
           }
