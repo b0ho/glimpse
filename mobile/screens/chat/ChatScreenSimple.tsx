@@ -170,7 +170,7 @@ export const ChatScreenSimple = () => {
 
     const newMessage: Message = {
       id: `msg_${Date.now()}`,
-      matchId: matchId,
+      roomId: matchId,
       senderId: 'current_user',
       content: inputText.trim(),
       type: 'text',

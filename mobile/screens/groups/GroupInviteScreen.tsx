@@ -147,8 +147,10 @@ export const GroupInviteScreen = () => {
     setIsInviting(true);
     try {
       const numbers = phoneNumbers.split(',').map(num => num.trim());
-      await groupApi.sendSMSInvites(groupId, numbers);
-      Alert.alert(t('group:invite.alerts.smsSuccess.title'), t('group:invite.alerts.smsSuccess.message'));
+      // TODO: Implement sendSMSInvites method in groupApi
+      // await groupApi.sendSMSInvites(groupId, numbers);
+      console.log('[GroupInviteScreen] SMS invites not implemented yet:', numbers);
+      Alert.alert(t('group:invite.alerts.smsSuccess.title'), 'SMS 초대 기능이 아직 구현되지 않았습니다.');
       setPhoneNumbers('');
     } catch (error: any) {
       Alert.alert(t('group:invite.alerts.smsError.title'), error.response?.data?.message || t('group:invite.alerts.smsError.message'));
@@ -159,7 +161,7 @@ export const GroupInviteScreen = () => {
 
   const revokeInvite = async (inviteId: string) => {
     try {
-      await groupApi.revokeInvite(groupId, inviteId);
+      await groupApi.revokeInvite(inviteId);
       await loadInvites();
       Alert.alert(t('group:invite.alerts.revokeSuccess.title'), t('group:invite.alerts.revokeSuccess.message'));
     } catch (error: any) {
