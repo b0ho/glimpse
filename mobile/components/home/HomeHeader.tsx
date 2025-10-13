@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@/hooks/useTheme';
 
 interface HomeHeaderProps {
-  t: (key: string) => string;
+  t: (key: string, options?: any) => string;
   remainingLikes: number;
   receivedLikesCount: number;
   userName?: string;

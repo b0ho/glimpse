@@ -34,7 +34,7 @@ interface NearbyGroupItemProps {
   /** 거리를 포맷팅하는 함수 (미터 → 문자열) */
   formatDistance: (meters: number) => string;
   /** 번역 함수 */
-  t: (key: string) => string;
+  t: (key: string, options?: any) => string;
 }
 
 /**
