@@ -78,7 +78,10 @@ export interface ChatActions {
   // 오프라인 큐 관련
   addToOfflineQueue: (message: OfflineMessage) => void;
   clearOfflineQueue: () => void;
-  
+
+  // 에러 관리
+  clearError: () => void;
+
   // 정리
   cleanup: () => void;
   reset: () => void;

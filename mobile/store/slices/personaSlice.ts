@@ -67,6 +67,8 @@ interface PersonaState {
   fetchMyPersona: () => Promise<void>;
   /** 페르소나 생성 또는 업데이트 */
   createOrUpdatePersona: (data: Partial<Persona>) => Promise<void>;
+  /** 내 페르소나 업데이트 (로컬) */
+  updateMyPersona: (updates: Partial<Persona>) => void;
   /** 페르소나 활성화 토글 */
   togglePersona: (isActive: boolean) => Promise<void>;
   /** 페르소나 삭제 */
@@ -163,6 +165,18 @@ export const usePersonaStore = create<PersonaState>()(
           };
           set({ myPersona: newPersona, isLoading: false });
           // 로컬 저장만 하고 에러는 throw하지 않음
+        }
+      },
+
+      /**
+       * 내 페르소나 업데이트 (로컬)
+       * @param {Partial<Persona>} updates - 업데이트할 페르소나 정보
+       * @description 로컬 페르소나 정보를 즉시 업데이트
+       */
+      updateMyPersona: (updates) => {
+        const currentPersona = get().myPersona;
+        if (currentPersona) {
+          set({ myPersona: { ...currentPersona, ...updates } });
         }
       },
 

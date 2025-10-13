@@ -303,7 +303,14 @@ export const useChatStore = create<ChatStore>()(
       clearOfflineQueue: () => {
         set({ offlineMessageQueue: [] });
       },
-      
+
+      /**
+       * 에러 초기화
+       */
+      clearError: () => {
+        set({ error: null });
+      },
+
       /**
        * 정리
        */

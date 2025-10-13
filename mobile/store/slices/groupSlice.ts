@@ -142,6 +142,8 @@ interface GroupStore extends GroupState {
   getGroupById: (groupId: string) => Group | undefined;
   /** 사용자가 그룹에 참여했는지 확인 */
   isUserInGroup: (groupId: string) => boolean;
+  /** 그룹 데이터 초기화 */
+  clearGroups: () => void;
 }
 
 /**

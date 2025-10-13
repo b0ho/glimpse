@@ -95,6 +95,10 @@ export interface LikeStore extends LikeState {
   // Computation helpers
   /** 좋아요 가능 여부 확인 */
   canLike: () => boolean;
+  /** 좋아요 전송 가능 여부 확인 (alias for canLike) */
+  canSendLike: () => boolean;
+  /** 마지막으로 보낸 좋아요 조회 */
+  getLastLike: () => Like | null;
   /** 남은 무료 좋아요 수 */
   getRemainingFreeLikes: () => number;
   /** 남은 전체 좋아요 수 */

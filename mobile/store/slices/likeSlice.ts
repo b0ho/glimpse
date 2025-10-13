@@ -74,6 +74,17 @@ export const useLikeStore = create<LikeStore>()(
         return likeCalculations.canLike(state);
       },
 
+      canSendLike: () => {
+        // Alias for canLike
+        return get().canLike();
+      },
+
+      getLastLike: () => {
+        const state = get();
+        const sentLikes = state.sentLikes;
+        return sentLikes.length > 0 ? sentLikes[sentLikes.length - 1] : null;
+      },
+
       getRemainingFreeLikes: () => {
         const state = get();
         return likeCalculations.getRemainingFreeLikes(state);
