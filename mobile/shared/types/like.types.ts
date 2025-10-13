@@ -45,6 +45,7 @@ export interface Match {
   groupId?: string;
   chatRoomId?: string;
   isActive: boolean;
+  matchedAt?: Date;
   lastInteraction?: Date;
   matchType?: 'DATING' | 'FRIEND';
   compatibilityScore?: number;

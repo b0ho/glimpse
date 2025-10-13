@@ -175,6 +175,7 @@ export const ChatScreenSimple = () => {
       content: inputText.trim(),
       type: 'text',
       isRead: true,
+      timestamp: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };

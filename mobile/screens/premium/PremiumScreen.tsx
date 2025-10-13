@@ -152,7 +152,7 @@ export const PremiumScreen = () => {
             )}
 
             <LinearGradient
-              colors={cardColors[tier]}
+              colors={cardColors[tier] as any}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               className="p-6"
