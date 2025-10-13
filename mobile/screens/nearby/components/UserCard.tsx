@@ -73,7 +73,7 @@ export const UserCard = ({
   onMessage,
 }) => {
   const { t } = useAndroidSafeTranslation();
-  const { isDarkMode } = useTheme();
+  const { isDark } = useTheme();
   const isMatch = false; // TODO: Check if user is matched with current user
   
   const formatDistance = (meters: number) => {

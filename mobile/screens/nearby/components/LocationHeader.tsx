@@ -60,7 +60,7 @@ export const LocationHeader = ({
   onRefresh,
 }) => {
   const { t } = useAndroidSafeTranslation();
-  const { isDarkMode } = useTheme();
+  const { isDark } = useTheme();
   
   return (
     <View className={cn(

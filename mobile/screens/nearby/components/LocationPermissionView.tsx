@@ -58,7 +58,7 @@ export const LocationPermissionView = ({
   onRequestPermission,
 }) => {
   const { t } = useAndroidSafeTranslation();
-  const { colors, isDarkMode } = useTheme();
+  const { colors, isDark } = useTheme();
   
   if (isLoading) {
     return (

@@ -61,7 +61,7 @@ export const RadiusSelector = ({
   onRadiusChange,
 }) => {
   const { t } = useAndroidSafeTranslation();
-  const { isDarkMode } = useTheme();
+  const { isDark } = useTheme();
   
   return (
     <View className="py-3 px-5 border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">

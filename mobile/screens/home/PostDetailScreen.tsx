@@ -97,7 +97,7 @@ export const PostDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { postId } = route.params as { postId: string };
-  const { colors, isDarkMode } = useTheme();
+  const { colors, isDark } = useTheme();
   const { t } = useAndroidSafeTranslation('post');
   const { user } = useAuthStore();
   
