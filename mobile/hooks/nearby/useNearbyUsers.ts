@@ -3,7 +3,7 @@
  */
 import { useState, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { NearbyUser } from '@/types';
+import { NearbyUser, ApiResponse } from '@/types';
 import { apiClient } from '@/services/api/config';
 import { LocationData } from './useLocationPermission';
 
@@ -45,7 +45,7 @@ export const useNearbyUsers = (currentLocation: LocationData | null) => {
         // 위치 업데이트 실패해도 근처 사용자 검색은 계속 진행
       }
       
-      const response = await apiClient.get('/location/nearby/users', {
+      const response = await apiClient.get<ApiResponse<NearbyUser[]>>('/location/nearby/users', {
         radius: selectedRadius, // km 단위로 전송
       });
 
@@ -112,38 +112,50 @@ function getDummyNearbyUsers(): NearbyUser[] {
   return [
     {
       id: 'nearby-1',
+      anonymousId: 'anon-1',
+      phoneNumber: '010-0000-0001',
       nickname: '근처사용자1',
       profileImageUrl: null,
+      isVerified: false,
+      credits: 0,
+      isPremium: false,
       distance: 0.5,
+      lastLocationUpdate: new Date(),
+      isVisible: true,
+      lastActive: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       persona: {
         bio: '안녕하세요! 운동 좋아하는 직장인입니다.',
         interests: ['운동', '영화', '카페'],
         ageRange: '20대 후반',
         occupation: '개발자'
       },
-      lastLocation: {
-        latitude: 37.5665,
-        longitude: 126.9780,
-        updatedAt: new Date().toISOString()
-      },
+      location: '서울시 마포구',
       mutualGroups: []
     },
     {
       id: 'nearby-2',
+      anonymousId: 'anon-2',
+      phoneNumber: '010-0000-0002',
       nickname: '근처사용자2',
       profileImageUrl: null,
+      isVerified: false,
+      credits: 0,
+      isPremium: false,
       distance: 1.2,
+      lastLocationUpdate: new Date(),
+      isVisible: true,
+      lastActive: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       persona: {
         bio: '책 읽는 것을 좋아합니다',
         interests: ['독서', '카페', '산책'],
         ageRange: '30대 초반',
         occupation: '프리랜서'
       },
-      lastLocation: {
-        latitude: 37.5700,
-        longitude: 126.9800,
-        updatedAt: new Date().toISOString()
-      },
+      location: '서울시 용산구',
       mutualGroups: []
     }
   ];
