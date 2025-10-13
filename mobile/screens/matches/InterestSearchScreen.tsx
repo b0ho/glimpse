@@ -374,8 +374,11 @@ export const InterestSearchScreen: React.FC = () => {
         <CreateStoryModal
           visible={storyModalVisible}
           onClose={() => setStoryModalVisible(false)}
-          onSave={handleSaveSuccessStory}
-          matchInfo={getSearchInfo(selectedMatch)}
+          onSubmit={handleSaveSuccessStory}
+          matchInfo={{
+            partnerNickname: selectedMatch.partnerNickname || selectedMatch.nickname || '매칭 상대',
+            matchId: selectedMatch.id || selectedMatch.matchId || '',
+          }}
         />
       )}
     </SafeAreaView>

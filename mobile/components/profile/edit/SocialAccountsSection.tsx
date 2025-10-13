@@ -11,11 +11,23 @@ import { SocialItem } from '@/types/profileEdit.types';
 
 interface SocialAccountsSectionProps {
   socialIds: SocialItem[];
-  showSocialIds: boolean;
-  onToggle: () => void;
-  onAdd: () => void;
-  onRemove: (index: number) => void;
-  onUpdate: (index: number, field: 'platform' | 'id', value: string) => void;
+  showSocialIds?: boolean;
+  onToggle?: () => void;
+  onAdd?: () => void;
+  onRemove?: (index: number) => void;
+  onUpdate?: (index: number, field: 'platform' | 'id', value: string) => void;
+  // Additional arrays and handlers
+  platformIds?: SocialItem[];
+  gameIds?: any[];
+  addSocialId?: () => void;
+  removeSocialId?: (index: number) => void;
+  updateSocialId?: (index: number, field: 'platform' | 'id', value: string) => void;
+  addPlatformId?: () => void;
+  removePlatformId?: (index: number) => void;
+  updatePlatformId?: (index: number, field: 'platform' | 'id', value: string) => void;
+  addGameId?: () => void;
+  removeGameId?: (index: number) => void;
+  updateGameId?: (index: number, field: 'game' | 'id', value: string) => void;
 }
 
 export const SocialAccountsSection: React.FC<SocialAccountsSectionProps> = ({

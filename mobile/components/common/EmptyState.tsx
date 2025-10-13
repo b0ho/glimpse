@@ -11,6 +11,7 @@ interface EmptyStateProps {
   title: string;
   description?: string;
   action?: React.ReactNode;
+  colors?: any;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({

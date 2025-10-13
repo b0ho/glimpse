@@ -8,6 +8,7 @@ import { useTheme } from '../../hooks/useTheme';
 
 interface LoadingScreenProps {
   message?: string;
+  colors?: any;
 }
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({

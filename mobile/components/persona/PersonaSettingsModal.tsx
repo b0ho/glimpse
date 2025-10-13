@@ -35,6 +35,10 @@ interface PersonaSettingsModalProps {
   visible: boolean;
   /** 모달 닫기 핸들러 */
   onClose: () => void;
+  /** 페르소나 저장 핸들러 (optional) */
+  onSave?: (persona: any) => void;
+  /** 편집할 페르소나 (optional) */
+  persona?: any;
 }
 
 /**

@@ -32,13 +32,17 @@ interface PaymentModalProps {
   /** 모달 표시 여부 */
   visible: boolean;
   /** 결제할 상품 */
-  product: PaymentProduct | null;
+  product?: PaymentProduct | null;
   /** 닫기 핸들러 */
   onClose: () => void;
   /** 결제 성공 핸들러 */
   onSuccess: () => void;
   /** 가격 포맷팅 함수 */
-  formatPrice: (price: number) => string;
+  formatPrice?: (price: number) => string;
+  /** 선택한 구독 티어 (optional) */
+  selectedTier?: any;
+  /** 결제 주기 (optional) */
+  billingCycle?: 'monthly' | 'yearly';
 }
 
 /**
