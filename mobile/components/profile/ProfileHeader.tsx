@@ -106,7 +106,7 @@ export const ProfileHeader= ({
           <Text className="statNumber">{stats.totalLikes}</Text>
           <Text className="statLabel">{t('profile:stats.likes')}</Text>
           {!user.isPremium && stats.totalLikes > 0 && (
-            <MaterialCommunityIcons name="lock" size={12} color="#999" className="lockIcon" />
+            <MaterialCommunityIcons name="lock" size={12} color="#999" />
           )}
         </TouchableOpacity>
         

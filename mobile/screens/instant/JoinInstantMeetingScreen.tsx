@@ -457,7 +457,7 @@ export function JoinInstantMeetingScreen() {
     <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
       <View className="flex-row items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
         <TouchableOpacity onPress={() => step > 1 ? setStep(step - 1) : navigation.goBack()}>
-          <Icon name="arrow-back" size={24} className="text-gray-900 dark:text-white" />
+          <Icon name="arrow-back" size={24} color="#1F2937" />
         </TouchableOpacity>
         <Text className="text-gray-900 dark:text-white text-lg font-semibold">
           {t('instant:join.title', { step })}
