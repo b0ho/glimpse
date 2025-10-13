@@ -235,5 +235,6 @@ export interface PrivacySettings {
   showOnlineStatus: boolean;
   showLastSeen: boolean;
   allowDirectMessages: boolean;
+  allowFriendRequests?: boolean;
   blockList: string[];
 }

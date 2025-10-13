@@ -11,6 +11,7 @@ export enum SubscriptionTier {
 export interface SubscriptionFeatures {
   // 관심상대 찾기 관련
   interestSearchLimit: number | 'unlimited';  // 관심상대 등록 개수 제한
+  maxInterestSearches: number | 'unlimited';  // alias for interestSearchLimit
   interestSearchTypes: number | 'unlimited';  // 사용 가능한 유형 수
   interestSearchDuration: number;             // 검색 유효 기간 (일 단위)
   canSendInterestFirst: boolean;              // 먼저 관심있어요 보내기 가능 여부
@@ -33,6 +34,7 @@ export interface SubscriptionFeatures {
 export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeatures> = {
   [SubscriptionTier.BASIC]: {
     interestSearchLimit: 3,           // 최대 3개 (유형별 1개씩)
+    maxInterestSearches: 3,           // alias
     interestSearchTypes: 3,            // 3개 유형만 사용 가능
     interestSearchDuration: 7,         // 7일
     canSendInterestFirst: false,
@@ -47,6 +49,7 @@ export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeature
   },
   [SubscriptionTier.ADVANCED]: {
     interestSearchLimit: 10,          // 모든 유형 1개씩 (총 10개)
+    maxInterestSearches: 10,          // alias
     interestSearchTypes: 10,           // 모든 유형 사용 가능
     interestSearchDuration: 14,        // 2주
     canSendInterestFirst: true,
@@ -61,6 +64,7 @@ export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeature
   },
   [SubscriptionTier.PREMIUM]: {
     interestSearchLimit: 'unlimited',  // 무제한
+    maxInterestSearches: 'unlimited',  // alias
     interestSearchTypes: 'unlimited',  // 모든 유형 무제한
     interestSearchDuration: 365,       // 사실상 무제한 (1년)
     canSendInterestFirst: true,
