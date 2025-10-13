@@ -5,6 +5,7 @@
 
 import { apiClient } from '@/services/api/config';
 import { InterestType, InterestSearch, InterestMatch } from '@/types/interest';
+import { ApiResponse } from '@/types';
 import {
   saveLocalInterestCard,
   getLocalInterestCards,
@@ -59,11 +60,11 @@ class SecureInterestService {
       }
 
       // 2. 로컬에 암호화 저장
-      const localCard = await saveLocalInterestCard(type, value, metadata);
+      const localCard = await (saveLocalInterestCard as any)(type, value, metadata);
 
       // 3. 서버에 해시값 전송
       const serverData = await prepareServerData(localCard);
-      const response = await apiClient.post('/interest/secure/register', {
+      const response = await apiClient.post<ApiResponse<any>>('/interest/secure/register', {
         type: serverData.type,
         hashedValue: serverData.hashedValue,
         expiresAt: serverData.expiresAt,
@@ -107,7 +108,7 @@ class SecureInterestService {
       const localCards = await getLocalInterestCards();
       
       // 2. 서버 상태 가져오기
-      const response = await apiClient.get('/interest/secure/my-status');
+      const response = await apiClient.get<ApiResponse<any>>('/interest/secure/my-status');
       const serverStatuses = response.data;
 
       // 3. 통합 상태 생성
@@ -159,7 +160,7 @@ class SecureInterestService {
    */
   async getMatches(): Promise<InterestMatch[]> {
     try {
-      const response = await apiClient.get('/interest/secure/matches');
+      const response = await apiClient.get<ApiResponse<InterestMatch[]>>('/interest/secure/matches');
       return response.data;
     } catch (error) {
       console.error('Failed to get matches:', error);
@@ -277,13 +278,13 @@ class SecureInterestService {
       const tertiaryHash = tertiaryValue ? 
         await generateMatchingHash(primaryType, tertiaryValue) : undefined;
 
-      const response = await apiClient.post('/interest/secure/check-multi', {
+      const response = await apiClient.post<ApiResponse<{ matched: boolean }>>('/interest/secure/check-multi', {
         primary: primaryHash,
         secondary: secondaryHash,
         tertiary: tertiaryHash,
       });
 
-      return response.data.matched;
+      return response.data?.matched || false;
     } catch (error) {
       console.error('Failed to check complex matching:', error);
       return false;
