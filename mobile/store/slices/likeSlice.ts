@@ -137,8 +137,9 @@ export const useLikeStore = create<LikeStore>()(
             toUserId,
             groupId,
             isSuper: false,
-            createdAt: new Date().toISOString(),
-            isRead: false,
+            isAnonymous: true,
+            updatedAt: new Date(),
+            createdAt: new Date(),
           };
 
           // 상태 업데이트
@@ -156,9 +157,9 @@ export const useLikeStore = create<LikeStore>()(
               user1Id: currentUserId,
               user2Id: toUserId,
               groupId,
-              createdAt: new Date().toISOString(),
-              lastMessage: null,
-              lastMessageAt: null,
+              isActive: true,
+              updatedAt: new Date(),
+              createdAt: new Date(),
             };
             get().createMatch(newMatch);
           }
@@ -264,7 +265,7 @@ export const useLikeStore = create<LikeStore>()(
       setPremiumStatus: (hasPremium) => {
         set({ 
           hasPremium,
-          dailySuperLikesLimit: hasPremium ? SUBSCRIPTION_FEATURES.premium.superLikes : 0,
+          dailySuperLikesLimit: hasPremium ? 0 : 0,
         });
       },
 
