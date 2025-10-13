@@ -333,8 +333,8 @@ export const useGroupStore = create<GroupStore>()(
 
     try {
       // API 호출 - apiClient 사용 (환경별 헤더 자동 처리)
-      const data = await apiClient.post(`/groups/${groupId}/invites`);
-      const inviteCode = data.data.inviteLink.split('/').pop(); // 초대코드만 추출
+      const response: any = await apiClient.post(`/groups/${groupId}/invites`);
+      const inviteCode = response.data.inviteLink.split('/').pop(); // 초대코드만 추출
       
       // 초대코드 캐시
       set((state) => ({
@@ -359,8 +359,8 @@ export const useGroupStore = create<GroupStore>()(
   joinGroupByInviteCode: async (inviteCode: string) => {
     try {
       // API 호출 - apiClient 사용 (환경별 헤더 자동 처리)
-      const data = await apiClient.post(`/groups/join/${inviteCode}`);
-      const group = data.data;
+      const response: any = await apiClient.post(`/groups/join/${inviteCode}`);
+      const group = response.data;
       
       set((state) => {
         const isAlreadyJoined = state.joinedGroups.some(g => g.id === group.id);
@@ -388,12 +388,12 @@ export const useGroupStore = create<GroupStore>()(
   toggleGroupLike: async (groupId: string) => {
     try {
       // API 호출 - apiClient 사용 (환경별 헤더 자동 처리)
-      const data = await apiClient.post(`/groups/${groupId}/like`);
-      
+      const response: any = await apiClient.post(`/groups/${groupId}/like`);
+
       set((state) => {
         const isLiked = state.likedGroupIds.includes(groupId);
         return {
-          likedGroupIds: data.data.liked
+          likedGroupIds: response.data.liked
             ? [...state.likedGroupIds.filter(id => id !== groupId), groupId]
             : state.likedGroupIds.filter(id => id !== groupId)
         };
