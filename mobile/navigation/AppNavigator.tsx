@@ -539,7 +539,6 @@ function MainTabNavigator() {
   return (
     <Tab.Navigator
       id={undefined}
-      lazy={true}
       detachInactiveScreens={true}
       screenOptions={{
         headerShown: false,
