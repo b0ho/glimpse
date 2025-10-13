@@ -5,7 +5,24 @@
  */
 
 import { apiClient } from './config';
-import { PersonaSettings } from '@/types';
+
+// Persona 타입을 personaSlice에서 가져와서 PersonaSettings로 사용
+interface PersonaSettings {
+  id?: string;
+  userId?: string;
+  nickname: string;
+  age?: number;
+  bio?: string;
+  interests?: string[];
+  occupation?: string;
+  height?: number;
+  mbti?: string;
+  drinking?: string;
+  smoking?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 /**
  * 페르소나 API 서비스
@@ -27,7 +44,7 @@ export const personaApi = {
    */
   getMyPersona: async (): Promise<PersonaSettings | null> => {
     try {
-      const response = await apiClient.get('/persona/my');
+      const response: any = await apiClient.get('/persona/my');
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 404) {
@@ -51,7 +68,7 @@ export const personaApi = {
    * });
    */
   createOrUpdatePersona: async (data: Partial<PersonaSettings>): Promise<PersonaSettings> => {
-    const response = await apiClient.post('/persona', data);
+    const response: any = await apiClient.post('/persona', data);
     return response.data;
   },
 
@@ -87,7 +104,7 @@ export const personaApi = {
     longitude: number,
     radiusKm: number = 5
   ): Promise<PersonaSettings[]> => {
-    const response = await apiClient.get('/persona/nearby', {
+    const response: any = await apiClient.get('/persona/nearby', {
       params: { latitude, longitude, radiusKm }
     });
     return response.data;
