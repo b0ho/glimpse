@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  useColorScheme,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
@@ -66,6 +67,8 @@ const ProfileSettingsScreen = () => {
   const { t } = useAndroidSafeTranslation('settings');
   const navigation = useNavigation();
   const { userProfile } = useProfileStore();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   
   const [privacySettings, setPrivacySettings] = useState({
     showProfile: userProfile?.privacySettings?.showProfile ?? true,
@@ -264,10 +267,10 @@ const ProfileSettingsScreen = () => {
       return (
         <View className="flex-row items-center justify-between px-4 py-4">
           <View className="flex-row items-center flex-1 gap-4">
-            <MaterialCommunityIcons 
-              name={item.icon as any} 
-              size={24} 
-              className="text-gray-900 dark:text-white"
+            <MaterialCommunityIcons
+              name={item.icon as any}
+              size={24}
+              color={isDark ? '#FFFFFF' : '#111827'}
             />
             <Text className="text-gray-900 dark:text-white text-base flex-1">{item.label}</Text>
           </View>
@@ -293,10 +296,10 @@ const ProfileSettingsScreen = () => {
         }}
       >
         <View className="flex-row items-center flex-1 gap-4">
-          <MaterialCommunityIcons 
-            name={item.icon as any} 
-            size={24} 
-            className="text-gray-900 dark:text-white"
+          <MaterialCommunityIcons
+            name={item.icon as any}
+            size={24}
+            color={isDark ? '#FFFFFF' : '#111827'}
           />
           <Text className="text-gray-900 dark:text-white text-base flex-1">{item.label}</Text>
         </View>
@@ -304,10 +307,10 @@ const ProfileSettingsScreen = () => {
           {typeof item.value === 'string' && (
             <Text className="text-gray-600 dark:text-gray-400 text-sm">{item.value}</Text>
           )}
-          <MaterialCommunityIcons 
-            name="chevron-right" 
-            size={24} 
-            className="text-gray-600 dark:text-gray-400"
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={24}
+            color={isDark ? '#9CA3AF' : '#6B7280'}
           />
         </View>
       </TouchableOpacity>
@@ -321,7 +324,7 @@ const ProfileSettingsScreen = () => {
           onPress={() => navigation.goBack()}
           className="w-10 h-10 justify-center"
         >
-          <MaterialCommunityIcons name="arrow-left" size={24} className="text-gray-900 dark:text-white" />
+          <MaterialCommunityIcons name="arrow-left" size={24} color={isDark ? '#FFFFFF' : '#111827'} />
         </TouchableOpacity>
         <Text className="text-gray-900 dark:text-white text-xl font-bold">{t('settings:title')}</Text>
         <View className="w-10" />
