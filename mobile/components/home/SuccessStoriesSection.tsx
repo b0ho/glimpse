@@ -46,8 +46,8 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
           <SuccessStoryCard
             key={story.id}
             story={story}
-            isCelebrated={celebratedStories.has(story.id)}
-            onToggleCelebration={() => onToggleCelebration(story.id)}
+            hasCelebrated={celebratedStories.has(story.id)}
+            onCelebrate={() => onToggleCelebration(story.id)}
           />
         ))}
       </ScrollView>

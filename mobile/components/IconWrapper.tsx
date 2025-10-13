@@ -16,6 +16,8 @@ interface IconWrapperProps {
   color?: string;
   /** 포커스 상태 (탭 네비게이션용) */
   focused?: boolean;
+  /** Tailwind CSS 클래스명 (NativeWind) */
+  className?: string;
 }
 
 /**
@@ -31,9 +33,9 @@ interface IconWrapperProps {
  * @example
  * <IconWrapper name="home" size={24} focused={isActive} />
  */
-export const IconWrapper = ({ name, size = 24, color = '#000', focused }: IconWrapperProps) => {
+export const IconWrapper = ({ name, size = 24, color = '#000', focused, className }: IconWrapperProps) => {
   return (
-    <View className="container">
+    <View className={className || "container"}>
       <Icon name={name} size={size} color={focused ? '#FF6B6B' : color} />
     </View>
   );

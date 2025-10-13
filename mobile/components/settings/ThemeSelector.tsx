@@ -127,11 +127,11 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     // 변경 완료 알림
     const themeName = getCurrentThemeText(newMode);
     Alert.alert(
-      t('settings:theme.changeSuccess', '테마 변경 완료'),
-      t('settings:theme.changeSuccessMessage', '{{theme}} 모드로 변경되었습니다', {
+      t('settings:theme.changeSuccess'),
+      t('settings:theme.changeSuccessMessage', {
         theme: themeName,
       }),
-      [{ text: t('common:buttons.confirm', '확인') }]
+      [{ text: t('common:buttons.confirm') }]
     );
   };
 
