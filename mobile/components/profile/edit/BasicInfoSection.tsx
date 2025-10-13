@@ -81,9 +81,9 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
         <View className="genderContainer">
           <TouchableOpacity
             className="genderOption"
-            onPress={() => setSelectedGender(Gender.MALE)}
+            onPress={() => setSelectedGender('MALE')}
           >
-            <Icon name="male-outline" size={24} color={selectedGender === Gender.MALE ? colors.PRIMARY : colors.TEXT.SECONDARY} />
+            <Icon name="male-outline" size={24} color={selectedGender === 'MALE' ? colors.PRIMARY : colors.TEXT.SECONDARY} />
             <Text className="genderText">
               남성
             </Text>
@@ -91,9 +91,9 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           
           <TouchableOpacity
             className="genderOption"
-            onPress={() => setSelectedGender(Gender.FEMALE)}
+            onPress={() => setSelectedGender('FEMALE')}
           >
-            <Icon name="female-outline" size={24} color={selectedGender === Gender.FEMALE ? colors.PRIMARY : colors.TEXT.SECONDARY} />
+            <Icon name="female-outline" size={24} color={selectedGender === 'FEMALE' ? colors.PRIMARY : colors.TEXT.SECONDARY} />
             <Text className="genderText">
               여성
             </Text>
@@ -101,9 +101,9 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           
           <TouchableOpacity
             className="genderOption"
-            onPress={() => setSelectedGender(Gender.OTHER)}
+            onPress={() => setSelectedGender('OTHER')}
           >
-            <Icon name="transgender-outline" size={24} color={selectedGender === Gender.OTHER ? colors.PRIMARY : colors.TEXT.SECONDARY} />
+            <Icon name="transgender-outline" size={24} color={selectedGender === 'OTHER' ? colors.PRIMARY : colors.TEXT.SECONDARY} />
             <Text className="genderText">
               기타
             </Text>
