@@ -132,10 +132,10 @@ export const useGoogleAuth = (onAuthCompleted: () => void) => {
         if (userInfo) {
           const userData = createUserFromOAuth({
             id: userInfo.id,
-            email: userInfo.emailAddress,
-            firstName: userInfo.firstName,
-            lastName: userInfo.lastName,
-            profileImageUrl: userInfo.imageUrl,
+            email: (userInfo as any).emailAddress,
+            firstName: (userInfo as any).firstName,
+            lastName: (userInfo as any).lastName,
+            profileImageUrl: (userInfo as any).imageUrl,
           }, createdSessionId);
           
           setUser(userData);
