@@ -36,9 +36,9 @@ export function HomeStackNavigator() {
         headerTintColor: colors.TEXT.PRIMARY,
       }}
     >
-      <HomeStack.Screen 
-        name="HomeScreen" 
-        component={HomeScreen} 
+      <HomeStack.Screen
+        name="HomeTab"
+        component={HomeScreen}
         options={{ headerShown: false }}
       />
       <HomeStack.Screen 
