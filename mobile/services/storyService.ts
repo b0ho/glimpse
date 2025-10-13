@@ -256,7 +256,7 @@ class StoryService {
       const token = getAuthToken();
       if (!token) {
         console.warn('[StoryService] No authentication token available');
-        return [];
+        throw new Error('No authentication token');
       }
 
       const response = await fetch(`${API_BASE_URL}/stories/${storyId}`, {
@@ -291,7 +291,7 @@ class StoryService {
       const token = getAuthToken();
       if (!token) {
         console.warn('[StoryService] No authentication token available');
-        return [];
+        return;
       }
 
       const response = await fetch(`${API_BASE_URL}/stories/${storyId}/view`, {
@@ -360,7 +360,7 @@ class StoryService {
       const token = '';
       if (!token) {
         console.warn('[StoryService] No authentication token available');
-        return [];
+        return;
       }
 
       const response = await fetch(`${API_BASE_URL}/stories/${storyId}`, {

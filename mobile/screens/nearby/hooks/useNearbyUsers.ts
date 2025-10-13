@@ -30,7 +30,9 @@ export const useNearbyUsers = () => {
         distance: 0, // Distance will be calculated by server
         lastSeen: new Date().toISOString(),
         isOnline: true,
-        commonGroups: []
+        commonGroups: [],
+        lastLocationUpdate: new Date(),
+        isVisible: true
       }));
 
       setNearbyUsers(nearbyUsersData);
