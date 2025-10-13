@@ -84,6 +84,7 @@ export type ProfileStackParamList = {
   ProfileTab: undefined;
   MyGroups: undefined;
   Premium: undefined;
+  ProfileEdit: undefined;
   NotificationSettings: undefined;
   WhoLikesYou: undefined;
   LikeHistory: undefined;

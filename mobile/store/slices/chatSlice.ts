@@ -329,3 +329,24 @@ export const useChatStore = create<ChatStore>()(
     }
   )
 );
+
+/**
+ * 채팅 선택자 함수들
+ */
+export const chatSelectors = {
+  /**
+   * 특정 채팅방의 메시지 가져오기
+   * @param {string} roomId - 채팅방 ID
+   * @returns {Function} 선택자 함수
+   */
+  getMessages: (roomId: string) => (state: ChatStore) =>
+    state.messages[roomId] || [],
+
+  /**
+   * 특정 채팅방의 타이핑 중인 사용자 가져오기
+   * @param {string} roomId - 채팅방 ID
+   * @returns {Function} 선택자 함수
+   */
+  getTypingUsers: (roomId: string) => (state: ChatStore) =>
+    state.typingUsers.filter(u => u.roomId === roomId),
+};

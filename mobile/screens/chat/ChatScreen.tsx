@@ -271,8 +271,8 @@ export const ChatScreen = () => {
 
   const handleCall = useCallback((callType: 'video' | 'audio') => {
     const otherUserId = matchId;
-    initiateCall(otherUserId, otherUserNickname, callType);
-  }, [matchId, otherUserNickname, initiateCall]);
+    initiateCall(otherUserId, callType);
+  }, [matchId, initiateCall]);
 
   const handleSendMessage = useCallback(async (content: string, type?: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY') => {
     try {

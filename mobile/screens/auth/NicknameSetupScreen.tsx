@@ -30,9 +30,11 @@ import { useTheme } from '@/hooks/useTheme';
  *
  * @interface NicknameSetupScreenProps
  * @property {() => void} onNicknameSet - 닉네임 설정 완료 시 호출되는 콜백
+ * @property {() => void} [onBack] - 뒤로가기 버튼 클릭 시 호출되는 선택적 콜백
  */
 interface NicknameSetupScreenProps {
   onNicknameSet: () => void;
+  onBack?: () => void;
 }
 
 /**
