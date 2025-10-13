@@ -42,19 +42,19 @@ export const GameInputField: React.FC<GameInputFieldProps> = ({
       <Text className="label">
         {t('interest:game')} *
       </Text>
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         className="gameScroll"
       >
         {GAME_PLATFORM_OPTIONS.map((game) => (
           <TouchableOpacity
-            key={game.id}
+            key={game.value}
             className="gameButton"
-            onPress={() => onGameSelect(game.id)}
+            onPress={() => onGameSelect(game.value)}
           >
             <Text className="gameButtonText">
-              {game.name}
+              {game.label}
             </Text>
           </TouchableOpacity>
         ))}

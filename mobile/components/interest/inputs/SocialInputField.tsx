@@ -49,19 +49,19 @@ export const SocialInputField: React.FC<SocialInputFieldProps> = ({
       <Text className="label">
         {t('interest:platform')} *
       </Text>
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         className="platformScroll"
       >
         {SOCIAL_PLATFORM_OPTIONS.map((platform) => (
           <TouchableOpacity
-            key={platform.id}
+            key={platform.value}
             className="platformButton"
-            onPress={() => onPlatformSelect(platform.id)}
+            onPress={() => onPlatformSelect(platform.value)}
           >
             <Text className="platformButtonText">
-              {platform.name}
+              {platform.label}
             </Text>
           </TouchableOpacity>
         ))}
