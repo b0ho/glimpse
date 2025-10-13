@@ -129,9 +129,10 @@ export const ChatScreenSimple = () => {
           onPress: async () => {
             try {
               // Notify server about leaving the chat
-              await chatService.leaveChat(matchId);
-              console.log('[ChatScreenSimple] 서버에 채팅 나가기 알림');
-              
+              // TODO: Implement leaveChat method in chatService
+              // await chatService.leaveChat(matchId);
+              console.log('[ChatScreenSimple] 서버에 채팅 나가기 알림 (leaveChat 미구현)');
+
               // 이전 화면으로 돌아가기
               navigation.goBack();
             } catch (error) {
@@ -172,7 +173,7 @@ export const ChatScreenSimple = () => {
       matchId: matchId,
       senderId: 'current_user',
       content: inputText.trim(),
-      type: 'TEXT',
+      type: 'text',
       isRead: true,
       isEncrypted: false,
       createdAt: new Date(),
@@ -181,7 +182,7 @@ export const ChatScreenSimple = () => {
 
     try {
       // Send message to server
-      await chatService.sendMessage(matchId, newMessage);
+      await chatService.sendMessage(matchId, inputText.trim());
       
       // Update UI optimistically
       const updatedMessages = [...messages, newMessage];

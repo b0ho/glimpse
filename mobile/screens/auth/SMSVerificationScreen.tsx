@@ -249,7 +249,10 @@ export const SMSVerificationScreen = ({
       } else {
         console.log('❌ Verification failed:', result.error);
         shakeAnimation(); // 에러 시 흔들림 효과
-        Alert.alert(t('common:status.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('auth:smsVerification.errors.invalidCode'));
+        const errorMessage = typeof result.error === 'string'
+          ? result.error
+          : (result.error as any)?.message || t('auth:smsVerification.errors.invalidCode');
+        Alert.alert(t('common:status.error'), errorMessage);
         setCode(''); // 코드 초기화
         inputRefs.current[0]?.focus(); // 첫번째 필드로 포커스
       }
@@ -277,7 +280,10 @@ export const SMSVerificationScreen = ({
         setCanResend(false);
         setCode('');
       } else {
-        Alert.alert(t('common:status.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('auth:smsVerification.resend.errors.failed'));
+        const errorMessage = typeof result.error === 'string'
+          ? result.error
+          : (result.error as any)?.message || t('auth:smsVerification.resend.errors.failed');
+        Alert.alert(t('common:status.error'), errorMessage);
       }
     } catch (error) {
       console.error('Resend code error:', error);

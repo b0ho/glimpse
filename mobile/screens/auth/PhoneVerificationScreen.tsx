@@ -184,7 +184,10 @@ export const PhoneVerificationScreen = ({
         }
       } else {
         console.log('❌ Auth service failed:', result.error);
-        Alert.alert(t('common:errors.error'), typeof result.error === 'string' ? result.error : result.error?.message || t('auth:phoneVerification.errors.sendFailed'));
+        const errorMessage = typeof result.error === 'string'
+          ? result.error
+          : (result.error as any)?.message || t('auth:phoneVerification.errors.sendFailed');
+        Alert.alert(t('common:errors.error'), errorMessage);
       }
     } catch (error) {
       console.error('🔥 Phone verification error:', error);
