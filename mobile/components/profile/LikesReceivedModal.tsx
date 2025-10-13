@@ -75,7 +75,7 @@ export const LikesReceivedModal = ({
             {item.fromUser?.nickname || '익명'}
           </Text>
           <Text className="groupName">
-            {item.group?.name || '그룹 정보 없음'}
+            {item.groupId ? `그룹 ID: ${item.groupId}` : '그룹 정보 없음'}
           </Text>
           <Text className="timeAgo">{timeAgo}</Text>
         </View>

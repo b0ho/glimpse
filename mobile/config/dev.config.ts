@@ -34,18 +34,6 @@ export const SUPER_ACCOUNTS: Record<string, User> = {
     lastActive: new Date(),
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date(),
-    notificationSettings: {
-      likes: true,
-      matches: true,
-      messages: true,
-      friendRequests: true,
-    },
-    privacySettings: {
-      showProfile: true,
-      showOnlineStatus: true,
-      showLastSeen: false,
-      allowFriendRequests: true,
-    },
   },
   
   // 프리미엄 테스트 계정
@@ -62,18 +50,6 @@ export const SUPER_ACCOUNTS: Record<string, User> = {
     lastActive: new Date(),
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date(),
-    notificationSettings: {
-      likes: true,
-      matches: true,
-      messages: true,
-      friendRequests: true,
-    },
-    privacySettings: {
-      showProfile: true,
-      showOnlineStatus: true,
-      showLastSeen: true,
-      allowFriendRequests: true,
-    },
   },
   
   // 관리자 계정
@@ -91,18 +67,6 @@ export const SUPER_ACCOUNTS: Record<string, User> = {
     lastActive: new Date(),
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date(),
-    notificationSettings: {
-      likes: true,
-      matches: true,
-      messages: true,
-      friendRequests: false,
-    },
-    privacySettings: {
-      showProfile: true,
-      showOnlineStatus: true,
-      showLastSeen: true,
-      allowFriendRequests: false,
-    },
   },
 };
 
