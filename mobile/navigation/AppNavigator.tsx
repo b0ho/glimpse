@@ -77,6 +77,7 @@ type AppStackParamList = {
   Auth: undefined;
   ModeSelection: undefined;
   Main: undefined;
+  Onboarding: undefined;
 };
 
 
@@ -542,7 +543,6 @@ function MainTabNavigator() {
       detachInactiveScreens={true}
       screenOptions={{
         headerShown: false,
-        unmountOnBlur: true,
         tabBarStyle: {
           backgroundColor: colors.BACKGROUND,
           borderTopWidth: 1,
@@ -562,7 +562,7 @@ function MainTabNavigator() {
         component={HomeStackNavigator}
         options={{
           title: getTabTitle('navigation:tabs.home', '홈'),
-          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.HOME} color={color} size={size || 24} />,
+          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.Home} color={color} size={size || 24} />,
           tabBarAccessibilityLabel: String(t('navigation:accessibility.home')),
         }}
       />
@@ -571,7 +571,7 @@ function MainTabNavigator() {
         component={GroupsStackNavigator}
         options={{
           title: getTabTitle('navigation:tabs.groups', '그룹'),
-          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.GROUPS} color={color} size={size || 24} />,
+          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.Groups} color={color} size={size || 24} />,
           tabBarAccessibilityLabel: String(t('navigation:accessibility.groups')),
         }}
       />
@@ -608,7 +608,7 @@ function MainTabNavigator() {
         component={ProfileStackNavigator}
         options={{
           title: getTabTitle('navigation:tabs.profile', '프로필'),
-          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.PROFILE} color={color} size={size || 24} />,
+          tabBarIcon: ({ color, size }) => <Icon name={NAVIGATION_ICONS.Profile} color={color} size={size || 24} />,
           tabBarAccessibilityLabel: String(t('navigation:accessibility.profile')),
         }}
       />

@@ -4,6 +4,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   Main: NavigatorScreenParams<MainTabParamList>;
+  Onboarding: undefined;
   // Instant Meeting Screens
   InstantMeeting: undefined;
   JoinInstantMeeting: { code: string };
