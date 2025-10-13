@@ -247,11 +247,11 @@ export const MyInfoRegisterScreen: React.FC = () => {
         className="flex-1"
       >
         {/* 헤더 */}
-        <ScreenHeader 
+        <ScreenHeader
           title={t('interest:search.registerMyInfo')}
-          rightButton={
+          rightComponent={
             isEditing ? (
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setIsEditing(false)}
                 className="px-4 py-2"
               >
@@ -260,7 +260,7 @@ export const MyInfoRegisterScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setIsEditing(true)}
                 className="px-4 py-2"
               >

@@ -300,8 +300,8 @@ export const HomeScreen = () => {
       {showStoryViewer && (
         <StoryFullViewer
           visible={showStoryViewer}
-          stories={stories}
-          initialIndex={selectedStoryIndex}
+          storyUsers={stories}
+          currentUserIndex={selectedStoryIndex}
           onClose={() => setShowStoryViewer(false)}
           currentUserId={authStore.user?.id || ''}
         />

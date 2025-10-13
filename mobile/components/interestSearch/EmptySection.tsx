@@ -10,6 +10,7 @@ interface EmptySectionProps {
   title: string;
   description: string;
   type: 'search' | 'match';
+  colors?: any;
   onAddPress?: () => void;
   t: (key: string) => string;
 }
