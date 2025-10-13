@@ -39,17 +39,3 @@ export interface NotificationSettings {
   messages: boolean;
   friendRequests: boolean;
 }
-
-/**
- * 사용자 디바이스 토큰 (푸시 알림용)
- */
-export interface UserDeviceToken {
-  id: string;
-  userId: string;
-  deviceId: string;
-  fcmToken: string;
-  platform: 'ios' | 'android' | 'web';
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}

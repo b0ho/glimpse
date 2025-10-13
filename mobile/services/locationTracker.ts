@@ -26,7 +26,7 @@ TaskManager.defineTask(LOCATION_UPDATE_TASK, async ({ data, error }) => {
 
 export class LocationTracker {
   private static instance: LocationTracker;
-  private intervalId: NodeJS.Timeout | null = null;
+  private intervalId: ReturnType<typeof setInterval> | null = null;
   
   static getInstance(): LocationTracker {
     if (!LocationTracker.instance) {

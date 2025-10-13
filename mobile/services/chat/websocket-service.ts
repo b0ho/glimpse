@@ -140,9 +140,9 @@ class WebSocketService {
    * @param type - 메시지 타입 (text, image, file)
    */
   async sendMessage(
-    roomId: string, 
-    content: string, 
-    type: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY' = 'TEXT'
+    roomId: string,
+    content: string,
+    type: 'text' | 'image' | 'voice' | 'system' = 'text'
   ): Promise<Message> {
     if (!this.socket || !this.isConnected) {
       throw new Error('WebSocket is not connected');
@@ -152,7 +152,7 @@ class WebSocketService {
       throw new Error('User ID is not set');
     }
 
-    const message: Omit<Message, 'id' | 'createdAt' | 'updatedAt'> = {
+    const message: Omit<Message, 'id' | 'createdAt' | 'updatedAt' | 'roomId' | 'timestamp'> & { matchId: string } = {
       matchId: roomId,
       senderId: this.currentUserId,
       content,

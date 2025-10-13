@@ -49,9 +49,9 @@ class SocketService {
     reconnectAttempts: 0
   };
   /** 하트비트 인터벌 */
-  private heartbeatInterval: NodeJS.Timeout | null = null;
+  private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
   /** 재연결 타임아웃 */
-  private reconnectTimeout: NodeJS.Timeout | null = null;
+  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   /** 오프라인 메시지 큐 */
   private offlineMessageQueue: OfflineMessage[] = [];
   /** 현재 사용자 ID */
