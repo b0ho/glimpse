@@ -56,7 +56,7 @@ import { cn } from '@/lib/utils';
  */
 export const ProfileEditScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { colors, isDarkMode } = useTheme();
+  const { colors, isDark } = useTheme();
   
   const {
     // Basic info

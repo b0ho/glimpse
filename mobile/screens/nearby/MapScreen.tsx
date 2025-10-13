@@ -23,7 +23,7 @@ import { useAuthStore } from '@/store/slices/authSlice';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { Group, GroupType, User } from '@/types';
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/store/slices/themeSlice';
+import { useTheme } from '@/hooks/useTheme';
 
 /**
  * 위치 데이터 인터페이스

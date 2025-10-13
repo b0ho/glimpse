@@ -175,7 +175,6 @@ export const ChatScreenSimple = () => {
       content: inputText.trim(),
       type: 'text',
       isRead: true,
-      isEncrypted: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

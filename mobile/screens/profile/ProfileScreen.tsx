@@ -65,7 +65,7 @@ export const ProfileScreen = () => {
   
   const navigation = useNavigation();
   const { t } = useAndroidSafeTranslation('profile');
-  const { colors, isDarkMode } = useTheme();
+  const { colors, isDark } = useTheme();
   
   const {
     isPremiumUser,
