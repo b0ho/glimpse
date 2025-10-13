@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 interface UseLikeHandlersProps {
   contents: Content[];
   setContents: React.Dispatch<React.SetStateAction<Content[]>>;
-  t: (key: string) => string;
+  t: (key: string, options?: any) => string;
 }
 
 export const useLikeHandlers = ({ contents, setContents, t }: UseLikeHandlersProps) => {
