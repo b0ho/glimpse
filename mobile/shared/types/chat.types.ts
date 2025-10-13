@@ -34,6 +34,7 @@ export interface Message {
   imageUrl?: string;
   voiceUrl?: string;
   isRead: boolean;
+  isEncrypted?: boolean;
   timestamp: Date;
   createdAt: Date;
   updatedAt?: Date;

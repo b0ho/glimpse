@@ -45,8 +45,10 @@ export interface Match {
   groupId?: string;
   chatRoomId?: string;
   isActive: boolean;
+  status?: string;
   matchedAt?: Date;
   lastInteraction?: Date;
+  lastMessageAt?: Date | null;
   matchType?: 'DATING' | 'FRIEND';
   compatibilityScore?: number;
   commonInterests?: string[];

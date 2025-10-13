@@ -153,6 +153,8 @@ export interface AnonymousUserInfo {
   profileImage?: string;
   isOnline?: boolean;
   lastSeen?: Date;
+  isMatched?: boolean;
+  gender?: string;
 }
 
 /**

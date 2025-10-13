@@ -56,6 +56,7 @@ export const sendLikeAction = async (
       isAnonymous: true,
       isSuper: isSuperLike,
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     const updatedState: Partial<LikeState> = {

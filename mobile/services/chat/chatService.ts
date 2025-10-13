@@ -220,7 +220,7 @@ class ChatService implements ChatServiceInterface {
       // Decrypt messages
       const messages = response.data;
       for (const message of messages) {
-        if (message.isEncrypted && message.type === 'TEXT') {
+        if (message.isEncrypted && message.type === 'text') {
           try {
             message.content = await encryptionService.decryptMessage(message.content);
           } catch (error) {
@@ -273,7 +273,7 @@ class ChatService implements ChatServiceInterface {
   onNewMessage(callback: (data: { matchId: string; message: Message }) => void): void {
     this.addEventListener('new-message', async (data: any) => {
       // Decrypt message if needed
-      if (data.message.isEncrypted && data.message.type === 'TEXT') {
+      if (data.message.isEncrypted && data.message.type === 'text') {
         try {
           data.message.content = await encryptionService.decryptMessage(data.message.content);
         } catch (error) {
