@@ -10,6 +10,8 @@ export type RootStackParamList = {
   JoinInstantMeeting: { code: string };
   UpdateFeatures: { meetingId: string };
   InstantMatches: { meetingId: string };
+  // Premium Subscription
+  Premium: undefined;
 };
 
 // Auth Stack
