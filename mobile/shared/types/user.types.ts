@@ -57,6 +57,8 @@ export interface User {
   }[];
   school?: string;
   major?: string;
+  department?: string;
+  studentId?: string;
   partTimeJob?: {
     place: string;
     position?: string;
@@ -77,6 +79,11 @@ export interface User {
   phoneNumberNational?: string;
   hasStory?: boolean;
   storyExpiresAt?: Date;
+
+  // Relationships
+  groups?: string[];
+  privacySettings?: PrivacySettings;
+  notificationSettings?: any;
 }
 
 /**

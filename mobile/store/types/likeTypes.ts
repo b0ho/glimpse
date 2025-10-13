@@ -147,6 +147,8 @@ export interface LikeStore extends LikeState {
   // Clear actions
   /** 스토어 초기화 */
   clear: () => void;
+  /** 좋아요 데이터 초기화 (로그아웃 시) */
+  clearLikes: () => void;
 }
 
 /**
