@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  useColorScheme,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -54,8 +55,10 @@ import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 export function InstantMeetingScreen() {
   const navigation = useNavigation<RootNavigationProp>();
   const { t } = useAndroidSafeTranslation();
-  const { 
-    currentMeeting, 
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const {
+    currentMeeting,
     participantCount,
     myStats,
     fetchMeetingDetails,
@@ -128,11 +131,11 @@ export function InstantMeetingScreen() {
     <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
       <View className="flex-row items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} className="text-gray-900 dark:text-white" />
+          <Icon name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#111827'} />
         </TouchableOpacity>
         <Text className="text-gray-900 dark:text-white text-lg font-semibold">{currentMeeting.name}</Text>
         <TouchableOpacity onPress={handleLeaveMeeting}>
-          <Icon name="exit-outline" size={24} className="text-red-500 dark:text-red-400" />
+          <Icon name="exit-outline" size={24} color={isDark ? '#F87171' : '#EF4444'} />
         </TouchableOpacity>
       </View>
 
@@ -150,7 +153,7 @@ export function InstantMeetingScreen() {
 
         {/* 자동 매칭 상태 */}
         <View className="bg-white dark:bg-gray-800 rounded-xl p-6 items-center mb-4 shadow-sm">
-          <Icon name="sync" size={32} className="text-blue-500 dark:text-blue-400" />
+          <Icon name="sync" size={32} color={isDark ? '#60A5FA' : '#3B82F6'} />
           <Text className="text-gray-900 dark:text-white text-lg font-semibold mt-3">
             {t('instant:meeting.autoMatching')}
           </Text>
@@ -182,14 +185,14 @@ export function InstantMeetingScreen() {
 
         {/* 매칭 확인 버튼 */}
         {myStats.matches > 0 && (
-          <TouchableOpacity 
+          <TouchableOpacity
             className="bg-white dark:bg-gray-800 rounded-xl p-4 flex-row items-center justify-between shadow-sm"
             onPress={handleViewMatches}
           >
             <Text className="text-blue-500 dark:text-blue-400 text-base font-semibold">
               {t('instant:meeting.viewMatches', { count: myStats.matches })}
             </Text>
-            <Icon name="chevron-forward" size={20} className="text-blue-500 dark:text-blue-400" />
+            <Icon name="chevron-forward" size={20} color={isDark ? '#60A5FA' : '#3B82F6'} />
           </TouchableOpacity>
         )}
       </ScrollView>
