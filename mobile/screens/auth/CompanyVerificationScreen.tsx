@@ -20,9 +20,21 @@ import {
   ScrollView,
 } from 'react-native';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
-import { CompanyVerification, VerificationStatus, VerificationMethod } from '@/types';
+import { CompanyVerification } from '@/shared/types/company.types';
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/store/slices/themeSlice';
+
+// 인증 상태 enum
+enum VerificationStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+// 인증 방법 enum
+enum VerificationMethod {
+  EMAIL_DOMAIN = 'EMAIL_DOMAIN',
+  INVITE_CODE = 'INVITE_CODE',
+}
 
 /**
  * Props 인터페이스
@@ -30,10 +42,12 @@ import { useTheme } from '@/store/slices/themeSlice';
  * @interface CompanyVerificationScreenProps
  * @property {() => void} onVerificationSubmitted - 인증 제출 완료 시 호출되는 콜백
  * @property {() => void} [onSkip] - 건너뛰기 버튼 클릭 시 호출되는 선택적 콜백
+ * @property {() => void} [onBack] - 뒤로가기 버튼 클릭 시 호출되는 선택적 콜백
  */
 interface CompanyVerificationScreenProps {
   onVerificationSubmitted: () => void;
   onSkip?: () => void;
+  onBack?: () => void;
 }
 
 /**
@@ -72,7 +86,6 @@ export const CompanyVerificationScreen = ({
   const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useAndroidSafeTranslation();
-  useTheme(); // Hook for potential theme access
 
   // 이메일 도메인에서 회사명 추출
   const extractCompanyFromEmail = (emailAddress: string): string => {
@@ -163,15 +176,12 @@ export const CompanyVerificationScreen = ({
       // TODO: 실제 API 호출로 교체
       const verificationData: Partial<CompanyVerification> = {
         companyId: 'temp_company_id', // TODO: Get actual company ID from search/selection
-        method: selectedMethod!,
-        status: VerificationStatus.PENDING,
-        submittedAt: new Date(),
-        data: {
-          companyName: companyName.trim(),
-        },
+        email: email,
+        status: VerificationStatus.PENDING as 'PENDING' | 'APPROVED' | 'REJECTED',
+        verificationMethod: selectedMethod === VerificationMethod.EMAIL_DOMAIN ? 'EMAIL' : 'DOCUMENT' as 'EMAIL' | 'DOCUMENT',
       };
 
-      console.log('Submitting company verification:', verificationData);
+      console.log('Submitting company verification:', verificationData, 'Company Name:', companyName);
 
       // 임시 지연 (실제 API 호출 시뮬레이션)
       await new Promise(resolve => setTimeout(resolve, 2000));
