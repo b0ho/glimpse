@@ -64,7 +64,7 @@ export const Card: React.FC<CardProps> = ({
 
   const content = gradient ? (
     <LinearGradient
-      colors={gradientColors}
+      colors={gradientColors as any}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       className={`rounded-2xl ${className}`}

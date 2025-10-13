@@ -133,7 +133,7 @@ export const Badge: React.FC<BadgeProps> = ({
 
   const badgeContent = gradient ? (
     <LinearGradient
-      colors={variantStyle.gradient}
+      colors={variantStyle.gradient as any}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
       className={`rounded-full ${sizeStyle.padding} ${className}`}

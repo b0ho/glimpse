@@ -328,7 +328,7 @@ export const JoinGroupScreen = () => {
                     className="mr-2"
                   >
                     <LinearGradient
-                      colors={selectedCategory === category.id ? category.gradient : ['#F3F4F6', '#E5E7EB']}
+                      colors={(selectedCategory === category.id ? category.gradient : ['#F3F4F6', '#E5E7EB']) as any}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
                       className="flex-row items-center px-4 py-2 rounded-full"

@@ -158,7 +158,7 @@ export const Button: React.FC<ButtonProps> = ({
         className={cn('overflow-hidden', className)}
       >
         <LinearGradient
-          colors={gradientColors}
+          colors={gradientColors as any}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           className={cn(
