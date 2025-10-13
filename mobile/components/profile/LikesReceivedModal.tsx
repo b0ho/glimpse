@@ -142,7 +142,7 @@ export const LikesReceivedModal = ({
                 data={likesReceived}
                 renderItem={renderLikeItem}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.listContainer}
+                contentContainerStyle={{ padding: SPACING.md }}
                 showsVerticalScrollIndicator={false}
               />
             </>

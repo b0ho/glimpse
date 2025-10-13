@@ -37,10 +37,10 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
         </Text>
       </View>
       
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.successStoriesList}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
       >
         {successStories.map(story => (
           <SuccessStoryCard

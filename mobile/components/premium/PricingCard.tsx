@@ -55,11 +55,16 @@ export const PricingCard: React.FC<PricingCardProps> = React.memo(({
   return (
     <TouchableOpacity
       style={[
-        styles.card,
+        {
+          padding: SPACING.md,
+          borderRadius: 16,
+          borderWidth: 2,
+          marginVertical: SPACING.sm,
+        },
         { backgroundColor: colors.SURFACE, borderColor: colors.TRANSPARENT },
         isSelected && { borderColor: colors.SUCCESS },
-        isPopular && { 
-          borderColor: colors.PRIMARY, 
+        isPopular && {
+          borderColor: colors.PRIMARY,
           backgroundColor: colors.PRIMARY + '10',
           transform: [{ scale: 1.02 }]
         },

@@ -204,7 +204,7 @@ export const FriendRequestsModal = ({
                 data={friendRequests}
                 renderItem={renderRequestItem}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.listContainer}
+                contentContainerStyle={{ padding: SPACING.md }}
                 showsVerticalScrollIndicator={false}
               />
             </>
