@@ -85,6 +85,8 @@ export interface GroupChat {
   group?: Group;
   name: string;
   description?: string;
+  imageUrl?: string;
+  memberCount?: number;
   members: GroupChatMember[];
   lastMessage?: GroupChatMessage;
   lastMessageAt?: Date;

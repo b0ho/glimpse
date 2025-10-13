@@ -21,7 +21,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useGroupStore } from '@/store/slices/groupSlice';
-import { GroupChat } from '@/../shared/types';
+import { GroupChat } from '@/shared/types';
 import { formatDistanceToNow } from '@/utils/dateUtils';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { ServerConnectionError } from '@/components/ServerConnectionError';
@@ -37,34 +37,34 @@ const ChatItem = ({ chat, onPress }: ChatItemProps) => {
 
   return (
     <TouchableOpacity 
-      className="flex-row items-center bg-white dark:bg-gray-800 py-4 px-4 border-b border-gray-200 dark:border-gray-700 active:opacity-70"
+     
       onPress={onPress}
     >
       <Image 
         source={{ uri: chat.imageUrl || 'https://via.placeholder.com/56' }}
-        className="w-14 h-14 rounded-full mr-4"
+       
       />
       
-      <View className="flex-1">
-        <View className="flex-row items-center mb-1">
-          <Text className="text-gray-900 dark:text-white text-base font-semibold flex-1" numberOfLines={1}>
+      <View>
+        <View>
+          <Text numberOfLines={1}>
             {chat.name}
           </Text>
-          <Text className="text-gray-500 dark:text-gray-500 text-xs ml-3">
+          <Text>
             <Icon name="people-outline" size={14} /> {t('groupchat:chat.memberCount', { count: chat.memberCount })}
           </Text>
         </View>
         
-        <Text className="text-gray-600 dark:text-gray-400 text-sm mb-1" numberOfLines={1}>
+        <Text numberOfLines={1}>
           {chat.description || t('groupchat:chat.defaultDescription')}
         </Text>
         
         {chat.lastMessage && (
-          <View className="flex-row items-center">
-            <Text className="text-gray-500 dark:text-gray-500 text-sm flex-1" numberOfLines={1}>
+          <View>
+            <Text numberOfLines={1}>
               {chat.lastMessage.sender?.nickname}: {chat.lastMessage.content}
             </Text>
-            <Text className="text-gray-500 dark:text-gray-500 text-xs ml-3">
+            <Text>
               {formatDistanceToNow(chat.lastMessage.createdAt)}
             </Text>
           </View>
@@ -72,8 +72,8 @@ const ChatItem = ({ chat, onPress }: ChatItemProps) => {
       </View>
 
       {unreadCount > 0 && (
-        <View className="bg-blue-500 dark:bg-blue-600 rounded-full min-w-6 h-6 justify-center items-center px-1.5">
-          <Text className="text-white text-xs font-bold">
+        <View>
+          <Text>
             {unreadCount > 99 ? '99+' : unreadCount}
           </Text>
         </View>
@@ -193,19 +193,19 @@ export const GroupChatListScreen = () => {
 
   if (isLoading && !isRefreshing) {
     return (
-      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-900">
-        <ActivityIndicator size="large" className="text-blue-500" />
+      <View>
+        <ActivityIndicator size="large" />
       </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
+    <SafeAreaView>
       {/* Search Bar */}
-      <View className="flex-row items-center bg-white dark:bg-gray-800 mx-4 mt-4 mb-3 px-4 rounded-full h-11 shadow-sm">
-        <Icon name="search-outline" size={20} className="text-gray-500 dark:text-gray-500" />
+      <View>
+        <Icon name="search-outline" size={20} />
         <TextInput
-          className="flex-1 ml-3 text-sm text-gray-900 dark:text-white"
+         
           placeholder={t('groupchat:search.placeholder')}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -214,13 +214,13 @@ export const GroupChatListScreen = () => {
       </View>
 
       {/* Quick Actions */}
-      <View className="px-4 mb-3">
+      <View>
         <TouchableOpacity 
-          className="flex-row items-center bg-blue-50 dark:bg-blue-900/20 py-3 px-4 rounded-full"
+         
           onPress={handleJoinPublicChat}
         >
-          <Icon name="globe-outline" size={20} className="text-blue-500 dark:text-blue-400" />
-          <Text className="ml-2 text-sm text-blue-500 dark:text-blue-400 font-medium">
+          <Icon name="globe-outline" size={20} />
+          <Text>
             {t('groupchat:actions.browsePublic')}
           </Text>
         </TouchableOpacity>
@@ -233,10 +233,10 @@ export const GroupChatListScreen = () => {
           <ChatItem chat={item} onPress={() => handleChatPress(item)} />
         )}
         ListEmptyComponent={
-          <View className="flex-1 justify-center items-center py-24">
-            <Icon name="chatbubbles-outline" size={60} className="text-gray-400 dark:text-gray-600" />
-            <Text className="text-gray-600 dark:text-gray-400 text-base mt-4">{t('groupchat:empty.title')}</Text>
-            <Text className="text-gray-500 dark:text-gray-500 text-sm mt-2 text-center px-8">
+          <View>
+            <Icon name="chatbubbles-outline" size={60} />
+            <Text>{t('groupchat:empty.title')}</Text>
+            <Text>
               {t('groupchat:empty.subtitle')}
             </Text>
           </View>
@@ -254,10 +254,10 @@ export const GroupChatListScreen = () => {
 
       {/* Floating Action Button */}
       <TouchableOpacity 
-        className="absolute right-4 bottom-6 w-14 h-14 bg-teal-400 dark:bg-teal-500 rounded-full justify-center items-center shadow-lg"
+       
         onPress={handleCreateChat}
       >
-        <Icon name="add" size={28} className="text-white" />
+        <Icon name="add" size={28} />
       </TouchableOpacity>
     </SafeAreaView>
   );
