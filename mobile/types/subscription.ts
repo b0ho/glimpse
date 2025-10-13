@@ -14,13 +14,14 @@ export interface SubscriptionFeatures {
   interestSearchTypes: number | 'unlimited';  // 사용 가능한 유형 수
   interestSearchDuration: number;             // 검색 유효 기간 (일 단위)
   canSendInterestFirst: boolean;              // 먼저 관심있어요 보내기 가능 여부
-  
+
   // 근처 사용자 관련
   dailyLikeLimit: number | 'unlimited';       // 일일 좋아요 제한
-  
+  superLikes: number;                        // 일일 슈퍼 좋아요 제한
+
   // 페르소나 관련
   personaTopPlacement: boolean;               // 페르소나 상단 배치
-  
+
   // 기타 혜택
   noAds: boolean;                            // 광고 제거
   priorityMatching: boolean;                  // 우선 매칭
@@ -36,6 +37,7 @@ export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeature
     interestSearchDuration: 7,         // 7일
     canSendInterestFirst: false,
     dailyLikeLimit: 1,                // 1일 1회
+    superLikes: 0,                    // 슈퍼 좋아요 없음
     personaTopPlacement: false,
     noAds: false,
     priorityMatching: false,
@@ -49,6 +51,7 @@ export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeature
     interestSearchDuration: 14,        // 2주
     canSendInterestFirst: true,
     dailyLikeLimit: 3,                 // 1일 3회
+    superLikes: 3,                    // 1일 3회 슈퍼 좋아요
     personaTopPlacement: false,
     noAds: true,
     priorityMatching: false,
@@ -62,6 +65,7 @@ export const SUBSCRIPTION_FEATURES: Record<SubscriptionTier, SubscriptionFeature
     interestSearchDuration: 365,       // 사실상 무제한 (1년)
     canSendInterestFirst: true,
     dailyLikeLimit: 'unlimited',       // 무제한
+    superLikes: 999,                  // 사실상 무제한
     personaTopPlacement: true,
     noAds: true,
     priorityMatching: true,

@@ -143,10 +143,10 @@ export const likeCalculations = {
    */
   getDailySuperLikesLimit: (subscriptionTier?: string): number => {
     switch (subscriptionTier) {
-      case 'premium':
-        return SUBSCRIPTION_FEATURES.premium.superLikes;
-      case 'plus':
-        return SUBSCRIPTION_FEATURES.plus.superLikes;
+      case 'PREMIUM':
+        return SUBSCRIPTION_FEATURES.PREMIUM.superLikes;
+      case 'ADVANCED':
+        return SUBSCRIPTION_FEATURES.ADVANCED.superLikes;
       default:
         return 0;
     }

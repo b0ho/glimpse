@@ -4,7 +4,7 @@
 
 import { Gender } from '../shared/types/user.types';
 
-export { Gender };
+export type { Gender };
 
 export enum InterestType {
   PHONE = 'PHONE',

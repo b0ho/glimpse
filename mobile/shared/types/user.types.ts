@@ -145,8 +145,11 @@ export interface UserResponse extends User {
  * 익명 사용자 정보
  */
 export interface AnonymousUserInfo {
+  id?: string;
   anonymousId: string;
+  displayName?: string;
   nickname?: string;
+  realName?: string;
   profileImage?: string;
   isOnline?: boolean;
   lastSeen?: Date;
