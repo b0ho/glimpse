@@ -27,7 +27,7 @@ interface ChatServiceInterface {
   leaveMatch(matchId: string): void;
 
   /** 메시징 */
-  sendMessage(matchId: string, content: string, type?: 'TEXT' | 'IMAGE'): void;
+  sendMessage(matchId: string, content: string, type?: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY'): void;
   markAsRead(matchId: string, messageIds: string[]): void;
 
   /** 타이핑 표시 */
@@ -124,11 +124,11 @@ class ChatService implements ChatServiceInterface {
    * @async
    * @param {string} matchId - 매칭 ID
    * @param {string} content - 메시지 내용
-   * @param {'TEXT' | 'IMAGE'} [type='TEXT'] - 메시지 유형
+   * @param {'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY'} [type='TEXT'] - 메시지 유형
    * @returns {Promise<void>}
    * @description 메시지를 암호화하여 전송
    */
-  async sendMessage(matchId: string, content: string, type: 'TEXT' | 'IMAGE' = 'TEXT'): Promise<void> {
+  async sendMessage(matchId: string, content: string, type: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY' = 'TEXT'): Promise<void> {
     // 개발 환경에서는 mock 동작
     if (__DEV__) {
       console.log('[chatService] Mock 메시지 전송:', { matchId, content, type });
