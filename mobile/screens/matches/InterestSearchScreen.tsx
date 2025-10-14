@@ -355,7 +355,7 @@ export const InterestSearchScreen: React.FC = () => {
                 등록 가능: {3 - filteredSearches.length}개 남음 • 유효기간: 3일
               </Text>
             </View>
-            {subscriptionTier === 'FREE' && (
+            {subscriptionTier === 'BASIC' && (
               <TouchableOpacity
                 className="bg-red-500 px-3 py-1.5 rounded-full"
                 onPress={() => navigation.navigate('PricingScreen' as any)}

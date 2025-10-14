@@ -137,12 +137,13 @@ class WebSocketService {
    * 메시지 전송
    * @param roomId - 채팅방 ID
    * @param content - 메시지 내용
-   * @param type - 메시지 타입 (text, image, file)
+   * @param type - 메시지 타입 (text, image, voice, location, story_reply, system)
    */
   async sendMessage(
     roomId: string,
     content: string,
-    type: 'text' | 'image' | 'voice' | 'system' = 'text'
+    type: 'text' | 'image' | 'voice' | 'location' | 'story_reply' | 'system' |
+          'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY' = 'text'
   ): Promise<Message> {
     if (!this.socket || !this.isConnected) {
       throw new Error('WebSocket is not connected');
@@ -152,11 +153,14 @@ class WebSocketService {
       throw new Error('User ID is not set');
     }
 
+    // Convert type to lowercase for Message interface compatibility
+    const messageType = type.toLowerCase() as 'text' | 'image' | 'voice' | 'system';
+
     const message: Omit<Message, 'id' | 'createdAt' | 'updatedAt' | 'roomId' | 'timestamp'> & { matchId: string } = {
       matchId: roomId,
       senderId: this.currentUserId,
       content,
-      type,
+      type: messageType,
       isRead: false,
     };
 
