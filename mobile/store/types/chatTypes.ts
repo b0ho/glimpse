@@ -20,7 +20,7 @@ export interface TypingUser {
 export interface OfflineMessage {
   roomId: string;
   content: string;
-  type: 'TEXT' | 'IMAGE';
+  type: 'TEXT' | 'IMAGE' | 'VOICE' | 'LOCATION' | 'STORY_REPLY';
   timestamp: number;
 }
 

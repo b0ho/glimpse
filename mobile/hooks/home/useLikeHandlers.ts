@@ -39,7 +39,7 @@ export const useLikeHandlers = ({ contents, setContents, t }: UseLikeHandlersPro
     }
 
     // 일일 좋아요 한도 체크
-    if (!likeStore.canSendLike(authorId)) {
+    if (!likeStore.canSendLike()) {
       const remainingLikes = likeStore.getRemainingFreeLikes();
       if (remainingLikes === 0) {
         Alert.alert(

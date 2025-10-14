@@ -137,23 +137,14 @@ export const NearbyUsersScreen = React.memo(() => {
         return;
       }
 
-      const result = await sendLike({
-        targetUserId: targetUser.id,
-        targetGroupId: null,
-        metadata: {
-          sentFrom: 'nearby',
-          distance: targetUser.distance,
-          location: currentLocation ? {
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-          } : undefined,
-        }
-      });
+      const result = await sendLike(targetUser.id, 'nearby');
 
-      if (result.success) {
+      if (result) {
         markUserAsLiked(targetUser.id);
-        
-        if (result.isMatch) {
+
+        // Check if it's a match (would need to be returned from sendLike)
+        const isMatch = false; // TODO: Get from API response
+        if (isMatch) {
           Alert.alert(
             t('location:matchFound'),
             t('location:matchFoundMessage', { name: targetUser.nickname }),

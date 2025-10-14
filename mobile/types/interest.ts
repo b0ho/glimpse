@@ -58,6 +58,7 @@ export interface InterestMatch {
   };
   matchType?: InterestType;
   matchValue?: string;
+  metadata?: Record<string, any>;
   matchedAt: Date | string;
   status?: 'ACTIVE' | 'INACTIVE';
   createdAt?: Date | string;
