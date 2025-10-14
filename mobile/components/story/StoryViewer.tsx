@@ -114,7 +114,7 @@ export const StoryViewer = ({
   
   const progressAnimation = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList>(null);
-  const videoRef = useRef<Video>(null);
+  const videoRef = useRef<any>(null);
   const storyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentGroup = storyGroups[currentGroupIndex];
