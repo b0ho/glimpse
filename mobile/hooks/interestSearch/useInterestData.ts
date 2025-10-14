@@ -4,11 +4,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useInterestStore } from '@/store/slices/interestSlice';
 import { secureInterestService } from '@/services/secureInterestService';
+import { InterestType } from '@/types/interest';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface LocalCard {
   id: string;
-  type: string;
+  type: InterestType;
   actualValue?: string;
   displayValue?: string;
   status: string;

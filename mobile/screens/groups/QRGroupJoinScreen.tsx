@@ -152,8 +152,8 @@ export const QRGroupJoinScreen = () => {
                   setIsLoading(false);
                   return;
                 }
-                
-                await joinGroup(targetGroup);
+
+                await joinGroup(targetGroup.id);
                 // 참여 성공으로 간주
                 Alert.alert(
                   t('group:qrJoin.successTitle'),

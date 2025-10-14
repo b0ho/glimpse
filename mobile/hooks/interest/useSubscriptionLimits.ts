@@ -85,18 +85,20 @@ export const useSubscriptionLimits = () => {
       }
       
       // 최대 관심상대 수 제한
-      const maxSearches = features.maxInterestSearches || 5;
-      
+      const maxSearchesValue = features.maxInterestSearches || 5;
+      const maxSearches = typeof maxSearchesValue === 'string' ? Infinity : maxSearchesValue;
+
       if (totalSearches >= maxSearches) {
         console.log(`[useSubscriptionLimits] Max searches reached: ${totalSearches}/${maxSearches}`);
         return false;
       }
-      
+
       return true;
     } catch (error) {
       console.error('[useSubscriptionLimits] Error checking limits:', error);
       // 에러 발생 시 서버 데이터만으로 체크
-      const maxSearches = features.maxInterestSearches || 5;
+      const maxSearchesValue = features.maxInterestSearches || 5;
+      const maxSearches = typeof maxSearchesValue === 'string' ? Infinity : maxSearchesValue;
       return searches.length < maxSearches;
     }
   };
@@ -105,8 +107,9 @@ export const useSubscriptionLimits = () => {
    * 남은 관심상대 등록 가능 수
    */
   const getRemainingSlots = async (): Promise<number> => {
-    const maxSearches = features.maxInterestSearches || 5;
-    
+    const maxSearchesValue = features.maxInterestSearches || 5;
+    const maxSearches = typeof maxSearchesValue === 'string' ? Infinity : maxSearchesValue;
+
     try {
       const localCards = await getLocalInterestCards();
       const localCardCount = localCards.length;

@@ -177,9 +177,9 @@ export const JoinGroupScreen = () => {
     setIsJoining(true);
     try {
       const result = await groupApi.joinGroupByInvite(inviteCode);
-      
+
       const group = await groupApi.getGroupById(result.group.id);
-      groupStore.joinGroup(group);
+      groupStore.joinGroup(group.id);
 
       Alert.alert(
         '성공',
