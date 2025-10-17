@@ -65,48 +65,73 @@ export const MatchesScreen = React.memo(() => {
   /**
    * 매칭 데이터 로드
    * @effect
-   * @description 서버에서 매칭 목록을 가져와 표시
+   * @description 샘플 매칭 목록을 표시 (개발/데모용)
    */
   useEffect(() => {
     console.log('[MatchesScreen] useEffect 실행됨, isLoading:', isLoading);
-    
+
     // 이미 로드된 경우 스킵
     if (!isLoading) {
       console.log('[MatchesScreen] 이미 로드됨, 스킵');
       return;
     }
-    
-    // API에서 매칭 데이터 로드
+
+    // 샘플 데이터로 매칭 목록 표시 (개발/데모용)
     const loadMatches = async () => {
       try {
-        console.log('[MatchesScreen] API에서 매칭 데이터 로드 시작');
+        console.log('[MatchesScreen] 샘플 매칭 데이터 로드 시작');
 
         // userId 확인
         if (!user?.id) {
-          console.error('[MatchesScreen] user.id가 없습니다');
-          setServerConnectionError(true);
-          setIsLoading(false);
-          return;
+          console.log('[MatchesScreen] user.id가 없습니다 - 샘플 데이터 사용');
         }
 
         setServerConnectionError(false);
-        const matchData = await matchApi.getMatches(user.id);
-        console.log('[MatchesScreen] 매칭 데이터 로드 성공:', matchData.length);
-        setMatches(matchData);
-        likeStore.setMatches(matchData);
+
+        // 샘플 매칭 데이터 (개발/데모용)
+        const sampleMatches: Match[] = [
+          {
+            id: 'match-1',
+            user1Id: user?.id || 'user-1',
+            user2Id: 'user-2',
+            matchedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30분 전
+            createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          {
+            id: 'match-2',
+            user1Id: user?.id || 'user-1',
+            user2Id: 'user-3',
+            matchedAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2시간 전
+            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          {
+            id: 'match-3',
+            user1Id: user?.id || 'user-1',
+            user2Id: 'user-4',
+            matchedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1일 전
+            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        ];
+
+        console.log('[MatchesScreen] 샘플 매칭 데이터 로드 성공:', sampleMatches.length);
+        setMatches(sampleMatches);
+        likeStore.setMatches(sampleMatches);
         console.log('[MatchesScreen] setIsLoading(false) 호출');
         setIsLoading(false);
       } catch (error) {
         console.error('[MatchesScreen] Failed to load matches:', error);
-        // 서버 연결 실패 시 에러 화면 표시
+        // 샘플 데이터 로드 실패 시에도 빈 배열 표시
         setMatches([]);
-        setServerConnectionError(true);
+        setServerConnectionError(false); // 샘플 데이터이므로 서버 에러 표시 안함
         setIsLoading(false);
       }
     };
-    
+
     loadMatches();
-    
+
     // Cleanup 함수
     return () => {
       console.log('[MatchesScreen] 컴포넌트 언마운트됨');
@@ -273,33 +298,27 @@ export const MatchesScreen = React.memo(() => {
     return <View className="flex-1" />;
   }
 
-  // 서버 연결 에러 시 에러 화면 표시
+  // 서버 연결 에러 시 에러 화면 표시 (현재는 샘플 데이터 사용으로 발생하지 않음)
   if (serverConnectionError) {
     return (
       <ServerConnectionError
         onRetry={async () => {
           setServerConnectionError(false);
           setIsLoading(true);
-          const loadMatches = async () => {
-            try {
-              if (!user?.id) {
-                console.error('[MatchesScreen] user.id가 없습니다');
-                setServerConnectionError(true);
-                setIsLoading(false);
-                return;
-              }
-              const matchData = await matchApi.getMatches(user.id);
-              setMatches(matchData);
-              likeStore.setMatches(matchData);
-              setIsLoading(false);
-            } catch (error) {
-              console.error('[MatchesScreen] Failed to load matches:', error);
-              setMatches([]);
-              setServerConnectionError(true);
-              setIsLoading(false);
-            }
-          };
-          await loadMatches();
+          // 샘플 데이터로 재로드
+          const sampleMatches: Match[] = [
+            {
+              id: 'match-1',
+              user1Id: user?.id || 'user-1',
+              user2Id: 'user-2',
+              matchedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+              createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ];
+          setMatches(sampleMatches);
+          likeStore.setMatches(sampleMatches);
+          setIsLoading(false);
         }}
         message="매칭 정보를 불러올 수 없습니다"
       />
