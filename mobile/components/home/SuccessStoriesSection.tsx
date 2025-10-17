@@ -27,16 +27,16 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
   }
 
   return (
-    <View className="successStoriesContainer">
-      <View className="successStoriesHeader">
-        <Text className="successStoriesTitle">
+    <View className="my-4">
+      <View className="px-4 mb-3">
+        <Text className="text-xl font-bold text-foreground dark:text-foreground-dark mb-1">
           💑 {t('home:successStories.title')}
         </Text>
-        <Text className="successStoriesSubtitle">
+        <Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
           {t('home:successStories.subtitle')}
         </Text>
       </View>
-      
+
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

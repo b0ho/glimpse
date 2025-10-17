@@ -11,7 +11,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { initI18n, ensureI18nReady } from './services/i18n/i18n';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './services/i18n/i18n';
-import { useIsDark, useColors } from './hooks/useTheme';
+import { useTheme } from './hooks/useTheme';
 import Toast from 'react-native-toast-message';
 
 // SafeAreaProvider는 네이티브 플랫폼에서만 필요
@@ -256,8 +256,8 @@ export default function App() {
   
   // 앱 컨텐츠
   const AppContent = () => {
-    const isDark = useIsDark();
-    const colors = useColors();
+    // useTheme()을 호출해서 initializeTheme()이 실행되도록 함
+    const { isDark, colors } = useTheme();
     
     // NativeWind 다크모드 클래스 동적 적용 (모든 플랫폼에서 일관되게)
     useEffect(() => {

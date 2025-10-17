@@ -142,15 +142,11 @@ export const useContentData = () => {
       console.log('[useContentData] Calling API...');
       const apiContents = await contentApi.getContents(undefined, page, 10);
       console.log('[useContentData] API response:', apiContents);
-      
-      let contentsToSet = apiContents;
-      
-      // API 응답이 없거나 에러인 경우 테스트 데이터 사용
-      if (!apiContents || apiContents.length === 0) {
-        contentsToSet = generateTestContents(page);
-        console.log('[useContentData] Using test contents for page:', page);
-      }
-      
+      console.log('[useContentData] API response type:', typeof apiContents, 'isArray:', Array.isArray(apiContents));
+
+      // API 응답을 그대로 사용 (mock data fallback 제거)
+      const contentsToSet = apiContents || [];
+
       // 3일 이내 콘텐츠만 필터링
       const recentContents = filterRecentContents(contentsToSet);
       console.log('[useContentData] Filtered recent contents:', recentContents.length);

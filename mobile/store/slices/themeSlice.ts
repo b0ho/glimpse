@@ -112,6 +112,16 @@ export const useThemeStore = create<ThemeStore>()(
           colors,
         });
 
+        // Web: document.documentElement에 dark 클래스 추가/제거 (NativeWind v4 필수!)
+        if (Platform.OS === 'web' && typeof document !== 'undefined') {
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+          console.log('[Theme] Web dark mode updated:', isDark);
+        }
+
         // 상태바 스타일 업데이트 (네이티브만)
         if (Platform.OS !== 'web') {
           try {
@@ -140,10 +150,14 @@ export const useThemeStore = create<ThemeStore>()(
 
       initializeTheme: async () => {
         try {
-          const savedMode = await secureStorage.getItem('theme_mode');
-          if (savedMode && ['light', 'dark', 'system'].includes(savedMode)) {
-            get().setTheme(savedMode as ThemeMode);
-          }
+          // Zustand persist가 이미 storage에서 state를 복원했으므로
+          // 현재 mode를 읽어서 setTheme()을 호출하여
+          // Web 환경에서 document.classList를 업데이트
+          const { mode } = get();
+          console.log('[Theme] Initializing with mode:', mode);
+
+          // setTheme() 호출해서 document.classList 업데이트
+          get().setTheme(mode);
 
           // 시스템 테마 변경 감지 (네이티브만)
           if (Platform.OS !== 'web') {
@@ -152,7 +166,7 @@ export const useThemeStore = create<ThemeStore>()(
               if (mode === 'system') {
                 const isDark = colorScheme === 'dark';
                 const colors = getColors(isDark);
-                
+
                 set({
                   isDark,
                   colors,

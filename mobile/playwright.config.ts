@@ -8,7 +8,7 @@ export default defineConfig({
   workers: 1,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:8082',
+    baseURL: 'http://localhost:8081',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -37,8 +37,8 @@ export default defineConfig({
       timeout: 60000,
     },
     {
-      command: 'cd /Users/b0ho/git/glimpse/mobile && npx expo start --web --clear --port 8082',
-      port: 8082,
+      command: 'cd /Users/b0ho/git/glimpse/mobile && npx expo start --web --clear --port 8081',
+      port: 8081,
       reuseExistingServer: true,
       timeout: 60000,
     }
