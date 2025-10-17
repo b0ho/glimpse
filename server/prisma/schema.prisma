@@ -1,4 +1,30 @@
-ㅋtedAt              DateTime?
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String                  @id @default(cuid())
+  clerkId                String?                 @unique
+  anonymousId            String                  @unique @default(cuid())
+  phoneNumber            String                  @unique
+  nickname               String?
+  age                    Int?
+  gender                 Gender?
+  profileImage           String?
+  bio                    String?
+  isVerified             Boolean                 @default(false)
+  credits                Int                     @default(1)
+  isPremium              Boolean                 @default(false)
+  premiumLevel           PremiumLevel            @default(FREE)
+  premiumUntil           DateTime?
+  lastActive             DateTime                @default(now())
+  lastOnline             DateTime?
+  deletedAt              DateTime?
   deletionReason         String?
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt

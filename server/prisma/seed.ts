@@ -300,6 +300,67 @@ async function main() {
 
   console.log(`✅ ${companyDomains.length}개의 회사 도메인 생성 완료`);
 
+  // 커뮤니티 포스트 생성
+  const posts = await Promise.all([
+    prisma.communityPost.create({
+      data: {
+        authorId: users[0].id,
+        groupId: normalGroups[0].id, // 삼성전자 그룹
+        title: '오늘 날씨 정말 좋네요!',
+        content: 'The weather is so nice today! Have a great day everyone ☀️',
+        category: '일반',
+        tags: ['날씨', '일상'],
+        imageUrls: [],
+      },
+    }),
+    prisma.communityPost.create({
+      data: {
+        authorId: users[1].id,
+        groupId: normalGroups[1].id, // 서울대학교 그룹
+        title: '새 프로젝트 시작!',
+        content: 'Started a new project! Fighting 💪',
+        category: '일반',
+        tags: ['프로젝트', '개발'],
+        imageUrls: [],
+      },
+    }),
+    prisma.communityPost.create({
+      data: {
+        authorId: users[2].id,
+        groupId: normalGroups[2].id, // 러닝 크루
+        title: '오늘 헬스장 다녀왔어요!',
+        content: 'Went to the gym today! Exercise makes me feel good 🏋️',
+        category: '일반',
+        tags: ['운동', '헬스'],
+        imageUrls: [],
+      },
+    }),
+    prisma.communityPost.create({
+      data: {
+        authorId: users[0].id,
+        groupId: normalGroups[3].id, // 독서 모임
+        title: '이번 주 책 추천',
+        content: '최근에 읽은 책 중 가장 인상 깊었던 소설 추천드려요! 📚',
+        category: '추천',
+        tags: ['책', '소설', '추천'],
+        imageUrls: [],
+      },
+    }),
+    prisma.communityPost.create({
+      data: {
+        authorId: users[1].id,
+        groupId: locationGroups[0].id, // 강남역 스타벅스
+        title: '커피 맛집 발견!',
+        content: '강남역 근처 새로 생긴 카페 진짜 맛있어요 ☕',
+        category: '맛집',
+        tags: ['커피', '카페', '맛집'],
+        imageUrls: [],
+      },
+    }),
+  ]);
+
+  console.log(`✅ ${posts.length}개의 커뮤니티 포스트 생성 완료`);
+
   console.log('🎉 시드 데이터 생성 완료!');
 }
 
