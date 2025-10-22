@@ -23,7 +23,7 @@
 #### 즉시 해결 (현재 적용됨)
 `.env.production` 파일에 개발 키 명시:
 ```
-EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ
+EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key_here
 ```
 
 #### 영구 해결 옵션

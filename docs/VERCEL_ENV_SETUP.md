@@ -14,7 +14,7 @@ Vercel 대시보드 (https://vercel.com/dashboard) 에서:
 2. 다음 환경변수 수정:
 
 ```
-EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ
+EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key_here
 ```
 
 3. `EXPO_PUBLIC_CLERK_FRONTEND_API` 환경변수 삭제 또는 비활성화
@@ -49,7 +49,7 @@ if (typeof window !== 'undefined') {
   isVercelDomain = hostname.includes('vercel.app');
   if (isVercelDomain) {
     // Vercel에서는 무조건 개발 키만 사용, 환경변수 완전 무시
-    clerkPublishableKey = 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
+    clerkPublishableKey = 'pk_test_your_clerk_publishable_key_here';
     clerkFrontendApi = undefined;
     console.log('🔧 CRITICAL: Forcing development Clerk key for Vercel deployment');
   }

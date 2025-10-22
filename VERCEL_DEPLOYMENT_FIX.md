@@ -12,7 +12,7 @@
 2. Project Settings > Environment Variables
 3. 다음 변수 수정:
    ```
-   EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ
+   EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key_here
    ```
 4. Redeploy 실행
 
@@ -34,7 +34,7 @@
 ```typescript
 if (hostname.includes('vercel.app')) {
   // Vercel 도메인에서는 무조건 개발 키 사용
-  clerkPublishableKey = 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
+  clerkPublishableKey = 'pk_test_your_clerk_publishable_key_here';
   clerkFrontendApi = undefined;
   console.log('⚠️ FORCING development Clerk key for Vercel domain');
 }

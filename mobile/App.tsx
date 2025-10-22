@@ -155,7 +155,8 @@ export default function App() {
   // Clerk publishable key - 환경에 따라 적절한 키 선택
   let clerkPublishableKey: string;
   let clerkFrontendApi: string | undefined = undefined;
-  const devKey = 'pk_test_bGlrZWQtZG9nLTkzLmNsZXJrLmFjY291bnRzLmRldiQ';
+  // 환경변수에서 개발 키 가져오기 (mobile/.env에서 설정)
+  const devKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
   
   // 환경별 Clerk 설정
   const isDevelopment = __DEV__ || process.env.NODE_ENV === 'development';
