@@ -27,7 +27,7 @@ Railway 대시보드에서 다음 환경변수를 설정하세요:
 DATABASE_URL=postgresql://postgres:[자동생성]@[자동생성].railway.app:5432/railway
 
 # Authentication
-CLERK_SECRET_KEY=sk_test_ahquE3eARWKYofKL7BQoMLfHl7474tiTuMSm1twG4C
+CLERK_SECRET_KEY=sk_test_your_clerk_secret_key_here
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 
 # App Configuration

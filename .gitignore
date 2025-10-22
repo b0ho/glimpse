@@ -32,6 +32,11 @@ mobile/expo-env.d.ts
 # Private configuration (Git에서 제외)
 config/private/
 config/private/*
+etc/config/private/secrets.env
+
+# Root environment files
+.env
+.env.defaults
 
 # Environment files (비밀 정보 포함)
 .env.local
@@ -41,8 +46,18 @@ config/private/*
 .env.development
 .env.test
 
-# Note: server/.env 와 mobile/.env 는 이제 Git으로 관리 (공개 개발 설정)
-# 실제 비밀키들은 config/private/secrets.env 에 설정
+# Package-specific environment files (민감한 정보 포함)
+server/.env
+server/.env.local
+server/.env.railway.example
+mobile/.env
+mobile/.env.local
+mobile/.env.vercel
+mobile/.env.vercel.production
+admin/.env.development
+admin/.env.local
+web/.env
+web/.env.local
 
 # Legacy environment files
 shared/.env
@@ -53,6 +68,8 @@ shared/.env
 *.tsbuildinfo
 build/
 dist/
+server2/bin/
+server2/build/
 
 # =====================================================
 # LOGS & DEBUG

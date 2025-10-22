@@ -153,15 +153,15 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/glimpse_dev
 PORT=3001
 NODE_ENV=development
 
-# JWT Secret
+# JWT Secret (generate: openssl rand -base64 64)
 JWT_SECRET=your_jwt_secret_key_here_make_it_long_and_random
 
-# Encryption Key (32 bytes hex)
-ENCRYPTION_KEY=c55bb6a39f66e80e5601d53d25a5e9d3cf64397655eedfff7efd10964db4246f
+# Encryption Key (32 bytes hex) (generate: openssl rand -hex 32)
+ENCRYPTION_KEY=your_encryption_key_here_64_hex_characters_replace_this
 
-# Clerk Authentication
-CLERK_SECRET_KEY=sk_test_dummy_key
-CLERK_PUBLISHABLE_KEY=pk_test_dummy_key
+# Clerk Authentication (get from https://clerk.com)
+CLERK_SECRET_KEY=sk_test_your_clerk_secret_key_here
+CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key_here
 
 # Redis
 REDIS_URL=redis://localhost:6379
@@ -268,9 +268,9 @@ if [ ! -f ".env" ]; then
 # API Configuration
 NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
 
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dummy_key
-CLERK_SECRET_KEY=sk_test_dummy_key
+# Clerk Authentication (get from https://clerk.com)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key_here
+CLERK_SECRET_KEY=sk_test_your_clerk_secret_key_here
 
 # Development
 NODE_ENV=development
@@ -304,8 +304,8 @@ if [ ! -f ".env" ]; then
 EXPO_PUBLIC_API_BASE_URL=http://localhost:3001/api/v1
 EXPO_PUBLIC_WEBSOCKET_URL=ws://localhost:3001
 
-# Clerk Authentication
-EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dummy_key
+# Clerk Authentication (get from https://clerk.com)
+EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key_here
 
 # Development
 NODE_ENV=development

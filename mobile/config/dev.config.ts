@@ -83,8 +83,9 @@ export const DEV_CONFIG = {
   // 디버그 로깅 활성화
   enableDebugLogging: isDevelopment,
   
-  // 개발 토큰 (실제 DB의 사용자 ID와 매칭되는 JWT)
-  devToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWVrdHUxeTgwMDAweHRjZ3IxYTF3aGozIiwic3ViIjoiY21la3R1MXk4MDAwMHh0Y2dyMWExd2hqMyIsInBob25lTnVtYmVyIjoiKzgyMDEwMDAwMDAwMCIsImlzVmVyaWZpZWQiOnRydWUsImlhdCI6MTc1Njk4MTU2MywiZXhwIjoxNzU5NTczNTYzfQ.8vU7_3b8HqXQhWL_avontJq5nstvh3nRzn2uXKOP94E',
+  // 개발 토큰 (서버에서 생성한 개발용 JWT - .env 파일에서 가져옴)
+  // Generate new token: node server/generate-dev-token.js
+  devToken: process.env.DEV_AUTH_TOKEN || '',
   
   // 개발 세션 ID
   devSessionId: 'dev-session-glimpse',
