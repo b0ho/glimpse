@@ -106,9 +106,33 @@ class SecureInterestService {
     try {
       // 1. 로컬 카드 가져오기
       const localCards = await getLocalInterestCards();
-      
+
       // 2. 서버 상태 가져오기
-      const response = await apiClient.get<ApiResponse<any>>('/interest/secure/my-status');
+      const { useAuthStore } = await import('@/store/slices/authSlice');
+      const { user } = useAuthStore.getState();
+
+      if (!user?.id) {
+        console.warn('[SecureInterestService] No user ID available');
+        // Return only local cards if no user
+        const cards: SecureInterestCard[] = [];
+        for (const localCard of localCards) {
+          const decrypted = await decryptCardData(localCard);
+          cards.push({
+            id: localCard.id,
+            type: localCard.type,
+            displayValue: this.maskValue(localCard.type, decrypted.value),
+            isActive: localCard.isActive,
+            createdAt: localCard.createdAt,
+            expiresAt: localCard.expiresAt,
+            deviceInfo: 'current',
+            isLocal: true,
+            canReveal: true,
+          });
+        }
+        return cards;
+      }
+
+      const response = await apiClient.get<ApiResponse<any>>(`/interest/secure/my-status?userId=${user.id}`);
       const serverStatuses = response.data;
 
       // 3. 통합 상태 생성

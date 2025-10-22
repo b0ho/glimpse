@@ -79,6 +79,27 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserDto> getUserById(String id) {
         log.debug("Getting user by ID: {}", id);
+
+        // Development: Return sample data for premium_user_id
+        if ("premium_user_id".equals(id)) {
+            return Optional.of(UserDto.builder()
+                    .id("premium_user_id")
+                    .phoneNumber("+821012345678")
+                    .nickname("프리미엄유저")
+                    .age(28)
+                    .gender(com.glimpse.server.entity.enums.Gender.MALE)
+                    .profileImage("https://api.dicebear.com/7.x/avataaars/svg?seed=premium")
+                    .bio("프리미엄 멤버십을 사용 중입니다")
+                    .anonymousId("anon_premium")
+                    .isVerified(true)
+                    .credits(100)
+                    .isPremium(true)
+                    .premiumLevel(PremiumLevel.PREMIUM)
+                    .createdAt(LocalDateTime.now().minusMonths(6))
+                    .lastActive(LocalDateTime.now())
+                    .build());
+        }
+
         return userRepository.findById(id)
                 .filter(user -> user.getDeletedAt() == null)
                 .map(this::convertToDto);

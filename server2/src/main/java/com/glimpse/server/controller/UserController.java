@@ -401,4 +401,31 @@ public class UserController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * 사용자 프로필을 조회합니다.
+     *
+     * @param userId 사용자 ID
+     * @return 사용자 프로필과 HTTP 200
+     */
+    @GetMapping("/profile")
+    @Operation(summary = "사용자 프로필 조회", description = "사용자의 프로필 정보를 조회합니다")
+    public ResponseEntity<ApiResponse<UserDto>> getUserProfile(@RequestParam(name = "userId") String userId) {
+        log.info("GET /api/v1/users/profile - Getting profile for user: {}", userId);
+        return userService.getUserById(userId)
+                .map(user -> {
+                    ApiResponse<UserDto> response = ApiResponse.<UserDto>builder()
+                            .success(true)
+                            .data(user)
+                            .build();
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> {
+                    ApiResponse<UserDto> response = ApiResponse.<UserDto>builder()
+                            .success(false)
+                            .message("사용자를 찾을 수 없습니다: " + userId)
+                            .build();
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                });
+    }
 }

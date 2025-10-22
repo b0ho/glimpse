@@ -103,13 +103,21 @@ export const useInterestStore = create<InterestState>()(
       fetchSearches: async (query?: GetInterestSearchesQuery) => {
         set({ loading: true, error: null });
         try {
+          // Get current user from auth store
+          const { user } = useAuthStore.getState();
+          if (!user?.id) {
+            console.warn('[interestSlice] No user ID available');
+            set({ searches: [], loading: false });
+            return;
+          }
 
           const params = new URLSearchParams();
+          params.append('userId', user.id);
           if (query?.type) params.append('type', query.type);
           if (query?.status) params.append('status', query.status);
 
           const response = await apiClient.get(
-            `/interest/searches${params.toString() ? `?${params.toString()}` : ''}`
+            `/interest/searches?${params.toString()}`
           );
 
           console.log('[interestSlice] fetchSearches response:', response);
@@ -151,8 +159,15 @@ export const useInterestStore = create<InterestState>()(
       fetchMatches: async () => {
         set({ loading: true, error: null });
         try {
+          // Get current user from auth store
+          const { user } = useAuthStore.getState();
+          if (!user?.id) {
+            console.warn('[interestSlice] No user ID available');
+            set({ matches: [], loading: false });
+            return;
+          }
 
-          const response = await apiClient.get('/interest/matches');
+          const response = await apiClient.get(`/interest/matches?userId=${user.id}`);
 
           console.log('[interestSlice] fetchMatches response:', response);
 
@@ -418,7 +433,14 @@ export const useInterestStore = create<InterestState>()(
        */
       getMyInfo: async () => {
         try {
-          const response = await apiClient.get('/interest/my-info');
+          // Get current user from auth store
+          const { user } = useAuthStore.getState();
+          if (!user?.id) {
+            console.warn('[interestSlice] No user ID available');
+            return null;
+          }
+
+          const response = await apiClient.get(`/interest/secure/my-status?userId=${user.id}`);
           if ((response as any).success) {
             return (response as any).data;
           }

@@ -44,7 +44,7 @@ public class GroupController {
     @Operation(summary = "그룹 생성", description = "새로운 그룹을 생성합니다")
     public ResponseEntity<ApiResponse<GroupDto>> createGroup(
             @Valid @RequestBody CreateGroupDto createGroupDto,
-            @RequestParam String creatorId) {
+            @RequestParam(name = "creatorId") String creatorId) {
         log.info("POST /api/v1/groups - Creating group: {} by user: {}", createGroupDto.getName(), creatorId);
         try {
             GroupDto groupDto = groupService.createGroup(createGroupDto, creatorId);
@@ -133,8 +133,8 @@ public class GroupController {
     @GetMapping
     @Operation(summary = "공개 그룹 목록 조회", description = "모든 공개 활성 그룹을 조회합니다")
     public ResponseEntity<ApiResponse<List<GroupDto>>> getPublicGroups(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         log.info("GET /api/v1/groups - Getting public groups (page: {}, size: {})", page, size);
         
         if (page == 0 && size == 20) {
@@ -220,9 +220,9 @@ public class GroupController {
     @GetMapping("/search")
     @Operation(summary = "그룹 검색", description = "키워드로 그룹을 검색합니다")
     public ResponseEntity<ApiResponse<List<GroupDto>>> searchGroups(
-            @RequestParam String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(name = "keyword") String keyword,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         log.info("GET /api/v1/groups/search?keyword={} - Searching groups", keyword);
         Pageable pageable = PageRequest.of(page, size);
         Page<GroupDto> groupPage = groupService.searchGroups(keyword, pageable);
@@ -236,9 +236,9 @@ public class GroupController {
     @GetMapping("/nearby")
     @Operation(summary = "주변 그룹 조회", description = "위치 기반으로 주변 그룹을 조회합니다")
     public ResponseEntity<ApiResponse<List<GroupDto>>> getNearbyGroups(
-            @RequestParam double latitude,
-            @RequestParam double longitude,
-            @RequestParam(defaultValue = "10.0") double radiusKm) {
+            @RequestParam(name = "latitude") double latitude,
+            @RequestParam(name = "longitude") double longitude,
+            @RequestParam(name = "radiusKm", defaultValue = "10.0") double radiusKm) {
         log.info("GET /api/v1/groups/nearby?lat={}&lng={}&radius={}", latitude, longitude, radiusKm);
         List<GroupDto> groups = groupService.getNearbyGroups(latitude, longitude, radiusKm);
         ApiResponse<List<GroupDto>> response = ApiResponse.<List<GroupDto>>builder()

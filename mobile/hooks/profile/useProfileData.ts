@@ -33,19 +33,22 @@ export const useProfileData = (t: (key: string) => string) => {
    */
   const fetchLatestProfile = async () => {
     try {
-      const response = await apiClient.get<{ success: boolean; data: any }>('/users/profile');
+      const currentUser = authStore.user;
+      if (!currentUser?.id) {
+        console.warn('No user ID available for profile fetch');
+        return;
+      }
+
+      const response = await apiClient.get<{ success: boolean; data: any }>(`/users/profile?userId=${currentUser.id}`);
       if (response.success && response.data) {
-        const currentUser = authStore.user;
-        if (currentUser) {
-          authStore.updateUserProfile({
-            ...currentUser,
-            nickname: response.data.nickname,
-            bio: response.data.bio,
-            profileImage: response.data.profileImage,
-            isPremium: response.data.isPremium,
-            credits: response.data.credits,
-          });
-        }
+        authStore.updateUserProfile({
+          ...currentUser,
+          nickname: response.data.nickname,
+          bio: response.data.bio,
+          profileImage: response.data.profileImage,
+          isPremium: response.data.isPremium,
+          credits: response.data.credits,
+        });
       }
     } catch (error) {
       console.error('Failed to fetch latest profile:', error);
