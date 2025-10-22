@@ -85,10 +85,16 @@ function setupEnvironmentSpecificConfig(env) {
 
 /**
  * 개발용 JWT 토큰 생성
+ * @description 개발 환경에서만 사용되는 테스트 토큰
+ * @warning 프로덕션에서는 절대 사용하지 않음
  */
 function generateDevToken() {
-  // 실제로는 jwt 라이브러리를 사용하겠지만, 여기서는 기본값 반환
-  return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyXzEiLCJ1c2VySWQiOiJ1c2VyXzEiLCJlbWFpbCI6InVzZXIxQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJwaG9uZU51bWJlciI6Iis4MjEwMTIzNDU2NzgiLCJpc1ZlcmlmaWVkIjp0cnVlLCJuaWNrbmFtZSI6Iuy7pO2UvOufrOuyhCIsIm5hbWUiOiLsu6TtlLzrn6zrsoQiLCJpYXQiOjE3NTQ1NzY3NDEsImV4cCI6MTc1NzE2ODc0MX0.mPfAyMdphixN6xTNWOSRltx7vLH6cESLJ_K-_AodMxw';
+  // 경고: 이것은 개발용 플레이스홀더입니다.
+  // 실제 개발 환경에서는:
+  // 1. server/scripts/generate-dev-token.js를 실행하거나
+  // 2. DEV_AUTH_TOKEN 환경변수를 .env 파일에 설정하세요
+  console.warn('⚠️ Using placeholder dev token - run "node server/scripts/generate-dev-token.js" to generate a real one');
+  return 'dev_jwt_token_placeholder_generate_using_server_script';
 }
 
 /**
