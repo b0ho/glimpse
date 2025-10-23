@@ -25,7 +25,7 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
 
   default_capacity_provider_strategy {
     capacity_provider = "FARGATE_SPOT"
-    weight            = 70
+    weight            = 90  # Phase 5: 70 → 90 (추가 $7/월 절감)
     base              = 0
   }
 
@@ -336,10 +336,10 @@ resource "aws_ecs_service" "api" {
     rollback = true
   }
 
-  # Fargate Spot 사용 (70% 비용 절감)
+  # Fargate Spot 사용 (Phase 5: 90% 비율로 증가)
   capacity_provider_strategy {
     capacity_provider = "FARGATE_SPOT"
-    weight            = 70
+    weight            = 90  # Phase 5: 70 → 90 (추가 $7/월 절감)
     base              = 0
   }
 

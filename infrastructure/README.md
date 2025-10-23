@@ -1,37 +1,54 @@
 # Glimpse AWS Infrastructure
 
 > **업데이트**: 2025-01-14
-> **월 비용**: **$83** (초기 $198 대비 58% 절감)
+> **현재 비용**: **$83/월** (Phase 4 완료)
+> **Phase 5 목표**: **$56/월** (총 72% 절감)
 > **지원 규모**: 0-500명 유저
 
 ---
 
 ## 📊 비용 구조
 
+### Phase 4 (현재)
+
 | 구성 요소 | 사양 | 월 비용 |
 |----------|------|--------|
-| **ECS Fargate** | 3 tasks × 0.25 vCPU, 0.5GB | $40 |
-| **RDS PostgreSQL** | db.t4g.micro (2 vCPU, 1GB) | **$13** |
+| **ECS Fargate** | 3 tasks × 0.25 vCPU, 0.5GB, Spot 70% | $40 |
+| **RDS PostgreSQL** | db.t4g.micro (2 vCPU, 1GB) | $13 |
 | **ElastiCache Redis** | cache.t4g.micro (0.5GB) | $12 |
 | **NAT Instance** | t4g.nano + EBS 8GB | $4 |
 | **ALB** | Application Load Balancer | $17 |
 | **기타** | API Gateway, S3, CloudWatch, SNS | $7 |
 | **총계** | | **$83/월** |
 
+### Phase 5 (목표)
+
+| 구성 요소 | 사양 | 변경사항 | 월 비용 |
+|----------|------|----------|--------|
+| **ECS Fargate** | 2 tasks × 0.25 vCPU, 0.5GB, Spot 90% | 3→2 tasks, 70%→90% Spot | **$23** (-$17) |
+| **RDS PostgreSQL** | db.t4g.micro (2 vCPU, 1GB) | 변경 없음 | $13 |
+| **ElastiCache Redis** | cache.t4g.micro (0.5GB) | 변경 없음 | $12 |
+| **NAT Instance** | t4g.nano + EBS 8GB | 변경 없음 | $4 |
+| **ALB** | Application Load Balancer | 변경 없음 | $17 |
+| **기타** | S3 (Pre-signed URL), CloudWatch | S3 직접 업로드 | **$2** (-$5) |
+| **총계** | | | **$56/월** (-$27) |
+
 ### 비용 절감 히스토리
 
 ```
-Phase 0: EKS 기반        $198/월
+Phase 0: EKS 기반              $198/월
   ↓ Phase 1: ECS Fargate
-Phase 1: ECS 전환        $141/월 (-29%)
+Phase 1: ECS 전환              $141/월 (-29%)
   ↓ Phase 2: NAT Instance
-Phase 2: NAT 최적화      $108/월 (-23%)
+Phase 2: NAT 최적화            $108/월 (-23%)
   ↓ Phase 3: ALB 최적화
-Phase 3: ALB 최적화      $96/월 (-11%)
+Phase 3: ALB 최적화            $96/월 (-11%)
   ↓ Phase 4: RDS Downsizing
-Phase 4: RDS micro       $83/월 (-14%)
+Phase 4: RDS micro             $83/월 (-14%)
+  ↓ Phase 5: ECS + S3 최적화 (진행중)
+Phase 5: Spot 90% + Task 감소  $56/월 (-32%)
 
-총 절감: $115/월 (58%)
+총 절감: $142/월 (72%)
 ```
 
 ---
@@ -384,11 +401,14 @@ resource "aws_iam_policy" "s3_access" {
 
 ## 🎯 로드맵
 
-### Phase 5 (즉시) - 목표: $66/월
-- [ ] ECS Spot 90% 증가
-- [ ] S3 Pre-signed URL 구현
-- [ ] HTTP Keep-Alive 활성화
-- [ ] Prisma Pool 최적화
+### Phase 5 (진행중) - 목표: $56/월 (-32%)
+- [x] ECS Spot 90% 증가 (Terraform 완료)
+- [x] ECS Task 수 감소 (3 → 2, Terraform 완료)
+- [ ] S3 Pre-signed URL 구현 (코드 작성 필요)
+- [ ] HTTP Keep-Alive 활성화 (코드 작성 필요)
+- [ ] Prisma Pool 최적화 (코드 작성 필요)
+
+> 📖 **상세 가이드**: [COST_OPTIMIZATION_PHASE5.md](./docs/COST_OPTIMIZATION_PHASE5.md)
 
 ### Phase 6 (3-6개월) - 목표: $55/월
 - [ ] RDS Reserved Instance (1년)

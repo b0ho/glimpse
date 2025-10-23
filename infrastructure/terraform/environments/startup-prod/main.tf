@@ -211,9 +211,9 @@ module "ecs" {
   task_cpu    = "256"  # 0.25 vCPU
   task_memory = "512"  # 0.5 GB
 
-  # Auto Scaling 설정
-  desired_count = 3   # 3개 태스크로 시작
-  min_capacity  = 2   # 최소 2개
+  # Auto Scaling 설정 (Phase 5: 비용 최적화)
+  desired_count = 2   # Phase 5: 3 → 2 태스크로 시작 (추가 $10/월 절감)
+  min_capacity  = 1   # Phase 5: 2 → 1 최소값 (Auto Scaling 여유)
   max_capacity  = 20  # 최대 20개 (10k+ 유저 대응)
 
   cpu_target_value    = 70  # CPU 70% 도달 시 스케일 아웃
