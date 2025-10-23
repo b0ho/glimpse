@@ -429,6 +429,39 @@ module "s3" {
 }
 
 # ===================================
+# CloudFront CDN
+# ===================================
+
+module "cloudfront" {
+  source = "../../modules/cloudfront"
+
+  project_name = local.project_name
+  environment  = local.environment
+
+  # S3 bucket for files (profiles, chat, groups)
+  s3_bucket_name                  = "${local.project_name}-${local.environment}-files"
+  s3_bucket_regional_domain_name  = "${local.project_name}-${local.environment}-files.s3.${var.aws_region}.amazonaws.com"
+  s3_bucket_arn                   = "arn:aws:s3:::${local.project_name}-${local.environment}-files"
+
+  # Price class: PriceClass_200 (Asia, NA, EU - excludes South America, Australia)
+  price_class = "PriceClass_200"
+
+  # Cache TTL
+  default_cache_ttl = 3600  # 1 hour
+  max_cache_ttl     = 86400 # 1 day
+
+  # Geo restriction: Korea only for startup phase
+  geo_restriction_type     = "whitelist"
+  geo_restriction_locations = ["KR"]
+
+  # No custom domain for now (use CloudFront default domain)
+  custom_domain       = null
+  acm_certificate_arn = null
+
+  depends_on = [module.s3]
+}
+
+# ===================================
 # API Gateway
 # ===================================
 
@@ -624,4 +657,14 @@ output "cognito_user_pool_client_ids" {
 output "s3_bucket_names" {
   description = "S3 bucket names"
   value       = module.s3.bucket_names
+}
+
+output "cloudfront_distribution_id" {
+  description = "CloudFront distribution ID"
+  value       = module.cloudfront.cloudfront_distribution_id
+}
+
+output "cloudfront_domain_name" {
+  description = "CloudFront distribution domain name (use this for file URLs)"
+  value       = module.cloudfront.cloudfront_domain_name
 }

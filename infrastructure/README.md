@@ -1,15 +1,16 @@
 # Glimpse AWS Infrastructure
 
-> **업데이트**: 2025-01-14
-> **현재 비용**: **$83/월** (Phase 4 완료)
-> **Phase 5 목표**: **$56/월** (총 72% 절감)
+> **업데이트**: 2025-10-23
+> **현재 비용**: **$73/월** (Phase 5 진행중)
+> **Phase 5 완료 목표**: **$56/월** (총 72% 절감)
+> **CloudFront**: 12개월 무료 티어 적용 ✅
 > **지원 규모**: 0-500명 유저
 
 ---
 
 ## 📊 비용 구조
 
-### Phase 4 (현재)
+### Phase 4 완료
 
 | 구성 요소 | 사양 | 월 비용 |
 |----------|------|--------|
@@ -21,34 +22,51 @@
 | **기타** | API Gateway, S3, CloudWatch, SNS | $7 |
 | **총계** | | **$83/월** |
 
-### Phase 5 (목표)
+### Phase 5 진행중 (CloudFront + ECS 최적화)
 
 | 구성 요소 | 사양 | 변경사항 | 월 비용 |
 |----------|------|----------|--------|
-| **ECS Fargate** | 2 tasks × 0.25 vCPU, 0.5GB, Spot 90% | 3→2 tasks, 70%→90% Spot | **$23** (-$17) |
+| **ECS Fargate** | 2 tasks × 0.25 vCPU, 0.5GB, Spot 90% | ✅ 3→2 tasks, 70%→90% Spot | **$23** (-$17) |
 | **RDS PostgreSQL** | db.t4g.micro (2 vCPU, 1GB) | 변경 없음 | $13 |
 | **ElastiCache Redis** | cache.t4g.micro (0.5GB) | 변경 없음 | $12 |
+| **CloudFront CDN** | Korea only, 12개월 무료 | ✅ 추가 | **$0** → $8 |
 | **NAT Instance** | t4g.nano + EBS 8GB | 변경 없음 | $4 |
 | **ALB** | Application Load Balancer | 변경 없음 | $17 |
-| **기타** | S3 (Pre-signed URL), CloudWatch | S3 직접 업로드 | **$2** (-$5) |
-| **총계** | | | **$56/월** (-$27) |
+| **기타** | API Gateway, S3, CloudWatch, SNS | 변경 없음 | $7 |
+| **총계 (현재)** | | | **$73/월** (-$10) |
+
+### Phase 5 완료 목표
+
+S3 Pre-signed URL + HTTP Keep-Alive 적용 시:
+
+| 구성 요소 | 사양 | 추가 변경사항 | 월 비용 |
+|----------|------|-------------|--------|
+| **ECS Fargate** | 2 tasks × 0.25 vCPU, 0.5GB, Spot 90% | ✅ 완료 | $23 |
+| **RDS PostgreSQL** | db.t4g.micro (2 vCPU, 1GB) | - | $13 |
+| **ElastiCache Redis** | cache.t4g.micro (0.5GB) | - | $12 |
+| **CloudFront CDN** | Korea only, 12개월 무료 | ✅ 완료 | $0 |
+| **NAT Instance** | t4g.nano + EBS 8GB | - | $4 |
+| **ALB** | Application Load Balancer | - | $17 |
+| **기타** | S3, CloudWatch, SNS | 📋 S3 Pre-signed URL 적용 필요 | **$2** (-$5) |
+| **총계 (목표)** | | | **$56/월** (-$27, 총 72% 절감) |
 
 ### 비용 절감 히스토리
 
 ```
-Phase 0: EKS 기반              $198/월
+Phase 0: EKS 기반                    $198/월
   ↓ Phase 1: ECS Fargate
-Phase 1: ECS 전환              $141/월 (-29%)
+Phase 1: ECS 전환                    $141/월 (-29%)
   ↓ Phase 2: NAT Instance
-Phase 2: NAT 최적화            $108/월 (-23%)
+Phase 2: NAT 최적화                  $108/월 (-23%)
   ↓ Phase 3: ALB 최적화
-Phase 3: ALB 최적화            $96/월 (-11%)
+Phase 3: ALB 최적화                  $96/월 (-11%)
   ↓ Phase 4: RDS Downsizing
-Phase 4: RDS micro             $83/월 (-14%)
-  ↓ Phase 5: ECS + S3 최적화 (진행중)
-Phase 5: Spot 90% + Task 감소  $56/월 (-32%)
+Phase 4: RDS micro                   $83/월 (-14%)
+  ↓ Phase 5: CloudFront + ECS 최적화 (진행중)
+Phase 5 현재: CDN + Spot 90% + 2 tasks  $73/월 (-12%)
+Phase 5 목표: S3 Pre-signed URL      $56/월 (-23%)
 
-총 절감: $142/월 (72%)
+총 절감 (Phase 5 목표): $142/월 (72%)
 ```
 
 ---
@@ -60,8 +78,14 @@ Internet
    │
    ├─ Route 53 (glimpse.contact)
    │
+   ├─ CloudFront CDN (Korea only, 12개월 무료)
+   │  ├─ /profiles/* (캐시 7일, 높은 재사용)
+   │  ├─ /groups/* (캐시 14일, 매우 높은 재사용)
+   │  ├─ /chat/* (캐시 1일, 낮은 재사용)
+   │  └─ S3 Origin (OAC 보안 접근)
+   │
    ├─ ALB (SSL Termination)
-   │  └─ ECS Fargate (3 tasks, Spot 70%)
+   │  └─ ECS Fargate (2 tasks, Spot 90%) ✅ Phase 5
    │     ├─ NestJS API (0.25 vCPU, 512MB)
    │     └─ Socket.IO (WebSocket)
    │
@@ -73,6 +97,7 @@ Internet
    │  └─ Query Cache (85% hit rate)
    │
    ├─ S3 (Pre-signed URL)
+   │  ├─ CloudFront로 캐싱 배포
    │  └─ 파일 직접 업로드 (ALB 우회)
    │
    └─ NAT Instance (t4g.nano)
@@ -81,11 +106,13 @@ Internet
 
 ### 핵심 최적화
 
-1. **ECS Fargate Spot 70%** - 컴퓨팅 비용 70% 절감
-2. **NAT Instance** - NAT Gateway 대비 $33/월 절감
-3. **Graviton2 ARM** - x86 대비 20% 저렴 + 성능 향상
-4. **RDS db.t4g.micro** - 1GB RAM, 50 connections로 최적화
-5. **Redis 캐싱** - DB 쿼리 85% 감소
+1. **ECS Fargate Spot 90%** ✅ - 컴퓨팅 비용 90% 절감 (Phase 5)
+2. **ECS Task 감소 (3→2)** ✅ - 추가 $10/월 절감 (Phase 5)
+3. **CloudFront CDN** ✅ - 12개월 무료, 이후 $8/월 (Phase 5)
+4. **NAT Instance** - NAT Gateway 대비 $33/월 절감
+5. **Graviton2 ARM** - x86 대비 20% 저렴 + 성능 향상
+6. **RDS db.t4g.micro** - 1GB RAM, 50 connections로 최적화
+7. **Redis 캐싱** - DB 쿼리 85% 감소
 
 ---
 
@@ -145,11 +172,60 @@ aws secretsmanager create-secret \
   --secret-string "your-redis-token"
 ```
 
+### 4. CloudFront CDN 사용
+
+```bash
+# CloudFront 배포 완료 후 도메인 확인
+terraform output cloudfront_domain_name
+# 출력 예시: d1234567890abc.cloudfront.net
+
+# 애플리케이션에서 CloudFront URL 사용
+# .env 파일에 추가
+CLOUDFRONT_DOMAIN=https://d1234567890abc.cloudfront.net
+
+# 파일 URL 구성
+# 프로필 이미지: https://d1234567890abc.cloudfront.net/profiles/{userId}/{filename}
+# 그룹 썸네일: https://d1234567890abc.cloudfront.net/groups/{groupId}/{filename}
+# 채팅 이미지: https://d1234567890abc.cloudfront.net/chat/{chatId}/{filename}
+```
+
+**모바일 앱에서 CloudFront 사용:**
+
+```typescript
+// mobile/services/fileService.ts
+const CLOUDFRONT_DOMAIN = process.env.EXPO_PUBLIC_CLOUDFRONT_DOMAIN;
+
+export const getFileUrl = (path: string) => {
+  return `${CLOUDFRONT_DOMAIN}/${path}`;
+};
+
+// 사용 예시
+const profileImageUrl = getFileUrl(`profiles/${userId}/avatar.jpg`);
+```
+
+**캐시 무효화 (파일 업데이트 시):**
+
+```bash
+# 특정 파일 캐시 무효화
+aws cloudfront create-invalidation \
+  --distribution-id $(terraform output -raw cloudfront_distribution_id) \
+  --paths "/profiles/user123/*"
+
+# 전체 캐시 무효화 (비용 발생 주의)
+aws cloudfront create-invalidation \
+  --distribution-id $(terraform output -raw cloudfront_distribution_id) \
+  --paths "/*"
+```
+
 ---
 
 ## 📈 추가 최적화 (Phase 5)
 
-즉시 적용 가능한 추가 절감: **$83 → $66/월** (-$17)
+**CloudFront CDN 적용 완료** ✅
+- 무료 티어 12개월: $0/월
+- 이후: $8/월 (프로필/그룹 이미지 캐싱)
+
+즉시 적용 가능한 추가 절감: **$91 → $74/월** (-$17, 무료 티어 이후)
 
 ### 1. ECS Spot 비율 90% 증가 (-$7/월)
 
@@ -401,19 +477,20 @@ resource "aws_iam_policy" "s3_access" {
 
 ## 🎯 로드맵
 
-### Phase 5 (진행중) - 목표: $56/월 (-32%)
+### Phase 5 (진행중) - 현재: $73/월, 목표: $56/월
 - [x] ECS Spot 90% 증가 (Terraform 완료)
 - [x] ECS Task 수 감소 (3 → 2, Terraform 완료)
+- [x] CloudFront CDN 도입 (Terraform 완료, 12개월 무료)
 - [ ] S3 Pre-signed URL 구현 (코드 작성 필요)
 - [ ] HTTP Keep-Alive 활성화 (코드 작성 필요)
 - [ ] Prisma Pool 최적화 (코드 작성 필요)
 
 > 📖 **상세 가이드**: [COST_OPTIMIZATION_PHASE5.md](./docs/COST_OPTIMIZATION_PHASE5.md)
 
-### Phase 6 (3-6개월) - 목표: $55/월
-- [ ] RDS Reserved Instance (1년)
-- [ ] CloudFront CDN 도입
+### Phase 6 (3-6개월) - 목표: $48/월
+- [ ] RDS Reserved Instance (1년, -$8/월)
 - [ ] ECS Min Capacity 조정
+- [ ] CloudWatch Logs 보존 기간 최적화
 
 ### Phase 7 (6-12개월) - 목표: $50/월
 - [ ] RDS 3-year RI 평가
@@ -446,6 +523,6 @@ aws ec2 reboot-instances --instance-ids <instance-id>
 
 ---
 
-**최종 업데이트**: 2025-01-14
-**문서 버전**: v2.0
-**다음 리뷰**: 2025-02-01
+**최종 업데이트**: 2025-10-23
+**문서 버전**: v2.1 (CloudFront CDN 추가)
+**다음 리뷰**: 2025-11-01
