@@ -438,10 +438,10 @@ module "cloudfront" {
   project_name = local.project_name
   environment  = local.environment
 
-  # S3 bucket for files (profiles, chat, groups)
-  s3_bucket_name                  = "${local.project_name}-${local.environment}-files"
-  s3_bucket_regional_domain_name  = "${local.project_name}-${local.environment}-files.s3.${var.aws_region}.amazonaws.com"
-  s3_bucket_arn                   = "arn:aws:s3:::${local.project_name}-${local.environment}-files"
+  # S3 bucket for files (profiles, chat, groups) - using outputs from S3 module
+  s3_bucket_name                  = module.s3.files_bucket_name
+  s3_bucket_regional_domain_name  = module.s3.files_bucket_regional_domain_name
+  s3_bucket_arn                   = module.s3.files_bucket_arn
 
   # Price class: PriceClass_200 (Asia, NA, EU - excludes South America, Australia)
   price_class = "PriceClass_200"
