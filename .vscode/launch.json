@@ -3,53 +3,64 @@
   "configurations": [
     {
       "type": "java",
-      "name": "GlimpseApplication",
+      "name": "🐛 Debug Backend (Local)",
       "request": "launch",
-      "mainClass": "com.glimpse.backend.GlimpseApplication",
-      "projectName": ""
+      "mainClass": "com.glimpse.server.GlimpseApplication",
+      "projectName": "backend",
+      "cwd": "${workspaceFolder}/backend",
+      "console": "integratedTerminal",
+      "env": {
+        "SPRING_PROFILES_ACTIVE": "local"
+      },
+      "vmArgs": "-Dspring.profiles.active=local",
+      "args": "",
+      "stopOnEntry": false,
+      "internalConsoleOptions": "neverOpen"
     },
     {
       "type": "java",
-      "name": "🐛 Debug Spring Boot (권장)",
+      "name": "🚀 Run Backend (Local)",
       "request": "launch",
       "mainClass": "com.glimpse.server.GlimpseApplication",
-      "projectName": "glimpse-backend",
+      "projectName": "backend",
+      "cwd": "${workspaceFolder}/backend",
+      "console": "integratedTerminal",
+      "env": {
+        "SPRING_PROFILES_ACTIVE": "local"
+      },
+      "vmArgs": "-Dspring.profiles.active=local",
+      "noDebug": true
+    },
+    {
+      "type": "java",
+      "name": "🔧 Debug Backend (Dev)",
+      "request": "launch",
+      "mainClass": "com.glimpse.server.GlimpseApplication",
+      "projectName": "backend",
       "cwd": "${workspaceFolder}/backend",
       "console": "integratedTerminal",
       "env": {
         "SPRING_PROFILES_ACTIVE": "dev"
       },
-      "args": ""
+      "vmArgs": "-Dspring.profiles.active=dev",
+      "stopOnEntry": false
     },
     {
       "type": "java",
-      "name": "▶️ Run Spring Boot",
-      "request": "launch",
-      "mainClass": "com.glimpse.server.GlimpseApplication",
-      "projectName": "glimpse-backend",
-      "cwd": "${workspaceFolder}/backend",
-      "env": {
-        "SPRING_PROFILES_ACTIVE": "dev"
-      }
-    },
-    {
-      "type": "java",
-      "name": "🧪 Debug TestApplication",
-      "request": "launch",
-      "mainClass": "com.glimpse.server.TestApplication",
-      "projectName": "glimpse-backend",
-      "cwd": "${workspaceFolder}/backend",
-      "console": "integratedTerminal",
-      "env": {
-        "SPRING_PROFILES_ACTIVE": "dev"
-      }
-    },
-    {
-      "type": "java",
-      "name": "🔌 Attach to Remote",
+      "name": "🔌 Attach to Running Backend",
       "request": "attach",
       "hostName": "localhost",
-      "port": 5005
+      "port": 5005,
+      "projectName": "backend"
+    },
+    {
+      "type": "java",
+      "name": "🧪 Debug Tests",
+      "request": "launch",
+      "mainClass": "",
+      "projectName": "backend",
+      "cwd": "${workspaceFolder}/backend",
+      "console": "integratedTerminal"
     }
   ]
 }

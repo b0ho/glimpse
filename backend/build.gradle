@@ -88,3 +88,15 @@ flyway {
     // 로컬 개발 환경에서만 사용하세요. Production에서는 절대 사용 금지!
     cleanDisabled = false  // 로컬 개발용
 }
+
+// ============================================================================
+// bootRun Debug Configuration
+// ============================================================================
+bootRun {
+    // 디버그 모드 활성화 (환경변수로 제어)
+    if (System.getenv('DEBUG_MODE') == 'true') {
+        jvmArgs = [
+            '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
+        ]
+    }
+}

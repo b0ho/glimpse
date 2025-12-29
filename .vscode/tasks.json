@@ -527,6 +527,112 @@
         "clear": true
       },
       "group": "none"
+    },
+    {
+      "label": "🐛 Backend 디버그 모드로 실행",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "bootRun",
+        "--args='--spring.profiles.active=local'",
+        "--console=plain"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend",
+        "env": {
+          "DEBUG_MODE": "true"
+        }
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "isBackground": false,
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "group": "none"
+    },
+    {
+      "label": "🔗 디버거 연결 준비 완료 대기",
+      "type": "shell",
+      "command": "sh",
+      "args": [
+        "-c",
+        "echo '🔍 디버그 포트 5005 확인 중...' && for i in {1..30}; do if lsof -ti :5005 > /dev/null 2>&1; then echo '✅ 디버그 포트 5005 준비 완료!'; echo 'ℹ️  이제 \"🔌 Attach to Running Backend\" 디버그 설정을 실행하세요.'; exit 0; fi; echo \"⏳ 대기 중... ($i/30)\"; sleep 1; done; echo '❌ 디버그 포트가 열리지 않았습니다.'; exit 1"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "🧪 Backend 테스트 실행",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "test",
+        "--info"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "🧪 Backend 테스트 (특정 클래스)",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "test",
+        "--tests",
+        "${input:testClass}",
+        "--info"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "test"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "testClass",
+      "type": "promptString",
+      "description": "테스트할 클래스 이름을 입력하세요 (예: GroupServiceTest)",
+      "default": "*Test"
     }
   ]
 }
