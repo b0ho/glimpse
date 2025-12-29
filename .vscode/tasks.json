@@ -6,7 +6,9 @@
       "type": "shell",
       "command": "./gradlew",
       "args": [
-        "bootRun"
+        "bootRun",
+        "--args='--spring.profiles.active=local'",
+        "--console=plain"
       ],
       "options": {
         "cwd": "${workspaceFolder}/backend"
@@ -15,12 +17,12 @@
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "focus": false,
+        "focus": true,
         "panel": "dedicated",
         "showReuseMessage": false,
-        "clear": false
+        "clear": true
       },
-      "isBackground": true,
+      "isBackground": false,
       "runOptions": {
         "instanceLimit": 1
       },
@@ -356,7 +358,8 @@
       "command": "./gradlew",
       "args": [
         "bootRun",
-        "--args='--spring.profiles.active=local'"
+        "--args='--spring.profiles.active=local'",
+        "--console=plain"
       ],
       "options": {
         "cwd": "${workspaceFolder}/backend"
@@ -365,14 +368,163 @@
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "focus": false,
+        "focus": true,
         "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "isBackground": false,
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "group": "none"
+    },
+    {
+      "label": "📚 Swagger UI 열기 (Chrome)",
+      "type": "shell",
+      "command": "open",
+      "args": [
+        "-a",
+        "Google Chrome",
+        "http://localhost:3001/swagger-ui.html"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
         "showReuseMessage": false,
         "clear": false
       },
-      "isBackground": true,
-      "runOptions": {
-        "instanceLimit": 1
+      "group": "none"
+    },
+    {
+      "label": "📖 API Docs 열기 (Chrome)",
+      "type": "shell",
+      "command": "open",
+      "args": [
+        "-a",
+        "Google Chrome",
+        "http://localhost:3001/api-docs"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "group": "none"
+    },
+    {
+      "label": "🌐 모든 페이지 열기 (Chrome)",
+      "type": "shell",
+      "command": "sh",
+      "args": [
+        "-c",
+        "open -a 'Google Chrome' http://localhost:3001/swagger-ui.html && sleep 1 && open -a 'Google Chrome' http://localhost:5173 && sleep 1 && open -a 'Google Chrome' http://localhost:3000 && sleep 1 && open -a 'Google Chrome' http://localhost:8081"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "group": "none"
+    },
+    {
+      "label": "🛑 모든 개발 서버 종료",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "/tmp/kill_all_servers.sh"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "🛑 Backend만 종료 (Java/Gradle)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "/tmp/kill_backend.sh"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "🛑 Frontend만 종료 (Node)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "/tmp/kill_frontend.sh"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "🛑 강제 종료 (모든 포트 + 프로세스)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "/tmp/kill_force.sh"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "📊 실행 중인 개발 서버 확인",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "/tmp/check_servers.sh"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
       },
       "group": "none"
     }
