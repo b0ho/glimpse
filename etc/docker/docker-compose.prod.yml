@@ -43,7 +43,7 @@ services:
       dockerfile: Dockerfile
       args:
         NODE_ENV: production
-    container_name: glimpse-server
+    container_name: glimpse-backend
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://${DB_USER:-glimpse}:${DB_PASSWORD}@postgres:5432/glimpse?schema=public

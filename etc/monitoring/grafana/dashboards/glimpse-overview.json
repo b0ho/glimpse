@@ -91,7 +91,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(http_requests_total{job=\"glimpse-server\"}[5m])",
+          "expr": "rate(http_requests_total{job=\"glimpse-backend\"}[5m])",
           "refId": "A",
           "legendFormat": "{{method}} {{route}} {{status_class}}"
         }
@@ -147,7 +147,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"glimpse-server\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"glimpse-backend\"}[5m])) by (le)) * 1000",
           "refId": "A"
         }
       ],
@@ -193,7 +193,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{job=\"glimpse-server\"}[1h])) by (status_class)",
+          "expr": "sum(rate(http_requests_total{job=\"glimpse-backend\"}[1h])) by (status_class)",
           "refId": "A",
           "legendFormat": "{{status_class}}"
         }
@@ -270,7 +270,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "nodejs_memory_usage_bytes{job=\"glimpse-server\"}",
+          "expr": "nodejs_memory_usage_bytes{job=\"glimpse-backend\"}",
           "refId": "A",
           "legendFormat": "{{type}}"
         }
@@ -332,7 +332,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(increase(user_registrations_total{job=\"glimpse-server\"}[24h]))",
+          "expr": "sum(increase(user_registrations_total{job=\"glimpse-backend\"}[24h]))",
           "refId": "A"
         }
       ],
@@ -385,7 +385,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(increase(matches_total{job=\"glimpse-server\"}[24h]))",
+          "expr": "sum(increase(matches_total{job=\"glimpse-backend\"}[24h]))",
           "refId": "A"
         }
       ],
@@ -438,7 +438,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(increase(payment_amount_krw_sum{job=\"glimpse-server\"}[24h]))",
+          "expr": "sum(increase(payment_amount_krw_sum{job=\"glimpse-backend\"}[24h]))",
           "refId": "A"
         }
       ],
@@ -499,7 +499,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{job=\"glimpse-server\",status_class=\"5xx\"}[5m])) / sum(rate(http_requests_total{job=\"glimpse-server\"}[5m])) * 100",
+          "expr": "sum(rate(http_requests_total{job=\"glimpse-backend\",status_class=\"5xx\"}[5m])) / sum(rate(http_requests_total{job=\"glimpse-backend\"}[5m])) * 100",
           "refId": "A"
         }
       ],

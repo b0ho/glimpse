@@ -13,7 +13,7 @@ mvn clean install
 # 3. 실행
 mvn spring-boot:run
 # 또는
-java -jar target/glimpse-server-0.0.1-SNAPSHOT.jar
+java -jar target/glimpse-backend-0.0.1-SNAPSHOT.jar
 ```
 
 ## 📋 마이그레이션 현황
@@ -157,7 +157,7 @@ mvn jacoco:report
 
 ### JVM Optimization
 ```bash
-java -Xms1g -Xmx2g -XX:+UseG1GC -jar target/glimpse-server.jar
+java -Xms1g -Xmx2g -XX:+UseG1GC -jar target/glimpse-backend.jar
 ```
 
 ### Connection Pool
@@ -170,7 +170,7 @@ java -Xms1g -Xmx2g -XX:+UseG1GC -jar target/glimpse-server.jar
 ### Docker
 ```dockerfile
 FROM openjdk:17-jdk-slim
-COPY target/glimpse-server.jar app.jar
+COPY target/glimpse-backend.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
 ```
 

@@ -26,6 +26,7 @@ dependencies {
     
     // Database
     runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
     
     // Lombok
     compileOnly 'org.projectlombok:lombok'
@@ -57,6 +58,4 @@ springBoot {
     mainClass = 'com.glimpse.server.GlimpseApplication'
 }
 
-bootRun {
-    systemProperty 'server.port', '3001'
-}
+// bootRun configuration - uses application.properties by default
