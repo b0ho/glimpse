@@ -93,10 +93,17 @@ flyway {
 // bootRun Debug Configuration
 // ============================================================================
 bootRun {
-    // 디버그 모드 활성화 (환경변수로 제어)
-    if (System.getenv('DEBUG_MODE') == 'true') {
+    // 로컬 개발 환경에서만 디버그 모드 활성화
+    // 조건: spring.profiles.active가 local, default, 또는 미설정인 경우
+    def profile = System.getProperty('spring.profiles.active', 'default')
+    def isLocalEnv = profile in ['local', 'default'] || profile == null
+    
+    if (isLocalEnv) {
+        println "🐛 Debug mode enabled for profile: ${profile}"
         jvmArgs = [
             '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
         ]
+    } else {
+        println "✅ Debug mode disabled for profile: ${profile}"
     }
 }

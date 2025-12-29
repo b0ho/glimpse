@@ -15,6 +15,12 @@
   "markdownlint.run": "onSave",
   "markdownlint.ignore": [
     "**/*.md"
-  ]
+  ],
+  
+  // Java 프로젝트 설정 - Monorepo 지원
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.import.gradle.enabled": true,
+  "java.import.gradle.wrapper.enabled": true,
+  "java.project.sourcePaths": [],
+  "java.import.gradle.home": null,
 }
-

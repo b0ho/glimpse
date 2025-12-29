@@ -1,0 +1,18 @@
+{
+  "folders": [
+    {
+      "name": "glimpse (root)",
+      "path": "."
+    },
+    {
+      "name": "backend (Java)",
+      "path": "backend"
+    }
+  ],
+  "settings": {
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.import.gradle.enabled": true,
+    "java.import.gradle.wrapper.enabled": true
+  }
+}
+
