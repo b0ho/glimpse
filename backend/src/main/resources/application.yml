@@ -1,0 +1,234 @@
+# ============================================================================
+# Glimpse Application Configuration
+# Spring Boot Multi-Profile Configuration (YAML)
+# ============================================================================
+
+# ============================================================================
+# Common Configuration (모든 환경 공통 설정)
+# ============================================================================
+server:
+  port: 3001
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        id:
+          new_generator_mappings: true
+  main:
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    schemas: public
+    validate-on-migrate: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+# ============================================================================
+# Default Profile (프로필 미지정 시 - H2 In-Memory DB)
+# 실행: ./gradlew bootRun
+# ============================================================================
+---
+spring:
+  config:
+    activate:
+      on-profile: default
+  datasource:
+    url: jdbc:h2:mem:testdb;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: always
+      platform: h2
+
+logging:
+  level:
+    org.springframework.web: INFO
+    com.glimpse: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type: TRACE
+
+# ============================================================================
+# Local Profile (로컬 개발 환경 - PostgreSQL)
+# 실행: ./gradlew bootRun --args='--spring.profiles.active=local'
+# ============================================================================
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:postgresql://localhost:5432/glimpse_local
+    driverClassName: org.postgresql.Driver
+    username: glimpse
+    password: glimpse123
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: never
+      platform: postgres
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+springdoc:
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    com.glimpse: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type: TRACE
+
+# ============================================================================
+# Dev Profile (개발 서버 환경)
+# 실행: ./gradlew bootRun --args='--spring.profiles.active=dev'
+# ============================================================================
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:postgresql://dev-db-server:5432/glimpse_dev
+    driverClassName: org.postgresql.Driver
+    username: ${DB_USERNAME:glimpse}
+    password: ${DB_PASSWORD:glimpse123}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: never
+      platform: postgres
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+springdoc:
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    org.springframework.web: INFO
+    com.glimpse: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.type: INFO
+
+# ============================================================================
+# Prd Profile (프로덕션 환경)
+# 실행: ./gradlew bootRun --args='--spring.profiles.active=prd'
+# ⚠️ 환경 변수 필수: DATABASE_URL, DB_USERNAME, DB_PASSWORD
+# ============================================================================
+---
+spring:
+  config:
+    activate:
+      on-profile: prd
+  datasource:
+    url: ${DATABASE_URL}
+    driverClassName: org.postgresql.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  sql:
+    init:
+      mode: never
+      platform: postgres
+  main:
+    allow-bean-definition-overriding: false
+    allow-circular-references: false
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
+
+server:
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    root: WARN
+    org.springframework.web: WARN
+    com.glimpse: INFO
+    org.hibernate.SQL: WARN
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+  file:
+    name: logs/glimpse-prod.log
+    max-size: 10MB
+    max-history: 30
+

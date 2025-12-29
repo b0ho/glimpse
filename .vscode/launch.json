@@ -3,6 +3,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "GlimpseApplication",
+      "request": "launch",
+      "mainClass": "com.glimpse.backend.GlimpseApplication",
+      "projectName": ""
+    },
+    {
+      "type": "java",
       "name": "🐛 Debug Spring Boot (권장)",
       "request": "launch",
       "mainClass": "com.glimpse.server.GlimpseApplication",

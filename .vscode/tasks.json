@@ -126,6 +126,255 @@
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "label": "🗄️ Flyway: 마이그레이션 정보 확인",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "flywayInfo"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "🚀 Flyway: 마이그레이션 실행",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "flywayMigrate"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "✅ Flyway: 마이그레이션 검증",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "flywayValidate"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "📜 Flyway: 베이스라인 설정",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "flywayBaseline"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "🧹 Flyway: DB 완전 초기화 (Clean)",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "flywayClean"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "🔧 Flyway: Repair (히스토리 테이블 복구)",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "flywayRepair"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "🔄 Flyway: Clean → Migrate (전체 재설정)",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "flywayClean",
+        "flywayMigrate"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "📊 Local DB: 테이블 통계 확인",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "glimpse-db",
+        "psql",
+        "-U",
+        "glimpse",
+        "-d",
+        "glimpse_local",
+        "-c",
+        "SELECT 'users' as table_name, COUNT(*)::text as count FROM users UNION ALL SELECT 'groups', COUNT(*)::text FROM groups UNION ALL SELECT 'matches', COUNT(*)::text FROM matches UNION ALL SELECT 'chat_message', COUNT(*)::text FROM chat_message UNION ALL SELECT 'user_like', COUNT(*)::text FROM user_like ORDER BY table_name;"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "🐳 Docker: PostgreSQL 컨테이너 시작",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": [
+        "-f",
+        "etc/docker/docker-compose.yml",
+        "up",
+        "-d",
+        "glimpse-db"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "🛑 Docker: PostgreSQL 컨테이너 중지",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": [
+        "-f",
+        "etc/docker/docker-compose.yml",
+        "stop",
+        "glimpse-db"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "none"
+    },
+    {
+      "label": "💻 Backend: Local 프로필로 실행",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "bootRun",
+        "--args='--spring.profiles.active=local'"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "isBackground": true,
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "group": "none"
     }
   ]
 }
