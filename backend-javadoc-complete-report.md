@@ -687,7 +687,7 @@ public enum EnumName {
 
 ### Backend 프로젝트 정보
 
-- **언어**: Java 17+
+- **언어**: Java 21
 - **프레임워크**: Spring Boot 3.x
 - **ORM**: Spring Data JPA (Hibernate)
 - **빌드 도구**: Gradle

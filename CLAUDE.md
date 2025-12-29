@@ -142,7 +142,7 @@ glimpse/
 | **Web (Landing)** | Vite, React 19, TypeScript, Tailwind CSS, Framer Motion |
 | **Admin Dashboard** | Next.js 15, React 18, Clerk Auth, Shadcn/UI, Tailwind CSS |
 | **Mobile App** | React Native, Expo, Zustand, TypeScript, Socket.IO |
-| **API Server** | Spring Boot, Java 17, Spring Data JPA, PostgreSQL |
+| **API Server** | Spring Boot, Java 21, Spring Data JPA, PostgreSQL |
 | **Real-time** | Socket.IO, WebSocket |
 | **Authentication** | Clerk, JWT |
 | **Payments** | Stripe, TossPay, KakaoPay |

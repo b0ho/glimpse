@@ -182,7 +182,7 @@ ENTRYPOINT ["java", "-jar", "/app.jar"]
 
 | Feature | NestJS | Spring Boot |
 |---------|--------|-------------|
-| Language | TypeScript | Java 17 |
+| Language | TypeScript | Java 21 |
 | ORM | Prisma | JPA/Hibernate |
 | WebSocket | Socket.IO | Spring WebSocket + STOMP |
 | DI | Decorator-based | Annotation-based |
