@@ -3,6 +3,10 @@
   "version": "0.1.4",
   "main": "index.js",
   "description": "Glimpse Dating App - React Native Mobile App",
+  "engines": {
+    "node": "22.x",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",

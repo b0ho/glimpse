@@ -1,0 +1,20 @@
+{
+  // Markdown linter 완전 비활성화
+  "markdownlint.config": {
+    "default": false
+  },
+  // 모든 MD 파일 무시
+  "files.exclude": {
+    "**/*.md": false
+  },
+  // Markdown 파일에 대한 진단 비활성화
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // markdownlint 확장 비활성화
+  "markdownlint.run": "onSave",
+  "markdownlint.ignore": [
+    "**/*.md"
+  ]
+}
+

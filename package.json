@@ -4,6 +4,10 @@
   "type": "module",
   "main": "index.ts",
   "description": "Glimpse Dating App - Independent Projects",
+  "engines": {
+    "node": "22.x",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:mobile\"",
     "dev:web": "cd web && npm run dev",
