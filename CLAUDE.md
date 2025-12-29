@@ -123,14 +123,15 @@ glimpse/
 │   ├── types/           # Mobile-specific types
 │   ├── utils/           # Mobile utilities
 │   └── navigation/      # App navigation
-├── server/           # Node.js + NestJS
+├── backend/          # Spring Boot + Java
 │   ├── src/
-│   │   ├── controllers/  # API endpoints
-│   │   ├── services/     # Business logic
-│   │   ├── middleware/   # Express middleware
-│   │   ├── types/        # Server-specific types
-│   │   └── routes/       # Route definitions
-│   └── prisma/          # Database schema
+│   │   └── main/java/com/glimpse/server/
+│   │       ├── config/        # Configuration
+│   │       ├── controller/    # REST API Controllers
+│   │       ├── service/       # Business Logic
+│   │       ├── entity/        # JPA Entities
+│   │       └── repository/    # Spring Data JPA
+│   └── build.gradle     # Build configuration
 └── package.json      # Root configuration
 ```
 
@@ -141,7 +142,7 @@ glimpse/
 | **Web (Landing)** | Vite, React 19, TypeScript, Tailwind CSS, Framer Motion |
 | **Admin Dashboard** | Next.js 15, React 18, Clerk Auth, Shadcn/UI, Tailwind CSS |
 | **Mobile App** | React Native, Expo, Zustand, TypeScript, Socket.IO |
-| **API Server** | Node.js, NestJS, Prisma, PostgreSQL, Socket.IO |
+| **API Server** | Spring Boot, Java 17, Spring Data JPA, PostgreSQL |
 | **Real-time** | Socket.IO, WebSocket |
 | **Authentication** | Clerk, JWT |
 | **Payments** | Stripe, TossPay, KakaoPay |
@@ -627,13 +628,13 @@ npm run test                       # Run tests
 ### Gemini CLI for Monorepo Analysis
 ```bash
 # Complete architecture analysis
-gemini -p "@web/ @admin/ @mobile/ @server/ Analyze complete independent monorepo architecture"
+gemini -p "@web/ @admin/ @mobile/ @backend/ Analyze complete independent monorepo architecture"
 
 # Type consistency check (independent packages)
-gemini -p "@web/src/types/ @admin/src/types/ @mobile/types/ @server/src/types/ Check TypeScript type patterns across packages"
+gemini -p "@web/src/types/ @admin/src/types/ @mobile/types/ @backend/src/ Check type patterns across packages"
 
 # Security audit
-gemini -p "@server/src/ @admin/src/ @mobile/services/ Security audit across all applications"
+gemini -p "@backend/src/ @admin/src/ @mobile/services/ Security audit across all applications"
 
 # UI/UX consistency check
 gemini -p "@web/src/components/ @admin/src/components/ @mobile/components/ Check UI component consistency"
