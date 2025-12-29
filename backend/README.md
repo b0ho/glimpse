@@ -169,7 +169,7 @@ java -Xms1g -Xmx2g -XX:+UseG1GC -jar target/glimpse-server.jar
 
 ### Docker
 ```dockerfile
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 COPY target/glimpse-server.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
 ```
