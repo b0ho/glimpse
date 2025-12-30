@@ -20,6 +20,7 @@ import { WelcomeScreen } from '@/components/auth/WelcomeScreen';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthSteps } from '@/hooks/auth/useAuthSteps';
 import { useAuthStore } from '@/store/slices/authSlice';
+import { useAuth } from '@/providers/AuthProvider';
 import { AuthScreenProps, QuickDevUser } from '@/types/auth.types';
 import { cn } from '@/lib/utils';
 
@@ -51,6 +52,7 @@ import { cn } from '@/lib/utils';
 export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
   const { colors } = useTheme();
   const { setUser, setToken } = useAuthStore();
+  const { signInDev } = useAuth();
   const navigation = useNavigation<any>();
   
   // 인증 단계 관리
@@ -78,34 +80,38 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
   /**
    * 빠른 개발 로그인 핸들러
    */
-  const handleQuickDevUserLogin = (user: QuickDevUser): void => {
-    const mockUser = {
-      id: user.id,
-      nickname: user.nickname,
-      email: `${user.id}@test.com`,
-      anonymousId: `anon_${user.id}`,
-      phoneNumber: user.phoneNumber || '',
-      isVerified: true,
-      profileImageUrl: user.profileImageUrl,
-      credits: user.isPremium ? 999 : 5,
-      isPremium: user.isPremium,
-      lastActive: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      currentMode: 'DATING' as any,
-    };
+  const handleQuickDevUserLogin = async (user: QuickDevUser): Promise<void> => {
+    if (!signInDev) {
+      console.warn('[AuthScreen] signInDev는 개발 환경에서만 사용 가능합니다.');
+      Alert.alert('알림', '개발 환경 빠른 로그인은 개발 모드에서만 사용할 수 있습니다.');
+      return;
+    }
     
-    // 개발 환경에서 토큰도 설정
-    const devToken = `dev-token-${user.id}`;
-    setToken(devToken);
-    setUser(mockUser);
-    onAuthCompleted();
-    
-    // 명시적으로 Main 화면으로 네비게이션
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Main' }],
-    });
+    try {
+      console.log('[AuthScreen] 개발 환경 빠른 로그인 시작:', user.id);
+      
+      // AuthProvider의 signInDev 호출
+      await signInDev({
+        id: user.id,
+        nickname: user.nickname,
+        phoneNumber: user.phoneNumber || '01012345678',
+        profileImageUrl: user.profileImageUrl,
+        isPremium: user.isPremium,
+      });
+      
+      onAuthCompleted();
+      
+      // 명시적으로 Main 화면으로 네비게이션
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Main' }],
+      });
+      
+      console.log('[AuthScreen] 개발 환경 빠른 로그인 완료');
+    } catch (error) {
+      console.error('[AuthScreen] 개발 환경 빠른 로그인 실패:', error);
+      Alert.alert('오류', '빠른 로그인에 실패했습니다.');
+    }
   };
   
   /**

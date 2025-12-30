@@ -26,6 +26,17 @@ const getApiBaseUrl = () => {
  * 
  * SMS 단일 인증 방식 - 개인 특정 및 중복 방지를 위한 보안 정책
  */
+/**
+ * 개발용 사용자 타입
+ */
+interface DevUser {
+  id: string;
+  nickname: string;
+  phoneNumber?: string;
+  profileImageUrl?: string;
+  isPremium?: boolean;
+}
+
 interface AuthContextType {
   // 상태
   isLoaded: boolean;
@@ -40,6 +51,9 @@ interface AuthContextType {
   signOutAllDevices: () => Promise<void>;
   getToken: () => Promise<string | null>;
   refreshSession: () => Promise<boolean>;
+  
+  // 개발 환경 전용
+  signInDev?: (user: DevUser) => Promise<void>;
 }
 
 interface AuthResult {
@@ -66,6 +80,7 @@ const defaultContext: AuthContextType = {
   signOutAllDevices: async () => {},
   getToken: async () => null,
   refreshSession: async () => false,
+  signInDev: undefined, // 개발 환경에서만 제공
 };
 
 const AuthContext = createContext<AuthContextType>(defaultContext);
@@ -398,6 +413,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return success;
   }, []);
 
+  /**
+   * 개발 환경 빠른 로그인
+   * 실제 API 호출 없이 테스트용 사용자로 로그인
+   */
+  const signInDev = useCallback(async (user: DevUser): Promise<void> => {
+    if (!__DEV__) {
+      console.warn('[AuthProvider] signInDev는 개발 환경에서만 사용 가능합니다.');
+      return;
+    }
+
+    console.log('[AuthProvider] 개발 환경 빠른 로그인:', user.id);
+    
+    // 개발용 토큰 생성 및 저장
+    const devAccessToken = `dev-access-token-${user.id}-${Date.now()}`;
+    const devRefreshToken = `dev-refresh-token-${user.id}-${Date.now()}`;
+    
+    await tokenManager.saveTokens({
+      accessToken: devAccessToken,
+      refreshToken: devRefreshToken,
+      expiresIn: 3600 * 24, // 개발 환경: 24시간
+    }, user.id);
+    setAuthToken(devAccessToken);
+    
+    // 개발용 사용자 정보 설정
+    const mockUser = {
+      id: user.id,
+      nickname: user.nickname,
+      email: `${user.id}@test.com`,
+      anonymousId: `anon_${user.id}`,
+      phoneNumber: user.phoneNumber || '01012345678',
+      isVerified: true,
+      profileImageUrl: user.profileImageUrl,
+      credits: user.isPremium ? 999 : 5,
+      isPremium: user.isPremium || false,
+      lastActive: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      currentMode: 'DATING' as const,
+    };
+    
+    // 상태 업데이트
+    setUserId(user.id);
+    setIsSignedIn(true);
+    setUser(mockUser);
+    
+    console.log('[AuthProvider] 개발 환경 빠른 로그인 완료:', { userId: user.id, isSignedIn: true });
+  }, [setUser]);
+
   const value: AuthContextType = {
     isLoaded,
     isSignedIn,
@@ -409,6 +472,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signOutAllDevices,
     getToken,
     refreshSession,
+    // 개발 환경에서만 signInDev 제공
+    ...__DEV__ && { signInDev },
   };
 
   return (
