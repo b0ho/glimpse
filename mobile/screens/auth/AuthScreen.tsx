@@ -19,7 +19,6 @@ import { CompanyVerificationScreen } from './CompanyVerificationScreen';
 import { WelcomeScreen } from '@/components/auth/WelcomeScreen';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthSteps } from '@/hooks/auth/useAuthSteps';
-import { useGoogleAuth } from '@/hooks/auth/useGoogleAuth';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { AuthScreenProps, QuickDevUser } from '@/types/auth.types';
 import { cn } from '@/lib/utils';
@@ -67,9 +66,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
     handleSignUpMode,
     handleBack,
   } = useAuthSteps();
-  
-  // 구글 인증
-  const { isGoogleLoading, handleGoogleLogin, handleQuickDevLogin } = useGoogleAuth(onAuthCompleted);
   
   /**
    * 회사 인증 완료 핸들러
@@ -148,10 +144,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthCompleted }) => {
           <WelcomeScreen
             onSignInMode={handleSignInMode}
             onSignUpMode={handleSignUpMode}
-            onGoogleLogin={handleGoogleLogin}
             onQuickDevLogin={handleQuickDevUserLogin}
             onResetOnboarding={handleResetOnboarding}
-            isGoogleLoading={isGoogleLoading}
           />
         );
       

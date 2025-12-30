@@ -1,76 +1,33 @@
 /**
  * Welcome 화면 컴포넌트
+ * 
+ * SMS 단일 인증 방식 - 개인 특정 및 중복 방지를 위한 보안 정책
  */
 
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Platform, ActivityIndicator, Alert } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
-import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
-import { shadowStyles } from '@/utils/shadowStyles';
 import { QuickDevUser } from '@/types/auth.types';
 import { isDevelopment } from '@/config/dev.config';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useKakaoAuthService } from '@/services/auth/kakao-service';
 
 interface WelcomeScreenProps {
   onSignInMode: () => void;
   onSignUpMode: () => void;
-  onGoogleLogin: () => Promise<void>;
-  onKakaoLogin?: (token: string, profile: any) => Promise<void>;
-  onNaverLogin?: () => Promise<void>;
   onQuickDevLogin: (user: QuickDevUser) => void;
   onResetOnboarding?: () => Promise<void>;
-  isGoogleLoading: boolean;
-  isNaverLoading?: boolean;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onSignInMode,
   onSignUpMode,
-  onGoogleLogin,
-  onKakaoLogin,
-  onNaverLogin,
   onQuickDevLogin,
   onResetOnboarding,
-  isGoogleLoading,
-  isNaverLoading = false,
 }) => {
   const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation('auth');
-  const [isKakaoLoading, setIsKakaoLoading] = useState(false);
-  const kakaoAuthService = useKakaoAuthService();
 
-  /**
-   * 카카오 로그인 핸들러
-   */
-  const handleKakaoLogin = async () => {
-    if (Platform.OS === 'web') {
-      Alert.alert(t('common:status.info'), t('auth:welcome.kakaoWebNotSupported'));
-      return;
-    }
-
-    setIsKakaoLoading(true);
-    try {
-      const result = await kakaoAuthService.signInWithKakao();
-      if (result.success && result.data) {
-        console.log('✅ 카카오 로그인 성공:', result.data.profile);
-        if (onKakaoLogin) {
-          await onKakaoLogin(result.data.token.accessToken, result.data.profile);
-        }
-      } else {
-        if (result.error && !result.error.includes('취소')) {
-          Alert.alert(t('common:status.error'), result.error);
-        }
-      }
-    } catch (error) {
-      console.error('카카오 로그인 오류:', error);
-      Alert.alert(t('common:status.error'), t('auth:welcome.kakaoLoginFailed'));
-    } finally {
-      setIsKakaoLoading(false);
-    }
-  };
-  
   /**
    * 빠른 개발 로그인 사용자 목록
    */
@@ -114,126 +71,52 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       </View>
 
       {/* 인증 버튼 컨테이너 */}
-      <View className="w-full max-w-md gap-y-3">
-        {/* 구글 로그인 버튼 */}
-        <TouchableOpacity
-          className="w-full bg-white dark:bg-gray-800 py-4 px-6 rounded-xl flex-row items-center justify-center gap-x-3 border border-gray-300 dark:border-gray-700"
-          onPress={onGoogleLogin}
-          disabled={isGoogleLoading}
-        >
-          {isGoogleLoading ? (
-            <ActivityIndicator size="small" color="#4285F4" />
-          ) : (
-            <>
-              <MaterialCommunityIcons
-                name="google"
-                size={20}
-                color="#4285F4"
-              />
-              <Text className="text-base font-medium text-gray-900 dark:text-white">
-                {t('welcome.continueWithGoogle')}
-              </Text>
-            </>
-          )}
-        </TouchableOpacity>
-
-        {/* 카카오 로그인 버튼 */}
-        {Platform.OS !== 'web' && (
-          <TouchableOpacity
-            className="w-full bg-yellow-400 py-4 px-6 rounded-xl flex-row items-center justify-center gap-x-3"
-            onPress={handleKakaoLogin}
-            disabled={isKakaoLoading}
-          >
-            {isKakaoLoading ? (
-              <ActivityIndicator size="small" color="#3C1E1E" />
-            ) : (
-              <>
-                <MaterialCommunityIcons
-                  name="chat"
-                  size={20}
-                  color="#3C1E1E"
-                />
-                <Text className="text-base font-semibold text-yellow-900">
-                  {t('welcome.continueWithKakao')}
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-        )}
-
-        {/* 네이버 로그인 버튼 */}
-        {onNaverLogin && (
-          <TouchableOpacity
-            className="w-full bg-green-500 py-4 px-6 rounded-xl flex-row items-center justify-center gap-x-3"
-            onPress={onNaverLogin}
-            disabled={isNaverLoading}
-          >
-            {isNaverLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Text className="text-lg font-bold text-white">N</Text>
-                <Text className="text-base font-semibold text-white">
-                  {t('welcome.continueWithNaver')}
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-        )}
-
-        {/* 전화번호 로그인 버튼 */}
+      <View className="w-full max-w-md gap-y-4">
+        {/* SMS 회원가입 버튼 (메인) */}
         <TouchableOpacity
           className="w-full bg-red-500 py-4 px-6 rounded-xl flex-row items-center justify-center gap-x-3"
-          onPress={onSignInMode}
-        >
-          <MaterialCommunityIcons
-            name="phone"
-            size={20}
-            color="#fff"
-          />
-          <Text className="text-base font-semibold text-white">
-            {t('welcome.loginWithPhone')}
-          </Text>
-        </TouchableOpacity>
-
-        {/* 회원가입 버튼 */}
-        <TouchableOpacity
-          className="w-full bg-white dark:bg-gray-800 py-4 px-6 rounded-xl flex-row items-center justify-center gap-x-3 border border-gray-300 dark:border-gray-700"
-          onPress={onSignUpMode}
-        >
-          <MaterialCommunityIcons
-            name="account-plus"
-            size={20}
-            color={colors.TEXT.PRIMARY}
-          />
-          <Text className="text-base font-medium text-gray-900 dark:text-white">
-            {t('welcome.signUpWithPhone')}
-          </Text>
-        </TouchableOpacity>
-
-        {/* 또는 구분선 */}
-        <View className="flex-row items-center my-2">
-          <View className="flex-1 h-px bg-gray-300 dark:bg-gray-700" />
-          <Text className="px-4 text-sm text-gray-500 dark:text-gray-400">
-            또는
-          </Text>
-          <View className="flex-1 h-px bg-gray-300 dark:bg-gray-700" />
-        </View>
-
-        {/* SMS 빠른 시작 버튼 */}
-        <TouchableOpacity
-          className="w-full bg-green-500 py-4 px-6 rounded-xl flex-row items-center justify-center gap-x-3"
           onPress={onSignUpMode}
         >
           <MaterialCommunityIcons
             name="message-text"
-            size={20}
+            size={22}
             color="#fff"
           />
           <Text className="text-base font-semibold text-white">
-            SMS로 빠른 시작
+            {t('welcome.signUpWithPhone')}
           </Text>
         </TouchableOpacity>
+
+        {/* 구분선 */}
+        <View className="flex-row items-center my-2">
+          <View className="flex-1 h-px bg-gray-300 dark:bg-gray-700" />
+          <Text className="px-4 text-sm text-gray-500 dark:text-gray-400">
+            {t('welcome.alreadyHaveAccount')}
+          </Text>
+          <View className="flex-1 h-px bg-gray-300 dark:bg-gray-700" />
+        </View>
+
+        {/* SMS 로그인 버튼 */}
+        <TouchableOpacity
+          className="w-full bg-white dark:bg-gray-800 py-4 px-6 rounded-xl flex-row items-center justify-center gap-x-3 border border-gray-300 dark:border-gray-700"
+          onPress={onSignInMode}
+        >
+          <MaterialCommunityIcons
+            name="phone"
+            size={22}
+            color={colors.TEXT.PRIMARY}
+          />
+          <Text className="text-base font-medium text-gray-900 dark:text-white">
+            {t('welcome.loginWithPhone')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* 보안 안내 문구 */}
+      <View className="mt-8 px-4">
+        <Text className="text-xs text-center text-gray-500 dark:text-gray-400">
+          🔒 전화번호 인증으로 안전하게 본인 확인
+        </Text>
       </View>
 
       {/* 개발 환경 빠른 로그인 */}
@@ -278,10 +161,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       {/* 약관 동의 문구 */}
       <View className="absolute bottom-8 px-8">
         <Text className="text-xs text-center text-gray-500 dark:text-gray-400">
-          로그인 시 개인정보처리방침과 서비스 이용약관에 동의하게 됩니다.
+          {t('welcome.termsNotice')}
         </Text>
       </View>
     </View>
   );
 };
-

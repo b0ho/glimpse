@@ -22,12 +22,9 @@ const getApiBaseUrl = () => {
 };
 
 /**
- * OAuth 제공자
- */
-type OAuthProvider = 'google' | 'kakao' | 'naver';
-
-/**
  * 인증 컨텍스트 타입
+ * 
+ * SMS 단일 인증 방식 - 개인 특정 및 중복 방지를 위한 보안 정책
  */
 interface AuthContextType {
   // 상태
@@ -35,11 +32,10 @@ interface AuthContextType {
   isSignedIn: boolean;
   userId: string | null;
   
-  // 액션
+  // 액션 (SMS 인증만 지원)
   signInWithPhone: (phoneNumber: string, code: string) => Promise<AuthResult>;
   signUpWithPhone: (phoneNumber: string, code: string, userData: SignUpData) => Promise<AuthResult>;
   sendVerificationCode: (phoneNumber: string) => Promise<boolean>;
-  signInWithOAuth: (provider: OAuthProvider, token: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
   signOutAllDevices: () => Promise<void>;
   getToken: () => Promise<string | null>;
@@ -66,7 +62,6 @@ const defaultContext: AuthContextType = {
   signInWithPhone: async () => ({ success: false, error: '초기화 중' }),
   signUpWithPhone: async () => ({ success: false, error: '초기화 중' }),
   sendVerificationCode: async () => false,
-  signInWithOAuth: async () => ({ success: false, error: '초기화 중' }),
   signOut: async () => {},
   signOutAllDevices: async () => {},
   getToken: async () => null,
@@ -314,54 +309,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [setUser]);
 
   /**
-   * OAuth 로그인
-   */
-  const signInWithOAuth = useCallback(async (
-    provider: OAuthProvider,
-    token: string
-  ): Promise<AuthResult> => {
-    try {
-      const baseUrl = getApiBaseUrl();
-      const response = await fetch(`${baseUrl}/api/v1/auth/oauth/${provider}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token }),
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.data) {
-        // 토큰 저장
-        await tokenManager.saveTokens({
-          accessToken: data.data.accessToken,
-          refreshToken: data.data.refreshToken,
-          expiresIn: data.data.expiresIn,
-        }, data.data.user?.id);
-
-        // API 클라이언트에 토큰 설정
-        setAuthToken(data.data.accessToken);
-
-        // 상태 업데이트
-        setUserId(data.data.user?.id || null);
-        setIsSignedIn(true);
-        
-        if (data.data.user) {
-          setUser(data.data.user);
-        }
-
-        return { success: true, userId: data.data.user?.id };
-      }
-
-      return { success: false, error: data.message || `${provider} 로그인 실패` };
-    } catch (error) {
-      console.error(`[AuthProvider] ${provider} 로그인 실패:`, error);
-      return { success: false, error: `${provider} 로그인 중 오류가 발생했습니다` };
-    }
-  }, [setUser]);
-
-  /**
    * 로그아웃
    */
   const signOut = useCallback(async () => {
@@ -458,7 +405,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signInWithPhone,
     signUpWithPhone,
     sendVerificationCode,
-    signInWithOAuth,
     signOut,
     signOutAllDevices,
     getToken,
