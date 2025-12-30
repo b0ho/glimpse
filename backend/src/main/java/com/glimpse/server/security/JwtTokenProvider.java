@@ -79,6 +79,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .subject(userId)
                 .claim("type", "refresh")
+                .id(java.util.UUID.randomUUID().toString()) // 고유 토큰 ID 추가
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(secretKey, Jwts.SIG.HS512)
