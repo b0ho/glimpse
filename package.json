@@ -44,7 +44,9 @@
     "typecheck:mobile": "cd mobile && npx tsc --noEmit",
     "env:setup": "node scripts/env-setup.js",
     "env:check": "node scripts/env-check.js",
-    "env:vault": "npx dotenv-vault@latest"
+    "env:vault": "npx dotenv-vault@latest",
+    "security:check": "bash scripts/pre-commit-security-check.sh",
+    "security:scan": "bash scripts/security-check.sh"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.9.0",

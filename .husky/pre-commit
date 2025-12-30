@@ -1,65 +1,75 @@
 #!/usr/bin/env sh
+# ==============================================
+# GLIMPSE Pre-commit Hook (Husky)
+# ==============================================
+# 민감정보 유출 방지 및 코드 품질 검사
+# ==============================================
 
-# Glimpse 보안 체크: 민감한 정보 커밋 방지
-echo "🔍 보안 체크: 민감한 정보 검사 중..."
+# 프로젝트 루트 찾기
+GIT_ROOT=$(git rev-parse --show-toplevel)
 
-# 커밋 대상 파일 목록
-FILES=$(git diff --cached --name-only --diff-filter=ACM)
-
-if [ -z "$FILES" ]; then
-  echo "✅ 커밋할 파일이 없습니다."
-  exit 0
-fi
-
-# 민감한 패턴 정의
-PATTERNS="sk_test_[a-zA-Z0-9]{20,}|sk_live_[a-zA-Z0-9]{20,}|pk_test_[a-zA-Z0-9]{20,}|pk_live_[a-zA-Z0-9]{20,}|eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+|[a-f0-9]{64}|admin123|AWS_ACCESS_KEY_ID=AK[A-Z0-9]{16,}|AWS_SECRET_ACCESS_KEY=[A-Za-z0-9/+=]{40}|STRIPE_SECRET_KEY=sk_[a-z]+_[A-Za-z0-9]+|-----BEGIN PRIVATE KEY-----"
-
-# 위반 사항 발견 여부
-FOUND_SECRETS=0
-
-# 각 파일 검사
-for file in $FILES; do
-  if [ -f "$file" ]; then
-    # .example 파일은 제외
-    if ! echo "$file" | grep -q "\.example$"; then
-      # 민감한 패턴 검사
-      if grep -qE "$PATTERNS" "$file" 2>/dev/null; then
-        # 플레이스홀더는 제외
-        if ! grep -E "$PATTERNS" "$file" | grep -qE "(your_|placeholder|example|replace_with)"; then
-          echo "❌ 경고: $file 파일에 민감한 정보가 포함되어 있을 수 있습니다!"
-          FOUND_SECRETS=1
-        fi
-      fi
+# 포괄적인 보안 검사 스크립트 실행
+if [ -f "$GIT_ROOT/scripts/pre-commit-security-check.sh" ]; then
+    bash "$GIT_ROOT/scripts/pre-commit-security-check.sh"
+    SECURITY_EXIT=$?
+    
+    if [ $SECURITY_EXIT -ne 0 ]; then
+        exit $SECURITY_EXIT
     fi
-  fi
-done
-
-# .env 파일 직접 체크
-for file in $FILES; do
-  case "$file" in
-    *.env|*.env.local)
-      if ! echo "$file" | grep -q "\.example$"; then
-        echo "❌ 경고: .env 파일이 커밋에 포함되어 있습니다: $file"
-        echo "   이 파일은 .gitignore에 추가되어야 합니다!"
-        FOUND_SECRETS=1
-      fi
-      ;;
-  esac
-done
-
-# 결과 처리
-if [ $FOUND_SECRETS -eq 1 ]; then
-  echo ""
-  echo "🚨 커밋이 차단되었습니다!"
-  echo "민감한 정보가 포함된 파일을 제거하거나 수정한 후 다시 시도하세요."
-  echo ""
-  echo "💡 도움말:"
-  echo "   1. 실제 키를 플레이스홀더로 교체하세요"
-  echo "   2. .env 파일은 .gitignore에 추가하세요"
-  echo "   3. 대신 .env.example 파일을 커밋하세요"
-  echo ""
-  echo "강제로 커밋하려면: git commit --no-verify"
-  exit 1
+else
+    echo "⚠️  보안 검사 스크립트를 찾을 수 없습니다."
+    echo "   scripts/pre-commit-security-check.sh 파일을 확인하세요."
+    
+    # 기본 검사 (스크립트가 없을 때)
+    echo "🔍 기본 보안 체크 실행 중..."
+    
+    FILES=$(git diff --cached --name-only --diff-filter=ACM)
+    
+    if [ -z "$FILES" ]; then
+        echo "✅ 커밋할 파일이 없습니다."
+        exit 0
+    fi
+    
+    FOUND_SECRETS=0
+    
+    # .env 파일 체크
+    for file in $FILES; do
+        case "$file" in
+            *.env|*.env.local|*.env.production|secrets.env)
+                if ! echo "$file" | grep -q "\.example$"; then
+                    echo "❌ 금지된 파일: $file"
+                    FOUND_SECRETS=1
+                fi
+                ;;
+            *.pem|*.key|*.p12|*.jks)
+                echo "❌ 금지된 파일: $file"
+                FOUND_SECRETS=1
+                ;;
+        esac
+    done
+    
+    # 기본 패턴 체크
+    PATTERNS="sk_live_[a-zA-Z0-9]|sk_test_[a-zA-Z0-9]|AKIA[0-9A-Z]|BEGIN PRIVATE KEY|ghp_[A-Za-z0-9]"
+    
+    for file in $FILES; do
+        if [ -f "$file" ]; then
+            if ! echo "$file" | grep -qE "\.example$|\.md$|\.txt$|node_modules"; then
+                if grep -qE "$PATTERNS" "$file" 2>/dev/null; then
+                    if ! grep -E "$PATTERNS" "$file" | grep -qE "(your_|placeholder|example|sample|test_)"; then
+                        echo "⚠️  민감정보 의심: $file"
+                        FOUND_SECRETS=1
+                    fi
+                fi
+            fi
+        fi
+    done
+    
+    if [ $FOUND_SECRETS -eq 1 ]; then
+        echo ""
+        echo "🚨 커밋이 차단되었습니다!"
+        echo "강제 커밋: git commit --no-verify"
+        exit 1
+    fi
 fi
 
 echo "✅ 보안 체크 통과!"

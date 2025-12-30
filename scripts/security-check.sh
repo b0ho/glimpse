@@ -1,38 +1,54 @@
-#\!/bin/bash
-set -e
+#!/bin/bash
+# ==============================================
+# GLIMPSE 프로젝트 보안 스캔
+# ==============================================
 
-# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
 NC='\033[0m'
 
-echo -e "${BLUE}=== Glimpse Security Check ===${NC}"
+echo "=== Glimpse 보안 스캔 ==="
 echo ""
 
 ISSUES=0
 
-# Check for hardcoded secrets
-echo -e "${GREEN}[INFO]${NC} Checking for hardcoded secrets..."
-if grep -r -i "password\s*=\s*['\"]" --include="*.ts" --include="*.js" --exclude-dir=node_modules . 2>/dev/null | grep -v "example\|test"; then
-    echo -e "${RED}[ERROR]${NC} Found hardcoded passwords\!"
-    ((ISSUES++))
+# 1. Git에 추적 중인 환경 파일
+echo "[1/4] 환경 파일 검사..."
+TRACKED_ENV=$(git ls-files | grep -E '\.env$|secrets\.env' | grep -v 'example' || true)
+if [ -n "$TRACKED_ENV" ]; then
+    echo -e "${RED}[CRITICAL]${NC} Git에 환경 파일 있음: $TRACKED_ENV"
+    ISSUES=$((ISSUES + 1))
 fi
 
-# Check npm audit
-echo -e "${GREEN}[INFO]${NC} Running npm audit..."
-npm audit --production 2>&1 | grep -v "0 vulnerabilities" || echo -e "${GREEN}[INFO]${NC} No vulnerabilities found"
+# 2. 민감 파일 존재
+echo "[2/4] 민감 파일 검사..."
+SENSITIVE=$(find . -type f \( -name "*.pem" -o -name "*.key" -o -name "serviceAccountKey.json" \) 2>/dev/null | grep -v "node_modules\|\.git\|debug" || true)
+if [ -n "$SENSITIVE" ]; then
+    echo -e "${RED}[CRITICAL]${NC} 민감 파일 발견:"
+    echo "$SENSITIVE"
+    ISSUES=$((ISSUES + 1))
+fi
 
-# Check for console.log
-echo -e "${GREEN}[INFO]${NC} Checking for console.log statements..."
-CONSOLE_COUNT=$(grep -r "console\." --include="*.ts" --include="*.tsx" --exclude-dir=node_modules --exclude-dir=tests . 2>/dev/null | wc -l)
-echo -e "${YELLOW}[WARNING]${NC} Found $CONSOLE_COUNT console statements"
+# 3. 하드코딩된 키 (소스 코드만)
+echo "[3/4] 하드코딩 키 검사..."
+HARDCODED=$(grep -rE "AKIA[0-9A-Z]{16}|sk_live_[a-zA-Z0-9]{20}" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.java" . 2>/dev/null | grep -v "node_modules\|\.example\|your_\|placeholder" || true)
+if [ -n "$HARDCODED" ]; then
+    echo -e "${RED}[CRITICAL]${NC} 하드코딩된 키 발견"
+    ISSUES=$((ISSUES + 1))
+fi
+
+# 4. npm audit
+echo "[4/4] 의존성 취약점 검사..."
+if command -v npm &> /dev/null; then
+    npm audit --audit-level=high 2>/dev/null | head -20 || true
+fi
 
 echo ""
-if [ $ISSUES -eq 0 ]; then
-    echo -e "${GREEN}✅ Security check passed\!${NC}"
+if [ "$ISSUES" -gt 0 ]; then
+    echo -e "${RED}=== $ISSUES건의 보안 이슈 발견 ===${NC}"
+    exit 1
 else
-    echo -e "${RED}❌ Found $ISSUES security issues${NC}"
+    echo -e "${GREEN}=== 보안 검사 통과 ===${NC}"
+    exit 0
 fi
-EOF < /dev/null

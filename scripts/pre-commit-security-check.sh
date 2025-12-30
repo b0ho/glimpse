@@ -45,7 +45,7 @@ PATTERNS=(
     'AIza[0-9A-Za-z_-]{30}'               # Firebase/Google API Key
 )
 
-EXCLUDE='\.md$|\.txt$|\.example$|node_modules|scripts/'
+EXCLUDE='\.md$|\.txt$|\.example$|node_modules|scripts/|\.husky/'
 
 for file in $STAGED_FILES; do
     if echo "$file" | grep -qE "$EXCLUDE"; then
