@@ -18,9 +18,11 @@ interface WelcomeScreenProps {
   onSignUpMode: () => void;
   onGoogleLogin: () => Promise<void>;
   onKakaoLogin?: (token: string, profile: any) => Promise<void>;
+  onNaverLogin?: () => Promise<void>;
   onQuickDevLogin: (user: QuickDevUser) => void;
   onResetOnboarding?: () => Promise<void>;
   isGoogleLoading: boolean;
+  isNaverLoading?: boolean;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
@@ -28,9 +30,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onSignUpMode,
   onGoogleLogin,
   onKakaoLogin,
+  onNaverLogin,
   onQuickDevLogin,
   onResetOnboarding,
   isGoogleLoading,
+  isNaverLoading = false,
 }) => {
   const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation('auth');
@@ -151,6 +155,26 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 />
                 <Text className="text-base font-semibold text-yellow-900">
                   {t('welcome.continueWithKakao')}
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
+
+        {/* 네이버 로그인 버튼 */}
+        {onNaverLogin && (
+          <TouchableOpacity
+            className="w-full bg-green-500 py-4 px-6 rounded-xl flex-row items-center justify-center gap-x-3"
+            onPress={onNaverLogin}
+            disabled={isNaverLoading}
+          >
+            {isNaverLoading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Text className="text-lg font-bold text-white">N</Text>
+                <Text className="text-base font-semibold text-white">
+                  {t('welcome.continueWithNaver')}
                 </Text>
               </>
             )}
