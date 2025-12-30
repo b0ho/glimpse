@@ -3,15 +3,20 @@
  *
  * @module hooks/auth/useGoogleAuth
  * @description Google OAuth 인증을 처리하는 커스텀 훅입니다.
- * Clerk OAuth를 사용하며, 개발 환경에서는 빠른 로그인을 지원합니다.
+ * 자체 JWT 인증 시스템을 사용합니다.
  */
 
 import { useState } from 'react';
 import { Alert, Platform } from 'react-native';
-import { useOAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@/providers/AuthProvider';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { OAuthUserInfo } from '@/types/auth.types';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+
+// 웹 브라우저 세션 핸들링
+WebBrowser.maybeCompleteAuthSession();
 
 /**
  * 구글 인증 훅
@@ -19,37 +24,20 @@ import { OAuthUserInfo } from '@/types/auth.types';
  * @hook
  * @param {Function} onAuthCompleted - 인증 완료 콜백 함수
  * @returns {Object} Google 인증 관련 상태 및 함수들
- * @returns {boolean} returns.isGoogleLoading - 구글 로그인 진행 중 여부
- * @returns {Function} returns.handleGoogleLogin - 구글 로그인 핸들러
- * @returns {Function} returns.handleQuickDevLogin - 개발 환경 빠른 로그인 핸들러
- *
- * @description
- * Google OAuth 인증 플로우를 관리합니다.
- * - 프로덕션: Clerk OAuth 사용
- * - 개발 환경: 빠른 로그인 지원 (OAuth 우회)
- * - 네트워크 오류 처리 (Cloudflare 등)
- * - 사용자 정보 자동 매핑
- *
- * @example
- * ```tsx
- * const { isGoogleLoading, handleGoogleLogin } = useGoogleAuth(() => {
- *   console.log('인증 완료!');
- *   navigation.navigate('Home');
- * });
- *
- * // 구글 로그인 버튼
- * <Button
- *   onPress={handleGoogleLogin}
- *   loading={isGoogleLoading}
- *   title="Google로 로그인"
- * />
- * ```
  */
 export const useGoogleAuth = (onAuthCompleted: () => void) => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
+  const { signInWithOAuth } = useAuth();
   const { setUser } = useAuthStore();
   const { t } = useAndroidSafeTranslation('auth');
+  
+  // Google OAuth 설정
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  });
   
   /**
    * 개발 환경 빠른 로그인
@@ -77,14 +65,14 @@ export const useGoogleAuth = (onAuthCompleted: () => void) => {
   /**
    * OAuth 사용자 정보를 앱 사용자 정보로 변환
    */
-  const createUserFromOAuth = (userInfo: OAuthUserInfo, sessionId: string) => {
+  const createUserFromOAuth = (userInfo: OAuthUserInfo, userId: string) => {
     return {
-      id: userInfo.id || sessionId,
+      id: userInfo.id || userId,
       email: userInfo.email || '',
       nickname: userInfo.nickname || 
                 `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() || 
                 t('fallbackUser.googleUser'),
-      anonymousId: `anon_${userInfo.id || sessionId}`,
+      anonymousId: `anon_${userInfo.id || userId}`,
       phoneNumber: '',
       isVerified: true,
       profileImageUrl: userInfo.profileImageUrl,
@@ -101,7 +89,7 @@ export const useGoogleAuth = (onAuthCompleted: () => void) => {
    * 구글 로그인 핸들러
    */
   const handleGoogleLogin = async (): Promise<void> => {
-    console.log('🟡 Google login button clicked (Clerk OAuth)');
+    console.log('🟡 Google login button clicked');
     
     // 개발 환경에서는 OAuth 우회
     if (__DEV__) {
@@ -112,48 +100,17 @@ export const useGoogleAuth = (onAuthCompleted: () => void) => {
     setIsGoogleLoading(true);
     
     try {
-      const result = await startOAuthFlow();
+      // Google OAuth 플로우 시작
+      const result = await promptAsync();
       
-      if (!result) {
-        console.log('❌ OAuth 플로우 취소됨');
-        return;
-      }
-      
-      const { createdSessionId, signIn, signUp, setActive } = result;
-      
-      if (createdSessionId && setActive) {
-        console.log('✅ Clerk OAuth 로그인 성공:', createdSessionId);
+      if (result.type === 'success' && result.authentication?.accessToken) {
+        console.log('✅ Google OAuth 성공');
         
-        // 세션 활성화
-        await setActive({ session: createdSessionId });
+        // 백엔드에 Google 토큰 전달
+        const authResult = await signInWithOAuth('google', result.authentication.accessToken);
         
-        // 사용자 정보 가져오기
-        const userInfo = signIn || signUp;
-        if (userInfo) {
-          const userData = createUserFromOAuth({
-            id: userInfo.id,
-            email: (userInfo as any).emailAddress,
-            firstName: (userInfo as any).firstName,
-            lastName: (userInfo as any).lastName,
-            profileImageUrl: (userInfo as any).imageUrl,
-          }, createdSessionId);
-          
-          setUser(userData);
-          
-          Alert.alert(
-            t('alerts.loginSuccess.title'),
-            t('alerts.loginSuccess.messageWithName', { nickname: userData.nickname }),
-            [
-              {
-                text: t('alerts.loginSuccess.confirm'),
-                onPress: () => onAuthCompleted(),
-              }
-            ]
-          );
-        } else {
-          // Fallback 사용자 정보
-          const fallbackUser = createUserFromOAuth({}, createdSessionId);
-          setUser(fallbackUser);
+        if (authResult.success && authResult.userId) {
+          console.log('✅ 백엔드 인증 성공:', authResult.userId);
           
           Alert.alert(
             t('alerts.loginSuccess.title'),
@@ -165,7 +122,15 @@ export const useGoogleAuth = (onAuthCompleted: () => void) => {
               }
             ]
           );
+        } else {
+          Alert.alert(
+            t('alerts.loginFailure.title'), 
+            authResult.error || t('alerts.loginFailure.messageOauth'),
+            [{ text: t('alerts.loginFailure.confirm') }]
+          );
         }
+      } else if (result.type === 'cancel') {
+        console.log('❌ Google OAuth 취소됨');
       } else {
         Alert.alert(
           t('alerts.loginFailure.title'), 
@@ -174,41 +139,12 @@ export const useGoogleAuth = (onAuthCompleted: () => void) => {
         );
       }
     } catch (error: any) {
-      console.error('🔥 Clerk 구글 로그인 예외:', error);
+      console.error('🔥 구글 로그인 예외:', error);
       
-      // 네트워크 오류 처리
-      if (error.message?.includes('401') || error.message?.includes('cloudflare')) {
-        console.log('🔧 Cloudflare 오류 감지, 개발 환경 fallback 적용');
-        
-        if (process.env.NODE_ENV === 'development') {
-          const fallbackUser = createUserFromOAuth({
-            nickname: t('fallbackUser.fallbackUser'),
-          }, 'fallback_google_user');
-          
-          setUser(fallbackUser);
-          
-          Alert.alert(
-            t('alerts.devMode.title'),
-            t('alerts.devMode.message'),
-            [
-              {
-                text: t('alerts.devMode.confirm'),
-                onPress: () => onAuthCompleted(),
-              }
-            ]
-          );
-        } else {
-          Alert.alert(
-            t('alerts.loginFailure.messageNetwork'), 
-            t('alerts.loginFailure.messageNetworkDescription')
-          );
-        }
-      } else {
-        Alert.alert(
-          t('alerts.loginFailure.messageGeneral'), 
-          error.message || t('alerts.loginFailure.messageGeneralDescription')
-        );
-      }
+      Alert.alert(
+        t('alerts.loginFailure.messageGeneral'), 
+        error.message || t('alerts.loginFailure.messageGeneralDescription')
+      );
     } finally {
       setIsGoogleLoading(false);
     }

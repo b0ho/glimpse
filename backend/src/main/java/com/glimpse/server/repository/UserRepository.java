@@ -16,7 +16,10 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
     
+    @Deprecated
     Optional<User> findByClerkId(String clerkId);
+    
+    Optional<User> findByOauthId(String oauthId);
     
     Optional<User> findByPhoneNumber(String phoneNumber);
     

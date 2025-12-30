@@ -29,6 +29,7 @@ public class WebConfig implements WebMvcConfigurer {
                 // 허용할 Origins (개발 환경)
                 .allowedOrigins(
                     "http://localhost:8081",     // Expo Web
+                    "http://localhost:8085",     // Expo Web (alternate port)
                     "http://localhost:3000",     // Web Landing / Admin
                     "http://localhost:5173",     // Vite Dev Server
                     "exp://192.168.*:8081",      // Expo Development Build

@@ -8,7 +8,6 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
 import { shadowStyles } from '@/utils/shadowStyles';
-import { ClerkGoogleAuth } from '@/components/auth/ClerkGoogleAuth';
 import { QuickDevUser } from '@/types/auth.types';
 import { isDevelopment } from '@/config/dev.config';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';

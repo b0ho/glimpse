@@ -84,4 +84,28 @@ public interface AuthService {
      * @throws IllegalArgumentException 토큰이 유효하지 않은 경우
      */
     String getUserIdFromToken(String token);
+
+    /**
+     * 로그아웃을 처리합니다.
+     * 
+     * @param userId 사용자 ID
+     * @param refreshToken 현재 리프레시 토큰 (선택)
+     */
+    void logout(String userId, String refreshToken);
+
+    /**
+     * 모든 기기에서 로그아웃합니다.
+     * 
+     * @param userId 사용자 ID
+     */
+    void logoutAllDevices(String userId);
+
+    /**
+     * OAuth 로그인을 처리합니다.
+     * 
+     * @param provider OAuth 제공자 (google, kakao, naver)
+     * @param oauthToken OAuth 액세스 토큰
+     * @return 인증 응답
+     */
+    AuthResponseDto oauthLogin(String provider, String oauthToken);
 }

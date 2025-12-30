@@ -64,7 +64,21 @@ public class User extends BaseEntity {
      * <p>Clerk를 통한 인증 시 사용되는 외부 식별자입니다. Unique 제약조건이 있습니다.</p>
      */
     @Column(name = "clerk_id", unique = true)
+    @Deprecated
     private String clerkId;
+
+    /**
+     * OAuth 고유 ID (provider_providerId 형식)
+     * <p>예: google_123456789, kakao_987654321</p>
+     */
+    @Column(name = "oauth_id", unique = true)
+    private String oauthId;
+
+    /**
+     * OAuth 제공자 (google, kakao, naver)
+     */
+    @Column(name = "oauth_provider", length = 20)
+    private String oauthProvider;
 
     /**
      * 익명 매칭용 고유 ID

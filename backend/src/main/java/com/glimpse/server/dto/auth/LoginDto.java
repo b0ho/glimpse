@@ -28,6 +28,10 @@ public class LoginDto {
     /** 비밀번호 (프로덕션 환경에서 사용, 개발 모드에서는 선택) */
     private String password;
 
-    /** Clerk 인증 토큰 (Clerk 인증 방식 사용 시) */
+    /** SMS 인증 코드 (6자리) */
+    private String verificationCode;
+
+    /** Clerk 인증 토큰 (Clerk 인증 방식 사용 시 - 레거시) */
+    @Deprecated
     private String clerkToken;
 }

@@ -31,6 +31,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    
+    // Redis (토큰 저장소)
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     
     // Database
     runtimeOnly 'com.h2database:h2'

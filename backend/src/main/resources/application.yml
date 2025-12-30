@@ -36,6 +36,36 @@ springdoc:
     path: /swagger-ui.html
 
 # ============================================================================
+# JWT Configuration
+# ============================================================================
+jwt:
+  # Base64 인코딩된 시크릿 키 (프로덕션에서는 환경 변수 사용)
+  # openssl rand -base64 64 명령으로 생성 가능
+  secret: ${JWT_SECRET:Z2xpbXBzZS1hcHAtc2VjcmV0LWtleS1mb3ItZGV2ZWxvcG1lbnQtb25seS1wbGVhc2UtY2hhbmdlLWluLXByb2R1Y3Rpb24=}
+  # Access Token 만료 시간 (밀리초): 1시간
+  access-token-expiry: ${JWT_ACCESS_EXPIRY:3600000}
+  # Refresh Token 만료 시간 (밀리초): 7일
+  refresh-token-expiry: ${JWT_REFRESH_EXPIRY:604800000}
+
+# ============================================================================
+# Auth Configuration
+# ============================================================================
+auth:
+  # 최대 동시 로그인 기기 수
+  max-devices: 5
+
+# ============================================================================
+# SMS Configuration (솔라피)
+# 프로덕션에서는 환경 변수 사용: SMS_API_KEY, SMS_API_SECRET, SMS_SENDER
+# ============================================================================
+sms:
+  enabled: ${SMS_ENABLED:false}
+  solapi:
+    api-key: ${SMS_API_KEY:}
+    api-secret: ${SMS_API_SECRET:}
+    sender: ${SMS_SENDER:}
+
+# ============================================================================
 # Default Profile (프로필 미지정 시 - H2 In-Memory DB)
 # 실행: ./gradlew bootRun
 # ============================================================================
@@ -56,7 +86,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:

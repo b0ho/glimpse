@@ -195,4 +195,106 @@ public class AuthController {
                 )
         );
     }
+
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "현재 기기에서 로그아웃합니다")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> logout(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @RequestBody(required = false) Map<String, String> request
+    ) {
+        log.info("로그아웃 요청");
+
+        try {
+            // Bearer 토큰에서 실제 토큰 추출
+            String token = null;
+            if (authorization != null && authorization.startsWith("Bearer ")) {
+                token = authorization.substring(7);
+            }
+
+            if (token == null || !authService.validateToken(token)) {
+                return ResponseEntity.badRequest().body(
+                        ApiResponse.error("유효하지 않은 토큰입니다")
+                );
+            }
+
+            String userId = authService.getUserIdFromToken(token);
+            String refreshToken = request != null ? request.get("refreshToken") : null;
+
+            authService.logout(userId, refreshToken);
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(Map.of("loggedOut", true), "로그아웃 되었습니다")
+            );
+        } catch (Exception e) {
+            log.error("로그아웃 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.error(e.getMessage())
+            );
+        }
+    }
+
+    @PostMapping("/logout/all")
+    @Operation(summary = "모든 기기 로그아웃", description = "모든 기기에서 로그아웃합니다")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> logoutAllDevices(
+            @RequestHeader(value = "Authorization", required = false) String authorization
+    ) {
+        log.info("모든 기기 로그아웃 요청");
+
+        try {
+            // Bearer 토큰에서 실제 토큰 추출
+            String token = null;
+            if (authorization != null && authorization.startsWith("Bearer ")) {
+                token = authorization.substring(7);
+            }
+
+            if (token == null || !authService.validateToken(token)) {
+                return ResponseEntity.badRequest().body(
+                        ApiResponse.error("유효하지 않은 토큰입니다")
+                );
+            }
+
+            String userId = authService.getUserIdFromToken(token);
+            authService.logoutAllDevices(userId);
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(Map.of("loggedOut", true), "모든 기기에서 로그아웃 되었습니다")
+            );
+        } catch (Exception e) {
+            log.error("모든 기기 로그아웃 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.error(e.getMessage())
+            );
+        }
+    }
+
+    @PostMapping("/oauth/{provider}")
+    @Operation(summary = "OAuth 로그인", description = "소셜 로그인을 처리합니다 (Google, Kakao, Naver)")
+    public ResponseEntity<ApiResponse<AuthResponseDto>> oauthLogin(
+            @PathVariable String provider,
+            @RequestBody Map<String, String> request
+    ) {
+        log.info("OAuth 로그인 요청: provider={}", provider);
+
+        try {
+            String oauthToken = request.get("token");
+            if (oauthToken == null || oauthToken.isEmpty()) {
+                return ResponseEntity.badRequest().body(
+                        ApiResponse.error("OAuth 토큰이 필요합니다")
+                );
+            }
+
+            AuthResponseDto response = authService.oauthLogin(provider, oauthToken);
+            return ResponseEntity.ok(ApiResponse.success(response, "OAuth 로그인 성공"));
+        } catch (UnsupportedOperationException e) {
+            log.warn("OAuth 로그인 미구현: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.error(e.getMessage())
+            );
+        } catch (Exception e) {
+            log.error("OAuth 로그인 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.error(e.getMessage())
+            );
+        }
+    }
 }

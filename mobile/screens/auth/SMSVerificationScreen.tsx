@@ -212,21 +212,21 @@ export const SMSVerificationScreen = ({
     setIsLoading(true);
 
     try {
-      console.log('🚀 Calling authService.verifyPhoneCode with code:', code);
-      const result = await authService.verifyPhoneCode(code);
+      console.log('🚀 Calling authService.verifyPhoneCode with phone:', phoneNumber, 'code:', code);
+      const result = await authService.verifyPhoneCode(phoneNumber, code);
       console.log('📨 Verification result:', result);
       
       if (result.success) {
         console.log('✅ Verification successful');
         // 인증 성공 시 사용자 정보를 스토어에 저장
-        const currentUser = authService.getCurrentUser();
-        console.log('👤 Current user:', currentUser);
-        if (currentUser) {
+        const userId = authService.getCurrentUserId();
+        console.log('👤 Current user ID:', userId);
+        if (userId) {
           authStore.setUser({
-            id: (currentUser as { id: string }).id,
-            anonymousId: `anon_${(currentUser as { id: string }).id.slice(-8)}`,
-            nickname: (currentUser as { firstName?: string }).firstName || t('common:user.defaultName'),
-            phoneNumber: phoneNumber, // 해시화된 전화번호 (실제로는 백엔드에서 처리)
+            id: userId,
+            anonymousId: `anon_${userId.slice(-8)}`,
+            nickname: t('common:user.defaultName'),
+            phoneNumber: phoneNumber,
             isVerified: true,
             credits: 10, // 기본 크레딧
             isPremium: false,
@@ -272,9 +272,9 @@ export const SMSVerificationScreen = ({
     setIsLoading(true);
 
     try {
-      const result = await authService.signInWithPhone(phoneNumber);
+      const result = await authService.sendVerificationCode(phoneNumber);
       
-      if (result.success) {
+      if (result.success || result.data?.sent) {
         Alert.alert(t('auth:smsVerification.resend.success.title'), t('auth:smsVerification.resend.success.message'));
         setRemainingTime(SECURITY.OTP_EXPIRY_MINUTES * 60);
         setCanResend(false);

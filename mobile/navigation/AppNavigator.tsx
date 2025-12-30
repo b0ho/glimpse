@@ -628,13 +628,9 @@ function AppNavigator() {
   const [hasSelectedMode, setHasSelectedMode] = React.useState(false);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = React.useState<boolean | null>(null);
   
-  // 개발 모드 또는 Vercel 도메인에서는 Zustand 스토어의 user 상태도 확인
-  const isVercelDomain = typeof window !== 'undefined' && 
-                        window.location?.hostname?.includes('vercel.app');
-  // user가 명시적으로 null이면 로그아웃된 것으로 처리
-  const isAuthenticated = (__DEV__ || isVercelDomain) 
-    ? (user !== null && (isSignedIn || !!user)) 
-    : isSignedIn;
+  // AuthProvider의 isSignedIn을 기본으로 사용
+  // persist에서 복원된 user가 있어도 토큰이 없으면 인증되지 않은 것으로 처리
+  const isAuthenticated = isSignedIn;
   
   // 디버깅을 위한 로그
   console.log('[AppNavigator] Auth State:', {

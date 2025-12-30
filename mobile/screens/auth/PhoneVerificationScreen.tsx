@@ -27,7 +27,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { COLORS } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { validatePhoneNumber as validatePhone } from '@/services/auth/clerk-config';
+import { validatePhoneNumber as validatePhone } from '@/services/auth/auth-service';
 import { cn } from '@/lib/utils';
 
 /**
@@ -149,15 +149,13 @@ export const PhoneVerificationScreen = ({
     setIsLoading(true);
 
     try {
-      console.log('🚀 Calling auth service, mode:', authMode);
-      // authMode에 따라 다른 서비스 메소드 호출
-      const result = authMode === 'signup' 
-        ? await authService.signUpWithPhone(rawNumbers)
-        : await authService.signInWithPhone(rawNumbers);
+      console.log('🚀 Calling auth service to send verification code');
+      // 인증 코드 발송 (로그인/회원가입 모드에 관계없이 동일)
+      const result = await authService.sendVerificationCode(rawNumbers);
       
       console.log('📨 Auth service result:', result);
       
-      if (result.success) {
+      if (result.success || result.data?.sent) {
         const titleKey = authMode === 'signup' ? 'phoneVerification.signup.success.title' : 'phoneVerification.success.title';
         const messageKey = authMode === 'signup' ? 'phoneVerification.signup.success.message' : 'phoneVerification.success.message';
         
