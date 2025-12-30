@@ -7,7 +7,7 @@
  * - 자동 회사명 추출 및 수동 입력 가능
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import {
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { CompanyVerification } from '@/shared/types/company.types';
 import { cn } from '@/lib/utils';
+import { companyVerificationService, CompanyDomain } from '@/services/companyVerificationService';
 
 // 인증 상태 enum
 enum VerificationStatus {
@@ -85,15 +86,27 @@ export const CompanyVerificationScreen = ({
   const [inviteCode, setInviteCode] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [suggestedCompanies, setSuggestedCompanies] = useState<CompanyDomain[]>([]);
   const { t } = useAndroidSafeTranslation();
 
-  // 이메일 도메인에서 회사명 추출
-  const extractCompanyFromEmail = (emailAddress: string): string => {
-    const domain = emailAddress.split('@')[1];
+  // 이메일 도메인에서 회사명 추출 (서비스 사용)
+  const extractCompanyFromEmail = async (emailAddress: string): Promise<string> => {
+    const domain = companyVerificationService.extractDomain(emailAddress);
     if (!domain) return '';
     
-    // TODO: 확장성 개선 - 이 데이터는 백엔드 API나 별도 설정 파일로 관리 (Gemini 피드백 반영)
-    const domainMappings: Record<string, string> = {
+    try {
+      // 백엔드 API에서 회사 도메인 검색
+      const companies = await companyVerificationService.searchCompanyDomains(domain);
+      if (companies && companies.length > 0) {
+        setSuggestedCompanies(companies);
+        return companyVerificationService.formatCompanyName(companies[0]);
+      }
+    } catch (error) {
+      console.log('회사 도메인 검색 실패, 로컬 추출 사용:', error);
+    }
+    
+    // 로컬 폴백: 도메인에서 회사명 추출
+    const localMappings: Record<string, string> = {
       'naver.com': '네이버',
       'kakao.com': '카카오',
       'samsung.com': '삼성전자',
@@ -104,11 +117,10 @@ export const CompanyVerificationScreen = ({
       'korea.ac.kr': '고려대학교',
     };
 
-    if (domainMappings[domain]) {
-      return domainMappings[domain];
+    if (localMappings[domain]) {
+      return localMappings[domain];
     }
 
-    // 일반적인 회사 도메인에서 회사명 추출 (예: company.co.kr -> Company)
     const companyPart = domain.split('.')[0];
     return companyPart.charAt(0).toUpperCase() + companyPart.slice(1);
   };
@@ -124,13 +136,14 @@ export const CompanyVerificationScreen = ({
     return codeRegex.test(code);
   };
 
-  const handleEmailChange = (text: string): void => {
+  const handleEmailChange = async (text: string): Promise<void> => {
     setEmail(text);
     if (validateEmail(text)) {
-      const extractedCompany = extractCompanyFromEmail(text);
+      const extractedCompany = await extractCompanyFromEmail(text);
       setCompanyName(extractedCompany);
     } else {
       setCompanyName('');
+      setSuggestedCompanies([]);
     }
   };
 
@@ -173,32 +186,45 @@ export const CompanyVerificationScreen = ({
     setIsLoading(true);
 
     try {
-      // TODO: 실제 API 호출로 교체
-      const verificationData: Partial<CompanyVerification> = {
-        companyId: 'temp_company_id', // TODO: Get actual company ID from search/selection
-        email: email,
-        status: VerificationStatus.PENDING as 'PENDING' | 'APPROVED' | 'REJECTED',
-        verificationMethod: selectedMethod === VerificationMethod.EMAIL_DOMAIN ? 'EMAIL' : 'DOCUMENT' as 'EMAIL' | 'DOCUMENT',
-      };
+      if (selectedMethod === VerificationMethod.EMAIL_DOMAIN) {
+        // 이메일 인증 코드 발송
+        const result = await companyVerificationService.sendVerificationEmail(email);
+        console.log('이메일 인증 요청 완료:', result);
+        
+        Alert.alert(
+          t('auth:companyVerification.email.success'),
+          t('auth:companyVerification.success.message'),
+          [
+            {
+              text: t('common:buttons.confirm'),
+              onPress: onVerificationSubmitted,
+            },
+          ]
+        );
+      } else {
+        // 초대 코드 인증 (현재는 성공으로 처리)
+        const verificationData: Partial<CompanyVerification> = {
+          companyId: suggestedCompanies[0]?.id || 'temp_company_id',
+          email: email,
+          status: VerificationStatus.PENDING as 'PENDING' | 'APPROVED' | 'REJECTED',
+          verificationMethod: 'DOCUMENT' as 'EMAIL' | 'DOCUMENT',
+        };
 
-      console.log('Submitting company verification:', verificationData, 'Company Name:', companyName);
-
-      // 임시 지연 (실제 API 호출 시뮬레이션)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      Alert.alert(
-        t('auth:companyVerification.success.title'),
-        t('auth:companyVerification.success.message'),
-        [
-          {
-            text: t('common:buttons.confirm'),
-            onPress: onVerificationSubmitted,
-          },
-        ]
-      );
+        console.log('초대 코드 인증 제출:', verificationData, '회사명:', companyName);
+        
+        Alert.alert(
+          t('auth:companyVerification.success.title'),
+          t('auth:companyVerification.success.message'),
+          [
+            {
+              text: t('common:buttons.confirm'),
+              onPress: onVerificationSubmitted,
+            },
+          ]
+        );
+      }
     } catch (error) {
-      console.error('Company verification error:', error);
-      // TODO: 실제 운영 환경에서는 Sentry, Firebase Crashlytics 등으로 에러 전송 (Gemini 피드백 반영)
+      console.error('회사 인증 오류:', error);
       Alert.alert(t('common:status.error'), t('auth:companyVerification.errors.submitFailed'));
     } finally {
       setIsLoading(false);

@@ -5,7 +5,9 @@ import {
   View,
   ActivityIndicator,
   Dimensions,
+  Platform,
 } from 'react-native';
+import { imageCacheService } from '@/services/imageCacheService';
 
 /**
  * OptimizedImage 컴포넌트 Props
@@ -67,46 +69,70 @@ export const OptimizedImage= ({
   const [blurUri, setBlurUri] = useState<string>('');
 
   useEffect(() => {
-    // Select appropriate image based on quality and screen size
-    let selectedUri = source.uri;
-    
-    if (source.variants && source.variants.length > 0) {
-      const targetWidth = width || screenWidth;
+    const loadImage = async () => {
+      // Select appropriate image based on quality and screen size
+      let selectedUri = source.uri;
       
-      // Find the best variant based on target width
-      const sortedVariants = [...source.variants].sort((a, b) => a.width - b.width);
-      
-      for (const variant of sortedVariants) {
-        if (variant.width >= targetWidth) {
-          selectedUri = variant.url;
-          break;
+      if (source.variants && source.variants.length > 0) {
+        const targetWidth = width || screenWidth;
+        
+        // Find the best variant based on target width
+        const sortedVariants = [...source.variants].sort((a, b) => a.width - b.width);
+        
+        for (const variant of sortedVariants) {
+          if (variant.width >= targetWidth) {
+            selectedUri = variant.url;
+            break;
+          }
+        }
+        
+        // If no variant is large enough, use the largest one
+        if (selectedUri === source.uri && sortedVariants.length > 0) {
+          selectedUri = sortedVariants[sortedVariants.length - 1].url;
         }
       }
       
-      // If no variant is large enough, use the largest one
-      if (selectedUri === source.uri && sortedVariants.length > 0) {
-        selectedUri = sortedVariants[sortedVariants.length - 1].url;
+      // Override with quality preference
+      if (source.variants) {
+        switch (quality) {
+          case 'low':
+            selectedUri = source.thumbnail || selectedUri;
+            break;
+          case 'high':
+          case 'original':
+            const originalVariant = source.variants.find(v => v.size === 'original');
+            if (originalVariant) {
+              selectedUri = originalVariant.url;
+            }
+            break;
+        }
       }
-    }
-    
-    // Override with quality preference
-    if (source.variants) {
-      switch (quality) {
-        case 'low':
-          selectedUri = source.thumbnail || selectedUri;
-          break;
-        case 'high':
-        case 'original':
-          const originalVariant = source.variants.find(v => v.size === 'original');
-          if (originalVariant) {
-            selectedUri = originalVariant.url;
+      
+      // 네이티브 환경에서만 캐싱 적용 (웹에서는 브라우저 캐시 사용)
+      if (Platform.OS !== 'web' && selectedUri) {
+        try {
+          // 캐시된 이미지가 있는지 확인
+          const cachedUri = await imageCacheService.getCachedImage(selectedUri);
+          if (cachedUri) {
+            setImageUri(cachedUri);
+          } else {
+            // 캐시에 없으면 다운로드 후 캐싱
+            const localUri = await imageCacheService.cacheImage(selectedUri);
+            setImageUri(localUri);
           }
-          break;
+        } catch (error) {
+          // 캐싱 실패 시 원본 URI 사용
+          console.log('이미지 캐싱 실패, 원본 URI 사용:', error);
+          setImageUri(selectedUri);
+        }
+      } else {
+        setImageUri(selectedUri);
       }
-    }
+      
+      setBlurUri(source.blur || '');
+    };
     
-    setImageUri(selectedUri);
-    setBlurUri(source.blur || '');
+    loadImage();
   }, [source, width, quality]);
 
   /**

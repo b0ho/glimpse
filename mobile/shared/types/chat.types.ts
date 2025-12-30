@@ -33,6 +33,8 @@ export interface Message {
   type: 'text' | 'image' | 'voice' | 'system';
   imageUrl?: string;
   voiceUrl?: string;
+  /** 음성 메시지 길이 (초) */
+  duration?: number;
   isRead: boolean;
   isEncrypted?: boolean;
   timestamp: Date;

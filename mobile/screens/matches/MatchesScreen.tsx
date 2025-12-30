@@ -94,25 +94,28 @@ export const MatchesScreen = React.memo(() => {
             id: 'match-1',
             user1Id: user?.id || 'user-1',
             user2Id: 'user-2',
-            matchedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30분 전
-            createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-            updatedAt: new Date().toISOString(),
+            isActive: true,
+            matchedAt: new Date(Date.now() - 1000 * 60 * 30), // 30분 전
+            createdAt: new Date(Date.now() - 1000 * 60 * 30),
+            updatedAt: new Date(),
           },
           {
             id: 'match-2',
             user1Id: user?.id || 'user-1',
             user2Id: 'user-3',
-            matchedAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2시간 전
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-            updatedAt: new Date().toISOString(),
+            isActive: true,
+            matchedAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2시간 전
+            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
+            updatedAt: new Date(),
           },
           {
             id: 'match-3',
             user1Id: user?.id || 'user-1',
             user2Id: 'user-4',
-            matchedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1일 전
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-            updatedAt: new Date().toISOString(),
+            isActive: true,
+            matchedAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1일 전
+            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
+            updatedAt: new Date(),
           },
         ];
 
@@ -311,9 +314,10 @@ export const MatchesScreen = React.memo(() => {
               id: 'match-1',
               user1Id: user?.id || 'user-1',
               user2Id: 'user-2',
-              matchedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-              createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-              updatedAt: new Date().toISOString(),
+              isActive: true,
+              matchedAt: new Date(Date.now() - 1000 * 60 * 30),
+              createdAt: new Date(Date.now() - 1000 * 60 * 30),
+              updatedAt: new Date(),
             },
           ];
           setMatches(sampleMatches);

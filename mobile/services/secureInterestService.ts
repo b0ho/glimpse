@@ -26,8 +26,15 @@ export interface SecureInterestCard {
   actualValue?: string; // 로컬에서만 복호화 가능
   status: 'local' | 'remote' | 'matched' | 'expired';
   registeredAt: string;
+  createdAt?: string;
   expiresAt: string;
   deviceInfo: 'current' | 'other';
+  /** 로컬 저장 카드 여부 */
+  isLocal?: boolean;
+  /** 카드 활성화 상태 (만료되지 않음) */
+  isActive?: boolean;
+  /** 값 공개 가능 여부 */
+  canReveal?: boolean;
   matchedUser?: {
     nickname: string;
     profileImage?: string;
@@ -117,11 +124,15 @@ class SecureInterestService {
         const cards: SecureInterestCard[] = [];
         for (const localCard of localCards) {
           const decrypted = await decryptCardData(localCard);
+          // 만료 여부로 활성 상태 계산
+          const isActive = new Date(localCard.expiresAt) > new Date();
           cards.push({
             id: localCard.id,
             type: localCard.type,
             displayValue: this.maskValue(localCard.type, decrypted.value),
-            isActive: localCard.isActive,
+            status: isActive ? 'local' : 'expired',
+            isActive,
+            registeredAt: localCard.createdAt,
             createdAt: localCard.createdAt,
             expiresAt: localCard.expiresAt,
             deviceInfo: 'current',

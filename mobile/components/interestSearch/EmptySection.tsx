@@ -62,7 +62,7 @@ export const EmptySection: React.FC<EmptySectionProps> = ({
           }}
         >
           <Icon name="add-outline" size={20} color="#FFFFFF" />
-          <Text className="text-sm font-semibold ml-2 text-white" style={{ whiteSpace: 'nowrap' }}>
+          <Text className="text-sm font-semibold ml-2 text-white" numberOfLines={1}>
             {t('search.addNew')}
           </Text>
         </TouchableOpacity>

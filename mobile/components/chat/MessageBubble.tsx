@@ -17,6 +17,8 @@ import { Message } from '@/types';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { STATE_ICONS } from '@/utils/icons';
 import { cn } from '@/lib/utils';
+import { ImageMessage } from './ImageMessage';
+import { VoiceMessagePlayer } from './VoiceMessagePlayer';
 
 /**
  * MessageBubble 컴포넌트 Props
@@ -76,45 +78,19 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
       
       case 'image':
         return (
-          <TouchableOpacity
-            onPress={() => onImagePress?.(message.content)}
-            accessibilityRole="button"
-            accessibilityLabel={t('common:accessibility.viewImage')}
-            accessibilityHint={t('accessibility:accessibility.viewImageHint')}
-          >
-            <Image
-              source={{ uri: message.content }}
-              className="w-50 h-37.5 rounded-lg"
-              resizeMode="cover"
-            />
-            <View className="absolute top-1 right-1 bg-black/50 rounded-lg p-1">
-              <Icon
-                name="expand"
-                size={20}
-                color="#FFFFFF"
-                style={{ opacity: 0.8 }}
-              />
-            </View>
-          </TouchableOpacity>
+          <ImageMessage
+            imageUrl={message.content}
+            isOwnMessage={isOwnMessage}
+          />
         );
       
       case 'voice':
         return (
-          <View className="flex-row items-center min-w-32">
-            <Icon
-              name="document-attach"
-              size={24}
-              color={isOwnMessage ? "#FFFFFF" : colors.PRIMARY}
-            />
-            <Text
-              className={cn(
-                "ml-2 text-sm flex-1",
-                isOwnMessage ? "text-white" : "text-gray-900 dark:text-white"
-              )}
-            >
-              {message.content}
-            </Text>
-          </View>
+          <VoiceMessagePlayer
+            uri={message.content}
+            duration={message.duration || 0}
+            isOwnMessage={isOwnMessage}
+          />
         );
       
       default:

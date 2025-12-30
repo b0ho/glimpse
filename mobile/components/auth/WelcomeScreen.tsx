@@ -2,8 +2,8 @@
  * Welcome 화면 컴포넌트
  */
 
-import React from 'react';
-import { View, Text, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { useAndroidSafeTranslation } from '@/hooks/useAndroidSafeTranslation';
 import { COLORS, SPACING, FONT_SIZES } from '@/utils/constants';
@@ -12,11 +12,13 @@ import { ClerkGoogleAuth } from '@/components/auth/ClerkGoogleAuth';
 import { QuickDevUser } from '@/types/auth.types';
 import { isDevelopment } from '@/config/dev.config';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useKakaoAuthService } from '@/services/auth/kakao-service';
 
 interface WelcomeScreenProps {
   onSignInMode: () => void;
   onSignUpMode: () => void;
   onGoogleLogin: () => Promise<void>;
+  onKakaoLogin?: (token: string, profile: any) => Promise<void>;
   onQuickDevLogin: (user: QuickDevUser) => void;
   onResetOnboarding?: () => Promise<void>;
   isGoogleLoading: boolean;
@@ -26,12 +28,45 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onSignInMode,
   onSignUpMode,
   onGoogleLogin,
+  onKakaoLogin,
   onQuickDevLogin,
   onResetOnboarding,
   isGoogleLoading,
 }) => {
   const { colors } = useTheme();
   const { t } = useAndroidSafeTranslation('auth');
+  const [isKakaoLoading, setIsKakaoLoading] = useState(false);
+  const kakaoAuthService = useKakaoAuthService();
+
+  /**
+   * 카카오 로그인 핸들러
+   */
+  const handleKakaoLogin = async () => {
+    if (Platform.OS === 'web') {
+      Alert.alert(t('common:status.info'), t('auth:welcome.kakaoWebNotSupported'));
+      return;
+    }
+
+    setIsKakaoLoading(true);
+    try {
+      const result = await kakaoAuthService.signInWithKakao();
+      if (result.success && result.data) {
+        console.log('✅ 카카오 로그인 성공:', result.data.profile);
+        if (onKakaoLogin) {
+          await onKakaoLogin(result.data.token.accessToken, result.data.profile);
+        }
+      } else {
+        if (result.error && !result.error.includes('취소')) {
+          Alert.alert(t('common:status.error'), result.error);
+        }
+      }
+    } catch (error) {
+      console.error('카카오 로그인 오류:', error);
+      Alert.alert(t('common:status.error'), t('auth:welcome.kakaoLoginFailed'));
+    } finally {
+      setIsKakaoLoading(false);
+    }
+  };
   
   /**
    * 빠른 개발 로그인 사용자 목록
@@ -98,6 +133,30 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             </>
           )}
         </TouchableOpacity>
+
+        {/* 카카오 로그인 버튼 */}
+        {Platform.OS !== 'web' && (
+          <TouchableOpacity
+            className="w-full bg-yellow-400 py-4 px-6 rounded-xl flex-row items-center justify-center gap-x-3"
+            onPress={handleKakaoLogin}
+            disabled={isKakaoLoading}
+          >
+            {isKakaoLoading ? (
+              <ActivityIndicator size="small" color="#3C1E1E" />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="chat"
+                  size={20}
+                  color="#3C1E1E"
+                />
+                <Text className="text-base font-semibold text-yellow-900">
+                  {t('welcome.continueWithKakao')}
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
 
         {/* 전화번호 로그인 버튼 */}
         <TouchableOpacity
