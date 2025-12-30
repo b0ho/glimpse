@@ -7,11 +7,12 @@
  */
 
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { tokenManager, TokenPair } from '@/services/auth/token-manager';
+import { tokenManager } from '@/services/auth/token-manager';
 import { useAuthStore } from '@/store/slices/authSlice';
 import { setAuthToken } from '@/services/api/config';
 import { Platform } from 'react-native';
 import { formatPhoneNumber, validatePhoneNumber } from '@/services/auth/auth-service';
+import { AppMode } from '@/shared/types';
 
 // API 베이스 URL
 const getApiBaseUrl = () => {
@@ -100,7 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   
-  const { setUser } = useAuthStore();
+  const { setUser, setToken } = useAuthStore();
   
   // 사용자 정보 초기화
   const clearUser = () => setUser(null);
@@ -123,10 +124,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUserId(storedUserId);
             setIsSignedIn(true);
             
-            // API 클라이언트에 토큰 설정
+            // API 클라이언트 및 Zustand store에 토큰 설정
             const token = await tokenManager.getAccessToken();
             if (token) {
               setAuthToken(token);
+              setToken(token);
               
               // 사용자 정보 로드
               await loadUserInfo(token);
@@ -143,6 +145,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const token = await tokenManager.getAccessToken();
             if (token) {
               setAuthToken(token);
+              setToken(token);
               await loadUserInfo(token);
             }
           } else {
@@ -246,8 +249,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           expiresIn: data.data.expiresIn,
         }, data.data.user?.id);
 
-        // API 클라이언트에 토큰 설정
+        // API 클라이언트 및 Zustand store에 토큰 설정
         setAuthToken(data.data.accessToken);
+        setToken(data.data.accessToken);
 
         // 상태 업데이트
         setUserId(data.data.user?.id || null);
@@ -265,7 +269,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('[AuthProvider] 로그인 실패:', error);
       return { success: false, error: '로그인 중 오류가 발생했습니다' };
     }
-  }, [setUser]);
+  }, [setUser, setToken]);
 
   /**
    * 전화번호 회원가입
@@ -302,8 +306,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           expiresIn: data.data.expiresIn,
         }, data.data.user?.id);
 
-        // API 클라이언트에 토큰 설정
+        // API 클라이언트 및 Zustand store에 토큰 설정
         setAuthToken(data.data.accessToken);
+        setToken(data.data.accessToken);
 
         // 상태 업데이트
         setUserId(data.data.user?.id || null);
@@ -321,7 +326,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('[AuthProvider] 회원가입 실패:', error);
       return { success: false, error: '회원가입 중 오류가 발생했습니다' };
     }
-  }, [setUser]);
+  }, [setUser, setToken]);
 
   /**
    * 로그아웃
@@ -347,8 +352,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // 로컬 토큰 삭제
       await tokenManager.clearTokens();
       
-      // API 클라이언트 토큰 삭제
+      // API 클라이언트 및 Zustand store 토큰 삭제
       setAuthToken(null);
+      setToken(null);
       
       // 상태 초기화
       setUserId(null);
@@ -361,11 +367,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // 실패해도 로컬 상태는 초기화
       await tokenManager.clearTokens();
       setAuthToken(null);
+      setToken(null);
       setUserId(null);
       setIsSignedIn(false);
       clearUser();
     }
-  }, [clearUser]);
+  }, [clearUser, setToken]);
 
   /**
    * 모든 기기 로그아웃
@@ -408,10 +415,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const token = await tokenManager.getAccessToken();
       if (token) {
         setAuthToken(token);
+        setToken(token);
       }
     }
     return success;
-  }, []);
+  }, [setToken]);
 
   /**
    * 개발 환경 빠른 로그인
@@ -435,6 +443,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       expiresIn: 3600 * 24, // 개발 환경: 24시간
     }, user.id);
     setAuthToken(devAccessToken);
+    setToken(devAccessToken);
     
     // 개발용 사용자 정보 설정
     const mockUser = {
@@ -450,7 +459,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       lastActive: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
-      currentMode: 'DATING' as const,
+      currentMode: AppMode.DATING,
     };
     
     // 상태 업데이트
@@ -459,7 +468,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(mockUser);
     
     console.log('[AuthProvider] 개발 환경 빠른 로그인 완료:', { userId: user.id, isSignedIn: true });
-  }, [setUser]);
+  }, [setUser, setToken]);
 
   const value: AuthContextType = {
     isLoaded,
@@ -473,7 +482,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     getToken,
     refreshSession,
     // 개발 환경에서만 signInDev 제공
-    ...__DEV__ && { signInDev },
+    ...(__DEV__ ? { signInDev } : {}),
   };
 
   return (
