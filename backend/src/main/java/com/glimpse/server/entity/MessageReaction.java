@@ -64,7 +64,7 @@ import org.hibernate.annotations.GenericGenerator;
  * @since 2025-01-14
  */
 @Entity
-@Table(name = "MessageReaction")
+@Table(name = "message_reaction")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -58,7 +58,7 @@ import org.hibernate.annotations.GenericGenerator;
  * @since 2025-01-14
  */
 @Entity
-@Table(name = "GroupLike")
+@Table(name = "group_like")
 @Getter
 @Setter
 @NoArgsConstructor

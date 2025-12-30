@@ -22,8 +22,9 @@ spring:
     allow-bean-definition-overriding: true
     allow-circular-references: true
   flyway:
-    enabled: false  # Spring Boot 실행 시 자동 마이그레이션 비활성화
+    enabled: false  # 자동 마이그레이션 비활성화 (수동 실행: ./gradlew flywayMigrate)
     baseline-on-migrate: true
+    baseline-version: 0
     locations: classpath:db/migration
     schemas: public
     validate-on-migrate: true

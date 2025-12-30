@@ -35,7 +35,7 @@ import java.time.LocalDateTime;
  * @since 2025-01-14
  */
 @Entity
-@Table(name = "Subscription")
+@Table(name = "subscription")
 @Getter
 @Setter
 @NoArgsConstructor

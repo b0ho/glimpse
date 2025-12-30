@@ -43,7 +43,7 @@ import java.time.LocalDateTime;
  * @since 2025-01-14
  */
 @Entity
-@Table(name = "GroupInvite")
+@Table(name = "group_invite")
 @Getter
 @Setter
 @NoArgsConstructor
