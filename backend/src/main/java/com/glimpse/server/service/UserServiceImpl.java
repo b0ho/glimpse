@@ -80,6 +80,11 @@ public class UserServiceImpl implements UserService {
     public Optional<UserDto> getUserById(String id) {
         log.debug("Getting user by ID: {}", id);
 
+        // Development: Return sample data for user1~user5
+        if (id != null && id.matches("user[1-5]")) {
+            return Optional.of(createDevUser(id));
+        }
+
         // Development: Return sample data for premium_user_id
         if ("premium_user_id".equals(id)) {
             return Optional.of(UserDto.builder()
@@ -341,6 +346,44 @@ public class UserServiceImpl implements UserService {
     @Override
     public long countPremiumUsers() {
         return userRepository.countPremiumUsers(LocalDateTime.now());
+    }
+
+    /**
+     * 개발 환경용 사용자 DTO 생성
+     */
+    private UserDto createDevUser(String userId) {
+        int userNum = Integer.parseInt(userId.replace("user", ""));
+        boolean isPremium = userNum == 2 || userNum == 4;
+        
+        return UserDto.builder()
+                .id(userId)
+                .phoneNumber("010" + String.format("%08d", userNum))
+                .nickname(getDevUserNickname(userId))
+                .age(25 + userNum)
+                .gender(userNum % 2 == 0 ? 
+                        com.glimpse.server.entity.enums.Gender.FEMALE : 
+                        com.glimpse.server.entity.enums.Gender.MALE)
+                .profileImage("https://api.dicebear.com/7.x/avataaars/svg?seed=" + userId)
+                .bio("테스트 사용자 " + userNum)
+                .anonymousId("anon_" + userId)
+                .isVerified(true)
+                .credits(isPremium ? 999 : 5)
+                .isPremium(isPremium)
+                .premiumLevel(isPremium ? PremiumLevel.VIP : PremiumLevel.FREE)
+                .lastActive(LocalDateTime.now())
+                .createdAt(LocalDateTime.now().minusDays(30))
+                .build();
+    }
+    
+    private String getDevUserNickname(String userId) {
+        return switch (userId) {
+            case "user1" -> "김철수";
+            case "user2" -> "이영희";
+            case "user3" -> "박민수";
+            case "user4" -> "최지연";
+            case "user5" -> "정민호";
+            default -> "테스트유저";
+        };
     }
 
     /**
