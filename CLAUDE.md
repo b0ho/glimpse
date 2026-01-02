@@ -547,13 +547,17 @@ npm run test                       # Run tests
 4. **Build Failure**: Rollback to stable version
 
 ### Git Commit Policy
-**FORBIDDEN**: Claude Code committing without explicit user request
+**커밋은 명시적 요청 시에만 수행**
 
-**Allowed Only When User Says**:
-- "커밋해줘" / "git commit 해줘" 
-- "변경사항 커밋해줘" / "commit please"
+**허용되는 경우** (이 키워드가 명확히 포함된 경우만):
+- "커밋해줘" / "커밋해" / "git commit 해줘" 
+- "변경사항 커밋해줘" / "commit please" / "커밋"
 
-**After Completion**: Report completion, don't commit automatically
+**금지되는 경우** (커밋 불가):
+- "진행해" / "모두 진행해" / "계속해" / "구현해" / "수정해"
+- 위 키워드는 구현/테스트만 의미하며 커밋 포함 안 함
+
+**작업 완료 후**: 구현 완료 보고만 하고 커밋 요청 대기
 
 ## 🔧 Common Issues & Solutions
 
