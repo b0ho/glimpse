@@ -60,10 +60,38 @@ auth:
 # ============================================================================
 sms:
   enabled: ${SMS_ENABLED:false}
+  dev-mode: ${SMS_DEV_MODE:true}
+  dev-code: "123456"
   solapi:
     api-key: ${SMS_API_KEY:}
     api-secret: ${SMS_API_SECRET:}
     sender: ${SMS_SENDER:}
+  # SMS 인증 설정
+  verification:
+    code-length: 6
+    expiry-seconds: 300  # 5분
+  # Rate Limiting 설정
+  rate-limit:
+    max-per-phone-hourly: 5    # 전화번호당 시간당 최대 발송
+    max-per-phone-daily: 10    # 전화번호당 일일 최대 발송
+    max-per-ip-hourly: 20      # IP당 시간당 최대 요청
+    cooldown-seconds: 60       # 재전송 대기 시간
+    max-attempts: 5            # 최대 인증 시도 횟수
+    block-duration-minutes: 10 # 차단 시간
+
+# ============================================================================
+# File Upload Configuration
+# ============================================================================
+file:
+  upload-dir: ${FILE_UPLOAD_DIR:./uploads}
+  max-size: ${FILE_MAX_SIZE:10485760}  # 10MB
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 # ============================================================================
 # Default Profile (프로필 미지정 시 - H2 In-Memory DB)
@@ -192,7 +220,7 @@ logging:
 # ============================================================================
 # Prd Profile (프로덕션 환경)
 # 실행: ./gradlew bootRun --args='--spring.profiles.active=prd'
-# ⚠️ 환경 변수 필수: DATABASE_URL, DB_USERNAME, DB_PASSWORD
+# ⚠️ 환경 변수 필수: DATABASE_URL, DB_USERNAME, DB_PASSWORD, REDIS_HOST
 # ============================================================================
 ---
 spring:
@@ -210,6 +238,15 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
+  # Redis 설정 (ElastiCache)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:true}
+      timeout: 5000
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -235,6 +272,11 @@ spring:
       enabled: false
     livereload:
       enabled: false
+
+# 프로덕션 SMS 설정
+sms:
+  enabled: true
+  dev-mode: false
 
 server:
   error:

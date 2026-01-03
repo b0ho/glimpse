@@ -33,6 +33,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     
+    // WebSocket Messaging
+    implementation 'org.webjars:sockjs-client:1.5.1'
+    implementation 'org.webjars:stomp-websocket:2.3.4'
+    
     // Redis (토큰 저장소)
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     
