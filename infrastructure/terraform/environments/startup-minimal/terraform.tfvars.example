@@ -1,0 +1,28 @@
+# ============================================================================
+# Glimpse Terraform Variables (startup-minimal)
+# 
+# 사용법:
+# 1. 이 파일을 terraform.tfvars로 복사
+# 2. 실제 값으로 수정
+# 3. terraform apply 실행
+#
+# cp terraform.tfvars.example terraform.tfvars
+# ============================================================================
+
+# AWS 리전
+aws_region = "ap-northeast-2"
+
+# JWT 시크릿 키 (최소 32자, 영문+숫자+특수문자)
+# 생성: openssl rand -base64 32
+jwt_secret_key = "CHANGE_ME_generate_with_openssl_rand_base64_32"
+
+# 알림 받을 이메일 주소
+alarm_email_addresses = [
+  "admin@example.com"
+]
+
+# ============================================================================
+# 주의: 이 파일은 .gitignore에 추가되어 있어야 합니다!
+# terraform.tfvars 파일에는 민감 정보가 포함됩니다.
+# ============================================================================
+
