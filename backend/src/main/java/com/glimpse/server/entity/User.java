@@ -81,6 +81,13 @@ public class User extends BaseEntity {
     private String oauthProvider;
 
     /**
+     * AWS Cognito User Sub ID
+     * <p>Cognito를 통한 인증 시 사용되는 고유 식별자입니다.</p>
+     */
+    @Column(name = "cognito_sub", unique = true)
+    private String cognitoSub;
+
+    /**
      * 익명 매칭용 고유 ID
      * <p>매칭 전까지 사용자의 실제 정보를 숨기기 위한 익명 식별자입니다.
      * Nullable하지 않으며 Unique해야 합니다.</p>

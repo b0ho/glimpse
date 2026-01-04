@@ -108,4 +108,15 @@ public interface AuthService {
      * @return 인증 응답
      */
     AuthResponseDto oauthLogin(String provider, String oauthToken);
+
+    /**
+     * AWS Cognito ID Token으로 로그인합니다.
+     * 
+     * <p>Cognito에서 발급한 ID Token을 검증하고, 기존 사용자를 조회하거나 신규 생성합니다.</p>
+     * 
+     * @param cognitoIdToken Cognito ID Token
+     * @return 인증 응답 (자체 JWT 토큰 및 사용자 정보)
+     * @throws IllegalArgumentException Cognito 토큰이 유효하지 않은 경우
+     */
+    AuthResponseDto loginWithCognito(String cognitoIdToken);
 }

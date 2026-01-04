@@ -2,6 +2,7 @@ package com.glimpse.server.controller;
 
 import com.glimpse.server.dto.common.ApiResponse;
 import com.glimpse.server.dto.auth.AuthResponseDto;
+import com.glimpse.server.dto.auth.CognitoLoginDto;
 import com.glimpse.server.dto.auth.LoginDto;
 import com.glimpse.server.dto.auth.RegisterDto;
 import com.glimpse.server.dto.auth.TokenDto;
@@ -294,6 +295,29 @@ public class AuthController {
             log.error("OAuth 로그인 실패: {}", e.getMessage());
             return ResponseEntity.badRequest().body(
                     ApiResponse.error(e.getMessage())
+            );
+        }
+    }
+
+    @PostMapping("/login/cognito")
+    @Operation(summary = "Cognito 로그인", description = "AWS Cognito ID Token으로 로그인합니다")
+    public ResponseEntity<ApiResponse<AuthResponseDto>> loginWithCognito(
+            @Valid @RequestBody CognitoLoginDto cognitoLoginDto
+    ) {
+        log.info("Cognito 로그인 요청");
+
+        try {
+            AuthResponseDto response = authService.loginWithCognito(cognitoLoginDto.getCognitoIdToken());
+            return ResponseEntity.ok(ApiResponse.success(response, "Cognito 로그인 성공"));
+        } catch (IllegalArgumentException e) {
+            log.error("Cognito 로그인 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.error(e.getMessage())
+            );
+        } catch (Exception e) {
+            log.error("Cognito 로그인 오류: {}", e.getMessage());
+            return ResponseEntity.status(500).body(
+                    ApiResponse.error("서버 오류가 발생했습니다")
             );
         }
     }

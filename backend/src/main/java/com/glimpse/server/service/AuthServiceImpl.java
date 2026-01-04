@@ -1,6 +1,7 @@
 package com.glimpse.server.service;
 
 import com.glimpse.server.dto.auth.AuthResponseDto;
+import com.glimpse.server.dto.auth.CognitoUser;
 import com.glimpse.server.dto.auth.LoginDto;
 import com.glimpse.server.dto.auth.OAuthUserInfo;
 import com.glimpse.server.dto.auth.RegisterDto;
@@ -44,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final SmsService smsService;
     private final OAuthService oAuthService;
+    private final CognitoTokenVerifier cognitoTokenVerifier;
 
     // 인증 코드 저장소 (프로덕션에서는 Redis 사용 권장)
     private final Map<String, VerificationInfo> verificationCodes = new ConcurrentHashMap<>();
@@ -382,6 +384,60 @@ public class AuthServiceImpl implements AuthService {
         Random random = new Random();
         int code = 100000 + random.nextInt(900000);
         return String.valueOf(code);
+    }
+
+    @Override
+    @Transactional
+    public AuthResponseDto loginWithCognito(String cognitoIdToken) {
+        log.info("Cognito 토큰 로그인 시도");
+
+        // 1. Cognito 토큰 검증
+        CognitoUser cognitoUser = cognitoTokenVerifier.verifyCognitoToken(cognitoIdToken);
+
+        // 2. 기존 사용자 조회 (cognitoSub 또는 phoneNumber로)
+        User user = userRepository.findByCognitoSub(cognitoUser.getSub())
+                .or(() -> userRepository.findByPhoneNumber(cognitoUser.getPhoneNumber()))
+                .orElseGet(() -> createUserFromCognito(cognitoUser));
+
+        // 3. cognitoSub 업데이트 (기존 사용자가 전화번호로만 존재했을 경우)
+        if (user.getCognitoSub() == null) {
+            user.setCognitoSub(cognitoUser.getSub());
+            userRepository.save(user);
+        }
+
+        // 4. 마지막 로그인 시간 업데이트
+        user.setLastOnline(LocalDateTime.now());
+        user.setLastActive(LocalDateTime.now());
+        userRepository.save(user);
+
+        log.info("Cognito 로그인 성공: userId={}, cognitoSub={}", user.getId(), cognitoUser.getSub());
+
+        // 5. 자체 JWT 토큰 발급
+        return createAuthResponse(user.getId(), user.getIsPremium() ? "PREMIUM" : "USER", convertToDto(user));
+    }
+
+    /**
+     * Cognito 사용자 정보로 신규 사용자 생성
+     */
+    private User createUserFromCognito(CognitoUser cognitoUser) {
+        log.info("새 Cognito 사용자 생성: cognitoSub={}, phoneNumber={}", 
+                cognitoUser.getSub(), cognitoUser.getPhoneNumber());
+
+        // 익명 ID 생성
+        String anonymousId = "anon_" + UUID.randomUUID().toString().substring(0, 8);
+
+        User user = User.builder()
+                .cognitoSub(cognitoUser.getSub())
+                .phoneNumber(cognitoUser.getPhoneNumber())
+                .email(cognitoUser.getEmail())
+                .anonymousId(anonymousId)
+                .nickname("사용자" + System.currentTimeMillis() % 10000) // 임시 닉네임
+                .isVerified(cognitoUser.getPhoneNumberVerified() != null ? cognitoUser.getPhoneNumberVerified() : false)
+                .credits(0)
+                .isPremium(false)
+                .build();
+
+        return userRepository.save(user);
     }
 
     /**

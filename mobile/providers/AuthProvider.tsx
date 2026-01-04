@@ -13,6 +13,8 @@ import { setAuthToken } from '@/services/api/config';
 import { Platform } from 'react-native';
 import { formatPhoneNumber, validatePhoneNumber } from '@/services/auth/auth-service';
 import { AppMode } from '@/shared/types';
+import { cognitoService, CognitoSignUpResult, CognitoSignInResult } from '@/services/auth/cognito-service';
+import { configureCognito, isCognitoConfigured } from '@/services/auth/cognito-config';
 
 // API 베이스 URL
 const getApiBaseUrl = () => {
@@ -52,6 +54,12 @@ interface AuthContextType {
   signOutAllDevices: () => Promise<void>;
   getToken: () => Promise<string | null>;
   refreshSession: () => Promise<boolean>;
+  
+  // Cognito 인증 (선택)
+  signUpWithCognito?: (phoneNumber: string, password: string) => Promise<CognitoSignUpResult>;
+  confirmSignUpWithCognito?: (phoneNumber: string, code: string) => Promise<{ success: boolean; error?: string }>;
+  signInWithCognito?: (phoneNumber: string, password: string) => Promise<AuthResult>;
+  resendCognitoCode?: (phoneNumber: string) => Promise<{ success: boolean; error?: string }>;
   
   // 개발 환경 전용
   signInDev?: (user: DevUser) => Promise<void>;
@@ -113,6 +121,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initialize = async () => {
       try {
         console.log('[AuthProvider] 초기화 시작');
+        
+        // Cognito 설정 (환경 변수가 있으면)
+        if (isCognitoConfigured()) {
+          configureCognito();
+        }
         
         // 토큰 매니저 초기화
         const hasToken = await tokenManager.initialize();
@@ -422,6 +435,108 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [setToken]);
 
   /**
+   * Cognito 회원가입 (SMS 인증 코드 발송)
+   */
+  const signUpWithCognito = useCallback(async (
+    phoneNumber: string,
+    password: string
+  ): Promise<CognitoSignUpResult> => {
+    if (!isCognitoConfigured()) {
+      return { success: false, error: 'Cognito가 설정되지 않았습니다' };
+    }
+    
+    return await cognitoService.signUp(phoneNumber, password);
+  }, []);
+
+  /**
+   * Cognito 인증 코드 확인
+   */
+  const confirmSignUpWithCognito = useCallback(async (
+    phoneNumber: string,
+    code: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!isCognitoConfigured()) {
+      return { success: false, error: 'Cognito가 설정되지 않았습니다' };
+    }
+    
+    return await cognitoService.confirmSignUp(phoneNumber, code);
+  }, []);
+
+  /**
+   * Cognito 인증 코드 재발송
+   */
+  const resendCognitoCode = useCallback(async (
+    phoneNumber: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!isCognitoConfigured()) {
+      return { success: false, error: 'Cognito가 설정되지 않았습니다' };
+    }
+    
+    return await cognitoService.resendSignUpCode(phoneNumber);
+  }, []);
+
+  /**
+   * Cognito 로그인 → Backend JWT 발급
+   */
+  const signInWithCognito = useCallback(async (
+    phoneNumber: string,
+    password: string
+  ): Promise<AuthResult> => {
+    if (!isCognitoConfigured()) {
+      return { success: false, error: 'Cognito가 설정되지 않았습니다' };
+    }
+    
+    try {
+      // 1. Cognito 로그인
+      const cognitoResult = await cognitoService.signIn(phoneNumber, password);
+      
+      if (!cognitoResult.success || !cognitoResult.idToken) {
+        return {
+          success: false,
+          error: cognitoResult.error || 'Cognito 로그인 실패',
+        };
+      }
+      
+      // 2. Backend에 Cognito ID Token 전송 → 자체 JWT 발급
+      const baseUrl = getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/v1/auth/login/cognito`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cognitoIdToken: cognitoResult.idToken }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        // 기존 토큰 저장 로직
+        await tokenManager.saveTokens({
+          accessToken: data.data.accessToken,
+          refreshToken: data.data.refreshToken,
+          expiresIn: data.data.expiresIn,
+        }, data.data.user?.id);
+        
+        setAuthToken(data.data.accessToken);
+        setToken(data.data.accessToken);
+        setUserId(data.data.user?.id || null);
+        setIsSignedIn(true);
+        
+        if (data.data.user) {
+          setUser(data.data.user);
+        }
+        
+        console.log('[AuthProvider] Cognito 로그인 성공');
+        
+        return { success: true, userId: data.data.user?.id };
+      }
+      
+      return { success: false, error: data.message || 'Backend 로그인 실패' };
+    } catch (error: any) {
+      console.error('[AuthProvider] Cognito 로그인 오류:', error);
+      return { success: false, error: error.message || '로그인 중 오류가 발생했습니다' };
+    }
+  }, [setUser, setToken]);
+
+  /**
    * 개발 환경 빠른 로그인
    * 실제 API 호출 없이 테스트용 사용자로 로그인
    */
@@ -481,6 +596,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signOutAllDevices,
     getToken,
     refreshSession,
+    // Cognito 인증 (설정된 경우에만)
+    ...(isCognitoConfigured() ? {
+      signUpWithCognito,
+      confirmSignUpWithCognito,
+      signInWithCognito,
+      resendCognitoCode,
+    } : {}),
     // 개발 환경에서만 signInDev 제공
     ...(__DEV__ ? { signInDev } : {}),
   };

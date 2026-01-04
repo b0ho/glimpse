@@ -55,6 +55,18 @@ auth:
   max-devices: 5
 
 # ============================================================================
+# AWS Cognito Configuration
+# ============================================================================
+aws:
+  cognito:
+    # AWS Cognito User Pool ID (환경 변수 사용 권장)
+    user-pool-id: ${AWS_COGNITO_USER_POOL_ID:}
+    # AWS Region
+    region: ${AWS_REGION:ap-northeast-2}
+    # Cognito Client ID (선택, audience 검증용)
+    client-id: ${AWS_COGNITO_CLIENT_ID:}
+
+# ============================================================================
 # SMS Configuration (솔라피)
 # 프로덕션에서는 환경 변수 사용: SMS_API_KEY, SMS_API_SECRET, SMS_SENDER
 # ============================================================================
