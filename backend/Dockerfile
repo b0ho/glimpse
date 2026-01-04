@@ -23,8 +23,9 @@ RUN ./gradlew bootJar --no-daemon -x test
 # Stage 2: Production
 FROM eclipse-temurin:21-jre-alpine
 
-# 보안: root 사용자 사용 금지
-RUN addgroup -g 1001 -S appgroup && \
+# 필수 패키지 설치 및 보안: root 사용자 사용 금지
+RUN apk add --no-cache wget && \
+    addgroup -g 1001 -S appgroup && \
     adduser -u 1001 -S appuser -G appgroup
 
 WORKDIR /app
