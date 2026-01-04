@@ -86,7 +86,16 @@ public class WebSocketChatController {
             @DestinationVariable String chatRoomId,
             SimpMessageHeaderAccessor headerAccessor) {
         
-        String userId = headerAccessor.getSessionAttributes().get("userId").toString();
+        Object userIdObj = headerAccessor.getSessionAttributes() != null 
+                ? headerAccessor.getSessionAttributes().get("userId") 
+                : null;
+        
+        if (userIdObj == null) {
+            log.error("WebSocket session userId not found");
+            throw new IllegalStateException("인증되지 않은 WebSocket 연결입니다");
+        }
+        
+        String userId = userIdObj.toString();
         log.info("User {} joined chat room {}", userId, chatRoomId);
         
         Map<String, Object> message = new HashMap<>();
@@ -111,7 +120,16 @@ public class WebSocketChatController {
             @DestinationVariable String chatRoomId,
             SimpMessageHeaderAccessor headerAccessor) {
         
-        String userId = headerAccessor.getSessionAttributes().get("userId").toString();
+        Object userIdObj = headerAccessor.getSessionAttributes() != null 
+                ? headerAccessor.getSessionAttributes().get("userId") 
+                : null;
+        
+        if (userIdObj == null) {
+            log.error("WebSocket session userId not found");
+            throw new IllegalStateException("인증되지 않은 WebSocket 연결입니다");
+        }
+        
+        String userId = userIdObj.toString();
         log.info("User {} left chat room {}", userId, chatRoomId);
         
         Map<String, Object> message = new HashMap<>();

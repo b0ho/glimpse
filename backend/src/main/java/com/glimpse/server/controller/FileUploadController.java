@@ -193,6 +193,12 @@ public class FileUploadController {
         }
 
         String contentType = file.getContentType();
+        
+        // Content-Type이 null인 경우 처리
+        if (contentType == null || contentType.trim().isEmpty()) {
+            throw new IllegalArgumentException("파일 형식을 확인할 수 없습니다. Content-Type이 누락되었습니다.");
+        }
+        
         boolean isAllowedType = false;
         for (String allowedType : ALLOWED_IMAGE_TYPES) {
             if (allowedType.equals(contentType)) {
@@ -202,7 +208,7 @@ public class FileUploadController {
         }
 
         if (!isAllowedType) {
-            throw new IllegalArgumentException("지원하지 않는 파일 형식입니다");
+            throw new IllegalArgumentException("지원하지 않는 파일 형식입니다. 허용: " + String.join(", ", ALLOWED_IMAGE_TYPES));
         }
     }
 

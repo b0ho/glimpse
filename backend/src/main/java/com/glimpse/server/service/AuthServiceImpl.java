@@ -396,7 +396,13 @@ public class AuthServiceImpl implements AuthService {
 
         // 2. 기존 사용자 조회 (cognitoSub 또는 phoneNumber로)
         User user = userRepository.findByCognitoSub(cognitoUser.getSub())
-                .or(() -> userRepository.findByPhoneNumber(cognitoUser.getPhoneNumber()))
+                .or(() -> {
+                    // phoneNumber가 null이 아닐 때만 조회
+                    if (cognitoUser.getPhoneNumber() != null && !cognitoUser.getPhoneNumber().isEmpty()) {
+                        return userRepository.findByPhoneNumber(cognitoUser.getPhoneNumber());
+                    }
+                    return Optional.empty();
+                })
                 .orElseGet(() -> createUserFromCognito(cognitoUser));
 
         // 3. cognitoSub 업데이트 (기존 사용자가 전화번호로만 존재했을 경우)

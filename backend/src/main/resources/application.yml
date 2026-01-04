@@ -72,7 +72,7 @@ aws:
 # ============================================================================
 sms:
   enabled: ${SMS_ENABLED:false}
-  dev-mode: ${SMS_DEV_MODE:true}
+  dev-mode: ${SMS_DEV_MODE:false}  # 기본값을 false로 변경 (보안 강화)
   dev-code: "123456"
   solapi:
     api-key: ${SMS_API_KEY:}
@@ -255,7 +255,7 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      password: ${REDIS_PASSWORD}  # 기본값 제거 - 환경 변수 필수
       ssl:
         enabled: ${REDIS_SSL_ENABLED:true}
       timeout: 5000

@@ -54,7 +54,17 @@ public class RedisConfig {
 
         // SSL/TLS 활성화 (ElastiCache TLS)
         if (sslEnabled) {
-            builder.useSsl().disablePeerVerification();
+            // 프로덕션 환경에서는 peer verification 활성화 (보안 강화)
+            boolean isProduction = System.getenv("SPRING_PROFILES_ACTIVE") != null 
+                    && System.getenv("SPRING_PROFILES_ACTIVE").contains("prd");
+            
+            if (isProduction) {
+                builder.useSsl(); // Peer verification 활성화
+                log.info("Redis SSL enabled with peer verification (production)");
+            } else {
+                builder.useSsl().disablePeerVerification(); // 개발 환경에서만 비활성화
+                log.warn("Redis SSL enabled with peer verification DISABLED (development only)");
+            }
         }
 
         return new LettuceConnectionFactory(config, builder.build());

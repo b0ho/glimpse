@@ -56,6 +56,13 @@ public class CognitoTokenVerifier {
      */
     @PostConstruct
     public void init() {
+        // User Pool ID 검증
+        if (userPoolId == null || userPoolId.trim().isEmpty()) {
+            log.warn("AWS Cognito User Pool ID가 설정되지 않았습니다. Cognito 인증이 비활성화됩니다.");
+            log.warn("환경 변수 AWS_COGNITO_USER_POOL_ID를 설정하세요.");
+            return; // 초기화 건너뛰기
+        }
+        
         try {
             this.issuer = String.format("https://cognito-idp.%s.amazonaws.com/%s", region, userPoolId);
             String jwksUrl = issuer + "/.well-known/jwks.json";
@@ -77,6 +84,11 @@ public class CognitoTokenVerifier {
      * @throws IllegalArgumentException 토큰이 유효하지 않은 경우
      */
     public CognitoUser verifyCognitoToken(String idToken) {
+        // Cognito가 설정되지 않은 경우 에러
+        if (jwkProvider == null) {
+            throw new IllegalStateException("Cognito가 설정되지 않았습니다. AWS_COGNITO_USER_POOL_ID 환경 변수를 확인하세요.");
+        }
+        
         try {
             log.debug("Cognito ID Token 검증 시작");
             
@@ -88,16 +100,17 @@ public class CognitoTokenVerifier {
             Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey(), null);
             
             // 3. 토큰 검증 (서명, issuer, token_use, audience)
-            JWTVerifier.BaseVerification verification = (JWTVerifier.BaseVerification) JWT.require(algorithm)
+            // BaseVerification 캐스팅 제거 - build() 직접 호출
+            var verificationBuilder = JWT.require(algorithm)
                     .withIssuer(issuer)
                     .withClaim("token_use", "id");
             
             // Client ID 검증 (설정된 경우)
             if (clientId != null && !clientId.isEmpty()) {
-                verification = verification.withAudience(clientId);
+                verificationBuilder = verificationBuilder.withAudience(clientId);
             }
             
-            JWTVerifier verifier = verification.build();
+            JWTVerifier verifier = verificationBuilder.build();
             DecodedJWT verified = verifier.verify(idToken);
             
             // 4. 사용자 정보 추출
